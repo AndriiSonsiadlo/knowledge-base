@@ -1,9 +1,10 @@
 import React, {type ReactNode} from 'react';
 import clsx from 'clsx';
 import {
-  useThemeConfig,
-  ErrorCauseBoundary,
-  ThemeClassNames,
+    useThemeConfig,
+    ErrorCauseBoundary,
+    ThemeClassNames,
+    useColorMode,
 } from '@docusaurus/theme-common';
 import {
   splitNavbarItems,
@@ -19,89 +20,122 @@ import NavbarSearch from '@theme/Navbar/Search';
 import styles from './styles.module.css';
 
 function useNavbarItems() {
-  // TODO temporary casting until ThemeConfig type is improved
-  return useThemeConfig().navbar.items as NavbarItemConfig[];
+    return useThemeConfig().navbar.items as NavbarItemConfig[];
+}
+function NavbarContentLayout({
+                                 left,
+                                 right,
+                             }: {
+    left: ReactNode;
+    right: ReactNode;
+}) {
+    return (
+        <div className="navbar__inner">
+            <div
+                className={clsx(
+                    ThemeClassNames.layout.navbar.containerLeft,
+                    'navbar__items',
+                )}>
+                {left}
+            </div>
+            <div
+                className={clsx(
+                    ThemeClassNames.layout.navbar.containerRight,
+                    'navbar__items navbar__items--right',
+                )}>
+                {right}
+            </div>
+        </div>
+    );
 }
 
-function NavbarItems({items}: {items: NavbarItemConfig[]}): ReactNode {
-  return (
-    <>
-      {items.map((item, i) => (
-        <ErrorCauseBoundary
-          key={i}
-          onError={(error) =>
-            new Error(
-              `A theme navbar item failed to render.
+
+function NavbarItems({items, isMobile}: {
+    items: NavbarItemConfig[],
+    isMobile?: boolean
+}): ReactNode {
+    const {colorMode} = useColorMode();
+    const isDarkTheme = colorMode === 'dark';
+
+    return (
+        <>
+            {items.map((item, i) => {
+                if (item.type === 'search') return null;
+
+                return (
+                    <ErrorCauseBoundary
+                        key={i}
+                        onError={(error) =>
+                            new Error(
+                                `A theme navbar item failed to render.
 Please double-check the following navbar item (themeConfig.navbar.items) of your Docusaurus config:
 ${JSON.stringify(item, null, 2)}`,
-              {cause: error},
-            )
-          }>
-          <NavbarItem {...item} />
-        </ErrorCauseBoundary>
-      ))}
-    </>
-  );
-}
-
-function NavbarContentLayout({
-  left,
-  right,
-}: {
-  left: ReactNode;
-  right: ReactNode;
-}) {
-  return (
-    <div className="navbar__inner">
-      <div
-        className={clsx(
-          ThemeClassNames.layout.navbar.containerLeft,
-          'navbar__items',
-        )}>
-        {left}
-      </div>
-      <div
-        className={clsx(
-          ThemeClassNames.layout.navbar.containerRight,
-          'navbar__items navbar__items--right',
-        )}>
-        {right}
-      </div>
-    </div>
-  );
+                                {cause: error},
+                            )
+                        }>
+                        {isMobile ? (
+                            <div className={clsx(
+                                'block px-4 py-2 rounded-lg transition-colors',
+                                isDarkTheme
+                                    ? 'text-slate-300 hover:text-white hover:bg-white/10'
+                                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                            )}>
+                                <NavbarItem {...item} />
+                            </div>
+                        ) : (
+                            <div
+                                className={clsx(
+                                    'transition-colors relative group',
+                                    isDarkTheme
+                                        ? 'text-slate-300 hover:text-white'
+                                        : 'text-slate-600 hover:text-slate-900'
+                                )}>
+                                <NavbarItem {...item} />
+                                <span
+                                    className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 group-hover:w-full transition-all duration-300"></span>
+                            </div>
+                        )}
+                    </ErrorCauseBoundary>
+                );
+            })}
+        </>
+    );
 }
 
 export default function NavbarContent(): ReactNode {
-  const mobileSidebar = useNavbarMobileSidebar();
+    const mobileSidebar = useNavbarMobileSidebar();
 
-  const items = useNavbarItems();
-  const [leftItems, rightItems] = splitNavbarItems(items);
+    const {colorMode} = useColorMode();
+    const isDarkTheme = colorMode === 'dark';
 
-  const searchBarItem = items.find((item) => item.type === 'search');
+    const items = useNavbarItems();
+    const [leftItems, rightItems] = splitNavbarItems(items);
 
-  return (
-    <NavbarContentLayout
-      left={
-        // TODO stop hardcoding items?
-        <>
-          {!mobileSidebar.disabled && <NavbarMobileSidebarToggle />}
-          <NavbarLogo />
-          <NavbarItems items={leftItems} />
-        </>
-      }
-      right={
-        // TODO stop hardcoding items?
-        // Ask the user to add the respective navbar items => more flexible
-        <>
-          <NavbarItems items={rightItems} />
-          <NavbarColorModeToggle className={styles.colorModeToggle} />
-          {!searchBarItem && (
-            <NavbarSearch>
-              <SearchBar />
-            </NavbarSearch>
-          )}
-        </>
-      }
-    />
-  );
+    const searchBarItem = items.find((item) => item.type === 'search');
+
+    return (
+        <NavbarContentLayout
+            left={
+            <>
+                {/* Desktop Navigation */}
+                {/*<div className="hidden md:flex items-center gap-8">*/}
+                    <NavbarItems items={leftItems}/>
+                {/*</div>*/}
+            </>
+            }
+            right={
+            <>
+                {/* Right side items */}
+                {/*<div className="hidden md:flex items-center gap-4">*/}
+                    <NavbarItems items={rightItems}/>
+                    {!searchBarItem && (
+                        <NavbarSearch>
+                            <SearchBar />
+                        </NavbarSearch>
+                    )}
+                {/*</div>*/}
+            </>
+            }
+        />
+    );
 }

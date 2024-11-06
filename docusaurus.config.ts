@@ -2,8 +2,6 @@ import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
-
 const config: Config = {
   title: 'Knowledge Base',
   tagline: 'Organized notes and structured information',
@@ -30,9 +28,6 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/',
-          // routeBasePath: '/',
-          // remarkPlugins: [],
-          // rehypePlugins: [],
         },
         blog: {
           showReadingTime: true,
@@ -55,13 +50,17 @@ const config: Config = {
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
+      defaultMode: 'dark',
+      disableSwitch: false,
       respectPrefersColorScheme: true,
     },
     navbar: {
+      hideOnScroll: false,
       title: 'Knowledge Base',
       logo: {
         alt: 'Knowledge Base Logo',
         src: 'img/logo.svg',
+        srcDark: 'img/logo.svg',
       },
       items: [
         {
@@ -77,10 +76,10 @@ const config: Config = {
           label: 'C++',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
-        {
-          type: 'search',
-          position: 'right',
-        },
+        // {
+        //   type: 'search',
+        //   position: 'right',
+        // },
         {
           href: 'https://github.com/AndriiSonsiadlo/knowledge-base',
           label: 'GitHub',
@@ -95,8 +94,12 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Python',
+              to: '/docs/programming/python/intro',
+            },
+            {
+              label: 'C++',
+              to: '/docs/programming/c++/intro',
             },
           ],
         },
@@ -121,12 +124,6 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
       // additionalLanguages: ['typescript', 'javascript', 'python', 'bash', 'json', 'yaml', 'cpp', 'c'],
     },
-      // algolia: {
-      //     // Optional: Add Algolia search (requires account)
-      //     appId: 'YOUR_APP_ID',
-      //     apiKey: 'YOUR_API_KEY',
-      //     indexName: 'YOUR_INDEX_NAME',
-      // },
   } satisfies Preset.ThemeConfig,
 };
 
