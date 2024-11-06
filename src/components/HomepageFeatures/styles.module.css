@@ -1,11 +1,24 @@
 .features {
-  display: flex;
-  align-items: center;
-  padding: 2rem 0;
-  width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem; /* Space between features */
+    margin-top: 3rem; /* Space between header and features */
+    width: 100%;
 }
 
 .featureSvg {
   height: 200px;
   width: 200px;
+}
+
+.featureCard {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+}
+
+html[data-theme='dark'] .featureCard {
+    background: rgba(0, 0, 0, 0.35);
 }

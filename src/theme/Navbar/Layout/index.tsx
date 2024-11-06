@@ -9,7 +9,6 @@ import {
 import {translate} from '@docusaurus/Translate';
 import NavbarMobileSidebar from '@theme/Navbar/MobileSidebar';
 import {Menu, X, Moon, Sun, Github, BookOpen, Search} from 'lucide-react';
-import SearchBar from '@theme/SearchBar';
 import styles from './styles.module.css';
 
 function NavbarBackdrop(props: ComponentProps<'div'>) {

@@ -29,6 +29,11 @@
     --docusaurus-highlighted-code-line-border-left-color: #a78bfa;
 }
 
+.main-wrapper {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
 /* ============ Global Styles ============ */
 html {
     scroll-behavior: smooth;
