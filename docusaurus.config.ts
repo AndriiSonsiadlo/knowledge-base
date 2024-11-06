@@ -20,7 +20,18 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-  plugins: ["./src/plugins/tailwind-config.js"],
+  plugins: [
+      "./src/plugins/tailwind-config.js",
+      [
+          "@cmfcmf/docusaurus-search-local",
+          {
+              indexDocs: true,        // index all docs
+              indexPages: true,       // index static pages
+              language: 'en',
+              style: undefined,       // uses default CSS
+          },
+      ],
+  ],
   presets: [
     [
       'classic',
@@ -80,11 +91,11 @@ const config: Config = {
         //   type: 'search',
         //   position: 'right',
         // },
-        {
-          href: 'https://github.com/AndriiSonsiadlo/knowledge-base',
-          label: 'GitHub',
-          position: 'right',
-        },
+        // {
+        //   href: 'https://github.com/AndriiSonsiadlo/knowledge-base',
+        //   label: 'GitHub',
+        //   position: 'right',
+        // },
       ],
     },
     footer: {

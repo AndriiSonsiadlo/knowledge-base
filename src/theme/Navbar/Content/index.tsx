@@ -128,11 +128,11 @@ export default function NavbarContent(): ReactNode {
                 {/* Right side items */}
                 {/*<div className="hidden md:flex items-center gap-4">*/}
                     <NavbarItems items={rightItems}/>
-                    {!searchBarItem && (
-                        <NavbarSearch>
-                            <SearchBar />
-                        </NavbarSearch>
-                    )}
+                    {/*{!searchBarItem && (*/}
+                    {/*    <NavbarSearch>*/}
+                    {/*        <SearchBar />*/}
+                    {/*    </NavbarSearch>*/}
+                    {/*)}*/}
                 {/*</div>*/}
             </>
             }
