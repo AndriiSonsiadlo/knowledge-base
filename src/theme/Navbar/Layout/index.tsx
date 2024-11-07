@@ -1,15 +1,14 @@
 import React, {type ComponentProps, type ReactNode, useState} from 'react';
 import clsx from 'clsx';
-import Link from '@docusaurus/Link';
-import {useThemeConfig, useColorMode} from '@docusaurus/theme-common';
-import {
-    useHideableNavbar,
-    useNavbarMobileSidebar,
-} from '@docusaurus/theme-common/internal';
+import {useColorMode, useThemeConfig} from '@docusaurus/theme-common';
+import {useHideableNavbar, useNavbarMobileSidebar,} from '@docusaurus/theme-common/internal';
 import {translate} from '@docusaurus/Translate';
 import NavbarMobileSidebar from '@theme/Navbar/MobileSidebar';
-import {Menu, X, Moon, Sun, Github, BookOpen, Search} from 'lucide-react';
+import type {Props} from '@theme/Navbar/Layout';
+import {BookOpen, Github, Menu, Moon, Search, Sun, X} from 'lucide-react';
+
 import styles from './styles.module.css';
+import Link from "@docusaurus/Link";
 
 function NavbarBackdrop(props: ComponentProps<'div'>) {
     return (
@@ -22,14 +21,14 @@ function NavbarBackdrop(props: ComponentProps<'div'>) {
 }
 
 function NavbarLogo() {
-    const { colorMode } = useColorMode();
+    const {colorMode} = useColorMode();
     const isDarkTheme = colorMode === 'dark';
 
     return (
         <Link
             to="/"
             className="flex items-center gap-2 group cursor-pointer"
-            style={{ textDecoration: 'none' }}
+            style={{textDecoration: 'none'}}
         >
             <div className={clsx(
                 'p-2 rounded-lg transition-all duration-300',
@@ -50,12 +49,13 @@ function NavbarLogo() {
     );
 }
 
-export default function NavbarLayout({children}: {children: ReactNode}): ReactNode {
+
+export default function NavbarLayout({children}: Props): ReactNode {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const {
-        navbar: {hideOnScroll, items: navbarItems}
+        navbar: {hideOnScroll, style, items: navbarItems}
     } = useThemeConfig();
-    const { colorMode, setColorMode } = useColorMode();
+    const {colorMode, setColorMode} = useColorMode();
     const isDarkTheme = colorMode === 'dark';
     const mobileSidebar = useNavbarMobileSidebar();
     const {navbarRef, isNavbarVisible} = useHideableNavbar(hideOnScroll);
@@ -77,10 +77,13 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                 description: 'The ARIA label for the main navigation',
             })}
             className={clsx(
+                // ThemeClassNames.layout.navbar.container,
+                'navbar',
                 'sticky top-0 z-50 backdrop-blur-xl transition-all duration-300',
                 isDarkTheme
                     ? 'bg-slate-900/50 border-b border-white/10'
                     : 'bg-white/80 border-b border-slate-200',
+                // 'navbar--fixed-top',
                 hideOnScroll && [
                     styles.navbarHideable,
                     !isNavbarVisible && styles.navbarHidden,
@@ -95,7 +98,7 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
 
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <NavbarLogo />
+                        <NavbarLogo/>
                     </div>
 
                     {/* Desktop Navigation */}
@@ -116,7 +119,7 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                             <Search className={clsx(
                                 'w-4 h-4 flex-shrink-0',
                                 isDarkTheme ? 'text-slate-400' : 'text-slate-500'
-                            )} />
+                            )}/>
                             <input
                                 type="text"
                                 placeholder="Search docs..."
@@ -142,7 +145,7 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                             )}
                             aria-label="GitHub repository"
                         >
-                            <Github className="w-5 h-5" />
+                            <Github className="w-5 h-5"/>
                         </a>
 
                         {/* Theme Toggle */}
@@ -157,9 +160,9 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                             aria-label="Toggle theme"
                         >
                             {isDarkTheme ? (
-                                <Sun className="w-5 h-5" />
+                                <Sun className="w-5 h-5"/>
                             ) : (
-                                <Moon className="w-5 h-5" />
+                                <Moon className="w-5 h-5"/>
                             )}
                         </button>
 
@@ -176,9 +179,9 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                             aria-expanded={isMobileMenuOpen}
                         >
                             {isMobileMenuOpen ? (
-                                <X className="w-6 h-6" />
+                                <X className="w-6 h-6"/>
                             ) : (
-                                <Menu className="w-6 h-6" />
+                                <Menu className="w-6 h-6"/>
                             )}
                         </button>
                     </div>
@@ -231,12 +234,12 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                             >
                                 {isDarkTheme ? (
                                     <>
-                                        <Sun className="w-4 h-4" />
+                                        <Sun className="w-4 h-4"/>
                                         <span>Light</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Moon className="w-4 h-4" />
+                                        <Moon className="w-4 h-4"/>
                                         <span>Dark</span>
                                     </>
                                 )}
@@ -252,7 +255,7 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                                         : 'hover:bg-slate-200 text-slate-600 hover:text-slate-900'
                                 )}
                             >
-                                <Github className="w-4 h-4" />
+                                <Github className="w-4 h-4"/>
                                 <span>GitHub</span>
                             </a>
                         </div>
@@ -260,8 +263,8 @@ export default function NavbarLayout({children}: {children: ReactNode}): ReactNo
                 )}
             </div>
 
-            <NavbarBackdrop onClick={mobileSidebar.toggle} />
-            <NavbarMobileSidebar />
+            <NavbarBackdrop onClick={mobileSidebar.toggle}/>
+            <NavbarMobileSidebar/>
         </nav>
     );
 }

@@ -7,8 +7,8 @@ import {
     useColorMode,
 } from '@docusaurus/theme-common';
 import {
-  splitNavbarItems,
-  useNavbarMobileSidebar,
+    splitNavbarItems,
+    useNavbarMobileSidebar,
 } from '@docusaurus/theme-common/internal';
 import NavbarItem, {type Props as NavbarItemConfig} from '@theme/NavbarItem';
 import NavbarColorModeToggle from '@theme/Navbar/ColorModeToggle';
@@ -20,35 +20,9 @@ import NavbarSearch from '@theme/Navbar/Search';
 import styles from './styles.module.css';
 
 function useNavbarItems() {
+    // TODO temporary casting until ThemeConfig type is improved
     return useThemeConfig().navbar.items as NavbarItemConfig[];
 }
-function NavbarContentLayout({
-                                 left,
-                                 right,
-                             }: {
-    left: ReactNode;
-    right: ReactNode;
-}) {
-    return (
-        <div className="navbar__inner">
-            <div
-                className={clsx(
-                    ThemeClassNames.layout.navbar.containerLeft,
-                    'navbar__items',
-                )}>
-                {left}
-            </div>
-            <div
-                className={clsx(
-                    ThemeClassNames.layout.navbar.containerRight,
-                    'navbar__items navbar__items--right',
-                )}>
-                {right}
-            </div>
-        </div>
-    );
-}
-
 
 function NavbarItems({items, isMobile}: {
     items: NavbarItemConfig[],
@@ -102,6 +76,33 @@ ${JSON.stringify(item, null, 2)}`,
     );
 }
 
+function NavbarContentLayout({
+                                 left,
+                                 right,
+                             }: {
+    left: ReactNode;
+    right: ReactNode;
+}) {
+    return (
+        <div className="navbar__inner">
+            <div
+                className={clsx(
+                    ThemeClassNames.layout.navbar.containerLeft,
+                    'navbar__items',
+                )}>
+                {left}
+            </div>
+            <div
+                className={clsx(
+                    ThemeClassNames.layout.navbar.containerRight,
+                    'navbar__items navbar__items--right',
+                )}>
+                {right}
+            </div>
+        </div>
+    );
+}
+
 export default function NavbarContent(): ReactNode {
     const mobileSidebar = useNavbarMobileSidebar();
 
@@ -128,9 +129,10 @@ export default function NavbarContent(): ReactNode {
                 {/* Right side items */}
                 {/*<div className="hidden md:flex items-center gap-4">*/}
                     <NavbarItems items={rightItems}/>
+                    {/*<NavbarColorModeToggle className={styles.colorModeToggle}/>*/}
                     {/*{!searchBarItem && (*/}
                     {/*    <NavbarSearch>*/}
-                    {/*        <SearchBar />*/}
+                    {/*        <SearchBar/>*/}
                     {/*    </NavbarSearch>*/}
                     {/*)}*/}
                 {/*</div>*/}
