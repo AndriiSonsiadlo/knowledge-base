@@ -1,11 +1,11 @@
 /* Full-page gradient background */
 .fullscreen {
-    min-height: 100vh;        /* Full screen */
+    min-height: 100vh;
     padding-bottom: 0 !important;
 }
 
 :global(.main-wrapper) {
-    padding: 0 !important;    /* Remove Docusaurus default white space */
+    padding: 0 !important;
     margin: 0 !important;
 }
 
@@ -13,52 +13,165 @@
     padding-bottom: 0 !important;
 }
 
+/* Dark mode background - sophisticated dark gradient */
 .heroGradient {
-    background: linear-gradient(
-            135deg,
-            rgba(255, 99, 146, 0.4),
-            rgba(125, 93, 255, 0.4),
-            rgba(56, 196, 255, 0.4)
+    background: linear-gradient(to bottom right, #0f172a, #581c87, #0f172a);
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    min-height: 100vh;
+}
+
+/* Light mode background - soft pastel gradient */
+html[data-theme='light'] .heroGradient {
+    background: linear-gradient(to bottom right, #f8fafc, #f3e8ff, #f8fafc);
+}
+
+/* Animated floating orbs - Dark mode */
+.heroGradient > div:nth-child(1) {
+    opacity: 0.25;
+}
+
+.heroGradient > div:nth-child(2) {
+    opacity: 0.25;
+}
+
+.heroGradient > div:nth-child(3) {
+    opacity: 0.25;
+}
+
+/* Light mode orbs - more subtle */
+html[data-theme='light'] .heroGradient > div:nth-child(1) {
+    opacity: 0.15;
+    filter: blur(60px);
+}
+
+html[data-theme='light'] .heroGradient > div:nth-child(2) {
+    opacity: 0.15;
+    filter: blur(60px);
+}
+
+html[data-theme='light'] .heroGradient > div:nth-child(3) {
+    opacity: 0.15;
+    filter: blur(60px);
+}
+
+/* Overlay - Dark mode */
+.heroGradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+            ellipse at 50% 50%,
+            rgba(0, 0, 0, 0),
+            rgba(0, 0, 0, 0.3)
     );
-    padding: 6rem 1rem;
-    display: flex;
-    align-items: center;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Light mode overlay */
+html[data-theme='light'] .heroGradient::after {
+    background: radial-gradient(
+            ellipse at 50% 50%,
+            rgba(255, 255, 255, 0.3),
+            rgba(0, 0, 0, 0.1)
+    );
 }
 
 /* Glass card */
 .glassCard {
-    background: rgba(255, 255, 255, 0.20);
-    border-radius: 1.8rem;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
 }
 
-/* Glass-style button */
-.glassButton {
-  background: rgba(200, 181, 248, 0.8) !important; /* new purple color */
-  color: #eab9b9;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 0.8rem 1.2rem;
-  border-radius: 0.9rem;
-  transition: all 0.2s ease;
+/* Light mode glass card */
+html[data-theme='light'] .glassCard {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(168, 85, 247, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
 }
 
-.glassButton:hover {
-  background: rgb(184, 155, 248) !important;
-  transform: translateY(-2px);
+/* Hero text - Dark mode */
+.heroTitle {
+  background: linear-gradient(to right, #e9d5ff, #bfdbfe, #e9d5ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-/* Dark mode support */
-html[data-theme='dark'] .glassCard {
-    background: rgba(0, 0, 0, 0.35);
-    border-color: rgba(255, 255, 255, 0.15);
+.heroSubtitle {
+  color: #e2e8f0 !important;
 }
 
-html[data-theme='dark'] .glassButton {
-    background: rgba(0, 0, 0, 0.35) !important;
-    border-color: rgba(255, 255, 255, 0.2);
+.heroDescription {
+  color: #cbd5e1 !important;
 }
 
+.heroCaption {
+  color: #94a3b8 !important;
+}
+
+/* Light mode hero text */
+[data-theme='light'] .heroTitle {
+  background: linear-gradient(to right, #7c3aed, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme='light'] .heroSubtitle {
+  color: #1e293b !important;
+}
+
+[data-theme='light'] .heroDescription {
+  color: #334155 !important;
+}
+
+[data-theme='light'] .heroCaption {
+  color: #64748b !important;
+}
+
+/* Categories section - Dark mode */
+.categoriesTitle {
+  color: #f1f5f9;
+}
+
+.categoriesDescription {
+  color: #cbd5e1;
+}
+
+/* Light mode categories */
+html[data-theme='light'] .categoriesTitle {
+  color: #1e293b;
+}
+
+html[data-theme='light'] .categoriesDescription {
+  color: #475569;
+}
+
+/* Grid container */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}

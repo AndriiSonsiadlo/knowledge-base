@@ -28,7 +28,8 @@ function NavbarLogo() {
     return (
         <Link
             to="/"
-            className="flex items-center gap-2 group cursor-pointer no-underline hover:no-underline"
+            className="flex items-center gap-2 group cursor-pointer"
+            style={{ textDecoration: 'none' }}
         >
             <div className={clsx(
                 'p-2 rounded-lg transition-all duration-300',

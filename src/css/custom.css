@@ -15,6 +15,14 @@
     --ifm-transition-fast: 150ms;
     --docusaurus-highlighted-code-line-bg: rgba(99, 102, 241, 0.1);
     --docusaurus-highlighted-code-line-border-left-color: #8b5cf6;
+    --ifm-footer-color: #545454;
+    --ifm-footer-background-color: #ececec;
+    --ifm-footer-title-color: #2f2f2f;
+    --ifm-footer-link-color: #282828;
+}
+
+.footer--dark {
+    --ifm-footer-background-color: #303846;
 }
 
 [data-theme='dark'] {
@@ -27,6 +35,10 @@
     --ifm-color-primary-lightest: #6d28d9;
     --docusaurus-highlighted-code-line-bg: rgba(168, 139, 250, 0.1);
     --docusaurus-highlighted-code-line-border-left-color: #a78bfa;
+    --ifm-footer-background-color: rgba(21, 21, 21, 0.2);
+    --ifm-footer-color: #8a8a8a;
+    --ifm-footer-title-color: #e5e5e5;
+    --ifm-footer-link-color: #e0e0e5;
 }
 
 .main-wrapper {
