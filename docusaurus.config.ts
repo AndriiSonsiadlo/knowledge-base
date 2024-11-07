@@ -1,9 +1,9 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
+import { themes as prismThemes } from 'prism-react-renderer';
+import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Knowledge Base',
+  title: 'My Knowledge Base',
   tagline: 'Organized notes and structured information',
   favicon: 'img/favicon.ico',
   future: {
@@ -13,24 +13,22 @@ const config: Config = {
   baseUrl: '/',
   organizationName: 'AndriiSonsiadlo',
   projectName: 'knowledge-base',
-
   onBrokenLinks: 'throw',
-
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
   },
   plugins: [
-      "./src/plugins/tailwind-config.js",
-      [
-          "@cmfcmf/docusaurus-search-local",
-          {
-              indexDocs: true,        // index all docs
-              indexPages: true,       // index static pages
-              language: 'en',
-              style: undefined,       // uses default CSS
-          },
-      ],
+    './src/plugins/tailwind-config.js',
+    [
+      '@cmfcmf/docusaurus-search-local',
+      {
+        indexDocs: true,
+        indexPages: true,
+        language: 'en',
+        style: undefined,
+      },
+    ],
   ],
   presets: [
     [
@@ -57,7 +55,6 @@ const config: Config = {
       } satisfies Preset.Options,
     ],
   ],
-
   themeConfig: {
     image: 'img/docusaurus-social-card.jpg',
     colorMode: {
@@ -67,7 +64,7 @@ const config: Config = {
     },
     navbar: {
       hideOnScroll: false,
-      title: 'Knowledge Base',
+      title: 'My Knowledge Base',
       logo: {
         alt: 'Knowledge Base Logo',
         src: 'img/logo.svg',
@@ -76,46 +73,61 @@ const config: Config = {
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'pythonSidebar',
+          sidebarId: 'programmingSidebar',
           position: 'left',
-          label: 'Python',
+          label: 'Programming',
         },
         {
           type: 'docSidebar',
-          sidebarId: 'cppSidebar',
+          sidebarId: 'computerScienceSidebar',
           position: 'left',
-          label: 'C++',
+          label: 'Computer Science',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
-        // {
-        //   type: 'search',
-        //   position: 'right',
-        // },
-        // {
-        //   href: 'https://github.com/AndriiSonsiadlo/knowledge-base',
-        //   label: 'GitHub',
-        //   position: 'right',
-        // },
+        {
+          type: 'docSidebar',
+          sidebarId: 'dataStructuresSidebar',
+          position: 'left',
+          label: 'Data & Algorithms',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'machineLearningaSidebar',
+          position: 'left',
+          label: 'Machine Learning',
+        },
+        {
+          to: '/blog',
+          label: 'Blog',
+          position: 'right',
+        },
       ],
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [
         {
-          title: 'Docs',
+          title: 'Knowledge',
           items: [
             {
-              label: 'Python',
-              to: '/docs/programming/python/intro',
+              label: 'Programming',
+              to: '/docs/programming/intro',
             },
             {
-              label: 'C++',
-              to: '/docs/programming/c++/intro',
+              label: 'Computer Science',
+              to: '/docs/computer-science/intro',
+            },
+            {
+              label: 'Data & Algorithms',
+              to: '/docs/data-structures-algorithms/intro',
+            },
+            {
+              label: 'Machine Learning',
+              to: '/docs/machine-learning/intro',
             },
           ],
         },
         {
-          title: 'More',
+          title: 'Resources',
           items: [
             {
               label: 'Blog',
@@ -133,7 +145,6 @@ const config: Config = {
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-      // additionalLanguages: ['typescript', 'javascript', 'python', 'bash', 'json', 'yaml', 'cpp', 'c'],
     },
   } satisfies Preset.ThemeConfig,
 };
