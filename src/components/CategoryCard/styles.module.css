@@ -1,0 +1,159 @@
+.cardLink {
+    text-decoration: none !important;
+}
+
+.cardLink:hover {
+    text-decoration: none !important;
+}
+
+/* Base card styling */
+.categoryCard {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 1rem;
+    padding: 2rem;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.categoryCard:hover {
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Dark mode - Purple card */
+.card-purple {
+    background: linear-gradient(135deg, rgba(121, 28, 135, 0.3), rgba(147, 51, 234, 0.2));
+    border-color: rgba(168, 85, 247, 0.2);
+}
+
+.card-purple:hover {
+    background: linear-gradient(135deg, rgba(110, 28, 135, 0.4), rgba(164, 51, 234, 0.3));
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+/* Dark mode - Blue card */
+.card-blue {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.3), rgba(59, 130, 246, 0.2));
+    border-color: rgba(96, 165, 250, 0.2);
+}
+
+.card-blue:hover {
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.3));
+    border-color: rgba(96, 165, 250, 0.3);
+}
+
+/* Dark mode - Cyan card */
+.card-cyan {
+    background: linear-gradient(135deg, rgba(9, 110, 126, 0.3), rgba(34, 211, 238, 0.2));
+    border-color: rgba(6, 182, 212, 0.2);
+}
+
+.card-cyan:hover {
+    background: linear-gradient(135deg, rgba(7, 123, 143, 0.4), rgba(34, 211, 238, 0.3));
+    border-color: rgba(6, 182, 212, 0.3);
+}
+
+/* Dark mode - Green card */
+.card-green {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.3), rgba(34, 197, 94, 0.2));
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.card-green:hover {
+    background: linear-gradient(135deg, rgba(6, 78, 59, 0.4), rgba(34, 197, 94, 0.3));
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Dark mode - Pink card */
+.card-pink {
+    background: linear-gradient(135deg, rgba(166, 29, 86, 0.3), rgba(215, 66, 139, 0.2));
+    border-color: rgba(244, 114, 182, 0.2);
+}
+
+.card-pink:hover {
+    background: linear-gradient(135deg, rgba(147, 27, 77, 0.4), rgba(236, 72, 153, 0.3));
+    border-color: rgba(244, 114, 182, 0.3);
+}
+
+/* Light mode overrides */
+html[data-theme='light'] .card-purple {
+    background: linear-gradient(135deg, rgba(212, 174, 255, 0.8), rgba(240, 230, 255, 0.6));
+    border-color: rgba(196, 181, 253, 0.4);
+}
+
+html[data-theme='light'] .card-purple:hover {
+    background: linear-gradient(135deg, rgba(212, 173, 255, 0.9), rgba(237, 233, 254, 0.7));
+    border-color: rgba(196, 181, 253, 0.6);
+    box-shadow: 0 20px 50px rgba(168, 85, 247, 0.15);
+}
+
+html[data-theme='light'] .card-blue {
+    background: linear-gradient(135deg, rgba(142, 208, 253, 0.8), rgba(219, 234, 254, 0.6));
+    border-color: rgba(147, 197, 253, 0.4);
+}
+
+html[data-theme='light'] .card-blue:hover {
+    background: linear-gradient(135deg, rgba(144, 211, 255, 0.9), rgba(219, 234, 254, 0.7));
+    border-color: rgba(147, 197, 253, 0.6);
+    box-shadow: 0 20px 50px rgba(59, 130, 246, 0.15);
+}
+
+html[data-theme='light'] .card-cyan {
+    background: linear-gradient(135deg, rgba(136, 245, 255, 0.8), rgba(206, 255, 255, 0.6));
+    border-color: rgba(165, 243, 252, 0.4);
+}
+
+html[data-theme='light'] .card-cyan:hover {
+    background: linear-gradient(135deg, rgba(140, 246, 255, 0.9), rgba(206, 255, 255, 0.7));
+    border-color: rgba(165, 243, 252, 0.6);
+    box-shadow: 0 20px 50px rgba(34, 211, 238, 0.15);
+}
+
+html[data-theme='light'] .card-green {
+    background: linear-gradient(135deg, rgba(141, 255, 180, 0.8), rgba(240, 253, 244, 0.6));
+    border-color: rgba(134, 239, 172, 0.4);
+}
+
+html[data-theme='light'] .card-green:hover {
+    background: linear-gradient(135deg, rgba(141, 255, 180, 0.9), rgba(240, 253, 244, 0.7));
+    border-color: rgba(134, 239, 172, 0.6);
+    box-shadow: 0 20px 50px rgba(34, 197, 94, 0.15);
+}
+
+html[data-theme='light'] .card-pink {
+    background: linear-gradient(135deg, rgba(255, 144, 208, 0.8), rgba(254, 240, 250, 0.6));
+    border-color: rgba(249, 168, 212, 0.4);
+}
+
+html[data-theme='light'] .card-pink:hover {
+    background: linear-gradient(135deg, rgba(255, 143, 207, 0.9), rgba(254, 240, 250, 0.7));
+    border-color: rgba(249, 168, 212, 0.6);
+    box-shadow: 0 20px 50px rgba(236, 72, 153, 0.15);
+}
+
+/* Card Title */
+.cardTitle {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #f1f5f9;
+}
+
+html[data-theme='light'] .cardTitle {
+    color: #1e293b;
+}
+
+/* Card Description */
+.cardDescription {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #cbd5e1;
+}
+
+html[data-theme='light'] .cardDescription {
+    color: #475569;
+}
