@@ -1,101 +1,101 @@
 /* Full-page gradient background */
 .fullscreen {
-    min-height: 100vh;
-    padding-bottom: 0 !important;
+  min-height: 100vh;
+  padding-bottom: 0 !important;
 }
 
 :global(.main-wrapper) {
-    padding: 0 !important;
-    margin: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
 :global(.container) {
-    padding-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* Dark mode background - sophisticated dark gradient */
 .heroGradient {
-    background: linear-gradient(to bottom right, #0f172a, #581c87, #0f172a);
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    min-height: 100vh;
+  background: linear-gradient(to bottom right, #0f172a, #581c87, #0f172a);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 100vh;
 }
 
 /* Light mode background - soft pastel gradient */
-html[data-theme='light'] .heroGradient {
-    background: linear-gradient(to bottom right, #f8fafc, #f3e8ff, #f8fafc);
+html[data-theme="light"] .heroGradient {
+  background: linear-gradient(to bottom right, #f8fafc, #f3e8ff, #f8fafc);
 }
 
 /* Animated floating orbs - Dark mode */
 .heroGradient > div:nth-child(1) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 .heroGradient > div:nth-child(2) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 .heroGradient > div:nth-child(3) {
-    opacity: 0.25;
+  opacity: 0.25;
 }
 
 /* Light mode orbs - more subtle */
-html[data-theme='light'] .heroGradient > div:nth-child(1) {
-    opacity: 0.15;
-    filter: blur(60px);
+html[data-theme="light"] .heroGradient > div:nth-child(1) {
+  opacity: 0.15;
+  filter: blur(60px);
 }
 
-html[data-theme='light'] .heroGradient > div:nth-child(2) {
-    opacity: 0.15;
-    filter: blur(60px);
+html[data-theme="light"] .heroGradient > div:nth-child(2) {
+  opacity: 0.15;
+  filter: blur(60px);
 }
 
-html[data-theme='light'] .heroGradient > div:nth-child(3) {
-    opacity: 0.15;
-    filter: blur(60px);
+html[data-theme="light"] .heroGradient > div:nth-child(3) {
+  opacity: 0.15;
+  filter: blur(60px);
 }
 
 /* Overlay - Dark mode */
 .heroGradient::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-            ellipse at 50% 50%,
-            rgba(0, 0, 0, 0),
-            rgba(0, 0, 0, 0.3)
-    );
-    pointer-events: none;
-    z-index: 0;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0.3)
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Light mode overlay */
-html[data-theme='light'] .heroGradient::after {
-    background: radial-gradient(
-            ellipse at 50% 50%,
-            rgba(255, 255, 255, 0.3),
-            rgba(0, 0, 0, 0.1)
-    );
+html[data-theme="light"] .heroGradient::after {
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(255, 255, 255, 0.3),
+    rgba(0, 0, 0, 0.1)
+  );
 }
 
 /* Glass card */
 .glassCard {
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 1.5rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 /* Light mode glass card */
-html[data-theme='light'] .glassCard {
+html[data-theme="light"] .glassCard {
   background: rgba(255, 255, 255, 0.7);
   border-color: rgba(168, 85, 247, 0.2);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
@@ -122,22 +122,22 @@ html[data-theme='light'] .glassCard {
 }
 
 /* Light mode hero text */
-[data-theme='light'] .heroTitle {
+[data-theme="light"] .heroTitle {
   background: linear-gradient(to right, #7c3aed, #2563eb, #7c3aed);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-[data-theme='light'] .heroSubtitle {
+[data-theme="light"] .heroSubtitle {
   color: #1e293b !important;
 }
 
-[data-theme='light'] .heroDescription {
+[data-theme="light"] .heroDescription {
   color: #334155 !important;
 }
 
-[data-theme='light'] .heroCaption {
+[data-theme="light"] .heroCaption {
   color: #64748b !important;
 }
 
@@ -151,27 +151,27 @@ html[data-theme='light'] .glassCard {
 }
 
 /* Light mode categories */
-html[data-theme='light'] .categoriesTitle {
+html[data-theme="light"] .categoriesTitle {
   color: #1e293b;
 }
 
-html[data-theme='light'] .categoriesDescription {
+html[data-theme="light"] .categoriesDescription {
   color: #475569;
 }
 
 /* Grid container */
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
-    width: 100%;
-    position: relative;
-    z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 768px) {
-    .grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }
