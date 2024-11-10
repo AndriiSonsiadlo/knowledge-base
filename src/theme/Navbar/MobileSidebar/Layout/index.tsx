@@ -3,10 +3,8 @@ import clsx from "clsx";
 import { useNavbarSecondaryMenu } from "@docusaurus/theme-common/internal";
 import { ThemeClassNames } from "@docusaurus/theme-common";
 import type { Props } from "@theme/Navbar/MobileSidebar/Layout";
+import { useColorMode } from "@docusaurus/theme-common";
 
-// TODO Docusaurus v4: remove temporary inert workaround
-//  See https://github.com/facebook/react/issues/17157
-//  See https://github.com/radix-ui/themes/pull/509
 function inertProps(inert: boolean) {
   const isBeforeReact19 = parseInt(version!.split(".")[0]!, 10) < 19;
   if (isBeforeReact19) {
@@ -27,6 +25,7 @@ function NavbarMobileSidebarPanel({
       className={clsx(
         ThemeClassNames.layout.navbar.mobileSidebar.panel,
         "navbar-sidebar__item menu",
+        "transition-all duration-300",
       )}
       {...inertProps(inert)}
     >
@@ -41,18 +40,29 @@ export default function NavbarMobileSidebarLayout({
   secondaryMenu,
 }: Props): ReactNode {
   const { shown: secondaryMenuShown } = useNavbarSecondaryMenu();
+  const { colorMode } = useColorMode();
+  const isDarkTheme = colorMode === "dark";
+
   return (
     <div
       className={clsx(
         ThemeClassNames.layout.navbar.mobileSidebar.container,
         "navbar-sidebar",
+        "fixed inset-0 top-16 z-40 flex flex-col",
+        isDarkTheme
+          ? "bg-slate-950 border-r border-white/10"
+          : "bg-white border-r border-slate-200",
       )}
     >
       {header}
       <div
-        className={clsx("navbar-sidebar__items", {
-          "navbar-sidebar__items--show-secondary": secondaryMenuShown,
-        })}
+        className={clsx(
+          "navbar-sidebar__items flex-1 overflow-y-auto",
+          "flex transition-transform duration-300",
+          {
+            "navbar-sidebar__items--show-secondary": secondaryMenuShown,
+          },
+        )}
       >
         <NavbarMobileSidebarPanel inert={secondaryMenuShown}>
           {primaryMenu}

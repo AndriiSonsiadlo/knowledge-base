@@ -85,13 +85,11 @@ export default function NavbarLayout({ children }: Props): ReactNode {
         description: "The ARIA label for the main navigation",
       })}
       className={clsx(
-        // ThemeClassNames.layout.navbar.container,
         "navbar",
         "sticky top-0 z-50 backdrop-blur-xl transition-all duration-300",
         isDarkTheme
           ? "bg-slate-900/50 border-b border-white/10"
           : "bg-white/80 border-b border-slate-200",
-        // 'navbar--fixed-top',
         hideOnScroll && [
           styles.navbarHideable,
           !isNavbarVisible && styles.navbarHidden,
@@ -124,7 +122,6 @@ export default function NavbarLayout({ children }: Props): ReactNode {
                   : "bg-slate-100/50 border border-slate-300 hover:bg-slate-100",
               )}
             >
-              {/*<SearchBar />*/}
               <Search
                 className={clsx(
                   "w-4 h-4 flex-shrink-0",
@@ -159,23 +156,7 @@ export default function NavbarLayout({ children }: Props): ReactNode {
               <Github className="w-5 h-5" />
             </a>
 
-            {/*/!* Theme Toggle *!/*/}
-            {/*<button*/}
-            {/*  onClick={toggleTheme}*/}
-            {/*  className={clsx(*/}
-            {/*    "hidden sm:flex p-2 rounded-lg transition-all duration-300",*/}
-            {/*    isDarkTheme*/}
-            {/*      ? "hover:bg-white/10 text-slate-400 hover:text-white"*/}
-            {/*      : "hover:bg-slate-200 text-slate-600 hover:text-slate-900",*/}
-            {/*  )}*/}
-            {/*  aria-label="Toggle theme"*/}
-            {/*>*/}
-            {/*  {isDarkTheme ? (*/}
-            {/*    <Sun className="w-5 h-5" />*/}
-            {/*  ) : (*/}
-            {/*    <Moon className="w-5 h-5" />*/}
-            {/*  )}*/}
-            {/*</button>*/}
+            {/* Theme Toggle */}
             <NavbarColorModeToggle className={styles.colorModeToggle} />
 
             {/* Mobile Menu Button */}
@@ -209,35 +190,20 @@ export default function NavbarLayout({ children }: Props): ReactNode {
           >
             {children}
 
-            {/* Mobile Search */}
+            {/* Mobile Actions */}
             <div
-              className={clsx(
-                "flex items-center gap-2 backdrop-blur-md rounded-lg px-3 py-2 mx-2 transition-all",
-                isDarkTheme
-                  ? "bg-white/5 border border-white/10"
-                  : "bg-slate-100/50 border border-slate-300",
-              )}
+              className="flex items-center gap-2 px-2 pt-2 mt-2 border-t"
+              style={{
+                borderColor: isDarkTheme
+                  ? "rgba(255,255,255,0.1)"
+                  : "rgba(0,0,0,0.1)",
+              }}
             >
-              {/*<Search className={clsx(*/}
-              {/*    'w-4 h-4 flex-shrink-0',*/}
-              {/*    isDarkTheme ? 'text-slate-400' : 'text-slate-500'*/}
-              {/*)} />*/}
-              {/*<input*/}
-              {/*    type="text"*/}
-              {/*    placeholder="Search docs..."*/}
-              {/*    className={clsx(*/}
-              {/*        'bg-transparent outline-none text-sm w-full placeholder-opacity-70 transition-colors',*/}
-              {/*        isDarkTheme*/}
-              {/*            ? 'text-white placeholder-slate-500'*/}
-              {/*            : 'text-slate-900 placeholder-slate-400'*/}
-              {/*    )}*/}
-              {/*/>*/}
-            </div>
-
-            {/* Mobile Theme Toggle & GitHub */}
-            <div className="flex items-center gap-2 px-2">
               <button
-                onClick={toggleTheme}
+                onClick={() => {
+                  toggleTheme();
+                  setIsMobileMenuOpen(false);
+                }}
                 className={clsx(
                   "flex-1 flex items-center justify-center gap-2 p-2 rounded-lg transition-all duration-300 font-medium",
                   isDarkTheme
