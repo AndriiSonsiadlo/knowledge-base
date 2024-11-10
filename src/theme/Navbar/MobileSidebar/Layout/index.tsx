@@ -8,7 +8,7 @@ import { useColorMode } from "@docusaurus/theme-common";
 function inertProps(inert: boolean) {
   const isBeforeReact19 = parseInt(version!.split(".")[0]!, 10) < 19;
   if (isBeforeReact19) {
-    return { inert: inert ? "" : undefined };
+    return inert ? { inert: true } : {};
   }
   return { inert };
 }

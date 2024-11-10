@@ -72,9 +72,9 @@ export default function NavbarLayout({ children }: Props): ReactNode {
     setColorMode(isDarkTheme ? "light" : "dark");
   };
 
-  const githubUrl =
-    navbarItems.find((item: any) => item.href?.includes("github.com"))?.href ||
-    "https://github.com";
+  const githubUrl = (navbarItems.find((item: any) =>
+    item.href?.includes("github.com"),
+  )?.href ?? "https://github.com") as string;
 
   return (
     <nav
