@@ -4,7 +4,7 @@ import clsx from "clsx";
 import styles from "./styles.module.css";
 
 interface CategoryCardProps {
-  title: string;
+  label: string;
   description: string;
   icon: React.ReactNode;
   href: string;
@@ -12,7 +12,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({
-  title,
+  label,
   description,
   icon,
   href,
@@ -31,7 +31,7 @@ export default function CategoryCard({
         <div className="flex items-start gap-4 h-full">
           <div className="text-4xl flex-shrink-0">{icon}</div>
           <div className="flex-1">
-            <h3 className={styles.cardTitle}>{title}</h3>
+            <h3 className={styles.cardTitle}>{label}</h3>
             <p className={styles.cardDescription}>{description}</p>
           </div>
         </div>

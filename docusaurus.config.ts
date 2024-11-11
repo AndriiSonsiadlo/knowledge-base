@@ -78,24 +78,36 @@ const config: Config = {
           sidebarId: "programmingSidebar",
           position: "left",
           label: "Programming",
+          description:
+            "Learn Python, C++, and master modern programming languages with practical examples.",
+          icon: "💻",
         },
         {
           type: "docSidebar",
           sidebarId: "computerScienceSidebar",
           position: "left",
           label: "Computer Science",
+          description:
+            "Deep dive into OS, architecture, memory management, and processor design.",
+          icon: "⚙️",
         },
         {
           type: "docSidebar",
           sidebarId: "dataStructuresSidebar",
           position: "left",
           label: "Data & Algorithms",
+          description:
+            "Explore sorting, searching, and fundamental algorithm design patterns.",
+          icon: "📊",
         },
         {
           type: "docSidebar",
-          sidebarId: "machineLearningaSidebar",
+          sidebarId: "machineLearningSidebar",
           position: "left",
           label: "Machine Learning",
+          description:
+            "Master fundamentals, neural networks, NLP, and modern ML architectures.",
+          icon: "🤖",
         },
         {
           to: "/blog",

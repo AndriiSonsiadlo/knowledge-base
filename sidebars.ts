@@ -110,7 +110,7 @@ const sidebars: SidebarsConfig = {
     },
   ],
 
-  machineLearningaSidebar: [
+  machineLearningSidebar: [
     "machine-learning/intro",
     {
       type: "category",

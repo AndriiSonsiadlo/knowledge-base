@@ -23,8 +23,8 @@ export default function NavbarMobilePrimaryMenu(): ReactNode {
   return (
     <ul className={clsx("menu__list w-full p-2 space-y-1 flex-1")}>
       {filteredItems.length > 0 ? (
-        filteredItems.map((item, i) => (
-          <li key={i} className="list-none">
+        filteredItems.map((item, i) => {
+          return (
             <div
               className={clsx(
                 "block px-4 py-3 rounded-lg transition-all duration-200 font-medium",
@@ -34,10 +34,10 @@ export default function NavbarMobilePrimaryMenu(): ReactNode {
               )}
               onClick={() => mobileSidebar.toggle()}
             >
-              <NavbarItem mobile {...item} />
+              <NavbarItem mobile key={i} {...item} />
             </div>
-          </li>
-        ))
+          );
+        })
       ) : (
         <li className="list-none px-4 py-3">
           <p className={isDarkTheme ? "text-slate-500" : "text-slate-400"}>

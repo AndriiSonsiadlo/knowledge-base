@@ -16,14 +16,14 @@ export default function Home(): ReactNode {
         className={clsx(styles.heroGradient, "w-full relative overflow-hidden")}
       >
         {/* Animated background elements */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-0 left-0 w-128 h-128 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
         <div
           className="absolute top-20 right-0 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
-          style={{ animationDelay: "2s" }}
+          style={{ animationDelay: "3s" }}
         ></div>
         <div
           className="absolute bottom-0 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
-          style={{ animationDelay: "4s" }}
+          style={{ animationDelay: "2s" }}
         ></div>
 
         {/* Content */}
@@ -78,9 +78,6 @@ export default function Home(): ReactNode {
             </div>
           </div>
         </main>
-
-        {/* Footer glow */}
-        {/*<div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-50"></div>*/}
       </div>
     </Layout>
   );
