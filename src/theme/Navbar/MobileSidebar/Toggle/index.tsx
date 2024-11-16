@@ -1,7 +1,7 @@
-import React, { type ReactNode } from "react";
-import { useNavbarMobileSidebar } from "@docusaurus/theme-common/internal";
 import { translate } from "@docusaurus/Translate";
+import { useNavbarMobileSidebar } from "@docusaurus/theme-common/internal";
 import IconMenu from "@theme/Icon/Menu";
+import React, { type ReactNode } from "react";
 
 export default function MobileSidebarToggle(): ReactNode {
   const { toggle, shown } = useNavbarMobileSidebar();

@@ -1,6 +1,6 @@
-import React, { type ReactNode } from "react";
-import NavbarLayout from "@theme/Navbar/Layout";
 import NavbarContent from "@theme/Navbar/Content";
+import NavbarLayout from "@theme/Navbar/Layout";
+import React, { type ReactNode } from "react";
 
 export default function Navbar(): ReactNode {
   return (

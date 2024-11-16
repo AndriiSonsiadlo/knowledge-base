@@ -1,8 +1,8 @@
-import React, { ReactNode } from "react";
+import { useLayoutDocsSidebar } from "@docusaurus/plugin-content-docs/client";
+import { useThemeConfig } from "@docusaurus/theme-common";
+import React, { type ReactNode } from "react";
 import CategoryCard from "../CategoryCard";
 import styles from "./styles.module.css";
-import { useThemeConfig } from "@docusaurus/theme-common";
-import { useLayoutDocsSidebar } from "@docusaurus/plugin-content-docs/client";
 
 function shuffle<T>(arr: T[]): T[] {
   const array = [...arr]; // avoid mutating original

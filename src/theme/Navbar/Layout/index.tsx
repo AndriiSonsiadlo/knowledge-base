@@ -1,18 +1,17 @@
-import React, { type ComponentProps, type ReactNode, useState } from "react";
-import clsx from "clsx";
+import Link from "@docusaurus/Link";
+import { translate } from "@docusaurus/Translate";
 import { useColorMode, useThemeConfig } from "@docusaurus/theme-common";
 import {
   useHideableNavbar,
   useNavbarMobileSidebar,
 } from "@docusaurus/theme-common/internal";
-import { translate } from "@docusaurus/Translate";
-import NavbarMobileSidebar from "@theme/Navbar/MobileSidebar";
-import type { Props } from "@theme/Navbar/Layout";
-import { BookOpen, Github, Menu, Moon, Search, Sun, X } from "lucide-react";
-
-import styles from "./styles.module.css";
-import Link from "@docusaurus/Link";
 import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle";
+import type { Props } from "@theme/Navbar/Layout";
+import NavbarMobileSidebar from "@theme/Navbar/MobileSidebar";
+import clsx from "clsx";
+import { BookOpen, Github, Menu, Moon, Search, Sun, X } from "lucide-react";
+import React, { type ComponentProps, type ReactNode, useState } from "react";
+import styles from "./styles.module.css";
 
 function NavbarBackdrop(props: ComponentProps<"div">) {
   return (

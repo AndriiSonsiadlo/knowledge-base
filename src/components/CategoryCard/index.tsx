@@ -1,6 +1,7 @@
-import React, { ReactNode } from "react";
 import Link from "@docusaurus/Link";
 import clsx from "clsx";
+import type React from "react";
+import type { ReactNode } from "react";
 import styles from "./styles.module.css";
 
 interface CategoryCardProps {

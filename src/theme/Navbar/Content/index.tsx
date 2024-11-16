@@ -1,21 +1,21 @@
-import React, { type ReactNode } from "react";
-import clsx from "clsx";
 import {
-  useThemeConfig,
   ErrorCauseBoundary,
   ThemeClassNames,
   useColorMode,
+  useThemeConfig,
 } from "@docusaurus/theme-common";
 import {
   splitNavbarItems,
   useNavbarMobileSidebar,
 } from "@docusaurus/theme-common/internal";
-import NavbarItem, { type Props as NavbarItemConfig } from "@theme/NavbarItem";
 import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle";
-import SearchBar from "@theme/SearchBar";
-import NavbarMobileSidebarToggle from "@theme/Navbar/MobileSidebar/Toggle";
 import NavbarLogo from "@theme/Navbar/Logo";
+import NavbarMobileSidebarToggle from "@theme/Navbar/MobileSidebar/Toggle";
 import NavbarSearch from "@theme/Navbar/Search";
+import NavbarItem, { type Props as NavbarItemConfig } from "@theme/NavbarItem";
+import SearchBar from "@theme/SearchBar";
+import clsx from "clsx";
+import React, { type ReactNode } from "react";
 
 import styles from "./styles.module.css";
 

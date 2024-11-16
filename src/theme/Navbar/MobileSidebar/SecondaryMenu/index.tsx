@@ -1,10 +1,9 @@
-import React, { type ComponentProps, type ReactNode } from "react";
-import { useThemeConfig } from "@docusaurus/theme-common";
-import { useNavbarSecondaryMenu } from "@docusaurus/theme-common/internal";
 import Translate from "@docusaurus/Translate";
-import { ArrowLeft } from "lucide-react";
+import { useColorMode, useThemeConfig } from "@docusaurus/theme-common";
+import { useNavbarSecondaryMenu } from "@docusaurus/theme-common/internal";
 import clsx from "clsx";
-import { useColorMode } from "@docusaurus/theme-common";
+import { ArrowLeft } from "lucide-react";
+import React, { type ComponentProps, type ReactNode } from "react";
 
 function SecondaryMenuBackButton(props: ComponentProps<"button">) {
   const { colorMode } = useColorMode();

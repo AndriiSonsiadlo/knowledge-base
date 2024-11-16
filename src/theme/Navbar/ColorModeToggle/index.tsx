@@ -1,8 +1,8 @@
-import React, { type ReactNode } from "react";
 import { useColorMode, useThemeConfig } from "@docusaurus/theme-common";
 import type { Props } from "@theme/Navbar/ColorModeToggle";
 import clsx from "clsx";
 import { Moon, Sun } from "lucide-react";
+import React, { type ReactNode } from "react";
 
 export default function NavbarColorModeToggle({ className }: Props): ReactNode {
   const navbarStyle = useThemeConfig().navbar.style;

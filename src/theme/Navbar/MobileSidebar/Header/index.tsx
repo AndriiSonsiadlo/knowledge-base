@@ -1,12 +1,12 @@
-import React, { type ReactNode } from "react";
-import { useNavbarMobileSidebar } from "@docusaurus/theme-common/internal";
 import { translate } from "@docusaurus/Translate";
-import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle";
-import IconClose from "@theme/Icon/Close";
-import NavbarLogo from "@theme/Navbar/Logo";
 import { useColorMode } from "@docusaurus/theme-common";
+import { useNavbarMobileSidebar } from "@docusaurus/theme-common/internal";
+import IconClose from "@theme/Icon/Close";
+import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle";
+import NavbarLogo from "@theme/Navbar/Logo";
 import clsx from "clsx";
 import { X } from "lucide-react";
+import React, { type ReactNode } from "react";
 
 function CloseButton() {
   const mobileSidebar = useNavbarMobileSidebar();

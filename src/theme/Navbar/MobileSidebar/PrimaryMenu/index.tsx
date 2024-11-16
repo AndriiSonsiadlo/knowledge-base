@@ -1,9 +1,8 @@
-import React, { type ReactNode } from "react";
-import { useThemeConfig } from "@docusaurus/theme-common";
+import { useColorMode, useThemeConfig } from "@docusaurus/theme-common";
 import { useNavbarMobileSidebar } from "@docusaurus/theme-common/internal";
 import NavbarItem, { type Props as NavbarItemConfig } from "@theme/NavbarItem";
-import { useColorMode } from "@docusaurus/theme-common";
 import clsx from "clsx";
+import React, { type ReactNode } from "react";
 
 function useNavbarItems() {
   return useThemeConfig().navbar.items as NavbarItemConfig[];

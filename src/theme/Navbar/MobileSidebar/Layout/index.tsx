@@ -1,9 +1,8 @@
-import React, { version, type ReactNode } from "react";
-import clsx from "clsx";
+import { ThemeClassNames, useColorMode } from "@docusaurus/theme-common";
 import { useNavbarSecondaryMenu } from "@docusaurus/theme-common/internal";
-import { ThemeClassNames } from "@docusaurus/theme-common";
 import type { Props } from "@theme/Navbar/MobileSidebar/Layout";
-import { useColorMode } from "@docusaurus/theme-common";
+import clsx from "clsx";
+import React, { type ReactNode, version } from "react";
 
 function inertProps(inert: boolean) {
   const isBeforeReact19 = parseInt(version!.split(".")[0]!, 10) < 19;

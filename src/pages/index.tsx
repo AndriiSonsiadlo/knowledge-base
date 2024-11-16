@@ -1,9 +1,9 @@
-import type { ReactNode } from "react";
-import clsx from "clsx";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import Layout from "@theme/Layout";
-import Heading from "@theme/Heading";
 import CategoryGrid from "@site/src/components/CategoryGrid";
+import Heading from "@theme/Heading";
+import Layout from "@theme/Layout";
+import clsx from "clsx";
+import type { ReactNode } from "react";
 
 import styles from "./index.module.css";
 
