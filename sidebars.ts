@@ -110,6 +110,17 @@ const sidebars: SidebarsConfig = {
     },
   ],
 
+  dataToolsSidebar: [
+    {
+      type: "category",
+      label: "Pandas",
+      items: [
+        "data-tools/pandas/overview",
+        "data-tools/pandas/foundations/core-concepts",
+      ],
+    },
+  ],
+
   machineLearningSidebar: [
     "machine-learning/intro",
     {

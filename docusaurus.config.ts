@@ -1,6 +1,6 @@
-import { themes as prismThemes } from "prism-react-renderer";
-import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Config } from "@docusaurus/types";
+import { themes as prismThemes } from "prism-react-renderer";
 
 const config: Config = {
   title: "My Knowledge Base",
@@ -102,6 +102,15 @@ const config: Config = {
         },
         {
           type: "docSidebar",
+          sidebarId: "dataToolsSidebar",
+          position: "left",
+          label: "Data Tools",
+          description:
+            "Practical data processing tools for analysis, ETL, querying, visualization, and performance optimization.",
+          icon: "🔧",
+        },
+        {
+          type: "docSidebar",
           sidebarId: "machineLearningSidebar",
           position: "left",
           label: "Machine Learning",
@@ -133,6 +142,10 @@ const config: Config = {
             {
               label: "Data & Algorithms",
               to: "/docs/data-structures-algorithms/intro",
+            },
+            {
+              label: "Data Tools",
+              to: "/docs/data-tools/readme",
             },
             {
               label: "Machine Learning",
