@@ -116,7 +116,14 @@ const sidebars: SidebarsConfig = {
       label: "Pandas",
       items: [
         "data-tools/pandas/overview",
-        "data-tools/pandas/foundations/core-concepts",
+        {
+          type: "category",
+          label: "Foundations",
+          items: [
+            "data-tools/pandas/foundations/core-concepts",
+            "data-tools/pandas/foundations/io-reading-writing",
+          ],
+        },
       ],
     },
   ],
