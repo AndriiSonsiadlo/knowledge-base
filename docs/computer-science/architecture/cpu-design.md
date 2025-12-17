@@ -1,5 +1,8 @@
 ---
 sidebar_position: 1
+tags: [cpu, design]
+categories: [computer-science, architecture]
+hide_table_of_contents: false
 ---
 
 # CPU Design
@@ -7,6 +10,14 @@ sidebar_position: 1
 Welcome to docs/computer-science/cpu-design section!
 
 ## subsection1: Basics of CPU Architecture
+
+### H3 Text
+
+#### H4 Text
+
+### H3 Text 2
+
+#### H4 Text
 
 ## Create a Page
 
@@ -21,7 +32,6 @@ Add **Markdown or React** files to `src/pages` to create a **standalone page**:
 Create a file at `src/pages/my-react-page.js`:
 
 ```jsx title="src/pages/my-react-page.js"
-
 import React from 'react';
 import Layout from '@theme/Layout';
 
