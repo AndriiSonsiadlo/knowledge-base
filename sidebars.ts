@@ -124,6 +124,13 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/foundations/io-reading-writing",
           ],
         },
+        {
+          type: "category",
+          label: "Selection",
+          items: [
+            "data-tools/pandas/selection/boolean-filtering",
+          ],
+        },
       ],
     },
   ],
