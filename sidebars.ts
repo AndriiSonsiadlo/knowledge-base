@@ -130,6 +130,7 @@ const sidebars: SidebarsConfig = {
           items: [
             "data-tools/pandas/selection/selecting-columns",
             "data-tools/pandas/selection/boolean-filtering",
+            "data-tools/pandas/selection/loc-vs-iloc",
           ],
         },
       ],
