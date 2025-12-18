@@ -128,6 +128,7 @@ const sidebars: SidebarsConfig = {
           type: "category",
           label: "Selection",
           items: [
+            "data-tools/pandas/selection/selecting-columns",
             "data-tools/pandas/selection/boolean-filtering",
           ],
         },
