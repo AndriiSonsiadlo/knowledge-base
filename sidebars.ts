@@ -131,6 +131,14 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/selection/selecting-columns",
             "data-tools/pandas/selection/boolean-filtering",
             "data-tools/pandas/selection/loc-vs-iloc",
+        {
+          type: "category",
+          label: "Cleaning",
+          items: [
+            "data-tools/pandas/cleaning/data-types",
+            "data-tools/pandas/cleaning/duplicates",
+          ],
+        },
           ],
         },
       ],
