@@ -144,6 +144,13 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/cleaning/string-operations",
           ],
         },
+        {
+          type: "category",
+          label: "Transformation",
+          items: [
+            "data-tools/pandas/transformation/apply-map",
+          ],
+        },
       ],
     },
   ],
