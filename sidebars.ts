@@ -149,6 +149,9 @@ const sidebars: SidebarsConfig = {
           label: "Transformation",
           items: [
             "data-tools/pandas/transformation/apply-map",
+            "data-tools/pandas/transformation/sorting-ranking",
+            "data-tools/pandas/transformation/binning-categorical",
+            "data-tools/pandas/transformation/reshaping",
           ],
         },
       ],
