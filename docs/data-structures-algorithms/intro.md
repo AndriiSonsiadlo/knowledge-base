@@ -1,3 +1,5 @@
-# data-structures-algorithms
+# Algorithms Overview
 
-Welcome to docs/data-structures-algorithms section!
+## References
+
+- [GeeksForGeeks - List of algorithms](https://www.geeksforgeeks.org/dsa/dsa/)

@@ -172,6 +172,11 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/time-series/resampling-rolling",
           ],
         },
+        {
+          type: "category",
+          label: "Cookbook",
+          items: ["data-tools/pandas/cookbook/interview-snippets"],
+        },
       ],
     },
   ],
