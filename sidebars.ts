@@ -152,6 +152,16 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/transformation/sorting-ranking",
             "data-tools/pandas/transformation/binning-categorical",
             "data-tools/pandas/transformation/reshaping",
+        {
+          type: "category",
+          label: "Aggregation",
+          items: [
+            "data-tools/pandas/aggregation/aggregation-functions",
+            "data-tools/pandas/aggregation/groupby",
+            "data-tools/pandas/aggregation/merge-join-concat",
+            "data-tools/pandas/aggregation/pivot-melt",
+          ],
+        },
           ],
         },
       ],
