@@ -152,6 +152,8 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/transformation/sorting-ranking",
             "data-tools/pandas/transformation/binning-categorical",
             "data-tools/pandas/transformation/reshaping",
+          ],
+        },
         {
           type: "category",
           label: "Aggregation",
@@ -162,6 +164,12 @@ const sidebars: SidebarsConfig = {
             "data-tools/pandas/aggregation/pivot-melt",
           ],
         },
+        {
+          type: "category",
+          label: "Time Series",
+          items: [
+            "data-tools/pandas/time-series/datetime-basics",
+            "data-tools/pandas/time-series/resampling-rolling",
           ],
         },
       ],
