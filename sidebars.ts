@@ -36,6 +36,21 @@ const sidebars: SidebarsConfig = {
         },
       ],
     },
+    {
+      type: "category",
+      label: "CMake",
+      items: [
+        "programming/cmake/readme",
+        {
+          type: "category",
+          label: "Introduction",
+          items: [
+            "programming/cmake/intro/what-is-cmake",
+            "programming/cmake/intro/installing-cmake",
+          ],
+        },
+      ],
+    },
   ],
 
   computerScienceSidebar: [
