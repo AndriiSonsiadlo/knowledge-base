@@ -48,6 +48,8 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/intro/what-is-cmake",
             "programming/cmake/intro/installing-cmake",
             "programming/cmake/intro/first-project",
+          ],
+        },
         {
           type: "category",
           label: "Basics",
