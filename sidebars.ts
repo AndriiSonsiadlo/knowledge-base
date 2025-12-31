@@ -55,6 +55,9 @@ const sidebars: SidebarsConfig = {
           label: "Basics",
           items: [
             "programming/cmake/basics/cmakelists-structure",
+            "programming/cmake/basics/variables",
+            "programming/cmake/basics/commands",
+            "programming/cmake/basics/build-types",
           ],
         },
           ],
