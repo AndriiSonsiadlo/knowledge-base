@@ -58,6 +58,14 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/basics/variables",
             "programming/cmake/basics/commands",
             "programming/cmake/basics/build-types",
+        {
+          type: "category",
+          label: "Targets",
+          items: [
+            "programming/cmake/targets/executables",
+            "programming/cmake/targets/libraries",
+            "programming/cmake/targets/linking",
+            "programming/cmake/targets/target-properties",
           ],
         },
           ],
