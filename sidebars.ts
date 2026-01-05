@@ -66,6 +66,15 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/targets/libraries",
             "programming/cmake/targets/linking",
             "programming/cmake/targets/target-properties",
+        {
+          type: "category",
+          label: "Dependencies",
+          items: [
+            "programming/cmake/dependencies/find-package",
+            "programming/cmake/dependencies/fetchcontent",
+            "programming/cmake/dependencies/external-projects",
+          ],
+        },
           ],
         },
           ],
