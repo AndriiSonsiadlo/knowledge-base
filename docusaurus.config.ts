@@ -149,7 +149,7 @@ const config: Config = {
             },
             {
               label: "Data Tools",
-              to: "/docs/data-tools/readme",
+              to: "/docs/data-tools",
             },
             {
               label: "Machine Learning",
