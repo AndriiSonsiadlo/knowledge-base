@@ -11,9 +11,12 @@ const config: Config = {
   },
   url: "https://your-docusaurus-site.example.com",
   baseUrl: "/",
-  organizationName: "AndriiSonsiadlo",
+  organizationName: "Andrii Sonsiadlo",
   projectName: "knowledge-base",
   onBrokenLinks: "throw",
+  customFields: {
+    githubUrl: "https://github.com/AndriiSonsiadlo/knowledge-base",
+  },
   i18n: {
     defaultLocale: "en",
     locales: ["en"],

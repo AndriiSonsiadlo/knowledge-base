@@ -70,11 +70,8 @@ export default function NavbarLayout({ children }: Props): ReactNode {
   const toggleTheme = () => {
     setColorMode(isDarkTheme ? "light" : "dark");
   };
-
-  const githubUrl = (navbarItems.find((item: any) =>
-    item.href?.includes("github.com"),
-  )?.href ?? "https://github.com") as string;
-
+  const { siteConfig } = useDocusaurusContext();
+  const { githubUrl } = siteConfig.customFields;
   return (
     <nav
       ref={navbarRef}
