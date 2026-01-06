@@ -75,6 +75,15 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/dependencies/external-projects",
           ],
         },
+        {
+          type: "category",
+          label: "Project Organization",
+          items: [
+            "programming/cmake/project-organization/multi-directory",
+            "programming/cmake/project-organization/subdirectories",
+            "programming/cmake/project-organization/best-practices",
+          ],
+        },
           ],
         },
           ],
