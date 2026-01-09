@@ -98,6 +98,12 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/advanced/custom-commands",
           ],
         },
+        {
+          type: "category",
+          label: "Testing",
+          items: [
+            "programming/cmake/testing/ctest-basics",
+            "programming/cmake/testing/integration",
           ],
         },
       ],
@@ -177,6 +183,7 @@ const sidebars: SidebarsConfig = {
   ],
 
   dataToolsSidebar: [
+    "data-tools/readme",
     {
       type: "category",
       label: "Pandas",
