@@ -456,3 +456,10 @@ a,
 button {
   @apply transition-colors duration-300;
 }
+
+
+/* ============ Memraid Graphs / Flowcharts ============ */
+.docusaurus-mermaid-container svg {
+  display: block;        /* allows margin auto centering */
+  margin: 2rem auto;     /* top/bottom + auto left/right */
+}
