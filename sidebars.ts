@@ -58,6 +58,8 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/basics/variables",
             "programming/cmake/basics/commands",
             "programming/cmake/basics/build-types",
+          ],
+        },
         {
           type: "category",
           label: "Targets",
@@ -66,6 +68,8 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/targets/libraries",
             "programming/cmake/targets/linking",
             "programming/cmake/targets/target-properties",
+          ],
+        },
         {
           type: "category",
           label: "Dependencies",
@@ -84,6 +88,14 @@ const sidebars: SidebarsConfig = {
             "programming/cmake/project-organization/best-practices",
           ],
         },
+        {
+          type: "category",
+          label: "Advanced",
+          items: [
+            "programming/cmake/advanced/generator-expressions",
+            "programming/cmake/advanced/functions-and-macros",
+            "programming/cmake/advanced/find-modules",
+            "programming/cmake/advanced/custom-commands",
           ],
         },
           ],
