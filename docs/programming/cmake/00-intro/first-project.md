@@ -2,6 +2,7 @@
 id: first-project
 title: Your First CMake Project
 sidebar_label: First CMake Project
+sidebar_position: 3
 tags: [ c++, cmake ]
 ---
 

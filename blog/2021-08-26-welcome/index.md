@@ -1,15 +1,14 @@
 ---
 slug: welcome
 title: Welcome
-authors: [slorber, yangshun]
+image: https://res.cloudinary.com/thanhnam/image/upload/v1736787946/project/docusaurus-tailwind-shadcn-template/blog_vep2ri.jpg
+authors: [slorber, yangshun, thanhnamnguyen]
 tags: [facebook, hello, docusaurus]
 ---
 
 [Docusaurus blogging features](https://docusaurus.io/docs/blog) are powered by the [blog plugin](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-blog).
 
-Here are a few tips you might find useful.
-
-<!-- truncate -->
+## I. Create a new blog post {#create-a-new-blog-post}
 
 Simply add Markdown files (or folders) to the `blog` directory.
 

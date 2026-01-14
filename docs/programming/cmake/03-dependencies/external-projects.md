@@ -2,6 +2,7 @@
 id: external-projects
 title: ExternalProject Module
 sidebar_label: ExternalProject
+sidebar_position: 3
 tags: [c++, cmake, dependencies, externalproject, build-system]
 ---
 

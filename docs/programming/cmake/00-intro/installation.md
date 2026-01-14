@@ -2,6 +2,7 @@
 id: installing-cmake
 title: Installing CMake
 sidebar_label: Installing CMake
+sidebar_position: 2
 tags: [ c++, cmake ]
 ---
 

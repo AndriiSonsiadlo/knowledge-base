@@ -2,6 +2,7 @@
 id: variables
 title: CMake Variables
 sidebar_label: Variables
+sidebar_position: 2
 tags: [ c++, cmake ]
 ---
 

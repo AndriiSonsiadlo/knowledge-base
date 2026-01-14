@@ -2,6 +2,7 @@
 id: functions-and-macros
 title: Functions and Macros
 sidebar_label: Functions & Macros
+sidebar_position: 2
 tags: [cmake, functions, macros, reusability, scripting]
 ---
 

@@ -2,6 +2,7 @@
 id: target-properties
 title: Target Properties
 sidebar_label: Target Properties
+sidebar_position: 3
 tags: [c++, cmake, targets, properties, configuration]
 ---
 

@@ -2,6 +2,7 @@
 id: multi-directory
 title: Multi-Directory Projects
 sidebar_label: Multi-Directory
+sidebar_position: 1
 tags: [cmake, project-structure, organization, subdirectories]
 ---
 

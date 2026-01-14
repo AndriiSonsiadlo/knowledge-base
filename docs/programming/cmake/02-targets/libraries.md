@@ -2,6 +2,7 @@
 id: libraries
 title: Library Targets
 sidebar_label: Library Targets
+sidebar_position: 2
 tags: [ c++, cmake ]
 ---
 

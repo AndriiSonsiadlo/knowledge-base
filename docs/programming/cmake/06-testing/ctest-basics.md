@@ -2,6 +2,7 @@
 id: ctest-basics
 title: CTest Basics
 sidebar_label: CTest Basics
+sidebar_position: 1
 tags: [cmake, ctest, testing, unit-tests]
 ---
 

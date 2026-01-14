@@ -2,6 +2,7 @@
 id: executables
 title: Executable Targets
 sidebar_label: Executable Targets
+sidebar_position: 1
 tags: [ c++, cmake ]
 ---
 

@@ -2,6 +2,7 @@
 id: custom-commands
 title: Custom Commands and Targets
 sidebar_label: Custom Commands
+sidebar_position: 4
 tags: [cmake, custom-commands, custom-targets, build-process]
 ---
 

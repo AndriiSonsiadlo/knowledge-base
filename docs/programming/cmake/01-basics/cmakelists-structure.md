@@ -2,6 +2,7 @@
 id: cmakelists-structure
 title: CMakeLists.txt Structure
 sidebar_label: CMakeLists Structure
+sidebar_position: 1
 tags: [ c++, cmake ]
 ---
 

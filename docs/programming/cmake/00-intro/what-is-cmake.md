@@ -2,6 +2,7 @@
 id: what-is-cmake
 title: What is CMake?
 sidebar_label: What is CMake?
+sidebar_position: 1
 tags: [ c++, cmake ]
 ---
 

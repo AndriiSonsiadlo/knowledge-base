@@ -2,6 +2,7 @@
 id: find-modules
 title: Writing Find Modules
 sidebar_label: Find Modules
+sidebar_position: 3
 tags: [cmake, find-modules, packages, dependencies]
 ---
 

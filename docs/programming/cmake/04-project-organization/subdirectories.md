@@ -2,6 +2,7 @@
 id: subdirectories
 title: Working with Subdirectories
 sidebar_label: Subdirectories
+sidebar_position: 2
 tags: [cmake, subdirectories, add_subdirectory, scope]
 ---
 

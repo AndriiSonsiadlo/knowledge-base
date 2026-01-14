@@ -2,6 +2,7 @@
 id: generator-expressions
 title: Generator Expressions
 sidebar_label: Generator Expressions
+sidebar_position: 1
 tags: [cmake, generator-expressions, conditional, advanced]
 ---
 

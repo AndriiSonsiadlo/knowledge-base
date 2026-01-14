@@ -2,6 +2,7 @@
 id: best-practices
 title: CMake Best Practices
 sidebar_label: Best Practices
+sidebar_position: 3
 tags: [cmake, best-practices, modern-cmake, patterns]
 ---
 

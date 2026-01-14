@@ -2,6 +2,7 @@
 id: fetchcontent
 title: FetchContent Module
 sidebar_label: FetchContent
+sidebar_position: 2
 tags: [c++, cmake, dependencies, fetchcontent, package-management]
 ---
 

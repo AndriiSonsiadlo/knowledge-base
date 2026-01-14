@@ -2,6 +2,7 @@
 id: linking
 title: Linking Libraries
 sidebar_label: Linking
+sidebar_position: 4
 tags: [c++, cmake, linking, dependencies]
 ---
 

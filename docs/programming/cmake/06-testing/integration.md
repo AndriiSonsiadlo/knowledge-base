@@ -2,6 +2,7 @@
 id: integration
 title: Test Integration
 sidebar_label: Test Integration
+sidebar_position: 2
 tags: [cmake, testing, integration, best-practices]
 ---
 

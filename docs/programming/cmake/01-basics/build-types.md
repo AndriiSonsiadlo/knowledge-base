@@ -2,6 +2,7 @@
 id: build-types
 title: Build Types
 sidebar_label: Build Types
+sidebar_position: 4
 tags: [ c++, cmake ]
 ---
 

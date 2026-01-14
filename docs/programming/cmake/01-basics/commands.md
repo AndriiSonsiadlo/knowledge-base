@@ -2,6 +2,7 @@
 id: commands
 title: Essential CMake Commands
 sidebar_label: Commands
+sidebar_position: 3
 tags: [ c++, cmake ]
 ---
 

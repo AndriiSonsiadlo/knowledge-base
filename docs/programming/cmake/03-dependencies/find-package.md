@@ -2,6 +2,7 @@
 id: find-package
 title: Finding External Packages
 sidebar_label: Finding Packages
+sidebar_position: 1
 tags: [ c++, cmake ]
 ---
 
