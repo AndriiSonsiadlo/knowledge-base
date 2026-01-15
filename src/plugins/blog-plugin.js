@@ -43,7 +43,7 @@ async function blogPluginExtended(...pluginArgs) {
 
 			actions.addRoute({
 				// Add route for the home page
-				path: "/",
+				path: "/knowledge-base/",
 				exact: true,
 
 				// The component to use for the "Home" page route

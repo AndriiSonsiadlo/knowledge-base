@@ -20,7 +20,7 @@ function BlogListPageMetadata(props) {
 		siteConfig: { title: siteTitle },
 	} = useDocusaurusContext();
 	const { blogDescription, blogTitle, permalink } = metadata;
-	const isBlogOnlyMode = permalink === "/";
+	const isBlogOnlyMode = permalink === "/knowledge-base/";
 	const title = isBlogOnlyMode ? siteTitle : blogTitle;
 
 	return (

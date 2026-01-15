@@ -10,7 +10,7 @@ export default function NavbarLogo() {
 
 	return (
 		<Link
-			to="/"
+			to="/knowledge-base/"
 			className="navbar__brand flex items-center gap-2 group cursor-pointer"
 			style={{ textDecoration: "none" }}
 		>
