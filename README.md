@@ -4,6 +4,9 @@ This is my personal documentation site where I keep track of everything I'm lear
 science, programming, and software development. I built it because I needed a centralized place to
 organize my notes, code examples, and technical explanations that I can reference anytime.
 
+The website is available 
+[**here**](https://andriisonsiadlo.github.io/knowledge-base/)
+
 ## Why I Made This
 
 I wanted something that was:
@@ -16,12 +19,6 @@ I wanted something that was:
 I chose Docusaurus because it handles documentation really well, supports both Markdown and React
 components, and has great search functionality out of the box.
 
-## Screenshots
-
-| Home page                                    | Example page with documentation              |
-|----------------------------------------------|----------------------------------------------|
-| <img src="./screenshots/1.png" width="300"/> | <img src="./screenshots/2.png" width="300"/> |
-
 ## Getting Started
 
 If you want to run this locally or use it as a template for your own knowledge base, here's what you
@@ -29,14 +26,8 @@ need to do.
 
 ### Requirements
 
-You'll need Node.js installed on your machine. I'm using version 20 or higher, but anything recent
-should work fine. You'll also need Yarn for package management.
-
-If you don't have Yarn installed, you can get it with:
-
-```bash
-npm install -g yarn
-```
+You'll need `Node.js` installed on your machine. I'm using version 20 or higher, but anything recent
+should work fine.
 
 ### Installation
 
@@ -50,7 +41,7 @@ cd knowledge-base
 Then install all the dependencies:
 
 ```bash
-yarn install
+npm run install
 ```
 
 ### Running the Development Server
@@ -58,7 +49,7 @@ yarn install
 Once everything is installed, start the local development server:
 
 ```bash
-yarn start
+npm run start
 ```
 
 This will open your browser automatically at <http://localhost:3000>. The nice thing about the
@@ -70,11 +61,17 @@ anything.
 If you want to create a production-ready build:
 
 ```bash
-yarn build
+npm run build
 ```
 
 This generates static files in the `build` directory. You can then serve these files using any
 static hosting service.
+
+```bash
+npm run serve
+```
+
+This starts a local server to preview your production build.
 
 ## How It's Organized
 
@@ -84,10 +81,10 @@ own folder with subcategories inside. For example:
 - `docs/programming/` contains Python and C++ content
 - `docs/computer-science/` covers OS, architecture, and memory management
 - `docs/data-structures-algorithms/` has sorting and searching algorithms
-- `docs/data-tools/` focuses on tools like Pandas
+- `docs/data-tools/` focuses on data processing tools like Pandas
 - `docs/machine-learning/` contains ML fundamentals and neural networks
 
-The navigation is defined in `sidebars.ts`, which controls how everything appears in the sidebar
+The navigation is defined in `sidebars.js`, which controls how everything appears in the sidebar
 menu.
 
 ## Customization
@@ -98,7 +95,7 @@ look and feel I wanted.
 
 If you're using this as a starting point for your own knowledge base, you'll probably want to:
 
-1. Update the site configuration in `docusaurus.config.ts` with your own information
+1. Update the site configuration in `docusaurus.config.js` with your own information
 2. Modify the homepage content in `src/pages/index.tsx`
 3. Replace the documentation in the `docs` folder with your own content
 4. Adjust the color scheme and styling in `src/css/custom.css` if you want
@@ -110,7 +107,7 @@ To add new documentation:
 1. Create a new Markdown file in the appropriate folder under `docs/`
 2. Add frontmatter at the top if needed (like tags or sidebar position)
 3. Write your content using standard Markdown
-4. Update `sidebars.ts` if you want it to appear in the navigation
+4. Docusaurus will automatically update `sidebars.js` if you want it to appear in the navigation
 
 The search functionality will automatically index your new content.
 
@@ -120,7 +117,7 @@ This site is built with:
 
 - `Docusaurus` - fhe static site generator that powers everything
 - `React` - for custom components
-- `TypeScript` - for type safety in custom code
+- `JavaScript` and `TypeScript` - for type safety in custom code
 - `Tailwind CSS` - for styling
 - `Lucide React` - for icons
 
