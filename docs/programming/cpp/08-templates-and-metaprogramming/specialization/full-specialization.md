@@ -11,7 +11,7 @@ tags: [c++, templates, specialization, template-specialization]
 Full specialization provides a completely custom implementation for specific template arguments. It's like saying "for this exact type, use this completely different code."
 
 :::info Complete Override
-Full specialization = brand new implementation for specific types. Template<int> can be totally different from Template<double>.
+Full specialization = brand new implementation for specific types. `Template<int>` can be totally different from `Template<double>`.
 :::
 
 ## Function Template Specialization
@@ -411,7 +411,7 @@ Overloading participates in normal overload resolution. Specialization doesn't!
 :::success Full Specialization Key Points
 
 **Complete override** = entirely new implementation  
-**template<>** = syntax for full specialization  
+**`template<>`** = syntax for full specialization  
 **All parameters specified** = no template parameters left  
 **Classes and functions** = both can be specialized  
 **Static members** = separate for each specialization  
