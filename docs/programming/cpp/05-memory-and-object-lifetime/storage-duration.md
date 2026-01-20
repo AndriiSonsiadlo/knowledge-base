@@ -29,7 +29,7 @@ Storage duration affects performance, thread-safety, and memory management strat
 
 Default for local variables:
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int x = 42;        // Created
     Widget w;          // Constructor called
@@ -49,7 +49,7 @@ void function() {
 
 ### Destruction Order
 
-```cpp
+```cpp showLineNumbers 
 {
     Widget a;
     Widget b;
@@ -63,7 +63,7 @@ void function() {
 
 Exists for entire program:
 
-```cpp
+```cpp showLineNumbers 
 // Global scope
 int global = 42;                    // Static duration
 
@@ -85,7 +85,7 @@ int Widget::instance_count = 0;
 
 ### Initialization
 
-```cpp
+```cpp showLineNumbers 
 // Zero-initialization first
 int global_uninit;  // Zero before program starts
 
@@ -98,7 +98,7 @@ int runtime_init = getValue();  // Called before main()
 
 ### Initialization Order Issues
 
-```cpp
+```cpp showLineNumbers 
 // file1.cpp
 int a = compute_a();
 
@@ -111,7 +111,7 @@ int b = compute_b();  // Uses 'a'
 
 **Solution**: Local static (lazy initialization):
 
-```cpp
+```cpp showLineNumbers 
 Widget& getInstance() {
     static Widget instance;  // Initialized on first call (thread-safe C++11+)
     return instance;
@@ -124,7 +124,7 @@ Widget& getInstance() {
 
 Manual lifetime control:
 
-```cpp
+```cpp showLineNumbers 
 // Create
 int* ptr = new int(42);
 Widget* w = new Widget();
@@ -142,7 +142,7 @@ delete[] arr;  // Use delete[], not delete!
 
 ### Common Patterns
 
-```cpp
+```cpp showLineNumbers 
 // RAII wrapper (preferred)
 std::unique_ptr<Widget> ptr = std::make_unique<Widget>();
 // Automatic delete when ptr goes out of scope
@@ -154,7 +154,7 @@ std::shared_ptr<Widget> shared = std::make_shared<Widget>();
 
 ### Memory Management
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     char* data;
     size_t size;
@@ -182,7 +182,7 @@ public:
 
 One instance per thread:
 
-```cpp
+```cpp showLineNumbers 
 thread_local int tls_counter = 0;  // Separate for each thread
 
 void thread_function() {
@@ -205,7 +205,7 @@ std::thread t2(thread_function);  // Different tls_counter = 1
 
 ### Example 1: Mixing Durations
 
-```cpp
+```cpp showLineNumbers 
 int global = 10;  // Static
 
 void function() {
@@ -222,7 +222,7 @@ void function() {
 
 ### Example 2: Lifetime Demonstration
 
-```cpp
+```cpp showLineNumbers 
 class Logger {
 public:
     Logger(const char* name) : name_(name) {
@@ -267,7 +267,7 @@ Global destroyed
 
 ## Performance Comparison
 
-```cpp
+```cpp showLineNumbers 
 // Automatic (fastest)
 void fast() {
     int arr[1000];  // Stack allocation
@@ -296,7 +296,7 @@ void slow() {
 
 ### Singleton (Static)
 
-```cpp
+```cpp showLineNumbers 
 class Singleton {
 public:
     static Singleton& getInstance() {
@@ -312,7 +312,7 @@ private:
 
 ### Factory (Dynamic)
 
-```cpp
+```cpp showLineNumbers 
 std::unique_ptr<Widget> createWidget() {
     return std::make_unique<Widget>();  // Dynamic
 }
@@ -323,7 +323,7 @@ auto widget = createWidget();
 
 ### Thread Pool (Thread-local)
 
-```cpp
+```cpp showLineNumbers 
 thread_local std::vector<Task> local_queue;
 
 void worker_thread() {
@@ -337,7 +337,7 @@ void worker_thread() {
 ## Summary
 
 **Storage durations**:
-```cpp
+```cpp showLineNumbers 
 // Automatic (default)
 int local;          // Destroyed at scope end
 

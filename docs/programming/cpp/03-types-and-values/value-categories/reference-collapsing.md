@@ -23,7 +23,7 @@ When template type deduction creates "reference to reference", C++ applies colla
 
 References to references aren't valid C++:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 int& r = x;
 
@@ -32,7 +32,7 @@ int& r = x;
 
 But templates can create them:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T&& param);
 
@@ -47,7 +47,7 @@ C++ applies **reference collapsing** to resolve this.
 
 ## Collapsing Rules
 
-```cpp
+```cpp showLineNumbers 
 typedef int&  LRef;
 typedef int&& RRef;
 
@@ -66,7 +66,7 @@ RRef &&   // int&& && → int&&
 
 Template parameter `T&&` is a **universal reference** (forwarding reference):
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T&& param);
 
@@ -85,7 +85,7 @@ func(std::move(x)); // T = int, param = int&&
 
 ## Type Deduction with Forwarding
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // arg has type T&&
@@ -109,7 +109,7 @@ wrapper(10);     // T = int, arg = int&&
 
 std::forward uses reference collapsing:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // Forward preserving value category
@@ -138,7 +138,7 @@ wrapper(10);  // T = int
 
 ### Example 1: Type Alias
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 struct AddLRef {
     using type = T&;
@@ -152,7 +152,7 @@ AddLRef<int&&>::type z;   // int&& & → int&
 
 ### Example 2: Function Template
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void process(T&& arg) {
     using RRefType = T&&;
@@ -171,7 +171,7 @@ process(10);       // T = int
 
 ### Example 3: Factory Function
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
@@ -191,7 +191,7 @@ auto p3 = make_unique<std::string>("literal");   // Construct from rvalue
 
 decltype doesn't cause collapsing (preserves exact type):
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 decltype(x)& r1 = x;    // int& (x is int)
 decltype((x))& r2 = x;  // int& & → int& (collapsing)
@@ -207,7 +207,7 @@ decltype(ref)&& r4 = 42; // int& && → int& (can't bind to rvalue!)
 
 auto also participates in reference collapsing:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 auto&& r1 = x;           // int& (x is lvalue, int& && → int&)
@@ -227,7 +227,7 @@ for (auto&& elem : container) {
 
 ### Without Collapsing
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void broken(T&& arg) {
     // Hypothetically without collapsing:
@@ -241,7 +241,7 @@ void broken(T&& arg) {
 
 ### With Collapsing
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void working(T&& arg) {
     // With collapsing:
@@ -259,7 +259,7 @@ void working(T&& arg) {
 
 ### Forwarding Wrapper
 
-```cpp
+```cpp showLineNumbers 
 template<typename Func, typename... Args>
 auto invoke_and_log(Func&& f, Args&&... args) 
     -> decltype(std::forward<Func>(f)(std::forward<Args>(args)...))
@@ -273,7 +273,7 @@ auto invoke_and_log(Func&& f, Args&&... args)
 
 ### Move-If-Rvalue
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 decltype(auto) move_if_rvalue(T&& arg) {
     return std::forward<T>(arg);
@@ -301,7 +301,7 @@ decltype(auto) move_if_rvalue(T&& arg) {
 - Only `&& &&` remains `&&`, rest become `&`
 
 **Practical use**:
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void forward_call(T&& arg) {
     // T&& is universal reference

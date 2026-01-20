@@ -12,7 +12,7 @@ Integer types can be signed (negative and positive) or unsigned (only positive).
 
 ## Signed Types (Default)
 
-```cpp
+```cpp showLineNumbers 
 int x = -42;        // Signed by default
 signed int y = -42; // Explicitly signed (same)
 
@@ -24,7 +24,7 @@ long l = -1000;
 
 ## Unsigned Types
 
-```cpp
+```cpp showLineNumbers 
 unsigned int count = 42;
 unsigned char byte = 255;
 unsigned long size = 1000000;
@@ -39,7 +39,7 @@ unsigned x = 42;  // unsigned int
 
 ## char is Special
 
-```cpp
+```cpp showLineNumbers 
 char c;           // Implementation-defined: signed or unsigned
 signed char sc;   // Guaranteed signed (-128 to 127)
 unsigned char uc; // Guaranteed unsigned (0 to 255)
@@ -52,7 +52,7 @@ unsigned char uc; // Guaranteed unsigned (0 to 255)
 
 ## Mixing Signed and Unsigned
 
-```cpp
+```cpp showLineNumbers 
 int x = -1;
 unsigned int y = 1;
 
@@ -72,14 +72,14 @@ if (x < y) {  // ⚠️ Danger! x converts to large unsigned
 
 ### Signed Overflow (Undefined)
 
-```cpp
+```cpp showLineNumbers 
 int x = INT_MAX;  // 2147483647
 x++;  // ❌ Undefined behavior!
 ```
 
 ### Unsigned Overflow (Well-Defined)
 
-```cpp
+```cpp showLineNumbers 
 unsigned int x = UINT_MAX;  // 4294967295
 x++;  // ✅ Wraps to 0 (modulo arithmetic)
 
@@ -95,7 +95,7 @@ Unsigned wraps around: 0 - 1 = 2^32 - 1
 
 ### Negative Loop
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Infinite loop!
 for (unsigned int i = 10; i >= 0; i--) {
     // i never < 0 (unsigned!)
@@ -109,7 +109,7 @@ for (int i = 10; i >= 0; i--) {
 
 ### Subtraction
 
-```cpp
+```cpp showLineNumbers 
 unsigned int a = 5;
 unsigned int b = 10;
 
@@ -135,7 +135,7 @@ int diff = static_cast<int>(a) - static_cast<int>(b);  // -5
 - Interfacing with C APIs
 - Wrap-around behavior desired
 
-```cpp
+```cpp showLineNumbers 
 // Typical usage
 int temperature = -5;           // Can be negative
 unsigned int flags = 0xFF00;    // Bit flags
@@ -151,7 +151,7 @@ size_t size = vec.size();       // Size (unsigned)
 - **Mixing**: Signed converts to unsigned
 - **Default**: Use signed unless specific reason
 
-```cpp
+```cpp showLineNumbers 
 // Generally prefer
 int x = 10;  // Signed by default
 

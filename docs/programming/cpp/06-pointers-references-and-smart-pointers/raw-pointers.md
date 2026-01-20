@@ -18,7 +18,7 @@ A pointer **stores an address** where data lives, not the data itself. Dereferen
 
 Pointers hold memory addresses as their values. You create pointers using the `*` symbol in the declaration, and you access what they point to using the dereference operator `*`.
 
-```cpp
+```cpp showLineNumbers 
 int value = 42;
 int* ptr = &value;  // ptr stores the address of value
 
@@ -34,7 +34,7 @@ The `&` operator (address-of) gets the memory address of a variable. The pointer
 
 The placement of `*` in declarations is stylistic, but understanding the declaration reading rules helps avoid confusion with multiple pointers.
 
-```cpp
+```cpp showLineNumbers 
 int* p1;        // Pointer to int (common style)
 int *p2;        // Pointer to int (alternative style)
 int* p3, p4;    // ⚠️ p3 is pointer, p4 is int! (confusing)
@@ -52,7 +52,7 @@ The `*` binds to the variable name, not the type, which is why `int* p3, p4` onl
 
 A null pointer doesn't point to any valid object. Always check pointers before dereferencing to avoid crashes.
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = nullptr;  // C++11: null pointer literal
 
 if (ptr) {
@@ -72,7 +72,7 @@ Dereferencing a null pointer is undefined behavior that typically causes a segme
 
 Uninitialized pointers contain garbage addresses and are extremely dangerous. They might "work" by pointing to valid memory, making bugs hard to find.
 
-```cpp
+```cpp showLineNumbers 
 int* bad_ptr;        // ❌ Uninitialized: contains garbage
 *bad_ptr = 42;       // ❌ Crashes or corrupts memory
 
@@ -88,7 +88,7 @@ An uninitialized pointer might contain an address that happens to be valid memor
 
 Pointers support several operations beyond basic dereferencing, including member access and address arithmetic for adjacent memory.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -109,7 +109,7 @@ The arrow operator `->` combines dereferencing and member access: `ptr->x` is sh
 
 Pointers can be compared to check if they point to the same location or to compare their relative positions in memory.
 
-```cpp
+```cpp showLineNumbers 
 int a = 10, b = 20;
 int* p1 = &a;
 int* p2 = &a;
@@ -134,7 +134,7 @@ Pointer equality checks if two pointers point to the same object, which is usefu
 
 Array names decay to pointers to their first element in most contexts. This allows passing arrays to functions efficiently but loses size information.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {1, 2, 3, 4, 5};
 int* ptr = arr;  // Decays to pointer to first element
 
@@ -153,7 +153,7 @@ The subscript operator `ptr[i]` is syntactic sugar for `*(ptr + i)`, which adds 
 
 Despite appearing similar, arrays and pointers are different types with different semantics, particularly regarding `sizeof` and assignment.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {1, 2, 3, 4, 5};
 int* ptr = arr;
 
@@ -170,7 +170,7 @@ An array name is a constant pointer-like entity that can't be reassigned. The `s
 
 Pointers are essential for dynamic memory allocation on the heap, where object lifetimes extend beyond their creating scope.
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);  // Allocate on heap
 std::cout << *ptr;       // 42
 delete ptr;              // Deallocate
@@ -190,7 +190,7 @@ Dynamic allocation returns a pointer to heap memory that persists until explicit
 
 A dangling pointer points to memory that has been deallocated or is no longer valid. Dereferencing creates undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 int* dangling = new int(42);
 delete dangling;
 *dangling = 100;  // ❌ Undefined behavior: use-after-free
@@ -209,7 +209,7 @@ After deletion, the pointer still holds the address, but the memory is no longer
 
 Returning a pointer to a local variable creates a dangling pointer because locals are destroyed when the function returns.
 
-```cpp
+```cpp showLineNumbers 
 int* dangerous() {
     int x = 42;
     return &x;  // ❌ Dangling: x destroyed when function returns
@@ -230,7 +230,7 @@ Local variables live on the stack and are destroyed at the end of their scope. R
 
 Pointers can point to other pointers, creating multiple levels of indirection useful for modifying pointers themselves or creating 2D structures.
 
-```cpp
+```cpp showLineNumbers 
 int value = 42;
 int* ptr = &value;
 int** ptr_to_ptr = &ptr;  // Pointer to pointer
@@ -254,7 +254,7 @@ Double pointers are particularly useful when you need a function to allocate mem
 
 A `void*` is a generic pointer that can point to any type but must be cast before dereferencing. It's used for type-agnostic memory operations.
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 void* vptr = &x;  // Can point to anything
 
@@ -272,7 +272,7 @@ You lose type information with `void*`, so the compiler can't perform type check
 
 Pointers can store addresses of functions, enabling callbacks, plugin systems, and strategy patterns.
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b) { return a + b; }
 int subtract(int a, int b) { return a - b; }
 

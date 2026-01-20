@@ -18,7 +18,7 @@ Most CPUs require or strongly prefer aligned data access. Misaligned access can 
 
 Modern CPUs read memory in chunks (typically 4, 8, or 16 bytes). When data is properly aligned, the CPU can read it in a single operation. Misaligned data may span chunk boundaries, requiring multiple reads and masking operations.
 
-```cpp
+```cpp showLineNumbers 
 // Assume 4-byte memory reads
 
 // Aligned int at address 0x1000
@@ -35,7 +35,7 @@ On x86-64, misaligned access is handled automatically but runs 2-10x slower depe
 
 Each type has a natural alignment equal to its size (or platform word size for types larger than a word). The compiler ensures objects are placed at addresses divisible by their alignment.
 
-```cpp
+```cpp showLineNumbers 
 char c;      // 1-byte alignment (any address)
 short s;     // 2-byte alignment (even addresses)
 int i;       // 4-byte alignment (divisible by 4)
@@ -57,7 +57,7 @@ The compiler inserts padding bytes to ensure each variable starts at an appropri
 
 Structs contain padding to align members and ensure the struct itself can be properly aligned in arrays. The compiler adds padding after members to meet alignment requirements.
 
-```cpp
+```cpp showLineNumbers 
 struct Bad {
     char c;    // 1 byte
     // 3 bytes padding
@@ -82,7 +82,7 @@ The padding after `c` in `Bad` ensures `i` starts at an address divisible by 4. 
 
 The struct's size must be a multiple of its alignment requirement so that array elements maintain proper alignment. This sometimes requires trailing padding even after the last member.
 
-```cpp
+```cpp showLineNumbers 
 struct Example {
     char c;    // 1 byte
     int i;     // 4 bytes (after 3 bytes padding)
@@ -100,7 +100,7 @@ Example arr[2];
 
 C++11 provides `alignof` to query alignment requirements and `alignas` to specify custom alignment, giving you explicit control over data layout.
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 std::cout << alignof(char) << "\n";    // 1
@@ -120,7 +120,7 @@ The `alignof` operator returns the alignment requirement in bytes. This is usefu
 
 The `alignas` specifier increases (never decreases) alignment requirements, useful for cache-line alignment, SIMD types, or hardware requirements.
 
-```cpp
+```cpp showLineNumbers 
 // Cache-line aligned (64 bytes on most platforms)
 struct alignas(64) CacheLinePadded {
     int data;
@@ -143,7 +143,7 @@ Cache-line alignment prevents false sharing in multithreaded code where differen
 
 Understanding alignment helps you write more efficient code by minimizing wasted space and avoiding performance penalties.
 
-```cpp
+```cpp showLineNumbers 
 // Poor layout - 24 bytes with 7 bytes wasted
 struct Poor {
     char a;      // 1 byte + 7 padding
@@ -175,7 +175,7 @@ The `BestCase` layout groups smaller members together to fill padding gaps, wast
 
 Some compilers allow removing padding entirely, though this causes misalignment and should be avoided except for binary compatibility or memory-constrained systems.
 
-```cpp
+```cpp showLineNumbers 
 // GCC/Clang: Remove padding
 struct __attribute__((packed)) Packed {
     char c;      // 1 byte
@@ -200,7 +200,7 @@ Packed structures eliminate padding, reducing memory usage but causing misaligne
 
 The `new` operator returns memory aligned to the largest fundamental type's alignment (typically 8 or 16 bytes), sufficient for most types. For over-aligned types, C++17 provides alignment-aware allocation.
 
-```cpp
+```cpp showLineNumbers 
 // Normal new - aligned to max_align_t (16 bytes typically)
 int* p = new int;  // Aligned to 4 bytes (int's requirement)
 double* d = new double;  // Aligned to 8 bytes
@@ -225,7 +225,7 @@ Over-aligned types (alignment > `alignof(std::max_align_t)`) require special han
 
 Alignment significantly affects performance through both instruction efficiency and cache behavior. Properly aligned data enables efficient memory operations.
 
-```cpp
+```cpp showLineNumbers 
 // Aligned access - fast (1 cycle)
 alignas(16) float data[4];
 load_vector(data);  // SIMD load, 1 instruction
@@ -249,7 +249,7 @@ False sharing occurs when independent variables share a cache line, causing cach
 
 You can verify pointer alignment at runtime using modulo arithmetic, useful for debugging alignment assumptions.
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 bool is_aligned(const T* ptr, size_t alignment = alignof(T)) {
     return reinterpret_cast<uintptr_t>(ptr) % alignment == 0;

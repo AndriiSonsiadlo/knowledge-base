@@ -18,7 +18,7 @@ If you manage resources manually, you must handle all related operations (Rule o
 
 C++ automatically generates up to six special member functions if you don't define them yourself:
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     Widget();                              // Default constructor
@@ -36,7 +36,7 @@ These functions handle object creation, destruction, copying, and moving. The co
 
 **Best Case**: If your class doesn't directly manage resources, don't define any of these functions! Let the compiler handle everything.
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Rule of Zero - no special members needed
 class Person {
     std::string name;        // string manages its own memory
@@ -62,7 +62,7 @@ This is the ideal! By using smart pointers, standard containers, and RAII wrappe
 
 Use standard library types instead of raw pointers and manual memory management:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Manual resource management (need Rule of 5)
 class BadBuffer {
     char* data;
@@ -91,7 +91,7 @@ The `std::vector` version is shorter, safer, and automatically handles copying, 
 
 **Classic C++**: If you define a destructor, copy constructor, OR copy assignment operator, you probably need to define all three.
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     char* data;
     size_t size;
@@ -130,7 +130,7 @@ The Rule of Three exists because if you need custom cleanup (destructor), the co
 
 These operations are intimately related when managing resources:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Only defined destructor
 class Broken {
     int* data;
@@ -153,7 +153,7 @@ If you need a destructor to clean up, you need copy operations that properly dup
 
 **Modern C++**: If you define any of destructor, copy constructor, copy assignment, move constructor, or move assignment, you should probably define or explicitly delete all five.
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     char* data;
     size_t size;
@@ -211,7 +211,7 @@ Move operations enable efficient transfer of resources without copying. If you'r
 
 Sometimes you want to prevent copying or moving:
 
-```cpp
+```cpp showLineNumbers 
 class Uncopyable {
     std::mutex mtx;  // Mutexes can't be copied or moved
     
@@ -239,7 +239,7 @@ Explicitly deleting operations makes your intent clear and gives better error me
 
 A clever technique that implements both copy and move assignment using the copy constructor and swap:
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     char* data;
     size_t size;
@@ -274,7 +274,7 @@ This is elegant because you write one assignment operator that handles both copy
 
 The compiler's rules for generating these functions are complex:
 
-```cpp
+```cpp showLineNumbers 
 class Example {
 public:
     // If you declare ANY constructor, default is not generated
@@ -300,7 +300,7 @@ These rules encourage modern practice: if you're managing resources (have a dest
 
 Here's how to decide which rule to follow:
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Rule of Zero (BEST): Use RAII wrappers
 class Widget {
     std::unique_ptr<Resource> resource;

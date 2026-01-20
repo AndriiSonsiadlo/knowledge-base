@@ -35,7 +35,7 @@ graph TD
 
 Contains executable instructions:
 
-```cpp
+```cpp showLineNumbers 
 void function() {  // Code stored here
     // Instructions
 }
@@ -46,14 +46,14 @@ void function() {  // Code stored here
 ### 2. Data Segment
 
 **Initialized data (.data)**:
-```cpp
+```cpp showLineNumbers 
 int global = 42;              // .data
 static int file_static = 100; // .data
 const char* str = "hello";    // Pointer in .data, string in .rodata
 ```
 
 **Uninitialized data (.bss)**:
-```cpp
+```cpp showLineNumbers 
 int global_uninit;            // .bss
 static int file_static_uninit; // .bss
 // Zero-initialized at program start
@@ -63,7 +63,7 @@ static int file_static_uninit; // .bss
 
 Automatic (local) variables:
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int local = 10;        // On stack
     char buffer[100];      // On stack
@@ -81,7 +81,7 @@ void function() {
 
 Dynamic allocations:
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);        // Heap allocation
 delete ptr;                    // Manual cleanup
 
@@ -133,7 +133,7 @@ Every object has:
 - **Value**: Content at that location
 - **Lifetime**: When object exists
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 // sizeof(x)  → 4 bytes (typical)
@@ -148,7 +148,7 @@ int x = 42;
 
 Objects align to boundaries for CPU efficiency:
 
-```cpp
+```cpp showLineNumbers 
 struct Example {
     char c;      // 1 byte
     // 3 bytes padding
@@ -173,7 +173,7 @@ sizeof(Example);  // 12 bytes
 
 ### Automatic Storage
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int x = 42;  // Created on entry, destroyed on exit
 }
@@ -181,7 +181,7 @@ void function() {
 
 ### Static Storage
 
-```cpp
+```cpp showLineNumbers 
 int global = 10;              // Program lifetime
 static int file_scope = 20;   // Program lifetime
 
@@ -192,14 +192,14 @@ void function() {
 
 ### Dynamic Storage
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);  // Lives until delete
 delete ptr;
 ```
 
 ### Thread Storage (C++11)
 
-```cpp
+```cpp showLineNumbers 
 thread_local int tls_var = 0;  // Per-thread lifetime
 ```
 
@@ -209,7 +209,7 @@ thread_local int tls_var = 0;  // Per-thread lifetime
 
 ### Allocation
 
-```cpp
+```cpp showLineNumbers 
 // Stack (automatic)
 int x;                    // Uninitialized
 int y = 42;              // Initialized
@@ -225,7 +225,7 @@ Widget* w1 = new Widget();  // Constructor called
 
 ### Deallocation
 
-```cpp
+```cpp showLineNumbers 
 // Stack: automatic
 {
     int x = 42;
@@ -246,7 +246,7 @@ delete w;  // Destructor called
 
 ## Pointers and Memory
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 int* ptr = &x;  // Pointer holds address
 
@@ -268,7 +268,7 @@ int value = *ptr;  // Read value at address
 
 ### Atomic Operations
 
-```cpp
+```cpp showLineNumbers 
 #include <atomic>
 
 std::atomic<int> counter{0};
@@ -280,7 +280,7 @@ void thread_func() {
 
 ### Memory Ordering
 
-```cpp
+```cpp showLineNumbers 
 std::atomic<int> x{0}, y{0};
 
 // Thread 1
@@ -298,7 +298,7 @@ if (y.load(std::memory_order_acquire) == 1) {
 
 ### Memory Leak
 
-```cpp
+```cpp showLineNumbers 
 void leak() {
     int* ptr = new int(42);
     // Never deleted! Memory leaked
@@ -307,7 +307,7 @@ void leak() {
 
 ### Dangling Pointer
 
-```cpp
+```cpp showLineNumbers 
 int* dangling() {
     int x = 42;
     return &x;  // ❌ Returns address of destroyed variable
@@ -316,7 +316,7 @@ int* dangling() {
 
 ### Double Free
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);
 delete ptr;
 delete ptr;  // ❌ Undefined behavior
@@ -324,7 +324,7 @@ delete ptr;  // ❌ Undefined behavior
 
 ### Use After Free
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);
 delete ptr;
 *ptr = 10;  // ❌ Undefined behavior
@@ -362,7 +362,7 @@ g++ -fsanitize=address program.cpp
 - Thread: Per-thread
 
 **Key concepts**:
-```cpp
+```cpp showLineNumbers 
 // Stack (fast, automatic)
 int x = 42;
 

@@ -13,7 +13,7 @@ The **utilities** library provides general-purpose components that don't fit int
 ## std::pair
 
 A simple container holding two heterogeneous values.
-```cpp
+```cpp showLineNumbers 
 #include <utility>
 #include <string>
 
@@ -39,7 +39,7 @@ void pairExample() {
 ## std::tuple
 
 A fixed-size collection of heterogeneous values.
-```cpp
+```cpp showLineNumbers 
 #include <tuple>
 #include <string>
 
@@ -65,7 +65,7 @@ void tupleExample() {
 
 :::info
 Use `std::tie` to unpack tuples into existing variables:
-```cpp
+```cpp showLineNumbers 
 int a; double b; std::string c;
 std::tie(a, b, c) = t1;
 ```
@@ -74,7 +74,7 @@ std::tie(a, b, c) = t1;
 ## std::optional (C++17)
 
 Represents a value that may or may not be present.
-```cpp
+```cpp showLineNumbers 
 #include <optional>
 #include <string>
 
@@ -111,7 +111,7 @@ Use `value_or()` or check `has_value()` first.
 ## std::variant (C++17)
 
 A type-safe union that can hold one of several types.
-```cpp
+```cpp showLineNumbers 
 #include <variant>
 #include <string>
 
@@ -151,7 +151,7 @@ void variantExample() {
 ## std::any (C++17)
 
 A type-safe container for single values of any type.
-```cpp
+```cpp showLineNumbers 
 #include <any>
 #include <string>
 
@@ -183,7 +183,7 @@ void anyExample() {
 ## std::function
 
 Type-erased wrapper for callable objects.
-```cpp
+```cpp showLineNumbers 
 #include <functional>
 
 void functionExample() {
@@ -208,7 +208,7 @@ void functionExample() {
 ## std::reference_wrapper
 
 A wrapper for storing references in containers.
-```cpp
+```cpp showLineNumbers 
 #include <functional>
 #include <vector>
 
@@ -232,7 +232,7 @@ void referenceWrapperExample() {
 ```
 
 ## std::move and std::forward
-```cpp
+```cpp showLineNumbers 
 #include <utility>
 #include <string>
 
@@ -252,7 +252,7 @@ void moveForwardExample() {
 ## std::exchange (C++14)
 
 Replaces a value and returns the old value.
-```cpp
+```cpp showLineNumbers 
 #include <utility>
 
 void exchangeExample() {
@@ -270,7 +270,7 @@ void exchangeExample() {
 ```
 
 ## Comparison Utilities
-```cpp
+```cpp showLineNumbers 
 #include <compare>
 
 struct Point {
@@ -291,7 +291,7 @@ void comparisonExample() {
 ```
 
 ## Type Traits Helpers
-```cpp
+```cpp showLineNumbers 
 #include <type_traits>
 
 template<typename T>

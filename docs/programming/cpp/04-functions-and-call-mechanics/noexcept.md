@@ -16,7 +16,7 @@ tags: [c++, noexcept, exceptions, optimization, cpp11]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 // Function that doesn't throw
 void safe_function() noexcept {
     // No exceptions thrown
@@ -37,7 +37,7 @@ void conditional() noexcept(sizeof(int) == 4) {
 
 ## noexcept vs throw()
 
-```cpp
+```cpp showLineNumbers 
 // Old style (C++98, deprecated)
 void old_style() throw() {
     // Exception specification (avoid)
@@ -55,7 +55,7 @@ void modern_style() noexcept {
 
 ## What Happens if Exception Thrown?
 
-```cpp
+```cpp showLineNumbers 
 void marked_noexcept() noexcept {
     throw std::runtime_error("Oops");  // ⚠️ Compiles but dangerous!
 }
@@ -76,7 +76,7 @@ int main() {
 
 ## Conditional noexcept
 
-```cpp
+```cpp showLineNumbers 
 // noexcept depends on expression
 template<typename T>
 void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible_v<T>) {
@@ -105,7 +105,7 @@ swap(a, b);  // noexcept(false)
 
 ## Testing for noexcept
 
-```cpp
+```cpp showLineNumbers 
 void func1() noexcept { }
 void func2() { }
 
@@ -125,7 +125,7 @@ static_assert(!noexcept(std::string("hello")), "String ctor might throw");
 
 Standard containers use move only if it's `noexcept`:
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Without noexcept
@@ -155,7 +155,7 @@ Mark move constructors/assignments `noexcept` or standard containers won't use t
 
 Destructors are implicitly `noexcept`:
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     ~Widget() {  // Implicitly noexcept
@@ -178,7 +178,7 @@ public:
 
 ## Functions That Should Be noexcept
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Move operations (critical!)
@@ -203,7 +203,7 @@ private:
 
 ## Propagating noexcept
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Wrapper {
     T value;
@@ -225,7 +225,7 @@ public:
 
 ### Without noexcept
 
-```cpp
+```cpp showLineNumbers 
 void process() {
     // Compiler must generate exception handling code
     // - Setup exception tables
@@ -236,7 +236,7 @@ void process() {
 
 ### With noexcept
 
-```cpp
+```cpp showLineNumbers 
 void process() noexcept {
     // Compiler can optimize away exception handling
     // - Smaller code
@@ -253,7 +253,7 @@ void process() noexcept {
 
 ### Wide Contract (noexcept friendly)
 
-```cpp
+```cpp showLineNumbers 
 // Accepts any input, never throws
 int abs(int x) noexcept {
     return x < 0 ? -x : x;
@@ -262,7 +262,7 @@ int abs(int x) noexcept {
 
 ### Narrow Contract (throws on invalid input)
 
-```cpp
+```cpp showLineNumbers 
 // Preconditions: size > 0
 int front(std::vector<int>& vec) {
     if (vec.empty()) {
@@ -279,7 +279,7 @@ int front(std::vector<int>& vec) {
 
 ## Real-World Example
 
-```cpp
+```cpp showLineNumbers 
 class String {
     char* data;
     size_t len;
@@ -323,7 +323,7 @@ public:
 
 ### Over-promising
 
-```cpp
+```cpp showLineNumbers 
 void process(const std::string& s) noexcept {
     std::string copy = s;  // ❌ Might throw bad_alloc!
 }
@@ -332,7 +332,7 @@ void process(const std::string& s) noexcept {
 
 ### Under-promising
 
-```cpp
+```cpp showLineNumbers 
 // Could be noexcept but isn't marked
 int add(int a, int b) {
     return a + b;  // Never throws
@@ -344,7 +344,7 @@ int add(int a, int b) {
 
 ## Checking Standard Library
 
-```cpp
+```cpp showLineNumbers 
 #include <type_traits>
 
 // Check if type's operations are noexcept
@@ -388,7 +388,7 @@ static_assert(noexcept(vec[0]));         // true (no bounds checking)
 - Crashes program if violated (std::terminate)
 
 **Key functions to mark**:
-```cpp
+```cpp showLineNumbers 
 class T {
     T(T&&) noexcept;              // Move constructor
     T& operator=(T&&) noexcept;   // Move assignment

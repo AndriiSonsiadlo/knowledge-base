@@ -16,7 +16,7 @@ Lambdas are compiler-generated function objects (functors). The lambda `[](){}` 
 
 ## Basic Syntax
 
-```cpp
+```cpp showLineNumbers 
 // Minimal lambda
 auto lambda = []() { 
     std::cout << "Hello\n"; 
@@ -33,7 +33,7 @@ int result = add(5, 3);  // 8
 ```
 
 **Parts**:
-```cpp
+```cpp showLineNumbers 
 [capture](parameters) -> return_type { body }
  ^^^^^^^  ^^^^^^^^^^    ^^^^^^^^^^^   ^^^^
  capture  params        return type   code
@@ -46,14 +46,14 @@ int result = add(5, 3);  // 8
 
 ### No Capture
 
-```cpp
+```cpp showLineNumbers 
 auto lambda = []() { return 42; };
 // Cannot access outer variables
 ```
 
 ### Capture by Value
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 auto lambda = [x]() { 
     return x * 2;  // Copy of x
@@ -65,7 +65,7 @@ std::cout << lambda();  // 20 (uses old value of x)
 
 ### Capture by Reference
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 auto lambda = [&x]() { 
     x *= 2;  // Modifies original x
@@ -77,7 +77,7 @@ std::cout << x;  // 20
 
 ### Multiple Captures
 
-```cpp
+```cpp showLineNumbers 
 int x = 1, y = 2;
 
 [x, y]()      { }  // Capture x and y by value
@@ -91,7 +91,7 @@ int x = 1, y = 2;
 
 ### Init Capture (C++14)
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 
 // Create new variable in capture
@@ -112,7 +112,7 @@ auto lambda2 = [p = std::move(ptr)]() {
 
 ### Auto Parameters (C++14)
 
-```cpp
+```cpp showLineNumbers 
 // Generic lambda
 auto print = [](auto x) { 
     std::cout << x << "\n"; 
@@ -125,7 +125,7 @@ print("hello");  // Works with const char*
 
 ### Explicit Return Type
 
-```cpp
+```cpp showLineNumbers 
 // Return type deduced
 auto add = [](int a, int b) { return a + b; };  // Returns int
 
@@ -141,7 +141,7 @@ auto divide = [](int a, int b) -> double {
 
 By default, captured-by-value variables are const:
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 
 auto lambda1 = [x]() { 
@@ -164,7 +164,7 @@ std::cout << x;  // 10 (original unchanged)
 
 ### STL Algorithms
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5, 6};
 
 // Count even numbers
@@ -182,7 +182,7 @@ std::sort(vec.begin(), vec.end(),
 
 ### Callbacks
 
-```cpp
+```cpp showLineNumbers 
 void process(std::function<void()> callback) {
     // Do work...
     callback();
@@ -196,7 +196,7 @@ process([&result]() {
 
 ### RAII Guards
 
-```cpp
+```cpp showLineNumbers 
 {
     auto guard = [cleanup = some_resource]() {
         // Cleanup happens when guard destroyed
@@ -213,7 +213,7 @@ process([&result]() {
 
 Lambdas are functors - classes with `operator()`:
 
-```cpp
+```cpp showLineNumbers 
 // Lambda
 auto lambda = [x = 10](int y) { return x + y; };
 
@@ -233,7 +233,7 @@ Lambda lambda2(10);
 
 Requires `std::function` or `auto` with explicit type:
 
-```cpp
+```cpp showLineNumbers 
 // Using std::function
 std::function<int(int)> factorial = [&factorial](int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);
@@ -249,7 +249,7 @@ auto factorial = [](this auto&& self, int n) {
 
 ## Immediately Invoked Lambda
 
-```cpp
+```cpp showLineNumbers 
 // IIFE (Immediately Invoked Function Expression)
 int value = []() {
     int temp = expensive_computation();
@@ -268,7 +268,7 @@ const auto data = [&]() {
 
 ## Template Lambdas (C++20)
 
-```cpp
+```cpp showLineNumbers 
 // Template lambda
 auto lambda = []<typename T>(T value) {
     return value * 2;
@@ -282,7 +282,7 @@ auto y = lambda(3.14);   // double
 
 ## Captures and Object Lifetime
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Dangling reference
 std::function<int()> makeFunc() {
     int x = 42;
@@ -306,7 +306,7 @@ std::function<int()> makeFunc() {
 
 ## Performance Considerations
 
-```cpp
+```cpp showLineNumbers 
 // Stack-allocated (fast)
 auto lambda = [](int x) { return x * 2; };
 
@@ -347,7 +347,7 @@ process([](int x) { std::cout << x; });  // No overhead
 ## Summary
 
 **Lambda syntax**:
-```cpp
+```cpp showLineNumbers 
 [captures](params) -> return_type { body }
 ```
 
@@ -359,7 +359,7 @@ process([](int x) { std::cout << x; });  // No overhead
 - `[y = x]` - Init capture (C++14)
 
 **Common patterns**:
-```cpp
+```cpp showLineNumbers 
 // STL algorithm
 std::sort(vec.begin(), vec.end(), [](int a, int b) { return a > b; });
 

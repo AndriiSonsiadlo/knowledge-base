@@ -25,7 +25,7 @@ graph TD
 ## Durations
 
 `std::chrono::duration` represents a time span:
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -59,7 +59,7 @@ Conversions from coarser to finer granularity are implicit (hours → seconds), 
 :::
 
 ### Duration Arithmetic
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 using namespace std::chrono;
@@ -86,7 +86,7 @@ void durationArithmetic() {
 ```
 
 ### Custom Durations
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <ratio>
 
@@ -109,7 +109,7 @@ void customDurations() {
 ## Time Points
 
 `std::chrono::time_point` represents a specific moment in time:
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -131,7 +131,7 @@ void timePointBasics() {
 ```
 
 ### Time Since Epoch
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -160,7 +160,7 @@ Chrono provides three standard clocks:
 ### system_clock
 
 Represents the system-wide real-time clock (wall-clock time):
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -184,7 +184,7 @@ void systemClockExample() {
 ### steady_clock
 
 Monotonic clock that never decreases:
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -210,7 +210,7 @@ Always use `steady_clock` for **measuring durations** and **benchmarking**!
 ### high_resolution_clock
 
 The clock with the shortest tick period available (usually an alias to `steady_clock` or `system_clock`):
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 void highResolutionExample() {
@@ -226,7 +226,7 @@ void highResolutionExample() {
 ```
 
 ## Measuring Execution Time
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 #include <thread>
@@ -253,7 +253,7 @@ void example() {
 ## Chrono Literals (C++14)
 
 Convenient syntax for durations:
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 using namespace std::chrono_literals;
@@ -283,7 +283,7 @@ Always use chrono literals (e.g., `100ms`) instead of raw numbers for readabilit
 C++20 adds extensive calendar and time zone support:
 
 ### Dates
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -314,7 +314,7 @@ void dateExample() {
 ```
 
 ### Time of Day
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 using namespace std::chrono;
@@ -332,7 +332,7 @@ void timeOfDayExample() {
 ```
 
 ### Time Zones
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 
@@ -358,7 +358,7 @@ void timeZoneExample() {
 ```
 
 ## Formatting and Parsing (C++20)
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <format>
 #include <iostream>
@@ -381,7 +381,7 @@ void formattingExample() {
 ## Practical Examples
 
 ### Example 1: Timeout Handler
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 using namespace std::chrono;
@@ -415,7 +415,7 @@ void usage() {
 ```
 
 ### Example 2: Rate Limiter
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <deque>
 
@@ -459,7 +459,7 @@ void usage() {
 ```
 
 ### Example 3: Periodic Task
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <thread>
 
@@ -484,7 +484,7 @@ void usage() {
 ```
 
 ### Example 4: Performance Profiler
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <iostream>
 #include <string>
@@ -577,7 +577,7 @@ void usage() {
   :::
 
 ## Common Patterns
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 
 using namespace std::chrono_literals;

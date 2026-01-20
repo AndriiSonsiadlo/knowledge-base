@@ -16,7 +16,7 @@ Class template = blueprint for creating type-specific classes. `vector<int>` and
 
 ## Basic Class Template
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Box {
     T value;
@@ -41,7 +41,7 @@ Compiler generates `Box<int>`, `Box<std::string>`, and `Box<double>` as separate
 
 ## Template with Multiple Parameters
 
-```cpp
+```cpp showLineNumbers 
 template<typename Key, typename Value>
 class Pair {
     Key key;
@@ -60,7 +60,7 @@ Pair<std::string, double> p2("pi", 3.14159);
 
 ## Non-Type Template Parameters
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, size_t Size>
 class Array {
     T data[Size];
@@ -82,7 +82,7 @@ Non-type parameters must be compile-time constants.
 ## Member Function Implementation
 
 **Inside class:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Widget {
 public:
@@ -93,7 +93,7 @@ public:
 ```
 
 **Outside class:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Widget {
 public:
@@ -111,7 +111,7 @@ void Widget<T>::process() {
 
 Provide different implementation for specific types:
 
-```cpp
+```cpp showLineNumbers 
 // General template
 template<typename T>
 class Container {
@@ -141,7 +141,7 @@ c2.print();   // "Bool container (optimized!)"
 
 Specialize for pointer types:
 
-```cpp
+```cpp showLineNumbers 
 // General template
 template<typename T>
 class Smart {
@@ -165,7 +165,7 @@ s2.info();    // "Pointer type"
 
 ## Default Template Arguments
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename Container = std::vector<T>>
 class Stack {
     Container data;
@@ -190,7 +190,7 @@ Stack<int, std::deque<int>> s2;   // Uses deque<int>
 
 Template parameter that is itself a template:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, template<typename> class Container>
 class Stack {
     Container<T> data;
@@ -208,7 +208,7 @@ Stack<double, std::list> s2;  // std::list is a template
 
 ## Friend Functions in Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Box {
     T value;
@@ -235,7 +235,7 @@ std::cout << b;  // Works!
 
 Each template instantiation has its own static members:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Counter {
     static int count;
@@ -262,7 +262,7 @@ std::cout << Counter<double>::getCount();  // 2
 
 ## Class Template Argument Deduction (C++17)
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Pair {
 public:
@@ -282,7 +282,7 @@ Pair(T, T) -> Pair<T>;
 
 ## Nested Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Outer {
 public:
@@ -301,7 +301,7 @@ Outer<int>::Inner<double> nested(5, 3.14);
 
 ## Real-World Example: Smart Pointer
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class UniquePtr {
     T* ptr;

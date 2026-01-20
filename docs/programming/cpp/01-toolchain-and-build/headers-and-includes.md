@@ -16,7 +16,7 @@ Headers declare interfaces (what exists), while source files define implementati
 
 ## Header vs Source File
 
-```cpp
+```cpp showLineNumbers 
 // math.h (Header - declarations)
 #pragma once
 
@@ -32,7 +32,7 @@ public:
 };
 ```
 
-```cpp
+```cpp showLineNumbers 
 // math.cpp (Source - definitions)
 #include "math.h"
 
@@ -63,7 +63,7 @@ Headers declare the API; source files implement it.
 
 ### Angle Brackets vs Quotes
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>      // System/standard headers
 #include <vector>        // Search: /usr/include, etc.
 
@@ -85,7 +85,7 @@ Headers declare the API; source files implement it.
 
 ### ✅ Should Include
 
-```cpp
+```cpp showLineNumbers 
 // Declarations
 class Widget;
 void function(int);
@@ -117,7 +117,7 @@ const double PI = 3.14159;
 
 ### ❌ Should NOT Include
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Function definitions (unless inline)
 void function() {
     // implementation
@@ -157,7 +157,7 @@ project/
 
 ### Include Order (Best Practice)
 
-```cpp
+```cpp showLineNumbers 
 // widget.cpp
 #include "widget.h"      // 1. Corresponding header FIRST
 
@@ -179,7 +179,7 @@ project/
 
 Headers should include everything they need:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Bad: Depends on iostream being included first
 // widget.h
 class Widget {
@@ -213,7 +213,7 @@ g++ -c widget.h  # Should work without errors
 
 Avoid including headers when forward declarations suffice:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Unnecessary include
 // widget.h
 #include "database.h"  // Includes entire database header
@@ -251,7 +251,7 @@ class Widget {
 
 Don't rely on transitive includes:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Bad: Relies on widget.h including vector
 // main.cpp
 #include "widget.h"  // Happens to include <vector>
@@ -278,7 +278,7 @@ int main() {
 
 Speed up compilation for stable headers:
 
-```cpp
+```cpp showLineNumbers 
 // pch.h - Rarely changing headers
 #include <iostream>
 #include <vector>
@@ -303,7 +303,7 @@ Precompiled headers compile once and reuse the compiled result. Can speed builds
 
 Libraries with only headers (no .cpp files):
 
-```cpp
+```cpp showLineNumbers 
 // math.h - Header-only library
 #pragma once
 
@@ -338,7 +338,7 @@ int result = math::square(5);
 
 Avoid circular includes:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Circular dependency
 // a.h
 #include "b.h"
@@ -355,7 +355,7 @@ class B {
 
 **Solution**: Forward declarations and pointers:
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Fixed with forward declarations
 // a.h
 class B;  // Forward declaration
@@ -407,7 +407,7 @@ g++ -I./include src/main.cpp
 
 ### Using namespace in Headers
 
-```cpp
+```cpp showLineNumbers 
 // ❌ header.h
 using namespace std;  // Pollutes every file that includes this!
 
@@ -418,7 +418,7 @@ class Widget {
 
 **Solution**: Always use fully qualified names in headers:
 
-```cpp
+```cpp showLineNumbers 
 // ✅ header.h
 class Widget {
     std::vector<int> data;
@@ -427,7 +427,7 @@ class Widget {
 
 ### Forgetting Include Guards
 
-```cpp
+```cpp showLineNumbers 
 // ❌ No include guard
 // widget.h
 class Widget {};
@@ -451,7 +451,7 @@ Headers:
 - **Never** put `using namespace` in headers
 
 **Best practices**:
-```cpp
+```cpp showLineNumbers 
 // Good header structure
 #pragma once                    // Include guard
 

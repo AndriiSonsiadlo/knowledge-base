@@ -16,7 +16,7 @@ C++ is case-sensitive: `variable`, `Variable`, and `VARIABLE` are three differen
 
 ## Hello World
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>  // Preprocessor directive
 
 int main() {         // Entry point
@@ -36,7 +36,7 @@ int main() {         // Entry point
 
 ## Statements and Expressions
 
-```cpp
+```cpp showLineNumbers 
 int x = 5;           // Statement (ends with ;)
 x + 3;               // Expression
 x = x + 1;           // Statement containing expression
@@ -54,7 +54,7 @@ if (x > 0) {         // Statement
 
 ## Comments
 
-```cpp
+```cpp showLineNumbers 
 // Single-line comment
 
 /* Multi-line
@@ -72,7 +72,7 @@ int x = 5;  // Inline comment
 
 ## Variables and Types
 
-```cpp
+```cpp showLineNumbers 
 int age = 25;                    // Integer
 double price = 19.99;            // Floating-point
 char grade = 'A';                // Single character
@@ -87,7 +87,7 @@ auto ratio = 3.14;               // double
 
 ## Operators
 
-```cpp
+```cpp showLineNumbers 
 // Arithmetic
 int sum = 5 + 3;     // Addition
 int diff = 5 - 3;    // Subtraction
@@ -117,7 +117,7 @@ x++;                 // x = x + 1
 
 ## Control Flow
 
-```cpp
+```cpp showLineNumbers 
 // If statement
 if (x > 0) {
     std::cout << "Positive\n";
@@ -149,7 +149,7 @@ for (int n : nums) {
 
 ## Functions
 
-```cpp
+```cpp showLineNumbers 
 // Function declaration
 int add(int a, int b);
 
@@ -166,7 +166,7 @@ int result = add(5, 3);  // Calls function
 
 ## Arrays
 
-```cpp
+```cpp showLineNumbers 
 // Fixed-size array
 int numbers[5] = {1, 2, 3, 4, 5};
 int first = numbers[0];  // Access element
@@ -184,7 +184,7 @@ int elem = vec[0];       // Access
 
 ## Input/Output
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 // Output
@@ -205,7 +205,7 @@ std::cin >> x >> y;
 
 ## Namespaces
 
-```cpp
+```cpp showLineNumbers 
 // Using full qualification
 std::cout << "Hello\n";
 std::vector<int> vec;
@@ -233,7 +233,7 @@ Basic C++ syntax:
 - `std::` prefix for standard library
 - `//` and `/* */` for comments
 
-```cpp
+```cpp showLineNumbers 
 // Template
 #include <iostream>
 

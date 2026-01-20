@@ -16,7 +16,7 @@ Partial specialization = specialize for type patterns. Full specialization = one
 
 ## Basic Partial Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T, typename U>
 class Pair {
@@ -51,7 +51,7 @@ p2.swap();  // Available!
 
 ## Specialization for Pointers
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class SmartPtr {
@@ -82,7 +82,7 @@ s2 = &x;
 
 ## Multiple Parameter Patterns
 
-```cpp
+```cpp showLineNumbers 
 // Primary: three different types
 template<typename T, typename U, typename V>
 class Triple {
@@ -108,7 +108,7 @@ Triple<int, int, int> t3;      // All same (most specialized!)
 
 ## const Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Wrapper {
@@ -139,7 +139,7 @@ w2.modify(cx);  // "Cannot modify const"
 
 ## Reference Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Storage {
@@ -168,7 +168,7 @@ std::cout << x;  // 200
 
 ## Array Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Container {
@@ -198,7 +198,7 @@ c2.size();  // 10
 
 ## Function Objects vs Function Pointers
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Callback {
 public:
@@ -225,7 +225,7 @@ c2.info();  // "Function pointer"
 
 ## Nested Template Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Outer {
@@ -253,7 +253,7 @@ o2.info();  // "Container with element type"
 
 More specialized templates are chosen:
 
-```cpp
+```cpp showLineNumbers 
 // Primary: most general
 template<typename T, typename U>
 class Widget {
@@ -288,7 +288,7 @@ Compiler picks most specific match!
 
 ## Remove Reference Implementation
 
-```cpp
+```cpp showLineNumbers 
 // Primary: does nothing
 template<typename T>
 struct remove_reference {
@@ -316,7 +316,7 @@ This is how `std::remove_reference` works!
 
 ## Conditional Type Selection
 
-```cpp
+```cpp showLineNumbers 
 // Primary: select first type
 template<bool Condition, typename T, typename F>
 struct conditional {
@@ -337,7 +337,7 @@ Implementation of `std::conditional`!
 
 ## is_same Implementation
 
-```cpp
+```cpp showLineNumbers 
 // Primary: types are different
 template<typename T, typename U>
 struct is_same {
@@ -356,7 +356,7 @@ is_same<int, double>::value;  // false
 
 ## Complex Pattern Matching
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Parser {
@@ -389,7 +389,7 @@ Parser<std::map<int, std::string>> p4;
 
 ## Function Templates Can't Be Partially Specialized
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Partial specialization not allowed for functions!
 template<typename T>
 void process(T value) { /* ... */ }
@@ -407,7 +407,7 @@ void process(T* value) { /* Pointers */ }  // Overload, not specialization
 
 ## Avoiding Ambiguity
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 class X;
 

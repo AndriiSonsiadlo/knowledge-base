@@ -18,7 +18,7 @@ The preprocessor doesn't understand C++ - it only does text replacement. This ma
 
 All preprocessor commands start with `#` and are processed before compilation:
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>      // File inclusion
 #define MAX 100          // Macro definition
 #ifdef DEBUG             // Conditional compilation
@@ -33,7 +33,7 @@ All preprocessor commands start with `#` and are processed before compilation:
 
 ### Angle Brackets vs Quotes
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>      // System/standard library headers
                          // Searches: /usr/include, /usr/local/include
 
@@ -43,7 +43,7 @@ All preprocessor commands start with `#` and are processed before compilation:
 
 **How it works**: The preprocessor finds the file and replaces the `#include` line with the file's contents.
 
-```cpp
+```cpp showLineNumbers 
 // Before preprocessing
 #include <iostream>
 int main() {
@@ -63,7 +63,7 @@ int main() {
 
 Without protection, including the same header multiple times causes redefinition errors:
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 class Widget {
     int value;
@@ -76,7 +76,7 @@ class Widget {
 
 **Solution 1: Include Guards**
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #ifndef WIDGET_H
 #define WIDGET_H
@@ -92,7 +92,7 @@ First inclusion defines `WIDGET_H`, second inclusion skips the content because `
 
 **Solution 2: #pragma once (Modern)**
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #pragma once  // Non-standard but universally supported
 
@@ -111,7 +111,7 @@ Macros perform text substitution before compilation. They're useful but dangerou
 
 ### Object-Like Macros
 
-```cpp
+```cpp showLineNumbers 
 #define PI 3.14159
 #define MAX_SIZE 1000
 
@@ -126,7 +126,7 @@ The preprocessor replaces `PI` with `3.14159` everywhere. Unlike `const`, macros
 
 ### Function-Like Macros
 
-```cpp
+```cpp showLineNumbers 
 #define SQUARE(x) ((x) * (x))
 
 int result = SQUARE(5);    // Becomes: ((5) * (5)) = 25
@@ -144,7 +144,7 @@ inline int square(int x) { return x * x; }
 
 ### Macro Pitfalls
 
-```cpp
+```cpp showLineNumbers 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 // Problem 1: Multiple evaluation
@@ -168,7 +168,7 @@ Compile different code based on conditions - useful for platform-specific code, 
 
 ### Basic Conditionals
 
-```cpp
+```cpp showLineNumbers 
 #define DEBUG 1
 
 int main() {
@@ -194,7 +194,7 @@ The preprocessor evaluates these conditions and removes code from branches not t
 
 ### Platform-Specific Code
 
-```cpp
+```cpp showLineNumbers 
 #ifdef _WIN32
     #include <windows.h>
     void platformInit() {
@@ -217,7 +217,7 @@ This allows one codebase to compile on multiple platforms with platform-specific
 
 ### Debug vs Release
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     void process() {
         #ifdef DEBUG
@@ -245,7 +245,7 @@ The `-DDEBUG` flag defines `DEBUG` during compilation, enabling debug code. Rele
 
 The preprocessor provides standard macros for debugging and meta-information:
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 void logError() {
@@ -283,7 +283,7 @@ Advanced macro techniques for manipulating tokens.
 
 Converts macro argument to string literal:
 
-```cpp
+```cpp showLineNumbers 
 #define STRINGIFY(x) #x
 #define LOG(var) std::cout << #var << " = " << var << "\n"
 
@@ -303,7 +303,7 @@ The `#` operator turns the token into a string, preserving whitespace and quotes
 
 Concatenates tokens to create new identifiers:
 
-```cpp
+```cpp showLineNumbers 
 #define DECLARE_VAR(type, name, suffix) \
     type name##suffix
 
@@ -329,7 +329,7 @@ class Widget {
 
 Compiler-specific directives for control and optimization:
 
-```cpp
+```cpp showLineNumbers 
 #pragma once  // Include guard alternative (universal support)
 
 #pragma pack(push, 1)  // Pack struct without padding
@@ -391,7 +391,7 @@ This shows exactly what the compiler sees after preprocessing. Useful for debugg
 
 ### Modern Alternatives
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Old style
 #define MAX 100
 #define SQUARE(x) ((x) * (x))
@@ -419,7 +419,7 @@ if constexpr (DEBUG) {
 
 ### Debug Assertions
 
-```cpp
+```cpp showLineNumbers 
 #ifdef DEBUG
     #define ASSERT(condition) \
         if (!(condition)) { \
@@ -437,7 +437,7 @@ ASSERT(size > 0);
 
 ### Feature Detection
 
-```cpp
+```cpp showLineNumbers 
 #if __cplusplus >= 202002L
     // C++20 code
     #define HAS_CONCEPTS 1

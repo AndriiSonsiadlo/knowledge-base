@@ -16,7 +16,7 @@ tags: [c++, decltype-auto, type-deduction, cpp14]
 
 ## The Problem
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3};
 
 // auto drops reference
@@ -36,7 +36,7 @@ z = 42;  // Modifies vec[0]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 const int cx = x;
 int& rx = x;
@@ -59,7 +59,7 @@ decltype(auto) c = rx;  // int&
 
 ### Before C++14
 
-```cpp
+```cpp showLineNumbers 
 // C++11: Need to duplicate expression
 template<typename Container, typename Index>
 auto getElement(Container& c, Index i) -> decltype(c[i]) {
@@ -69,7 +69,7 @@ auto getElement(Container& c, Index i) -> decltype(c[i]) {
 
 ### C++14: decltype(auto)
 
-```cpp
+```cpp showLineNumbers 
 // Clean and DRY (Don't Repeat Yourself)
 template<typename Container, typename Index>
 decltype(auto) getElement(Container& c, Index i) {
@@ -85,7 +85,7 @@ elem = 42;  // Modifies vec[0]
 
 ## Variable Declarations
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 int& ref = x;
 
@@ -96,7 +96,7 @@ decltype(auto) c = (x);  // int& (parentheses → expression)
 ```
 
 :::danger Parentheses Matter
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 decltype(auto) a = x;    // int
@@ -114,7 +114,7 @@ b = 10;  // Modifies x
 
 ### Value vs Reference
 
-```cpp
+```cpp showLineNumbers 
 std::string getString() {
     std::string s = "hello";
     return s;  // Returns by value
@@ -136,7 +136,7 @@ decltype(auto) func3() {
 ```
 
 :::warning Dangling References
-```cpp
+```cpp showLineNumbers 
 decltype(auto) bad() {
     int x = 42;
     return (x);  // ❌ Returns int& to local variable!
@@ -161,7 +161,7 @@ decltype(auto) bad() {
 
 ### Generic Wrapper
 
-```cpp
+```cpp showLineNumbers 
 template<typename Func, typename... Args>
 decltype(auto) callWrapper(Func&& f, Args&&... args) {
     log("Calling function");
@@ -178,7 +178,7 @@ decltype(auto) ref = callWrapper(getRef);  // int&
 
 ### Container Access
 
-```cpp
+```cpp showLineNumbers 
 template<typename Container>
 class Wrapper {
     Container c;
@@ -194,7 +194,7 @@ decltype(auto) elem = w[0];  // int& (matches vector's behavior)
 
 ### Lazy Evaluation
 
-```cpp
+```cpp showLineNumbers 
 template<typename Func>
 class Lazy {
     Func func;
@@ -220,7 +220,7 @@ decltype(auto) value = lazy.get();  // int&
 
 ### Use decltype(auto) When
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Perfect forwarding return types
 template<typename T>
 decltype(auto) forward_call(T&& arg) {
@@ -239,7 +239,7 @@ decltype(auto) result = complicated_expression();
 
 ### Use auto When
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Want a copy
 auto copy = vec[0];  // int (copy)
 
@@ -256,7 +256,7 @@ auto count = vec.size();  // size_t
 
 ### Unintended Reference
 
-```cpp
+```cpp showLineNumbers 
 decltype(auto) getLocal() {
     int x = 42;
     return (x);  // ❌ Returns int& to local!
@@ -265,7 +265,7 @@ decltype(auto) getLocal() {
 
 ### Expression vs Variable
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 decltype(auto) a = x;    // int (variable)
@@ -277,7 +277,7 @@ b = 10;  // OK: modifies x through reference
 
 ### Const Propagation
 
-```cpp
+```cpp showLineNumbers 
 const std::vector<int> cvec = {1, 2, 3};
 
 decltype(auto) elem = cvec[0];  // const int& (preserves const)
@@ -296,7 +296,7 @@ elem = 42;  // ❌ Error: const
 - **Beware parentheses** - create expressions!
 
 **Decision guide**:
-```cpp
+```cpp showLineNumbers 
 auto x = expr;              // Want copy, drop ref/const
 auto& x = expr;             // Want reference
 decltype(expr) x;           // Exact type, but verbose
@@ -304,7 +304,7 @@ decltype(auto) x = expr;    // Exact type, concise
 ```
 
 **Common use**:
-```cpp
+```cpp showLineNumbers 
 // Generic return type forwarding
 template<typename F, typename... Args>
 decltype(auto) call(F&& f, Args&&... args) {

@@ -19,7 +19,7 @@ C++ supports two forms of polymorphism: dynamic (runtime, using virtual function
 
 Uses inheritance and virtual functions. Type decided at runtime:
 
-```cpp
+```cpp showLineNumbers 
 class Shape {
 public:
     virtual void draw() = 0;
@@ -59,7 +59,7 @@ render(s);              // Don't know which until runtime
 
 Uses templates. Type decided at compile-time:
 
-```cpp
+```cpp showLineNumbers 
 class Circle {
 public:
     void draw() {
@@ -95,7 +95,7 @@ render(r);      // Compiles to: r.draw() directly
 
 ## Performance Comparison
 
-```cpp
+```cpp showLineNumbers 
 // Dynamic polymorphism
 std::vector<std::unique_ptr<Shape>> shapes;
 shapes.push_back(std::make_unique<Circle>());
@@ -121,7 +121,7 @@ Static polymorphism is 2-3x faster per call and allows inlining.
 
 ## Code Size
 
-```cpp
+```cpp showLineNumbers 
 // Dynamic: One compiled function
 void processShape(Shape* s) {
     s->draw();
@@ -141,7 +141,7 @@ Dynamic polymorphism generates less code. Static polymorphism duplicates code fo
 
 ## Flexibility
 
-```cpp
+```cpp showLineNumbers 
 // Dynamic: Can choose type at runtime
 Shape* getShape(int choice) {
     if (choice == 1)
@@ -170,7 +170,7 @@ Dynamic polymorphism can make runtime decisions. Static polymorphism requires co
 
 You can combine dynamic and static polymorphism:
 
-```cpp
+```cpp showLineNumbers 
 template<typename Derived>
 class ShapeBase {
 public:
@@ -217,7 +217,7 @@ void draw(Shape& s) {
 
 ## Real-World Example
 
-```cpp
+```cpp showLineNumbers 
 // Dynamic: GUI framework
 class Widget {
 public:

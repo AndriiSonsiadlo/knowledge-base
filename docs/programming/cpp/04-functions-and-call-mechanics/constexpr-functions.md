@@ -16,7 +16,7 @@ tags: [c++, constexpr, compile-time, optimization, cpp11]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 // constexpr variable (must be compile-time constant)
 constexpr int x = 42;
 constexpr double pi = 3.14159;
@@ -29,7 +29,7 @@ int arr[x];  // ✅ OK: x is compile-time constant
 
 ## constexpr Functions
 
-```cpp
+```cpp showLineNumbers 
 // C++11 constexpr function (single return statement)
 constexpr int square(int x) {
     return x * x;
@@ -52,7 +52,7 @@ int runtime_result = square(n);  // Computed at runtime
 
 ### C++11 Restrictions
 
-```cpp
+```cpp showLineNumbers 
 // C++11: Very limited
 constexpr int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);  // Only recursion
@@ -66,7 +66,7 @@ constexpr int factorial(int n) {
 
 ### C++14 Relaxed Rules
 
-```cpp
+```cpp showLineNumbers 
 // C++14: Much more flexible
 constexpr int factorial(int n) {
     int result = 1;  // Local variables OK
@@ -90,7 +90,7 @@ constexpr int fib(int n) {
 
 ### C++20 Enhanced
 
-```cpp
+```cpp showLineNumbers 
 // C++20: Even more features
 constexpr std::string getMessage() {
     std::string s = "Hello";  // Dynamic allocation OK!
@@ -110,7 +110,7 @@ constexpr std::vector<int> getNumbers() {
 
 ## constexpr vs const
 
-```cpp
+```cpp showLineNumbers 
 // const: Runtime or compile-time constant
 const int x = 10;           // Compile-time
 const int y = getValue();   // Runtime (depends on getValue)
@@ -136,7 +136,7 @@ int arr3[size3];  // ✅ OK (guaranteed compile-time)
 
 ## constexpr Constructors
 
-```cpp
+```cpp showLineNumbers 
 class Point {
     int x, y;
 public:
@@ -162,7 +162,7 @@ int arr[dist];  // ✅ OK: array of 25 elements
 
 ## Compile-Time vs Runtime
 
-```cpp
+```cpp showLineNumbers 
 constexpr int compute(int x) {
     return x * x + 1;
 }
@@ -183,7 +183,7 @@ int result2 = compute(n);  // Evaluated at runtime (n not known)
 
 ## Requirements for constexpr Functions
 
-```cpp
+```cpp showLineNumbers 
 // ✅ OK
 constexpr int good(int x) {
     return x * 2;  // Simple computation
@@ -215,7 +215,7 @@ constexpr int maybe(int x) {
 
 Compile-time conditional compilation:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 auto process(T value) {
     if constexpr (std::is_integral_v<T>) {
@@ -240,21 +240,21 @@ auto y = process(3.14);    // Returns 4.71 (float path compiled)
 
 ### Array Sizes
 
-```cpp
+```cpp showLineNumbers 
 constexpr int buffer_size = 1024;
 char buffer[buffer_size];  // Compile-time array size
 ```
 
 ### Template Arguments
 
-```cpp
+```cpp showLineNumbers 
 constexpr int size = compute_size();
 std::array<int, size> arr;  // Template argument must be compile-time
 ```
 
 ### Lookup Tables
 
-```cpp
+```cpp showLineNumbers 
 constexpr int pow2(int n) {
     return 1 << n;
 }
@@ -267,7 +267,7 @@ constexpr std::array<int, 10> powers = {
 
 ### Compile-Time Validation
 
-```cpp
+```cpp showLineNumbers 
 constexpr bool is_valid_port(int port) {
     return port > 0 && port <= 65535;
 }
@@ -282,7 +282,7 @@ static_assert(is_valid_port(8080), "Port must be valid");
 
 Forces compile-time evaluation:
 
-```cpp
+```cpp showLineNumbers 
 consteval int must_be_compile_time(int x) {
     return x * x;
 }
@@ -301,7 +301,7 @@ int result2 = must_be_compile_time(n);  // ❌ Error: runtime argument
 
 ### Code Bloat Reduction
 
-```cpp
+```cpp showLineNumbers 
 // Without constexpr
 int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);
@@ -321,7 +321,7 @@ char buffer[size];  // size = 120, no runtime computation
 
 ### Optimization Opportunities
 
-```cpp
+```cpp showLineNumbers 
 constexpr int compute_hash(const char* str) {
     int hash = 0;
     while (*str) {
@@ -347,7 +347,7 @@ switch (compute_hash(input)) {
 
 ### Undefined Behavior
 
-```cpp
+```cpp showLineNumbers 
 constexpr int divide(int a, int b) {
     return a / b;  // ❌ UB if b is 0
 }
@@ -357,7 +357,7 @@ constexpr int divide(int a, int b) {
 
 ### Non-constexpr Dependencies
 
-```cpp
+```cpp showLineNumbers 
 int global = 42;
 
 constexpr int bad() {
@@ -373,7 +373,7 @@ constexpr int good() {
 
 ### Pointer Conversions
 
-```cpp
+```cpp showLineNumbers 
 constexpr int x = 42;
 
 constexpr int* ptr = &x;  // ❌ Error: address not compile-time constant
@@ -417,7 +417,7 @@ constexpr const int* ptr2 = &x;  // ❌ Still problematic
 - `constexpr`: Can be runtime
 - `consteval`: Must be compile-time
 
-```cpp
+```cpp showLineNumbers 
 // Common pattern
 constexpr int factorial(int n) {
     int result = 1;

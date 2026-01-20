@@ -18,7 +18,7 @@ A reference is NOT a new variable - it's just another name for an existing objec
 
 References create an alternate name for an existing variable. All operations on the reference affect the original variable because they're the same thing.
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 int& ref = x;  // ref is an alias for x
 
@@ -37,7 +37,7 @@ The reference `ref` doesn't create new storage - it's just another way to access
 
 Unlike pointers, references cannot exist without referring to something. They must be bound to an object at declaration.
 
-```cpp
+```cpp showLineNumbers 
 int& bad_ref;  // ❌ Error: references must be initialized
 
 int x = 42;
@@ -52,7 +52,7 @@ This requirement eliminates null reference bugs. There's no way to create a refe
 
 Once initialized, a reference always refers to the same object. Assignment through a reference modifies the referred-to object, it doesn't change what the reference refers to.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 int y = 20;
 int& ref = x;  // ref refers to x
@@ -71,7 +71,7 @@ This is a critical difference from pointers. With pointers, `ptr = &y` changes w
 
 The choice between references and pointers depends on whether you need nullable, reassignable behavior or guaranteed valid aliases.
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 // Pointer (nullable, reassignable)
@@ -96,7 +96,7 @@ Use references when you need a guaranteed-valid alias (function parameters, retu
 
 References enable efficient pass-by-reference semantics, allowing functions to modify caller's variables without copying.
 
-```cpp
+```cpp showLineNumbers 
 void increment(int& x) {  // Pass by reference
     x++;                  // Modifies caller's variable
 }
@@ -120,7 +120,7 @@ Pass-by-reference avoids copying large objects and allows functions to modify ar
 
 Const references allow reading but prevent modification, making them ideal for passing large objects efficiently without allowing changes.
 
-```cpp
+```cpp showLineNumbers 
 void print(const std::string& s) {  // No copy, can't modify
     std::cout << s;
     // s[0] = 'X';  // ❌ Error: s is const
@@ -142,7 +142,7 @@ Const references can bind to temporaries, extending their lifetime. This makes `
 
 Functions can return references to allow modification of class members or avoid copying large objects.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     std::string name;
 public:
@@ -168,7 +168,7 @@ Returning non-const references enables chaining and direct modification of inter
 
 Never return references to local variables. Locals are destroyed when the function returns, creating dangling references.
 
-```cpp
+```cpp showLineNumbers 
 int& dangerous() {
     int x = 42;
     return x;  // ❌ Dangling: x destroyed at return
@@ -195,7 +195,7 @@ References don't extend object lifetimes. Returning a reference to a local creat
 
 Rvalue references (using `&&`) bind to temporaries and enable move semantics, allowing efficient transfer of resources.
 
-```cpp
+```cpp showLineNumbers 
 void process(int& x) {       // Lvalue reference
     std::cout << "lvalue\n";
 }
@@ -216,7 +216,7 @@ Rvalue references enable distinguishing between objects you can modify in-place 
 
 Move operations transfer ownership of resources from source to destination, avoiding expensive copying.
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     char* data;
     size_t size;
@@ -248,7 +248,7 @@ The move constructor transfers ownership by stealing the source's pointer instea
 
 `std::reference_wrapper` allows storing references in containers, which normally can't hold references directly.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10, y = 20, z = 30;
 
 // ❌ Can't store references in vector
@@ -270,7 +270,7 @@ References can't be stored in containers because they're not regular objects (ca
 
 Template parameters with `&&` create forwarding references (universal references) that preserve value categories.
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {  // Forwarding reference
     process(std::forward<T>(arg));  // Perfect forwarding

@@ -16,7 +16,7 @@ Each object with virtual functions has a **vptr** (vtable pointer) pointing to i
 
 ## Basic vtable Structure
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 public:
     virtual void speak() { std::cout << "Animal\n"; }
@@ -46,7 +46,7 @@ Each class with virtual functions has one shared vtable. Each object has its own
 
 ## How Virtual Calls Work
 
-```cpp
+```cpp showLineNumbers 
 Animal* ptr = new Dog();
 ptr->speak();
 
@@ -62,7 +62,7 @@ ptr->speak();
 3. Call through function pointer
 
 **vs non-virtual call:**
-```cpp
+```cpp showLineNumbers 
 ptr->nonVirtualFunc();
 // Just: call Animal::nonVirtualFunc(ptr)
 // Direct call, no indirection
@@ -70,7 +70,7 @@ ptr->nonVirtualFunc();
 
 ## vtable Memory Layout
 
-```cpp
+```cpp showLineNumbers 
 class Base {
     int data;           // 4 bytes
 public:
@@ -89,7 +89,7 @@ The vptr is typically the first member (implementation-defined), allowing safe d
 
 Multiple inheritance with virtual functions gets complex:
 
-```cpp
+```cpp showLineNumbers 
 class A {
 public:
     virtual void fa() {}
@@ -121,7 +121,7 @@ Each base class with virtual functions contributes a vptr. Pointer conversions a
 
 vtables are constructed during compilation:
 
-```cpp
+```cpp showLineNumbers 
 // Compiler generates (pseudocode):
 struct Animal_vtable {
     void (*speak)(Animal*);  // &Animal::speak
@@ -150,7 +150,7 @@ vtables are constant, read-only data created at compile-time.
 
 Run-Time Type Information is stored with vtables:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual ~Base() = default;
@@ -171,7 +171,7 @@ RTTI information is stored near the vtable, enabling `dynamic_cast` and `typeid`
 
 ## Performance Implications
 
-```cpp
+```cpp showLineNumbers 
 class Hot {
 public:
     virtual void process() {  // Virtual
@@ -204,7 +204,7 @@ for (int i = 0; i < 1000000; ++i) {
 
 Compilers can sometimes optimize away virtual calls:
 
-```cpp
+```cpp showLineNumbers 
 void process() {
     Dog d;
     d.speak();  // Compiler knows exact type: direct call!
@@ -239,7 +239,7 @@ cl /d1reportAllClassLayout file.cpp
 
 Virtual inheritance adds complexity:
 
-```cpp
+```cpp showLineNumbers 
 class A {
 public:
     virtual void f() {}

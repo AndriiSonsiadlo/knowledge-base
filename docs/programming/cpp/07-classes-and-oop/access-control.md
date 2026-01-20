@@ -18,7 +18,7 @@ Access specifiers define the interface (public) and hide implementation (private
 
 C++ provides three access levels that control member visibility from different contexts.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     int publicMember;       // Accessible everywhere
@@ -45,7 +45,7 @@ Public members form the class interface - they're accessible from any code. Priv
 
 class and struct have different default access, but are otherwise identical.
 
-```cpp
+```cpp showLineNumbers 
 class MyClass {
     int x;  // ❌ Private by default
 };
@@ -67,7 +67,7 @@ Use `class` when you want private-by-default (typical for objects with invariant
 
 All member functions can access all members of their own class regardless of access level.
 
-```cpp
+```cpp showLineNumbers 
 class Account {
 private:
     double balance;
@@ -91,7 +91,7 @@ Member functions are "inside" the class, so they have full access to implement f
 
 Friend declarations grant external functions or classes access to private and protected members.
 
-```cpp
+```cpp showLineNumbers 
 class Secret {
 private:
     int data;
@@ -124,7 +124,7 @@ Friends are useful for helper functions that need access to internals (like oper
 
 You can make specific member functions of another class friends, rather than the entire class.
 
-```cpp
+```cpp showLineNumbers 
 class Storage;
 
 class Accessor {
@@ -159,7 +159,7 @@ This provides fine-grained control, granting access only where needed. It's more
 
 Protected members are accessible in derived classes, enabling inheritance while hiding from external code.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 protected:
     int protectedValue;
@@ -189,7 +189,7 @@ Protected allows derived classes to access and modify base class internals while
 
 The inheritance access specifier (public, protected, private) affects how base class members are accessible in derived class.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     int pub;
@@ -227,7 +227,7 @@ Public inheritance maintains access levels (most common, represents "is-a" relat
 
 Different inheritance access controls what parts of the base interface remain public in derived class.
 
-```cpp
+```cpp showLineNumbers 
 class Engine {
 public:
     void start() { /* ... */ }
@@ -258,7 +258,7 @@ Private inheritance hides the base class interface, making it an implementation 
 
 You can use `using` to change the accessibility of inherited members.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 protected:
     void protectedFunc() {}
@@ -279,7 +279,7 @@ This is useful when you want to expose specific base class members that would ot
 
 Nested classes have access to the enclosing class's private members.
 
-```cpp
+```cpp showLineNumbers 
 class Outer {
 private:
     int secret;
@@ -307,7 +307,7 @@ Nested classes are useful for implementation helpers that need full access to th
 
 Static members follow the same access rules as non-static members.
 
-```cpp
+```cpp showLineNumbers 
 class Config {
 private:
     static int privateCounter;
@@ -336,7 +336,7 @@ Static members don't require an object instance, but access control still applie
 
 Access control enables hiding implementation and protecting invariants.
 
-```cpp
+```cpp showLineNumbers 
 class BankAccount {
 private:
     double balance;  // Protected - cannot go negative

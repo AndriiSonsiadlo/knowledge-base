@@ -18,7 +18,7 @@ Value initialization ensures fundamental types are zeroed, making it safer than 
 
 Value initialization is triggered by using empty parentheses or braces when creating an object. This explicit syntax signals to the compiler that you want a "zero-like" value rather than an indeterminate one.
 
-```cpp
+```cpp showLineNumbers 
 int x{};        // Value-initialized to 0
 int y = int();  // Value-initialized to 0
 double d{};     // Value-initialized to 0.0
@@ -36,7 +36,7 @@ The key difference from default initialization is that value initialization perf
 
 For all fundamental types, value initialization produces a predictable zero value. This makes value initialization much safer than default initialization when you need to ensure a known starting state.
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     // Default initialization - indeterminate values
     int a;
@@ -58,7 +58,7 @@ This behavior is particularly important for types like pointers, where an indete
 
 For class types, value initialization's behavior depends on whether the class has any user-defined constructors. If the class has user-defined constructors, value initialization calls the default constructor, just like default initialization would.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int value;
 public:
@@ -78,7 +78,7 @@ When a user-defined constructor exists, both default and value initialization pr
 
 The real difference in behavior appears when a class has no user-defined constructors. In this case, value initialization zero-initializes all members, while default initialization leaves fundamental type members with indeterminate values.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x;
     int y;
@@ -98,7 +98,7 @@ This makes value initialization the safer choice when working with simple aggreg
 
 Arrays can be value-initialized to ensure all elements are properly initialized. For fundamental type arrays, this means all elements are set to zero. For class type arrays, each element is value-initialized according to the rules for that type.
 
-```cpp
+```cpp showLineNumbers 
 int arr1[5];     // Default initialization: indeterminate values ❌
 int arr2[5]{};   // Value initialization: all zeros ✅
 
@@ -114,7 +114,7 @@ Value initialization of arrays is particularly useful when you need a clean slat
 
 Value initialization works with multi-dimensional arrays as well, zeroing out all elements regardless of the array's dimensionality.
 
-```cpp
+```cpp showLineNumbers 
 int matrix1[3][3];     // Indeterminate values
 int matrix2[3][3]{};   // All zeros
 
@@ -126,7 +126,7 @@ matrix2[2][2];  // ✅ 0
 
 When using `new` to allocate objects dynamically, you can request value initialization by using parentheses or braces. Without these, fundamental types are default-initialized (left with indeterminate values).
 
-```cpp
+```cpp showLineNumbers 
 int* p1 = new int;      // Default-initialized: indeterminate value ❌
 int* p2 = new int();    // Value-initialized: 0 ✅
 int* p3 = new int{};    // Value-initialized: 0 ✅
@@ -143,7 +143,7 @@ This distinction is critical when allocating fundamental types on the heap. The 
 
 When allocating arrays dynamically, value initialization can be requested for each element. This is particularly useful for fundamental type arrays where you want to ensure clean initialization.
 
-```cpp
+```cpp showLineNumbers 
 int* arr1 = new int[10];     // Default-initialized: indeterminate ❌
 int* arr2 = new int[10]();   // Value-initialized: all zeros ✅
 int* arr3 = new int[10]{};   // Value-initialized: all zeros ✅
@@ -158,7 +158,7 @@ delete[] arr1; delete[] arr2; delete[] arr3;
 
 When initializing members in a constructor's initializer list, using empty braces provides value initialization for each member. This is a clean way to ensure all members start in a known state.
 
-```cpp
+```cpp showLineNumbers 
 class Container {
     int value;
     double ratio;
@@ -187,7 +187,7 @@ This pattern guarantees that even if you forget to provide explicit values, the 
 
 Understanding when to use value initialization versus default initialization is important for writing correct code. The choice affects both correctness and performance.
 
-```cpp
+```cpp showLineNumbers 
 // Default initialization
 int a;              // Indeterminate value - dangerous ❌
 Widget w;           // Calls Widget() - fine if constructor exists ✅
@@ -203,7 +203,7 @@ For fundamental types, value initialization is almost always preferable unless y
 
 Value initialization does have a small performance cost compared to default initialization because it requires zeroing memory. However, this cost is typically negligible and far outweighed by the safety benefits of not having indeterminate values.
 
-```cpp
+```cpp showLineNumbers 
 void process_large_array() {
     int data[1000000];     // No initialization cost
     // But data is full of garbage! ❌

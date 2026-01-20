@@ -16,7 +16,7 @@ Without guards, including a header twice causes "redefinition" errors. Guards en
 
 ## The Problem
 
-```cpp
+```cpp showLineNumbers 
 // widget.h (no guard)
 class Widget {
     int value;
@@ -33,7 +33,7 @@ The preprocessor copies `widget.h` contents twice, causing duplicate class defin
 
 ## Solution 1: Traditional Include Guards
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #ifndef WIDGET_H          // If not defined
 #define WIDGET_H          // Define it
@@ -54,7 +54,7 @@ public:
 
 ### Guard Naming Convention
 
-```cpp
+```cpp showLineNumbers 
 // project/include/mylib/widget.h
 #ifndef MYLIB_WIDGET_H
 #define MYLIB_WIDGET_H
@@ -78,7 +78,7 @@ public:
 
 ## Solution 2: #pragma once (Modern)
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #pragma once
 
@@ -113,7 +113,7 @@ Use `#pragma once` for new code - it's simpler, faster, and universally supporte
 
 ### Scenario: Indirect Double Include
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #pragma once
 #include "component.h"
@@ -151,7 +151,7 @@ graph TD
 
 ### Forgetting Include Guard
 
-```cpp
+```cpp showLineNumbers 
 // math.h (no guard - BAD)
 inline int square(int x) {
     return x * x;
@@ -172,7 +172,7 @@ Even for inline functions, always use guards to avoid unnecessary reprocessing.
 
 ### Macro Name Collision
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Bad: Generic name
 // util.h
 #ifndef UTIL_H  // Too common!
@@ -210,7 +210,7 @@ Some compilers may include both if symlink points to same file. Traditional guar
 
 ### Traditional Guards
 
-```cpp
+```cpp showLineNumbers 
 // First inclusion
 #ifndef WIDGET_H     // Not defined → condition TRUE
 #define WIDGET_H     // Define it
@@ -227,7 +227,7 @@ Preprocessor skips content on second pass - fast but still processes `#ifndef` c
 
 ### #pragma once
 
-```cpp
+```cpp showLineNumbers 
 // First inclusion
 #pragma once  // Compiler remembers: "Don't include this file again"
 class Widget {};
@@ -245,7 +245,7 @@ Faster because compiler short-circuits before reading file contents.
 
 Can use both for maximum compatibility:
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #pragma once  // Fast path for modern compilers
 
@@ -290,7 +290,7 @@ Or use IDE features to auto-insert guards.
 
 ### Guard Typo
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #ifndef WIDGET_H
 #define WIDGTE_H  // ❌ Typo! Doesn't match
@@ -302,7 +302,7 @@ Typo means guard never defined → multiple inclusion still occurs.
 
 ### Missing #endif
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #ifndef WIDGET_H
 #define WIDGET_H
@@ -314,7 +314,7 @@ class Widget {};
 
 ### Incorrect Guard Scope
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Guard around include, not content
 // widget.h
 #ifndef WIDGET_H
@@ -364,7 +364,7 @@ find . -name "*.h" -exec sh -c \
 
 C++20 modules eliminate the need for include guards:
 
-```cpp
+```cpp showLineNumbers 
 // widget.cppm (module interface)
 export module widget;
 
@@ -389,7 +389,7 @@ Modules are imported directly without preprocessing. No multiple inclusion probl
 Include guards prevent multiple inclusion:
 
 **Traditional Guards**:
-```cpp
+```cpp showLineNumbers 
 #ifndef PROJECT_PATH_FILE_H
 #define PROJECT_PATH_FILE_H
 // Content
@@ -397,7 +397,7 @@ Include guards prevent multiple inclusion:
 ```
 
 **Modern #pragma once**:
-```cpp
+```cpp showLineNumbers 
 #pragma once
 // Content
 ```
@@ -414,7 +414,7 @@ Include guards prevent multiple inclusion:
 - Need strict ISO C++ compliance? → Traditional guards
 - Maximum compatibility? → Both
 
-```cpp
+```cpp showLineNumbers 
 // Recommended modern header structure
 #pragma once
 

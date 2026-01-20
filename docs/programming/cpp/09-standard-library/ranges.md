@@ -13,7 +13,7 @@ tags: [c++, stl, ranges, cpp20, views, algorithms, pipelines]
 ## Why Ranges?
 
 Traditional STL algorithms require iterator pairs, which is verbose and error-prone. Ranges simplify this:
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 #include <algorithm>
 #include <ranges>
@@ -49,7 +49,7 @@ graph TD
     A --> G[output_range]
     E --> H[sized_range]
 ```
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 #include <list>
@@ -70,7 +70,7 @@ std::istream_iterator<int> it; // input_range
 **Views** are lightweight, lazy-evaluated range adaptors. They don't own data and operations are performed on-demand.
 
 ### Basic Views
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 #include <iostream>
@@ -104,7 +104,7 @@ Views are **lazy** - they only compute values when iterated. This means no inter
 ### View Composition (Pipelines)
 
 The power of ranges comes from **composing** multiple views:
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 
@@ -137,7 +137,7 @@ void pipelineExample() {
 | `reverse` | Reverse order | Backwards |
 | `keys` | Extract keys from pairs | Map keys |
 | `values` | Extract values from pairs | Map values |
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <map>
 
@@ -159,7 +159,7 @@ void commonViewsExample() {
 ## Range Factories
 
 Create ranges from scratch without underlying containers:
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <iostream>
 
@@ -189,7 +189,7 @@ void rangeFactories() {
 ## Range Algorithms
 
 C++20 adds range-based versions of all STL algorithms:
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 #include <algorithm>
@@ -219,7 +219,7 @@ void rangeAlgorithms() {
 ### Projections
 
 Projections allow you to specify how to extract values for comparison:
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 #include <algorithm>
@@ -254,7 +254,7 @@ void projectionExample() {
 ## Practical Examples
 
 ### Example 1: Processing Text Lines
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <string>
 #include <vector>
@@ -284,7 +284,7 @@ void processTextLines() {
 ```
 
 ### Example 2: Mathematical Operations
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 #include <numeric>
@@ -304,7 +304,7 @@ void mathOperations() {
 ```
 
 ### Example 3: Zip and Enumerate
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 
@@ -327,7 +327,7 @@ void zipEnumerate() {
 ## Range Adaptors
 
 Create custom views for specific needs:
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 
 // Custom view: chunk (group elements)
@@ -358,7 +358,7 @@ graph LR
 - Lazy evaluation - only compute what's needed
 - Better optimization opportunities for compilers
   :::
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 
@@ -386,7 +386,7 @@ void performanceComparison() {
 ## Common Patterns
 
 ### Pattern 1: Filter-Transform-Collect
-```cpp
+```cpp showLineNumbers 
 std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 auto result = nums
@@ -397,14 +397,14 @@ std::vector<int> vec(result.begin(), result.end());
 ```
 
 ### Pattern 2: Flat Map (C++23)
-```cpp
+```cpp showLineNumbers 
 std::vector<std::vector<int>> nested = {{1, 2}, {3, 4}, {5, 6}};
 
 // auto flat = nested | std::views::join;  // {1, 2, 3, 4, 5, 6}
 ```
 
 ### Pattern 3: Infinite Sequences
-```cpp
+```cpp showLineNumbers 
 // Generate infinite Fibonacci-like sequence
 auto fibonacci = std::views::iota(0)
     | std::views::transform([](int n) { /* compute fib(n) */ return n; })
@@ -430,7 +430,7 @@ auto fibonacci = std::views::iota(0)
   :::
 
 ## Migration from Traditional STL
-```cpp
+```cpp showLineNumbers 
 // Before (C++17)
 std::vector<int> nums = {1, 2, 3, 4, 5};
 std::vector<int> evens;

@@ -30,7 +30,7 @@ Calling conventions vary by architecture (x86, x64, ARM) and compiler. Understan
 
 Default for C/C++ on x86:
 
-```cpp
+```cpp showLineNumbers 
 int __cdecl add(int a, int b) {
     return a + b;
 }
@@ -55,7 +55,7 @@ int __cdecl add(int a, int b) {
 
 Windows API standard:
 
-```cpp
+```cpp showLineNumbers 
 int __stdcall add(int a, int b) {
     return a + b;
 }
@@ -72,7 +72,7 @@ int __stdcall add(int a, int b) {
 
 First 2-4 parameters in registers:
 
-```cpp
+```cpp showLineNumbers 
 int __fastcall add(int a, int b) {
     return a + b;
 }
@@ -90,7 +90,7 @@ int __fastcall add(int a, int b) {
 
 Used on Windows:
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b, int c, int d, int e) {
     return a + b + c + d + e;
 }
@@ -113,7 +113,7 @@ int add(int a, int b, int c, int d, int e) {
 
 Used on Linux, macOS, BSD:
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b, int c, int d, int e, int f, int g) {
     return a + b + c + d + e + f + g;
 }
@@ -130,7 +130,7 @@ int add(int a, int b, int c, int d, int e, int f, int g) {
 
 ## Practical Example
 
-```cpp
+```cpp showLineNumbers 
 // C++ code
 int compute(int x, int y, int z) {
     return x * y + z;
@@ -162,7 +162,7 @@ main:
 
 ## ARM Conventions (AAPCS)
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b, int c, int d, int e) {
     return a + b + c + d + e;
 }
@@ -179,7 +179,7 @@ int add(int a, int b, int c, int d, int e) {
 
 ### Small Types
 
-```cpp
+```cpp showLineNumbers 
 int func() { return 42; }
 // Return in RAX/EAX register
 
@@ -189,7 +189,7 @@ bool check() { return true; }
 
 ### Large Types (Structs)
 
-```cpp
+```cpp showLineNumbers 
 struct Large {
     int data[100];
 };
@@ -211,7 +211,7 @@ Large create() {
 
 ## Variadic Functions
 
-```cpp
+```cpp showLineNumbers 
 void printf(const char* fmt, ...) {
     // Variable arguments
 }
@@ -230,7 +230,7 @@ void printf(const char* fmt, ...) {
 
 ### GCC/Clang Attributes
 
-```cpp
+```cpp showLineNumbers 
 int __attribute__((cdecl)) func1();
 int __attribute__((stdcall)) func2();
 int __attribute__((fastcall)) func3();
@@ -238,7 +238,7 @@ int __attribute__((fastcall)) func3();
 
 ### MSVC Keywords
 
-```cpp
+```cpp showLineNumbers 
 int __cdecl func1();
 int __stdcall func2();
 int __fastcall func3();
@@ -247,7 +247,7 @@ int __vectorcall func4();  // SIMD optimization
 
 ### C++ Default
 
-```cpp
+```cpp showLineNumbers 
 // Default: compiler chooses
 // Usually most efficient for platform
 int func(int x, int y);
@@ -259,7 +259,7 @@ int func(int x, int y);
 
 ### C++ Calling C
 
-```cpp
+```cpp showLineNumbers 
 extern "C" {
     // Uses C calling convention (cdecl typically)
     void c_function(int x);
@@ -268,7 +268,7 @@ extern "C" {
 
 ### Platform-Specific Code
 
-```cpp
+```cpp showLineNumbers 
 #ifdef _WIN32
     #define CALL_CONV __stdcall
 #else
@@ -286,7 +286,7 @@ int CALL_CONV platform_function(int x);
 
 Caller must save if needed:
 
-```cpp
+```cpp showLineNumbers 
 // RAX, RCX, RDX, R8-R11 (x64)
 // Function can freely modify
 // Caller saves before call if values needed after
@@ -296,7 +296,7 @@ Caller must save if needed:
 
 Callee must preserve:
 
-```cpp
+```cpp showLineNumbers 
 // RBX, RBP, RSI, RDI, R12-R15 (x64)
 // Function must save/restore if used
 // Caller can assume unchanged after call
@@ -308,7 +308,7 @@ Callee must preserve:
 
 Modern platforms require aligned stacks:
 
-```cpp
+```cpp showLineNumbers 
 // x64: 16-byte alignment
 // Must maintain alignment across calls
 
@@ -323,7 +323,7 @@ void func() {
 
 ## Performance Implications
 
-```cpp
+```cpp showLineNumbers 
 // Many parameters → stack usage (slower)
 void slow(int a, int b, int c, int d, int e, int f, int g, int h) {
     // g, h on stack (x64)

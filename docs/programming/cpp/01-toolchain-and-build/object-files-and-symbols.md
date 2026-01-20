@@ -49,7 +49,7 @@ graph TD
 
 Contains executable machine code:
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b) {
     return a + b;
 }
@@ -69,7 +69,7 @@ objdump -d file.o
 
 Contains initialized global and static variables:
 
-```cpp
+```cpp showLineNumbers 
 int global_var = 42;              // .data
 static int static_var = 100;     // .data
 const int writable_const = 5;    // .data (if modifiable)
@@ -84,7 +84,7 @@ objdump -s -j .data file.o
 
 Contains uninitialized globals (Block Started by Symbol):
 
-```cpp
+```cpp showLineNumbers 
 int uninitialized;                // .bss
 static int static_uninit;         // .bss
 int array[1000];                  // .bss (zero-initialized)
@@ -96,7 +96,7 @@ int array[1000];                  // .bss (zero-initialized)
 
 Contains constants and string literals:
 
-```cpp
+```cpp showLineNumbers 
 const char* msg = "Hello";        // "Hello" in .rodata
 const int read_only = 42;         // .rodata
 ```
@@ -107,7 +107,7 @@ const int read_only = 42;         // .rodata
 
 Maps names to addresses and types. The linker uses this to resolve references.
 
-```cpp
+```cpp showLineNumbers 
 // example.cpp
 int global = 42;                  // Global symbol
 static int local_static = 10;    // Local symbol
@@ -170,7 +170,7 @@ nm -S file.o
 
 ### Global vs Local Symbols
 
-```cpp
+```cpp showLineNumbers 
 // Global symbol (visible to linker)
 int global_func() { return 42; }
 
@@ -189,7 +189,7 @@ Local symbols prevent name collisions and allow compiler optimizations.
 
 Allow providing default implementations:
 
-```cpp
+```cpp showLineNumbers 
 // Default implementation (weak)
 __attribute__((weak))
 void custom_allocator(size_t size) {
@@ -210,7 +210,7 @@ void custom_allocator(size_t size) {
 
 Object files contain placeholders where addresses need filling:
 
-```cpp
+```cpp showLineNumbers 
 extern int external_var;
 
 int get_value() {
@@ -289,7 +289,7 @@ size file.o
 
 Control which symbols are exported:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 #if defined(_WIN32)
     #define EXPORT __declspec(dllexport)
@@ -329,7 +329,7 @@ Hiding internal symbols:
 
 ### Duplicate Symbols
 
-```cpp
+```cpp showLineNumbers 
 // header.h (❌ Wrong)
 int global = 42;  // Defined in header
 
@@ -344,7 +344,7 @@ int global = 42;  // Defined in header
 
 **Solution**: Declare in header, define in one .cpp:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 extern int global;  // Declaration
 
@@ -354,7 +354,7 @@ int global = 42;    // Definition
 
 ### Undefined Symbols
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp
 void missing_function();
 

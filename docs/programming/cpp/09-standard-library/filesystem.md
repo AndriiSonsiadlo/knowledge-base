@@ -27,7 +27,7 @@ graph TD
 ## Paths
 
 `std::filesystem::path` represents filesystem paths in a portable way:
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -54,7 +54,7 @@ Paths are **portable** - the library handles platform differences (\ vs /) autom
 :::
 
 ### Path Operations
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -82,7 +82,7 @@ void pathOperations() {
 ## Checking File Status
 
 Query file properties without reading contents:
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -119,7 +119,7 @@ void fileStatus() {
 ## File Operations
 
 ### Creating and Removing Files
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <fstream>
 
@@ -150,7 +150,7 @@ void fileOps() {
 ```
 
 ### Copying with Options
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -168,7 +168,7 @@ void copyOptions() {
 ## Directory Operations
 
 ### Creating Directories
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -193,7 +193,7 @@ void directoryCUD() {
 ```
 
 ### Iterating Directories
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -223,7 +223,7 @@ Use `recursive_directory_iterator` to walk entire directory trees easily!
 :::
 
 ### Filtering Directory Entries
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <vector>
 
@@ -250,7 +250,7 @@ void usage() {
 ## Working Paths
 
 ### Current Directory
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -270,7 +270,7 @@ void currentDirectory() {
 ```
 
 ### Absolute and Relative Paths
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -296,7 +296,7 @@ void pathConversion() {
 ```
 
 ## Temporary Files
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <fstream>
 
@@ -321,7 +321,7 @@ void temporaryFile() {
 ## Error Handling
 
 Filesystem operations can use exceptions or error codes:
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -353,7 +353,7 @@ Prefer **error code versions** in performance-critical code to avoid exception o
 ## Space Information
 
 Query disk space:
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <iostream>
 
@@ -375,7 +375,7 @@ void diskSpace() {
 ## Practical Examples
 
 ### Example 1: Find All Files by Extension
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <vector>
 #include <string>
@@ -403,7 +403,7 @@ std::vector<fs::path> findByExtension(
 ```
 
 ### Example 2: Backup Directory
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <chrono>
 #include <sstream>
@@ -431,7 +431,7 @@ void backupDirectory(const fs::path& source, const fs::path& backup_root) {
 ```
 
 ### Example 3: Clean Old Files
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 #include <chrono>
 
@@ -459,7 +459,7 @@ void usage() {
 ```
 
 ### Example 4: Calculate Directory Size
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -482,7 +482,7 @@ std::uintmax_t directorySize(const fs::path& dir) {
 ## Permissions
 
 Work with file permissions (Unix-style):
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -529,7 +529,7 @@ void permissions() {
   :::
 
 ## Performance Tips
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 
 namespace fs = std::filesystem;

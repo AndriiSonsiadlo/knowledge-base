@@ -20,7 +20,7 @@ C++ provides `std::string` for dynamic text storage and manipulation, along with
 
 Different ways to construct and initialize strings.
 
-```cpp
+```cpp showLineNumbers 
 #include 
 
 // Default constructor - empty string
@@ -55,7 +55,7 @@ auto s10 = "Hello"s;  // std::string, not const char*
 
 Multiple ways to access individual characters with different safety guarantees.
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello";
 
 // Subscript operator (no bounds check)
@@ -84,7 +84,7 @@ const char* cstr2 = str.c_str();
 
 Query string state and characteristics.
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Size and capacity
@@ -113,7 +113,7 @@ Rich set of operations for adding, removing, and changing content.
 
 ### Appending
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello";
 
 // append method
@@ -137,7 +137,7 @@ msg.append("Error: ").append("File not found");
 
 ### Inserting
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello World";
 
 // Insert at position
@@ -154,7 +154,7 @@ str.insert(0, prefix);
 
 ### Erasing
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Erase range
@@ -175,7 +175,7 @@ str.clear();             // ""
 
 ### Replacing
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Replace range
@@ -190,7 +190,7 @@ str.replace(str.begin(), str.begin() + 3, "Goodbye");
 
 ### Resizing
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello";
 
 // Increase size (fill with null bytes or specified char)
@@ -207,7 +207,7 @@ Find substrings, characters, and patterns.
 
 ### Basic Search
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World! Hello, C++!";
 
 // Find substring (first occurrence)
@@ -232,7 +232,7 @@ size_t last = str.rfind("Hello");  // 14
 
 ### Character Set Search
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Find first of any character in set
@@ -262,7 +262,7 @@ Extract parts and compare strings.
 
 ### Substring Extraction
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Get substring
@@ -278,7 +278,7 @@ buffer[5] = '\0';        // Null-terminate
 
 ### String Comparison
 
-```cpp
+```cpp showLineNumbers 
 std::string s1 = "apple";
 std::string s2 = "banana";
 std::string s3 = "apple";
@@ -308,7 +308,7 @@ bool caseInsensitiveEqual = (toLower(s1) == toLower(s3));
 
 ### String Prefix/Suffix (C++20)
 
-```cpp
+```cpp showLineNumbers 
 std::string str = "Hello, World!";
 
 // Check prefix
@@ -329,7 +329,7 @@ Convert between strings and numbers.
 
 ### Numbers to Strings
 
-```cpp
+```cpp showLineNumbers 
 // std::to_string (C++11)
 int num = 42;
 double pi = 3.14159;
@@ -348,7 +348,7 @@ std::string s3 = oss.str();  // "3.14"
 
 ### Strings to Numbers
 
-```cpp
+```cpp showLineNumbers 
 std::string s = "12345";
 
 // std::stoi, stol, stoll (string to integer)
@@ -381,7 +381,7 @@ int value = std::stoi(hex, &pos, 16);  // 26 (parse as hex)
 
 Non-owning string reference - no allocation, efficient passing.
 
-```cpp
+```cpp showLineNumbers 
 #include 
 
 // Create from various sources
@@ -429,7 +429,7 @@ sv4.remove_suffix(1);   // "World"
 
 **Warning:** string_view doesn't own data - ensure underlying data outlives the view!
 
-```cpp
+```cpp showLineNumbers 
 std::string_view dangling() {
     std::string temp = "danger";
     return temp;  // ❌ Returns view to destroyed string!
@@ -440,7 +440,7 @@ std::string_view dangling() {
 
 Different string literal types for different character encodings.
 
-```cpp
+```cpp showLineNumbers 
 // Narrow strings (char)
 const char* s1 = "Hello";
 std::string s2 = "Hello";
@@ -476,7 +476,7 @@ Practical examples for common tasks.
 
 ### Splitting Strings
 
-```cpp
+```cpp showLineNumbers 
 #include 
 #include 
 
@@ -499,7 +499,7 @@ auto fruits = split(csv, ',');  // {"apple", "banana", "cherry"}
 
 ### Trimming Whitespace
 
-```cpp
+```cpp showLineNumbers 
 std::string trim(const std::string& str) {
     size_t start = str.find_first_not_of(" \t\n\r");
     if (start == std::string::npos) return "";
@@ -514,7 +514,7 @@ std::string trimmed = trim(s);  // "Hello"
 
 ### Case Conversion
 
-```cpp
+```cpp showLineNumbers 
 #include 
 #include 
 
@@ -535,7 +535,7 @@ std::string lower = toLower(s);  // "hello world"
 
 ### Replace All Occurrences
 
-```cpp
+```cpp showLineNumbers 
 void replaceAll(std::string& str, const std::string& from, const std::string& to) {
     size_t pos = 0;
     while ((pos = str.find(from, pos)) != std::string::npos) {
@@ -550,7 +550,7 @@ replaceAll(text, "Hello", "Hi");  // "Hi World, Hi Everyone"
 
 ### Joining Strings
 
-```cpp
+```cpp showLineNumbers 
 template
 std::string join(const Container& strings, const std::string& delim) {
     std::string result;
@@ -573,7 +573,7 @@ std::string sentence = join(words, " ");  // "Hello World !"
 
 Understanding string performance characteristics.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Inefficient: repeated concatenation
 std::string result;
 for (int i = 0; i < 1000; ++i) {
@@ -608,7 +608,7 @@ void process2(std::string_view sv) {    // ✅ Even better (C++17)
 
 Most implementations optimize for short strings.
 
-```cpp
+```cpp showLineNumbers 
 // Short strings stored inside string object (no heap allocation)
 std::string short_str = "Hi";  // Likely no allocation
 

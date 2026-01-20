@@ -18,7 +18,7 @@ Braces `{}` work for any type, making initialization uniform across the language
 
 Before C++11, C++ had multiple initialization syntaxes that could be confusing and sometimes behaved differently. Uniform initialization was introduced to provide one syntax that works everywhere.
 
-```cpp
+```cpp showLineNumbers 
 // Pre-C++11: Multiple confusing syntaxes
 int a = 5;              // Copy initialization
 int b(5);               // Direct initialization  
@@ -41,7 +41,7 @@ The brace syntax unifies all these different forms, making the language more con
 
 Braces can be used to initialize any type, from fundamental types to complex class types. The syntax is always the same: put the initializer values inside curly braces.
 
-```cpp
+```cpp showLineNumbers 
 int x{42};                    // Fundamental type
 double d{3.14};              
 std::string s{"hello"};       // Class type
@@ -56,7 +56,7 @@ This consistent syntax means you can initialize variables without remembering ty
 
 One of the most important features of uniform initialization is that it prevents narrowing conversions - implicit conversions that might lose information. This catches common bugs at compile-time that would otherwise cause silent data loss.
 
-```cpp
+```cpp showLineNumbers 
 int x = 3.14;    // ⚠️ OK but truncates: x = 3 (silent data loss)
 int y{3.14};     // ❌ Error: narrowing conversion
 
@@ -75,7 +75,7 @@ The compiler rejects any initialization that would lose precision or change the 
 
 Empty braces provide value-initialization, which zero-initializes fundamental types and calls the default constructor for class types. This is safer than default initialization which leaves fundamental types with indeterminate values.
 
-```cpp
+```cpp showLineNumbers 
 int x{};        // Value-initialized to 0
 double d{};     // Value-initialized to 0.0
 bool b{};       // Value-initialized to false
@@ -91,7 +91,7 @@ Using empty braces gives you predictable zero values for fundamental types, elim
 
 Uniform initialization solves the "most vexing parse" problem where syntax that looks like a variable declaration is actually parsed as a function declaration. This was a notorious gotcha in C++98/03.
 
-```cpp
+```cpp showLineNumbers 
 // Pre-C++11: Most vexing parse
 Widget w();  // ❌ This declares a function, not a variable!
 // Function named 'w' that takes no args and returns Widget
@@ -106,7 +106,7 @@ The vexing parse occurred because the compiler always prefers to interpret synta
 
 Uniform initialization makes it easy to create STL containers with initial values. Before C++11, you often had to create an empty container and then add elements one by one.
 
-```cpp
+```cpp showLineNumbers 
 // Direct initialization with values
 std::vector<int> v{1, 2, 3, 4, 5};
 std::set<std::string> names{"Alice", "Bob", "Charlie"};
@@ -126,7 +126,7 @@ The brace initialization syntax lets you see the container's initial contents at
 
 When you use braces with multiple values, the compiler creates an `std::initializer_list` that's passed to the appropriate constructor. This is how STL containers know to initialize themselves with the values you provide.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v{1, 2, 3};
 // Calls: vector(std::initializer_list<int>)
 
@@ -148,7 +148,7 @@ Initializer list constructors are given priority when braces are used with multi
 
 While braces work universally, parentheses still exist for backward compatibility. Understanding when each syntax is preferred helps you write more idiomatic code.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1(10);     // Constructor: vector of 10 zeros
 std::vector<int> v2{10};     // Initializer list: vector with one element: 10
 
@@ -162,7 +162,7 @@ This difference can be surprising. Braces prefer initializer list constructors w
 
 When a class has both an initializer list constructor and regular constructors, braces always prefer the initializer list constructor, even if the regular constructor would be a better match.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     Widget(int x, int y) {  // Regular constructor
@@ -187,7 +187,7 @@ The initializer list constructor takes precedence with braces even though the re
 
 You can also use braces with the assignment syntax for copy list initialization. This combines the consistency of braces with traditional assignment-style declaration.
 
-```cpp
+```cpp showLineNumbers 
 int x = {42};                // Copy list initialization
 std::string s = {"hello"};
 std::vector<int> v = {1, 2, 3};
@@ -202,7 +202,7 @@ Copy list initialization provides the same benefits as direct list initializatio
 
 Braces work naturally with aggregates (arrays and simple structs), maintaining the traditional aggregate initialization syntax while adding narrowing protection.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -221,7 +221,7 @@ Using braces for aggregate initialization is safer than traditional syntax becau
 
 When initializing nested aggregates, you can omit inner braces and the compiler will match initializers to members in order. However, including inner braces makes the structure clearer.
 
-```cpp
+```cpp showLineNumbers 
 struct Inner { int a, b; };
 struct Outer { Inner i; int c; };
 
@@ -235,7 +235,7 @@ While brace elision is allowed, explicit inner braces make the nesting structure
 
 As a general guideline, prefer braces for their safety benefits, but use parentheses when you specifically need to avoid the initializer list constructor or when the braces syntax would be confusing.
 
-```cpp
+```cpp showLineNumbers 
 // Prefer braces (safety, consistency)
 int x{42};
 std::string s{"hello"};

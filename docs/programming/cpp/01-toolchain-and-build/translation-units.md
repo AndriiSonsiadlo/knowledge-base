@@ -16,7 +16,7 @@ Each .cpp file becomes one translation unit, which compiles independently into o
 
 ## What is a Translation Unit?
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp (before preprocessing)
 #include <iostream>
 #include "utils.h"
@@ -57,7 +57,7 @@ Each .cpp file is independently preprocessed and compiled. They don't "see" each
 
 ## Independent Compilation
 
-```cpp
+```cpp showLineNumbers 
 // math.cpp (Translation Unit 1)
 int add(int a, int b) {
     return a + b;
@@ -89,7 +89,7 @@ Each translation unit compiles without knowing about the others. The linker reso
 
 ### Valid: Definition in One TU
 
-```cpp
+```cpp showLineNumbers 
 // math.cpp (TU1)
 int calculate(int x) {
     return x * 2;
@@ -106,7 +106,7 @@ int main() {
 
 ### Invalid: Multiple Definitions
 
-```cpp
+```cpp showLineNumbers 
 // file1.cpp (TU1)
 int global = 42;
 
@@ -122,7 +122,7 @@ int global = 100;  // ❌ ODR violation!
 
 ### Declarations (Multiple Allowed)
 
-```cpp
+```cpp showLineNumbers 
 // Can appear in multiple TUs
 extern int global;           // Variable declaration
 void function(int);          // Function declaration
@@ -131,7 +131,7 @@ class Widget;                // Forward declaration
 
 ### Definitions (One Only)
 
-```cpp
+```cpp showLineNumbers 
 // Must appear in exactly ONE TU
 int global = 42;                    // Variable definition
 void function(int x) { /*...*/ }    // Function definition
@@ -146,7 +146,7 @@ class Widget { int value; };        // Class definition
 
 Headers are textually included in multiple translation units:
 
-```cpp
+```cpp showLineNumbers 
 // utils.h
 int square(int x);  // Declaration
 
@@ -175,7 +175,7 @@ Declarations can repeat; definitions cannot.
 
 Makes symbols local to the translation unit (internal linkage):
 
-```cpp
+```cpp showLineNumbers 
 // file1.cpp
 static int helper = 42;  // Local to file1.cpp
 static void internal_func() {}  // Local to file1.cpp
@@ -191,7 +191,7 @@ Each TU gets its own copy. No conflicts at link time.
 
 Declares a symbol defined elsewhere (external linkage):
 
-```cpp
+```cpp showLineNumbers 
 // globals.cpp
 int shared_var = 42;  // Definition
 
@@ -212,7 +212,7 @@ All TUs share the same `shared_var` via linker.
 
 Inline functions can be defined in headers without ODR violations:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 inline int square(int x) {
     return x * x;
@@ -235,7 +235,7 @@ inline int square(int x) {
 
 Templates must be fully visible in each TU that uses them:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Wrong: Template split between header and source
 // math.h
 template<typename T>
@@ -256,7 +256,7 @@ max(5, 10);  // ❌ Linker error: undefined reference
 
 **Solution**: Define templates in headers:
 
-```cpp
+```cpp showLineNumbers 
 // math.h
 template<typename T>
 T max(T a, T b) {
@@ -270,7 +270,7 @@ T max(T a, T b) {
 
 Modern alternative to `static` for internal linkage:
 
-```cpp
+```cpp showLineNumbers 
 // file.cpp
 namespace {
     int internal_var = 42;  // Local to this TU
@@ -290,7 +290,7 @@ Symbols in anonymous namespaces have internal linkage - not visible to other TUs
 
 ### Large Translation Units
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp
 #include <iostream>   // ~10,000 lines
 #include <vector>     // ~5,000 lines
@@ -309,7 +309,7 @@ int main() {
 
 ### Minimizing TU Size
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Better: Forward declare when possible
 // widget.h
 class Database;  // Forward declaration (no need to include database.h)
@@ -377,7 +377,7 @@ Translation Unit:
 - **inline/template**: Special rules (can repeat)
 
 **Key concepts**:
-```cpp
+```cpp showLineNumbers 
 // Declaration (multiple TUs OK)
 extern int var;
 void func();

@@ -18,7 +18,7 @@ CV-qualifiers (`const` and `volatile`) modify type behavior. `const` prevents mo
 
 ### Basic const
 
-```cpp
+```cpp showLineNumbers 
 const int x = 42;
 x = 10;  // ❌ Error: cannot modify const
 
@@ -28,14 +28,14 @@ y = 200;  // ✅ OK: not const
 
 ### const Variables Must Initialize
 
-```cpp
+```cpp showLineNumbers 
 const int x;        // ❌ Error: uninitialized const
 const int y = 42;   // ✅ OK
 ```
 
 ### const with Pointers
 
-```cpp
+```cpp showLineNumbers 
 // Pointer to const (cannot modify value)
 const int* ptr1 = &x;
 *ptr1 = 10;  // ❌ Error
@@ -60,7 +60,7 @@ const int* const ptr;  // ptr is const pointer to const int
 
 ### const with References
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 // const reference (cannot modify through reference)
@@ -75,7 +75,7 @@ int& ref3 = 42;        // ❌ Error: non-const ref to temporary
 
 ### const Member Functions
 
-```cpp
+```cpp showLineNumbers 
 class Counter {
     int count;
 public:
@@ -100,7 +100,7 @@ c.increment();   // ❌ Error: non-const function on const object
 
 ### mutable (Override const)
 
-```cpp
+```cpp showLineNumbers 
 class Cache {
     mutable int access_count;  // Can modify even in const functions
     std::string data;
@@ -119,7 +119,7 @@ public:
 
 Compile-time constants and functions:
 
-```cpp
+```cpp showLineNumbers 
 constexpr int square(int x) {
     return x * x;
 }
@@ -130,7 +130,7 @@ int arr[value];  // OK: value is compile-time constant
 ```
 
 **const vs constexpr**:
-```cpp
+```cpp showLineNumbers 
 const int x = 10;           // Runtime or compile-time
 constexpr int y = 10;       // Must be compile-time
 
@@ -144,7 +144,7 @@ constexpr int cy = getValue();  // ❌ Error: must be compile-time
 
 Prevents compiler optimization - value can change externally:
 
-```cpp
+```cpp showLineNumbers 
 volatile int* hardware_register = (volatile int*)0x40000000;
 
 // Compiler won't optimize away reads
@@ -158,7 +158,7 @@ int y = *hardware_register;  // Second read actually happens
 
 ### Common Uses
 
-```cpp
+```cpp showLineNumbers 
 // 1. Memory-mapped I/O
 volatile uint32_t* GPIO = (volatile uint32_t*)0x40020000;
 *GPIO = 0xFF;  // Write to hardware
@@ -180,7 +180,7 @@ In modern C++, use `std::atomic` for thread-safe variables, not `volatile`.
 
 Practice of using `const` wherever possible:
 
-```cpp
+```cpp showLineNumbers 
 // Good const correctness
 class String {
     char* data;
@@ -203,7 +203,7 @@ public:
 
 ### Benefits
 
-```cpp
+```cpp showLineNumbers 
 void process(const std::vector<int>& data) {  // Won't modify
     // data.push_back(5);  // ❌ Error: const
     
@@ -220,7 +220,7 @@ process({1, 2, 3});  // OK: binds to const&
 
 ## Top-Level vs Low-Level const
 
-```cpp
+```cpp showLineNumbers 
 const int x = 42;          // Top-level const (x itself)
 const int* ptr = &x;       // Low-level const (pointed-to value)
 int* const ptr2 = &y;      // Top-level const (pointer itself)
@@ -258,7 +258,7 @@ int* p2 = p1;  // ❌ Error: discards const
 - Mark non-modifying members `const`
 - Use `constexpr` for compile-time values
 
-```cpp
+```cpp showLineNumbers 
 // Good const usage
 void process(const std::string& input) {
     // Read-only access

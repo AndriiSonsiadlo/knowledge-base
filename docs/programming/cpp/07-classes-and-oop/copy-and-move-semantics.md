@@ -19,7 +19,7 @@ Copy creates a duplicate of an object. Move transfers ownership of resources fro
 
 Copying creates an independent duplicate with its own resources.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3, 4, 5};
 std::vector<int> v2 = v1;  // Copy: v2 gets its own array
 
@@ -37,7 +37,7 @@ std::cout << v1[0];  // Still 1
 
 Moving transfers resources without copying the actual data.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3, 4, 5};
 std::vector<int> v2 = std::move(v1);  // Move: v2 steals v1's array
 
@@ -54,7 +54,7 @@ std::vector<int> v2 = std::move(v1);  // Move: v2 steals v1's array
 
 Moving is dramatically faster for resource-owning types:
 
-```cpp
+```cpp showLineNumbers 
 class BigData {
     int* data;
     size_t size;
@@ -78,7 +78,7 @@ public:
 ```
 
 **Benchmark example:**
-```cpp
+```cpp showLineNumbers 
 std::vector<std::string> vec(1000000);  // 1 million strings
 
 auto copy = vec;              // ~50ms (copies all strings)
@@ -89,7 +89,7 @@ auto moved = std::move(vec);  // ~0.001ms (just pointer swap)
 
 Understanding lvalues and rvalues helps predict when moves happen:
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;           // x is lvalue (has name, address)
 int y = x + 5;        // x+5 is rvalue (temporary)
 
@@ -107,7 +107,7 @@ std::string s4 = s1 + s2;      // Move (s1+s2 is temporary rvalue)
 
 Move operations should be `noexcept` and leave source in valid state:
 
-```cpp
+```cpp showLineNumbers 
 class Resource {
     int* data;
     
@@ -141,7 +141,7 @@ public:
 
 Compilers optimize away unnecessary copies/moves:
 
-```cpp
+```cpp showLineNumbers 
 Widget createWidget() {
     Widget w(42);
     return w;  // No copy! No move! (RVO)
@@ -156,7 +156,7 @@ Widget w = createWidget();  // Direct construction in w's memory
 
 ## When to Use std::move
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3};
 
 // ✅ Good: Moving from local about to die
@@ -179,7 +179,7 @@ auto v4 = std::move(cv);  // Copies anyway! const can't be moved-from
 
 Templates can forward arguments preserving their value category:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // std::forward preserves lvalue/rvalue-ness

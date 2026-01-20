@@ -18,7 +18,7 @@ Using `new` requires matching `delete` to avoid memory leaks. Modern C++ prefers
 
 The `new` operator allocates memory on the heap and constructs an object in that memory. It returns a pointer to the newly created object that you must eventually delete to avoid memory leaks.
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int;        // Allocate int (uninitialized)
 *ptr = 42;                 // Assign value
 delete ptr;                // Deallocate memory
@@ -39,7 +39,7 @@ The `new` operator does two things: it allocates raw memory from the heap (calli
 
 Different initialization forms with `new` produce different results, particularly for fundamental types where the distinction between initialized and uninitialized values matters.
 
-```cpp
+```cpp showLineNumbers 
 int* p1 = new int;      // Uninitialized (indeterminate value) ❌
 int* p2 = new int();    // Value-initialized (zero)  ✅
 int* p3 = new int{};    // Value-initialized (zero)  ✅
@@ -58,7 +58,7 @@ For class types, all forms call the appropriate constructor, so the difference m
 
 Dynamic arrays require special syntax with `new[]` and must be deallocated with `delete[]` rather than `delete`. Mixing the single-object and array forms causes undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 int* arr = new int[10];        // Allocate array of 10 ints
 arr[0] = 1;
 arr[9] = 10;
@@ -75,7 +75,7 @@ The `delete[]` operator knows how to properly destroy all array elements and dea
 
 You can initialize arrays allocated with `new[]` using parentheses or braces. Empty parentheses value-initialize all elements (setting them to zero for fundamental types).
 
-```cpp
+```cpp showLineNumbers 
 int* arr1 = new int[5];        // Uninitialized ❌
 int* arr2 = new int[5]();      // All zeros ✅  
 int* arr3 = new int[5]{};      // All zeros ✅
@@ -93,7 +93,7 @@ Partial initialization fills the specified elements and value-initializes the re
 
 By default, if `new` cannot allocate memory, it throws `std::bad_alloc`. You can either catch this exception or use the nothrow form that returns `nullptr` instead.
 
-```cpp
+```cpp showLineNumbers 
 try {
     int* huge = new int[1000000000000];  // Impossible allocation
     delete[] huge;
@@ -117,7 +117,7 @@ The throwing behavior is the default because most code doesn't handle allocation
 
 Forgetting to `delete` allocated memory causes memory leaks where the program gradually consumes more memory until it crashes or exhausts system resources.
 
-```cpp
+```cpp showLineNumbers 
 void leak() {
     int* ptr = new int(42);
     // Forgot to delete! Memory leaked
@@ -144,7 +144,7 @@ Memory leaks accumulate over the program's lifetime. Each leaked allocation perm
 
 Several patterns commonly cause memory leaks, often involving early returns or exceptions that bypass cleanup code.
 
-```cpp
+```cpp showLineNumbers 
 void early_return_leak() {
     int* ptr = new int(42);
     
@@ -177,7 +177,7 @@ Smart pointers solve these problems by tying memory lifetime to object lifetime.
 
 Calling `delete` twice on the same pointer causes undefined behavior, typically corrupting the heap allocator's internal data structures and causing crashes.
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);
 delete ptr;
 delete ptr;  // ❌ Undefined behavior! Heap corrupted
@@ -195,7 +195,7 @@ Setting pointers to `nullptr` after deletion prevents double-delete bugs because
 
 Accessing memory after it's been deleted causes undefined behavior. The pointer still points to the memory location, but that memory may have been reused for something else.
 
-```cpp
+```cpp showLineNumbers 
 int* ptr = new int(42);
 delete ptr;
 std::cout << *ptr;  // ❌ Undefined behavior
@@ -214,7 +214,7 @@ Use-after-free bugs are particularly insidious because they often appear to work
 
 Placement new constructs an object in pre-allocated memory without allocating new memory. This is used for custom memory management and object pools where allocation and construction are separate concerns.
 
-```cpp
+```cpp showLineNumbers 
 #include <new>  // For placement new
 
 alignas(int) char buffer[sizeof(int)];  // Raw memory
@@ -232,7 +232,7 @@ Placement new calls the constructor on existing memory without allocating. You m
 
 You can overload `operator new` and `operator delete` to customize memory allocation behavior globally or per-class, enabling techniques like memory pooling and debugging instrumentation.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Class-specific allocation
@@ -257,7 +257,7 @@ Custom allocators are used for performance (memory pools), debugging (tracking a
 
 Modern C++ code should prefer smart pointers over raw `new`/`delete` because they provide automatic memory management without the risk of leaks or double-deletes.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Old style (error-prone)
 int* ptr = new int(42);
 // ... must remember to delete

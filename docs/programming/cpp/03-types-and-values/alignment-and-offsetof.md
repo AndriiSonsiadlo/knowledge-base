@@ -12,7 +12,7 @@ Alignment ensures data is placed at memory addresses divisible by its size, impr
 
 ## Alignment Basics
 
-```cpp
+```cpp showLineNumbers 
 struct Example {
     char c;     // 1 byte
     int i;      // 4 bytes
@@ -27,7 +27,7 @@ sizeof(Example);  // 8, not 5! (3 bytes padding after c)
 
 ## Alignment Requirements
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 std::cout << alignof(char) << "\n";    // 1
@@ -42,7 +42,7 @@ std::cout << alignof(void*) << "\n";   // 8 (64-bit)
 
 ## Struct Padding
 
-```cpp
+```cpp showLineNumbers 
 struct Bad {
     char c;      // Offset 0, size 1
     // 3 bytes padding
@@ -69,7 +69,7 @@ sizeof(Good);  // 8 bytes (50% savings!)
 
 Get member offset within struct:
 
-```cpp
+```cpp showLineNumbers 
 #include <cstddef>
 
 struct Point {
@@ -89,7 +89,7 @@ std::cout << offsetof(Point, z) << "\n";  // 8
 
 ### alignas (C++11)
 
-```cpp
+```cpp showLineNumbers 
 // Align to 16 bytes
 struct alignas(16) Aligned {
     int x;
@@ -107,7 +107,7 @@ struct Container {
 
 ### Packed Structs
 
-```cpp
+```cpp showLineNumbers 
 // Remove padding (compiler-specific)
 struct __attribute__((packed)) Packed {
     char c;
@@ -133,7 +133,7 @@ struct Packed {
 
 ### Network Protocol
 
-```cpp
+```cpp showLineNumbers 
 // Bad: padding wastes bandwidth
 struct Message {
     char type;     // 1 byte
@@ -153,7 +153,7 @@ struct Message {
 
 ### Cache Optimization
 
-```cpp
+```cpp showLineNumbers 
 // Align to cache line (64 bytes) to prevent false sharing
 struct alignas(64) Counter {
     std::atomic<int> value;
@@ -172,7 +172,7 @@ struct alignas(64) Counter {
 - **alignas**: Control alignment
 - **Order members**: Large → small minimizes padding
 
-```cpp
+```cpp showLineNumbers 
 // Minimize padding
 struct Optimized {
     double d;  // 8 bytes

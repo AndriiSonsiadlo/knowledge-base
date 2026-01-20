@@ -18,7 +18,7 @@ C++ is statically typed - every variable has a type known at compile-time, enabl
 
 ### Basic Integer Types
 
-```cpp
+```cpp showLineNumbers 
 // Standard integers
 char        // At least 8 bits (usually 1 byte)
 short       // At least 16 bits
@@ -37,7 +37,7 @@ unsigned char byte = 255;
 
 ### Size Guarantees
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <climits>
 
@@ -64,7 +64,7 @@ Unsigned types: 0 to (2^bits - 1)
 
 ### Fixed-Width Types (C++11)
 
-```cpp
+```cpp showLineNumbers 
 #include <cstdint>
 
 int8_t   x;   // Exactly 8 bits
@@ -82,7 +82,7 @@ uint32_t b;   // Unsigned 32 bits
 
 ## Floating-Point Types
 
-```cpp
+```cpp showLineNumbers 
 float       // Single precision (usually 32 bits, ~7 decimal digits)
 double      // Double precision (usually 64 bits, ~15 decimal digits)
 long double // Extended precision (usually 80 or 128 bits)
@@ -94,7 +94,7 @@ long double ld = 3.14L;    // L suffix
 
 ### Precision
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <iomanip>
 
@@ -110,7 +110,7 @@ std::cout << "double: " << d << "\n";   // ~0.333333333333333
 
 ## Character Types
 
-```cpp
+```cpp showLineNumbers 
 char         // At least 8 bits, typically ASCII/UTF-8
 wchar_t      // Wide character (16 or 32 bits)
 char16_t     // UTF-16 (C++11)
@@ -123,7 +123,7 @@ wchar_t wide = L'中';   // Wide character
 ```
 
 **char is an integer type**:
-```cpp
+```cpp showLineNumbers 
 char c = 65;    // Same as 'A' (ASCII)
 c++;            // Now 66 ('B')
 int x = c;      // Implicit conversion
@@ -133,7 +133,7 @@ int x = c;      // Implicit conversion
 
 ## Boolean Type
 
-```cpp
+```cpp showLineNumbers 
 bool flag = true;
 bool result = false;
 
@@ -151,7 +151,7 @@ bool b2 = 0;    // b2 = false
 
 Special type indicating "no value":
 
-```cpp
+```cpp showLineNumbers 
 void func() {
     // No return value
 }
@@ -163,7 +163,7 @@ void* ptr;  // Generic pointer (can point to any type)
 
 ## Type Sizes
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 int main() {
@@ -190,7 +190,7 @@ int main() {
 
 ## Type Limits
 
-```cpp
+```cpp showLineNumbers 
 #include <limits>
 #include <iostream>
 
@@ -209,7 +209,7 @@ int main() {
 
 ## Type Inference (auto)
 
-```cpp
+```cpp showLineNumbers 
 auto x = 5;           // int
 auto y = 3.14;        // double
 auto z = 'c';         // char
@@ -226,7 +226,7 @@ auto iter = vec.begin();  // std::vector<int>::iterator
 
 ## Type Aliases
 
-```cpp
+```cpp showLineNumbers 
 // typedef (old style)
 typedef unsigned long ulong;
 typedef int* IntPtr;
@@ -257,7 +257,7 @@ IntPtr ptr = &x;
 - `auto` for type inference
 - `char` is an integer type
 
-```cpp
+```cpp showLineNumbers 
 // Typical usage
 int count = 0;              // Counters, indices
 double price = 19.99;       // Decimals

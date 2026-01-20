@@ -16,7 +16,7 @@ Enable templates only for certain types. If substitution fails, the compiler tri
 
 ## Basic enable_if
 
-```cpp
+```cpp showLineNumbers 
 #include <type_traits>
 
 // Only enable for integral types
@@ -37,7 +37,7 @@ int x = increment(5);      // ✅ int is integral
 
 ## Modern enable_if (C++14)
 
-```cpp
+```cpp showLineNumbers 
 // Shorter with _t alias
 template<typename T>
 std::enable_if_t<std::is_integral_v<T>, T>
@@ -60,7 +60,7 @@ auto increment(T value)
 
 ## Return Type enable_if
 
-```cpp
+```cpp showLineNumbers 
 // Enable based on return type
 template<typename T>
 std::enable_if_t<std::is_floating_point_v<T>, T>
@@ -74,7 +74,7 @@ auto x = sqrt(3.14);   // ✅ double
 
 ## Template Parameter enable_if
 
-```cpp
+```cpp showLineNumbers 
 // Default template parameter approach (cleaner)
 template<typename T, 
          std::enable_if_t<std::is_integral_v<T>, int> = 0>
@@ -93,7 +93,7 @@ This approach keeps the function signature clean.
 
 ## Multiple Overloads
 
-```cpp
+```cpp showLineNumbers 
 // For integral types
 template<typename T>
 std::enable_if_t<std::is_integral_v<T>, void>
@@ -116,7 +116,7 @@ Different implementations for different type categories!
 
 ## Class Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename Enable = void>
 class Container;
 
@@ -143,7 +143,7 @@ c2.info();  // "Float container"
 
 ## Combining Conditions
 
-```cpp
+```cpp showLineNumbers 
 // Multiple requirements with conjunction
 template<typename T>
 std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, T>
@@ -164,7 +164,7 @@ process2(T value) {
 
 ## Member Function enable_if
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Only enabled for integral types
@@ -191,7 +191,7 @@ w.set(std::string("hello"));  // "Setting string: hello"
 
 Concepts are cleaner than enable_if:
 
-```cpp
+```cpp showLineNumbers 
 // Old way with enable_if
 template<typename T>
 std::enable_if_t<std::is_integral_v<T>, T>
@@ -217,7 +217,7 @@ Much more readable!
 
 ## Common Type Traits
 
-```cpp
+```cpp showLineNumbers 
 std::is_integral<T>         // int, long, char, bool, etc.
 std::is_floating_point<T>   // float, double
 std::is_arithmetic<T>       // integral or floating
@@ -236,7 +236,7 @@ std::is_convertible<From, To>   // Can convert?
 
 ## Real-World Example
 
-```cpp
+```cpp showLineNumbers 
 // Serialize only types with .serialize() method
 template<typename T>
 auto serialize(const T& obj)
@@ -258,7 +258,7 @@ auto serialize(const T& obj)
 
 ## Expression SFINAE
 
-```cpp
+```cpp showLineNumbers 
 // Check if type has .size() method
 template<typename T>
 auto getSize(const T& container)

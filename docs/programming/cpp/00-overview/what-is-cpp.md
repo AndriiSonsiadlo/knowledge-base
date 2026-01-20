@@ -51,7 +51,7 @@ C++ follows the principle: "You don't pay for what you don't use." Features that
 have zero runtime cost. This means abstractions like classes, templates, and inline functions
 compile down to code as efficient as hand-written C or assembly.
 
-```cpp
+```cpp showLineNumbers 
 // High-level abstraction
 std::vector<int> numbers = {1, 2, 3, 4, 5};
 int sum = std::accumulate(numbers.begin(), numbers.end(), 0);
@@ -73,7 +73,7 @@ Unlike higher-level languages, C++ allows direct manipulation of memory addresse
 hardware registers. This makes it ideal for systems programming, embedded systems, and
 performance-critical applications.
 
-```cpp
+```cpp showLineNumbers 
 // Direct memory manipulation
 void* ptr = malloc(1024);              // Allocate raw memory
 uint8_t* bytes = static_cast<uint8_t*>(ptr);
@@ -106,7 +106,7 @@ to render complex 3D graphics at 60+ FPS while simulating physics, AI, and netwo
 
 **Examples**: Unreal Engine, Unity (core), CryEngine, id Tech engines
 
-```cpp
+```cpp showLineNumbers 
 // Simplified game loop structure
 class Game {
     void run() {
@@ -183,7 +183,7 @@ safety guarantees but has a steeper learning curve.
 C++ supports classes, inheritance, polymorphism, and encapsulation. This allows modeling complex
 systems as interacting objects with clear interfaces.
 
-```cpp
+```cpp showLineNumbers 
 class BankAccount {
 private:
     double balance;                     // Encapsulated data
@@ -220,7 +220,7 @@ and virtual functions enable runtime polymorphism.
 Templates allow writing code that works with any type, enabling type-safe reusable algorithms and
 data structures. The STL (Standard Template Library) is built entirely on templates.
 
-```cpp
+```cpp showLineNumbers 
 // Generic function works with any comparable type
 template<typename T>
 T max(T a, T b) {
@@ -242,7 +242,7 @@ safety while avoiding code duplication.
 The STL provides battle-tested containers (vector, map, set), algorithms (sort, find, transform),
 and iterators. These components work together seamlessly and are heavily optimized.
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -269,7 +269,7 @@ lambda provides a custom comparison inline without defining a separate function.
 RAII ties resource lifetime to object lifetime, ensuring automatic cleanup even during exceptions.
 This is C++'s answer to garbage collection, but with deterministic timing.
 
-```cpp
+```cpp showLineNumbers 
 {
     std::fstream file("data.txt");  // File opened in constructor
     file << "Hello, World!";
@@ -291,7 +291,7 @@ return), preventing resource leaks.
 Move semantics allow transferring resources instead of copying them, dramatically improving
 performance when working with temporary objects or large data structures.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> createLargeVector() {
     std::vector<int> vec(1000000);  // 1 million elements
     // ... populate vector ...
@@ -312,7 +312,7 @@ The 2011 standard modernized C++, making it safer and more expressive while main
 
 ### Before C++11
 
-```cpp
+```cpp showLineNumbers 
 // Manual memory management
 Widget* ptr = new Widget();
 // ... use ptr ...
@@ -332,7 +332,7 @@ std::count_if(vec.begin(), vec.end(), isEven);
 
 ### After C++11
 
-```cpp
+```cpp showLineNumbers 
 // Automatic memory management
 auto ptr = std::make_unique<Widget>();
 // Automatically deleted when ptr goes out of scope
@@ -376,7 +376,7 @@ high-performance systems. It's consistently among the top 5 most-used languages.
 
 ### Minimal C++ Program
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 int main() {

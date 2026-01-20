@@ -20,7 +20,7 @@ Deep dive into object lifecycle, construction/destruction order, exception safet
 
 Members initialize in declaration order, not initializer list order:
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int b;
     int a;
@@ -49,7 +49,7 @@ public:
 
 Exact reverse of construction:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     ~Base() { std::cout << "~Base "; }
@@ -79,7 +79,7 @@ Derived d;
 
 If constructor throws, object isn't fully constructed:
 
-```cpp
+```cpp showLineNumbers 
 class Resource {
     int* data;
     
@@ -102,7 +102,7 @@ public:
 
 **Solution:** Use RAII members that clean themselves up:
 
-```cpp
+```cpp showLineNumbers 
 class Resource {
     std::unique_ptr<int[]> data;  // ✅ Cleans up automatically
     
@@ -120,7 +120,7 @@ public:
 
 Sometimes you need separate construction and initialization:
 
-```cpp
+```cpp showLineNumbers 
 class Database {
     Connection* conn;
     
@@ -153,7 +153,7 @@ if (!db.initialize("localhost:5432")) {
 
 Don't call virtual functions in constructor/destructor:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     Base() {
@@ -179,7 +179,7 @@ During construction, the object's type gradually "becomes" the derived type. In 
 
 One constructor calls another (C++11):
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int value;
     std::string name;
@@ -199,7 +199,7 @@ public:
 
 **Can't** mix delegation with member initialization:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Error: can't have both
 Widget(int v) : Widget(v, "default"), value(42) {}
 
@@ -211,7 +211,7 @@ Widget(int v) : value(v), name("default") {}  // Direct init
 
 ## Inheriting Constructors
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     Base(int x) {}
@@ -235,7 +235,7 @@ Derived d2(5, 10);
 
 Construct object in pre-allocated memory:
 
-```cpp
+```cpp showLineNumbers 
 alignas(Widget) char buffer[sizeof(Widget)];
 
 Widget* w = new (buffer) Widget(42);  // Placement new
@@ -251,7 +251,7 @@ Used for memory pools, custom allocators, and embedded systems.
 
 Trivial destructors can be optimized away:
 
-```cpp
+```cpp showLineNumbers 
 struct Simple {
     int x, y;
     // Implicit trivial destructor (does nothing)

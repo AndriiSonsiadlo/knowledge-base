@@ -40,7 +40,7 @@ graph TD
 
 ### Example: Undefined Symbol
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp
 extern int getValue();  // Declaration only
 
@@ -108,7 +108,7 @@ g++ main.o -o app -Wl,-rpath,./libs
 
 The linker assigns final addresses to symbols and patches all references:
 
-```cpp
+```cpp showLineNumbers 
 // Before linking (relative address)
 call   0x0  # Placeholder address
 
@@ -130,7 +130,7 @@ nm app | grep main
 
 C++ requires exactly one definition per symbol:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ ODR violation
 // file1.cpp
 int global = 42;
@@ -146,7 +146,7 @@ g++ file1.o file2.o -o app
 
 **Solution**: Use `extern` for declarations:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 extern int global;  // Declaration
 
@@ -163,7 +163,7 @@ extern int global;  // Uses definition from file1.cpp
 
 Weak symbols allow multiple definitions, with linker choosing one:
 
-```cpp
+```cpp showLineNumbers 
 // Default implementation (weak)
 __attribute__((weak))
 void custom_handler() {
@@ -201,7 +201,7 @@ The linker can inline functions across translation units, improving performance 
 
 ### Undefined Reference
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp
 void foo();  // Declared but not defined
 int main() { foo(); }
@@ -216,7 +216,7 @@ g++ main.cpp -o app
 
 ### Multiple Definitions
 
-```cpp
+```cpp showLineNumbers 
 // header.h (❌ Wrong - in header)
 int global = 42;  // Defined in header
 
@@ -234,7 +234,7 @@ g++ file1.cpp file2.cpp -o app
 
 **Solution**: Declare in header, define in one .cpp:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 extern int global;  // Declaration
 

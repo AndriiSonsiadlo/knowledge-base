@@ -41,7 +41,7 @@ The preprocessor handles directives starting with `#` - includes, macros, condit
 **Output**: Preprocessed file (.i)  
 **Tool**: cpp (C preprocessor)
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp - before preprocessing
 #include <iostream>
 #define MAX 100
@@ -190,7 +190,7 @@ graph TD
 
 ## Complete Example
 
-```cpp
+```cpp showLineNumbers 
 // hello.cpp
 #include <iostream>
 #define GREETING "Hello"
@@ -244,7 +244,7 @@ g++ hello.cpp -o hello
 
 Different optimization levels produce vastly different code:
 
-```cpp
+```cpp showLineNumbers 
 int sum(int n) {
     int total = 0;
     for (int i = 1; i <= n; i++) {
@@ -272,7 +272,7 @@ The `-O3` compiler recognizes the pattern and replaces the entire loop with a ma
 
 ### Preprocessing Errors
 
-```cpp
+```cpp showLineNumbers 
 #include "missing.h"  // ❌ fatal error: missing.h: No such file or directory
 #define X Y
 #define Y X
@@ -283,7 +283,7 @@ int x = X;  // ❌ Infinite macro expansion
 
 ### Compilation Errors
 
-```cpp
+```cpp showLineNumbers 
 int x = "hello";  // ❌ error: invalid conversion from 'const char*' to 'int'
 template<typename T> T max(T a, T b);
 max(5, 3.14);  // ❌ error: no matching function (int vs double)
@@ -293,7 +293,7 @@ max(5, 3.14);  // ❌ error: no matching function (int vs double)
 
 ### Linking Errors
 
-```cpp
+```cpp showLineNumbers 
 // main.cpp
 void foo();
 int main() { foo(); }
@@ -328,7 +328,7 @@ g++ -std=c++20 -Wall -Wextra -O2 -g -I./include -L./lib -lmylib main.cpp -o app
 
 ### 1. Precompiled Headers
 
-```cpp
+```cpp showLineNumbers 
 // stdafx.h - rarely changing headers
 #include <iostream>
 #include <vector>

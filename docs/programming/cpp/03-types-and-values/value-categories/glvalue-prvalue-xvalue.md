@@ -55,7 +55,7 @@ lvalue xvalue prvalue
 
 Has persistent address, cannot be moved from:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;              // x is lvalue
 int* p = &x;             // Can take address
 x = 10;                  // Can appear on left of assignment
@@ -76,7 +76,7 @@ s.append(" world");      // s is lvalue, can call non-const methods
 
 Temporary value with no address:
 
-```cpp
+```cpp showLineNumbers 
 42                       // Literal prvalue
 x + y                    // Arithmetic result
 x && y                   // Logical result
@@ -99,7 +99,7 @@ getValue()               // Function returning by value → prvalue
 
 Has identity but about to expire (can be moved from):
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v = {1, 2, 3};
 
 std::move(v)             // xvalue (cast to rvalue)
@@ -125,7 +125,7 @@ getRRef()                // xvalue
 
 ### lvalues
 
-```cpp
+```cpp showLineNumbers 
 int x;                   // Variable
 int arr[10];             
 arr[0]                   // Array element
@@ -137,7 +137,7 @@ s.append("!")            // Non-const member function
 
 ### prvalues
 
-```cpp
+```cpp showLineNumbers 
 42                       // Literals
 x + y                    // Arithmetic
 x++                      // Post-increment (returns copy)
@@ -148,7 +148,7 @@ Point{1, 2}             // Temporary object
 
 ### xvalues
 
-```cpp
+```cpp showLineNumbers 
 std::move(x)             // Cast to rvalue
 std::move(vec[0])        // Element moved
 static_cast<T&&>(x)      // Explicit cast
@@ -159,7 +159,7 @@ a.m (where a is rvalue and m is non-static member)
 
 ## Reference Binding
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 // lvalue references
@@ -190,7 +190,7 @@ int&& rr3 = std::move(x);        // ✅ xvalue → rvalue ref
 
 prvalues convert to xvalues when binding to references:
 
-```cpp
+```cpp showLineNumbers 
 struct Point { int x, y; };
 
 Point getPoint() { return {1, 2}; }  // Returns prvalue
@@ -207,7 +207,7 @@ const Point& ref = getPoint();
 
 Value categories enable perfect forwarding:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // arg is always lvalue (has name)
@@ -229,7 +229,7 @@ wrapper(std::move(x)); // T = int, forwards as rvalue
 
 Understanding categories is key to move semantics:
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     int* data;
 public:
@@ -251,7 +251,7 @@ Buffer b3 = b1;               // Copy (lvalue)
 
 `decltype` reveals value category:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 decltype(x)       // int (lvalue variable → type)
@@ -271,7 +271,7 @@ decltype(std::move(x))  // int&& (xvalue)
 
 ### Overload Resolution
 
-```cpp
+```cpp showLineNumbers 
 void process(const std::string& s) {
     std::cout << "lvalue\n";
 }
@@ -288,7 +288,7 @@ process(std::move(s));     // xvalue → rvalue overload
 
 ### Return Value Optimization
 
-```cpp
+```cpp showLineNumbers 
 std::string make() {
     return std::string("hello");  // prvalue
     // Compiler can elide copy/move (RVO)
@@ -309,7 +309,7 @@ std::string s = make();  // No copy, no move with RVO
 - **rvalue**: prvalue or xvalue (can move from)
 
 **Key distinctions**:
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 x                    // lvalue (has identity, not movable)

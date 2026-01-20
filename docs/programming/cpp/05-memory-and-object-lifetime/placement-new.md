@@ -18,7 +18,7 @@ Placement new calls only the constructor on existing memory, giving you full con
 
 Placement new takes a pointer to existing memory and constructs an object at that location. The syntax uses parentheses after `new` to pass the memory address where construction should occur.
 
-```cpp
+```cpp showLineNumbers 
 #include <new>  // Required for placement new
 
 alignas(int) char buffer[sizeof(int)];  // Pre-allocated memory
@@ -36,7 +36,7 @@ The placement new expression `new (buffer) int(42)` calls the `int` constructor 
 
 The memory you provide to placement new must meet specific requirements, or you'll invoke undefined behavior. These requirements ensure the constructed object operates correctly.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int data;
 public:
@@ -68,7 +68,7 @@ The memory must be at least as large as `sizeof(T)` and properly aligned for typ
 
 Objects constructed with placement new must have their destructors called explicitly because you can't use `delete` on memory you didn't allocate. The destructor cleans up the object state but doesn't deallocate memory.
 
-```cpp
+```cpp showLineNumbers 
 class Resource {
     int* data;
 public:
@@ -97,7 +97,7 @@ The explicit destructor call `r->~Resource()` runs the destructor's cleanup code
 
 Placement new enables memory pool implementations where you pre-allocate a large block and construct objects within it. This amortizes allocation overhead and improves cache locality.
 
-```cpp
+```cpp showLineNumbers 
 class ObjectPool {
     static constexpr size_t POOL_SIZE = 100;
     alignas(Widget) char pool[POOL_SIZE * sizeof(Widget)];
@@ -132,7 +132,7 @@ The pool allocates a large array once and reuses that memory for multiple object
 
 Placement new can construct objects on the stack or in any memory region, not just heap memory. This is useful when you want object-like behavior with stack storage duration.
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     // Stack-allocated buffer
     alignas(std::string) char buffer[sizeof(std::string)];
@@ -152,7 +152,7 @@ The string object lives in `buffer` which is on the stack, yet you can use all o
 
 You can construct arrays using placement new, though this requires careful calculation of offsets and multiple destructor calls.
 
-```cpp
+```cpp showLineNumbers 
 constexpr size_t N = 5;
 alignas(Widget) char buffer[N * sizeof(Widget)];
 
@@ -176,7 +176,7 @@ Array placement new requires you to track the array size yourself since `delete[
 
 Placement new requires properly aligned memory. Using `alignas` ensures the buffer meets alignment requirements automatically.
 
-```cpp
+```cpp showLineNumbers 
 struct alignas(64) CacheLine {  // 64-byte aligned
     int data[16];
 };
@@ -196,7 +196,7 @@ Alignment requirements are platform and type-specific. SSE/AVX types need 16/32-
 
 Placement new enables object relocation by constructing a copy in new memory and destroying the old one. This is how `std::vector` moves objects during reallocation.
 
-```cpp
+```cpp showLineNumbers 
 void relocate_object() {
     // Original object
     std::string orig("Hello, World!");
@@ -220,7 +220,7 @@ This pattern underlies container growth: allocate new storage, move-construct el
 
 After destructing an object created with placement new, you can reuse the same memory for another object of the same type (or compatible size/alignment).
 
-```cpp
+```cpp showLineNumbers 
 alignas(Widget) char buffer[sizeof(Widget)];
 
 // First use
@@ -247,7 +247,7 @@ Memory reuse is fundamental to custom allocators and object pools. The same phys
 
 Understanding the differences between placement new and regular new helps clarify when each is appropriate.
 
-```cpp
+```cpp showLineNumbers 
 // Regular new: allocates + constructs
 Widget* w1 = new Widget(42);
 delete w1;  // Destroys + deallocates
@@ -264,7 +264,7 @@ Regular `new` handles the entire memory lifecycle (allocation through deallocati
 
 Several common errors can cause crashes or subtle bugs when using placement new incorrectly.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Calling delete on placement new
 alignas(Widget) char buffer[sizeof(Widget)];
 Widget* w = new (buffer) Widget();

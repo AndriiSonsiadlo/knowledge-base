@@ -14,7 +14,7 @@ C++ performs automatic (implicit) and manual (explicit) type conversions. Unders
 
 Automatic conversions performed by compiler:
 
-```cpp
+```cpp showLineNumbers 
 int x = 3.14;        // double → int (truncates to 3)
 double y = 5;        // int → double (promotes to 5.0)
 float f = 3.14;      // double → float (may lose precision)
@@ -29,7 +29,7 @@ int i = true;        // bool → int (1)
 
 Small integer types promote to `int` in expressions:
 
-```cpp
+```cpp showLineNumbers 
 char c = 'A';
 short s = 100;
 
@@ -47,7 +47,7 @@ auto z = x + y;      // z is int, not char!
 
 Rules for mixed-type operations:
 
-```cpp
+```cpp showLineNumbers 
 int x = 5;
 double y = 2.5;
 
@@ -63,7 +63,7 @@ auto result = x + y;  // int→double, result is double (7.5)
 
 Losing information (often warns):
 
-```cpp
+```cpp showLineNumbers 
 int x = 1000;
 char c = x;         // ⚠️ Truncates (c = -24 on 8-bit char)
 
@@ -82,7 +82,7 @@ int y = 3.14;       // ⚠️ Warning but allowed
 
 ### C++ Style Casts (Preferred)
 
-```cpp
+```cpp showLineNumbers 
 double d = 3.14;
 
 // static_cast - compile-time conversion
@@ -101,7 +101,7 @@ Derived* d = dynamic_cast<Derived*>(base_ptr);
 
 ### C-Style Cast (Avoid)
 
-```cpp
+```cpp showLineNumbers 
 double d = 3.14;
 int x = (int)d;      // C-style cast (works but avoid)
 ```
@@ -115,7 +115,7 @@ Use C++ casts for:
 
 ## Pointer Conversions
 
-```cpp
+```cpp showLineNumbers 
 // Derived → Base (implicit, safe)
 class Base {};
 class Derived : public Base {};
@@ -140,7 +140,7 @@ int* ptr = nullptr;  // OK
 
 ## Boolean Conversions
 
-```cpp
+```cpp showLineNumbers 
 // To bool
 bool b1 = 42;        // true (non-zero → true)
 bool b2 = 0;         // false
@@ -158,7 +158,7 @@ int y = false;       // 0
 
 Classes can define conversions:
 
-```cpp
+```cpp showLineNumbers 
 class Fraction {
     int num, den;
 public:
@@ -184,7 +184,7 @@ explicit operator double() const { /*...*/ }
 
 ### Silent Truncation
 
-```cpp
+```cpp showLineNumbers 
 int x = 1000000;
 short s = x;  // ⚠️ Overflow/truncation
 
@@ -197,7 +197,7 @@ if (x > SHRT_MAX || x < SHRT_MIN) {
 
 ### Signed/Unsigned
 
-```cpp
+```cpp showLineNumbers 
 int x = -1;
 unsigned int y = 10;
 
@@ -208,7 +208,7 @@ if (x < y) {  // ⚠️ False! x converts to huge unsigned
 
 ### Double to Float
 
-```cpp
+```cpp showLineNumbers 
 double d = 1.23456789012345;
 float f = d;  // Loses precision
 
@@ -231,7 +231,7 @@ std::cout << f;  // 1.234567890... (fewer digits)
 - Avoid mixing signed/unsigned
 - Use `explicit` for constructors/conversions
 
-```cpp
+```cpp showLineNumbers 
 // Good
 double d = 3.14;
 int x = static_cast<int>(d);  // Clear intent

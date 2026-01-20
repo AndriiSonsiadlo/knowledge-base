@@ -185,7 +185,7 @@ export LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH
 
 Control which symbols are exported in shared libraries:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 #ifdef _WIN32
     #define EXPORT __declspec(dllexport)
@@ -242,7 +242,7 @@ ln -s libmylib.so.1 libmylib.so
 
 Dynamic loading allows loading code at runtime without relinking:
 
-```cpp
+```cpp showLineNumbers 
 #include <dlfcn.h>  // POSIX
 
 // Load library at runtime

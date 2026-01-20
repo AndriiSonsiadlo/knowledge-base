@@ -100,7 +100,7 @@ Every allocation requires manual deallocation. Forgetting `String_destroy` cause
 
 #### C++ Approach: Abstraction and Automatic Management
 
-```cpp
+```cpp showLineNumbers 
 // C++ - RAII and object-oriented
 #include <iostream>
 #include <string>
@@ -392,7 +392,7 @@ The C++ ecosystem includes thousands of libraries. These are the most important 
 
 Ships with every C++ compiler, providing fundamental data structures and algorithms.
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>      // Dynamic arrays
 #include <string>      // String handling
 #include <map>         // Associative containers
@@ -409,7 +409,7 @@ The STL is heavily optimized and battle-tested. Using `std::vector` is almost al
 
 Extended functionality not (yet) in the standard. Many Boost libraries eventually become standard features.
 
-```cpp
+```cpp showLineNumbers 
 #include <boost/asio.hpp>        // Async I/O, networking
 #include <boost/filesystem.hpp>  // File operations (pre-C++17)
 #include <boost/program_options.hpp>  // Command-line parsing
@@ -450,7 +450,7 @@ Testing is critical for maintaining C++ codebases. Modern testing frameworks mak
 
 Industry standard unit testing framework with rich assertion macros and test organization.
 
-```cpp
+```cpp showLineNumbers 
 #include <gtest/gtest.h>
 
 // Test case organization
@@ -476,7 +476,7 @@ Tests are grouped into test suites (first parameter) with individual test cases 
 
 Modern, header-only testing framework with natural assertion syntax.
 
-```cpp
+```cpp showLineNumbers 
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
@@ -559,7 +559,7 @@ ASan detects:
 
 Standard documentation generator that extracts comments into HTML/PDF documentation.
 
-```cpp
+```cpp showLineNumbers 
 /**
  * @brief Calculates the factorial of a number
  * 

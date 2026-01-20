@@ -16,7 +16,7 @@ Every C++ program must have exactly one `main()` function - this is where execut
 
 ## Minimal Program
 
-```cpp
+```cpp showLineNumbers 
 int main() {
     return 0;  // 0 indicates success
 }
@@ -28,7 +28,7 @@ This is the simplest valid C++ program. It does nothing but exit successfully.
 
 ## Complete Program Structure
 
-```cpp
+```cpp showLineNumbers 
 // 1. Preprocessor directives
 #include <iostream>
 #include "myheader.h"
@@ -82,7 +82,7 @@ void Widget::display() {
 
 ### Standard Signatures
 
-```cpp
+```cpp showLineNumbers 
 // No arguments
 int main() {
     return 0;
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
 ### Command-Line Arguments
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 int main(int argc, char* argv[]) {
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
 
 ### Return Values
 
-```cpp
+```cpp showLineNumbers 
 int main() {
     // Return value indicates success/failure to OS
     
@@ -144,7 +144,7 @@ int main() {
 - `0`: Success
 - Non-zero: Error code (1, -1, EXIT_FAILURE)
 
-```cpp
+```cpp showLineNumbers 
 #include <cstdlib>
 
 int main() {
@@ -160,7 +160,7 @@ int main() {
 
 ### Single File Program
 
-```cpp
+```cpp showLineNumbers 
 // simple.cpp
 #include <iostream>
 
@@ -177,7 +177,7 @@ int main() {
 ### Multi-File Program
 
 **Header file (math.h)**:
-```cpp
+```cpp showLineNumbers 
 #pragma once
 
 int add(int a, int b);
@@ -185,7 +185,7 @@ int multiply(int a, int b);
 ```
 
 **Implementation file (math.cpp)**:
-```cpp
+```cpp showLineNumbers 
 #include "math.h"
 
 int add(int a, int b) {
@@ -198,7 +198,7 @@ int multiply(int a, int b) {
 ```
 
 **Main file (main.cpp)**:
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include "math.h"
 
@@ -241,7 +241,7 @@ project/
 
 ### Global Namespace
 
-```cpp
+```cpp showLineNumbers 
 // Global scope
 int global_var = 42;
 
@@ -256,7 +256,7 @@ int main() {
 
 ### Custom Namespace
 
-```cpp
+```cpp showLineNumbers 
 namespace math {
     const double PI = 3.14159;
     
@@ -273,7 +273,7 @@ int main() {
 
 ### Using Declarations
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <vector>
 
@@ -289,7 +289,7 @@ int main() {
 
 ### Using Directive
 
-```cpp
+```cpp showLineNumbers 
 // Entire namespace (avoid in headers!)
 using namespace std;
 
@@ -319,7 +319,7 @@ graph TD
 
 ### Static Initialization
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 // Initialized before main() starts
@@ -358,7 +358,7 @@ int main() {
 
 Declare functions before use:
 
-```cpp
+```cpp showLineNumbers 
 // Forward declaration
 void helper();
 
@@ -374,7 +374,7 @@ void helper() {
 ```
 
 Without forward declaration:
-```cpp
+```cpp showLineNumbers 
 int main() {
     helper();  // ❌ Error: 'helper' not declared
     return 0;
@@ -424,7 +424,7 @@ C++ program structure:
 - Source (`.cpp`): Definitions
 - One `main()` per program
 
-```cpp
+```cpp showLineNumbers 
 // Template structure
 #include <headers>
 

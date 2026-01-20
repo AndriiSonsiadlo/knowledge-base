@@ -16,7 +16,7 @@ Requires expressions (C++20) check if code compiles without actually compiling i
 
 ## Basic Requires Expression
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void process(T value) {
     // Check if T supports these operations
@@ -37,7 +37,7 @@ void process(T value) {
 
 Check constraints before function body:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires(T x) {  // First 'requires' = clause, second = expression
     x + x;
@@ -56,7 +56,7 @@ twice(3.14);   // ✅ OK: double supports these ops
 
 Check if expressions are valid (compile):
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires(T x) {
     x.size();       // Must have .size() method
@@ -77,7 +77,7 @@ process(std::vector<int>{1,2,3});  // ✅ Has size, begin, end
 
 Check if types exist:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires {
     typename T::value_type;     // Must have value_type
@@ -96,7 +96,7 @@ info(std::vector<int>{});  // ✅ Has all these types
 
 Check expressions AND their return types:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires(T x) {
     { x.size() } -> std::convertible_to<size_t>;  // size() returns size_t-like
@@ -114,7 +114,7 @@ void process(T& container) {
 
 Check for nested properties:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires(T x) {
     requires sizeof(T) <= 8;  // Size constraint
@@ -128,7 +128,7 @@ void fast_process(T value) {
 
 ## Multiple Parameter Requirements
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 requires requires(T a, U b) {
     { a + b } -> std::same_as<T>;  // Addition returns T
@@ -142,7 +142,7 @@ T compute(T a, U b) {
 
 ## Checking for Specific Operations
 
-```cpp
+```cpp showLineNumbers 
 // Check if type is incrementable
 template<typename T>
 concept Incrementable = requires(T x) {
@@ -163,7 +163,7 @@ advance(x, 5);  // ✅ int is incrementable
 
 ## Checking Member Functions
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Printable = requires(T x) {
     { x.print() } -> std::same_as<void>;  // Must have print() returning void
@@ -184,7 +184,7 @@ display(Widget{});  // ✅ Widget has print()
 
 ## Checking Constructors
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept DefaultConstructible = requires {
     T{};  // Can default-construct
@@ -203,7 +203,7 @@ T create() {
 
 ## Combining Requirements
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Container = requires(T c) {
     // Type requirements
@@ -231,7 +231,7 @@ void process(const T& container) {
 
 Requirements are checked in order, stopping at first failure:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires(T x) {
     x.size();           // Checked first
@@ -246,7 +246,7 @@ void process(const T& container);
 
 ## Boolean Expressions
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires requires {
     requires sizeof(T) <= 8;  // Must be small
@@ -260,7 +260,7 @@ void optimize(T value) {
 
 ## With Standard Concepts
 
-```cpp
+```cpp showLineNumbers 
 #include <concepts>
 
 template<typename T>
@@ -276,7 +276,7 @@ void process(T value) {
 
 ## Real-World Example: Generic Swap
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Swappable = requires(T a, T b) {
     { std::swap(a, b) } -> std::same_as<void>;
@@ -300,7 +300,7 @@ void sortTwo(T& a, T& b) {
 
 ## Debugging Requires Expressions
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Debuggable = requires(T x) {
     { x.print() } -> std::same_as<void>;
@@ -323,7 +323,7 @@ Much clearer than SFINAE errors!
 ## Common Patterns
 
 **Range-like:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Range = requires(T r) {
     r.begin();
@@ -333,7 +333,7 @@ concept Range = requires(T r) {
 ```
 
 **Arithmetic:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Arithmetic = requires(T a, T b) {
     { a + b } -> std::same_as<T>;
@@ -344,7 +344,7 @@ concept Arithmetic = requires(T a, T b) {
 ```
 
 **Comparable:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Comparable = requires(T a, T b) {
     { a == b } -> std::convertible_to<bool>;

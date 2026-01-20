@@ -18,7 +18,7 @@ An aggregate is an array or a class with no user-declared constructors, no priva
 
 Arrays are the simplest form of aggregates. You can initialize them by providing values in braces, and the compiler matches each value to the corresponding array element by position.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {1, 2, 3, 4, 5};  // All elements initialized
 
 for (int i = 0; i < 5; ++i) {
@@ -32,7 +32,7 @@ The values in the braces are assigned to array elements in order from index 0 on
 
 When you provide fewer initializers than array elements, the remaining elements are value-initialized (set to zero for fundamental types). This is a convenient way to initialize only some elements while zeroing the rest.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {1, 2, 3};  // arr = {1, 2, 3, 0, 0}
 // Elements 3 and 4 are value-initialized to 0
 
@@ -46,7 +46,7 @@ This behavior is particularly useful when you want to initialize the first few e
 
 An empty initializer list provides a shorthand for zero-initializing all array elements. This is equivalent to value initialization and guarantees all elements are set to zero.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {};  // All elements initialized to 0
 
 // Equivalent to:
@@ -57,7 +57,7 @@ int arr[5] = {0, 0, 0, 0, 0};
 
 Structures that meet the aggregate requirements can be initialized using brace-enclosed lists where each value initializes the corresponding member in declaration order. This provides clean syntax without requiring constructor definitions.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x;
     int y;
@@ -73,7 +73,7 @@ The members are initialized in the order they're declared in the struct. This ma
 
 Aggregates can contain other aggregates, and you can use nested braces to initialize them. The inner braces initialize the nested aggregate, while the outer braces initialize the containing aggregate.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -96,7 +96,7 @@ The nested brace structure mirrors the struct's layout, making initialization cl
 
 You can actually omit inner braces in nested aggregate initialization, and the initializers will be assigned to members in order. However, this makes the code less clear about the structure being initialized.
 
-```cpp
+```cpp showLineNumbers 
 Line line = {0, 0, 10, 20};  // Valid but less clear
 // Same as {{0, 0}, {10, 20}}
 ```
@@ -107,7 +107,7 @@ While this works, it's generally better style to include the inner braces becaus
 
 C++20 introduced designated initializers, allowing you to explicitly name which member you're initializing. This makes aggregate initialization more self-documenting and allows you to initialize members out of order (though they must still be in declaration order).
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x;
     int y;
@@ -126,7 +126,7 @@ Designated initializers significantly improve code readability by making it expl
 
 You can initialize only some members using designated initializers, and the remaining members are value-initialized. This is particularly useful for large structs where you only need to set a few fields.
 
-```cpp
+```cpp showLineNumbers 
 struct Config {
     int timeout;
     int retry_count;
@@ -142,7 +142,7 @@ Config cfg = {.timeout = 5000, .debug_mode = true};
 
 Not every struct can be initialized as an aggregate. The requirements are deliberately restrictive to ensure that aggregate initialization has well-defined semantics without requiring complex constructor logic.
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Valid aggregate
 struct Aggregate {
     int a;
@@ -181,7 +181,7 @@ These restrictions ensure that aggregate initialization is simple and efficient.
 
 You can combine array initialization with aggregate initialization to create arrays of structs. This is commonly used for lookup tables and configuration data.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -207,7 +207,7 @@ Each element of the array is itself an aggregate, so you use nested braces where
 
 When you provide fewer initializers than aggregate members, the remaining members are value-initialized. For fundamental types, this means they're set to zero, making partial initialization safe and predictable.
 
-```cpp
+```cpp showLineNumbers 
 struct Widget {
     int a;
     int b;
@@ -226,7 +226,7 @@ This behavior is consistent with array initialization and provides a convenient 
 
 Standard library containers work seamlessly with aggregate-initialized objects. You can construct aggregates directly in place using brace initialization.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -247,7 +247,7 @@ The brace initialization syntax integrates naturally with STL containers, making
 
 Aggregates provide a lightweight alternative to classes with constructors for simple data structures. If your type is just a collection of public data members, using an aggregate is simpler than writing constructors.
 
-```cpp
+```cpp showLineNumbers 
 // Aggregate approach (simple)
 struct Point {
     int x, y;

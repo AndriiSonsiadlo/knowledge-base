@@ -17,7 +17,7 @@ Functions can accept 0, 1, 2, or any number of arguments!
 
 ## Basic Variadic Template
 
-```cpp
+```cpp showLineNumbers 
 // Base case: no arguments
 void print() {
     std::cout << "\n";
@@ -42,7 +42,7 @@ print();                     // "" (calls base case)
 
 ## Parameter Pack Expansion
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void forward(Args... args) {
     // args... expands to: arg1, arg2, arg3, ...
@@ -55,7 +55,7 @@ forward(1, 2, 3);
 
 ## Getting Pack Size
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void info(Args... args) {
     std::cout << "Number of arguments: " << sizeof...(Args) << "\n";
@@ -73,7 +73,7 @@ info();               // 0
 
 Much simpler than recursion!
 
-```cpp
+```cpp showLineNumbers 
 // Sum all arguments
 template<typename... Args>
 auto sum(Args... args) {
@@ -98,7 +98,7 @@ We'll cover fold expressions in detail in the next section!
 
 Variadic templates + forwarding = perfect forwarding:
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void wrapper(Args&&... args) {
     // Forward all arguments preserving lvalue/rvalue-ness
@@ -116,7 +116,7 @@ This is how `std::make_unique` and `std::make_shared` work!
 
 ## Variadic Class Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Types>
 class Tuple {};
 
@@ -138,7 +138,7 @@ Tuple<int, double, std::string> t(42, 3.14, "hello");
 
 ## Expanding in Different Contexts
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void example(Args... args) {
     // Function call
@@ -157,7 +157,7 @@ void example(Args... args) {
 
 ## Processing Each Argument
 
-```cpp
+```cpp showLineNumbers 
 // C++17: Using fold expression
 template<typename... Args>
 void processAll(Args... args) {
@@ -177,7 +177,7 @@ processAll(1, 2, 3);
 
 ## Variadic Constructor
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 class Logger {
     std::vector<std::string> messages;
@@ -203,7 +203,7 @@ log.print();  // "1 2 3 4"
 
 Generating indices at compile-time for accessing tuple elements:
 
-```cpp
+```cpp showLineNumbers 
 template<size_t... Is>
 void printIndices(std::index_sequence<Is...>) {
     ((std::cout << Is << " "), ...);
@@ -217,7 +217,7 @@ Used internally by standard library for tuple operations.
 
 ## Real-World: make_unique
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename... Args>
 std::unique_ptr<T> make_unique(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
@@ -232,7 +232,7 @@ Perfect forwarding lets you pass constructor arguments through!
 
 ## Type Constraints
 
-```cpp
+```cpp showLineNumbers 
 // C++20: Require all types satisfy a concept
 template<typename... Args>
 requires (std::integral<Args> && ...)

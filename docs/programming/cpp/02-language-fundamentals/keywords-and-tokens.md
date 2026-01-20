@@ -33,7 +33,7 @@ C++ keywords have predefined meanings and cannot be used as variable/function na
 
 ### C++98 Keywords (63)
 
-```cpp
+```cpp showLineNumbers 
 asm          auto        bool        break       case
 catch        char        class       const       const_cast
 continue     default     delete      do          double
@@ -51,7 +51,7 @@ void         volatile    wchar_t     while
 
 ### C++11 Added (12)
 
-```cpp
+```cpp showLineNumbers 
 alignas      alignof     char16_t    char32_t    constexpr
 decltype     noexcept    nullptr     static_assert
 thread_local
@@ -59,14 +59,14 @@ thread_local
 
 ### C++20 Added (9)
 
-```cpp
+```cpp showLineNumbers 
 char8_t      concept     consteval   constinit   co_await
 co_return    co_yield    requires
 ```
 
 ### Usage Examples
 
-```cpp
+```cpp showLineNumbers 
 // Control flow keywords
 if, else, switch, case, default
 for, while, do
@@ -99,7 +99,7 @@ Names for variables, functions, classes, etc.
 
 ### Rules
 
-```cpp
+```cpp showLineNumbers 
 // Valid identifiers
 int count;
 int _private;
@@ -122,7 +122,7 @@ int my var;      // ❌ Space not allowed
 
 ### Naming Conventions
 
-```cpp
+```cpp showLineNumbers 
 // Variables: snake_case or camelCase
 int user_count;
 int userCount;
@@ -150,7 +150,7 @@ class Widget {
 
 Avoid these patterns (reserved for implementation):
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Reserved by standard
 _Capital     // Names starting with _ followed by capital
 __double     // Names with double underscore
@@ -169,7 +169,7 @@ Fixed values in source code.
 
 ### Integer Literals
 
-```cpp
+```cpp showLineNumbers 
 42           // Decimal
 0b101010     // Binary (C++14)
 052          // Octal (leading 0)
@@ -188,7 +188,7 @@ Fixed values in source code.
 
 ### Floating-Point Literals
 
-```cpp
+```cpp showLineNumbers 
 3.14         // double
 3.14f        // float
 3.14L        // long double
@@ -202,7 +202,7 @@ Fixed values in source code.
 
 ### Character Literals
 
-```cpp
+```cpp showLineNumbers 
 'A'          // char
 L'A'         // wchar_t
 u'A'         // char16_t (C++11)
@@ -222,7 +222,7 @@ u8'A'        // char8_t (C++20)
 
 ### String Literals
 
-```cpp
+```cpp showLineNumbers 
 "Hello"      // const char*
 L"Hello"     // const wchar_t*
 u"Hello"     // const char16_t* (C++11)
@@ -241,21 +241,21 @@ R"delimiter(Text with "quotes" and \ backslash)delimiter"
 
 ### Boolean Literals
 
-```cpp
+```cpp showLineNumbers 
 true         // Boolean true
 false        // Boolean false
 ```
 
 ### Pointer Literal
 
-```cpp
+```cpp showLineNumbers 
 nullptr      // Null pointer (C++11)
 NULL         // Old style (avoid, it's 0)
 ```
 
 ### User-Defined Literals (C++11)
 
-```cpp
+```cpp showLineNumbers 
 // Define custom suffix
 constexpr long long operator"" _km(long long x) {
     return x * 1000;
@@ -276,7 +276,7 @@ auto dur2 = 100ms;        // milliseconds
 
 ### Arithmetic
 
-```cpp
+```cpp showLineNumbers 
 +  -  *  /  %           // Binary
 +  -                    // Unary
 ++  --                  // Increment/decrement
@@ -284,35 +284,35 @@ auto dur2 = 100ms;        // milliseconds
 
 ### Comparison
 
-```cpp
+```cpp showLineNumbers 
 ==  !=  <  >  <=  >=
 <=>                     // Three-way comparison (C++20)
 ```
 
 ### Logical
 
-```cpp
+```cpp showLineNumbers 
 &&  ||  !               // AND, OR, NOT
 and or not              // Alternative tokens (rare)
 ```
 
 ### Bitwise
 
-```cpp
+```cpp showLineNumbers 
 &  |  ^  ~              // AND, OR, XOR, NOT
 <<  >>                  // Shift
 ```
 
 ### Assignment
 
-```cpp
+```cpp showLineNumbers 
 =  +=  -=  *=  /=  %=
 &=  |=  ^=  <<=  >>=
 ```
 
 ### Other
 
-```cpp
+```cpp showLineNumbers 
 ? :                     // Ternary
 ,                       // Comma
 .  ->                   // Member access
@@ -324,7 +324,7 @@ and or not              // Alternative tokens (rare)
 
 ## Punctuators
 
-```cpp
+```cpp showLineNumbers 
 ;                       // Statement terminator
 ,                       // Separator
 :                       // Label, base class, initializer
@@ -342,7 +342,7 @@ and or not              // Alternative tokens (rare)
 
 Rarely used text alternatives for operators:
 
-```cpp
+```cpp showLineNumbers 
 // Operator    Alternative
 and            &&
 or             ||
@@ -366,7 +366,7 @@ if (x > 0 and y < 10)  // Same as: x > 0 && y < 10
 
 Comments are removed during preprocessing:
 
-```cpp
+```cpp showLineNumbers 
 // Single-line comment
 
 /* Multi-line
@@ -397,7 +397,7 @@ Comments are removed during preprocessing:
 - Boolean: `true`, `false`
 - Pointer: `nullptr`
 
-```cpp
+```cpp showLineNumbers 
 // Example with all token types
 int         // keyword
 count       // identifier

@@ -18,7 +18,7 @@ A `unique_ptr` is the sole owner of its object. It cannot be copied, only moved,
 
 Creating and using a unique_ptr is straightforward. The managed object is automatically deleted when the unique_ptr is destroyed.
 
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 
 // Create unique_ptr
@@ -38,7 +38,7 @@ The key benefit is automatic cleanup: you never call `delete`. The unique_ptr's 
 
 Always prefer `std::make_unique` over direct `new` for exception safety and conciseness.
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Preferred: make_unique
 auto ptr1 = std::make_unique<int>(42);
 auto ptr2 = std::make_unique<std::string>("hello");
@@ -62,7 +62,7 @@ void risky() {
 
 unique_ptr cannot be copied because that would create two owners. It can only be moved, transferring ownership.
 
-```cpp
+```cpp showLineNumbers 
 std::unique_ptr<int> ptr1 = std::make_unique<int>(42);
 
 // std::unique_ptr<int> ptr2 = ptr1;  // ❌ Error: cannot copy
@@ -83,7 +83,7 @@ After moving, the source unique_ptr becomes null. This ensures exclusive ownersh
 
 unique_ptr is move-only, which prevents accidental copies and makes ownership transfer explicit.
 
-```cpp
+```cpp showLineNumbers 
 std::unique_ptr<int> create() {
     auto ptr = std::make_unique<int>(42);
     return ptr;  // Automatically moved (no std::move needed)
@@ -107,7 +107,7 @@ Return values are automatically moved, so no explicit `std::move` needed when re
 
 unique_ptr provides several ways to access the managed pointer for different use cases.
 
-```cpp
+```cpp showLineNumbers 
 auto ptr = std::make_unique<int>(42);
 
 // Dereference
@@ -135,7 +135,7 @@ The `get()` method returns the raw pointer without transferring ownership. This 
 
 You can explicitly release ownership, getting the raw pointer and leaving the unique_ptr empty.
 
-```cpp
+```cpp showLineNumbers 
 auto ptr = std::make_unique<int>(42);
 
 int* raw = ptr.release();  // ptr becomes nullptr
@@ -155,7 +155,7 @@ Use `release()` when transferring ownership to code that expects raw pointers (l
 
 Reset deletes the current object and optionally takes ownership of a new one.
 
-```cpp
+```cpp showLineNumbers 
 auto ptr = std::make_unique<int>(42);
 
 ptr.reset();  // Deletes int(42), ptr becomes nullptr
@@ -173,7 +173,7 @@ Reset is useful when you want to replace the managed object or delete it early w
 
 unique_ptr has a partial specialization for arrays that calls `delete[]` instead of `delete`.
 
-```cpp
+```cpp showLineNumbers 
 // Single object
 auto ptr = std::make_unique<int>(42);
 
@@ -191,7 +191,7 @@ The array specialization changes the interface slightly: you can use subscript n
 
 For dynamic arrays, standard containers are almost always better than unique_ptr to arrays.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Using unique_ptr for array
 auto arr1 = std::make_unique<int[]>(10);
 arr1[5] = 42;
@@ -211,7 +211,7 @@ unique_ptr to arrays lacks the convenience methods containers provide. Use it on
 
 You can provide a custom deleter for non-standard cleanup (we'll cover this in detail in the Custom Deleters section).
 
-```cpp
+```cpp showLineNumbers 
 // Custom deleter for FILE*
 auto deleter = [](FILE* f) { 
     if (f) fclose(f); 
@@ -231,7 +231,7 @@ Custom deleters enable using unique_ptr with resources that aren't heap-allocate
 
 unique_ptr works seamlessly with polymorphism, properly calling derived class destructors.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual ~Base() { std::cout << "~Base\n"; }
@@ -255,7 +255,7 @@ The virtual destructor ensures proper cleanup. When the unique_ptr is destroyed,
 
 Containers can hold unique_ptrs, enabling collections of polymorphic objects with automatic cleanup.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<std::unique_ptr<Widget>> widgets;
 
 widgets.push_back(std::make_unique<Widget>(1));
@@ -278,7 +278,7 @@ This pattern is common for managing collections of polymorphic objects. Each vec
 
 Different parameter types express different ownership semantics for functions.
 
-```cpp
+```cpp showLineNumbers 
 // Observe: doesn't take ownership
 void observe(const Widget* w) {
     w->inspect();
@@ -314,7 +314,7 @@ Pass by raw pointer or reference when the function doesn't take ownership. Pass 
 
 unique_ptr is ideal for factory functions that create and return objects.
 
-```cpp
+```cpp showLineNumbers 
 class Shape {
 public:
     virtual ~Shape() = default;
@@ -352,7 +352,7 @@ The factory returns ownership to the caller through unique_ptr. This is clearer 
 
 unique_ptr has zero overhead compared to raw pointers. The abstraction is completely compile-time.
 
-```cpp
+```cpp showLineNumbers 
 // Same size as raw pointer
 sizeof(std::unique_ptr<int>) == sizeof(int*)  // true
 

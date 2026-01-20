@@ -17,7 +17,7 @@ Every C++ expression has a type and a **value category**. Lvalues have persisten
 
 ## Basic Distinction
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;  // x is lvalue, 42 is rvalue
 
 x = 10;      // ✅ OK: lvalue on left
@@ -34,7 +34,7 @@ int* ptr = &x;     // ✅ OK: can take address of lvalue
 
 ## Identifying Lvalues
 
-```cpp
+```cpp showLineNumbers 
 // Variables are lvalues
 int x = 5;           // x is lvalue
 std::string s;       // s is lvalue
@@ -60,7 +60,7 @@ const char* p = "hello";  // "hello" is lvalue
 
 ## Identifying Rvalues
 
-```cpp
+```cpp showLineNumbers 
 // Literals (except strings)
 42                   // rvalue
 3.14                 // rvalue
@@ -89,7 +89,7 @@ Point{1, 2}         // rvalue (temporary object)
 
 Bind to lvalues only:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 int& ref = x;        // ✅ OK: lvalue reference to lvalue
@@ -110,7 +110,7 @@ const int& cref2 = 42;  // ✅ OK: rvalue (lifetime extended!)
 
 Bind to rvalues only:
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 int&& rref1 = 42;        // ✅ OK: rvalue reference to rvalue
@@ -125,7 +125,7 @@ int&& rref4 = std::move(x);  // ✅ OK: explicit cast
 
 ## Named Rvalue References are Lvalues!
 
-```cpp
+```cpp showLineNumbers 
 void process(int&& x) {
     // Inside function, x has a name
     // Therefore x is an LVALUE, even though type is rvalue reference!
@@ -145,7 +145,7 @@ process(42);  // 42 is rvalue, binds to x
 
 ## Reference Binding Rules
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 
 // Lvalue reference
@@ -174,7 +174,7 @@ int&& r7 = std::move(x);  // ✅ Lvalue→rvalue (explicit)
 
 Binding rvalue to const reference extends its lifetime:
 
-```cpp
+```cpp showLineNumbers 
 std::string getString() { return "temporary"; }
 
 // Destroyed immediately
@@ -195,7 +195,7 @@ std::cout << rref;  // ✅ OK: still valid
 
 Casts lvalue to rvalue (enables move):
 
-```cpp
+```cpp showLineNumbers 
 #include <utility>
 
 std::vector<int> v1 = {1, 2, 3};
@@ -217,7 +217,7 @@ std::cout << v1.size();  // Likely 0, but not guaranteed
 
 Functions can overload on value category:
 
-```cpp
+```cpp showLineNumbers 
 void process(int& x) {
     std::cout << "Lvalue: " << x << "\n";
 }
@@ -242,7 +242,7 @@ int main() {
 
 Rvalue references enable efficient resource transfer:
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     int* data;
     size_t size;
@@ -276,7 +276,7 @@ Buffer b3 = std::move(b1);  // Move (explicit)
 
 ## Pre-increment vs Post-increment
 
-```cpp
+```cpp showLineNumbers 
 int x = 5;
 
 ++x;  // Pre-increment: modifies x, returns lvalue (reference to x)
@@ -295,7 +295,7 @@ int& r1 = ++x;  // ✅ OK: lvalue
 
 ### Temporary Objects
 
-```cpp
+```cpp showLineNumbers 
 std::string s1 = "hello";
 std::string s2 = "world";
 
@@ -309,7 +309,7 @@ std::string s3 = s1 + s2;  // s1 + s2 is rvalue
 
 ### Perfect Forwarding
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // Forward preserving value category
@@ -327,7 +327,7 @@ wrapper(20);     // Forwards as rvalue
 
 ### Using Moved-From Objects
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3};
 std::vector<int> v2 = std::move(v1);
 
@@ -338,7 +338,7 @@ std::cout << v1.size();  // Undefined! Don't use moved-from objects
 
 ### Dangling References
 
-```cpp
+```cpp showLineNumbers 
 const std::string& getDangling() {
     return "temporary";  // ❌ Returns reference to temporary!
 }
@@ -349,7 +349,7 @@ std::cout << ref;  // ❌ Undefined: temporary destroyed
 
 ### Moving const Objects
 
-```cpp
+```cpp showLineNumbers 
 const std::vector<int> cv = {1, 2, 3};
 std::vector<int> v2 = std::move(cv);  // ❌ Calls COPY! const prevents move
 ```
@@ -371,7 +371,7 @@ std::vector<int> v2 = std::move(cv);  // ❌ Calls COPY! const prevents move
 - Binds to `T&&` or `const T&`
 
 **Key points**:
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 x                    // lvalue

@@ -18,7 +18,7 @@ Accessing an object through a pointer of an incompatible type is undefined behav
 
 An object's stored value may only be accessed through an lvalue of certain compatible types. Accessing it through an incompatible type is undefined behavior, even if the memory contains a valid representation.
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 float* fp = reinterpret_cast<float*>(&x);
 
@@ -32,7 +32,7 @@ The compiler assumes an `int*` and `float*` never point to the same memory. Base
 
 Strict aliasing enables important compiler optimizations. If the compiler knows two pointers cannot alias, it can reorder operations and cache values in registers without worrying about one pointer modifying what the other points to.
 
-```cpp
+```cpp showLineNumbers 
 void optimize_example(int* a, float* b) {
     *a = 1;
     *b = 2.0f;
@@ -50,7 +50,7 @@ The compiler can eliminate the first assignment because it assumes `b` cannot po
 
 The rule permits several specific forms of aliasing that are necessary for common programming patterns and language features.
 
-```cpp
+```cpp showLineNumbers 
 struct Widget {
     int x;
     char c;
@@ -72,7 +72,7 @@ These exceptions exist for practical reasons: `void*` is used for generic memory
 
 Certain type relationships permit aliasing because they're defined to be compatible or have special language support.
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Signed and unsigned variants
 int x;
 unsigned int* up = (unsigned int*)&x;  // Allowed
@@ -93,7 +93,7 @@ const int* cp = &x;  // Allowed
 
 Type punning means reinterpreting memory as a different type. Most forms of type punning violate strict aliasing and cause undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Classic type-punning violation
 int x = 42;
 float* fp = (float*)&x;
@@ -111,7 +111,7 @@ Even though the memory representations might be compatible (both are 4-byte valu
 
 Violating strict aliasing can cause different behaviors depending on optimization level, making bugs extremely difficult to debug.
 
-```cpp
+```cpp showLineNumbers 
 void demonstrate_violation() {
     int x = 42;
     float* fp = reinterpret_cast<float*>(&x);
@@ -134,7 +134,7 @@ C++ provides several safe ways to reinterpret memory when you actually need type
 
 The `memcpy` approach is the standard-blessed way to reinterpret bits as another type. The compiler recognizes this pattern and optimizes it efficiently.
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 float f;
 
@@ -152,7 +152,7 @@ This works because `memcpy` operates on the storage (bytes) rather than the obje
 
 C++11 allows type punning through unions as a special case, though it's not guaranteed to work for all types and some compilers issue warnings.
 
-```cpp
+```cpp showLineNumbers 
 union IntFloat {
     int i;
     float f;
@@ -172,7 +172,7 @@ Accessing a different union member than the one last written is technically unde
 
 C++20 introduces `std::bit_cast` as the official, type-safe way to reinterpret object representations.
 
-```cpp
+```cpp showLineNumbers 
 #include <bit>
 
 int x = 42;
@@ -191,7 +191,7 @@ static_assert(sizeof(int) == sizeof(float));
 
 Even without dereferencing, just creating an aliasing pointer can cause undefined behavior in optimized code.
 
-```cpp
+```cpp showLineNumbers 
 void dangerous(int* a, float* b) {
     *a = 1;
     *b = 2.0f;
@@ -229,7 +229,7 @@ The `-Wstrict-aliasing` warning catches some violations at compile-time, though 
 
 A common pitfall occurs when trying to inspect bytes of a structure or when implementing serialization.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Wrong way to access bytes
 struct Data {
     int x;

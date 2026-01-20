@@ -17,7 +17,7 @@ Inheritance lets you create new classes based on existing ones, reusing code and
 
 ## Basic Inheritance
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 protected:
     std::string name;
@@ -49,7 +49,7 @@ d.bark();  // ✅ Defined in Dog
 
 The inheritance specifier affects how base members appear in derived class:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:    int pub;
 protected: int prot;
@@ -85,7 +85,7 @@ class Derived3 : private Base {
 
 Virtual functions enable polymorphism - calling the right function based on actual object type:
 
-```cpp
+```cpp showLineNumbers 
 class Shape {
 public:
     virtual void draw() {  // virtual = can be overridden
@@ -114,7 +114,7 @@ delete s;   // Calls Circle's destructor (virtual!)
 
 Pure virtual functions have no implementation and make class abstract:
 
-```cpp
+```cpp showLineNumbers 
 class Shape {
 public:
     virtual void draw() = 0;  // = 0 means pure virtual
@@ -143,7 +143,7 @@ Abstract classes define interfaces that derived classes must implement.
 
 Modern C++ keywords make intent explicit:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual void foo() {}
@@ -170,7 +170,7 @@ class MoreDerived : public Derived {
 
 ## Constructor and Destructor Order
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     Base() { std::cout << "Base constructor\n"; }
@@ -198,7 +198,7 @@ Derived d;
 
 Always make base class destructor virtual if you'll delete through base pointer:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     ~Base() { std::cout << "~Base\n"; }  // ❌ Not virtual!
@@ -226,7 +226,7 @@ public:
 
 Copying derived object to base object "slices off" derived parts:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     int x = 1;

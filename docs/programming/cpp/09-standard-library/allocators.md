@@ -29,7 +29,7 @@ graph TD
 ## Allocator Interface
 
 Standard allocators must provide these members:
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class MyAllocator {
 public:
@@ -62,7 +62,7 @@ Since C++17, `construct()` and `destroy()` are optional. Containers use `std::al
 ## Using Allocators with Containers
 
 All STL containers accept an allocator as a template parameter:
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 #include <memory>
 
@@ -83,7 +83,7 @@ void allocatorUsage() {
 ### std::allocator
 
 The default allocator using `new`/`delete`:
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 
 template<typename T>
@@ -102,7 +102,7 @@ public:
 ### std::pmr::polymorphic_allocator (C++17)
 
 Type-erased allocator that works with **memory resources**:
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 #include <vector>
 
@@ -129,7 +129,7 @@ void pmrExample() {
 ## Custom Allocator Example
 
 ### Simple Pool Allocator
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 #include <vector>
 
@@ -181,7 +181,7 @@ void usePoolAllocator() {
 ### Logging Allocator
 
 Track all allocations for debugging:
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 #include <iostream>
 
@@ -216,7 +216,7 @@ public:
 ## std::allocator_traits
 
 Provides a uniform interface to allocators, filling in optional members:
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 
 template<typename Allocator>
@@ -245,7 +245,7 @@ Always use `std::allocator_traits` when writing allocator-aware code. It handles
 ## Memory Resources (C++17)
 
 PMR provides pre-defined memory resources:
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 #include <vector>
 
@@ -272,7 +272,7 @@ void memoryResources() {
 ### Monotonic Buffer Resource
 
 Fast allocator that never deallocates until destroyed:
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 #include <vector>
 
@@ -300,7 +300,7 @@ Monotonic buffers **never deallocate** individual allocations. Only when the res
 ### Pool Resources
 
 Efficient for fixed-size allocations:
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 
 void poolExample() {
@@ -321,7 +321,7 @@ void poolExample() {
 ## Allocator-Aware Containers
 
 Custom classes can be allocator-aware:
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 #include <vector>
 
@@ -367,7 +367,7 @@ public:
 ```
 
 ## Performance Considerations
-```cpp
+```cpp showLineNumbers 
 #include <chrono>
 #include <vector>
 #include <memory_resource>
@@ -405,7 +405,7 @@ void performanceTest() {
 ### Arena Allocation
 
 Allocate all memory upfront, free all at once:
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 
 void arenaPattern() {
@@ -424,7 +424,7 @@ void arenaPattern() {
 ```
 
 ### Per-Thread Allocators
-```cpp
+```cpp showLineNumbers 
 #include <memory_resource>
 
 thread_local std::pmr::unsynchronized_pool_resource thread_pool;

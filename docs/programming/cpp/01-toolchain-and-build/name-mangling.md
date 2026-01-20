@@ -16,7 +16,7 @@ C++ supports function overloading (multiple functions with same name), but linke
 
 ## The Problem
 
-```cpp
+```cpp showLineNumbers 
 // C++ allows this
 void print(int x);
 void print(double x);
@@ -32,7 +32,7 @@ Without mangling, the linker would see three symbols all called `print` and repo
 
 ## Mangled vs Unmangled
 
-```cpp
+```cpp showLineNumbers 
 void calculate(int a, double b);
 ```
 
@@ -79,7 +79,7 @@ Different compilers use different schemes, but most follow Itanium C++ ABI:
 
 ### Basic Types
 
-```cpp
+```cpp showLineNumbers 
 void func(int);           // _Z4funci
 void func(char);          // _Z4funcc
 void func(bool);          // _Z4funcb
@@ -100,7 +100,7 @@ void func(void*);         // _Z4funcPv
 
 ### Pointers and References
 
-```cpp
+```cpp showLineNumbers 
 void func(int*);          // _Z4funcPi   (Pointer to int)
 void func(int&);          // _Z4funcRi   (Reference to int)
 void func(int**);         // _Z4funcPPi  (Pointer to pointer to int)
@@ -109,7 +109,7 @@ void func(const int*);    // _Z4funcPKi  (Pointer to const int, K=const)
 
 ### Classes and Namespaces
 
-```cpp
+```cpp showLineNumbers 
 namespace math {
     class Vector {
     public:
@@ -129,7 +129,7 @@ namespace math {
 
 ### Function Overloading
 
-```cpp
+```cpp showLineNumbers 
 void print(int x);           // _Z5printi
 void print(double x);        // _Z5printd
 void print(int x, int y);    // _Z5printii
@@ -139,7 +139,7 @@ Each overload gets a unique mangled name encoding its parameter types.
 
 ### Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void sort(T* data, int size);
 
@@ -165,7 +165,7 @@ void c_function(int x);  // Symbol: c_function (unmangled)
 
 Prevents name mangling for C++ code, enabling C/C++ interoperability:
 
-```cpp
+```cpp showLineNumbers 
 // C++ code
 extern "C" void c_style_function(int x);
 // Symbol: c_style_function (unmangled, C-compatible)
@@ -179,7 +179,7 @@ extern "C" {
 
 **Common use case**: Creating C-compatible libraries from C++:
 
-```cpp
+```cpp showLineNumbers 
 // library.h
 #ifdef __cplusplus
 extern "C" {
@@ -200,14 +200,14 @@ This header works in both C and C++ code.
 
 ### GCC/Clang (Itanium ABI)
 
-```cpp
+```cpp showLineNumbers 
 void func(int, double);
 // _Z4funcid
 ```
 
 ### MSVC (Windows)
 
-```cpp
+```cpp showLineNumbers 
 void func(int, double);
 // ?func@@YAXHN@Z
 ```
@@ -222,7 +222,7 @@ MSVC uses a different mangling scheme with `?` prefix and `@@` separators.
 
 Name mangling is part of the ABI (Application Binary Interface). Breaking changes cause link errors:
 
-```cpp
+```cpp showLineNumbers 
 // Version 1
 void process(int x);         // _Z7processi
 
@@ -238,7 +238,7 @@ Programs compiled against v1 looking for `_Z7processi` won't find it in v2. This
 
 ### Linking Errors
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 void calculate(int a, int b);
 
@@ -275,7 +275,7 @@ nm -C libwidget.so | grep "Widget::"
 
 ## Member Functions
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int value;
 public:
@@ -301,7 +301,7 @@ Member functions encode:
 
 ## Constructor and Destructor
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     Widget();                    // Constructor
@@ -346,7 +346,7 @@ nm -C library.a | grep "function_name"
 
 ## Demangling in Code
 
-```cpp
+```cpp showLineNumbers 
 #include <cxxabi.h>
 #include <memory>
 

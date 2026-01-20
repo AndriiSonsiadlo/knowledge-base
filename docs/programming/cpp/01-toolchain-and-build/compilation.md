@@ -37,7 +37,7 @@ graph LR
 
 Breaks source code into tokens (keywords, identifiers, operators):
 
-```cpp
+```cpp showLineNumbers 
 int x = 42 + y;
 
 // Tokenized as:
@@ -48,7 +48,7 @@ int x = 42 + y;
 
 Builds Abstract Syntax Tree (AST) ensuring code follows C++ grammar:
 
-```cpp
+```cpp showLineNumbers 
 x = a + b * c;
 
 // AST:
@@ -67,7 +67,7 @@ The tree respects operator precedence (`*` before `+`). Syntax errors are caught
 
 Checks types, scopes, and semantics:
 
-```cpp
+```cpp showLineNumbers 
 int x = "hello";  // ❌ Type error: can't assign string to int
 foo();            // ❌ Error: 'foo' not declared
 int y = x + z;    // ✅ OK if z is int/compatible type
@@ -84,7 +84,7 @@ int y = x + z;    // ✅ OK if z is int/compatible type
 
 Converts AST to platform-independent intermediate form. Optimizations work on IR:
 
-```cpp
+```cpp showLineNumbers 
 int sum(int a, int b) {
     int temp = a + b;
     return temp;
@@ -99,7 +99,7 @@ ret i32 %temp
 
 Transforms code for better performance without changing behavior:
 
-```cpp
+```cpp showLineNumbers 
 // Original
 int square(int x) {
     return x * x;
@@ -114,7 +114,7 @@ int result = 25;  // Computed at compile-time!
 
 Translates optimized IR to target assembly:
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b) {
     return a + b;
 }
@@ -140,7 +140,7 @@ g++ -Og main.cpp  # Optimize for debugging
 
 ### O0 vs O3 Comparison
 
-```cpp
+```cpp showLineNumbers 
 int factorial(int n) {
     if (n <= 1) return 1;
     return n * factorial(n - 1);
@@ -196,14 +196,14 @@ The `-O3` version is shorter, faster, and may even unroll loops or use tail recu
 
 ### 1. Constant Folding
 
-```cpp
+```cpp showLineNumbers 
 int x = 3 + 4 * 5;  // Computed at compile-time
 // Becomes: int x = 23;
 ```
 
 ### 2. Dead Code Elimination
 
-```cpp
+```cpp showLineNumbers 
 int compute() {
     int unused = 42;  // Removed - never used
     return 10;
@@ -213,7 +213,7 @@ int compute() {
 
 ### 3. Function Inlining
 
-```cpp
+```cpp showLineNumbers 
 inline int square(int x) { return x * x; }
 
 int result = square(5);
@@ -224,7 +224,7 @@ The compiler replaces function calls with the function body when beneficial.
 
 ### 4. Loop Unrolling
 
-```cpp
+```cpp showLineNumbers 
 for (int i = 0; i < 4; i++) {
     sum += arr[i];
 }
@@ -239,7 +239,7 @@ sum += arr[3];
 
 ### 5. Strength Reduction
 
-```cpp
+```cpp showLineNumbers 
 int result = x * 8;
 // Optimized to: int result = x << 3;  (bit shift is faster)
 
@@ -258,7 +258,7 @@ for (int i = 0, y = 0; i < n; i++, y += 4) {
 
 The compiler generates code for each template specialization used:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 T max(T a, T b) {
     return a > b ? a : b;
@@ -311,7 +311,7 @@ g++ -Wall -Wextra -Wpedantic main.cpp
 -Wformat              # printf format errors
 ```
 
-```cpp
+```cpp showLineNumbers 
 // Examples caught by warnings
 int x;                    // -Wuninitialized
 void foo(int unused) {}   // -Wunused-parameter
@@ -330,7 +330,7 @@ g++ -Wall -Wextra -Werror main.cpp  # Fail on warnings
 
 ### 1. Precompiled Headers
 
-```cpp
+```cpp showLineNumbers 
 // pch.h - stable headers
 #include <iostream>
 #include <vector>
@@ -345,7 +345,7 @@ g++ -include pch.h main.cpp
 
 ### 2. Forward Declarations
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Slow - includes entire header
 #include "widget.h"
 
@@ -356,7 +356,7 @@ void process(Widget* w);
 
 ### 3. Extern Templates
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 template<typename T>
 class Container { /* ... */ };
@@ -375,7 +375,7 @@ Prevents the compiler from instantiating templates in every translation unit.
 
 ### Undefined Reference (Actually Linker Error)
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 void foo();
 
@@ -387,7 +387,7 @@ foo();  // ❌ undefined reference to `foo()'
 
 ### Template Instantiation Error
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void print(T value) {
     std::cout << value.name << "\n";  // Assumes T has 'name'
@@ -400,7 +400,7 @@ print(42);  // ❌ int has no member 'name'
 
 ### Ambiguous Overload
 
-```cpp
+```cpp showLineNumbers 
 void foo(int x) {}
 void foo(double x) {}
 
@@ -411,7 +411,7 @@ foo(3.14f);  // ❌ Ambiguous: float converts to both int and double
 
 ## Compiler-Specific Features
 
-```cpp
+```cpp showLineNumbers 
 // GCC/Clang attributes
 [[gnu::always_inline]]
 int fast_func() { return 42; }

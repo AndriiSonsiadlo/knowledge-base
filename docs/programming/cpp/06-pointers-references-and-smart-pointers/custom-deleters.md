@@ -18,7 +18,7 @@ Default deleters call `delete` or `delete[]`. Custom deleters can close files, u
 
 Smart pointers call a deleter function when the managed object should be destroyed. By default, this is `delete`, but you can provide custom cleanup logic.
 
-```cpp
+```cpp showLineNumbers 
 // Default deleter uses delete
 auto ptr1 = std::make_unique<int>(42);
 // Equivalent to: delete ptr;
@@ -44,7 +44,7 @@ The deleter is called when the smart pointer is destroyed, providing automatic c
 
 For unique_ptr, the deleter type is part of the type signature, affecting the size and interface.
 
-```cpp
+```cpp showLineNumbers 
 // Deleter type is template parameter
 auto deleter = [](int* p) {
     std::cout << "Custom delete\n";
@@ -66,7 +66,7 @@ The deleter type must be specified in the template parameters. Lambda deleters r
 
 Function pointers as deleters are simpler but less flexible than lambdas.
 
-```cpp
+```cpp showLineNumbers 
 void customDelete(int* p) {
     std::cout << "Function delete\n";
     delete p;
@@ -85,7 +85,7 @@ Function pointer deleters don't increase the size of unique_ptr beyond a single 
 
 Lambdas are more flexible, allowing capture of state needed for cleanup.
 
-```cpp
+```cpp showLineNumbers 
 std::string filename = "data.txt";
 
 auto deleter = [filename](FILE* f) {
@@ -107,7 +107,7 @@ Capturing lambdas increase unique_ptr's size by the capture size. Stateless lamb
 
 shared_ptr handles custom deleters more elegantly - the deleter type is not part of the type signature.
 
-```cpp
+```cpp showLineNumbers 
 auto deleter = [](int* p) {
     std::cout << "Custom delete\n";
     delete p;
@@ -126,7 +126,7 @@ The deleter is stored in the control block, not the shared_ptr itself. This mean
 
 shared_ptr uses type erasure for deleters, enabling mixing different deleters of the same type.
 
-```cpp
+```cpp showLineNumbers 
 void deleter1(int* p) { delete p; }
 auto deleter2 = [](int* p) { delete p; };
 
@@ -147,7 +147,7 @@ This flexibility makes shared_ptr easier to use with custom deleters than unique
 
 Managing C file handles with RAII using smart pointers.
 
-```cpp
+```cpp showLineNumbers 
 auto fileDeleter = [](FILE* f) {
     if (f) {
         std::cout << "Closing file\n";
@@ -173,7 +173,7 @@ The file is automatically closed when the last shared_ptr is destroyed, even if 
 
 Custom deleters can unlock mutexes, though std::lock_guard is usually better.
 
-```cpp
+```cpp showLineNumbers 
 std::mutex mtx;
 
 void process() {
@@ -203,7 +203,7 @@ While this demonstrates custom deleters, standard lock management facilities (lo
 
 Managing operating system resources like file descriptors or handles.
 
-```cpp
+```cpp showLineNumbers 
 #include <unistd.h>  // Unix file descriptors
 
 auto fdDeleter = [](int* fd) {
@@ -232,7 +232,7 @@ System resources often use integers as handles. Wrapping them in smart pointers 
 
 Custom deleters work well for managing database connections or transactions.
 
-```cpp
+```cpp showLineNumbers 
 struct Connection {
     // Database connection handle
     void* handle;
@@ -261,7 +261,7 @@ std::shared_ptr<Connection> openConnection(const std::string& connString) {
 
 When managing arrays allocated with custom allocators.
 
-```cpp
+```cpp showLineNumbers 
 // Array with custom allocator
 int* allocateArray(size_t size) {
     std::cout << "Custom allocate " << size << " ints\n";
@@ -286,7 +286,7 @@ arr[0] = 42;
 
 Sometimes you need a smart pointer to non-owned memory that shouldn't be deleted.
 
-```cpp
+```cpp showLineNumbers 
 int global = 42;
 
 // No-op deleter - doesn't delete
@@ -307,7 +307,7 @@ This is useful when you need to store both owned and non-owned pointers in the s
 
 Capturing state in lambda deleters enables context-aware cleanup.
 
-```cpp
+```cpp showLineNumbers 
 class Logger {
 public:
     void log(const std::string& msg) {
@@ -332,7 +332,7 @@ The captured logger keeps the logger alive as long as any resources with this de
 
 The default deleter used by unique_ptr is available as `std::default_delete` for explicit use.
 
-```cpp
+```cpp showLineNumbers 
 std::default_delete<int> deleter;
 
 int* p = new int(42);
@@ -355,7 +355,7 @@ You rarely need to use default_delete explicitly, but it's useful for template c
 
 Custom deleters have different performance implications for unique_ptr and shared_ptr.
 
-```cpp
+```cpp showLineNumbers 
 // unique_ptr: deleter type affects size
 auto lambda = [](int* p) { delete p; };
 sizeof(std::unique_ptr<int, decltype(lambda)>);  

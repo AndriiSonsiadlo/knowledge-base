@@ -16,7 +16,7 @@ Type traits answer questions about types at compile-time: Is it a pointer? Is it
 
 ## Basic Type Traits
 
-```cpp
+```cpp showLineNumbers 
 #include <type_traits>
 
 // Check properties
@@ -32,7 +32,7 @@ std::is_pointer_v<int*>;             // true
 
 ## Primary Type Categories
 
-```cpp
+```cpp showLineNumbers 
 // Fundamental types
 std::is_void_v<void>           // true
 std::is_null_pointer_v<nullptr_t>  // true
@@ -50,7 +50,7 @@ std::is_member_pointer_v<int MyClass::*>  // true
 
 ## Composite Type Categories
 
-```cpp
+```cpp showLineNumbers 
 // Arithmetic = integral or floating
 std::is_arithmetic_v<int>      // true
 std::is_arithmetic_v<double>   // true
@@ -72,7 +72,7 @@ std::is_compound_v<int*>       // true
 
 ## Type Properties
 
-```cpp
+```cpp showLineNumbers 
 // const/volatile
 std::is_const_v<const int>     // true
 std::is_volatile_v<volatile int>  // true
@@ -95,7 +95,7 @@ std::is_pod_v<MyStruct>  // true if both trivial and standard layout
 
 ## Type Relationships
 
-```cpp
+```cpp showLineNumbers 
 // Same type
 std::is_same_v<int, int>           // true
 std::is_same_v<int, const int>     // false
@@ -117,7 +117,7 @@ std::is_convertible_v<void*, int*>     // false
 
 ## Type Transformations
 
-```cpp
+```cpp showLineNumbers 
 // Remove modifiers
 using T1 = std::remove_const_t<const int>;     // int
 using T2 = std::remove_reference_t<int&>;      // int
@@ -138,7 +138,7 @@ using T11 = std::decay_t<int()>;               // int(*)()
 
 ## Conditional Type Selection
 
-```cpp
+```cpp showLineNumbers 
 // Choose type based on condition
 template<bool B, typename T, typename F>
 using conditional_t = std::conditional<B, T, F>::type;
@@ -164,7 +164,7 @@ auto getValue(T value) {
 
 ## Common Type
 
-```cpp
+```cpp showLineNumbers 
 // Find common type between multiple types
 using T1 = std::common_type_t<int, long, short>;  // long
 using T2 = std::common_type_t<int, double>;       // double
@@ -180,7 +180,7 @@ auto add(T a, U b) {
 ## Practical Examples
 
 **Safe division:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 auto safeDivide(T a, T b) {
     static_assert(std::is_arithmetic_v<T>, "Must be arithmetic type");
@@ -193,7 +193,7 @@ auto safeDivide(T a, T b) {
 ```
 
 **Generic swap:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void swap(T& a, T& b) {
     static_assert(std::is_move_constructible_v<T>, 
@@ -208,7 +208,7 @@ void swap(T& a, T& b) {
 ```
 
 **Type-specific optimization:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void process(const T& value) {
     if constexpr (std::is_trivially_copyable_v<T>) {
@@ -223,7 +223,7 @@ void process(const T& value) {
 
 ## Custom Type Traits
 
-```cpp
+```cpp showLineNumbers 
 // Check if type has .size() method
 template<typename T, typename = void>
 struct has_size : std::false_type {};
@@ -242,7 +242,7 @@ has_size_v<int>                // false
 
 ## Compile-Time Assertions
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void processInteger(T value) {
     static_assert(std::is_integral_v<T>, 
@@ -262,7 +262,7 @@ class Container {
 
 ## constexpr if with Type Traits (C++17)
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 auto getValue(T value) {
     if constexpr (std::is_pointer_v<T>) {

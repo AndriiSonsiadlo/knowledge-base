@@ -17,7 +17,7 @@ Virtual functions enable runtime polymorphism - calling the correct function bas
 
 ## Basic Virtual Functions
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 public:
     virtual void speak() {  // virtual keyword
@@ -52,7 +52,7 @@ delete ptr;
 
 ## Without Virtual (Static Binding)
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 public:
     void speak() {  // NOT virtual
@@ -78,7 +78,7 @@ Without `virtual`, the compiler uses the pointer type, not the actual object typ
 
 Use `override` to catch mistakes:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual void foo(int x) {}
@@ -106,7 +106,7 @@ public:
 
 Always make base class destructor virtual if you'll delete through base pointer:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual ~Base() {  // MUST be virtual!
@@ -138,7 +138,7 @@ delete ptr;  // Calls both destructors correctly!
 
 Pure virtual functions have no implementation and make the class abstract:
 
-```cpp
+```cpp showLineNumbers 
 class Shape {
 public:
     virtual void draw() = 0;  // = 0 means pure virtual
@@ -171,7 +171,7 @@ Pure virtual functions define an interface that derived classes must implement.
 
 Virtual functions have a small performance cost:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual void vfunc() {}  // Virtual: ~3ns overhead
@@ -194,7 +194,7 @@ sizeof(Base);  // 8 bytes (just the vtable pointer)
 
 Prevent further overriding:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual void foo() {}
@@ -219,7 +219,7 @@ Use `final` when you know the implementation is complete and shouldn't be change
 
 Overriding function can return a derived type:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual Base* clone() {
@@ -244,7 +244,7 @@ The return type can be more specific in the derived class, as long as it's a poi
 
 Virtual functions can be called even with different access levels:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 private:
     virtual void secret() {
@@ -274,7 +274,7 @@ Access control is checked at compile-time based on the static type, but the virt
 
 Virtual functions and default arguments don't mix well:
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual void print(int x = 10) {
@@ -301,7 +301,7 @@ ptr->print();  // "Derived: 10" ⚠️
 
 The Non-Virtual Interface idiom:
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Public non-virtual interface

@@ -18,7 +18,7 @@ Class layout determines size, alignment, and performance. Members are arranged i
 
 Classes lay out their data members in memory in the order they're declared, just like structs. The compiler adds padding to meet alignment requirements.
 
-```cpp
+```cpp showLineNumbers 
 class Simple {
     int a;      // 4 bytes
     char b;     // 1 byte
@@ -38,7 +38,7 @@ The padding after `b` ensures `c` starts at an address divisible by 4 (its align
 
 Reordering members can reduce wasted space from padding, sometimes significantly.
 
-```cpp
+```cpp showLineNumbers 
 class Wasteful {
     char a;     // 1 byte + 7 padding
     double b;   // 8 bytes
@@ -63,7 +63,7 @@ Grouping larger members together and smaller members together minimizes padding.
 
 Even empty classes have non-zero size to ensure distinct addresses for different objects.
 
-```cpp
+```cpp showLineNumbers 
 class Empty {};
 sizeof(Empty);  // 1 byte (minimum)
 
@@ -83,7 +83,7 @@ The one-byte minimum ensures every object has a unique address, which is require
 
 The compiler calculates fixed offsets for each member, enabling efficient direct access.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int x;      // Offset: 0
     int y;      // Offset: 4
@@ -105,7 +105,7 @@ Member access is just pointer arithmetic using compile-time offsets. This makes 
 
 Classes with virtual functions have a hidden pointer to a virtual function table (vtable), adding overhead.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
     int data;           // 4 bytes
     virtual void f() {} // Adds vtable pointer
@@ -123,7 +123,7 @@ The vtable pointer (vptr) typically appears at the start of the object, though t
 
 The vtable contains function pointers for all virtual functions in the class hierarchy.
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 public:
     virtual void speak() { std::cout << "Animal\n"; }
@@ -156,7 +156,7 @@ Virtual function calls require an extra indirection: load the vptr, then load th
 
 Multiple inheritance creates complex layouts with multiple base class subobjects.
 
-```cpp
+```cpp showLineNumbers 
 class Base1 {
     int b1;
 };
@@ -181,7 +181,7 @@ Each base class appears as a subobject within the derived object. The derived cl
 
 When multiple base classes have virtual functions, the derived class contains multiple vtable pointers.
 
-```cpp
+```cpp showLineNumbers 
 class Base1 {
     int b1;
     virtual void f1() {}
@@ -206,7 +206,7 @@ Each base class with virtual functions contributes a vtable pointer. Converting 
 
 The class's overall alignment is the maximum alignment of its members.
 
-```cpp
+```cpp showLineNumbers 
 class Example {
     char c;      // Align: 1
     int i;       // Align: 4
@@ -227,7 +227,7 @@ The size must be a multiple of the alignment to ensure arrays of objects maintai
 
 Bit fields allow packing multiple values into fewer bytes, useful for flags and low-level structures.
 
-```cpp
+```cpp showLineNumbers 
 struct Flags {
     unsigned int flag1 : 1;  // 1 bit
     unsigned int flag2 : 1;  // 1 bit
@@ -249,7 +249,7 @@ Bit fields specify the exact number of bits for each member. The compiler packs 
 
 Some compilers allow forcing tighter packing, eliminating padding but potentially causing misalignment.
 
-```cpp
+```cpp showLineNumbers 
 // GCC/Clang: packed attribute
 struct __attribute__((packed)) Packed {
     char c;      // 1 byte
@@ -275,7 +275,7 @@ Packed structures eliminate padding but members may be misaligned. On x86-64 thi
 
 Standard layout classes have restrictions but guarantee C-compatible memory layout.
 
-```cpp
+```cpp showLineNumbers 
 // Standard layout: C-compatible
 class StandardLayout {
 public:
@@ -306,7 +306,7 @@ Standard layout classes can be passed to C code because their layout is predicta
 
 You can examine class layout using compiler-specific tools and `offsetof`.
 
-```cpp
+```cpp showLineNumbers 
 #include <cstddef>
 
 class Widget {

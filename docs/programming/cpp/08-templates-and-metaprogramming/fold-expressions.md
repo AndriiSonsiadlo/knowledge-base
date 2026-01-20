@@ -17,7 +17,7 @@ C++17: `(args + ...)` - simple and readable!
 
 ## Basic Fold Expressions
 
-```cpp
+```cpp showLineNumbers 
 // Sum all arguments
 template<typename... Args>
 auto sum(Args... args) {
@@ -40,29 +40,29 @@ product(2, 3, 4);  // 24
 ## Four Types of Folds
 
 **Unary right fold:** `(pack op ...)`
-```cpp
+```cpp showLineNumbers 
 (args + ...)  // ((arg1 + arg2) + arg3) + ...
 ```
 
 **Unary left fold:** `(... op pack)`
-```cpp
+```cpp showLineNumbers 
 (... + args)  // ... + (arg3 + (arg2 + arg1))
 ```
 
 **Binary right fold:** `(pack op ... op init)`
-```cpp
+```cpp showLineNumbers 
 (args + ... + 0)  // ((arg1 + arg2) + arg3) + 0
 ```
 
 **Binary left fold:** `(init op ... op pack)`
-```cpp
+```cpp showLineNumbers 
 (0 + ... + args)  // 0 + (arg1 + (arg2 + arg3))
 ```
 
 ## Common Operations
 
 **Logical AND:**
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 bool all(Args... args) {
     return (args && ...);  // All must be true
@@ -73,7 +73,7 @@ all(true, false, true);  // false
 ```
 
 **Logical OR:**
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 bool any(Args... args) {
     return (args || ...);  // At least one true
@@ -84,7 +84,7 @@ any(false, false, false); // false
 ```
 
 **Comma operator (execute all):**
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void print(Args... args) {
     ((std::cout << args << " "), ...);
@@ -96,7 +96,7 @@ print(1, "hello", 3.14);  // "1 hello 3.14"
 
 ## With Initial Value
 
-```cpp
+```cpp showLineNumbers 
 // Sum with initial value
 template<typename... Args>
 auto sumFrom(int start, Args... args) {
@@ -116,7 +116,7 @@ concat("Hello", " ", "World");  // "Hello World"
 
 ## Function Calls
 
-```cpp
+```cpp showLineNumbers 
 // Call function for each argument
 template<typename... Args>
 void processAll(Args... args) {
@@ -135,7 +135,7 @@ addAll(v, 1, 2, 3, 4, 5);  // v = {1, 2, 3, 4, 5}
 
 ## Comparison Chains
 
-```cpp
+```cpp showLineNumbers 
 // Check if all equal
 template<typename T, typename... Args>
 bool allEqual(T first, Args... args) {
@@ -154,7 +154,7 @@ bool isAscending(Args... args) {
 
 ## Combining Folds
 
-```cpp
+```cpp showLineNumbers 
 // Average
 template<typename... Args>
 double average(Args... args) {
@@ -175,7 +175,7 @@ allInRange(0, 100, 50, 150, 25);  // false
 
 ## With Member Functions
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
     void print() const {
@@ -194,7 +194,7 @@ printAll(p1, p2, p3);  // "(1,2) (3,4) (5,6)"
 
 ## Building Tuples
 
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 auto makeTuple(Args... args) {
     return std::tuple<Args...>(args...);
@@ -213,7 +213,7 @@ printTuple(t, std::make_index_sequence<3>{});  // "1 hello 3.14"
 ## Comparison: Before and After
 
 **Before C++17 (recursive):**
-```cpp
+```cpp showLineNumbers 
 // Base case
 void print() {}
 
@@ -226,7 +226,7 @@ void print(T first, Args... rest) {
 ```
 
 **C++17 (fold expression):**
-```cpp
+```cpp showLineNumbers 
 template<typename... Args>
 void print(Args... args) {
     ((std::cout << args << " "), ...);

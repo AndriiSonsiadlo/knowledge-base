@@ -16,7 +16,7 @@ Templates = blueprints. The compiler stamps out type-specific versions as needed
 
 ## Basic Function Template
 
-```cpp
+```cpp showLineNumbers 
 // Template definition
 template<typename T>
 T max(T a, T b) {
@@ -37,7 +37,7 @@ std::string s = max("abc", "xyz");  // max<std::string>
 
 ## Template Parameters
 
-```cpp
+```cpp showLineNumbers 
 // Type parameter
 template<typename T>
 void print(T value) {
@@ -68,7 +68,7 @@ size_t size = arraySize(arr);  // N=10
 
 Compiler figures out template arguments from function arguments:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 T square(T x) {
     return x * x;
@@ -88,7 +88,7 @@ auto result3 = square<long>(5);  // Force T to be long
 
 ## Multiple Parameters
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 void process(T first, U second) {
     std::cout << first << ", " << second << "\n";
@@ -102,7 +102,7 @@ Different parameters can have different types. They're independently deduced.
 
 ## Return Type Deduction
 
-```cpp
+```cpp showLineNumbers 
 // C++11: Trailing return type
 template<typename T, typename U>
 auto add(T a, U b) -> decltype(a + b) {
@@ -122,7 +122,7 @@ auto x = add(5, 3.14);  // Returns double
 
 Provide specific implementation for certain types:
 
-```cpp
+```cpp showLineNumbers 
 // General template
 template<typename T>
 T max(T a, T b) {
@@ -141,7 +141,7 @@ const char* s = max("abc", "xyz");  // Uses specialization
 
 ## Overloading Function Templates
 
-```cpp
+```cpp showLineNumbers 
 // Template version
 template<typename T>
 void print(T value) {
@@ -164,7 +164,7 @@ print(3.14);    // "Template: 3.14" (template version)
 
 ## Constraints and Concepts (C++20)
 
-```cpp
+```cpp showLineNumbers 
 // Require type to support operator<
 template<typename T>
 requires std::totally_ordered<T>
@@ -188,7 +188,7 @@ Concepts make templates fail with clear error messages instead of cryptic templa
 ## Common Patterns
 
 **Generic swap:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void swap(T& a, T& b) {
     T temp = std::move(a);
@@ -198,7 +198,7 @@ void swap(T& a, T& b) {
 ```
 
 **Generic comparison:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 bool equal(const T& a, const T& b) {
     return a == b;
@@ -206,7 +206,7 @@ bool equal(const T& a, const T& b) {
 ```
 
 **Generic algorithm:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 T sum(const std::vector<T>& vec) {
     T result{};
@@ -221,7 +221,7 @@ T sum(const std::vector<T>& vec) {
 
 Templates are compiled when instantiated, not when defined:
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 template<typename T>
 T add(T a, T b) {

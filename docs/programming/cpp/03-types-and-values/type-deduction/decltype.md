@@ -16,7 +16,7 @@ tags: [c++, decltype, type-deduction, cpp11]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 decltype(x) y = x;  // int (same type as x)
 
@@ -33,7 +33,7 @@ decltype(ref) b = ref;  // const int& (keeps everything)
 
 ### Named Variables
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 const int cx = x;
 int& rx = x;
@@ -47,7 +47,7 @@ decltype(rx)  // int&
 
 ### Expressions
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 decltype((x))    // int& (parentheses make it expression)
@@ -67,7 +67,7 @@ decltype(++x)    // int& (pre-increment returns reference)
 
 ### Variable Type Matching
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec;
 
 // Declare same type as existing variable
@@ -81,7 +81,7 @@ decltype(map) map2;  // Exact same type
 
 ### Return Type Deduction
 
-```cpp
+```cpp showLineNumbers 
 template<typename Container>
 auto getElement(Container& c, int index) -> decltype(c[index]) {
     return c[index];
@@ -94,7 +94,7 @@ auto& elem = getElement(vec, 0);  // Returns int&
 
 ### Perfect Return Type
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 auto add(T a, U b) -> decltype(a + b) {
     return a + b;
@@ -107,7 +107,7 @@ auto result = add(5, 3.14);  // double (decltype(int + double))
 
 ## decltype vs auto
 
-```cpp
+```cpp showLineNumbers 
 const int x = 42;
 const int& ref = x;
 
@@ -131,7 +131,7 @@ decltype(ref) e = ref;  // const int& (exact match)
 
 ### Type of Member
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     double x, y;
 };
@@ -144,7 +144,7 @@ decltype(Point::x) coord;  // double (static member access)
 
 ### Container Element Type
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec;
 decltype(vec[0]) elem;  // int& (vector::operator[] returns reference)
 
@@ -154,7 +154,7 @@ decltype(bvec[0]) proxy;  // std::vector<bool>::reference (proxy)
 
 ### Function Return Type
 
-```cpp
+```cpp showLineNumbers 
 int func();
 
 decltype(func()) x;  // int (return type of func)
@@ -166,7 +166,7 @@ decltype(&func) fp;  // int(*)() (function pointer type)
 
 ## Parentheses Matter!
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 decltype(x)   // int (name)
@@ -187,7 +187,7 @@ Parentheses change name to expression!
 
 ### C++11: Trailing Return Type
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 auto add(T a, U b) -> decltype(a + b) {
     return a + b;
@@ -198,7 +198,7 @@ Must use trailing return type because `a` and `b` not in scope before parameter 
 
 ### C++14: auto Return
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 auto add(T a, U b) {
     return a + b;  // auto deduction (uses template rules)
@@ -215,7 +215,7 @@ auto getFirst() {
 
 ## Combining auto and decltype
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3};
 
 // auto drops reference
@@ -234,7 +234,7 @@ decltype(auto) z = vec[0];  // int& (preserves return type)
 
 ### Generic Code
 
-```cpp
+```cpp showLineNumbers 
 template<typename Container>
 void process(Container& c) {
     // Get exact type of element
@@ -247,7 +247,7 @@ void process(Container& c) {
 
 ### Type Traits
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 struct remove_reference {
     using type = T;
@@ -273,7 +273,7 @@ using Type = typename remove_reference<decltype(x)>::type;  // int
 - `decltype((name))` → reference (expression)
 
 **Comparison**:
-```cpp
+```cpp showLineNumbers 
 const int& ref = x;
 
 auto a = ref;           // int (template deduction)
@@ -287,7 +287,7 @@ decltype(auto) c = ref; // const int& (C++14)
 - Type of complex expressions
 - Generic code requiring perfect forwarding
 
-```cpp
+```cpp showLineNumbers 
 // Common idioms
 decltype(expr) var;           // Match expression type
 decltype(auto) var = expr;    // Deduce with preservation (C++14)

@@ -21,7 +21,7 @@ Containers store collections of objects. The STL provides optimized, well-tested
 
 The most commonly used container. Contiguous memory, fast random access, efficient end insertion.
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 
 std::vector<int> vec;         // Empty vector
@@ -74,7 +74,7 @@ for (int val : vec) {
 
 Stack-allocated, fixed-size array wrapper with STL interface.
 
-```cpp
+```cpp showLineNumbers 
 #include <array>
 
 std::array<int, 5> arr = {1, 2, 3, 4, 5};
@@ -100,7 +100,7 @@ constexpr size_t size = arr.size();  // 5
 
 Fast insertion/removal at both ends. Not contiguous.
 
-```cpp
+```cpp showLineNumbers 
 #include <deque>
 
 std::deque<int> deq;
@@ -129,7 +129,7 @@ int x = deq[0];
 
 Efficient insertion/removal anywhere, but no random access.
 
-```cpp
+```cpp showLineNumbers 
 #include <list>
 
 std::list<int> lst = {1, 2, 3, 4, 5};
@@ -167,7 +167,7 @@ lst.unique();
 
 Like list but single links. More memory efficient.
 
-```cpp
+```cpp showLineNumbers 
 #include <forward_list>
 
 std::forward_list<int> fwd = {1, 2, 3};
@@ -188,7 +188,7 @@ fwd.insert_after(fwd.begin(), 5);
 
 Sorted unique elements, typically implemented as red-black tree.
 
-```cpp
+```cpp showLineNumbers 
 #include <set>
 
 std::set<int> s = {3, 1, 4, 1, 5};  // Duplicates ignored
@@ -234,7 +234,7 @@ for (int val : s) {
 
 Like set but allows duplicates.
 
-```cpp
+```cpp showLineNumbers 
 #include <set>
 
 std::multiset<int> ms = {1, 2, 2, 3, 3, 3};
@@ -253,7 +253,7 @@ for (auto it = range.first; it != range.second; ++it) {
 
 Associates keys with values, sorted by key.
 
-```cpp
+```cpp showLineNumbers 
 #include <map>
 
 std::map<std::string, int> ages;
@@ -298,7 +298,7 @@ ages.erase("Alice");
 
 ## std::multimap - Multiple Values Per Key
 
-```cpp
+```cpp showLineNumbers 
 #include <map>
 
 std::multimap<std::string, int> scores;
@@ -317,7 +317,7 @@ for (auto it = range.first; it != range.second; ++it) {
 
 Unordered unique elements using hash table.
 
-```cpp
+```cpp showLineNumbers 
 #include <unordered_set>
 
 std::unordered_set<int> us = {3, 1, 4, 1, 5};
@@ -362,7 +362,7 @@ std::unordered_set<Point, PointHash> points;
 
 Fast key-value lookup using hash table.
 
-```cpp
+```cpp showLineNumbers 
 #include <unordered_map>
 
 std::unordered_map<std::string, int> counts;
@@ -391,7 +391,7 @@ counts.rehash(100);       // Set minimum bucket count
 
 Stack interface built on top of another container (default: deque).
 
-```cpp
+```cpp showLineNumbers 
 #include <stack>
 
 std::stack<int> stk;
@@ -415,7 +415,7 @@ std::stack<int, std::vector<int>> vecStack;  // Use vector
 
 Queue interface built on deque.
 
-```cpp
+```cpp showLineNumbers 
 #include <queue>
 
 std::queue<int> q;
@@ -435,7 +435,7 @@ q.pop();      // Remove front
 
 Max-heap by default.
 
-```cpp
+```cpp showLineNumbers 
 #include <queue>
 
 std::priority_queue<int> pq;
@@ -462,7 +462,7 @@ std::priority_queue<int, std::vector<int>, decltype(cmp)> customPQ(cmp);
 
 ## Container Selection Guide
 
-```cpp
+```cpp showLineNumbers 
 // Need random access? → vector or array
 // Add/remove at ends? → deque
 // Add/remove anywhere? → list
@@ -477,7 +477,7 @@ std::priority_queue<int, std::vector<int>, decltype(cmp)> customPQ(cmp);
 
 ## Common Operations Across Containers
 
-```cpp
+```cpp showLineNumbers 
 // All containers support
 c.size();
 c.empty();

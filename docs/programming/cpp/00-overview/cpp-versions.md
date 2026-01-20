@@ -37,7 +37,7 @@ The first standardized C++, establishing the core language and STL (Standard Tem
 
 ### Key Features
 
-```cpp
+```cpp showLineNumbers 
 // Templates - generic programming foundation
 template<typename T>
 class vector {
@@ -60,7 +60,7 @@ The STL introduced the concept of generic containers and algorithms that work to
 
 ### Limitations
 
-```cpp
+```cpp showLineNumbers 
 // ❌ No type inference
 std::vector<std::map<std::string, std::vector<int>>>::iterator it;  // Verbose!
 
@@ -91,7 +91,7 @@ C++11 was the most significant update, modernizing the language with features th
 
 The `auto` keyword deduces types automatically, reducing verbosity and making code more maintainable. When you change a function's return type, code using `auto` doesn't need updates.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++11
 std::vector<std::map<std::string, int>>::iterator it = myMap.begin();
 
@@ -109,7 +109,7 @@ auto names = std::vector<std::string>();  // std::vector<std::string>
 
 Iterating through containers becomes dramatically simpler. The range-based for loop automatically handles begin/end iterators and dereferences values for you.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> numbers = {1, 2, 3, 4, 5};
 
 // Before C++11
@@ -138,7 +138,7 @@ for (auto& num : numbers) {
 
 Lambdas allow defining inline anonymous functions, eliminating the need for separate function definitions for simple operations. This makes STL algorithms much more convenient.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> numbers = {1, 2, 3, 4, 5, 6};
 
 // Before C++11 - needed separate function
@@ -161,7 +161,7 @@ The `[threshold]` syntax captures the `threshold` variable by value, making it a
 
 Smart pointers automate memory management, eliminating the need for manual `delete` calls and preventing memory leaks. They use RAII to ensure resources are released when the smart pointer is destroyed.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++11 - manual memory management
 Widget* ptr = new Widget();
 ptr->doSomething();
@@ -184,7 +184,7 @@ auto shared2 = shared1;  // Reference counted
 
 Move semantics allow transferring resources instead of copying them, dramatically improving performance when working with large objects or containers.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++11 - expensive copy
 std::vector<int> createVector() {
     std::vector<int> vec(1000000);
@@ -211,7 +211,7 @@ Moving is essentially transferring the internal pointer rather than copying all 
 
 The `nullptr` keyword replaces NULL, providing type safety for null pointers. NULL was actually the integer 0, which could cause ambiguity in function overloading.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++11
 void func(int n) { }
 void func(char* ptr) { }
@@ -229,7 +229,7 @@ func(nullptr);  // Calls func(char*) - unambiguous
 
 Brace initialization provides a consistent syntax for all initialization scenarios and prevents narrowing conversions (like assigning a double to an int).
 
-```cpp
+```cpp showLineNumbers 
 // Before C++11 - different syntaxes
 int a = 5;
 int arr[] = {1, 2, 3};
@@ -250,7 +250,7 @@ int y{7.7};       // ❌ Compilation error! Prevents bugs
 
 C++11 finally added standardized threading support, making concurrent programming portable across platforms.
 
-```cpp
+```cpp showLineNumbers 
 #include <thread>
 #include <mutex>
 
@@ -285,7 +285,7 @@ C++14 focused on refining C++11 features and fixing issues rather than adding ma
 
 Lambda parameters can now use `auto`, making them work with any type. This creates a template function without the template syntax.
 
-```cpp
+```cpp showLineNumbers 
 // C++11 - specific type
 auto add = [](int a, int b) { return a + b; };
 
@@ -303,7 +303,7 @@ The compiler generates a separate instantiation for each type used, just like te
 
 Functions can now use `auto` for return types, with the compiler deducing the type from return statements.
 
-```cpp
+```cpp showLineNumbers 
 // C++11 - must specify return type
 auto multiply(int a, int b) -> int {
     return a * b;
@@ -326,7 +326,7 @@ auto createMap() {
 
 Binary literals and digit separators improve readability when working with bit patterns and large numbers.
 
-```cpp
+```cpp showLineNumbers 
 // Binary literals
 int mask = 0b11110000;  // 240 in decimal
 int flags = 0b0001'0100'1000'1100;  // With separators
@@ -342,7 +342,7 @@ The separator (') has no effect on the value, it's purely for human readability.
 
 C++11 had `std::make_shared` but forgot `std::make_unique`. C++14 fixed this oversight.
 
-```cpp
+```cpp showLineNumbers 
 // C++11 - inconsistent
 auto shared = std::make_shared<Widget>(42);
 auto unique = std::unique_ptr<Widget>(new Widget(42));  // Inconsistent!
@@ -364,7 +364,7 @@ C++17 added features that make everyday programming more convenient and expressi
 
 Unpack tuples, pairs, and structs into individual variables in a single declaration. This eliminates the need for `std::tie` or accessing members by index.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++17
 std::map<std::string, int> ages;
 for (auto it = ages.begin(); it != ages.end(); ++it) {
@@ -387,7 +387,7 @@ auto [x, y, z] = std::make_tuple(1, 2.5, "hello");
 
 Compile-time conditional compilation allows different code paths based on template parameters, eliminating the need for complex SFINAE tricks.
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void process(T value) {
     if constexpr (std::is_integral_v<T>) {
@@ -409,7 +409,7 @@ The condition is evaluated at compile time, and only the matching branch is comp
 
 Represents a value that may or may not exist, eliminating the need for special sentinel values or pointers to indicate absence.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++17 - using special values or exceptions
 int parseInt(const std::string& str) {
     try {
@@ -444,7 +444,7 @@ int val = result.value_or(0);
 
 Finally, a standard way to interact with the filesystem across all platforms, replacing platform-specific APIs.
 
-```cpp
+```cpp showLineNumbers 
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -471,7 +471,7 @@ Before C++17, you had to use POSIX APIs on Linux, Windows APIs on Windows, or th
 
 A non-owning view into a string, avoiding unnecessary copies when you only need to read string data.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++17 - copies string
 void printString(const std::string& str) {  // May copy if passed char*
     std::cout << str << "\n";
@@ -500,7 +500,7 @@ C++20 is the biggest update since C++11, adding four major features and dozens o
 
 Concepts provide named constraints on template parameters, replacing cryptic SFINAE error messages with clear requirements.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++20 - SFINAE hell
 template<typename T>
 typename std::enable_if<std::is_integral<T>::value, T>::type
@@ -537,7 +537,7 @@ When you call `add("hello", "world")`, you get a clear error: "constraints not s
 
 Ranges provide a composable way to work with sequences, making algorithms more readable and allowing lazy evaluation.
 
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 namespace rg = std::ranges;
 namespace vw = std::views;
@@ -568,7 +568,7 @@ Ranges use lazy evaluation, so the filtering and transformation happen on-the-fl
 
 Coroutines allow functions to suspend and resume execution, enabling async/await patterns and generators.
 
-```cpp
+```cpp showLineNumbers 
 #include <coroutine>
 #include <iostream>
 
@@ -596,7 +596,7 @@ The `co_yield` keyword suspends the function, saving its state. When iteration c
 
 Modules replace the preprocessor-based `#include` system, improving compile times and eliminating header file issues.
 
-```cpp
+```cpp showLineNumbers 
 // Before C++20 - header file (widget.h)
 #ifndef WIDGET_H
 #define WIDGET_H
@@ -627,7 +627,7 @@ Modules compile once and are reused, unlike headers which are reprocessed in eve
 
 The `<=>` operator generates all six comparison operators automatically.
 
-```cpp
+```cpp showLineNumbers 
 #include <compare>
 
 class Point {
@@ -658,7 +658,7 @@ C++23 adds smaller features that improve quality of life.
 
 ### Key Features
 
-```cpp
+```cpp showLineNumbers 
 // 1. std::print - finally, a simple print function!
 std::print("Hello, {}!\n", "World");
 std::print("Value: {}, Hex: {:x}\n", 42, 42);

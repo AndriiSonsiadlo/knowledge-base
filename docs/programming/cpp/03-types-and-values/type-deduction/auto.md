@@ -16,7 +16,7 @@ tags: [c++, auto, type-deduction, cpp11, templates]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 auto x = 5;           // int
 auto y = 3.14;        // double
 auto z = 'c';         // char
@@ -36,7 +36,7 @@ auto func = [](int x) { return x * 2; };  // lambda type
 
 `auto` uses **template type deduction** rules:
 
-```cpp
+```cpp showLineNumbers 
 // Same as template<typename T> void f(T param)
 auto x = expr;
 
@@ -53,7 +53,7 @@ const auto d = i;   // const int (explicitly const)
 
 ### Reference and const Behavior
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 const int cx = x;
 const int& rx = x;
@@ -74,7 +74,7 @@ const auto& g = x;  // const int& (explicitly const reference)
 
 ## auto with Pointers
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 int* p = &x;
 const int* cp = &x;
@@ -92,7 +92,7 @@ const auto e = p;   // int* const (const pointer)
 
 ## auto with References
 
-```cpp
+```cpp showLineNumbers 
 int x = 42;
 
 // auto& deduces reference
@@ -114,7 +114,7 @@ auto&& r5 = 42;     // int&& (rvalue)
 
 ### Return Type (C++14)
 
-```cpp
+```cpp showLineNumbers 
 // Return type deduced from return statement
 auto add(int a, int b) {
     return a + b;  // Returns int
@@ -135,7 +135,7 @@ auto func(bool flag) {
 
 ### Range-Based For Loop
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 // Copy each element
@@ -156,7 +156,7 @@ for (const auto& elem : vec) {
 
 ### Lambda Captures (C++14)
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 
 // Init capture with auto
@@ -175,7 +175,7 @@ auto lambda2 = [ptr = std::make_unique<int>(42)]() {
 
 ### When auto Helps
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Verbose without auto
 std::vector<int>::iterator it = vec.begin();
 std::unordered_map<std::string, std::vector<int>>::iterator it2 = map.begin();
@@ -191,7 +191,7 @@ auto ptr = std::make_unique<Widget>();
 
 ### When Explicit Types Help
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Unclear intent
 auto x = getData();  // What type is x?
 
@@ -211,7 +211,7 @@ std::vector<int> x = {1, 2, 3};
 
 ### Unexpected Types
 
-```cpp
+```cpp showLineNumbers 
 // Proxy objects
 std::vector<bool> vec = {true, false};
 auto x = vec[0];     // std::vector<bool>::reference (proxy!)
@@ -228,7 +228,7 @@ auto x{1};           // int (C++17)
 
 ### Invisible Copies
 
-```cpp
+```cpp showLineNumbers 
 std::string getString() { return "hello"; }
 
 auto s = getString();  // Copy (if not RVO)
@@ -241,7 +241,7 @@ auto s = std::move(getString());  // Explicit move
 
 ### Losing const
 
-```cpp
+```cpp showLineNumbers 
 const std::vector<int> vec = {1, 2, 3};
 
 auto copy = vec;      // std::vector<int> (const dropped!)
@@ -257,7 +257,7 @@ copy2.push_back(4);      // ❌ Error: copy2 is const
 
 Some developers advocate using `auto` everywhere:
 
-```cpp
+```cpp showLineNumbers 
 // AAA style
 auto name = std::string{"Alice"};
 auto age = 25;
@@ -276,7 +276,7 @@ double price = 19.99;
 
 ## auto with Multiple Declarations
 
-```cpp
+```cpp showLineNumbers 
 // All same type
 auto x = 1, y = 2, z = 3;  // All int
 
@@ -315,7 +315,7 @@ auto p = &x, v = x;   // Error: int* vs int
 - **Universal reference** with `auto&&`
 - **Same as** `template<typename T> void f(T param)`
 
-```cpp
+```cpp showLineNumbers 
 // Common patterns
 auto x = value;           // Copy, drops ref/const
 auto& x = value;          // Reference

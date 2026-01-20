@@ -33,7 +33,7 @@ graph LR
 
 ## Automatic Objects
 
-```cpp
+```cpp showLineNumbers 
 {
     Widget w;  // 1. Memory allocated on stack
                // 2. Constructor called
@@ -48,7 +48,7 @@ graph LR
 
 ### Construction Order
 
-```cpp
+```cpp showLineNumbers 
 {
     Widget a;
     Widget b;
@@ -62,7 +62,7 @@ graph LR
 
 ## Dynamic Objects
 
-```cpp
+```cpp showLineNumbers 
 Widget* ptr = new Widget();  // 1. Allocate heap memory
                              // 2. Call constructor
                              // 3. Lifetime begins
@@ -77,7 +77,7 @@ delete ptr;  // 4. Call destructor
 
 ### Dangling Pointers
 
-```cpp
+```cpp showLineNumbers 
 Widget* ptr = new Widget();
 delete ptr;  // Object destroyed
 
@@ -89,7 +89,7 @@ ptr->use();  // ❌ Undefined behavior! Lifetime ended
 
 ## Member Object Lifetimes
 
-```cpp
+```cpp showLineNumbers 
 class Container {
     Widget member;  // Member object
 public:
@@ -112,7 +112,7 @@ public:
 5. Member destructors (reverse order)
 6. Base class destructors (if any)
 
-```cpp
+```cpp showLineNumbers 
 class Example {
     Widget a;
     Widget b;
@@ -132,7 +132,7 @@ public:
 
 ## Temporary Object Lifetimes
 
-```cpp
+```cpp showLineNumbers 
 std::string getString() { return "hello"; }
 
 // Temporary destroyed at end of statement
@@ -157,7 +157,7 @@ const std::string& bad() {
 
 ### Const Reference
 
-```cpp
+```cpp showLineNumbers 
 const Widget& ref = Widget();  // Temporary lifetime extended
 // Widget lives as long as ref
 
@@ -169,7 +169,7 @@ const Widget& ref = Widget();  // Temporary lifetime extended
 
 ### Not Extended
 
-```cpp
+```cpp showLineNumbers 
 Widget&& rref = Widget();  // Lifetime extended (rvalue reference)
 
 void func(const Widget& w);
@@ -182,7 +182,7 @@ func(Widget());  // Temporary destroyed after func returns
 
 Separate allocation from construction:
 
-```cpp
+```cpp showLineNumbers 
 alignas(Widget) char buffer[sizeof(Widget)];  // Raw memory
 
 // Construct in pre-allocated memory
@@ -198,7 +198,7 @@ w->~Widget();  // Explicit destructor call
 
 ## Static Initialization
 
-```cpp
+```cpp showLineNumbers 
 Widget global;  // Constructed before main()
 
 int main() {
@@ -214,7 +214,7 @@ int main() {
 
 **Order fiasco**:
 
-```cpp
+```cpp showLineNumbers 
 // file1.cpp
 int a = compute_a();
 
@@ -225,7 +225,7 @@ int b = compute_b();  // Uses 'a'
 
 **Solution**: Function-local static (lazy initialization):
 
-```cpp
+```cpp showLineNumbers 
 Widget& getWidget() {
     static Widget w;  // Constructed on first call
     return w;
@@ -236,7 +236,7 @@ Widget& getWidget() {
 
 ## Lifetime and RAII
 
-```cpp
+```cpp showLineNumbers 
 class File {
     FILE* handle;
 public:
@@ -265,7 +265,7 @@ public:
 
 ## Moved-From Objects
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3};
 std::vector<int> v2 = std::move(v1);
 
@@ -286,7 +286,7 @@ std::cout << v1.size();  // Technically OK but don't rely on value
 
 ### Use After Free
 
-```cpp
+```cpp showLineNumbers 
 Widget* ptr = new Widget();
 delete ptr;
 ptr->method();  // ❌ Lifetime ended
@@ -294,7 +294,7 @@ ptr->method();  // ❌ Lifetime ended
 
 ### Dangling Reference
 
-```cpp
+```cpp showLineNumbers 
 Widget& getRef() {
     Widget w;
     return w;  // ❌ Returns reference to destroyed object
@@ -303,7 +303,7 @@ Widget& getRef() {
 
 ### Double Delete
 
-```cpp
+```cpp showLineNumbers 
 Widget* ptr = new Widget();
 delete ptr;
 delete ptr;  // ❌ Lifetime already ended
@@ -311,7 +311,7 @@ delete ptr;  // ❌ Lifetime already ended
 
 ### Accessing Before Construction
 
-```cpp
+```cpp showLineNumbers 
 class Bad {
     Widget& ref;
 public:
@@ -329,7 +329,7 @@ public:
 
 ## Lifetime-Dependent Objects
 
-```cpp
+```cpp showLineNumbers 
 class View {
     const std::string& data;  // References another object
 public:
@@ -355,7 +355,7 @@ void broken() {
 
 ## Perfect Forwarding and Lifetime
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     process(std::forward<T>(arg));  // Preserves value category
@@ -371,7 +371,7 @@ wrapper(std::string("temp")); // Forwards rvalue
 ## Summary
 
 **Lifetime = Construction → Destruction**:
-```cpp
+```cpp showLineNumbers 
 {
     Widget w;  // Construction (lifetime begins)
     w.use();   // Usage (lifetime active)
@@ -386,7 +386,7 @@ wrapper(std::string("temp")); // Forwards rvalue
 - Dynamic objects: manual lifetime (new/delete)
 
 **Lifetime bugs**:
-```cpp
+```cpp showLineNumbers 
 delete ptr; ptr->use();  // ❌ Use after free
 return local;            // ❌ Return local by reference
 delete p; delete p;      // ❌ Double delete

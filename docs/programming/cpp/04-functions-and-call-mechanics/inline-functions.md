@@ -16,7 +16,7 @@ tags: [c++, functions, inline, optimization, performance]
 
 ## Basic Usage
 
-```cpp
+```cpp showLineNumbers 
 // Without inline
 int square(int x) {
     return x * x;
@@ -38,7 +38,7 @@ int result = square(5);  // May be replaced with: 5 * 5
 
 ### Normal Function Call
 
-```cpp
+```cpp showLineNumbers 
 int add(int a, int b) {
     return a + b;
 }
@@ -55,7 +55,7 @@ int x = add(5, 3);
 
 ### Inlined Function
 
-```cpp
+```cpp showLineNumbers 
 inline int add(int a, int b) {
     return a + b;
 }
@@ -76,7 +76,7 @@ No call overhead: no stack manipulation, no jump, faster execution.
 
 ### Good Candidates
 
-```cpp
+```cpp showLineNumbers 
 // Small, frequently called functions
 inline int max(int a, int b) {
     return a > b ? a : b;
@@ -96,7 +96,7 @@ inline double square(double x) { return x * x; }
 
 ### Poor Candidates
 
-```cpp
+```cpp showLineNumbers 
 // Large functions (defeats purpose)
 inline void processComplexData(/*...*/) {
     // 100 lines of code
@@ -121,7 +121,7 @@ public:
 
 Inline functions must be defined in headers (visible to all translation units):
 
-```cpp
+```cpp showLineNumbers 
 // widget.h
 #pragma once
 
@@ -153,7 +153,7 @@ Inline functions can be defined in multiple translation units (identical definit
 
 ### Member Functions Defined in Class
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     // Implicitly inline
@@ -171,7 +171,7 @@ private:
 
 ### constexpr Functions
 
-```cpp
+```cpp showLineNumbers 
 // constexpr is implicitly inline
 constexpr int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);
@@ -184,7 +184,7 @@ constexpr int factorial(int n) {
 
 ### Automatic Inlining
 
-```cpp
+```cpp showLineNumbers 
 // Even without 'inline', compilers inline with optimization
 int square(int x) {
     return x * x;
@@ -195,7 +195,7 @@ int square(int x) {
 
 ### Force Inline (Compiler-Specific)
 
-```cpp
+```cpp showLineNumbers 
 // GCC/Clang
 __attribute__((always_inline))
 inline int add(int a, int b) {
@@ -210,7 +210,7 @@ __forceinline int add(int a, int b) {
 
 ### Prevent Inline
 
-```cpp
+```cpp showLineNumbers 
 // GCC/Clang
 __attribute__((noinline))
 void debug_func() {
@@ -229,7 +229,7 @@ __declspec(noinline) void debug_func() {
 
 ### Benefits
 
-```cpp
+```cpp showLineNumbers 
 // Eliminates call overhead
 for (int i = 0; i < 1000000; i++) {
     result += square(i);  // No function call per iteration
@@ -246,7 +246,7 @@ int y = compute(5);  // Compiler sees: 5 * 2 + 1
 
 ### Drawbacks
 
-```cpp
+```cpp showLineNumbers 
 // Code bloat
 inline void largeFunction() {
     // 50 lines of code
@@ -260,7 +260,7 @@ inline void largeFunction() {
 
 ## Inline Variables (C++17)
 
-```cpp
+```cpp showLineNumbers 
 // header.h
 inline int global_counter = 0;  // OK in header (C++17)
 
@@ -269,7 +269,7 @@ inline const std::string default_name = "Widget";
 
 Before C++17, needed workarounds:
 
-```cpp
+```cpp showLineNumbers 
 // C++14 workaround
 extern const std::string default_name;
 
@@ -283,7 +283,7 @@ const std::string default_name = "Widget";
 
 Template functions are implicitly inline:
 
-```cpp
+```cpp showLineNumbers 
 // Implicitly inline (defined in header)
 template<typename T>
 T max(T a, T b) {
@@ -333,7 +333,7 @@ g++ -flto -O3 file1.cpp file2.cpp -o app
 
 Inlined functions don't appear in stack traces:
 
-```cpp
+```cpp showLineNumbers 
 inline void helper() {
     throw std::runtime_error("Error");
 }
@@ -361,7 +361,7 @@ void process() {
 - Template functions
 
 **Modern practice**:
-```cpp
+```cpp showLineNumbers 
 // Let compiler decide
 int square(int x) { return x * x; }
 

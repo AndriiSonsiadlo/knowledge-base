@@ -16,7 +16,7 @@ Copying derived object to base object only copies the base part. Derived data an
 
 ## Basic Slicing Example
 
-```cpp
+```cpp showLineNumbers 
 class Animal {
 public:
     int legs = 4;
@@ -45,7 +45,7 @@ When you assign a Dog to an Animal, only the Animal parts are copied. The Dog-sp
 
 ## Why Slicing Happens
 
-```cpp
+```cpp showLineNumbers 
 Animal animal = dog;
 // This is NOT polymorphic assignment!
 // It's copy construction: Animal(const Animal& other)
@@ -62,7 +62,7 @@ Base class copy constructor/assignment only handles base class members. It doesn
 
 Passing by value causes slicing:
 
-```cpp
+```cpp showLineNumbers 
 void processAnimal(Animal a) {  // ⚠️ Pass by value
     a.speak();  // Always calls Animal::speak!
 }
@@ -74,7 +74,7 @@ processAnimal(dog);  // "Animal sound" - sliced!
 
 ## Preventing Slicing: Use Pointers
 
-```cpp
+```cpp showLineNumbers 
 void processAnimal(Animal* a) {  // ✅ Pointer
     a->speak();  // Calls correct overridden version!
 }
@@ -87,7 +87,7 @@ Pointers and references preserve polymorphism. No copying, no slicing.
 
 ## Preventing Slicing: Use References
 
-```cpp
+```cpp showLineNumbers 
 void processAnimal(const Animal& a) {  // ✅ Reference
     a.speak();  // Calls correct overridden version!
 }
@@ -102,7 +102,7 @@ References are usually the best choice for polymorphic parameters.
 
 Storing objects (not pointers) in containers causes slicing:
 
-```cpp
+```cpp showLineNumbers 
 std::vector<Animal> animals;  // ⚠️ Stores Animal objects
 
 Dog dog;
@@ -118,7 +118,7 @@ for (auto& a : animals) {
 
 **Solution**: Store pointers (preferably smart pointers):
 
-```cpp
+```cpp showLineNumbers 
 std::vector<std::unique_ptr<Animal>> animals;  // ✅ Pointers
 
 animals.push_back(std::make_unique<Dog>());
@@ -131,7 +131,7 @@ for (auto& a : animals) {
 
 ## Assignment Slicing
 
-```cpp
+```cpp showLineNumbers 
 Dog dog;
 Cat cat;
 Animal& ref = dog;  // ✅ Reference, no slicing
@@ -149,7 +149,7 @@ Assignment through references still slices because it calls the base class assig
 
 ## Copy Construction vs Assignment
 
-```cpp
+```cpp showLineNumbers 
 Dog dog;
 
 Animal a1 = dog;    // Copy construction: slicing
@@ -177,7 +177,7 @@ g++ -Weffc++ file.cpp
 
 ## Real-World Example
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Bad: slicing
 std::vector<Animal> zoo;
 zoo.push_back(Dog());   // Sliced!

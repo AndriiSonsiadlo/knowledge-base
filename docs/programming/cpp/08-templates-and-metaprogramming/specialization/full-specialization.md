@@ -16,7 +16,7 @@ Full specialization = brand new implementation for specific types. `Template<int
 
 ## Function Template Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 T max(T a, T b) {
@@ -39,7 +39,7 @@ const char* s = max("abc", "xyz");  // Uses specialization
 ## Why Specialize?
 
 **Different algorithm for specific types:**
-```cpp
+```cpp showLineNumbers 
 // Generic swap
 template<typename T>
 void swap(T& a, T& b) {
@@ -60,7 +60,7 @@ void swap<std::array<int, 1000>>(
 
 ## Class Template Specialization
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Storage {
@@ -105,7 +105,7 @@ boolStore.set(true);
 
 ## Multiple Template Parameters
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T, typename U>
 class Pair {
@@ -138,7 +138,7 @@ p2.swap();  // Only available in specialization
 
 ## Specialization for Pointers
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class SmartPtr {
@@ -161,7 +161,7 @@ public:
 ## Specialization Declaration and Definition
 
 **Declare in header:**
-```cpp
+```cpp showLineNumbers 
 // header.h
 template<typename T>
 class Widget {
@@ -178,7 +178,7 @@ void Widget<int>::process();
 ```
 
 **Define in source:**
-```cpp
+```cpp showLineNumbers 
 // source.cpp
 template<>
 class Widget<int> {
@@ -196,7 +196,7 @@ void Widget<int>::process() {
 
 ## Member Function Specialization
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Processor {
 public:
@@ -224,7 +224,7 @@ ps.process("hello");  // "String specialized: hello"
 
 ## Specialization for Complex Types
 
-```cpp
+```cpp showLineNumbers 
 // Primary template
 template<typename T>
 class Container {
@@ -250,7 +250,7 @@ c2.info();  // "Vector container"
 
 Each specialization has its own static members:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Counter {
     static int count;
@@ -275,7 +275,7 @@ std::cout << Counter<bool>::getCount();  // 102 (started at 100!)
 
 ## Specialization Order Matters
 
-```cpp
+```cpp showLineNumbers 
 // Forward declare specialization before use
 template<typename T>
 class Widget;
@@ -294,7 +294,7 @@ Always declare specializations before first use.
 
 ## Friend Functions in Specializations
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Box {
     T value;
@@ -321,7 +321,7 @@ class Box<bool> {
 
 Specialization is how type traits work:
 
-```cpp
+```cpp showLineNumbers 
 // Primary template: assume false
 template<typename T>
 struct is_pointer {
@@ -341,7 +341,7 @@ is_pointer<char*>::value;  // true
 
 ## Real-World Example: Custom Hash
 
-```cpp
+```cpp showLineNumbers 
 // Primary template (assumes type has std::hash)
 template<typename T>
 struct MyHash {
@@ -368,7 +368,7 @@ std::unordered_map<Point, std::string, MyHash<Point>> map;
 
 ## Avoid Over-Specialization
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Bad: Too many specializations
 template<> void process<int>();
 template<> void process<long>();
@@ -391,7 +391,7 @@ void process() {
 
 **Function templates:** Prefer overloading over specialization:
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Specialization (can cause surprises)
 template<typename T>
 void func(T value) { std::cout << "Template\n"; }

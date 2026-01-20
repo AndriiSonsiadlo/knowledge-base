@@ -16,7 +16,7 @@ SFINAE is a fundamental C++ template mechanism: when template argument substitut
 
 ## Basic SFINAE Example
 
-```cpp
+```cpp showLineNumbers 
 // Works for types with .size() method
 template<typename T>
 auto getSize(const T& container) 
@@ -43,7 +43,7 @@ If `vec.size()` didn't exist, the first template would be removed from considera
 
 ## How SFINAE Works
 
-```cpp
+```cpp showLineNumbers 
 // This will SFINAE away for types without ::value_type
 template<typename T>
 typename T::value_type get(const T& container) {
@@ -73,7 +73,7 @@ auto b = get(x);    // Uses second (int doesn't have value_type, SFINAE)
 
 Check if an expression is valid:
 
-```cpp
+```cpp showLineNumbers 
 // Check if T supports operator[]
 template<typename T>
 auto access(T& container, size_t index)
@@ -101,7 +101,7 @@ access(x, 0);    // Returns x (no operator[])
 
 The trailing return type is perfect for SFINAE:
 
-```cpp
+```cpp showLineNumbers 
 // Only enabled if T has .begin() and .end()
 template<typename T>
 auto print(const T& container)
@@ -130,7 +130,7 @@ print(x);    // "Not a container"
 
 Classic approach before C++20 concepts:
 
-```cpp
+```cpp showLineNumbers 
 // Only for integral types
 template<typename T>
 typename std::enable_if<std::is_integral<T>::value, T>::type
@@ -155,7 +155,7 @@ If the condition is false, `enable_if<false, T>::type` doesn't exist → SFINAE.
 
 Check if a type has specific members:
 
-```cpp
+```cpp showLineNumbers 
 // Primary template: assume false
 template<typename, typename = void>
 struct has_size : std::false_type {};
@@ -181,7 +181,7 @@ has_size_v<int>                // false
 
 ## Checking Member Functions
 
-```cpp
+```cpp showLineNumbers 
 // Check for .serialize() method
 template<typename T, typename = void>
 struct is_serializable : std::false_type {};
@@ -208,7 +208,7 @@ save(const T&) {
 
 ## Checking Member Types
 
-```cpp
+```cpp showLineNumbers 
 // Check if type has ::iterator
 template<typename T, typename = void>
 struct has_iterator : std::false_type {};
@@ -231,7 +231,7 @@ has_value_type<std::map<int, int>>::value  // true
 
 ## Function Overloading with SFINAE
 
-```cpp
+```cpp showLineNumbers 
 // For containers
 template<typename T>
 auto sum(const T& container)
@@ -258,7 +258,7 @@ sum(42);    // 42 (arithmetic version)
 
 ## SFINAE in Class Templates
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename Enable = void>
 class Wrapper;
 
@@ -285,7 +285,7 @@ w2.info();  // "Value wrapper"
 
 ## Complex SFINAE Conditions
 
-```cpp
+```cpp showLineNumbers 
 // Type must be integral AND not bool
 template<typename T>
 std::enable_if_t<
@@ -312,7 +312,7 @@ auto process(const T& container)
 
 ## std::void_t Explained
 
-```cpp
+```cpp showLineNumbers 
 // std::void_t always produces void
 template<typename...>
 using void_t = void;
@@ -333,7 +333,7 @@ struct has_foo<T, std::void_t<decltype(&T::foo)>>
 ## Common SFINAE Patterns
 
 **Has member function:**
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename = void>
 struct has_print : std::false_type {};
 
@@ -343,7 +343,7 @@ struct has_print<T, std::void_t<decltype(std::declval<T>().print())>>
 ```
 
 **Has member type:**
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename = void>
 struct has_value_type : std::false_type {};
 
@@ -353,7 +353,7 @@ struct has_value_type<T, std::void_t<typename T::value_type>>
 ```
 
 **Supports operator:**
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename = void>
 struct has_addition : std::false_type {};
 
@@ -365,7 +365,7 @@ struct has_addition<T, std::void_t<decltype(std::declval<T>() + std::declval<T>(
 ## SFINAE vs Concepts (C++20)
 
 **SFINAE (complex):**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 std::enable_if_t<std::is_integral_v<T>, T>
 twice(T value) {
@@ -374,7 +374,7 @@ twice(T value) {
 ```
 
 **Concepts (clean):**
-```cpp
+```cpp showLineNumbers 
 template<std::integral T>
 T twice(T value) {
     return value * 2;

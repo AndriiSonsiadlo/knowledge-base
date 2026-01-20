@@ -16,7 +16,7 @@ Overload resolution happens at compile-time based on argument types, not runtime
 
 ## Basic Overloading
 
-```cpp
+```cpp showLineNumbers 
 void print(int x) {
     std::cout << "int: " << x << "\n";
 }
@@ -41,19 +41,19 @@ print("hello");  // Calls print(const char*)
 Functions can differ by:
 
 ✅ **Number of parameters**
-```cpp
+```cpp showLineNumbers 
 void func(int x);
 void func(int x, int y);
 ```
 
 ✅ **Type of parameters**
-```cpp
+```cpp showLineNumbers 
 void func(int x);
 void func(double x);
 ```
 
 ✅ **const/volatile qualifiers**
-```cpp
+```cpp showLineNumbers 
 void func(int x);
 void func(const int x);  // ❌ Same (top-level const ignored)
 
@@ -66,13 +66,13 @@ void process(std::string&& s);     // Rvalue
 ```
 
 ✅ **Reference qualifiers**
-```cpp
+```cpp showLineNumbers 
 void func(int& x);   // Lvalue reference
 void func(int&& x);  // Rvalue reference
 ```
 
 ❌ **Return type only** (not allowed)
-```cpp
+```cpp showLineNumbers 
 int func(int x);
 double func(int x);  // ❌ Error: differs only by return type
 ```
@@ -85,7 +85,7 @@ double func(int x);  // ❌ Error: differs only by return type
 2. **Filter viable**: Can be called with given arguments
 3. **Select best match**: Most specific match wins
 
-```cpp
+```cpp showLineNumbers 
 void func(int x);          // #1
 void func(double x);       // #2
 void func(int x, int y);   // #3
@@ -100,7 +100,7 @@ func('c');       // Calls #1: char promotes to int
 
 ## Exact Match vs Conversion
 
-```cpp
+```cpp showLineNumbers 
 void print(int x);
 void print(double x);
 
@@ -120,7 +120,7 @@ print('A');      // char → int promotion → print(int)
 
 ## Ambiguous Overloads
 
-```cpp
+```cpp showLineNumbers 
 void func(int x, double y);
 void func(double x, int y);
 
@@ -131,7 +131,7 @@ func(42, 3.14);    // ✅ OK: exact match on both
 
 ### Resolving Ambiguity
 
-```cpp
+```cpp showLineNumbers 
 // Explicit cast
 func(42, static_cast<double>(42));  // Calls first overload
 func(static_cast<double>(42), 42);  // Calls second overload
@@ -144,7 +144,7 @@ void func(int x, int y);  // Exact match for func(42, 42)
 
 ## const Overloading
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     int getValue() const {        // const version
@@ -172,7 +172,7 @@ int x = cw.getValue();  // Calls const version
 
 ## Reference Overloading
 
-```cpp
+```cpp showLineNumbers 
 void process(const std::string& s) {
     std::cout << "lvalue: " << s << "\n";
 }
@@ -192,7 +192,7 @@ process(std::move(str));   // Calls rvalue version
 
 ## Pointer vs Array
 
-```cpp
+```cpp showLineNumbers 
 void func(int* arr);
 void func(int arr[]);     // Same as int*
 void func(int arr[10]);   // Still same as int*
@@ -206,7 +206,7 @@ void func(int (&arr)[10]); // ✅ Different: reference to array
 
 ## Default Arguments
 
-```cpp
+```cpp showLineNumbers 
 void func(int x, int y = 0);
 void func(int x);  // ❌ Error: ambiguous with func(x, 0)
 
@@ -218,7 +218,7 @@ func(42);  // Which one? Ambiguous!
 
 ## Template Overloading
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T x) {
     std::cout << "template\n";
@@ -238,7 +238,7 @@ func(3.14);  // Calls template (only option)
 
 ## Variadic Overloading
 
-```cpp
+```cpp showLineNumbers 
 void print(int x) {
     std::cout << x << "\n";
 }
@@ -256,7 +256,7 @@ print(1, 2, 3, 4);  // 1, 2, 3, 4
 
 ## Name Hiding in Inheritance
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     void func(int x) {
@@ -278,7 +278,7 @@ d.func(42);    // Calls Derived::func(double), not Base::func(int)!
 
 **Solution**: Use `using` declaration:
 
-```cpp
+```cpp showLineNumbers 
 class Derived : public Base {
 public:
     using Base::func;  // Bring Base::func into scope
@@ -296,7 +296,7 @@ d.func(42);  // Now calls Base::func(int) - better match
 
 ## Operator Overloading
 
-```cpp
+```cpp showLineNumbers 
 class Complex {
     double real, imag;
 public:
@@ -338,7 +338,7 @@ Complex c = a + b;  // Calls operator+
 
 ### Surprising Conversions
 
-```cpp
+```cpp showLineNumbers 
 void func(long x);
 void func(double x);
 
@@ -347,7 +347,7 @@ func(42);  // ❌ Ambiguous! int→long and int→double both conversions
 
 ### Pointer/Bool Conversion
 
-```cpp
+```cpp showLineNumbers 
 void func(int x);
 void func(bool x);
 
@@ -356,7 +356,7 @@ func(nullptr);  // ❌ Ambiguous in some cases
 
 ### Forwarding References
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T&& x);  // Universal reference
 
@@ -386,7 +386,7 @@ Function overloading:
 - Parameter names
 - Top-level const
 
-```cpp
+```cpp showLineNumbers 
 // Good overload set
 void process(int x);              // Integer
 void process(double x);           // Floating-point

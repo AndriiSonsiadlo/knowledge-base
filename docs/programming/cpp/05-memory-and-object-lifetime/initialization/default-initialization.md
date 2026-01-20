@@ -18,7 +18,7 @@ Default initialization of fundamental types (int, double, pointers) in automatic
 
 When you declare a fundamental type variable without providing an initial value, the compiler performs default initialization. For automatic (local) variables, this means the memory is not cleared and contains whatever garbage values were previously there.
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int x;        // Default-initialized to indeterminate value
     double d;     // Indeterminate value
@@ -36,7 +36,7 @@ The reason for this behavior is performance: zeroing memory on every variable de
 
 For variables with static storage duration (globals and static locals), default initialization actually does provide a predictable value: zero. This is part of the C++ standard's guarantee that all static storage is zero-initialized before any other initialization occurs.
 
-```cpp
+```cpp showLineNumbers 
 int global;              // Default-initialized to 0
 static int file_static;  // Default-initialized to 0
 
@@ -55,7 +55,7 @@ This difference between automatic and static storage is a source of subtle bugs.
 
 When a class defines a default constructor (one that takes no arguments), default initialization calls that constructor. This provides a way to ensure objects are always in a valid state, even when no explicit initializer is provided.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int value;
 public:
@@ -76,7 +76,7 @@ The default constructor is called automatically, ensuring the object is properly
 
 If a class doesn't declare any constructors at all, the compiler generates an implicit default constructor. However, this generated constructor performs member-wise default initialization, which means fundamental type members are left uninitialized.
 
-```cpp
+```cpp showLineNumbers 
 class Point {
     int x, y;  // No constructor defined
 };
@@ -100,7 +100,7 @@ The compiler-generated default constructor does what you tell it to do, but for 
 
 Some classes explicitly delete their default constructor to prevent default initialization. This is useful when an object only makes sense with certain parameters.
 
-```cpp
+```cpp showLineNumbers 
 class File {
     FILE* handle;
 public:
@@ -120,7 +120,7 @@ By deleting the default constructor, the class designer forces users to provide 
 
 Arrays of fundamental types follow the same rules as scalar variables. Local arrays are left with indeterminate values, while static arrays are zero-initialized.
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int arr[10];  // Each element has indeterminate value ❌
     
@@ -142,7 +142,7 @@ This behavior extends to multi-dimensional arrays as well. The important princip
 
 When an array contains objects of a class type, each element is default-initialized by calling the class's default constructor. This ensures that all array elements are properly constructed.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     Widget() { std::cout << "Constructed\n"; }
@@ -158,7 +158,7 @@ The default constructor is called for each array element in order, from index 0 
 
 Class member variables are default-initialized when the constructor doesn't explicitly initialize them. For fundamental types in members, this means they have indeterminate values unless the class is stored in static storage.
 
-```cpp
+```cpp showLineNumbers 
 class Bad {
     int value;  // Not initialized in constructor
 public:
@@ -190,7 +190,7 @@ Always initialize member variables in the constructor's initializer list or use 
 
 Modern C++ allows you to provide default values directly in the class definition. These initializers are used when the constructor doesn't explicitly initialize the member.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int value = 42;      // In-class initializer
     std::string name = "default";

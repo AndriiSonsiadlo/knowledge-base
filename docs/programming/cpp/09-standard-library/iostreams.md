@@ -25,7 +25,7 @@ graph TD
 ```
 
 ## Standard Streams
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 // Standard input/output streams
@@ -40,7 +40,7 @@ std::clog  // standard error (buffered)
 :::
 
 ## Basic Input/Output
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <string>
 
@@ -62,7 +62,7 @@ int main() {
 ## File Streams
 
 ### Reading from Files
-```cpp
+```cpp showLineNumbers 
 #include <fstream>
 #include <string>
 
@@ -84,7 +84,7 @@ void readFile() {
 ```
 
 ### Writing to Files
-```cpp
+```cpp showLineNumbers 
 #include <fstream>
 
 void writeFile() {
@@ -103,7 +103,7 @@ Always check if a file opened successfully with `is_open()` or by testing the st
 :::
 
 ## String Streams
-```cpp
+```cpp showLineNumbers 
 #include <sstream>
 #include <string>
 
@@ -123,7 +123,7 @@ void stringStreamExample() {
 ```
 
 ## Stream Manipulators
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <iomanip>
 
@@ -149,7 +149,7 @@ void formatOutput() {
 ```
 
 ## Stream States
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 void checkStreamState() {
@@ -172,7 +172,7 @@ Always clear error flags with `clear()` before retrying input after a failure.
 :::
 
 ## Binary I/O
-```cpp
+```cpp showLineNumbers 
 #include <fstream>
 
 struct Data {
@@ -195,7 +195,7 @@ void binaryIO() {
 ```
 
 ## Custom Stream Operators
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 
 struct Point {
@@ -237,7 +237,7 @@ int main() {
   :::
 
 ## Performance Tips
-```cpp
+```cpp showLineNumbers 
 // Disable synchronization with C streams for better performance
 std::ios_base::sync_with_stdio(false);
 std::cin.tie(nullptr);

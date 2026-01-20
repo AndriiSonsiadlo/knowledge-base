@@ -18,7 +18,7 @@ Algorithms work on ranges defined by iterators. One algorithm works with vector,
 
 ### std::find - Linear Search
 
-```cpp
+```cpp showLineNumbers 
 #include <algorithm>
 #include <vector>
 
@@ -46,7 +46,7 @@ auto it3 = std::find_if_not(vec.begin(), vec.end(), [](int x) {
 
 ### std::count - Count Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 2, 5, 2};
 
 // Count occurrences
@@ -60,7 +60,7 @@ int even_count = std::count_if(vec.begin(), vec.end(), [](int x) {
 
 ### std::all_of, any_of, none_of
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {2, 4, 6, 8};
 
 // All satisfy predicate?
@@ -81,7 +81,7 @@ bool none_odd = std::none_of(vec.begin(), vec.end(), [](int x) {
 
 ### std::for_each - Apply Function
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 // Apply function to each element
@@ -104,7 +104,7 @@ auto final_func = std::for_each(vec.begin(), vec.end(), sum_func);
 
 ### std::copy - Copy Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> src = {1, 2, 3, 4, 5};
 std::vector<int> dst(5);
 
@@ -124,7 +124,7 @@ std::copy_n(src.begin(), 3, first_three.begin());  // {1, 2, 3}
 
 ### std::move - Move Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<std::string> src = {"one", "two", "three"};
 std::vector<std::string> dst(3);
 
@@ -136,7 +136,7 @@ std::move(src.begin(), src.end(), dst.begin());
 
 ### std::transform - Apply Function and Store Result
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 std::vector<int> result(5);
 
@@ -155,7 +155,7 @@ std::transform(vec.begin(), vec.end(), vec2.begin(), result.begin(),
 
 ### std::fill and std::generate
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec(10);
 
 // Fill with value
@@ -170,7 +170,7 @@ std::generate(vec.begin(), vec.end(), [&counter]() {
 
 ### std::replace - Replace Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 2, 5, 2};
 
 // Replace all 2s with 99
@@ -185,7 +185,7 @@ std::replace_if(vec.begin(), vec.end(), [](int x) {
 
 ### std::remove - Remove Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 2, 5, 2};
 
 // Remove all 2s (doesn't actually delete!)
@@ -207,7 +207,7 @@ vec.erase(new_end2, vec.end());
 
 ### std::unique - Remove Consecutive Duplicates
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 1, 2, 2, 2, 3, 3, 1};
 
 // Must be sorted for full deduplication!
@@ -220,7 +220,7 @@ vec.erase(new_end, vec.end());
 
 ### std::reverse - Reverse Range
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 std::reverse(vec.begin(), vec.end());
@@ -233,7 +233,7 @@ std::reverse_copy(vec.begin(), vec.end(), reversed.begin());
 
 ### std::rotate - Rotate Elements
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 // Rotate left (move first element to end)
@@ -249,7 +249,7 @@ std::rotate(vec.rbegin(), vec.rbegin() + 1, vec.rend());
 
 ### std::sort - Sort Range
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
 
 // Sort ascending
@@ -271,7 +271,7 @@ std::sort(words.begin(), words.end(), [](const auto& a, const auto& b) {
 
 ### std::stable_sort - Stable Sort
 
-```cpp
+```cpp showLineNumbers 
 struct Person {
     std::string name;
     int age;
@@ -290,7 +290,7 @@ std::stable_sort(people.begin(), people.end(), [](const auto& a, const auto& b) 
 
 ### std::partial_sort - Partially Sort
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
 
 // Sort first 4 elements, rest can be in any order
@@ -302,7 +302,7 @@ std::partial_sort(vec.begin(), vec.begin() + 4, vec.end());
 
 ### std::nth_element - Find Nth Element
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
 
 // Partition so vec[4] is in correct sorted position
@@ -323,7 +323,7 @@ int median = vec[mid];
 
 ### std::binary_search - Check if Element Exists
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
 bool found = std::binary_search(vec.begin(), vec.end(), 5);  // true
@@ -334,7 +334,7 @@ bool found = std::binary_search(vec.begin(), vec.end(), 5);  // true
 
 ### std::lower_bound - First >= Value
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 4, 4, 4, 6, 7};
 
 auto it = std::lower_bound(vec.begin(), vec.end(), 4);
@@ -344,14 +344,14 @@ int index = std::distance(vec.begin(), it);  // 2
 
 ### std::upper_bound - First > Value
 
-```cpp
+```cpp showLineNumbers 
 auto it = std::upper_bound(vec.begin(), vec.end(), 4);
 // Points to 6 (first element > 4)
 ```
 
 ### std::equal_range - Range of Equal Elements
 
-```cpp
+```cpp showLineNumbers 
 auto [lower, upper] = std::equal_range(vec.begin(), vec.end(), 4);
 // lower points to first 4
 // upper points to 6
@@ -362,7 +362,7 @@ int count = std::distance(lower, upper);  // 3 (three 4s)
 
 ## Set Operations (on sorted ranges)
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3, 4, 5};
 std::vector<int> v2 = {3, 4, 5, 6, 7};
 std::vector<int> result;
@@ -393,7 +393,7 @@ std::set_symmetric_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
 
 ## Heap Operations
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {3, 1, 4, 1, 5, 9};
 
 // Make heap (max heap by default)
@@ -415,7 +415,7 @@ std::sort_heap(vec.begin(), vec.end());
 
 ## Min/Max Operations
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
 
 // Min/max element
@@ -436,7 +436,7 @@ auto [a, b] = std::minmax(5, 10);  // {5, 10}
 
 ## Permutations
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3};
 
 // Next permutation
@@ -459,7 +459,7 @@ std::prev_permutation(vec.begin(), vec.end());
 
 ## Numeric Algorithms
 
-```cpp
+```cpp showLineNumbers 
 #include <numeric>
 
 std::vector<int> vec = {1, 2, 3, 4, 5};
@@ -498,7 +498,7 @@ std::iota(seq.begin(), seq.end(), 0);
 
 ## C++17 Parallel Algorithms
 
-```cpp
+```cpp showLineNumbers 
 #include <execution>
 
 std::vector<int> vec(1000000);

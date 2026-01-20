@@ -20,7 +20,7 @@ Explanation of the concept...
 
 ## Example
 
-```cpp
+```cpp showLineNumbers 
 // Example code
 #include <iostream>
 

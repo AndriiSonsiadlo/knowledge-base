@@ -18,7 +18,7 @@ tags: [c++, smart-pointers, weak-ptr, reference-counting, cpp11]
 
 A weak_ptr doesn't increase the reference count of the object it observes. The object can be deleted even if weak_ptrs still exist.
 
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 
 std::weak_ptr<int> weak;
@@ -43,7 +43,7 @@ The weak_ptr watches the shared_ptr but doesn't participate in ownership. When a
 
 You create weak_ptrs from shared_ptrs, never from raw pointers or unique_ptrs.
 
-```cpp
+```cpp showLineNumbers 
 auto shared = std::make_shared<int>(42);
 
 // Create weak_ptr from shared_ptr
@@ -63,7 +63,7 @@ All these weak_ptrs observe the same object but don't own it. The shared_ptr's r
 
 Before accessing an object through weak_ptr, you must check if it still exists.
 
-```cpp
+```cpp showLineNumbers 
 std::weak_ptr<int> weak;
 
 {
@@ -93,7 +93,7 @@ The `expired()` method checks if the object has been deleted (equivalent to `use
 
 To access the object, convert the weak_ptr to shared_ptr using `lock()`. This fails safely if the object has been deleted.
 
-```cpp
+```cpp showLineNumbers 
 std::weak_ptr<int> weak;
 
 {
@@ -123,7 +123,7 @@ if (auto locked = weak.lock()) {
 
 Directly checking and then accessing would have a race condition in multithreaded code.
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Race condition (don't do this)
 if (!weak.expired()) {
     // Another thread might destroy last shared_ptr here!
@@ -143,7 +143,7 @@ if (auto shared = weak.lock()) {
 
 The primary use case for weak_ptr is breaking circular references that would prevent shared_ptr from deleting objects.
 
-```cpp
+```cpp showLineNumbers 
 class Node {
 public:
     std::string data;
@@ -174,7 +174,7 @@ Without weak_ptr, the `prev` pointers would be shared_ptrs, creating reference c
 
 Parent-child relationships typically use shared_ptr from parent to child and weak_ptr from child to parent.
 
-```cpp
+```cpp showLineNumbers 
 class Child;
 
 class Parent {
@@ -215,7 +215,7 @@ The parent owns the children (strong references), and children observe the paren
 
 weak_ptr is ideal for implementing observers that should not keep observed objects alive.
 
-```cpp
+```cpp showLineNumbers 
 class Subject {
     std::vector<std::weak_ptr<Observer>> observers;
     
@@ -248,7 +248,7 @@ Observers can be destroyed without notifying the subject. The subject doesn't ke
 
 weak_ptr enables caches that don't prevent cached objects from being deleted.
 
-```cpp
+```cpp showLineNumbers 
 class ResourceManager {
     std::map<std::string, std::weak_ptr<Resource>> cache;
     
@@ -278,7 +278,7 @@ The cache stores weak_ptrs, so it doesn't prevent resources from being deleted w
 
 weak_ptr provides several operations for observation and conversion.
 
-```cpp
+```cpp showLineNumbers 
 auto shared = std::make_shared<int>(42);
 std::weak_ptr<int> weak = shared;
 
@@ -307,7 +307,7 @@ if (weak.expired()) {
 
 Like shared_ptr, weak_ptr's control block operations are thread-safe, but the observed object isn't automatically protected.
 
-```cpp
+```cpp showLineNumbers 
 std::shared_ptr<int> shared = std::make_shared<int>(42);
 std::weak_ptr<int> weak = shared;
 
@@ -332,7 +332,7 @@ Creating and destroying weak_ptrs, copying them, and calling `lock()` are all th
 
 When you need to create a shared_ptr or weak_ptr to `this` inside a member function, inherit from `enable_shared_from_this`.
 
-```cpp
+```cpp showLineNumbers 
 class Widget : public std::enable_shared_from_this<Widget> {
 public:
     std::weak_ptr<Widget> getWeakPtr() {
@@ -361,7 +361,7 @@ Never create a shared_ptr directly from `this` - it creates a second control blo
 
 ### Common Mistake: Creating from this
 
-```cpp
+```cpp showLineNumbers 
 class Bad {
 public:
     std::shared_ptr<Bad> getPtr() {
@@ -378,7 +378,7 @@ auto ptr2 = ptr1->getPtr();            // Control block 2 (disaster!)
 
 weak_ptr has minimal overhead - it's essentially a pointer plus a pointer to the control block.
 
-```cpp
+```cpp showLineNumbers 
 sizeof(std::weak_ptr<int>) == sizeof(std::shared_ptr<int>)
 // Both: 16 bytes (2 pointers)
 

@@ -19,7 +19,7 @@ Stack and heap are the two primary memory regions for storing variables. Underst
 
 ### Characteristics
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int x = 42;           // Stack allocation
     char buffer[1024];    // Stack array
@@ -61,7 +61,7 @@ Low Address
 
 **Stack overflow**: Exceeding stack size causes crash:
 
-```cpp
+```cpp showLineNumbers 
 void recursive() {
     int large[100000];  // Each call allocates 400KB
     recursive();        // ❌ Stack overflow after ~10 calls
@@ -74,7 +74,7 @@ void recursive() {
 
 ### Characteristics
 
-```cpp
+```cpp showLineNumbers 
 void function() {
     int* ptr = new int(42);        // Heap allocation
     char* buffer = new char[1024]; // Heap array
@@ -116,7 +116,7 @@ Deallocation:
 
 **Fragmentation**:
 
-```cpp
+```cpp showLineNumbers 
 char* a = new char[100];  // [100]
 char* b = new char[100];  // [100][100]
 delete a;                 // [free][100]
@@ -146,7 +146,7 @@ char* c = new char[150];  // ❌ Can't fit! Fragmented
 
 ### Use Stack When
 
-```cpp
+```cpp showLineNumbers 
 // Small objects
 int x = 42;
 std::array<int, 100> arr;
@@ -165,7 +165,7 @@ void fast_function() {
 
 ### Use Heap When
 
-```cpp
+```cpp showLineNumbers 
 // Large objects
 int* huge = new int[1000000];  // 4 MB, too big for stack
 
@@ -185,7 +185,7 @@ Base* ptr = new Derived();  // Dynamic type
 
 ## Performance Impact
 
-```cpp
+```cpp showLineNumbers 
 // Stack allocation benchmark
 void stack_test() {
     for (int i = 0; i < 1000000; ++i) {
@@ -208,7 +208,7 @@ void heap_test() {
 
 ## Stack Overflow
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Stack overflow causes
 void recursive_bomb() {
     recursive_bomb();  // Infinite recursion
@@ -237,7 +237,7 @@ g++ -fstack-protector-all program.cpp
 
 ## Memory Leaks (Heap Problem)
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Leak
 void leak() {
     int* ptr = new int(42);
@@ -263,7 +263,7 @@ void array_safe() {
 
 ### Example 1: Factory Function
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Cannot return stack object
 Widget create() {
     Widget w;
@@ -288,7 +288,7 @@ std::unique_ptr<Widget> create() {
 
 ### Example 2: Large Data
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Stack overflow
 void process_data() {
     double matrix[10000][10000];  // 800 MB!
@@ -304,7 +304,7 @@ void process_data() {
 
 ### Example 3: Variable Size
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Can't do variable-length arrays on stack (non-standard)
 void process(int n) {
     int arr[n];  // ❌ VLA (not standard C++)
@@ -320,7 +320,7 @@ void process(int n) {
 
 ## Cache Performance
 
-```cpp
+```cpp showLineNumbers 
 // Stack (good cache locality)
 void stack_access() {
     int arr[1000];
@@ -377,7 +377,7 @@ void heap_access() {
 - Slower, but necessary for many cases
 
 **Decision guide**:
-```cpp
+```cpp showLineNumbers 
 // Stack (default)
 int x = 42;
 Widget w;

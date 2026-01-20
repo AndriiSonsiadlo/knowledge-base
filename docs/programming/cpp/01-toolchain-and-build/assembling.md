@@ -46,7 +46,7 @@ Debug info:       Source line mappings (if -g flag)
 
 ### Example Object File Content
 
-```cpp
+```cpp showLineNumbers 
 // source.cpp
 int global = 42;           // .data section
 int uninit;                // .bss section
@@ -120,7 +120,7 @@ nm main.o
 
 Object files have **relative addresses** that need fixing during linking:
 
-```cpp
+```cpp showLineNumbers 
 extern int external_var;
 
 int foo() {

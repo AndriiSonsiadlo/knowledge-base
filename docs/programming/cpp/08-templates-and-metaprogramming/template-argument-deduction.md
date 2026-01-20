@@ -16,7 +16,7 @@ The compiler examines function arguments and deduces template parameters. Usuall
 
 ## Basic Deduction
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T param) {
     // ...
@@ -35,7 +35,7 @@ Compiler matches argument types to template parameters automatically.
 ## Reference Deduction
 
 **lvalue reference:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T& param) {
     // ...
@@ -50,7 +50,7 @@ func(cx);  // T = const int, param type is const int&
 ```
 
 **const reference:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(const T& param) {
     // ...
@@ -62,7 +62,7 @@ func(5);   // ✅ OK: const ref binds to rvalue
 ```
 
 **rvalue reference (forwarding reference):**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T&& param) {  // Universal/forwarding reference
     // ...
@@ -76,7 +76,7 @@ func(std::move(x));  // rvalue: T = int, param = int&&
 
 ## Pointer Deduction
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T* param) {
     // ...
@@ -91,7 +91,7 @@ func(&cx);  // T = const int, param = const int*
 
 ## Array Deduction
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T param) {
     // ...
@@ -120,7 +120,7 @@ size_t size = arraySize(arr);  // N = 15
 
 ## const and Reference Stripping
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T param) {  // Pass by value
     // ...
@@ -139,7 +139,7 @@ When passing by value, top-level const and references are stripped because you'r
 
 ## Multiple Parameters
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T a, T b) {  // Both must be same type
     // ...
@@ -159,7 +159,7 @@ func2(5, 3.14);  // ✅ T = int, U = double
 
 ## Explicit Template Arguments
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 T max(T a, T b) {
     return (a > b) ? a : b;
@@ -180,7 +180,7 @@ double d = convert<double>(x);  // R = double (specified), T = int (deduced)
 
 ## Return Type Deduction
 
-```cpp
+```cpp showLineNumbers 
 // C++11: Trailing return with decltype
 template<typename T, typename U>
 auto add(T a, U b) -> decltype(a + b) {
@@ -198,7 +198,7 @@ auto x = add(5, 3.14);  // Returns double
 
 ## Class Template Argument Deduction (CTAD - C++17)
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Pair {
 public:
@@ -221,7 +221,7 @@ std::vector v{1, 2, 3, 4, 5};  // Deduced as vector<int>
 
 Help the compiler deduce template arguments:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 class Container {
 public:
@@ -241,7 +241,7 @@ Container c2("hello");  // Deduced as Container<std::string>
 
 ## Common Deduction Failures
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void func(T a, T b) {
     // ...
@@ -268,7 +268,7 @@ void func(typename std::vector<T>::iterator it) {
 
 ## Perfect Forwarding
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 void wrapper(T&& arg) {
     // Forward preserving value category

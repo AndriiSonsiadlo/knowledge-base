@@ -16,7 +16,7 @@ Concept = named set of requirements. Instead of cryptic SFINAE, you get clear, r
 
 ## Basic Concept Definition
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Numeric = std::is_arithmetic_v<T>;
 
@@ -37,7 +37,7 @@ Much clearer than SFINAE!
 
 C++20 provides many concepts in `<concepts>`:
 
-```cpp
+```cpp showLineNumbers 
 #include <concepts>
 
 // Integral types
@@ -70,27 +70,27 @@ To convert(From value) {
 ## Four Ways to Use Concepts
 
 **1. Template constraint:**
-```cpp
+```cpp showLineNumbers 
 template<std::integral T>
 T add(T a, T b) { return a + b; }
 ```
 
 **2. Trailing requires clause:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 requires std::integral<T>
 T add(T a, T b) { return a + b; }
 ```
 
 **3. Abbreviated function template (auto):**
-```cpp
+```cpp showLineNumbers 
 auto add(std::integral auto a, std::integral auto b) {
     return a + b;
 }
 ```
 
 **4. Inline concept check:**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 T add(T a, T b) requires std::integral<T> {
     return a + b;
@@ -103,7 +103,7 @@ All four are equivalent! Choose based on readability.
 
 Define your own requirements:
 
-```cpp
+```cpp showLineNumbers 
 // Simple concept
 template<typename T>
 concept Incrementable = requires(T x) {
@@ -133,7 +133,7 @@ concept Container = requires(T c) {
 ## Combining Concepts
 
 **AND (conjunction):**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept SignedIntegral = std::integral<T> && std::signed_integral<T>;
 
@@ -144,7 +144,7 @@ T negate(T value) {
 ```
 
 **OR (disjunction):**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Number = std::integral<T> || std::floating_point<T>;
 
@@ -155,7 +155,7 @@ T square(T value) {
 ```
 
 **NOT (negation):**
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept NotPointer = !std::is_pointer_v<T>;
 
@@ -169,7 +169,7 @@ void process(T value) {
 
 More specific concepts are preferred:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Integral = std::is_integral_v<T>;
 
@@ -196,7 +196,7 @@ Compiler picks the most constrained overload.
 
 ## Concepts with Multiple Parameters
 
-```cpp
+```cpp showLineNumbers 
 template<typename T, typename U>
 concept Addable = requires(T a, U b) {
     { a + b } -> std::convertible_to<T>;
@@ -217,7 +217,7 @@ add("hello", 5); // ❌ const char* + int not addable
 
 Build concepts on top of others:
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Readable = requires(T x) {
     { x.read() } -> std::same_as<std::string>;
@@ -242,7 +242,7 @@ void processFile(T& file) {
 ## Standard Concepts Overview
 
 **Core language concepts:**
-```cpp
+```cpp showLineNumbers 
 std::same_as<T, U>          // T and U are same type
 std::derived_from<T, Base>  // T derives from Base
 std::convertible_to<From, To>  // From converts to To
@@ -255,14 +255,14 @@ std::floating_point<T>      // float, double, long double
 ```
 
 **Comparison concepts:**
-```cpp
+```cpp showLineNumbers 
 std::equality_comparable<T>     // Supports ==
 std::totally_ordered<T>         // Supports <, >, <=, >=
 std::three_way_comparable<T>    // Supports <=>
 ```
 
 **Object concepts:**
-```cpp
+```cpp showLineNumbers 
 std::movable<T>              // Move constructible/assignable
 std::copyable<T>             // Copy constructible/assignable
 std::semiregular<T>          // Default + move/copy
@@ -270,14 +270,14 @@ std::regular<T>              // Semiregular + equality comparable
 ```
 
 **Callable concepts:**
-```cpp
+```cpp showLineNumbers 
 std::invocable<F, Args...>   // Can call F with Args
 std::predicate<F, Args...>   // Returns bool
 ```
 
 ## Concepts with Ranges
 
-```cpp
+```cpp showLineNumbers 
 #include <ranges>
 
 // Only accept ranges
@@ -300,7 +300,7 @@ void binarySearch(R&& range, const auto& value) {
 
 Different implementations for different concepts:
 
-```cpp
+```cpp showLineNumbers 
 // Generic version
 template<typename T>
 void serialize(const T& value) {
@@ -327,7 +327,7 @@ serialize(std::string("hi"));  // "String: hi"
 
 ## Class Template Concepts
 
-```cpp
+```cpp showLineNumbers 
 template<typename T>
 concept Numeric = std::is_arithmetic_v<T>;
 
@@ -366,7 +366,7 @@ Clear and concise!
 
 ## Real-World Example
 
-```cpp
+```cpp showLineNumbers 
 // Generic container algorithm
 template<typename C>
 concept Container = requires(C c) {

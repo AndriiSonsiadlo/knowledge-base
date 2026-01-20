@@ -18,7 +18,7 @@ Read declarations right-to-left: `const int* ptr` = "ptr is a pointer to const i
 
 A pointer to const cannot modify the pointed-to data, but the pointer itself can be reassigned to point elsewhere.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10, y = 20;
 const int* ptr = &x;  // Pointer to const int
 
@@ -35,7 +35,7 @@ The `const` protects the data from modification through this particular pointer,
 
 Both `const int*` and `int const*` mean the same thing: pointer to const int. The const applies to the int, not the pointer.
 
-```cpp
+```cpp showLineNumbers 
 const int* ptr1 = &x;  // Pointer to const int
 int const* ptr2 = &x;  // Same thing (const after type)
 
@@ -50,7 +50,7 @@ The first form (`const int*`) is more common, but the second form (`int const*`)
 
 A const pointer always points to the same object but allows modifying that object's value.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10, y = 20;
 int* const ptr = &x;  // const pointer to int
 
@@ -66,7 +66,7 @@ The pointer is const (can't be reassigned), but the data isn't const (can be mod
 
 Const pointers are useful when you want a pointer with reference-like "cannot be reseated" semantics but need actual pointer behavior.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
     int* const internal_ptr;  // Always points to same allocation
     
@@ -87,7 +87,7 @@ Member pointers that should never change what they point to benefit from being c
 
 Both the pointer and the pointed-to data are const. Neither can be changed.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10, y = 20;
 const int* const ptr = &x;  // const pointer to const int
 
@@ -103,7 +103,7 @@ This provides maximum immutability for the pointer. You're promising not to modi
 
 The right-to-left reading rule helps parse complex const declarations correctly.
 
-```cpp
+```cpp showLineNumbers 
 const int* const ptr;
 // Read right-to-left: "ptr is a const pointer to const int"
 
@@ -123,7 +123,7 @@ The position of `const` relative to `*` determines what's const. Before `*` (or 
 
 const pointers in function signatures communicate intent and enable compiler optimizations.
 
-```cpp
+```cpp showLineNumbers 
 // Pointer to const - can't modify through pointer
 void read_data(const int* data, size_t size) {
     for (size_t i = 0; i < size; ++i) {
@@ -152,7 +152,7 @@ Most commonly, functions take pointer-to-const to indicate they won't modify the
 
 Pointer-to-const works naturally with arrays, preventing modification of array elements.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {1, 2, 3, 4, 5};
 const int* ptr = arr;  // Pointer to const int
 
@@ -169,7 +169,7 @@ Array subscripting works through pointer-to-const because it's syntactic sugar f
 
 You can remove const with `const_cast`, but modifying originally-const data is undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 int x = 10;
 const int* cptr = &x;
 
@@ -190,7 +190,7 @@ If the original object was declared const, removing const and modifying it is un
 
 const affects what you can do with dynamically allocated memory through the pointer.
 
-```cpp
+```cpp showLineNumbers 
 // Pointer to const on heap
 const int* ptr1 = new int(42);
 // *ptr1 = 10;  // ❌ Cannot modify
@@ -213,7 +213,7 @@ The const qualifiers don't prevent deleting the memory, only modification throug
 
 Using const correctly throughout your code catches bugs at compile-time and documents intent.
 
-```cpp
+```cpp showLineNumbers 
 class Buffer {
     int* data;
     size_t size;

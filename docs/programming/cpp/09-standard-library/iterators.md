@@ -16,7 +16,7 @@ Iterators abstract away container details. Algorithms work with any container th
 
 ## Iterator Basics
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 #include <iostream>
 
@@ -49,7 +49,7 @@ Different iterators support different operations, forming a hierarchy.
 
 Can read elements, move forward, single-pass.
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <iterator>
 
@@ -81,7 +81,7 @@ while (input != eof) {
 
 Can write elements, move forward, single-pass.
 
-```cpp
+```cpp showLineNumbers 
 #include <iostream>
 #include <iterator>
 #include <vector>
@@ -113,7 +113,7 @@ auto inserter = std::back_inserter(vec);
 
 Can read/write, move forward, multi-pass allowed.
 
-```cpp
+```cpp showLineNumbers 
 #include <forward_list>
 
 std::forward_list<int> flist = {1, 2, 3, 4, 5};
@@ -141,7 +141,7 @@ int x = *it2;  // Can read
 
 Can move both directions.
 
-```cpp
+```cpp showLineNumbers 
 #include <list>
 #include <set>
 
@@ -172,7 +172,7 @@ std::cout << *it;  // 4
 
 Can jump to any position instantly.
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 #include <array>
 
@@ -210,7 +210,7 @@ auto diff = vec.end() - vec.begin();  // Number of elements
 
 Guarantees contiguous memory (vector, array, string).
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 int* ptr = &*vec.begin();  // Get raw pointer
@@ -224,7 +224,7 @@ ptr[2];  // Same as vec[2]
 
 Prevents modification through the iterator.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3};
 
 // Regular iterator (can modify)
@@ -246,7 +246,7 @@ auto it2 = cvec.begin();  // const_iterator
 
 Iterate backward.
 
-```cpp
+```cpp showLineNumbers 
 #include <vector>
 
 std::vector<int> vec = {1, 2, 3, 4, 5};
@@ -267,7 +267,7 @@ auto it = rit.base();  // Convert to normal iterator
 
 ## Iterator Operations
 
-```cpp
+```cpp showLineNumbers 
 #include <iterator>
 #include <vector>
 
@@ -293,7 +293,7 @@ auto it3 = std::prev(vec.end(), 1);    // Iterator at last element
 
 Special output iterators that insert into containers.
 
-```cpp
+```cpp showLineNumbers 
 #include <iterator>
 #include <vector>
 
@@ -321,7 +321,7 @@ auto insert_it = std::inserter(vec2, vec2.begin() + 1);
 
 Read from or write to streams.
 
-```cpp
+```cpp showLineNumbers 
 #include <iterator>
 #include <fstream>
 #include <vector>
@@ -343,7 +343,7 @@ std::copy(vec.begin(), vec.end(), out_it);  // Prints: 1 2 3 4 5
 
 Query properties of iterators at compile-time.
 
-```cpp
+```cpp showLineNumbers 
 #include <iterator>
 #include <vector>
 
@@ -370,7 +370,7 @@ using Ref = std::iterator_traits<VecIter>::reference;  // int&
 
 Create iterators for custom containers.
 
-```cpp
+```cpp showLineNumbers 
 class Range {
     int current;
     int end;
@@ -410,7 +410,7 @@ for (int i : Range(0, 10)) {
 
 Iterators can become invalid after container modifications.
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 auto it = vec.begin() + 2;  // Points to 3
@@ -431,7 +431,7 @@ it = vec.begin() + index;  // Recalculate iterator
 
 ## Range-Based for Loop (Iterator Under the Hood)
 
-```cpp
+```cpp showLineNumbers 
 std::vector<int> vec = {1, 2, 3, 4, 5};
 
 // Range-based for
@@ -458,7 +458,7 @@ for (const auto& val : vec) {
 
 ## Iterator Concepts (C++20)
 
-```cpp
+```cpp showLineNumbers 
 #include <iterator>
 
 template<std::input_iterator Iter>
@@ -482,7 +482,7 @@ void fast_access(Iter it) {
 
 ## Common Pitfalls
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Dereferencing end()
 auto it = vec.end();
 *it;  // Undefined behavior!

@@ -18,7 +18,7 @@ shared_ptr uses reference counting - each copy increments the count, each destru
 
 Creating and copying shared_ptrs is straightforward. All copies share ownership of the same object.
 
-```cpp
+```cpp showLineNumbers 
 #include <memory>
 
 // Create shared_ptr
@@ -42,7 +42,7 @@ Copying a shared_ptr increments the reference count. The object persists as long
 
 Always prefer `std::make_shared` over direct `new` for efficiency and exception safety.
 
-```cpp
+```cpp showLineNumbers 
 // ✅ Preferred: make_shared (single allocation)
 auto ptr1 = std::make_shared<int>(42);
 auto ptr2 = std::make_shared<std::string>("hello");
@@ -57,7 +57,7 @@ std::shared_ptr<int> ptr3(new int(42));
 
 shared_ptr maintains a reference count tracking how many shared_ptrs own the object.
 
-```cpp
+```cpp showLineNumbers 
 auto ptr1 = std::make_shared<int>(42);
 std::cout << ptr1.use_count();  // 1
 
@@ -80,7 +80,7 @@ Each shared_ptr can query the current reference count with `use_count()`. When t
 
 Reference count updates are thread-safe (atomic), but the pointed-to object is not automatically protected.
 
-```cpp
+```cpp showLineNumbers 
 std::shared_ptr<int> global_ptr = std::make_shared<int>(42);
 
 void thread1() {
@@ -100,7 +100,7 @@ Copying shared_ptrs between threads is safe - the reference count operations are
 
 Multiple shared_ptrs can own the same object, useful for shared resources and graph structures.
 
-```cpp
+```cpp showLineNumbers 
 class Node {
 public:
     std::string data;
@@ -126,7 +126,7 @@ This enables building complex data structures where multiple objects reference t
 
 Like unique_ptr, you can reset shared_ptrs to release ownership or take ownership of a different object.
 
-```cpp
+```cpp showLineNumbers 
 auto ptr1 = std::make_shared<int>(42);
 auto ptr2 = ptr1;
 
@@ -148,7 +148,7 @@ Resetting decrements the reference count. If it was the last owner, the object i
 
 shared_ptr works naturally with inheritance and polymorphism.
 
-```cpp
+```cpp showLineNumbers 
 class Base {
 public:
     virtual ~Base() { std::cout << "~Base\n"; }
@@ -176,7 +176,7 @@ The virtual destructor ensures correct cleanup. All shared_ptrs can share owners
 
 Containers can hold shared_ptrs, enabling collections where multiple containers can reference the same objects.
 
-```cpp
+```cpp showLineNumbers 
 class Widget {
 public:
     int id;
@@ -204,7 +204,7 @@ Objects persist as long as any container holds a shared_ptr to them. This enable
 
 Different parameter types express different ownership and lifetime requirements.
 
-```cpp
+```cpp showLineNumbers 
 // Observe: doesn't extend lifetime
 void observe(const Widget* w) {
     w->inspect();
@@ -239,7 +239,7 @@ Pass by raw pointer or reference when the function doesn't need ownership. Pass 
 
 shared_ptr can create circular references that prevent deletion, causing memory leaks.
 
-```cpp
+```cpp showLineNumbers 
 class Node {
 public:
     std::shared_ptr<Node> next;  // ❌ Circular reference possible
@@ -263,7 +263,7 @@ Each node keeps the other alive through its shared_ptr. When the original shared
 
 Use `weak_ptr` to break circular references (covered in the next section).
 
-```cpp
+```cpp showLineNumbers 
 class Node {
 public:
     std::shared_ptr<Node> next;
@@ -284,7 +284,7 @@ node2->prev = node1;       // Weak reference (doesn't increase count)
 
 shared_ptr supports aliasing - storing one pointer but referencing another, useful for managing members of an object.
 
-```cpp
+```cpp showLineNumbers 
 struct Widget {
     int value;
     Widget(int v) : value(v) {}
@@ -310,7 +310,7 @@ The aliased shared_ptr shares ownership of the Widget but points to its member. 
 
 shared_ptr supports custom deleters for non-standard cleanup, passed at construction time.
 
-```cpp
+```cpp showLineNumbers 
 auto deleter = [](FILE* f) {
     if (f) {
         std::cout << "Closing file\n";
@@ -329,7 +329,7 @@ Unlike unique_ptr, the deleter type isn't part of shared_ptr's type, making it e
 
 shared_ptr has overhead compared to unique_ptr and raw pointers due to reference counting.
 
-```cpp
+```cpp showLineNumbers 
 // Size overhead
 sizeof(std::shared_ptr<int>) > sizeof(std::unique_ptr<int>)
 // shared_ptr: 16 bytes (2 pointers: object + control block)
@@ -348,7 +348,7 @@ The control block contains the reference count and weak count, requiring extra m
 
 Like unique_ptr, shared_ptr works well with factory functions, but allows sharing the returned object.
 
-```cpp
+```cpp showLineNumbers 
 std::shared_ptr<Widget> createWidget(int id) {
     return std::make_shared<Widget>(id);
 }

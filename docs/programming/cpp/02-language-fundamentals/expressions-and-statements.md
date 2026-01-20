@@ -19,7 +19,7 @@ Expressions produce values; statements perform actions. Understanding the distin
 
 An expression is any code that produces a value and can be evaluated.
 
-```cpp
+```cpp showLineNumbers 
 // Simple expressions
 42                  // Literal (value: 42)
 x                   // Variable (value: contents of x)
@@ -47,7 +47,7 @@ A statement is a complete instruction that performs an action. Most statements e
 
 ### Types of Statements
 
-```cpp
+```cpp showLineNumbers 
 // Expression statement (expression + semicolon)
 x = 5;              // Assignment statement
 func();             // Function call statement
@@ -75,7 +75,7 @@ break;              // Break statement
 
 ## Expression vs Statement Examples
 
-```cpp
+```cpp showLineNumbers 
 // Expression: produces value, no semicolon needed
 int x = 5 + 3;      // '5 + 3' is expression
         ^^^^
@@ -101,7 +101,7 @@ x = (y = 5) + 3;    // y = 5 is expression (value: 5)
 
 The building blocks of all expressions:
 
-```cpp
+```cpp showLineNumbers 
 // Literals
 42                  // Integer literal
 3.14                // Floating-point literal
@@ -123,7 +123,7 @@ this->member        // Access to class member
 
 ### Postfix Expressions
 
-```cpp
+```cpp showLineNumbers 
 arr[5]              // Array subscript
 obj.member          // Member access
 ptr->member         // Pointer member access
@@ -135,7 +135,7 @@ type(value)         // Functional cast
 
 ### Unary Expressions
 
-```cpp
+```cpp showLineNumbers 
 ++x                 // Pre-increment (returns new value)
 --x                 // Pre-decrement
 +x                  // Unary plus
@@ -152,7 +152,7 @@ delete ptr          // Deallocation
 
 ### Binary Expressions
 
-```cpp
+```cpp showLineNumbers 
 // Arithmetic
 x + y               // Addition
 x - y               // Subtraction
@@ -190,7 +190,7 @@ x *= y              // x = x * y
 
 Only one ternary operator in C++:
 
-```cpp
+```cpp showLineNumbers 
 condition ? value_if_true : value_if_false
 
 // Examples
@@ -207,7 +207,7 @@ int sign = (x > 0) ? 1 : (x < 0) ? -1 : 0;
 
 Determines evaluation order when multiple operators present:
 
-```cpp
+```cpp showLineNumbers 
 // High to low precedence (simplified)
 x++  x--                    // Postfix
 ++x  --x  !  ~  *  &        // Unary
@@ -233,7 +233,7 @@ int x = y = 5;              // 5 (right-to-left)
 
 Use parentheses for clarity:
 
-```cpp
+```cpp showLineNumbers 
 // Unclear
 int result = x + y * z;
 
@@ -249,7 +249,7 @@ int result = x + (y * z);   // Explicit intent
 
 Empty statement (just semicolon):
 
-```cpp
+```cpp showLineNumbers 
 ;                   // Null statement
 
 // Used in loops with no body
@@ -265,7 +265,7 @@ for (int i = 0; i < n; ++i, sum += i)
 
 Groups multiple statements:
 
-```cpp
+```cpp showLineNumbers 
 {
     int x = 5;      // Local to block
     int y = 10;
@@ -283,7 +283,7 @@ std::cout << x;     // 1
 
 ### Declaration Statement
 
-```cpp
+```cpp showLineNumbers 
 int x;                      // Declaration
 int y = 5;                  // Declaration with initialization
 const double PI = 3.14;     // Constant declaration
@@ -296,7 +296,7 @@ int *ptr, arr[10];          // Pointer and array
 
 ### Selection Statements
 
-```cpp
+```cpp showLineNumbers 
 // If statement
 if (x > 0) {
     std::cout << "Positive";
@@ -326,7 +326,7 @@ if (auto result = compute(); result > 0) {
 
 ### Iteration Statements
 
-```cpp
+```cpp showLineNumbers 
 // While loop
 while (condition) {
     // Body
@@ -350,7 +350,7 @@ for (auto& elem : container) {
 
 ### Jump Statements
 
-```cpp
+```cpp showLineNumbers 
 // Break: exit loop/switch
 while (true) {
     if (done) break;
@@ -379,7 +379,7 @@ error_handler:
 
 ### Order of Evaluation
 
-```cpp
+```cpp showLineNumbers 
 // Undefined order in most cases
 int result = f() + g() + h();  // f, g, h can be called in any order
 
@@ -399,7 +399,7 @@ x || y           // If x is true, y not evaluated
 
 Points where all previous evaluations complete:
 
-```cpp
+```cpp showLineNumbers 
 // Semicolon is sequence point
 x = 1;
 y = x + 1;       // x=1 completes before this
@@ -422,7 +422,7 @@ arr[i++] = 5;    // OK: i evaluated before increment
 
 ### Assignment in Condition
 
-```cpp
+```cpp showLineNumbers 
 // ❌ Common mistake
 if (x = 5) {     // Assignment, not comparison!
     // Always executes (5 is true)
@@ -441,7 +441,7 @@ if ((x = getValue()) != 0) {
 
 ### Expression as Statement
 
-```cpp
+```cpp showLineNumbers 
 x + 5;           // ⚠️ Legal but useless (value discarded)
 x == 5;          // ⚠️ Legal but useless (comparison unused)
 
@@ -470,7 +470,7 @@ x = 5;           // ✅ Useful statement
 - Operator precedence determines evaluation order
 - Short-circuit evaluation for `&&` and `||`
 
-```cpp
+```cpp showLineNumbers 
 // Expression
 x + y
 

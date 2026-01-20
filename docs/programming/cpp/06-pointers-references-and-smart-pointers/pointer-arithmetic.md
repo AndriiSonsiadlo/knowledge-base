@@ -18,7 +18,7 @@ Adding 1 to a pointer moves it forward by `sizeof(type)` bytes, not 1 byte. The 
 
 When you add an integer to a pointer, the pointer advances by that many elements of the pointed-to type. This makes array navigation natural.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* ptr = arr;  // Points to arr[0]
 
@@ -38,7 +38,7 @@ The compiler multiplies the integer by `sizeof(int)` automatically. This is why 
 
 You can combine pointer arithmetic with dereferencing to access elements at calculated positions.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* ptr = arr;
 
@@ -58,7 +58,7 @@ The subscript operator `ptr[i]` is syntactic sugar for `*(ptr + i)`. Both forms 
 
 Pointers support increment and decrement operators, which move the pointer forward or backward by one element.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* ptr = arr;
 
@@ -77,7 +77,7 @@ These operators modify the pointer itself, changing what it points to. This is u
 
 The distinction between pre and post increment matters when the result is used in an expression.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30};
 int* ptr = arr;
 
@@ -96,7 +96,7 @@ Post-increment returns the old pointer value before incrementing, while pre-incr
 
 Subtracting two pointers gives the number of elements between them, not the byte difference. This only makes sense for pointers into the same array.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* start = arr;
 int* end = arr + 5;
@@ -114,7 +114,7 @@ The result type is `ptrdiff_t`, a signed integer type that can represent the dif
 
 Pointer subtraction enables computing array size when you have pointers to the beginning and end.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* begin = arr;
 int* end = arr + 5;  // One past the last element
@@ -132,7 +132,7 @@ This pattern is fundamental to C++ iterators. The "one past the end" pointer is 
 
 Pointers can be compared with relational operators when they point into the same array or object. Comparison checks addresses, not pointed-to values.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* p1 = arr;
 int* p2 = arr + 2;
@@ -158,7 +158,7 @@ Relational comparison (`<`, `>`, `<=`, `>=`) only makes sense for pointers into 
 
 Pointer arithmetic is the foundation of array iteration. Modern C++ prefers iterators, but understanding pointer arithmetic helps with legacy code and manual memory management.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30, 40, 50};
 int* end = arr + 5;  // One past last element
 
@@ -179,7 +179,7 @@ The loop continues while the pointer hasn't reached the end marker. Incrementing
 
 Pointer arithmetic works with multi-dimensional arrays but requires understanding how they're laid out in memory as contiguous rows.
 
-```cpp
+```cpp showLineNumbers 
 int matrix[3][4] = {
     {1,  2,  3,  4},
     {5,  6,  7,  8},
@@ -205,7 +205,7 @@ Multi-dimensional arrays are stored in row-major order. The compiler converts `m
 
 Pointer arithmetic has no bounds checking. Going beyond array boundaries causes undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 int arr[5] = {10, 20, 30, 40, 50};
 int* ptr = arr;
 
@@ -226,7 +226,7 @@ The compiler doesn't check if your pointer arithmetic stays within bounds. Acces
 
 Unchecked pointer arithmetic is the root cause of buffer overflow vulnerabilities, where writing past array bounds corrupts adjacent memory.
 
-```cpp
+```cpp showLineNumbers 
 char buffer[10];
 char* ptr = buffer;
 
@@ -246,7 +246,7 @@ Buffer overflows are dangerous security vulnerabilities. Attackers can exploit t
 
 Pointer arithmetic works with any type, including structures. Adding 1 moves to the next structure in an array.
 
-```cpp
+```cpp showLineNumbers 
 struct Point {
     int x, y;
 };
@@ -270,7 +270,7 @@ The compiler knows `sizeof(Point)` and moves the pointer by that amount. This wo
 
 Pointer arithmetic assumes all pointed-to memory has the same type. Treating memory as a different type breaks type safety and often causes undefined behavior.
 
-```cpp
+```cpp showLineNumbers 
 int arr[] = {10, 20, 30};
 int* iptr = arr;
 
