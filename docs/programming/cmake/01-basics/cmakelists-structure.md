@@ -15,7 +15,7 @@ readability. This structure typically starts with version requirements, project 
 compiler settings, and gradually adds dependencies, subdirectories, targets, installation rules, and
 testing configuration.
 
-```python title="CMakeLists.txt (Complete Example)"
+```cmake title="CMakeLists.txt (Complete Example)"
 # 1. Minimum version requirement
 cmake_minimum_required(VERSION 3.15)
 
@@ -59,7 +59,7 @@ endif()
 
 ### 1. Version Requirement
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 ```
 
@@ -76,7 +76,7 @@ missing commands.
 
 ### 2. Project Declaration
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 project(MyProject 
     VERSION 1.0.0
     DESCRIPTION "A sample project"
@@ -108,7 +108,7 @@ available for all targets, dependencies, and packaging commands.
 This section ensures all targets use a consistent C++ standard and compiler options, and optionally
 generates `compile_commands.json` for IDEs or code analysis tools.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -134,7 +134,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 Options allow users to customize the build without editing CMake files. For example, users may
 enable/disable tests, documentation, or optional features using `cmake -DOPTION=ON/OFF ..`.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 option(BUILD_TESTS "Build the test suite" ON)
 option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_WARNINGS "Enable compiler warnings" ON)
@@ -142,7 +142,7 @@ option(ENABLE_WARNINGS "Enable compiler warnings" ON)
 
 This pattern ensures optional features are only included when explicitly enabled:
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
@@ -164,7 +164,7 @@ automatically.
 
 #### Using find_package()
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # Mandatory dependency (System libraries)
 find_package(Threads REQUIRED)
 
@@ -191,7 +191,7 @@ target_link_libraries(myapp PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 For more manual control, CMake also provides:
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # Locate a library file
 find_library(MYLIB_PATH mylib PATHS /usr/local/lib /opt/lib)
 
@@ -217,7 +217,7 @@ These are lower-level commands useful if `find_package()` is not available for a
 
 :::
 
-```python title="Example: Modern CMake with Dependencies"
+```cmake title="Example: Modern CMake with Dependencies"
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Boost 1.70 COMPONENTS filesystem system QUIET)
@@ -235,7 +235,7 @@ endif()
 
 The `add_subdirectory()` command allows you to split a large project into smaller, self-contained modules, each with its own `CMakeLists.txt`. This makes it easier to manage complex builds.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 add_subdirectory(src)
 add_subdirectory(libs)
 add_subdirectory(external/fmt)
@@ -263,7 +263,7 @@ This improves modularity, readability, and maintainability.
 
 Targets are the **fundamental building blocks** in CMake. They represent the actual outputs of your project: either executables or libraries. Properly defining targets makes your build modular, maintainable, and portable.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # Executable
 add_executable(myapp 
     src/main.cpp
@@ -331,7 +331,7 @@ For header-only libraries, define them as `INTERFACE` libraries with `target_inc
 
 CMake provides the `install()` command to define how your project’s binaries, libraries, and headers are installed on a system or packaged for distribution. This is especially important if you want users or other projects to use your library or executable without building from source.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # Install executable and libraries
 install(TARGETS myapp mylib
     RUNTIME DESTINATION bin       # Executable binaries (Windows/Linux)
@@ -357,7 +357,7 @@ install(DIRECTORY include/
 
 You can also install files selectively using `FILES`:
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 install(FILES README.md LICENSE DESTINATION share/doc/MyProject)
 ```
 
@@ -381,7 +381,7 @@ If no `--prefix` is given, CMake uses the default install directory, which varie
 
 CMake provides built-in support for testing through **CTest**. By defining test executables and registering them, you can easily run automated tests as part of your build process. This helps catch regressions early and ensures your code behaves as expected.
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 if(BUILD_TESTS)
     enable_testing()  # Enable CTest functionality
 
@@ -442,7 +442,7 @@ For unit tests, consider frameworks like **Google Test**, **Catch2**, or **docte
 
 **Pattern 1: List explicitly**
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 add_executable(myapp
     src/main.cpp
     src/file1.cpp
@@ -452,7 +452,7 @@ add_executable(myapp
 
 **Pattern 2: Use variables**
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 set(SOURCES
     src/main.cpp
     src/file1.cpp
@@ -463,7 +463,7 @@ add_executable(myapp ${SOURCES})
 
 **Pattern 3: Glob (not recommended)**
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 file(GLOB SOURCES "src/*.cpp")
 add_executable(myapp ${SOURCES})
 ```
@@ -474,14 +474,14 @@ CMake won't detect new files added after initial configuration. Prefer explicit 
 
 ### Header-Only Libraries
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 add_library(myheaderlib INTERFACE)
 target_include_directories(myheaderlib INTERFACE include)
 ```
 
 ### Conditional Compilation
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 if(WIN32)
     target_sources(myapp PRIVATE src/windows_specific.cpp)
 elseif(UNIX)
@@ -507,7 +507,7 @@ project/
     └── test_mylib.cpp
 ```
 
-```python title="CMakeLists.txt (Root)"
+```cmake title="CMakeLists.txt (Root)"
 cmake_minimum_required(VERSION 3.15)
 project(MultiFileProject VERSION 1.0)
 
@@ -523,7 +523,7 @@ if(BUILD_TESTS)
 endif()
 ```
 
-```python title="lib/CMakeLists.txt"
+```cmake title="lib/CMakeLists.txt"
 add_library(mylib STATIC
     mylib.cpp
 )
@@ -533,7 +533,7 @@ target_include_directories(mylib PUBLIC
 )
 ```
 
-```python title="src/CMakeLists.txt"
+```cmake title="src/CMakeLists.txt"
 add_executable(myapp
     main.cpp
     app.cpp
@@ -542,7 +542,7 @@ add_executable(myapp
 target_link_libraries(myapp PRIVATE mylib)
 ```
 
-```python title="tests/CMakeLists.txt"
+```cmake title="tests/CMakeLists.txt"
 add_executable(test_suite test_mylib.cpp)
 target_link_libraries(test_suite PRIVATE mylib)
 add_test(NAME MyLibTests COMMAND test_suite)
@@ -568,7 +568,7 @@ add_test(NAME MyLibTests COMMAND test_suite)
 
 ## Quick Template
 
-```python title="Minimal Modern CMakeLists.txt"
+```cmake title="Minimal Modern CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(ProjectName VERSION 1.0 LANGUAGES CXX)
 

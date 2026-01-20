@@ -65,7 +65,7 @@ flowchart TD
 
 Here's the simplest possible CMake project:
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(HelloWorld)
 

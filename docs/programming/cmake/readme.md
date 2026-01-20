@@ -73,7 +73,7 @@ Adding tests to your project:
 
 ### Common Commands
 
-```python title="CMake Basics"
+```cmake title="CMake Basics"
 # Project setup
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0)
@@ -97,7 +97,7 @@ find_package(Threads REQUIRED)
 
 ### Build Workflow
 
-```python title="Terminal"
+```bash title="Terminal"
 # Configure
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 

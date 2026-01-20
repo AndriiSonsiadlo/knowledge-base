@@ -58,7 +58,7 @@ inline std::string getGreeting() {
 
 ### 3. Create CMakeLists.txt
 
-```python title="CMakeLists.txt"
+```cmake title="CMakeLists.txt"
 # Minimum required version
 cmake_minimum_required(VERSION 3.15)
 
@@ -195,7 +195,7 @@ cmake -G "Xcode" ..
 The example above works, but modern CMake uses **target-based** configuration:
 :::
 
-```python title="CMakeLists.txt (Modern Style)"
+```cmake title="CMakeLists.txt (Modern Style)"
 cmake_minimum_required(VERSION 3.15)
 project(MyFirstProject VERSION 1.0)
 
