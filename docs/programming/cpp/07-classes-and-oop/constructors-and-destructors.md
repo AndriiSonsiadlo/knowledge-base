@@ -8,48 +8,109 @@ tags: [c++, classes, constructors, destructors, lifecycle, raii]
 
 # Constructors and Destructors
 
-Deep dive into object lifecycle, construction/destruction order, exception safety, and advanced patterns.
+Constructors initialize objects and allocate resources. Destructors clean up when objects are destroyed. Together they enable RAII (Resource Acquisition Is Initialization).
 
 :::info Object Lifecycle
-**Birth**: Constructor runs  
-**Life**: Object is usable  
-**Death**: Destructor runs (automatic cleanup)
+**Birth** → Constructor runs  
+**Life** → Object is usable  
+**Death** → Destructor runs (automatic cleanup)
 :::
 
-## Construction Order Details
+## Constructor Basics
 
-Members initialize in declaration order, not initializer list order:
-
-```cpp showLineNumbers 
+Constructors initialize objects. They have the same name as the class and no return type.
+```cpp showLineNumbers
 class Widget {
-    int b;
-    int a;
+    int value;
+    std::string name;
     
 public:
-    // ⚠️ Misleading: a listed first but b initializes first!
-    Widget(int val) : a(val), b(a * 2) {
-        // b initializes first (uninitialized value!)
-        // then a initializes
-    }
+    // Default constructor
+    Widget() : value(0), name("default") {}
     
-    // ✅ Correct: match declaration order
-    Widget(int val) : b(val * 2), a(val) {
-        // b = val * 2
-        // a = val
+    // Parameterized constructor
+    Widget(int v) : value(v), name("widget") {}
+    
+    // Multiple parameters
+    Widget(int v, std::string n) : value(v), name(n) {}
+};
+
+Widget w1;              // Calls default constructor
+Widget w2(42);          // Calls Widget(int)
+Widget w3(42, "test");  // Calls Widget(int, string)
+```
+
+**Member initializer list** (`: value(v), name(n)`) is preferred over assignment in the body because it directly constructs members rather than default-constructing then assigning.
+
+## Initialization vs Assignment
+```cpp showLineNumbers
+class Widget {
+    const int id;
+    std::string name;
+    
+public:
+    // ✅ Correct: initializer list
+    Widget(int i, std::string n) 
+        : id(i), name(n) {}
+    
+    // ❌ Won't compile: can't assign to const
+    Widget(int i, std::string n) {
+        id = i;      // Error: id is const
+        name = n;    // Works but inefficient (default construct + assign)
     }
 };
 ```
 
-**Rules:**
-1. Base classes (left to right if multiple inheritance)
+:::success Use Initializer Lists
+**Required for:**
+- const members
+- Reference members
+- Members without default constructor
+
+**Better for:**
+- All other members (more efficient)
+:::
+
+## Construction Order
+
+Members initialize in **declaration order**, not initializer list order. Bases initialize before members.
+```cpp showLineNumbers
+class Base {
+public:
+    Base() { std::cout << "1. Base "; }
+};
+
+class Widget : public Base {
+    int second;
+    int first;
+    
+public:
+    // ⚠️ Misleading: first listed but second initializes first!
+    Widget(int val) : first(val), second(first * 2) {}
+    // Order: Base → second → first (declaration order)
+    
+    // ✅ Correct: match declaration order
+    Widget(int val) : second(val), first(val * 2) {}
+};
+
+Widget w(5);
+// Output: "1. Base "
+// Initialization: Base() → second=5 → first=10
+```
+
+**Initialization order:**
+1. Base classes (left to right for multiple inheritance)
 2. Member variables (declaration order)
 3. Constructor body
 
+:::warning Order Matters
+Always list initializers in declaration order to avoid confusion. Compiler may warn if order doesn't match.
+:::
+
 ## Destruction Order
 
-Exact reverse of construction:
-
-```cpp showLineNumbers 
+Destruction happens in **exact reverse** of construction.
+```cpp showLineNumbers
 class Base {
 public:
     ~Base() { std::cout << "~Base "; }
@@ -62,35 +123,120 @@ public:
 
 class Derived : public Base {
     Member m;
+    
 public:
     ~Derived() { std::cout << "~Derived "; }
 };
 
-Derived d;
-// Output on destruction: ~Derived ~Member ~Base
+{
+    Derived d;
+}
+// Output: ~Derived ~Member ~Base
 ```
 
-**Rules:**
+**Destruction order:**
 1. Destructor body
 2. Member variables (reverse declaration order)
-3. Base classes (reverse of construction order)
+3. Base classes (reverse construction order)
+
+## Delegating Constructors
+
+One constructor can call another, avoiding code duplication.
+```cpp showLineNumbers
+class Widget {
+    int value;
+    std::string name;
+    bool initialized;
+    
+    void init() { /* common initialization */ }
+    
+public:
+    // Main constructor
+    Widget(int v, std::string n) 
+        : value(v), name(n), initialized(true) {
+        init();
+    }
+    
+    // Delegate to main constructor
+    Widget(int v) : Widget(v, "default") {}
+    Widget() : Widget(0, "default") {}
+};
+```
+
+:::danger Delegation Rules
+**Cannot mix** delegation with member initialization:
+```cpp
+// ❌ Error: can't have both
+Widget(int v) : Widget(v, "default"), value(42) {}
+
+// ✅ Choose one:
+Widget(int v) : Widget(v, "default") {}  // Delegation
+// OR
+Widget(int v) : value(v), name("default") {}  // Direct
+```
+:::
+
+## Explicit Constructors
+
+Prevent implicit conversions with single-argument constructors.
+```cpp showLineNumbers
+class String {
+public:
+    String(int size) {}  // ⚠️ Allows implicit conversion
+};
+
+void process(String s) {}
+
+process(100);  // ⚠️ Implicit: int → String(100)
+
+// ✅ Use explicit
+class String {
+public:
+    explicit String(int size) {}
+};
+
+// process(100);  // ❌ Error: no implicit conversion
+process(String(100));  // ✅ OK: explicit conversion
+```
+
+:::success Use explicit
+**Always use `explicit`** for single-argument constructors (except copy/move constructors) to prevent accidental conversions.
+:::
+
+## Default and Delete (C++11)
+
+Explicitly control compiler-generated functions.
+```cpp showLineNumbers
+class Widget {
+public:
+    Widget() = default;  // Use compiler-generated version
+    ~Widget() = default;
+    
+    // Prevent copying
+    Widget(const Widget&) = delete;
+    Widget& operator=(const Widget&) = delete;
+};
+
+Widget w1;
+// Widget w2 = w1;  // ❌ Error: copy deleted
+```
+
+`= default` tells compiler to generate the default implementation. `= delete` prevents the function from being used at all.
 
 ## Exceptions in Constructors
 
-If constructor throws, object isn't fully constructed:
-
-```cpp showLineNumbers 
+If a constructor throws, the object isn't fully constructed and the destructor won't run.
+```cpp showLineNumbers
 class Resource {
     int* data;
     
 public:
-    Resource() {
-        data = new int[1000];
+    Resource(int size) {
+        data = new int[size];
         
         if (someCondition()) {
-            // ⚠️ Exception before constructor completes!
             throw std::runtime_error("Init failed");
-            // data leaked! Destructor won't run!
+            // ⚠️ data leaked! Destructor won't run!
         }
     }
     
@@ -100,118 +246,105 @@ public:
 };
 ```
 
-**Solution:** Use RAII members that clean themselves up:
-
-```cpp showLineNumbers 
+**Solution**: Use RAII members that clean themselves up.
+```cpp showLineNumbers
 class Resource {
     std::unique_ptr<int[]> data;  // ✅ Cleans up automatically
     
 public:
-    Resource() : data(new int[1000]) {
+    Resource(int size) : data(new int[size]) {
         if (someCondition()) {
             throw std::runtime_error("Init failed");
             // data automatically deleted (unique_ptr destructor runs)
         }
     }
+    // No destructor needed - unique_ptr handles it
 };
 ```
 
-## Two-Phase Initialization
+:::info Constructor Exception Safety
+Members that were successfully constructed before the exception **will** have their destructors called. Only the object's destructor won't run.
+:::
 
-Sometimes you need separate construction and initialization:
+## Virtual Destructors
 
-```cpp showLineNumbers 
-class Database {
-    Connection* conn;
+Always make base class destructor virtual if you'll delete through a base pointer.
+```cpp showLineNumbers
+class Base {
+public:
+    ~Base() {  // ❌ Not virtual!
+        std::cout << "~Base\n";
+    }
+};
+
+class Derived : public Base {
+    int* data;
     
 public:
-    // Phase 1: Constructor (can't fail)
-    Database() : conn(nullptr) {}
+    Derived() : data(new int[100]) {}
     
-    // Phase 2: Initialize (can fail)
-    bool initialize(const std::string& connString) {
-        try {
-            conn = new Connection(connString);
-            return true;
-        } catch (...) {
-            return false;
-        }
+    ~Derived() {
+        delete[] data;
+        std::cout << "~Derived\n";
     }
-    
-    ~Database() { delete conn; }
 };
 
-Database db;
-if (!db.initialize("localhost:5432")) {
-    std::cerr << "Failed to connect\n";
-}
+Base* ptr = new Derived();
+delete ptr;  // ⚠️ Only calls ~Base! Memory leak!
+
+// ✅ Fix: virtual destructor
+class Base {
+public:
+    virtual ~Base() { std::cout << "~Base\n"; }
+};
+
+// Now delete ptr calls both ~Derived and ~Base
 ```
 
-**Better:** Use exception-throwing constructor or factory function.
+:::danger Always Virtual
+**If your class has any virtual functions, make the destructor virtual!** Otherwise, deleting through a base pointer causes resource leaks.
+:::
 
 ## Virtual Functions in Constructors/Destructors
 
-Don't call virtual functions in constructor/destructor:
-
-```cpp showLineNumbers 
+Don't call virtual functions in constructors or destructors - they won't dispatch to derived versions.
+```cpp showLineNumbers
 class Base {
 public:
     Base() {
         init();  // ⚠️ Calls Base::init, not Derived::init!
     }
     
-    virtual void init() { std::cout << "Base init\n"; }
+    virtual void init() { 
+        std::cout << "Base init\n"; 
+    }
+    
     virtual ~Base() = default;
 };
 
 class Derived : public Base {
 public:
-    void init() override { std::cout << "Derived init\n"; }
+    void init() override { 
+        std::cout << "Derived init\n"; 
+    }
 };
 
 Derived d;  // Output: "Base init"
-// During Base constructor, object is still a Base, not Derived yet!
 ```
 
-During construction, the object's type gradually "becomes" the derived type. In Base constructor, it's only a Base.
+**Why?** During Base's constructor, the object is still just a Base - the Derived part hasn't been constructed yet. Virtual dispatch uses the current type.
 
-## Delegating Constructors
-
-One constructor calls another (C++11):
-
-```cpp showLineNumbers 
-class Widget {
-    int value;
-    std::string name;
-    
-public:
-    // Main constructor
-    Widget(int v, std::string n) 
-        : value(v), name(n) {
-        // Common initialization
-    }
-    
-    // Delegates to main constructor
-    Widget(int v) : Widget(v, "default") {}
-    Widget() : Widget(0, "default") {}
-};
-```
-
-**Can't** mix delegation with member initialization:
-
-```cpp showLineNumbers 
-// ❌ Error: can't have both
-Widget(int v) : Widget(v, "default"), value(42) {}
-
-// ✅ Must choose one:
-Widget(int v) : Widget(v, "default") {}  // Delegation
-// OR
-Widget(int v) : value(v), name("default") {}  // Direct init
-```
+:::warning Construction Phases
+- During Base constructor → object is a Base
+- During Derived constructor → object becomes Derived
+- During Derived destructor → object becomes Base again
+- During Base destructor → object is a Base
+:::
 
 ## Inheriting Constructors
 
-```cpp showLineNumbers 
+Derived class can inherit base class constructors.
+```cpp showLineNumbers
 class Base {
 public:
     Base(int x) {}
@@ -231,54 +364,80 @@ Derived d1(5);
 Derived d2(5, 10);
 ```
 
+This avoids writing forwarding constructors when you just want to pass arguments to the base class.
+
 ## Placement new
 
-Construct object in pre-allocated memory:
-
-```cpp showLineNumbers 
+Construct an object in pre-allocated memory.
+```cpp showLineNumbers
 alignas(Widget) char buffer[sizeof(Widget)];
 
 Widget* w = new (buffer) Widget(42);  // Placement new
 w->use();
 
 w->~Widget();  // Explicit destructor call
-// Don't delete w! (memory not from heap)
+// Don't delete w! Memory not from heap
 ```
 
-Used for memory pools, custom allocators, and embedded systems.
+**Used for:**
+- Memory pools
+- Custom allocators
+- Embedded systems
+- Avoiding heap allocations
 
 ## Trivial Destructors
 
-Trivial destructors can be optimized away:
-
-```cpp showLineNumbers 
+Trivial destructors can be optimized away by the compiler.
+```cpp showLineNumbers
 struct Simple {
     int x, y;
     // Implicit trivial destructor (does nothing)
 };
 
-// Compiler can optimize: no destructor call needed
+// Compiler optimizes: no destructor calls needed
 std::vector<Simple> vec(1000);
-vec.clear();  // Just deallocates memory, no destructor calls
+vec.clear();  // Just deallocates memory
 
 struct Complex {
     std::string s;
-    ~Complex() {}  // Non-trivial (string's destructor must run)
+    ~Complex() {}  // Non-trivial (string destructor must run)
 };
+
+std::vector<Complex> vec2(1000);
+vec2.clear();  // Calls 1000 destructors
 ```
 
-**Trivial if:**
-- No user-defined destructor
-- No virtual functions
-- No virtual base classes
-- All members have trivial destructors
+**Trivial destructor** = compiler-generated, does nothing. Allows optimizations like `memcpy` instead of element-wise copy.
 
-:::success Constructor/Destructor Key Points
+## Summary
 
-**Order matters** = members by declaration, bases before members  
-**Exceptions** = use RAII members for exception safety  
-**No virtual calls** = in ctor/dtor (wrong type context)  
-**Delegation** = one ctor calls another (can't mix with member init)  
-**Inheriting** = `using Base::Base` inherits constructors  
-**Placement new** = construct in pre-allocated memory
+:::info Constructor basics:
+- Initialize objects, same name as class, no return type
+- Use initializer list (required for const/reference, efficient for all)
+- Initialization order: bases → members (declaration order) → body
+:::
+
+:::info Destructor basics:
+- Clean up resources, runs automatically
+- Destruction order: body → members (reverse) → bases (reverse)
+- Make virtual if base class with virtual functions
+:::
+
+:::info Modern features:
+- Delegating constructors avoid code duplication
+- `explicit` prevents implicit conversions
+- `= default` uses compiler-generated version
+- `= delete` prevents function use
+:::
+
+:::info Safety:
+- Use RAII members for exception safety in constructors
+- Never call virtual functions in constructors/destructors
+- Always virtual destructor for polymorphic base classes
+:::
+
+:::info Advanced:
+- Inheriting constructors with `using Base::Base`
+- Placement new for custom memory management
+- Trivial destructors enable optimizations
 :::

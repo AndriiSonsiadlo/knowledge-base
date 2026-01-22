@@ -1,7 +1,7 @@
 ---
 id: dynamic-vs-static-polymorphism
 title: Dynamic vs Static Polymorphism
-sidebar_label: Dynamic vs Static
+sidebar_label: Dynamic vs Static Polymorphism
 sidebar_position: 11
 tags: [c++, polymorphism, templates, virtual-functions]
 ---

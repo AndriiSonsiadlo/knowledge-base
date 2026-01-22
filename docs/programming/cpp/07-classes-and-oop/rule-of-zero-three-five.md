@@ -8,71 +8,70 @@ tags: [c++, special-members, rule-of-five, raii, best-practices]
 
 # Rule of Zero/Three/Five
 
-These rules tell you which special member functions (constructor, destructor, copy, move, assignment) you need to define based on your class's resource management needs. Following these rules prevents memory leaks, double-deletes, and other resource management bugs.
+These rules tell you which special member functions to define based on your class's resource management needs.
 
-:::info Special Members Working Together
-If you manage resources manually, you must handle all related operations (Rule of 5). If you use RAII wrappers, you don't need to define any (Rule of 0)!
+:::info The Three Rules
+**Rule of Zero** - Use RAII wrappers, define nothing  
+**Rule of Three** - If you need one, you need all three (C++98)  
+**Rule of Five** - If you need one, you need all five (C++11+)
 :::
 
-## The Special Member Functions
+## The Six Special Members
 
-C++ automatically generates up to six special member functions if you don't define them yourself:
-
-```cpp showLineNumbers 
+C++ can generate up to six special member functions:
+```cpp showLineNumbers
 class Widget {
 public:
     Widget();                              // Default constructor
     ~Widget();                             // Destructor
     Widget(const Widget&);                 // Copy constructor
     Widget& operator=(const Widget&);      // Copy assignment
-    Widget(Widget&&) noexcept;             // Move constructor (C++11)
-    Widget& operator=(Widget&&) noexcept;  // Move assignment (C++11)
+    Widget(Widget&&) noexcept;             // Move constructor
+    Widget& operator=(Widget&&) noexcept;  // Move assignment
 };
 ```
 
-These functions handle object creation, destruction, copying, and moving. The compiler generates them if needed, but its defaults only work for simple cases. When you manage resources (memory, files, handles), you need to define them yourself!
+The compiler generates them when needed, but defaults only work for simple cases. When you manage resources, you need custom implementations.
 
-## Rule of Zero
+## Rule of Zero (Best Case)
 
-**Best Case**: If your class doesn't directly manage resources, don't define any of these functions! Let the compiler handle everything.
-
-```cpp showLineNumbers 
+**If your class doesn't directly manage resources, don't define any special members.**
+```cpp showLineNumbers
 // ✅ Rule of Zero - no special members needed
 class Person {
-    std::string name;        // string manages its own memory
+    std::string name;        // string manages its memory
     int age;                 // trivial type
-    std::vector<int> scores; // vector manages its own memory
+    std::vector<int> scores; // vector manages its memory
     
-    // Don't need to define:
-    // - Destructor (members clean themselves up)
-    // - Copy constructor (memberwise copy works fine)
-    // - Copy assignment (memberwise copy works fine)
-    // - Move constructor (memberwise move works fine)
-    // - Move assignment (memberwise move works fine)
+    // Don't define:
+    // - Destructor
+    // - Copy constructor
+    // - Copy assignment
+    // - Move constructor
+    // - Move assignment
+    
+    // Compiler handles everything automatically!
 };
 
 Person p1{"Alice", 30, {95, 87, 92}};
-Person p2 = p1;           // ✅ Copy works automatically
-Person p3 = std::move(p1); // ✅ Move works automatically
+Person p2 = p1;            // ✅ Copy works
+Person p3 = std::move(p1); // ✅ Move works
+// p1 is now moved-from (empty)
 ```
 
-This is the ideal! By using smart pointers, standard containers, and RAII wrappers for all resources, you let those classes handle resource management. Your class just uses them. This is safer, simpler, and less error-prone than manual resource management.
+**This is the ideal!** Use smart pointers, containers, and RAII wrappers. Let them handle resource management.
 
-### When Rule of Zero Applies
-
-Use standard library types instead of raw pointers and manual memory management:
-
-```cpp showLineNumbers 
+### Prefer RAII Wrappers
+```cpp showLineNumbers
 // ❌ Manual resource management (need Rule of 5)
 class BadBuffer {
     char* data;
     size_t size;
     
 public:
-    BadBuffer(size_t s) : size(s) {
-        data = new char[size];
-    }
-    // Need destructor, copy, move, assignment...
+    BadBuffer(size_t s) : size(s), data(new char[size]) {}
+    ~BadBuffer() { delete[] data; }
+    // Need copy, move, assignment...
 };
 
 // ✅ Rule of Zero (standard types handle it)
@@ -80,18 +79,19 @@ class GoodBuffer {
     std::vector<char> data;
     
 public:
-    GoodBuffer(size_t s) : data(s) {}
-    // No special members needed! vector handles everything
+    explicit GoodBuffer(size_t s) : data(s) {}
+    // No special members needed!
 };
 ```
 
-The `std::vector` version is shorter, safer, and automatically handles copying, moving, and cleanup. This is modern C++ - use RAII wrappers for everything!
+`std::vector` automatically handles copying, moving, and cleanup. Shorter, safer, and easier to maintain.
 
 ## Rule of Three (Pre-C++11)
 
-**Classic C++**: If you define a destructor, copy constructor, OR copy assignment operator, you probably need to define all three.
+**If you define destructor, copy constructor, OR copy assignment, define all three.**
 
-```cpp showLineNumbers 
+These operations are intimately related when managing resources.
+```cpp showLineNumbers
 class Buffer {
     char* data;
     size_t size;
@@ -100,21 +100,21 @@ public:
     // Constructor
     Buffer(size_t s) : size(s), data(new char[size]) {}
     
-    // Destructor (need it to free memory)
+    // 1. Destructor (need it to free memory)
     ~Buffer() {
         delete[] data;
     }
     
-    // Copy constructor (need it for deep copy)
+    // 2. Copy constructor (need deep copy)
     Buffer(const Buffer& other) 
         : size(other.size), data(new char[size]) {
         std::copy(other.data, other.data + size, data);
     }
     
-    // Copy assignment (need it for deep copy)
+    // 3. Copy assignment (need deep copy)
     Buffer& operator=(const Buffer& other) {
-        if (this != &other) {
-            delete[] data;  // Free old memory
+        if (this != &other) {  // Self-assignment check
+            delete[] data;     // Free old memory
             size = other.size;
             data = new char[size];
             std::copy(other.data, other.data + size, data);
@@ -124,13 +124,12 @@ public:
 };
 ```
 
-The Rule of Three exists because if you need custom cleanup (destructor), the compiler-generated copy operations will just copy the pointer, not the data! This causes double-delete bugs and shallow copies. You need to define all three to handle the resource properly.
+:::warning Why All Three?
+If you need a destructor to clean up, compiler-generated copy will just copy the pointer, causing **double-delete** bugs!
+:::
 
-### Why All Three?
-
-These operations are intimately related when managing resources:
-
-```cpp showLineNumbers 
+### The Double-Delete Problem
+```cpp showLineNumbers
 // ❌ Only defined destructor
 class Broken {
     int* data;
@@ -139,21 +138,21 @@ public:
     Broken(int v) : data(new int(v)) {}
     ~Broken() { delete data; }
     
-    // Compiler generates copy operations that just copy pointer!
+    // Compiler generates copy that just copies pointer!
 };
 
 Broken b1(42);
 Broken b2 = b1;  // ⚠️ Both point to same memory
-// Both destructors try to delete the same memory! Crash! 💥
+// When b1 destructs: deletes memory
+// When b2 destructs: tries to delete same memory 💥 Crash!
 ```
-
-If you need a destructor to clean up, you need copy operations that properly duplicate the resource. They're a package deal!
 
 ## Rule of Five (C++11+)
 
-**Modern C++**: If you define any of destructor, copy constructor, copy assignment, move constructor, or move assignment, you should probably define or explicitly delete all five.
+**If you define any of destructor, copy, or move operations, define or delete all five.**
 
-```cpp showLineNumbers 
+Adding move operations enables efficient resource transfer.
+```cpp showLineNumbers
 class Buffer {
     char* data;
     size_t size;
@@ -162,18 +161,18 @@ public:
     // Constructor
     Buffer(size_t s) : size(s), data(new char[size]) {}
     
-    // Destructor
+    // 1. Destructor
     ~Buffer() {
         delete[] data;
     }
     
-    // Copy constructor
+    // 2. Copy constructor
     Buffer(const Buffer& other)
         : size(other.size), data(new char[size]) {
         std::copy(other.data, other.data + size, data);
     }
     
-    // Copy assignment
+    // 3. Copy assignment
     Buffer& operator=(const Buffer& other) {
         if (this != &other) {
             delete[] data;
@@ -184,34 +183,55 @@ public:
         return *this;
     }
     
-    // Move constructor
+    // 4. Move constructor
     Buffer(Buffer&& other) noexcept
         : size(other.size), data(other.data) {
-        other.data = nullptr;  // Steal resource
+        other.data = nullptr;  // Steal resource, nullify source
         other.size = 0;
     }
     
-    // Move assignment
+    // 5. Move assignment
     Buffer& operator=(Buffer&& other) noexcept {
         if (this != &other) {
-            delete[] data;  // Free our old resource
-            data = other.data;  // Steal other's resource
+            delete[] data;         // Free our old resource
+            data = other.data;     // Steal other's resource
             size = other.size;
-            other.data = nullptr;  // Leave other valid but empty
+            other.data = nullptr;  // Leave other valid
             other.size = 0;
         }
         return *this;
     }
 };
+
+Buffer b1(100);
+Buffer b2 = std::move(b1);  // Move: fast pointer swap
+// b1 is now empty (data = nullptr, size = 0)
 ```
 
-Move operations enable efficient transfer of resources without copying. If you're managing resources manually, you should provide move operations for performance. They're like copy but they "steal" the resource instead of duplicating it.
+**Move semantics** enable efficient transfer without copying. Move = "steal" the resource, leaving the source empty but valid.
 
-### Explicitly Deleting Operations
+### Why noexcept?
+```cpp showLineNumbers
+class Widget {
+public:
+    Widget(Widget&& other) noexcept {  // Mark noexcept!
+        // Move implementation
+    }
+};
 
-Sometimes you want to prevent copying or moving:
+std::vector<Widget> vec;
+vec.push_back(Widget());  // Can use move if noexcept
+// Otherwise uses copy for exception safety
+```
 
-```cpp showLineNumbers 
+:::success Always noexcept
+Move constructors and move assignments should almost always be `noexcept`. This enables optimizations in standard containers.
+:::
+
+## Explicitly Deleting Operations
+
+Sometimes you want to prevent copying or moving.
+```cpp showLineNumbers
 class Uncopyable {
     std::mutex mtx;  // Mutexes can't be copied or moved
     
@@ -233,13 +253,12 @@ Uncopyable u1;
 // Uncopyable u3 = std::move(u1);  // ❌ Error: move deleted
 ```
 
-Explicitly deleting operations makes your intent clear and gives better error messages than making them private.
+`= delete` is clearer than making functions private and gives better error messages.
 
 ## Copy-and-Swap Idiom
 
-A clever technique that implements both copy and move assignment using the copy constructor and swap:
-
-```cpp showLineNumbers 
+Implement both copy and move assignment using one function.
+```cpp showLineNumbers
 class Buffer {
     char* data;
     size_t size;
@@ -253,62 +272,88 @@ public:
         std::swap(size, other.size);
     }
     
-    // Unified assignment operator (by-value parameter!)
-    Buffer& operator=(Buffer other) {  // Note: by value!
-        swap(other);  // Swap with the parameter
+    // Unified assignment (note: parameter by value!)
+    Buffer& operator=(Buffer other) {
+        swap(other);  // Swap with parameter
         return *this;
-        // other destructs with our old data
+        // other destructs, cleaning up our old data
     }
 };
 
 Buffer b1(100);
 Buffer b2(200);
 
-b1 = b2;           // Copy: parameter constructed via copy
-b1 = std::move(b2); // Move: parameter constructed via move
+b1 = b2;           // Copy: other constructed via copy
+b1 = std::move(b2); // Move: other constructed via move
 ```
 
-This is elegant because you write one assignment operator that handles both copy and move! The parameter is constructed either by copying or moving (depending on what you pass), then you swap your contents with it. When the parameter destructs, it cleans up your old data. Less code, less chance for bugs!
+**Benefits:**
+- One assignment operator handles both copy and move
+- Strong exception safety
+- Less code, less chance for bugs
 
-## Generated vs Deleted
+## Compiler Generation Rules
 
-The compiler's rules for generating these functions are complex:
-
-```cpp showLineNumbers 
-class Example {
+The compiler's rules for generating these functions are complex.
+```cpp showLineNumbers
+class Example1 {
 public:
-    // If you declare ANY constructor, default is not generated
-    Example(int x) {}
-    // Example obj;  // ❌ Error: no default constructor
-    
-    // Declaring a destructor doesn't prevent copy/move generation
-    ~Example() {}
-    
-    // But declaring copy constructor prevents move generation!
-    Example(const Example&) {}
+    // Declaring ANY constructor prevents default constructor
+    Example1(int x) {}
+    // Example1 obj;  // ❌ Error: no default constructor
+};
+
+class Example2 {
+public:
+    // Declaring destructor doesn't prevent copy/move
+    ~Example2() {}
+    // Copy and move still generated
+};
+
+class Example3 {
+public:
+    // Declaring copy constructor PREVENTS move generation
+    Example3(const Example3&) {}
     // Move constructor and move assignment NOT generated
-    
-    // Declaring move constructor prevents copy generation!
-    Example(Example&&) noexcept {}
+};
+
+class Example4 {
+public:
+    // Declaring move constructor PREVENTS copy generation
+    Example4(Example4&&) noexcept {}
     // Copy constructor and copy assignment DELETED
 };
 ```
 
-These rules encourage modern practice: if you're managing resources (have a destructor), you should handle copy and move explicitly. The compiler tries to prevent silent bugs.
+:::info Generation Rules Summary
+- User-declared destructor → no move operations generated
+- User-declared copy → no move operations generated
+- User-declared move → copy operations deleted
+- This encourages explicitly handling all or none
+:::
 
-## Practical Guidelines
-
-Here's how to decide which rule to follow:
-
-```cpp showLineNumbers 
-// ✅ Rule of Zero (BEST): Use RAII wrappers
+## Decision Guide
+```mermaid
+graph TD
+    A[Does class directly manage resources?]
+    A -->|No| B[Rule of Zero<br/>Use RAII wrappers]
+    A -->|Yes| C[Need to prevent copy/move?]
+    C -->|Yes| D[Delete unwanted operations<br/>= delete]
+    C -->|No| E[Rule of Five<br/>Define all 5]
+    
+    style B fill:#90EE90
+    style E fill:#FFE5B4
+    style D fill:#87CEEB
+```
+```cpp showLineNumbers
+// ✅ Rule of Zero (BEST)
 class Widget {
     std::unique_ptr<Resource> resource;
     std::vector<int> data;
     // No special members needed!
 };
 
-// ✅ Rule of Five: Only if you MUST manage resources manually
+// ✅ Rule of Five (only if you MUST manage resources)
 class ManualResource {
     int* ptr;
     
@@ -320,51 +365,62 @@ public:
     ManualResource& operator=(ManualResource&&) noexcept;
 };
 
-// ✅ Explicitly deleted: When copies/moves don't make sense
-class NonMovable {
+// ✅ Explicit deletion (when copies/moves don't make sense)
+class NonCopyable {
 public:
-    NonMovable() = default;
-    NonMovable(const NonMovable&) = delete;
-    NonMovable(NonMovable&&) = delete;
+    NonCopyable() = default;
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
 };
 ```
 
-Prefer Rule of Zero! Only fall back to Rule of Five when you absolutely must manage resources manually (rare in modern C++). Make deletion explicit to show intent.
+## Common Mistakes
 
-:::warning Common Mistakes
+:::danger Watch Out
+**Self-Assignment:** Always check `if (this != &other)` in copy assignment
 
-**Forgetting Self-Assignment**: Check `if (this != &other)` in copy assignment!
+**Resource Leaks:** Delete old resource before acquiring new one in assignment
 
-**Resource Leaks**: Not deleting old resource in assignment before acquiring new one.
+**Missing noexcept:** Move operations should be `noexcept`
 
-**Not noexcept**: Move constructors should almost always be noexcept.
+**Shallow Copy:** Compiler-generated copy just copies pointers
 
-**Shallow Copy**: Compiler-generated copy just copies pointers, not what they point to.
+**Dangling Pointers:** Leave moved-from objects in valid state (usually nullptr)
 
-**Dangling Pointers**: After move, source object should be left in valid state (usually nullptr).
-
-**Missing Operations**: If you define one of destructor/copy/move, define or delete them all.
+**Incomplete Rule:** If you define one, define or delete all
 :::
 
 ## Summary
 
-The Rule of Zero says if you don't manage resources directly, don't define special member functions - let the compiler generate them and use RAII wrappers like smart pointers and containers. This is the modern C++ ideal and the safest approach. The Rule of Three (pre-C++11) says if you define destructor, copy constructor, or copy assignment, define all three because they're related when managing resources. The Rule of Five (C++11+) adds move constructor and move assignment to the Rule of Three - if you manage resources, define or delete all five special members. Move operations enable efficient resource transfer without copying. Explicitly delete operations you don't want rather than making them private. The copy-and-swap idiom provides strong exception safety and unified copy/move assignment. Compiler generation rules are complex: declaring a destructor doesn't prevent copy/move but declaring copy prevents move generation. Always mark move operations noexcept. Check for self-assignment in assignment operators. Leave moved-from objects in valid (usually empty) state. Prefer Rule of Zero by using standard library types. Only implement Rule of Five when you absolutely must manage resources manually. These rules prevent resource leaks, double-deletes, and shallow copy bugs.
+:::info Rule of Zero (preferred):
+- Use RAII wrappers (smart pointers, containers)
+- Don't define any special members
+- Safest and simplest approach
+:::
 
-:::success Key Principles
+:::info Rule of Three (C++98):
+- Destructor, copy constructor, copy assignment
+- All related when managing resources
+- If you need one, you need all three
+:::
 
-**Rule of Zero = Best**: Use RAII wrappers, no special members needed.
+:::info Rule of Five (C++11+):
+- Add move constructor and move assignment
+- Enables efficient resource transfer
+- If you manage resources, define or delete all five
+:::
 
-**All or Nothing**: If you need one of destructor/copy/move, define or delete all five.
+:::info Best practices:
+- Prefer Rule of Zero whenever possible
+- Mark move operations `noexcept`
+- Check self-assignment: `if (this != &other)`
+- Leave moved-from objects valid (empty/null)
+- Use `= delete` to show intent explicitly
+- Copy-and-swap provides exception safety
+:::
 
-**Move = noexcept**: Move constructors and assignments should be noexcept.
-
-**Self-Assignment**: Always check `this != &other` in assignment operators.
-
-**Moved-From = Valid**: Leave objects usable after moving (usually empty/null state).
-
-**Delete Explicitly**: Use `= delete` to show intent, not private.
-
-**Standard Library**: Use smart pointers, containers, RAII wrappers.
-
-**Copy-and-Swap**: Provides strong exception safety and unified assignment.
+:::info Generation rules:
+- Declaring destructor prevents move generation
+- Declaring copy prevents move generation
+- Declaring move deletes copy operations
 :::
