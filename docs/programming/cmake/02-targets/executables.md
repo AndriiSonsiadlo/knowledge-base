@@ -14,7 +14,7 @@ The `add_executable()` command creates a build target for an executable program.
 
 ## Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 add_executable(target_name
     source1.cpp
     source2.cpp
@@ -26,7 +26,7 @@ add_executable(target_name
 
 ### Single File
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(HelloWorld)
 
@@ -44,7 +44,7 @@ int main() {
 
 ### Multiple Files
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp
     src/main.cpp
     src/utils.cpp
@@ -62,7 +62,7 @@ Header files are optional but recommended - helps IDEs index them.
 
 ### Using Variables
 
-```cmake
+```cmake showLineNumbers 
 set(APP_SOURCES
     src/main.cpp
     src/engine.cpp
@@ -79,7 +79,7 @@ add_executable(myapp ${APP_SOURCES} ${APP_HEADERS})
 
 ### Separate by Type
 
-```cmake
+```cmake showLineNumbers 
 set(CORE_SOURCES
     src/core/main.cpp
     src/core/app.cpp
@@ -102,7 +102,7 @@ add_executable(game ${ALL_SOURCES})
 
 ### C++ Standard
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Method 1: Using target_compile_features (recommended)
@@ -126,7 +126,7 @@ Use `target_compile_features()` - it's more portable and explicit.
 
 ### Output Name
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Change executable name
@@ -139,7 +139,7 @@ set_target_properties(myapp PROPERTIES
 
 ### Output Directory
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Put executable in bin/
@@ -156,7 +156,7 @@ set_target_properties(myapp PROPERTIES
 
 ## Include Directories
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp 
     src/main.cpp
     src/utils.cpp
@@ -192,7 +192,7 @@ project/
 
 Add preprocessor macros:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 target_compile_definitions(myapp PRIVATE
@@ -204,7 +204,7 @@ target_compile_definitions(myapp PRIVATE
 
 In code:
 
-```cpp
+```cpp showLineNumbers 
 #ifdef ENABLE_LOGGING
     std::cout << "Logging enabled" << std::endl;
 #endif
@@ -215,7 +215,7 @@ std::cout << "Max connections: " << MAX_CONNECTIONS << std::endl;
 
 ### Conditional Definitions
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Platform-specific
@@ -233,7 +233,7 @@ endif()
 
 ## Compile Options (Compiler Flags)
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # GCC/Clang warnings
@@ -255,7 +255,7 @@ endif()
 
 ### Generator Expressions
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 target_compile_options(myapp PRIVATE
@@ -268,7 +268,7 @@ target_compile_options(myapp PRIVATE
 
 ## Linking Libraries
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Link with libraries
@@ -293,7 +293,7 @@ Executables typically use `PRIVATE` since nothing depends on them.
 
 ### Windows GUI Application
 
-```cmake
+```cmake showLineNumbers 
 # Console application (default)
 add_executable(myapp_console main.cpp)
 
@@ -303,7 +303,7 @@ add_executable(myapp_gui WIN32 main.cpp)
 
 ### macOS Application Bundle
 
-```cmake
+```cmake showLineNumbers 
 add_executable(MyApp MACOSX_BUNDLE main.cpp)
 
 set_target_properties(MyApp PROPERTIES
@@ -317,7 +317,7 @@ set_target_properties(MyApp PROPERTIES
 
 ### target_sources()
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Add more sources later
@@ -336,7 +336,7 @@ endif()
 
 ## Complete Example
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(GameEngine VERSION 1.0.0)
 
@@ -392,7 +392,7 @@ install(TARGETS game DESTINATION bin)
 
 ## Multiple Executables
 
-```cmake
+```cmake showLineNumbers 
 # Main application
 add_executable(app src/main.cpp src/app.cpp)
 target_link_libraries(app PRIVATE mylib)
@@ -422,7 +422,7 @@ cmake --build build --target tool1
 
 Sometimes you need to reference external executables:
 
-```cmake
+```cmake showLineNumbers 
 # Create imported executable target
 add_executable(external_tool IMPORTED)
 
@@ -443,7 +443,7 @@ add_custom_command(
 
 ### Executable with Library
 
-```cmake
+```cmake showLineNumbers 
 # Library (reusable logic)
 add_library(engine STATIC
     src/engine.cpp
@@ -465,7 +465,7 @@ target_link_libraries(engine_test PRIVATE engine)
 
 Generate version header:
 
-```cmake
+```cmake showLineNumbers 
 # Configure version header
 configure_file(
     "${CMAKE_SOURCE_DIR}/version.h.in"
@@ -492,7 +492,7 @@ target_include_directories(myapp PRIVATE
 
 1. **Use target-based commands**
 
-   ```cmake
+   ```cmake showLineNumbers 
    # ✅ Good
    target_include_directories(myapp PRIVATE include/)
    
@@ -502,7 +502,7 @@ target_include_directories(myapp PRIVATE
 
 2. **Explicit source lists**
 
-   ```cmake
+   ```cmake showLineNumbers 
    # ✅ Good
    add_executable(myapp main.cpp utils.cpp)
    
@@ -513,13 +513,13 @@ target_include_directories(myapp PRIVATE
 
 3. **Set C++ standard per target**
 
-   ```cmake
+   ```cmake showLineNumbers 
    target_compile_features(myapp PRIVATE cxx_std_17)
    ```
 
 4. **Use PRIVATE for executable dependencies**
 
-   ```cmake
+   ```cmake showLineNumbers 
    target_link_libraries(myapp PRIVATE mylib)
    ```
 
@@ -538,21 +538,21 @@ target_include_directories(myapp PRIVATE
 
 ### Undefined reference errors
 
-```cmake
+```cmake showLineNumbers 
 # Ensure libraries are linked
 target_link_libraries(myapp PRIVATE required_lib)
 ```
 
 ### Header not found
 
-```cmake
+```cmake showLineNumbers 
 # Add include directory
 target_include_directories(myapp PRIVATE include/)
 ```
 
 ### Wrong C++ standard
 
-```cmake
+```cmake showLineNumbers 
 # Set explicitly
 target_compile_features(myapp PRIVATE cxx_std_17)
 ```

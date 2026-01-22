@@ -24,7 +24,7 @@ CTest is CMake's testing tool that runs tests and reports results. It's integrat
 
 Enable CTest in your project:
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MyProject)
 
@@ -43,7 +43,7 @@ add_subdirectory(tests)
 
 The fundamental command for defining tests:
 
-```cmake
+```cmake showLineNumbers 
 add_test(
     NAME test_name
     COMMAND executable arg1 arg2
@@ -52,7 +52,7 @@ add_test(
 
 **Simple example:**
 
-```cmake
+```cmake showLineNumbers 
 add_executable(test_math test_math.cpp)
 target_link_libraries(test_math PRIVATE mylib)
 
@@ -61,7 +61,7 @@ add_test(NAME MathTests COMMAND test_math)
 
 ### Test with Arguments
 
-```cmake
+```cmake showLineNumbers 
 add_test(NAME test_with_args 
     COMMAND mytest --verbose --iterations=100
 )
@@ -71,7 +71,7 @@ add_test(NAME test_with_args
 
 Set where the test runs:
 
-```cmake
+```cmake showLineNumbers 
 add_test(NAME test_needs_data 
     COMMAND mytest
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test_data
@@ -120,7 +120,7 @@ Test project /path/to/build
 
 Configure test behavior with properties:
 
-```cmake
+```cmake showLineNumbers 
 add_test(NAME mytest COMMAND mytest)
 
 set_tests_properties(mytest PROPERTIES
@@ -133,7 +133,7 @@ set_tests_properties(mytest PROPERTIES
 
 ### Common Properties
 
-```cmake
+```cmake showLineNumbers 
 # Timeout (seconds)
 set_tests_properties(slow_test PROPERTIES TIMEOUT 300)
 
@@ -162,7 +162,7 @@ set_tests_properties(mytest PROPERTIES LABELS "unit;math")
 
 Run setup/cleanup code before/after tests:
 
-```cmake
+```cmake showLineNumbers 
 # Setup fixture
 add_test(NAME db_setup COMMAND setup_database)
 set_tests_properties(db_setup PROPERTIES FIXTURES_SETUP Database)
@@ -188,7 +188,7 @@ Multiple tests can share the same fixture.
 
 ### Catch2
 
-```cmake
+```cmake showLineNumbers 
 include(FetchContent)
 
 FetchContent_Declare(
@@ -220,7 +220,7 @@ With `catch_discover_tests()`, each TEST_CASE becomes a separate CTest test.
 
 ### Google Test
 
-```cmake
+```cmake showLineNumbers 
 include(FetchContent)
 
 FetchContent_Declare(
@@ -247,7 +247,7 @@ gtest_discover_tests(tests)
 
 ### doctest
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     doctest
     GIT_REPOSITORY https://github.com/doctest/doctest.git
@@ -266,7 +266,7 @@ doctest_discover_tests(tests)
 
 ### Multiple Test Executables
 
-```cmake
+```cmake showLineNumbers 
 # Unit tests
 add_executable(unit_tests
     test_math.cpp
@@ -303,7 +303,7 @@ tests/
     └── test_input.txt
 ```
 
-```cmake title="tests/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/CMakeLists.txt"
 # Unit tests
 add_executable(unit_tests
     unit/test_math.cpp
@@ -366,7 +366,7 @@ ctest -Q
 
 Handle different build types:
 
-```cmake
+```cmake showLineNumbers 
 add_test(NAME mytest COMMAND mytest)
 
 # Different timeout per configuration
@@ -410,7 +410,7 @@ ctest --timeout 60
 
 Or per-test:
 
-```cmake
+```cmake showLineNumbers 
 set_tests_properties(slow_test PROPERTIES TIMEOUT 300)
 ```
 
@@ -418,7 +418,7 @@ set_tests_properties(slow_test PROPERTIES TIMEOUT 300)
 
 Complete test setup:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0.0)
 
@@ -441,7 +441,7 @@ if(BUILD_TESTS)
 endif()
 ```
 
-```cmake title="tests/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/CMakeLists.txt"
 # Fetch Catch2
 include(FetchContent)
 FetchContent_Declare(
@@ -546,7 +546,7 @@ test:
 
 CTest can submit results to CDash (CMake's dashboard system):
 
-```cmake
+```cmake showLineNumbers 
 include(CTest)  # Instead of enable_testing()
 
 set(CTEST_PROJECT_NAME "MyProject")
@@ -562,25 +562,25 @@ ctest -D Experimental  # Run and submit to dashboard
 
 1. **Enable testing conditionally** - users may not want tests
 
-   ```cmake
+   ```cmake showLineNumbers 
    option(BUILD_TESTS "Build tests" ON)
    ```
 
 2. **Use test discovery** - automatic registration of test cases
 
-   ```cmake
+   ```cmake showLineNumbers 
    catch_discover_tests(tests)
    ```
 
 3. **Label your tests** - easy filtering
 
-   ```cmake
+   ```cmake showLineNumbers 
    set_tests_properties(mytest PROPERTIES LABELS "unit;math")
    ```
 
 4. **Set timeouts** - prevent hanging tests
 
-   ```cmake
+   ```cmake showLineNumbers 
    set_tests_properties(mytest PROPERTIES TIMEOUT 30)
    ```
 
@@ -588,7 +588,7 @@ ctest -D Experimental  # Run and submit to dashboard
 
 6. **Use fixtures** - for setup/teardown
 
-   ```cmake
+   ```cmake showLineNumbers 
    FIXTURES_SETUP, FIXTURES_CLEANUP, FIXTURES_REQUIRED
    ```
 
@@ -636,7 +636,7 @@ ctest -D Experimental  # Run and submit to dashboard
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Enable testing
 enable_testing()
 

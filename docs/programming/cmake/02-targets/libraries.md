@@ -16,7 +16,7 @@ CMake supports several library types, each with different use cases.
 
 ### Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 add_library(library_name <type>
     source1.cpp
     source2.cpp
@@ -30,7 +30,7 @@ add_library(library_name <type>
 
 Compiled into the executable at link time (`.a` on Unix, `.lib` on Windows).
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC
     src/mylib.cpp
     include/mylib.h
@@ -49,7 +49,7 @@ add_library(mylib STATIC
 - ❌ Code duplication if used by multiple executables
 - ❌ Cannot update library without recompiling
 
-```cmake
+```cmake showLineNumbers 
 # Example
 add_library(math_lib STATIC
     src/add.cpp
@@ -66,7 +66,7 @@ target_link_libraries(app PRIVATE math_lib)
 
 Dynamically loaded at runtime (`.so` on Unix, `.dll` on Windows, `.dylib` on macOS).
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED
     src/mylib.cpp
     include/mylib.h
@@ -85,7 +85,7 @@ add_library(mylib SHARED
 - ❌ Slightly slower (dynamic linking)
 - ❌ Version compatibility issues
 
-```cmake
+```cmake showLineNumbers 
 # Example
 add_library(graphics_lib SHARED
     src/renderer.cpp
@@ -106,7 +106,7 @@ For shared libraries, consider using `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` or expli
 
 Plugins loaded at runtime via `dlopen()` (Unix) or `LoadLibrary()` (Windows).
 
-```cmake
+```cmake showLineNumbers 
 add_library(myplugin MODULE
     src/plugin.cpp
 )
@@ -118,7 +118,7 @@ add_library(myplugin MODULE
 - Dynamically loaded extensions
 - Optional functionality
 
-```cmake
+```cmake showLineNumbers 
 # Plugin example
 add_library(audio_plugin MODULE
     plugins/audio/mp3_decoder.cpp
@@ -139,7 +139,7 @@ add_library(audio_plugin MODULE
 
 Compile sources into object files without creating an archive.
 
-```cmake
+```cmake showLineNumbers 
 add_library(common OBJECT
     src/common.cpp
     src/utils.cpp
@@ -155,7 +155,7 @@ add_executable(app2 app2.cpp $<TARGET_OBJECTS:common>)
 - Avoid creating unnecessary archives
 - Share compiled objects
 
-```cmake
+```cmake showLineNumbers 
 # More modern approach (CMake 3.12+)
 add_library(common OBJECT
     common.cpp
@@ -175,7 +175,7 @@ target_link_libraries(app2 PRIVATE common)
 
 Header-only libraries with no compiled sources.
 
-```cmake
+```cmake showLineNumbers 
 add_library(myheaderlib INTERFACE)
 
 target_include_directories(myheaderlib INTERFACE
@@ -193,7 +193,7 @@ target_compile_definitions(myheaderlib INTERFACE
 - Propagating settings to dependents
 - Interface requirements
 
-```cmake
+```cmake showLineNumbers 
 # Header-only math library
 add_library(math_header INTERFACE)
 
@@ -213,7 +213,7 @@ target_link_libraries(app PRIVATE math_header)
 
 ## Default Library Type
 
-```cmake
+```cmake showLineNumbers 
 # User can choose via BUILD_SHARED_LIBS
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
@@ -234,7 +234,7 @@ cmake -DBUILD_SHARED_LIBS=OFF .. # Build static
 
 ### Output Name
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -246,7 +246,7 @@ set_target_properties(mylib PROPERTIES
 
 ### Version Information (Shared Libraries)
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -262,7 +262,7 @@ set_target_properties(mylib PROPERTIES
 
 ### Position Independent Code
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 # Required for linking static library into shared library
@@ -273,7 +273,7 @@ set_target_properties(mylib PROPERTIES
 
 ## Include Directories
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC
     src/mylib.cpp
 )
@@ -306,7 +306,7 @@ mylib/
     └── mylib.h
 ```
 
-```cmake
+```cmake showLineNumbers 
 target_include_directories(mylib
     PRIVATE src/
     PUBLIC include/
@@ -317,7 +317,7 @@ target_include_directories(mylib
 
 Understanding `PRIVATE`, `PUBLIC`, and `INTERFACE`:
 
-```cmake
+```cmake showLineNumbers 
 add_library(A STATIC a.cpp)
 add_library(B STATIC b.cpp)
 add_library(C STATIC c.cpp)
@@ -346,7 +346,7 @@ target_link_libraries(app PRIVATE A)
 
 ## Compile Definitions
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 # Only for mylib
@@ -389,7 +389,7 @@ public:
 MYLIB_API void myFreeFunction();
 ```
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 # Define export macro when building mylib
@@ -398,7 +398,7 @@ target_compile_definitions(mylib PRIVATE MYLIB_EXPORTS)
 
 ### CMake's generate_export_header
 
-```cmake
+```cmake showLineNumbers 
 include(GenerateExportHeader)
 
 add_library(mylib SHARED mylib.cpp)
@@ -416,7 +416,7 @@ target_include_directories(mylib PUBLIC
 
 ### Static Library
 
-```cmake
+```cmake showLineNumbers 
 # Math library
 add_library(math_lib STATIC
     src/add.cpp
@@ -440,7 +440,7 @@ target_link_libraries(calculator PRIVATE math_lib)
 
 ### Shared Library
 
-```cmake
+```cmake showLineNumbers 
 # Graphics library
 add_library(graphics SHARED
     src/renderer.cpp
@@ -478,7 +478,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 ### Header-Only Library
 
-```cmake
+```cmake showLineNumbers 
 # Vector math header library
 add_library(vecmath INTERFACE)
 
@@ -497,7 +497,7 @@ target_link_libraries(physics_sim PRIVATE vecmath)
 
 ## Library Hierarchies
 
-```cmake
+```cmake showLineNumbers 
 # Low-level library
 add_library(core STATIC
     src/core/memory.cpp
@@ -533,7 +533,7 @@ target_link_libraries(mygame PRIVATE game)
 
 1. **Modern library interface**
 
-   ```cmake
+   ```cmake showLineNumbers 
    add_library(mylib mylib.cpp)
    target_include_directories(mylib PUBLIC include/)
    target_compile_features(mylib PUBLIC cxx_std_17)
@@ -554,7 +554,7 @@ target_link_libraries(mygame PRIVATE game)
 
 4. **Version shared libraries**
 
-   ```cmake
+   ```cmake showLineNumbers 
    set_target_properties(mylib PROPERTIES
        VERSION ${PROJECT_VERSION}
        SOVERSION ${PROJECT_VERSION_MAJOR}
@@ -563,7 +563,7 @@ target_link_libraries(mygame PRIVATE game)
 
 5. **Let users choose library type**
 
-   ```cmake
+   ```cmake showLineNumbers 
    option(BUILD_SHARED_LIBS "Build shared" OFF)
    add_library(mylib mylib.cpp)  # Type determined by option
    ```
@@ -574,7 +574,7 @@ target_link_libraries(mygame PRIVATE game)
 
 ### Internal Library
 
-```cmake
+```cmake showLineNumbers 
 # Library not installed, only used internally
 add_library(internal_utils STATIC utils.cpp)
 target_include_directories(internal_utils PRIVATE src/)
@@ -586,7 +586,7 @@ set_target_properties(internal_utils PROPERTIES
 
 ### Conditional Library Type
 
-```cmake
+```cmake showLineNumbers 
 if(MOBILE_PLATFORM)
     # Static linking on mobile
     add_library(mylib STATIC mylib.cpp)
@@ -598,7 +598,7 @@ endif()
 
 ### Library with Dependencies
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 # Find dependencies
@@ -616,14 +616,14 @@ target_link_libraries(mylib
 
 ### Undefined symbols in shared library
 
-```cmake
+```cmake showLineNumbers 
 # Ensure all dependencies are linked
 target_link_libraries(mylib PRIVATE all_deps)
 ```
 
 ### "position independent code" error
 
-```cmake
+```cmake showLineNumbers 
 set_target_properties(mylib PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
@@ -631,7 +631,7 @@ set_target_properties(mylib PROPERTIES
 
 ### DLL export errors on Windows
 
-```cmake
+```cmake showLineNumbers 
 # Use GenerateExportHeader
 include(GenerateExportHeader)
 generate_export_header(mylib)
@@ -639,7 +639,7 @@ generate_export_header(mylib)
 
 ### Can't find headers when linking
 
-```cmake
+```cmake showLineNumbers 
 # Ensure PUBLIC include directories
 target_include_directories(mylib PUBLIC include/)
 ```

@@ -14,13 +14,13 @@ tags: [ c++, cmake ]
 
 ## Basic Usage
 
-```cmake
+```cmake showLineNumbers 
 find_package(PackageName [version] [REQUIRED] [COMPONENTS ...])
 ```
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 # Find any version
 find_package(OpenCV)
 
@@ -43,7 +43,7 @@ CMake searches for one of two files:
 
 ### Config Mode (Preferred)
 
-```cmake
+```cmake showLineNumbers 
 find_package(MyPackage CONFIG)
 ```
 
@@ -60,7 +60,7 @@ Searches for:
 
 ### Module Mode
 
-```cmake
+```cmake showLineNumbers 
 find_package(MyPackage MODULE)
 ```
 
@@ -81,7 +81,7 @@ CMake tries both modes automatically. Use `CONFIG` or `MODULE` to force one.
 
 ### Threads
 
-```cmake
+```cmake showLineNumbers 
 find_package(Threads REQUIRED)
 
 add_executable(myapp main.cpp)
@@ -90,7 +90,7 @@ target_link_libraries(myapp PRIVATE Threads::Threads)
 
 ### OpenSSL
 
-```cmake
+```cmake showLineNumbers 
 find_package(OpenSSL REQUIRED)
 
 add_executable(myapp main.cpp)
@@ -102,7 +102,7 @@ target_link_libraries(myapp PRIVATE
 
 ### Boost
 
-```cmake
+```cmake showLineNumbers 
 find_package(Boost 1.70 REQUIRED COMPONENTS
     filesystem
     system
@@ -119,7 +119,7 @@ target_link_libraries(myapp PRIVATE
 
 ### Qt5/Qt6
 
-```cmake
+```cmake showLineNumbers 
 find_package(Qt5 COMPONENTS
     Core
     Widgets
@@ -137,7 +137,7 @@ target_link_libraries(myapp PRIVATE
 
 ### OpenCV
 
-```cmake
+```cmake showLineNumbers 
 find_package(OpenCV REQUIRED)
 
 add_executable(vision main.cpp)
@@ -149,7 +149,7 @@ target_link_libraries(vision PRIVATE opencv_core opencv_imgproc)
 
 ### Python
 
-```cmake
+```cmake showLineNumbers 
 find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
 add_executable(myapp main.cpp)
@@ -158,7 +158,7 @@ target_link_libraries(myapp PRIVATE Python3::Python)
 
 ## Version Requirements
 
-```cmake
+```cmake showLineNumbers 
 # Exact version
 find_package(MyPackage 2.1.3 EXACT REQUIRED)
 
@@ -171,7 +171,7 @@ find_package(MyPackage 1.0...2.0 REQUIRED)
 
 ## Components
 
-```cmake
+```cmake showLineNumbers 
 # Find specific components
 find_package(Boost COMPONENTS
     filesystem
@@ -200,7 +200,7 @@ Most packages set these:
 - `<Package>_INCLUDE_DIRS` - Include directories
 - `<Package>_LIBRARIES` - Libraries to link
 
-```cmake
+```cmake showLineNumbers 
 find_package(ZLIB)
 
 if(ZLIB_FOUND)
@@ -215,7 +215,7 @@ endif()
 
 ### Modern Imported Targets (Preferred)
 
-```cmake
+```cmake showLineNumbers 
 find_package(ZLIB REQUIRED)
 
 # ✅ Modern way - use imported target
@@ -232,7 +232,7 @@ Modern packages provide `Package::Component` targets. These are self-contained a
 
 ## Handling Optional Packages
 
-```cmake
+```cmake showLineNumbers 
 # Try to find optional package
 find_package(OptionalLib)
 
@@ -247,7 +247,7 @@ endif()
 
 **With option:**
 
-```cmake
+```cmake showLineNumbers 
 option(USE_OPTIONALLIB "Use OptionalLib if available" ON)
 
 if(USE_OPTIONALLIB)
@@ -264,7 +264,7 @@ endif()
 
 ### Hint Paths
 
-```cmake
+```cmake showLineNumbers 
 # Set before find_package
 set(MyPackage_DIR "/path/to/MyPackageConfig.cmake")
 find_package(MyPackage REQUIRED)
@@ -277,7 +277,7 @@ cmake -DMyPackage_DIR=/path/to/cmake ..
 
 ### CMAKE_PREFIX_PATH
 
-```cmake
+```cmake showLineNumbers 
 list(APPEND CMAKE_PREFIX_PATH "/opt/mypackage")
 find_package(MyPackage REQUIRED)
 ```
@@ -297,7 +297,7 @@ cmake ..
 
 ## Custom Module Path
 
-```cmake
+```cmake showLineNumbers 
 # Add custom Find modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -316,7 +316,7 @@ project/
 
 ## Writing Custom Find Modules
 
-```cmake title="cmake/modules/FindMyLib.cmake"
+```cmake showLineNumbers  title="cmake/modules/FindMyLib.cmake"
 # Find include directory
 find_path(MyLib_INCLUDE_DIR
     NAMES mylib.h
@@ -363,7 +363,7 @@ mark_as_advanced(MyLib_INCLUDE_DIR MyLib_LIBRARY)
 
 **Usage:**
 
-```cmake
+```cmake showLineNumbers 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 find_package(MyLib REQUIRED)
@@ -376,7 +376,7 @@ target_link_libraries(app PRIVATE MyLib::MyLib)
 
 ### Multi-Package Application
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MultiPackageApp)
 
@@ -413,7 +413,7 @@ endif()
 
 ### Version-Specific Features
 
-```cmake
+```cmake showLineNumbers 
 find_package(Boost 1.70 REQUIRED COMPONENTS filesystem)
 
 if(Boost_VERSION VERSION_GREATER_EQUAL "1.75")
@@ -424,7 +424,7 @@ endif()
 
 ### Platform-Specific Packages
 
-```cmake
+```cmake showLineNumbers 
 if(WIN32)
     find_package(WindowsSDK REQUIRED)
     target_link_libraries(app PRIVATE WindowsSDK::Core)
@@ -441,7 +441,7 @@ endif()
 
 ### Package Not Found
 
-```cmake
+```cmake showLineNumbers 
 find_package(MyPackage)
 
 if(NOT MyPackage_FOUND)
@@ -458,14 +458,14 @@ endif()
 
 1. **Wrong package name**
 
-   ```cmake
+   ```cmake showLineNumbers 
    find_package(opencv)  # ❌ Wrong
    find_package(OpenCV)  # ✅ Correct (case-sensitive!)
    ```
 
 2. **Missing components**
 
-   ```cmake
+   ```cmake showLineNumbers 
    find_package(Qt5)  # ❌ No components
    find_package(Qt5 COMPONENTS Core Widgets)  # ✅ Specify
    ```
@@ -490,25 +490,25 @@ endif()
 
 1. **Use REQUIRED for mandatory packages**
 
-   ```cmake
+   ```cmake showLineNumbers 
    find_package(Threads REQUIRED)
    ```
 
 2. **Prefer imported targets**
 
-   ```cmake
+   ```cmake showLineNumbers 
    target_link_libraries(app PRIVATE Package::Component)
    ```
 
 3. **Check version explicitly**
 
-   ```cmake
+   ```cmake showLineNumbers 
    find_package(Boost 1.70 REQUIRED)
    ```
 
 4. **Handle optional packages gracefully**
 
-   ```cmake
+   ```cmake showLineNumbers 
    find_package(Optional)
    if(Optional_FOUND)
        target_link_libraries(app PRIVATE Optional::Optional)
@@ -517,7 +517,7 @@ endif()
 
 5. **Provide helpful messages**
 
-   ```cmake
+   ```cmake showLineNumbers 
    if(NOT Package_FOUND)
        message(STATUS "Package not found. Install with:")
        message(STATUS "  Ubuntu: sudo apt install libpackage-dev")
@@ -529,7 +529,7 @@ endif()
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Basic
 find_package(Package REQUIRED)
 

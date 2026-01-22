@@ -22,7 +22,7 @@ The key distinction: FetchContent downloads during the CMake configure step and 
 
 `FetchContent` requires CMake 3.11 or later (3.14+ recommended for `FetchContent_MakeAvailable`).
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.14)
 project(MyProject)
 
@@ -34,7 +34,7 @@ include(FetchContent)
 
 Here's a complete example fetching the fmt library:
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.14)
 project(MyApp)
 
@@ -70,7 +70,7 @@ This command tells CMake what to fetch and where to find it. It doesn't actually
 
 The most common source is Git repositories:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -88,7 +88,7 @@ FetchContent_Declare(
 
 **Using commit hashes for security:**
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     spdlog
     GIT_REPOSITORY https://github.com/gabime/spdlog.git
@@ -103,7 +103,7 @@ Commit hashes are immutable - tags can be moved, but hashes cannot. This guarant
 
 You can download tarballs or zip files:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     catch2
     URL https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz
@@ -122,7 +122,7 @@ FetchContent_Declare(
 
 Useful during development or for vendored dependencies:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     mylib
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/mylib
@@ -135,7 +135,7 @@ This treats a local directory as if it were fetched, making it easy to switch be
 
 Introduced in CMake 3.14, this command does the actual work of making the content available. For earlier CMake versions, you need a more verbose approach (shown later).
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_MakeAvailable(fmt spdlog json)
 ```
 
@@ -151,7 +151,7 @@ You can make multiple dependencies available at once, and CMake will parallelize
 
 If you're stuck with CMake 3.11-3.13, use this pattern:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -174,7 +174,7 @@ Often you need to control how dependencies are built. FetchContent lets you set 
 
 ### Setting Options
 
-```cmake
+```cmake showLineNumbers 
 # Disable examples and tests for dependencies
 set(FMT_INSTALL OFF CACHE BOOL "" FORCE)
 set(FMT_TEST OFF CACHE BOOL "" FORCE)
@@ -195,7 +195,7 @@ The `CACHE ... FORCE` syntax ensures your settings override the dependency's def
 
 Most well-designed CMake projects have options to disable non-essential components:
 
-```cmake
+```cmake showLineNumbers 
 # For most libraries, consider disabling:
 set(DEPENDENCY_INSTALL OFF CACHE BOOL "" FORCE)      # Don't install dependency
 set(DEPENDENCY_TESTS OFF CACHE BOOL "" FORCE)        # Don't build tests
@@ -221,7 +221,7 @@ FetchContent_MakeAvailable(...)
 
 Real projects usually have several dependencies. Here's how to manage them cleanly:
 
-```cmake
+```cmake showLineNumbers 
 include(FetchContent)
 
 # Configure all dependencies first
@@ -272,7 +272,7 @@ Notice `SPDLOG_FMT_EXTERNAL` - this tells spdlog to use our fetched fmt instead 
 
 For projects with many dependencies, create a separate file:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.14)
 project(MyProject)
 
@@ -288,7 +288,7 @@ target_link_libraries(myapp PRIVATE
 )
 ```
 
-```cmake title="cmake/Dependencies.cmake"
+```cmake showLineNumbers  title="cmake/Dependencies.cmake"
 include(FetchContent)
 
 # Configure options
@@ -325,7 +325,7 @@ This separation keeps your main `CMakeLists.txt` clean and makes dependency mana
 
 FetchContent downloads to `${CMAKE_BINARY_DIR}/_deps` by default. If you clean your build directory, it re-downloads everything. To cache across build directory cleanups:
 
-```cmake
+```cmake showLineNumbers 
 # Put downloads in a global cache directory
 set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/.fetchcontent-cache"
     CACHE PATH "FetchContent download directory")
@@ -337,7 +337,7 @@ Now dependencies are cached in `.fetchcontent-cache/` in your source tree (add t
 
 To update to a newer version:
 
-```cmake
+```cmake showLineNumbers 
 # Change the version tag
 FetchContent_Declare(
     fmt
@@ -365,7 +365,7 @@ cmake -B build
 
 Reduce output clutter:
 
-```cmake
+```cmake showLineNumbers 
 set(FETCHCONTENT_QUIET ON CACHE BOOL "" FORCE)
 
 FetchContent_Declare(...)
@@ -380,7 +380,7 @@ Only errors will be shown. During initial setup, keep this OFF to see progress.
 
 Make a dependency optional based on availability or user choice:
 
-```cmake
+```cmake showLineNumbers 
 option(USE_FMT "Use fmt library for formatting" ON)
 
 if(USE_FMT)
@@ -400,7 +400,7 @@ endif()
 
 Allow users to override dependency versions:
 
-```cmake
+```cmake showLineNumbers 
 # Default versions
 set(FMT_VERSION "9.1.0" CACHE STRING "fmt library version")
 set(SPDLOG_VERSION "v1.11.0" CACHE STRING "spdlog library version")
@@ -424,7 +424,7 @@ Users can now override: `cmake -DFMT_VERSION=10.0.0 -B build`
 
 Only fetch if not already available on the system:
 
-```cmake
+```cmake showLineNumbers 
 find_package(fmt QUIET)
 
 if(NOT fmt_FOUND)
@@ -446,7 +446,7 @@ This gives users flexibility - they can use system packages if available, or let
 
 Sometimes you need to modify a dependency. Use patch files:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     somelib
     GIT_REPOSITORY https://github.com/example/somelib.git
@@ -461,7 +461,7 @@ The patch is applied after downloading but before configuring. Keep patches in y
 
 Here's a comprehensive example for a real project:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.14)
 project(WebServer VERSION 1.0.0 LANGUAGES CXX)
 
@@ -498,7 +498,7 @@ endif()
 install(TARGETS webserver DESTINATION bin)
 ```
 
-```cmake title="cmake/Dependencies.cmake"
+```cmake showLineNumbers  title="cmake/Dependencies.cmake"
 include(FetchContent)
 
 # Cache directory for faster rebuilds
@@ -559,7 +559,7 @@ message(STATUS "  - nlohmann_json")
 message(STATUS "  - cpp-httplib")
 ```
 
-```cmake title=".gitignore"
+```cmake showLineNumbers  title=".gitignore"
 build/
 .fetchcontent-cache/
 ```
@@ -617,7 +617,7 @@ When should you use each?
 
 Best of both worlds - try system first, fall back to fetch:
 
-```cmake
+```cmake showLineNumbers 
 find_package(fmt QUIET)
 
 if(fmt_FOUND)
@@ -639,7 +639,7 @@ endif()
 
 Some projects don't create imported targets or use different names:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     somelib
     GIT_REPOSITORY https://github.com/example/somelib.git
@@ -660,7 +660,7 @@ message(STATUS "somelib targets: ${targets}")
 
 Some header-only libraries need special handling:
 
-```cmake
+```cmake showLineNumbers 
 FetchContent_Declare(
     eigen
     GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -677,7 +677,7 @@ target_link_libraries(myapp PRIVATE Eigen3::Eigen)
 
 FetchContent can slow down configuration. Mitigate this:
 
-```cmake
+```cmake showLineNumbers 
 # Use shallow clones
 GIT_SHALLOW ON
 
@@ -698,7 +698,7 @@ endif()
 
 Two dependencies might fetch different versions of the same library:
 
-```cmake
+```cmake showLineNumbers 
 # Force both to use your version
 set(COMMON_LIB_VERSION "1.0.0" CACHE STRING "" FORCE)
 
@@ -719,7 +719,7 @@ FetchContent_MakeAvailable(dependency_a dependency_b)
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Basic usage
 include(FetchContent)
 

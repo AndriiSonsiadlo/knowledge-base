@@ -18,7 +18,7 @@ The syntax uses `$<...>` and looks unusual, but it's powerful for expressing com
 
 ## Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 $<CONDITION:value_if_true>
 $<IF:condition,value_if_true,value_if_false>
 ```
@@ -31,7 +31,7 @@ $<IF:condition,value_if_true,value_if_false>
 
 Different flags for Debug vs Release:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 target_compile_definitions(myapp PRIVATE
@@ -47,7 +47,7 @@ This expands to:
 
 Traditional approach (more verbose):
 
-```cmake
+```cmake showLineNumbers 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(myapp PRIVATE DEBUG_MODE)
 else()
@@ -59,7 +59,7 @@ But this fails with multi-config generators! Generator expressions handle both c
 
 ### Compiler-Specific Flags
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(myapp PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
     $<$<CXX_COMPILER_ID:GNU>:-Wall>
@@ -69,7 +69,7 @@ target_compile_options(myapp PRIVATE
 
 **Cleaner with matches:**
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(myapp PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
     $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-Wall>
@@ -78,7 +78,7 @@ target_compile_options(myapp PRIVATE
 
 ### Platform-Specific Settings
 
-```cmake
+```cmake showLineNumbers 
 target_compile_definitions(myapp PRIVATE
     $<$<PLATFORM_ID:Windows>:WINDOWS_BUILD>
     $<$<PLATFORM_ID:Linux>:LINUX_BUILD>
@@ -90,7 +90,7 @@ target_compile_definitions(myapp PRIVATE
 
 ### Basic Conditions
 
-```cmake
+```cmake showLineNumbers 
 # Simple boolean
 $<BOOL:value>           # 1 if value is true-like, 0 otherwise
 
@@ -104,7 +104,7 @@ $<IN_LIST:item,list>    # 1 if item in list
 
 ### Logical Operators
 
-```cmake
+```cmake showLineNumbers 
 # AND - all must be true
 $<AND:cond1,cond2,...>
 
@@ -117,7 +117,7 @@ $<NOT:condition>
 
 **Example combining conditions:**
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(myapp PRIVATE
     # Warnings only in Debug with GCC or Clang
     $<$<AND:$<CONFIG:Debug>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-Wall>
@@ -128,7 +128,7 @@ This reads: "If (Debug AND (GCC OR Clang)), add -Wall"
 
 ### String Operations
 
-```cmake
+```cmake showLineNumbers 
 # Concatenation
 $<JOIN:list,separator>              # Join list with separator
 
@@ -142,7 +142,7 @@ $<UPPER_CASE:string>
 
 **Example:**
 
-```cmake
+```cmake showLineNumbers 
 set(MY_LIST "a;b;c")
 target_compile_definitions(myapp PRIVATE
     "ITEMS=$<JOIN:${MY_LIST},->"  # Expands to: ITEMS=a->b->c
@@ -153,7 +153,7 @@ target_compile_definitions(myapp PRIVATE
 
 Access target properties in generator expressions:
 
-```cmake
+```cmake showLineNumbers 
 # Target property
 $<TARGET_PROPERTY:target,property>
 
@@ -170,7 +170,7 @@ $<TARGET_FILE_DIR:target>          # Directory containing target
 
 Get library output location:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 add_custom_command(TARGET mylib POST_BUILD
@@ -184,7 +184,7 @@ This copies `mylib` to `dist/` after building, and it works for any platform/con
 
 ### Target Property Queries
 
-```cmake
+```cmake showLineNumbers 
 # Include directories from another target
 target_include_directories(myapp PRIVATE
     $<TARGET_PROPERTY:mylib,INTERFACE_INCLUDE_DIRECTORIES>
@@ -193,7 +193,7 @@ target_include_directories(myapp PRIVATE
 
 **Check target type:**
 
-```cmake
+```cmake showLineNumbers 
 $<TARGET_PROPERTY:mylib,TYPE>  # STATIC_LIBRARY, SHARED_LIBRARY, etc.
 ```
 
@@ -201,7 +201,7 @@ $<TARGET_PROPERTY:mylib,TYPE>  # STATIC_LIBRARY, SHARED_LIBRARY, etc.
 
 Critical for libraries that are both used in-source and installed:
 
-```cmake
+```cmake showLineNumbers 
 target_include_directories(mylib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
@@ -217,7 +217,7 @@ Without this distinction, installed libraries would reference non-existent sourc
 
 ### Complete Example
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib
     src/mylib.cpp
 )
@@ -242,7 +242,7 @@ target_compile_definitions(mylib PUBLIC
 
 These evaluate based on build configuration:
 
-```cmake
+```cmake showLineNumbers 
 $<CONFIG:cfg>                    # True if current config matches
 $<CONFIG>                        # Current config name
 
@@ -256,7 +256,7 @@ target_compile_options(myapp PRIVATE
 
 **Configuration comparisons:**
 
-```cmake
+```cmake showLineNumbers 
 # Is this a debug build?
 $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>
 
@@ -268,7 +268,7 @@ $<NOT:$<CONFIG:Debug>>
 
 ### Per-Configuration Output Names
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -283,7 +283,7 @@ Creates:
 
 ### Conditional Linking
 
-```cmake
+```cmake showLineNumbers 
 target_link_libraries(myapp PRIVATE
     mylib
     $<$<PLATFORM_ID:Windows>:ws2_32>
@@ -295,7 +295,7 @@ Only links platform-specific libraries on relevant platforms.
 
 ### Version-Based Logic
 
-```cmake
+```cmake showLineNumbers 
 # Check CMake version
 $<VERSION_GREATER:version1,version2>
 $<VERSION_LESS:version1,version2>
@@ -309,7 +309,7 @@ target_compile_definitions(myapp PRIVATE
 
 ### Optimization Flags
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(myapp PRIVATE
     # Disable optimizations in Debug
     $<$<CONFIG:Debug>:-O0>
@@ -328,7 +328,7 @@ target_compile_options(myapp PRIVATE
 
 Generator expressions can be nested:
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(myapp PRIVATE
     # If (Release OR RelWithDebInfo) AND (GCC OR Clang), enable LTO
     $<$<AND:$<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>,$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>>:-flto>
@@ -337,7 +337,7 @@ target_compile_options(myapp PRIVATE
 
 **Readability tip:** Break complex expressions into variables:
 
-```cmake
+```cmake showLineNumbers 
 set(IS_OPTIMIZED_BUILD $<OR:$<CONFIG:Release>,$<CONFIG:RelWithDebInfo>>)
 set(IS_GCC_OR_CLANG $<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>)
 
@@ -350,7 +350,7 @@ target_compile_options(myapp PRIVATE
 
 Use with custom target properties:
 
-```cmake
+```cmake showLineNumbers 
 define_property(TARGET PROPERTY MY_CUSTOM_FLAG
     BRIEF_DOCS "Custom flag"
 )
@@ -365,7 +365,7 @@ target_compile_definitions(myapp PRIVATE
 
 ### Installation Expressions
 
-```cmake
+```cmake showLineNumbers 
 install(FILES
     $<$<CONFIG:Debug>:debug_config.ini>
     $<$<CONFIG:Release>:release_config.ini>
@@ -379,7 +379,7 @@ Only installs the config file relevant to the build type.
 
 Generator expressions can be hard to debug since they're evaluated late. Use `file(GENERATE)` to see results:
 
-```cmake
+```cmake showLineNumbers 
 set(EXPR $<$<CONFIG:Debug>:DEBUG_FLAG>)
 
 file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/genex_debug.txt
@@ -391,7 +391,7 @@ After generation, check `genex_debug.txt` to see the evaluated result.
 
 **Alternative - print during generation:**
 
-```cmake
+```cmake showLineNumbers 
 add_custom_target(show_genex ALL
     COMMAND ${CMAKE_COMMAND} -E echo "Config: $<CONFIG>"
     VERBATIM
@@ -404,7 +404,7 @@ add_custom_target(show_genex ALL
 
 **❌ Using in set() commands**
 
-```cmake
+```cmake showLineNumbers 
 # Doesn't work - evaluated too late
 set(MY_VAR $<CONFIG>)
 message(STATUS "${MY_VAR}")  # Prints the genex, not value
@@ -412,7 +412,7 @@ message(STATUS "${MY_VAR}")  # Prints the genex, not value
 
 **❌ Using in if() statements**
 
-```cmake
+```cmake showLineNumbers 
 # Doesn't work
 if($<CONFIG:Debug>)  # if() evaluates during configure
     # ...
@@ -421,7 +421,7 @@ endif()
 
 **✅ Correct usage - in target commands:**
 
-```cmake
+```cmake showLineNumbers 
 target_compile_definitions(myapp PRIVATE
     $<$<CONFIG:Debug>:DEBUG_MODE>
 )
@@ -448,7 +448,7 @@ target_compile_definitions(myapp PRIVATE
 
 **Example of when NOT to use:**
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Over-complicated
 set(SOURCES 
     main.cpp
@@ -466,7 +466,7 @@ endif()
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Conditionals
 $<condition:value_if_true>
 $<IF:cond,true,false>

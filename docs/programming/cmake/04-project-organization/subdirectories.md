@@ -12,7 +12,7 @@ tags: [cmake, subdirectories, add_subdirectory, scope]
 
 `add_subdirectory()` tells CMake to process another directory containing its own `CMakeLists.txt`. This is fundamental for organizing multi-component projects.
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
 ```
 
@@ -31,7 +31,7 @@ When CMake encounters `add_subdirectory()`:
 3. Creates a new scope (variables can be isolated)
 4. Returns to the parent when done
 
-```cmake title="Root CMakeLists.txt"
+```cmake showLineNumbers  title="Root CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(MyProject)
 
@@ -43,7 +43,7 @@ add_subdirectory(app)       # Then process app/CMakeLists.txt
 message(STATUS "Back in root")
 ```
 
-```cmake title="libs/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/CMakeLists.txt"
 message(STATUS "Processing libs")
 
 add_library(mylib mylib.cpp)
@@ -65,12 +65,12 @@ Subdirectories create new variable scopes, but it's not complete isolation:
 
 Child directories see parent variables:
 
-```cmake title="Root"
+```cmake showLineNumbers  title="Root"
 set(MY_VAR "from parent")
 add_subdirectory(child)
 ```
 
-```cmake title="child/CMakeLists.txt"
+```cmake showLineNumbers  title="child/CMakeLists.txt"
 message(STATUS "MY_VAR = ${MY_VAR}")  # Output: "from parent"
 ```
 
@@ -78,11 +78,11 @@ message(STATUS "MY_VAR = ${MY_VAR}")  # Output: "from parent"
 
 By default, changes in child don't affect parent:
 
-```cmake title="child/CMakeLists.txt"
+```cmake showLineNumbers  title="child/CMakeLists.txt"
 set(CHILD_VAR "value")
 ```
 
-```cmake title="Root (after add_subdirectory)"
+```cmake showLineNumbers  title="Root (after add_subdirectory)"
 message(STATUS "${CHILD_VAR}")  # Empty! Not set in parent scope
 ```
 
@@ -90,18 +90,18 @@ message(STATUS "${CHILD_VAR}")  # Empty! Not set in parent scope
 
 Use `PARENT_SCOPE` to modify parent variables:
 
-```cmake title="child/CMakeLists.txt"
+```cmake showLineNumbers  title="child/CMakeLists.txt"
 set(RESULT "computed value" PARENT_SCOPE)
 ```
 
-```cmake title="Root"
+```cmake showLineNumbers  title="Root"
 add_subdirectory(child)
 message(STATUS "${RESULT}")  # Output: "computed value"
 ```
 
 **Important:** Setting `PARENT_SCOPE` doesn't set the variable in the current scope:
 
-```cmake
+```cmake showLineNumbers 
 set(VAR "value" PARENT_SCOPE)
 message(STATUS "${VAR}")  # Empty in current scope!
 
@@ -114,11 +114,11 @@ set(VAR "value")
 
 Unlike variables, targets (executables, libraries) are globally visible after creation:
 
-```cmake title="libs/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/CMakeLists.txt"
 add_library(mylib mylib.cpp)
 ```
 
-```cmake title="app/CMakeLists.txt"
+```cmake showLineNumbers  title="app/CMakeLists.txt"
 add_executable(myapp main.cpp)
 
 # Can link to library from sibling directory
@@ -127,12 +127,12 @@ target_link_libraries(myapp PRIVATE mylib)
 
 This works because targets exist in a global namespace. However, best practice is to use ALIAS targets for clarity:
 
-```cmake title="libs/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/CMakeLists.txt"
 add_library(mylib mylib.cpp)
 add_library(MyProject::mylib ALIAS mylib)  # Namespaced
 ```
 
-```cmake title="app/CMakeLists.txt"
+```cmake showLineNumbers  title="app/CMakeLists.txt"
 target_link_libraries(myapp PRIVATE MyProject::mylib)
 ```
 
@@ -140,7 +140,7 @@ target_link_libraries(myapp PRIVATE MyProject::mylib)
 
 Beyond variables and targets, directories have properties you can set:
 
-```cmake
+```cmake showLineNumbers 
 # Set property for current directory
 set_property(DIRECTORY PROPERTY COMPILE_OPTIONS -Wall)
 
@@ -177,7 +177,7 @@ Each subdirectory gets its own build directory. Access them with:
 - `CMAKE_CURRENT_SOURCE_DIR`: Source directory being processed
 - `CMAKE_CURRENT_BINARY_DIR`: Corresponding build directory
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "Source: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "Binary: ${CMAKE_CURRENT_BINARY_DIR}")
 ```
@@ -186,7 +186,7 @@ message(STATUS "Binary: ${CMAKE_CURRENT_BINARY_DIR}")
 
 Override default build location:
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(libs ${CMAKE_BINARY_DIR}/mylibs)
 ```
 
@@ -201,7 +201,7 @@ Now `libs/` builds to `build/mylibs/` instead of `build/libs/`. Rarely needed bu
 - Has its own binary directory
 - Use for: components with their own build
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(libs)
 ```
 
@@ -212,7 +212,7 @@ add_subdirectory(libs)
 - No binary directory
 - Use for: shared CMake code, utilities, macros
 
-```cmake
+```cmake showLineNumbers 
 include(cmake/CompilerWarnings.cmake)
 ```
 
@@ -225,11 +225,11 @@ include(cmake/CompilerWarnings.cmake)
 
 Prevent subdirectory targets from building by default:
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(optional_tools EXCLUDE_FROM_ALL)
 ```
 
-```cmake title="optional_tools/CMakeLists.txt"
+```cmake showLineNumbers  title="optional_tools/CMakeLists.txt"
 add_executable(tool1 tool1.cpp)
 add_executable(tool2 tool2.cpp)
 ```
@@ -251,21 +251,21 @@ add_executable(tool2 tool2.cpp)
 
 Subdirectories are processed in order listed:
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(libs)  # Build libraries first
 add_subdirectory(app)   # Then app that uses libraries
 ```
 
 If `app` depends on targets from `libs`, they must be added in this order. Wrong order causes errors:
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(app)   # ❌ Error: 'mylib' target not found
 add_subdirectory(libs)  # Defines mylib too late
 ```
 
 **Dependencies determine order:**
 
-```cmake
+```cmake showLineNumbers 
 # Correct order based on dependencies
 add_subdirectory(external)     # Third-party libs (no deps)
 add_subdirectory(libs/utils)   # Utils (no deps)
@@ -279,7 +279,7 @@ add_subdirectory(tests)        # Tests (depend on everything)
 
 `add_subdirectory()` accepts relative paths from current directory:
 
-```cmake
+```cmake showLineNumbers 
 # From root
 add_subdirectory(libs/core)        # Relative to root
 add_subdirectory(../shared)        # Parent directory (unusual)
@@ -294,7 +294,7 @@ add_subdirectory(/usr/src/lib)     # Avoid
 
 Add subdirectories based on conditions:
 
-```cmake
+```cmake showLineNumbers 
 option(BUILD_TESTS "Build test suite" ON)
 option(BUILD_EXAMPLES "Build examples" OFF)
 
@@ -320,12 +320,12 @@ endif()
 
 Most common - one subdirectory creates target, another uses it:
 
-```cmake title="lib/CMakeLists.txt"
+```cmake showLineNumbers  title="lib/CMakeLists.txt"
 add_library(mylib mylib.cpp)
 add_library(Project::mylib ALIAS mylib)
 ```
 
-```cmake title="app/CMakeLists.txt"
+```cmake showLineNumbers  title="app/CMakeLists.txt"
 add_executable(app main.cpp)
 target_link_libraries(app PRIVATE Project::mylib)
 ```
@@ -334,7 +334,7 @@ target_link_libraries(app PRIVATE Project::mylib)
 
 Share configuration across subdirectories:
 
-```cmake title="Root"
+```cmake showLineNumbers  title="Root"
 set(SHARED_OPTION ON CACHE BOOL "Shared option")
 add_subdirectory(component1)
 add_subdirectory(component2)
@@ -346,11 +346,11 @@ Both components see `SHARED_OPTION`.
 
 Child can pass information to parent:
 
-```cmake title="child/CMakeLists.txt"
+```cmake showLineNumbers  title="child/CMakeLists.txt"
 set(STATUS_MESSAGE "Child completed successfully" PARENT_SCOPE)
 ```
 
-```cmake title="Root"
+```cmake showLineNumbers  title="Root"
 add_subdirectory(child)
 message(STATUS "${STATUS_MESSAGE}")
 ```
@@ -361,11 +361,11 @@ message(STATUS "${STATUS_MESSAGE}")
 
 Building multiple libraries:
 
-```cmake title="Root"
+```cmake showLineNumbers  title="Root"
 add_subdirectory(libs)
 ```
 
-```cmake title="libs/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/CMakeLists.txt"
 add_subdirectory(core)
 add_subdirectory(utils)
 add_subdirectory(network)
@@ -375,7 +375,7 @@ Each library directory has its own `CMakeLists.txt` defining the library target.
 
 ### Optional Features
 
-```cmake
+```cmake showLineNumbers 
 option(ENABLE_NETWORKING "Enable network features" ON)
 
 if(ENABLE_NETWORKING)
@@ -395,7 +395,7 @@ endif()
 
 Find all subdirectories with CMakeLists.txt:
 
-```cmake
+```cmake showLineNumbers 
 file(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} */CMakeLists.txt)
 
 foreach(child ${children})
@@ -411,7 +411,7 @@ endforeach()
 
 A complete multi-subdirectory project:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(MultiComponent VERSION 1.0.0)
 
@@ -443,7 +443,7 @@ if(BUILD_TESTS)
 endif()
 ```
 
-```cmake title="libs/core/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/core/CMakeLists.txt"
 add_library(core
     src/engine.cpp
     src/system.cpp
@@ -465,7 +465,7 @@ target_link_libraries(core
 target_compile_features(core PUBLIC cxx_std_17)
 ```
 
-```cmake title="app/CMakeLists.txt"
+```cmake showLineNumbers  title="app/CMakeLists.txt"
 add_executable(myapp main.cpp)
 
 target_link_libraries(myapp PRIVATE
@@ -478,13 +478,13 @@ target_link_libraries(myapp PRIVATE
 
 ### See What's Being Processed
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "Entering directory: ${CMAKE_CURRENT_SOURCE_DIR}")
 ```
 
 ### Check Variables
 
-```cmake
+```cmake showLineNumbers 
 # At end of subdirectory
 get_cmake_property(_vars VARIABLES)
 foreach(_var ${_vars})
@@ -494,7 +494,7 @@ endforeach()
 
 ### Verify Targets Exist
 
-```cmake
+```cmake showLineNumbers 
 if(NOT TARGET Project::mylib)
     message(FATAL_ERROR "Expected target Project::mylib not found")
 endif()
@@ -525,7 +525,7 @@ endif()
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Add subdirectory
 add_subdirectory(path)
 add_subdirectory(path binary_dir)

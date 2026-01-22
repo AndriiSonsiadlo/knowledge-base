@@ -30,7 +30,7 @@ A Find module must:
 
 ### Minimal Example
 
-```cmake title="cmake/FindMyLib.cmake"
+```cmake showLineNumbers  title="cmake/FindMyLib.cmake"
 # Find include directory
 find_path(MyLib_INCLUDE_DIR
     NAMES mylib.h
@@ -70,7 +70,7 @@ mark_as_advanced(MyLib_INCLUDE_DIR MyLib_LIBRARY)
 
 **Usage:**
 
-```cmake
+```cmake showLineNumbers 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 find_package(MyLib REQUIRED)
@@ -83,7 +83,7 @@ target_link_libraries(myapp PRIVATE MyLib::MyLib)
 
 Use `find_path()` to locate header files:
 
-```cmake
+```cmake showLineNumbers 
 find_path(MyLib_INCLUDE_DIR
     NAMES mylib/api.h          # Header to find
     PATHS                      # Search paths
@@ -104,7 +104,7 @@ find_path(MyLib_INCLUDE_DIR
 
 **Multiple header locations:**
 
-```cmake
+```cmake showLineNumbers 
 find_path(MyLib_INCLUDE_DIR
     NAMES mylib.h
     PATHS /usr/include /usr/local/include
@@ -120,7 +120,7 @@ find_path(MyLib_CONFIG_DIR
 
 Use `find_library()` to locate library files:
 
-```cmake
+```cmake showLineNumbers 
 find_library(MyLib_LIBRARY
     NAMES mylib libmylib        # Library names (without prefix/suffix)
     PATHS
@@ -134,7 +134,7 @@ find_library(MyLib_LIBRARY
 
 **Platform considerations:**
 
-```cmake
+```cmake showLineNumbers 
 # Different names on different platforms
 if(WIN32)
     set(LIB_NAMES mylib.lib)
@@ -154,7 +154,7 @@ find_library(MyLib_LIBRARY
 
 Extract version from header or library:
 
-```cmake
+```cmake showLineNumbers 
 # Find version from header
 if(EXISTS "${MyLib_INCLUDE_DIR}/mylib/version.h")
     file(READ "${MyLib_INCLUDE_DIR}/mylib/version.h" version_header)
@@ -180,7 +180,7 @@ find_package_handle_standard_args(MyLib
 
 **Using pkg-config for version:**
 
-```cmake
+```cmake showLineNumbers 
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
     pkg_check_modules(PC_MyLib QUIET mylib)
@@ -192,7 +192,7 @@ endif()
 
 Handle libraries with optional components:
 
-```cmake title="FindMyLib.cmake"
+```cmake showLineNumbers  title="FindMyLib.cmake"
 # Core library (always required)
 find_library(MyLib_CORE_LIBRARY
     NAMES mylib_core
@@ -232,7 +232,7 @@ find_package_handle_standard_args(MyLib
 
 **Usage:**
 
-```cmake
+```cmake showLineNumbers 
 find_package(MyLib REQUIRED COMPONENTS network graphics)
 
 if(MyLib_network_FOUND)
@@ -244,7 +244,7 @@ endif()
 
 Modern Find modules create imported targets:
 
-```cmake
+```cmake showLineNumbers 
 if(MyLib_FOUND AND NOT TARGET MyLib::MyLib)
     # Static or shared library
     add_library(MyLib::MyLib UNKNOWN IMPORTED)
@@ -271,7 +271,7 @@ endif()
 
 **Component targets:**
 
-```cmake
+```cmake showLineNumbers 
 # Core library
 add_library(MyLib::Core UNKNOWN IMPORTED)
 set_target_properties(MyLib::Core PROPERTIES
@@ -293,7 +293,7 @@ endif()
 
 A production-ready Find module:
 
-```cmake title="cmake/FindSQLite3.cmake"
+```cmake showLineNumbers  title="cmake/FindSQLite3.cmake"
 #[=======================================================================[.rst:
 FindSQLite3
 -----------
@@ -410,7 +410,7 @@ CMake searches in this order:
 3. `CMAKE_PREFIX_PATH`
 4. System-specific paths
 
-```cmake
+```cmake showLineNumbers 
 find_library(MyLib_LIBRARY
     NAMES mylib
     HINTS ${MyLib_ROOT}              # 1. User hint
@@ -425,7 +425,7 @@ find_library(MyLib_LIBRARY
 
 **Controlling search:**
 
-```cmake
+```cmake showLineNumbers 
 # Only search in specified paths
 find_library(MyLib_LIBRARY
     NAMES mylib
@@ -444,7 +444,7 @@ find_library(MyLib_LIBRARY
 
 If your library depends on others:
 
-```cmake
+```cmake showLineNumbers 
 # Find dependencies first
 find_package(ZLIB REQUIRED)
 find_package(Threads REQUIRED)
@@ -479,7 +479,7 @@ endif()
 
 ## Testing Your Find Module
 
-```cmake title="test/CMakeLists.txt"
+```cmake showLineNumbers  title="test/CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(FindModuleTest)
 
@@ -499,7 +499,7 @@ message(STATUS "MyLib_LIBRARIES: ${MyLib_LIBRARIES}")
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Find header
 find_path(Pkg_INCLUDE_DIR
     NAMES header.h

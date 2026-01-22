@@ -36,7 +36,7 @@ CMake's `add_custom_command()` has two distinct uses:
 
 Create files as part of the build:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT generated_file.cpp              # File to generate
     COMMAND python3 ${CMAKE_SOURCE_DIR}/generate.py
@@ -70,7 +70,7 @@ add_executable(myapp
 
 One command generating multiple files:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT
         config.h
@@ -91,7 +91,7 @@ add_library(config ${CMAKE_CURRENT_BINARY_DIR}/config.cpp)
 
 Run commands before or after building a target:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Run after building
@@ -111,7 +111,7 @@ add_custom_command(TARGET myapp POST_BUILD
 
 **Common uses:**
 
-```cmake
+```cmake showLineNumbers 
 # Copy DLLs on Windows
 if(WIN32)
     add_custom_command(TARGET myapp POST_BUILD
@@ -141,7 +141,7 @@ endif()
 
 Targets that don't produce normal build outputs:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_target(name
     [ALL]
     COMMAND command1
@@ -155,7 +155,7 @@ add_custom_target(name
 
 ### Documentation Generation
 
-```cmake
+```cmake showLineNumbers 
 find_package(Doxygen)
 
 if(DOXYGEN_FOUND)
@@ -172,7 +172,7 @@ Build with: `cmake --build build --target docs`
 
 ### Format Code
 
-```cmake
+```cmake showLineNumbers 
 find_program(CLANG_FORMAT clang-format)
 
 if(CLANG_FORMAT)
@@ -191,7 +191,7 @@ endif()
 
 ### Run Linter
 
-```cmake
+```cmake showLineNumbers 
 add_custom_target(lint
     COMMAND cppcheck
         --enable=all
@@ -204,7 +204,7 @@ add_custom_target(lint
 
 ### Package Distribution
 
-```cmake
+```cmake showLineNumbers 
 add_custom_target(package
     COMMAND ${CMAKE_COMMAND} -E tar czf
         ${CMAKE_BINARY_DIR}/myapp-${PROJECT_VERSION}.tar.gz
@@ -220,7 +220,7 @@ add_custom_target(package
 
 ### Protocol Buffer Compilation
 
-```cmake
+```cmake showLineNumbers 
 find_package(Protobuf REQUIRED)
 
 set(PROTO_FILES
@@ -255,7 +255,7 @@ target_include_directories(protos PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 While Qt provides modules, here's the manual approach:
 
-```cmake
+```cmake showLineNumbers 
 find_package(Qt5 COMPONENTS Core REQUIRED)
 
 set(MOC_HEADERS
@@ -285,7 +285,7 @@ add_executable(myapp main.cpp ${MOC_SOURCES})
 
 Convert files to C arrays:
 
-```cmake
+```cmake showLineNumbers 
 function(embed_resource output input)
     add_custom_command(
         OUTPUT ${output}
@@ -308,7 +308,7 @@ add_executable(myapp
 
 ### Shader Compilation
 
-```cmake
+```cmake showLineNumbers 
 file(GLOB SHADERS ${CMAKE_SOURCE_DIR}/shaders/*.glsl)
 
 foreach(shader ${SHADERS})
@@ -337,7 +337,7 @@ add_dependencies(renderer shaders)
 
 Custom targets can depend on other targets:
 
-```cmake
+```cmake showLineNumbers 
 # Custom target that depends on executable
 add_custom_target(run
     COMMAND myapp
@@ -355,7 +355,7 @@ add_custom_target(deploy DEPENDS build_docs package)
 
 Custom commands support generator expressions:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(TARGET myapp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
         $<TARGET_FILE:myapp>
@@ -368,7 +368,7 @@ add_custom_command(TARGET myapp POST_BUILD
 
 Use `${CMAKE_COMMAND} -E` for portable file operations:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(TARGET myapp POST_BUILD
     # Copy file
     COMMAND ${CMAKE_COMMAND} -E copy
@@ -399,7 +399,7 @@ add_custom_command(TARGET myapp POST_BUILD
 
 Always use `VERBATIM` for commands with complex arguments:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT output.txt
     COMMAND ${CMAKE_COMMAND} -E echo "Complex string with spaces"
@@ -414,7 +414,7 @@ add_custom_command(
 
 Declare files created as side effects:
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT main_output.txt
     BYPRODUCTS side_effect.log
@@ -445,19 +445,19 @@ This helps CMake understand the full build graph, important for Ninja generator.
 
 **❌ Relative paths in OUTPUT:**
 
-```cmake
+```cmake showLineNumbers 
 OUTPUT file.cpp  # Wrong - unclear which directory
 ```
 
 **✅ Absolute paths:**
 
-```cmake
+```cmake showLineNumbers 
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/file.cpp
 ```
 
 **❌ Forgetting dependencies:**
 
-```cmake
+```cmake showLineNumbers 
 # Missing DEPENDS - won't rebuild when template changes
 add_custom_command(
     OUTPUT file.cpp
@@ -467,7 +467,7 @@ add_custom_command(
 
 **✅ Include dependencies:**
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT file.cpp
     COMMAND generate.py
@@ -479,7 +479,7 @@ add_custom_command(
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Generate files
 add_custom_command(
     OUTPUT file.cpp

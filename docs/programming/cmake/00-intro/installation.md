@@ -143,7 +143,7 @@ C:\Program Files\CMake\bin
 
 Create a test project:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(TestSetup)
 

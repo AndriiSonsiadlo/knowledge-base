@@ -53,7 +53,7 @@ project/
 
 The root file orchestrates the entire build:
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0.0 LANGUAGES CXX)
 
@@ -98,7 +98,7 @@ endif()
 
 Each library gets its own CMakeLists.txt:
 
-```cmake title="libs/core/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/core/CMakeLists.txt"
 add_library(core
     src/engine.cpp
     src/processor.cpp
@@ -135,7 +135,7 @@ target_compile_features(core PUBLIC cxx_std_17)
 
 The application depends on libraries:
 
-```cmake title="app/CMakeLists.txt"
+```cmake showLineNumbers  title="app/CMakeLists.txt"
 add_executable(myapp
     main.cpp
     application.cpp
@@ -171,7 +171,7 @@ app (depends on ui, transitively gets core and utils)
 
 If `core` links to `utils` with `PUBLIC`, then `ui` automatically gets `utils` too. This transitive propagation is powerful but requires careful use of visibility keywords.
 
-```cmake
+```cmake showLineNumbers 
 # In libs/core/CMakeLists.txt
 target_link_libraries(core
     PUBLIC MyProject::utils    # ui gets this automatically
@@ -206,7 +206,7 @@ libs/core/
 
 Usage in code:
 
-```cpp
+```cpp showLineNumbers 
 // Clear where this comes from
 #include <myproject/core/engine.h>
 #include <myproject/utils/helper.h>
@@ -217,7 +217,7 @@ Usage in code:
 
 Configure in CMake:
 
-```cmake
+```cmake showLineNumbers 
 target_include_directories(core
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -233,7 +233,7 @@ Implementation includes private headers directly: `#include "internal.h"`
 
 Some components are header-only:
 
-```cmake title="libs/utils/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/utils/CMakeLists.txt"
 add_library(utils INTERFACE)
 
 add_library(MyProject::utils ALIAS utils)
@@ -273,7 +273,7 @@ libs/platform/
         └── implementation.cpp
 ```
 
-```cmake title="libs/platform/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/platform/CMakeLists.txt"
 add_library(platform)
 
 target_include_directories(platform
@@ -297,7 +297,7 @@ add_library(MyProject::platform ALIAS platform)
 
 Handle third-party code in separate directory:
 
-```cmake title="external/CMakeLists.txt"
+```cmake showLineNumbers  title="external/CMakeLists.txt"
 include(FetchContent)
 
 # Configure all external projects
@@ -317,7 +317,7 @@ FetchContent_Declare(fmt
 FetchContent_MakeAvailable(json fmt)
 ```
 
-```cmake title="Root CMakeLists.txt"
+```cmake showLineNumbers  title="Root CMakeLists.txt"
 # Fetch dependencies before our code
 add_subdirectory(external)
 
@@ -342,7 +342,7 @@ tests/
     └── test_full_system.cpp
 ```
 
-```cmake title="tests/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/CMakeLists.txt"
 # Fetch test framework
 FetchContent_Declare(catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
@@ -393,7 +393,7 @@ add_test(NAME IntegrationTests COMMAND test_integration)
 
 Large projects benefit from building only needed components:
 
-```cmake
+```cmake showLineNumbers 
 # Root CMakeLists.txt
 option(BUILD_APP "Build application" ON)
 option(BUILD_CORE "Build core library" ON)
@@ -420,7 +420,7 @@ Users can now: `cmake -DBUILD_UI=OFF -B build`
 
 Install while preserving structure:
 
-```cmake
+```cmake showLineNumbers 
 # In each library's CMakeLists.txt
 install(TARGETS core
     EXPORT MyProjectTargets
@@ -463,7 +463,7 @@ After installation, the directory structure is:
 
 A realistic multi-directory project:
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(GameEngine VERSION 1.0.0)
 
@@ -507,7 +507,7 @@ if(BUILD_EXAMPLES)
 endif()
 ```
 
-```cmake title="libs/graphics/CMakeLists.txt"
+```cmake showLineNumbers  title="libs/graphics/CMakeLists.txt"
 find_package(OpenGL REQUIRED)
 
 add_library(graphics
@@ -553,7 +553,7 @@ cmake/
 └── InstallHelper.cmake
 ```
 
-```cmake title="cmake/CompilerWarnings.cmake"
+```cmake showLineNumbers  title="cmake/CompilerWarnings.cmake"
 function(target_set_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 /WX)
@@ -567,7 +567,7 @@ endfunction()
 
 Use in root:
 
-```cmake
+```cmake showLineNumbers 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(CompilerWarnings)
 include(Dependencies)
@@ -591,7 +591,7 @@ plugins/
     └── CMakeLists.txt
 ```
 
-```cmake title="plugins/CMakeLists.txt"
+```cmake showLineNumbers  title="plugins/CMakeLists.txt"
 file(GLOB plugin_dirs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} */CMakeLists.txt)
 
 foreach(plugin_cmake ${plugin_dirs})
@@ -603,7 +603,7 @@ endforeach()
 
 Each plugin is a MODULE library:
 
-```cmake title="plugins/audio_mp3/CMakeLists.txt"
+```cmake showLineNumbers  title="plugins/audio_mp3/CMakeLists.txt"
 add_library(audio_mp3 MODULE
     mp3_decoder.cpp
 )

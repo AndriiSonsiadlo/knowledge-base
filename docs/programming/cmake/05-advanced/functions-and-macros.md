@@ -18,7 +18,7 @@ Functions create a new scope for variables. Changes to variables inside the func
 
 ### Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 function(function_name arg1 arg2)
     # Function body
     # Variables set here are local
@@ -30,7 +30,7 @@ function_name(value1 value2)
 
 ### Simple Example
 
-```cmake
+```cmake showLineNumbers 
 function(print_message msg)
     message(STATUS "Message: ${msg}")
 endfunction()
@@ -48,7 +48,7 @@ Functions automatically get these variables:
 - `${ARGN}`: Arguments beyond named ones
 - `${ARG0}`, `${ARG1}`, etc.: Individual arguments
 
-```cmake
+```cmake showLineNumbers 
 function(show_args first second)
     message(STATUS "first: ${first}")
     message(STATUS "second: ${second}")
@@ -68,7 +68,7 @@ show_args(a b c d e)
 
 **ARGN is useful for variadic functions:**
 
-```cmake
+```cmake showLineNumbers 
 function(add_my_executable name)
     add_executable(${name} ${ARGN})
     target_compile_features(${name} PRIVATE cxx_std_17)
@@ -82,7 +82,7 @@ add_my_executable(myapp main.cpp utils.cpp config.cpp)
 
 Functions don't have explicit return values. Use `set(... PARENT_SCOPE)` to return data:
 
-```cmake
+```cmake showLineNumbers 
 function(compute_value result_var)
     set(computed "some_value")
     set(${result_var} ${computed} PARENT_SCOPE)
@@ -94,7 +94,7 @@ message(STATUS "Result: ${my_result}")  # Result: some_value
 
 **Important:** Setting PARENT_SCOPE doesn't set the variable in the function's scope:
 
-```cmake
+```cmake showLineNumbers 
 function(example)
     set(VAR "value" PARENT_SCOPE)
     message(STATUS "In function: ${VAR}")  # Empty!
@@ -106,7 +106,7 @@ message(STATUS "In parent: ${VAR}")  # value
 
 To set both:
 
-```cmake
+```cmake showLineNumbers 
 function(example)
     set(VAR "value" PARENT_SCOPE)
     set(VAR "value")  # Also set locally
@@ -119,7 +119,7 @@ Macros are like text substitution - they don't create a new scope. Variables set
 
 ### Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 macro(macro_name arg1 arg2)
     # Macro body
     # Variables set here affect caller
@@ -132,7 +132,7 @@ macro_name(value1 value2)
 
 Key difference illustrated:
 
-```cmake
+```cmake showLineNumbers 
 function(my_function)
     set(RESULT "from function")
 endfunction()
@@ -158,7 +158,7 @@ Use macros when you need to:
 
 **Most common use - control flow wrappers:**
 
-```cmake
+```cmake showLineNumbers 
 macro(require_package package)
     find_package(${package} REQUIRED)
     if(NOT ${package}_FOUND)
@@ -171,7 +171,7 @@ endmacro()
 
 For complex functions with optional and named arguments, use `cmake_parse_arguments()`:
 
-```cmake
+```cmake showLineNumbers 
 function(create_test)
     cmake_parse_arguments(
         TEST                          # Prefix for output variables
@@ -221,7 +221,7 @@ After parsing:
 
 ### Compiler Warnings
 
-```cmake
+```cmake showLineNumbers 
 function(target_set_warnings target_name)
     if(MSVC)
         target_compile_options(${target_name} PRIVATE
@@ -245,7 +245,7 @@ target_set_warnings(myapp)
 
 ### Library Creator
 
-```cmake
+```cmake showLineNumbers 
 function(add_project_library name)
     cmake_parse_arguments(
         LIB
@@ -307,7 +307,7 @@ add_project_library(mylib
 
 ### Executable with Standard Setup
 
-```cmake
+```cmake showLineNumbers 
 function(add_project_executable name)
     cmake_parse_arguments(
         EXE
@@ -341,7 +341,7 @@ add_project_executable(myapp
 
 ### Install Helper
 
-```cmake
+```cmake showLineNumbers 
 function(install_project_library target)
     install(TARGETS ${target}
         EXPORT MyProjectTargets
@@ -367,7 +367,7 @@ install_project_library(mylib)
 
 Understanding scope differences:
 
-```cmake
+```cmake showLineNumbers 
 set(GLOBAL_VAR "global")
 
 function(test_function)
@@ -395,7 +395,7 @@ message(STATUS "MACRO_VAR: ${MACRO_VAR}")        # "macro local"
 
 Macros can use flow control that affects the caller:
 
-```cmake
+```cmake showLineNumbers 
 macro(early_return)
     if(SOME_CONDITION)
         return()  # Returns from caller, not just macro!
@@ -405,7 +405,7 @@ endmacro()
 
 **This is dangerous and usually unintended.** Functions don't have this problem:
 
-```cmake
+```cmake showLineNumbers 
 function(safe_early_return)
     if(SOME_CONDITION)
         return()  # Returns from function only
@@ -417,7 +417,7 @@ endfunction()
 
 Create a utilities file:
 
-```cmake title="cmake/ProjectUtils.cmake"
+```cmake showLineNumbers  title="cmake/ProjectUtils.cmake"
 function(target_set_warnings target)
     # ... implementation
 endfunction()
@@ -433,7 +433,7 @@ endfunction()
 
 Include in root CMakeLists.txt:
 
-```cmake
+```cmake showLineNumbers 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(ProjectUtils)
 
@@ -445,7 +445,7 @@ add_project_library(mylib SOURCES src/lib.cpp)
 
 ### Function Returning Multiple Values
 
-```cmake
+```cmake showLineNumbers 
 function(get_version major minor patch)
     set(${major} 1 PARENT_SCOPE)
     set(${minor} 2 PARENT_SCOPE)
@@ -458,7 +458,7 @@ message(STATUS "Version: ${MAJ}.${MIN}.${PAT}")  # 1.2.3
 
 ### Optional Arguments
 
-```cmake
+```cmake showLineNumbers 
 function(add_my_library name)
     cmake_parse_arguments(
         LIB
@@ -491,7 +491,7 @@ add_my_library(core SOURCES core.cpp VERSION 1.0.0)
 
 ### Conditional Compilation Helper
 
-```cmake
+```cmake showLineNumbers 
 function(target_add_feature target feature)
     string(TOUPPER ${feature} FEATURE_UPPER)
     
@@ -535,7 +535,7 @@ target_add_feature(myapp graphics)
 
 **Documentation:**
 
-```cmake
+```cmake showLineNumbers 
 # Add a library with standard project configuration
 #
 # Arguments:
@@ -556,7 +556,7 @@ endfunction()
 
 **❌ Forgetting PARENT_SCOPE in functions:**
 
-```cmake
+```cmake showLineNumbers 
 function(get_value result)
     set(${result} "value")  # Wrong - only local
 endfunction()
@@ -564,7 +564,7 @@ endfunction()
 
 **✅ Correct:**
 
-```cmake
+```cmake showLineNumbers 
 function(get_value result)
     set(${result} "value" PARENT_SCOPE)
 endfunction()
@@ -572,7 +572,7 @@ endfunction()
 
 **❌ Using return() in macros:**
 
-```cmake
+```cmake showLineNumbers 
 macro(bad_macro)
     return()  # Returns from caller!
 endmacro()
@@ -580,7 +580,7 @@ endmacro()
 
 **✅ Use function:**
 
-```cmake
+```cmake showLineNumbers 
 function(good_function)
     return()  # Returns from function only
 endfunction()
@@ -590,7 +590,7 @@ endfunction()
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Function
 function(name arg1 arg2)
     # New scope

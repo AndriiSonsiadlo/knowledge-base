@@ -14,7 +14,7 @@ tags: [ c++, cmake ]
 
 Print messages during configuration.
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "Configuring project...")
 message(WARNING "This is deprecated")
 message(SEND_ERROR "Error but continue")
@@ -32,7 +32,7 @@ message("Regular message")
 
 **Example:**
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -46,7 +46,7 @@ endif()
 
 Create an executable target.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(target_name
     source1.cpp
     source2.cpp
@@ -60,7 +60,7 @@ Including headers is optional but helps IDEs index them.
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 # Simple
 add_executable(myapp main.cpp)
 
@@ -86,7 +86,7 @@ add_executable(myapp WIN32 main.cpp)  # GUI app on Windows
 
 Create a library target.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC
     src/mylib.cpp
     include/mylib.h
@@ -103,7 +103,7 @@ add_library(mylib STATIC
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 # Static library
 add_library(mylib STATIC mylib.cpp)
 
@@ -124,7 +124,7 @@ add_executable(app2 app2.cpp $<TARGET_OBJECTS:common>)
 
 Link libraries to a target.
 
-```cmake
+```cmake showLineNumbers 
 target_link_libraries(target
     <PRIVATE|PUBLIC|INTERFACE> lib1 lib2 ...
 )
@@ -136,7 +136,7 @@ target_link_libraries(target
 - `PUBLIC` - This target and dependents need it
 - `INTERFACE` - Only dependents need it
 
-```cmake
+```cmake showLineNumbers 
 add_library(engine STATIC engine.cpp)
 add_library(ui STATIC ui.cpp)
 add_executable(game main.cpp)
@@ -159,7 +159,7 @@ target_link_libraries(game PRIVATE ui)
 
 Add include paths to a target.
 
-```cmake
+```cmake showLineNumbers 
 target_include_directories(target
     <PRIVATE|PUBLIC|INTERFACE>
     include/
@@ -169,7 +169,7 @@ target_include_directories(target
 
 **Example:**
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib mylib.cpp)
 
 # Only mylib needs these headers
@@ -187,7 +187,7 @@ target_include_directories(headerlib INTERFACE include/)
 
 Add preprocessor definitions.
 
-```cmake
+```cmake showLineNumbers 
 target_compile_definitions(target
     <PRIVATE|PUBLIC|INTERFACE>
     DEFINE_NAME
@@ -197,7 +197,7 @@ target_compile_definitions(target
 
 **Example:**
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Define DEBUG macro
@@ -217,7 +217,7 @@ endif()
 
 In code:
 
-```cpp
+```cpp showLineNumbers 
 #ifdef DEBUG
     std::cout << "Debug mode" << std::endl;
 #endif
@@ -231,7 +231,7 @@ In code:
 
 Add compiler flags.
 
-```cmake
+```cmake showLineNumbers 
 target_compile_options(target
     <PRIVATE|PUBLIC|INTERFACE>
     -Wall -Wextra
@@ -240,7 +240,7 @@ target_compile_options(target
 
 **Example:**
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 if(MSVC)
@@ -268,7 +268,7 @@ Prefer `target_compile_features()` for C++ standard and portable options.
 
 Require specific C++ features.
 
-```cmake
+```cmake showLineNumbers 
 target_compile_features(target
     <PRIVATE|PUBLIC|INTERFACE>
     cxx_std_17
@@ -281,7 +281,7 @@ target_compile_features(target
 
 **Specific features:**
 
-```cmake
+```cmake showLineNumbers 
 target_compile_features(mylib PUBLIC
     cxx_std_17
     cxx_constexpr
@@ -293,7 +293,7 @@ target_compile_features(mylib PUBLIC
 
 ### if/elseif/else
 
-```cmake
+```cmake showLineNumbers 
 if(condition)
     # ...
 elseif(other_condition)
@@ -305,7 +305,7 @@ endif()
 
 **Conditions:**
 
-```cmake
+```cmake showLineNumbers 
 # Variable existence
 if(DEFINED MY_VAR)
 
@@ -337,7 +337,7 @@ if(NOT DISABLE_WARNINGS)
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Debug build enabled")
     target_compile_definitions(myapp PRIVATE DEBUG_MODE)
@@ -356,7 +356,7 @@ endif()
 
 Iterate over lists.
 
-```cmake
+```cmake showLineNumbers 
 foreach(var IN LISTS list_var)
     # ${var} holds current item
 endforeach()
@@ -364,7 +364,7 @@ endforeach()
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 # Simple list
 set(NUMBERS 1 2 3 4 5)
 foreach(num IN LISTS NUMBERS)
@@ -396,7 +396,7 @@ endforeach()
 
 ### while
 
-```cmake
+```cmake showLineNumbers 
 set(i 0)
 while(i LESS 5)
     message(STATUS "i = ${i}")
@@ -410,7 +410,7 @@ endwhile()
 
 Create reusable functions.
 
-```cmake
+```cmake showLineNumbers 
 function(function_name arg1 arg2)
     # Function body
     # ${arg1}, ${arg2} available
@@ -419,7 +419,7 @@ endfunction()
 
 **Examples:**
 
-```cmake
+```cmake showLineNumbers 
 function(add_my_executable name)
     add_executable(${name} ${ARGN})
     target_compile_features(${name} PRIVATE cxx_std_17)
@@ -461,7 +461,7 @@ create_test(
 
 Similar to functions but different scoping.
 
-```cmake
+```cmake showLineNumbers 
 macro(macro_name arg1)
     # Macro body
 endmacro()
@@ -480,17 +480,17 @@ endmacro()
 
 Generate files from templates.
 
-```cmake
+```cmake showLineNumbers 
 configure_file(input output [@ONLY])
 ```
 
-```cmake
+```cmake showLineNumbers 
 # config.h.in
 #define VERSION "@PROJECT_VERSION@"
 #define COMPILER "@CMAKE_CXX_COMPILER_ID@"
 ```
 
-```cmake
+```cmake showLineNumbers 
 configure_file(
     "${PROJECT_SOURCE_DIR}/config.h.in"
     "${PROJECT_BINARY_DIR}/config.h"
@@ -501,7 +501,7 @@ configure_file(
 
 File system operations.
 
-```cmake
+```cmake showLineNumbers 
 # Read
 file(READ "file.txt" content)
 
@@ -531,7 +531,7 @@ file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/output")
 
 Include another CMake file.
 
-```cmake
+```cmake showLineNumbers 
 include(CMakePackageConfigHelpers)
 include(${CMAKE_SOURCE_DIR}/cmake/Utilities.cmake)
 ```
@@ -540,7 +540,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/Utilities.cmake)
 
 Find external dependencies.
 
-```cmake
+```cmake showLineNumbers 
 find_package(Threads REQUIRED)
 find_package(OpenCV 4.5 REQUIRED)
 find_package(Boost 1.70 COMPONENTS filesystem regex)
@@ -550,7 +550,7 @@ find_package(Boost 1.70 COMPONENTS filesystem regex)
 
 Add a subdirectory to build.
 
-```cmake
+```cmake showLineNumbers 
 add_subdirectory(src)
 add_subdirectory(libs/mylib)
 add_subdirectory(external/fmt EXCLUDE_FROM_ALL)
@@ -562,7 +562,7 @@ add_subdirectory(external/fmt EXCLUDE_FROM_ALL)
 
 Define installation rules.
 
-```cmake
+```cmake showLineNumbers 
 install(TARGETS myapp mylib
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
@@ -577,7 +577,7 @@ install(DIRECTORY include/ DESTINATION include)
 
 Create a CMake option.
 
-```cmake
+```cmake showLineNumbers 
 option(BUILD_TESTS "Build test suite" ON)
 option(ENABLE_LTO "Enable link-time optimization" OFF)
 ```

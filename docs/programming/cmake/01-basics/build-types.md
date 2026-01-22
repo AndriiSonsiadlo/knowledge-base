@@ -18,7 +18,7 @@ Build types define how your code is compiled - with optimization, debug symbols,
 
 Optimized for **debugging**.
 
-```cmake
+```cmake showLineNumbers 
 set(CMAKE_BUILD_TYPE Debug)
 ```
 
@@ -46,7 +46,7 @@ cmake -DCMAKE_BUILD_TYPE=Debug ..
 
 Optimized for **performance**.
 
-```cmake
+```cmake showLineNumbers 
 set(CMAKE_BUILD_TYPE Release)
 ```
 
@@ -74,7 +74,7 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 
 **Release with Debug Info** - best of both worlds.
 
-```cmake
+```cmake showLineNumbers 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 ```
 
@@ -106,7 +106,7 @@ This is the ideal configuration for performance profiling tools!
 
 Optimized for **minimal binary size**.
 
-```cmake
+```cmake showLineNumbers 
 set(CMAKE_BUILD_TYPE MinSizeRel)
 ```
 
@@ -143,7 +143,7 @@ cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
 
 ### GCC/Clang
 
-```cmake
+```cmake showLineNumbers 
 # Debug
 CMAKE_CXX_FLAGS_DEBUG = "-g"
 
@@ -159,7 +159,7 @@ CMAKE_CXX_FLAGS_MINSIZEREL = "-Os -DNDEBUG"
 
 ### MSVC (Visual Studio)
 
-```cmake
+```cmake showLineNumbers 
 # Debug
 CMAKE_CXX_FLAGS_DEBUG = "/MDd /Zi /Ob0 /Od /RTC1"
 
@@ -177,7 +177,7 @@ CMAKE_CXX_FLAGS_MINSIZEREL = "/MD /O1 /Ob1 /DNDEBUG"
 
 ### In CMakeLists.txt
 
-```cmake
+```cmake showLineNumbers 
 # Set default if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -230,7 +230,7 @@ cmake --build build --config Release
 
 You can create your own build types:
 
-```cmake
+```cmake showLineNumbers 
 # Create Profiling build type
 set(CMAKE_CXX_FLAGS_PROFILING "-O2 -g -pg" 
     CACHE STRING "Flags for profiling build")
@@ -255,7 +255,7 @@ Ensure all compiler/linker flags are set for your custom type!
 
 Set different values per build type:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Different output names
@@ -275,7 +275,7 @@ set_target_properties(myapp PROPERTIES
 
 ### Using Generator Expressions
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 target_compile_definitions(myapp PRIVATE
@@ -291,7 +291,7 @@ target_compile_options(myapp PRIVATE
 
 ### Using CMAKE_BUILD_TYPE
 
-```cmake
+```cmake showLineNumbers 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(myapp PRIVATE VERBOSE_LOGGING)
     target_link_libraries(myapp PRIVATE debug_helper)
@@ -306,7 +306,7 @@ endif()
 
 ### Development Configuration
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MyApp)
 
@@ -332,7 +332,7 @@ endif()
 
 ### Production Configuration
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MyApp)
 
@@ -404,7 +404,7 @@ int main() {
 
 5. **Always set a default**:
 
-   ```cmake
+   ```cmake showLineNumbers 
    if(NOT CMAKE_BUILD_TYPE)
        set(CMAKE_BUILD_TYPE Release)
    endif()
@@ -412,7 +412,7 @@ int main() {
 
 6. **Document your choice**:
 
-   ```cmake
+   ```cmake showLineNumbers 
    message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
    ```
 
@@ -420,7 +420,7 @@ int main() {
 
 ## Checking Current Build Type
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "Current build type: ${CMAKE_BUILD_TYPE}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -454,7 +454,7 @@ cmake ..  # No -DCMAKE_BUILD_TYPE specified
 
 **Issue**: Wrong type for multi-config generators
 
-```cmake
+```cmake showLineNumbers 
 set(CMAKE_BUILD_TYPE Release)  # Ignored by Visual Studio!
 ```
 

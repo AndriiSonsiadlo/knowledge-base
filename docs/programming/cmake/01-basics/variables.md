@@ -16,7 +16,7 @@ Variables in CMake store strings, lists, or paths. They're the primary way to st
 
 ### Setting Variables
 
-```cmake
+```cmake showLineNumbers 
 # Simple string
 set(MY_VAR "Hello")
 
@@ -32,7 +32,7 @@ set(BUILD_TYPE "Release" CACHE STRING "Build type")
 
 ### Using Variables
 
-```cmake
+```cmake showLineNumbers 
 set(GREETING "Hello")
 message(STATUS "Greeting: ${GREETING}")
 
@@ -45,7 +45,7 @@ Use `${VAR_NAME}` to access the value. Without `${}`, you get the literal string
 
 ### Unsetting Variables
 
-```cmake
+```cmake showLineNumbers 
 unset(MY_VAR)
 unset(CACHE_VAR CACHE)  # Remove from cache
 ```
@@ -54,7 +54,7 @@ unset(CACHE_VAR CACHE)  # Remove from cache
 
 ### Normal Variables (Function/Directory Scope)
 
-```cmake
+```cmake showLineNumbers 
 set(LOCAL_VAR "value")  # Only in current scope
 
 function(my_function)
@@ -67,7 +67,7 @@ message(STATUS ${FUNC_VAR})  # ❌ Undefined!
 
 ### PARENT_SCOPE
 
-```cmake
+```cmake showLineNumbers 
 function(set_parent)
     set(MY_VAR "value" PARENT_SCOPE)
 endfunction()
@@ -78,7 +78,7 @@ message(STATUS ${MY_VAR})  # ✅ "value"
 
 ### Cache Variables (Global/Persistent)
 
-```cmake
+```cmake showLineNumbers 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build shared libraries")
 ```
 
@@ -98,7 +98,7 @@ cmake -DBUILD_SHARED_LIBS=ON ..
 
 ### Project Variables
 
-```cmake
+```cmake showLineNumbers 
 project(MyProject VERSION 1.2.3)
 
 message(STATUS "Name: ${PROJECT_NAME}")           # MyProject
@@ -124,7 +124,7 @@ In subdirectories, prefer `CMAKE_CURRENT_SOURCE_DIR` over `CMAKE_SOURCE_DIR`
 
 ### Compiler Variables
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS "Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
@@ -139,7 +139,7 @@ message(STATUS "Compiler Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 ### System Variables
 
-```cmake
+```cmake showLineNumbers 
 message(STATUS "System: ${CMAKE_SYSTEM_NAME}")
 message(STATUS "Processor: ${CMAKE_SYSTEM_PROCESSOR}")
 
@@ -157,7 +157,7 @@ endif()
 
 ### Build Configuration Variables
 
-```cmake
+```cmake showLineNumbers 
 # Build type
 set(CMAKE_BUILD_TYPE Release)
 # Options: Debug, Release, RelWithDebInfo, MinSizeRel
@@ -174,7 +174,7 @@ Lists are semicolon-separated strings.
 
 ### Creating Lists
 
-```cmake
+```cmake showLineNumbers 
 # Method 1: Multiple arguments
 set(SOURCES main.cpp utils.cpp)
 
@@ -188,7 +188,7 @@ list(APPEND SOURCES utils.cpp helper.cpp)
 
 ### List Operations
 
-```cmake
+```cmake showLineNumbers 
 set(MY_LIST a b c d e)
 
 # Length
@@ -226,7 +226,7 @@ endif()
 :::warning Quoting Lists
 When passing lists to commands, don't quote them:
 
-```cmake
+```cmake showLineNumbers 
 # ✅ Correct
 add_executable(myapp ${SOURCES})
 
@@ -240,7 +240,7 @@ add_executable(myapp "${SOURCES}")
 
 ### String Manipulation
 
-```cmake
+```cmake showLineNumbers 
 set(STR "Hello World")
 
 # Length
@@ -262,7 +262,7 @@ string(STRIP "  spaces  " stripped)  # "spaces"
 
 ### Regular Expressions
 
-```cmake
+```cmake showLineNumbers 
 set(VERSION "v1.2.3-beta")
 
 # Match
@@ -280,7 +280,7 @@ message(STATUS "Clean: ${clean_version}")  # 1.2.3
 
 ### Reading
 
-```cmake
+```cmake showLineNumbers 
 # Get environment variable
 message(STATUS "PATH: $ENV{PATH}")
 message(STATUS "HOME: $ENV{HOME}")
@@ -291,7 +291,7 @@ set(USER_HOME $ENV{HOME})
 
 ### Setting
 
-```cmake
+```cmake showLineNumbers 
 # Set for current CMake run only
 set(ENV{MY_VAR} "value")
 
@@ -306,7 +306,7 @@ set(ENV{MY_VAR} "value")
 
 ### Version Header Generation
 
-```cmake
+```cmake showLineNumbers 
 project(MyApp VERSION 1.2.3)
 
 configure_file(
@@ -329,7 +329,7 @@ configure_file(
 
 Generated `version.h`:
 
-```cpp
+```cpp showLineNumbers 
 #ifndef VERSION_H
 #define VERSION_H
 
@@ -343,7 +343,7 @@ Generated `version.h`:
 
 ### Platform-Specific Configuration
 
-```cmake
+```cmake showLineNumbers 
 if(WIN32)
     set(PLATFORM_SOURCES src/windows.cpp)
     set(PLATFORM_LIBS ws2_32)
@@ -362,7 +362,7 @@ target_link_libraries(myapp PRIVATE ${PLATFORM_LIBS})
 
 ### Compiler-Specific Flags
 
-```cmake
+```cmake showLineNumbers 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(WARNINGS -Wall -Wextra -Wpedantic)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -384,7 +384,7 @@ target_compile_options(myapp PRIVATE ${WARNINGS})
 - Project prefix - `MYPROJECT_OPTION_NAME`
   :::
 
-```cmake
+```cmake showLineNumbers 
 # Good
 set(MYPROJECT_BUILD_TESTS ON CACHE BOOL "Build tests")
 set(source_files main.cpp utils.cpp)
@@ -398,7 +398,7 @@ set(x main.cpp)     # Unclear purpose
 
 ### Unquoted Variables
 
-```cmake
+```cmake showLineNumbers 
 set(MY_VAR "value with spaces")
 
 # ❌ Wrong - split into multiple arguments
@@ -410,7 +410,7 @@ message(STATUS "${MY_VAR}")
 
 ### Variable Expansion in Lists
 
-```cmake
+```cmake showLineNumbers 
 set(LIST_A a b c)
 set(LIST_B ${LIST_A} d e)
 
@@ -419,7 +419,7 @@ message(STATUS "${LIST_B}")  # a;b;c;d;e
 
 ### Conditional Comparisons
 
-```cmake
+```cmake showLineNumbers 
 set(MY_VAR "ON")
 
 # All these are equivalent:
@@ -434,7 +434,7 @@ if("${MY_VAR}" STREQUAL "ON")
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Set
 set(VAR "value")
 set(VAR "value" CACHE TYPE "description")

@@ -20,7 +20,7 @@ This is the primary command for establishing dependencies between targets. It do
 
 ### Basic Syntax
 
-```cmake
+```cmake showLineNumbers 
 target_link_libraries(target
     <PRIVATE|PUBLIC|INTERFACE> library1 library2 ...
 )
@@ -30,7 +30,7 @@ The target must already exist (created with `add_executable()` or `add_library()
 
 ### Simple Example
 
-```cmake
+```cmake showLineNumbers 
 # Create a library
 add_library(math_operations STATIC
     src/add.cpp
@@ -54,7 +54,7 @@ The visibility keywords (`PRIVATE`, `PUBLIC`, `INTERFACE`) control how dependenc
 
 Use `PRIVATE` when a library is an implementation detail that consumers don't need to know about. The dependency is used internally but doesn't appear in your public API.
 
-```cmake
+```cmake showLineNumbers 
 add_library(database STATIC
     src/database.cpp
     src/connection.cpp
@@ -78,7 +78,7 @@ target_link_libraries(database PRIVATE SQLite3::SQLite3)
 
 Use `PUBLIC` when a library appears in your public interface - when users of your library also need to know about and link to this dependency.
 
-```cmake
+```cmake showLineNumbers 
 add_library(graphics_engine STATIC
     src/renderer.cpp
     src/shader.cpp
@@ -102,7 +102,7 @@ target_link_libraries(graphics_engine PUBLIC OpenGL::GL)
 
 Use `INTERFACE` when a library is needed by consumers but not by the library itself. This is primarily used for header-only libraries or when you're propagating requirements without using them yourself.
 
-```cmake
+```cmake showLineNumbers 
 # Header-only library
 add_library(math_utilities INTERFACE)
 
@@ -131,7 +131,7 @@ One of CMake's most powerful features is automatic handling of transitive depend
 
 ### How Transitivity Works
 
-```cmake
+```cmake showLineNumbers 
 # Low-level library
 add_library(logging STATIC logging.cpp)
 target_include_directories(logging PUBLIC include/logging)
@@ -164,7 +164,7 @@ This happens automatically because of the `PUBLIC` links. No manual tracking nee
 
 You can break transitive propagation using `PRIVATE`:
 
-```cmake
+```cmake showLineNumbers 
 add_library(A STATIC a.cpp)
 add_library(B STATIC b.cpp)
 add_library(C STATIC c.cpp)
@@ -194,7 +194,7 @@ Static libraries (`.a` on Unix, `.lib` on Windows) are archives of compiled obje
 
 When you link a static library, the linker extracts only the object files you actually use and copies them into your executable. This creates a self-contained binary with no runtime dependencies on those libraries.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC
     src/core.cpp
     src/utils.cpp
@@ -222,7 +222,7 @@ target_link_libraries(app PRIVATE mylib)
 
 When a static library will be linked into a shared library, it must be compiled with position-independent code (PIC):
 
-```cmake
+```cmake showLineNumbers 
 add_library(my_static_lib STATIC lib.cpp)
 
 # Required if this static lib will be linked into a shared lib
@@ -245,7 +245,7 @@ Shared libraries (`.so` on Unix, `.dll` on Windows, `.dylib` on macOS) are loade
 
 Unlike static libraries, shared libraries remain separate files that must be present at runtime:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED
     src/api.cpp
     src/implementation.cpp
@@ -274,7 +274,7 @@ When you run `app`, the system's dynamic linker searches for `libmylib.so.2` in 
 
 RPATH (Run-time search path) tells the executable where to find shared libraries. By default, CMake sets up reasonable RPATH behavior:
 
-```cmake
+```cmake showLineNumbers 
 # CMake's default RPATH settings (usually don't need to change)
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -284,7 +284,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 For custom library locations:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(app main.cpp)
 target_link_libraries(app PRIVATE mylib)
 
@@ -304,7 +304,7 @@ System libraries are external libraries installed on the system, typically found
 
 The modern approach uses imported targets, which encapsulate all necessary information:
 
-```cmake
+```cmake showLineNumbers 
 # Find the package
 find_package(Threads REQUIRED)
 find_package(ZLIB REQUIRED)
@@ -333,7 +333,7 @@ target_link_libraries(myapp PRIVATE
 
 Older CMake code uses variables. While this still works, it's less maintainable:
 
-```cmake
+```cmake showLineNumbers 
 find_package(ZLIB REQUIRED)
 
 add_executable(myapp main.cpp)
@@ -350,7 +350,7 @@ target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
 Different platforms have different system libraries. Handle them conditionally:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 if(WIN32)
@@ -385,7 +385,7 @@ The order in which you link libraries can matter, especially with static librari
 
 ### Link Order Matters for Static Libraries
 
-```cmake
+```cmake showLineNumbers 
 # If libB depends on symbols in libA
 add_executable(myapp main.cpp)
 target_link_libraries(myapp PRIVATE
@@ -400,7 +400,7 @@ With modern CMake and target-based linking, CMake usually handles this correctly
 
 Sometimes two static libraries depend on each other (though this is a design smell):
 
-```cmake
+```cmake showLineNumbers 
 # If libA and libB have circular dependencies
 target_link_libraries(myapp PRIVATE
     libA
@@ -415,7 +415,7 @@ Better solution: redesign to eliminate the circular dependency or combine into o
 
 For stubborn circular dependencies with static libraries:
 
-```cmake
+```cmake showLineNumbers 
 target_link_libraries(myapp PRIVATE
     -Wl,--start-group
     libA
@@ -432,7 +432,7 @@ This tells the linker to resolve symbols within the group iteratively. Note this
 
 Sometimes you need to force the linker to include all symbols from a static library, not just those referenced:
 
-```cmake
+```cmake showLineNumbers 
 if(MSVC)
     target_link_libraries(myapp PRIVATE
         -WHOLEARCHIVE:mylib
@@ -450,7 +450,7 @@ This is useful for libraries with static initializers or plugin systems where sy
 
 Add linker-specific flags:
 
-```cmake
+```cmake showLineNumbers 
 target_link_options(myapp PRIVATE
     -Wl,--as-needed        # Only link libraries actually used
     -Wl,--no-undefined     # Error on undefined symbols
@@ -468,7 +468,7 @@ endif()
 
 Group common dependencies into interface libraries:
 
-```cmake
+```cmake showLineNumbers 
 # Create a convenience interface library
 add_library(common_deps INTERFACE)
 
@@ -490,7 +490,7 @@ target_link_libraries(app2 PRIVATE common_deps)
 
 Here's a comprehensive example showing different linking scenarios:
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(ComplexProject VERSION 1.0.0)
 
@@ -599,7 +599,7 @@ install(TARGETS myapp core network utilities
 
 When you see "undefined reference to..." errors:
 
-```cmake
+```cmake showLineNumbers 
 # Check that you've linked all required libraries
 target_link_libraries(myapp PRIVATE
     all_required_libs
@@ -613,7 +613,7 @@ target_link_libraries(myapp PRIVATE
 
 When the same symbol is defined multiple times:
 
-```cmake
+```cmake showLineNumbers 
 # Ensure libraries aren't linked multiple times
 # Use PRIVATE where possible
 # Check for duplicate object files in link command
@@ -637,7 +637,7 @@ set_target_properties(myapp PROPERTIES
 
 When libraries depend on each other:
 
-```cmake
+```cmake showLineNumbers 
 # Best: Redesign to remove circular dependency
 # Workaround: Use link groups or link twice
 target_link_libraries(myapp PRIVATE A B A)
@@ -645,7 +645,7 @@ target_link_libraries(myapp PRIVATE A B A)
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Basic linking
 target_link_libraries(target PRIVATE library)
 

@@ -58,7 +58,7 @@ Each phase can be customized or disabled based on your needs.
 
 ### Including the Module
 
-```cmake
+```cmake showLineNumbers 
 include(ExternalProject)
 ```
 
@@ -66,7 +66,7 @@ include(ExternalProject)
 
 Here's a minimal example building a CMake-based library:
 
-```cmake
+```cmake showLineNumbers 
 include(ExternalProject)
 
 ExternalProject_Add(
@@ -83,7 +83,7 @@ ExternalProject_Add(
 
 This downloads nlohmann/json at build time and installs it to `${CMAKE_BINARY_DIR}/external`. However, you can't use it directly in your project yet - you need to find it:
 
-```cmake
+```cmake showLineNumbers 
 # After the external project is built, find it
 find_package(nlohmann_json REQUIRED
     PATHS ${CMAKE_BINARY_DIR}/external
@@ -106,7 +106,7 @@ ExternalProject supports multiple ways to obtain source code.
 
 The most common method for open-source dependencies:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     fmt_external
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -131,7 +131,7 @@ ExternalProject_Add(
 
 Download from a direct URL (tarball, zip file, etc.):
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     boost_external
     URL https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.gz
@@ -158,7 +158,7 @@ sha256sum boost_1_81_0.tar.gz
 
 For projects still using Subversion:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     legacy_project
     SVN_REPOSITORY http://svn.example.com/project/trunk
@@ -170,7 +170,7 @@ ExternalProject_Add(
 
 Useful for development or vendored dependencies:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     local_lib
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/local_lib
@@ -189,7 +189,7 @@ The configure step sets up the external project's build system.
 
 Pass CMake variables to the external project:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     my_cmake_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -216,7 +216,7 @@ ExternalProject_Add(
 
 **Common variables to forward:**
 
-```cmake
+```cmake showLineNumbers 
 CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/external
     -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -230,7 +230,7 @@ CMAKE_ARGS
 
 For Autotools-based projects (./configure, make, make install):
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     zlib_external
     URL https://www.zlib.net/zlib-1.2.13.tar.gz
@@ -255,7 +255,7 @@ ExternalProject_Add(
 
 For projects with custom build systems:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     custom_lib
     URL https://example.com/custom_lib.tar.gz
@@ -277,7 +277,7 @@ Control how the external project is built.
 
 ### Parallel Builds
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     parallel_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -294,7 +294,7 @@ The `--parallel` flag uses all available cores. You can also specify a number: `
 
 ### Custom Build Commands
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     make_based_lib
     URL https://example.com/lib.tar.gz
@@ -320,7 +320,7 @@ Control where and how artifacts are installed.
 
 ### Standard Installation
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     installed_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -337,7 +337,7 @@ ExternalProject_Add(
 
 ### Custom Installation
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     custom_install
     URL https://example.com/lib.tar.gz
@@ -358,7 +358,7 @@ ExternalProject_Add(
 
 Sometimes you just want to build, not install:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     no_install
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -378,7 +378,7 @@ Apply modifications to external projects.
 
 ### Patch Files
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     patched_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -398,7 +398,7 @@ git diff > ../patches/fix_bug.patch
 
 ### Multiple Patches
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     multi_patch
     URL https://example.com/lib.tar.gz
@@ -416,7 +416,7 @@ ExternalProject_Add(
 
 For complex modifications:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     script_patched
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -426,7 +426,7 @@ ExternalProject_Add(
 )
 ```
 
-```cmake title="cmake/patch_lib.cmake"
+```cmake showLineNumbers  title="cmake/patch_lib.cmake"
 file(READ "${SOURCE_DIR}/config.h" content)
 string(REPLACE "old_value" "new_value" content "${content}")
 file(WRITE "${SOURCE_DIR}/config.h" "${content}")
@@ -436,7 +436,7 @@ file(WRITE "${SOURCE_DIR}/config.h" "${content}")
 
 Control build order when external projects depend on each other.
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     dependency_base
     GIT_REPOSITORY https://github.com/example/base.git
@@ -469,7 +469,7 @@ After building external projects, you need to link against them.
 
 The recommended approach:
 
-```cmake
+```cmake showLineNumbers 
 # Define external project
 ExternalProject_Add(
     fmt_external
@@ -499,7 +499,7 @@ add_dependencies(myapp fmt_external)
 
 ### Via Manual Linking
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     mylib_external
     # ... configuration ...
@@ -537,7 +537,7 @@ superbuild/
 
 ### Implementation
 
-```cmake title="CMakeLists.txt (Superbuild)"
+```cmake showLineNumbers  title="CMakeLists.txt (Superbuild)"
 cmake_minimum_required(VERSION 3.14)
 project(SuperBuild NONE)
 
@@ -554,7 +554,7 @@ include(cmake/External_ProjectB.cmake)
 include(cmake/External_MyApp.cmake)
 ```
 
-```cmake title="cmake/External_ProjectA.cmake"
+```cmake showLineNumbers  title="cmake/External_ProjectA.cmake"
 ExternalProject_Add(
     ProjectA
     GIT_REPOSITORY https://github.com/example/ProjectA.git
@@ -566,7 +566,7 @@ ExternalProject_Add(
 )
 ```
 
-```cmake title="cmake/External_MyApp.cmake"
+```cmake showLineNumbers  title="cmake/External_MyApp.cmake"
 ExternalProject_Add(
     MyApp
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/src
@@ -591,7 +591,7 @@ This pattern is excellent for complex projects with many dependencies and compon
 
 Control output from external projects:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     quiet_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -612,7 +612,7 @@ This keeps your build output clean while preserving logs for debugging.
 
 Create individual targets for each step:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     stepped_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -632,7 +632,7 @@ Useful for debugging or manual intervention between steps.
 
 Control when steps re-execute:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     cached_lib
     URL https://example.com/lib.tar.gz
@@ -651,7 +651,7 @@ ExternalProject_Add(
 
 Don't build by default:
 
-```cmake
+```cmake showLineNumbers 
 ExternalProject_Add(
     optional_lib
     GIT_REPOSITORY https://github.com/example/lib.git
@@ -666,7 +666,7 @@ ExternalProject_Add(
 
 Building Boost (a complex, large dependency):
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.14)
 project(BoostExample)
 
@@ -752,7 +752,7 @@ add_dependencies(myapp boost)
 
 2. **Forward compiler settings**
 
-   ```cmake
+   ```cmake showLineNumbers 
    CMAKE_ARGS
        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
@@ -760,7 +760,7 @@ add_dependencies(myapp boost)
 
 3. **Disable unnecessary components**
 
-   ```cmake
+   ```cmake showLineNumbers 
    CMAKE_ARGS
        -DBUILD_TESTING=OFF
        -DBUILD_EXAMPLES=OFF
@@ -769,21 +769,21 @@ add_dependencies(myapp boost)
 
 4. **Use logging for quiet builds**
 
-   ```cmake
+   ```cmake showLineNumbers 
    LOG_DOWNLOAD ON
    LOG_BUILD ON
    ```
 
 5. **Set installation prefix consistently**
 
-   ```cmake
+   ```cmake showLineNumbers 
    CMAKE_ARGS
        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/external
    ```
 
 6. **Verify downloads**
 
-   ```cmake
+   ```cmake showLineNumbers 
    URL_HASH SHA256=...
    ```
 
@@ -807,7 +807,7 @@ add_dependencies(myapp boost)
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 include(ExternalProject)
 
 # Basic CMake project

@@ -41,7 +41,7 @@ project/
 
 ## Root CMakeLists.txt Setup
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0.0)
 
@@ -68,7 +68,7 @@ This gives users control over what gets built and tested.
 
 ## Test Directory Organization
 
-```cmake title="tests/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/CMakeLists.txt"
 # Fetch testing framework
 include(FetchContent)
 
@@ -109,7 +109,7 @@ add_subdirectory(fixtures)
 
 Fast, isolated tests for individual components:
 
-```cmake title="tests/unit/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/unit/CMakeLists.txt"
 add_executable(unit_tests
     test_math.cpp
     test_string_utils.cpp
@@ -141,7 +141,7 @@ catch_discover_tests(unit_tests
 
 Test component interactions:
 
-```cmake title="tests/integration/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/integration/CMakeLists.txt"
 add_executable(integration_tests
     test_database.cpp
     test_api_client.cpp
@@ -180,7 +180,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data
 
 Test the complete system:
 
-```cmake title="tests/system/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/system/CMakeLists.txt"
 add_executable(system_tests
     test_full_workflow.cpp
     test_performance.cpp
@@ -213,7 +213,7 @@ catch_discover_tests(system_tests
 
 Shared setup/teardown code:
 
-```cmake title="tests/fixtures/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/fixtures/CMakeLists.txt"
 add_library(test_fixtures STATIC
     test_database.cpp
     test_server.cpp
@@ -231,7 +231,7 @@ target_include_directories(test_fixtures PUBLIC
 
 **Usage in tests:**
 
-```cmake
+```cmake showLineNumbers 
 target_link_libraries(integration_tests PRIVATE
     test_fixtures
     Catch2::Catch2WithMain
@@ -261,7 +261,7 @@ public:
 
 For better organization and parallel execution:
 
-```cmake title="tests/unit/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/unit/CMakeLists.txt"
 # Math tests
 add_executable(math_tests test_math.cpp)
 target_link_libraries(math_tests PRIVATE MyProject::core Catch2::Catch2WithMain)
@@ -289,7 +289,7 @@ catch_discover_tests(file_tests TEST_PREFIX "File.")
 
 ### Copying Test Data
 
-```cmake
+```cmake showLineNumbers 
 # Copy entire directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data
     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
@@ -305,7 +305,7 @@ configure_file(
 
 ### Generating Test Data
 
-```cmake
+```cmake showLineNumbers 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test_data.bin
     COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/generate_data.py
@@ -325,7 +325,7 @@ add_dependencies(integration_tests generate_test_data)
 
 Ensure tests run in correct order:
 
-```cmake
+```cmake showLineNumbers 
 # Setup fixture
 add_executable(setup_db tests/fixtures/setup_db.cpp)
 add_test(NAME DbSetup COMMAND setup_db)
@@ -356,7 +356,7 @@ catch_discover_tests(integration_tests
 
 ### GCC/Clang (gcov/lcov)
 
-```cmake title="cmake/CodeCoverage.cmake"
+```cmake showLineNumbers  title="cmake/CodeCoverage.cmake"
 option(ENABLE_COVERAGE "Enable coverage reporting" OFF)
 
 if(ENABLE_COVERAGE)
@@ -370,7 +370,7 @@ if(ENABLE_COVERAGE)
 endif()
 ```
 
-```cmake title="CMakeLists.txt"
+```cmake showLineNumbers  title="CMakeLists.txt"
 include(cmake/CodeCoverage.cmake)
 
 if(BUILD_TESTS)
@@ -411,7 +411,7 @@ cmake --build . --target coverage
 
 ### Valgrind Integration
 
-```cmake
+```cmake showLineNumbers 
 find_program(VALGRIND_PROGRAM valgrind)
 
 if(VALGRIND_PROGRAM)
@@ -440,7 +440,7 @@ cmake --build build --target memcheck
 
 ### AddressSanitizer
 
-```cmake
+```cmake showLineNumbers 
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 
 if(ENABLE_ASAN)
@@ -541,7 +541,7 @@ ctest || exit 1
 
 ## Performance Testing
 
-```cmake
+```cmake showLineNumbers 
 add_executable(perf_tests
     tests/performance/bench_math.cpp
     tests/performance/bench_parsing.cpp
@@ -568,7 +568,7 @@ ctest -L benchmark
 
 ## Complete Integration Example
 
-```cmake title="Project Root"
+```cmake showLineNumbers  title="Project Root"
 cmake_minimum_required(VERSION 3.15)
 project(CompleteExample VERSION 1.0.0)
 
@@ -601,7 +601,7 @@ if(BUILD_TESTS)
 endif()
 ```
 
-```cmake title="tests/CMakeLists.txt"
+```cmake showLineNumbers  title="tests/CMakeLists.txt"
 # Fetch Catch2
 include(FetchContent)
 FetchContent_Declare(
@@ -666,7 +666,7 @@ catch_discover_tests(integration_tests
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # Enable testing
 enable_testing()
 

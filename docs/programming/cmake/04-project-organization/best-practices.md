@@ -20,7 +20,7 @@ The shift from "directory-based" to "target-based" CMake is fundamental. Old CMa
 
 This is the single most important rule for maintainable CMake projects.
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Old style - affects everything in directory
 include_directories(include/)
 add_definitions(-DFEATURE=1)
@@ -39,7 +39,7 @@ target_link_libraries(myapp PRIVATE somelib)
 
 Always use `PRIVATE`, `PUBLIC`, or `INTERFACE` - never omit them.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib mylib.cpp)
 
 # ✅ Explicit visibility
@@ -64,7 +64,7 @@ target_link_libraries(mylib
 
 Don't use `file(GLOB)` to collect source files - CMake won't detect when you add/remove files.
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Bad - CMake won't know about new files
 file(GLOB SOURCES "src/*.cpp")
 add_executable(myapp ${SOURCES})
@@ -112,7 +112,7 @@ make
 
 Use a recent version but be realistic about user requirements.
 
-```cmake
+```cmake showLineNumbers 
 # ✅ Good - modern but widely available
 cmake_minimum_required(VERSION 3.15)
 
@@ -131,7 +131,7 @@ cmake_minimum_required(VERSION 3.15)
 
 Prefer feature requirements over directly setting `CMAKE_CXX_STANDARD`.
 
-```cmake
+```cmake showLineNumbers 
 # ✅ Best - portable and clear
 add_executable(myapp main.cpp)
 target_compile_features(myapp PRIVATE cxx_std_17)
@@ -183,7 +183,7 @@ project/
 
 ### Root CMakeLists.txt Pattern
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0.0 LANGUAGES CXX)
 
@@ -215,7 +215,7 @@ endif()
 
 ### Library CMakeLists.txt Pattern
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib
     src/implementation.cpp
     src/utils.cpp
@@ -245,7 +245,7 @@ The alias `MyProject::mylib` allows using the library consistently whether it's 
 
 ### Prefer FetchContent for Small Libraries
 
-```cmake
+```cmake showLineNumbers 
 include(FetchContent)
 
 set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
@@ -262,7 +262,7 @@ FetchContent_MakeAvailable(json)
 
 ### Use find_package() for System Libraries
 
-```cmake
+```cmake showLineNumbers 
 find_package(Threads REQUIRED)
 find_package(OpenSSL REQUIRED)
 
@@ -276,7 +276,7 @@ target_link_libraries(myapp PRIVATE
 
 Try system package first, fall back to fetch:
 
-```cmake
+```cmake showLineNumbers 
 find_package(fmt 9.0 QUIET)
 
 if(NOT fmt_FOUND)
@@ -294,7 +294,7 @@ endif()
 
 Enable warnings per-target, not globally:
 
-```cmake
+```cmake showLineNumbers 
 function(set_project_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE
@@ -322,7 +322,7 @@ Store this function in `cmake/CompilerWarnings.cmake` and include it.
 
 Always provide a sensible default:
 
-```cmake
+```cmake showLineNumbers 
 # Set default build type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -338,7 +338,7 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 Make libraries installable and discoverable:
 
-```cmake
+```cmake showLineNumbers 
 install(TARGETS mylib
     EXPORT MyProjectTargets
     LIBRARY DESTINATION lib
@@ -385,7 +385,7 @@ Now users can `find_package(MyProject)` after installation.
 
 ### Don't Use Global Commands
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Don't do this
 include_directories(include/)
 link_directories(/usr/local/lib)
@@ -399,7 +399,7 @@ target_compile_definitions(myapp PRIVATE DEBUG)
 
 ### Don't Modify CMAKE_CXX_FLAGS Directly
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Avoid
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -409,7 +409,7 @@ target_compile_options(myapp PRIVATE -Wall)
 
 ### Don't Use Absolute Paths
 
-```cmake
+```cmake showLineNumbers 
 # ❌ Breaks on other systems
 include_directories(/home/user/myproject/include)
 
@@ -421,7 +421,7 @@ target_include_directories(myapp PRIVATE
 
 ### Don't Build in Source Directory
 
-```cmake
+```cmake showLineNumbers 
 # Prevent in-source builds
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR
@@ -435,7 +435,7 @@ endif()
 
 Integrate testing cleanly:
 
-```cmake
+```cmake showLineNumbers 
 if(BUILD_TESTS)
     enable_testing()
     
@@ -467,7 +467,7 @@ endif()
 
 Document your CMake options and configuration:
 
-```cmake
+```cmake showLineNumbers 
 # At the top of CMakeLists.txt
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(BUILD_TESTS "Build test suite" ON)
@@ -490,7 +490,7 @@ message(STATUS "")
 
 ### Cache Expensive Operations
 
-```cmake
+```cmake showLineNumbers 
 # ✅ Check once, cache result
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
@@ -504,7 +504,7 @@ endif()
 
 ### Use Precompiled Headers (CMake 3.16+)
 
-```cmake
+```cmake showLineNumbers 
 target_precompile_headers(myapp PRIVATE
     <iostream>
     <string>
@@ -546,7 +546,7 @@ cmake --build build --parallel 8
 
 ## Example: Complete Modern Project
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(ModernProject VERSION 1.0.0 LANGUAGES CXX)
 

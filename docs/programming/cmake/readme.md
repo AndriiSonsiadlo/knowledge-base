@@ -73,7 +73,7 @@ Adding tests to your project:
 
 ### Common Commands
 
-```cmake title="CMake Basics"
+```cmake showLineNumbers  title="CMake Basics"
 # Project setup
 cmake_minimum_required(VERSION 3.15)
 project(MyProject VERSION 1.0)

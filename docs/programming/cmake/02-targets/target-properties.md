@@ -22,7 +22,7 @@ There are several ways to set target properties, each with different use cases a
 
 This is the most direct way to set one or more properties on one or more targets simultaneously. It's useful when you need to set multiple properties or configure multiple targets identically.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -35,7 +35,7 @@ set_target_properties(myapp PROPERTIES
 
 You can set properties on multiple targets at once:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(app1 app1.cpp)
 add_executable(app2 app2.cpp)
 
@@ -50,7 +50,7 @@ set_target_properties(app1 app2 PROPERTIES
 
 This command offers more flexibility, allowing you to set properties with different behaviors like appending or using generator expressions.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib mylib.cpp)
 
 # Set a property
@@ -75,7 +75,7 @@ The `APPEND` keyword is particularly useful for properties that hold lists of va
 
 Retrieve the current value of a target property. This is useful for debugging or conditional logic based on existing property values.
 
-```cmake
+```cmake showLineNumbers 
 get_target_property(output_name myapp OUTPUT_NAME)
 message(STATUS "Output name: ${output_name}")
 
@@ -92,7 +92,7 @@ endif()
 
 Control which C++ standard your target uses. This is fundamental for modern C++ development.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Method 1: Using properties
@@ -120,7 +120,7 @@ Control where and how target output files are named and placed.
 
 Change the name of the generated file:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Creates "MyApplication" instead of "myapp"
@@ -139,7 +139,7 @@ set_target_properties(myapp PROPERTIES
 
 Specify where built files are placed:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 # Put executable in bin/
@@ -160,7 +160,7 @@ set_target_properties(myapp PROPERTIES
 - **LIBRARY_OUTPUT_DIRECTORY:** For shared libraries (`.so`, `.dylib`)
 - **ARCHIVE_OUTPUT_DIRECTORY:** For static libraries (`.a`, `.lib`)
 
-```cmake
+```cmake showLineNumbers 
 # Library output example
 add_library(mylib SHARED mylib.cpp)
 
@@ -174,7 +174,7 @@ set_target_properties(mylib PROPERTIES
 
 Control the prefix and suffix of library names:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 # On Unix: normally creates "libmylib.so"
@@ -193,7 +193,7 @@ set_target_properties(mylib PROPERTIES
 
 Position Independent Code is required when static libraries are linked into shared libraries. On most platforms, shared libraries must be loadable at any memory address.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mystaticlib STATIC lib.cpp)
 
 # Enable PIC (required if this will be linked into a shared lib)
@@ -214,7 +214,7 @@ set_target_properties(mystaticlib PROPERTIES
 
 Version properties are important for shared libraries, enabling API compatibility tracking.
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -237,7 +237,7 @@ On Linux, this creates:
 
 Add preprocessor macros to a target. These become `-D` flags passed to the compiler.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -258,7 +258,7 @@ While you can set `COMPILE_DEFINITIONS` as a property, `target_compile_definitio
 
 While you can set include directories as properties, using `target_include_directories()` is more common and clearer:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib mylib.cpp)
 
 # Property approach
@@ -284,7 +284,7 @@ Windows has unique requirements for GUI applications and DLL exports.
 
 Create a GUI application without a console window:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp WIN32 main.cpp)
 
 # Or set as property
@@ -299,7 +299,7 @@ When `WIN32_EXECUTABLE` is ON, the application uses `WinMain` instead of `main` 
 
 Windows requires explicit export/import declarations for shared libraries:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 # Automatically export all symbols (Windows only)
@@ -318,7 +318,7 @@ macOS applications can be bundled with resources and frameworks.
 
 Create a `.app` bundle on macOS:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(MyApp MACOSX_BUNDLE main.cpp)
 
 set_target_properties(MyApp PROPERTIES
@@ -336,7 +336,7 @@ This creates `MyApp.app` with the proper directory structure and Info.plist.
 
 Create a macOS framework:
 
-```cmake
+```cmake showLineNumbers 
 add_library(MyFramework SHARED framework.cpp)
 
 set_target_properties(MyFramework PROPERTIES
@@ -355,7 +355,7 @@ Frameworks bundle headers, resources, and the library into a single package.
 
 RPATH tells executables where to find shared libraries at runtime. This is critical for proper deployment.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -373,7 +373,7 @@ set_target_properties(myapp PROPERTIES
 
 **Common RPATH patterns:**
 
-```cmake
+```cmake showLineNumbers 
 # Use $ORIGIN to make path relative to executable location
 set_target_properties(myapp PROPERTIES
     INSTALL_RPATH "$ORIGIN/../lib"
@@ -393,7 +393,7 @@ set_target_properties(myapp PROPERTIES
 
 Link-Time Optimization allows the compiler to optimize across translation units, potentially improving performance significantly.
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp utils.cpp)
 
 # Enable LTO if supported
@@ -412,7 +412,7 @@ endif()
 
 LTO can significantly improve performance but increases build time. Typically used only for Release builds:
 
-```cmake
+```cmake showLineNumbers 
 set_target_properties(myapp PROPERTIES
     INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
 )
@@ -422,7 +422,7 @@ set_target_properties(myapp PROPERTIES
 
 Control symbol visibility in shared libraries (Unix/Linux):
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -443,7 +443,7 @@ This is good practice for shared libraries - it creates cleaner ABIs and can imp
 
 Add a suffix to debug builds to distinguish them from release builds:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -457,7 +457,7 @@ Creates `libmylib.a` for Release and `libmylibd.a` for Debug, allowing both to c
 
 Exclude targets from the default build:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(optional_tool tool.cpp)
 
 set_target_properties(optional_tool PROPERTIES
@@ -480,7 +480,7 @@ Useful for:
 
 While `target_link_libraries()` is the standard way to link, you can also use properties:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -497,7 +497,7 @@ The command-based approach is preferred because it handles visibility and transi
 
 Add custom linker flags:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -515,7 +515,7 @@ target_link_options(myapp PRIVATE
 
 Control the order and method of linking:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib STATIC mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -533,7 +533,7 @@ Configure how targets are installed.
 
 On macOS, shared libraries embed their expected installation path:
 
-```cmake
+```cmake showLineNumbers 
 add_library(mylib SHARED mylib.cpp)
 
 set_target_properties(mylib PROPERTIES
@@ -547,7 +547,7 @@ This tells the library where it expects to be installed, which affects how execu
 
 Control RPATH in installed binaries:
 
-```cmake
+```cmake showLineNumbers 
 add_executable(myapp main.cpp)
 
 set_target_properties(myapp PROPERTIES
@@ -569,7 +569,7 @@ set_target_properties(myapp PROPERTIES
 
 You can define custom properties for organizational purposes or meta-information:
 
-```cmake
+```cmake showLineNumbers 
 # Define a custom property
 define_property(TARGET PROPERTY CUSTOM_CATEGORY
     BRIEF_DOCS "Category of the target"
@@ -596,7 +596,7 @@ This is useful for:
 
 Here's a comprehensive example showing various properties in context:
 
-```cmake
+```cmake showLineNumbers 
 cmake_minimum_required(VERSION 3.15)
 project(CompleteExample VERSION 1.2.3)
 
@@ -702,7 +702,7 @@ install(TARGETS myapp mylib
 
 3. **Use generator expressions for conditional properties**
 
-   ```cmake
+   ```cmake showLineNumbers 
    set_target_properties(myapp PROPERTIES
        COMPILE_DEFINITIONS "$<$<CONFIG:Debug>:DEBUG_MODE>"
    )
@@ -723,7 +723,7 @@ install(TARGETS myapp mylib
 
 1. **Setting global properties instead of target properties**
 
-   ```cmake
+   ```cmake showLineNumbers 
    # ❌ Bad - affects all targets
    set(CMAKE_CXX_STANDARD 17)
    
@@ -733,7 +733,7 @@ install(TARGETS myapp mylib
 
 2. **Forgetting POSITION_INDEPENDENT_CODE for static libs**
 
-   ```cmake
+   ```cmake showLineNumbers 
    # If static lib will link into shared lib
    set_target_properties(mystaticlib PROPERTIES
        POSITION_INDEPENDENT_CODE ON
@@ -742,7 +742,7 @@ install(TARGETS myapp mylib
 
 3. **Not setting SOVERSION for shared libraries**
 
-   ```cmake
+   ```cmake showLineNumbers 
    # Always set for shared libraries
    set_target_properties(mylib PROPERTIES
        VERSION ${PROJECT_VERSION}
@@ -757,7 +757,7 @@ install(TARGETS myapp mylib
 
 ## Quick Reference
 
-```cmake
+```cmake showLineNumbers 
 # C++ Standard
 set_target_properties(target PROPERTIES
     CXX_STANDARD 17
