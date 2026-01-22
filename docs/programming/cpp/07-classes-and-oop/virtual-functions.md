@@ -2,7 +2,7 @@
 id: virtual-functions-and-vtables
 title: Virtual Functions and vtables
 sidebar_label: Virtual Functions & vtables
-sidebar_position: 9
+sidebar_position: 8
 tags: [c++, virtual-functions, vtables, polymorphism, dynamic-dispatch]
 ---
 

@@ -2,7 +2,7 @@
 id: object-slicing
 title: Object Slicing
 sidebar_label: Object Slicing
-sidebar_position: 12
+sidebar_position: 10
 tags: [c++, object-slicing, polymorphism, pitfalls]
 ---
 
