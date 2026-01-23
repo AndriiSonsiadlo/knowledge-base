@@ -222,4 +222,3 @@ public:
 
 - **[Function Declarations](function-declarations.md)** - Function signatures
 - **[Overloading](overloading.md)** - Alternative approach
-- **[Lambdas](lambdas.md)** - Closures with captures

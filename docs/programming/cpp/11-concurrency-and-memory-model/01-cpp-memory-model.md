@@ -250,7 +250,6 @@ public:
 
 ## Related Topics
 
-- **[Atomics](02-atomics.md)** - Atomic operations
-- **[Fences](03-fences.md)** - Memory barriers
-- **[Mutexes](06-mutexes.md)** - Synchronization primitives
-- **[Data Races](04-data-races.md)** - Race conditions
+- **[Atomics and fences](02-atomics-and-fences.md)** - Atomic operations and memory barriers
+- **[Mutexes](05-mutexes.md)** - Synchronization primitives
+- **[Data Races](03-data-races.md)** - Race conditions

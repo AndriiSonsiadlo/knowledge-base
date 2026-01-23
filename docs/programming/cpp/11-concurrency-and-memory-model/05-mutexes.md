@@ -2,7 +2,7 @@
 id: mutexes
 title: Mutexes and Locks
 sidebar_label: Mutexes
-sidebar_position: 6
+sidebar_position: 5
 tags: [cpp, concurrency, mutexes, locks, synchronization]
 ---
 
@@ -369,7 +369,7 @@ void efficient() {
 
 ## Related Topics
 
-- **[Threads](05-threads.md)** - Thread basics
-- **[Condition Variables](07-condition-variables.md)** - Thread coordination
-- **[Data Races](04-data-races.md)** - Avoiding races
-- **[Atomics](02-atomics.md)** - Lock-free alternative
+- **[Threads](04-threads.md)** - Thread basics
+- **[Condition Variables](06-condition-variables.md)** - Thread coordination
+- **[Data Races](03-data-races.md)** - Avoiding races
+- **[Atomics](02-atomics-and-fences.md)** - Lock-free alternative

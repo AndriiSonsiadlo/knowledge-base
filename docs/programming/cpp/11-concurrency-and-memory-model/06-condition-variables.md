@@ -2,7 +2,7 @@
 id: condition-variables
 title: Condition Variables
 sidebar_label: Condition Variables
-sidebar_position: 7
+sidebar_position: 6
 tags: [cpp, concurrency, condition-variables, synchronization, threading]
 ---
 
@@ -424,7 +424,7 @@ cv.wait(lock, []{ return ready; });
 
 ## Related Topics
 
-- **[Mutexes](06-mutexes.md)** - Thread synchronization
-- **[Futures and Promises](08-futures-and-promises.md)** - One-time values
-- **[Threads](05-threads.md)** - Thread basics
-- **[Thread Pools](09-thread-pools.md)** - Worker coordination
+- **[Mutexes](05-mutexes.md)** - Thread synchronization
+- **[Futures and Promises](07-futures-and-promises.md)** - One-time values
+- **[Threads](04-threads.md)** - Thread basics
+- **[Thread Pools](08-thread-pools.md)** - Worker coordination

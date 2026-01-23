@@ -2,7 +2,7 @@
 id: threads
 title: Thread Management
 sidebar_label: Threads
-sidebar_position: 5
+sidebar_position: 4
 tags: [cpp, concurrency, threads, threading, parallelism]
 ---
 
@@ -406,7 +406,7 @@ threads.push_back(std::thread(task));  // Move construction
 
 ## Related Topics
 
-- **[Mutexes](06-mutexes.md)** - Thread synchronization
-- **[Condition Variables](07-condition-variables.md)** - Thread coordination
-- **[Thread Pools](09-thread-pools.md)** - Efficient thread management
-- **[Data Races](04-data-races.md)** - Avoiding race conditions
+- **[Mutexes](05-mutexes.md)** - Thread synchronization
+- **[Condition Variables](06-condition-variables.md)** - Thread coordination
+- **[Thread Pools](08-thread-pools.md)** - Efficient thread management
+- **[Data Races](03-data-races.md)** - Avoiding race conditions

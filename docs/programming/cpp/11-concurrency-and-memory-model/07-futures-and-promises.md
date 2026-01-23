@@ -2,7 +2,7 @@
 id: futures-and-promises
 title: Futures and Promises
 sidebar_label: Futures & Promises
-sidebar_position: 8
+sidebar_position: 7
 tags: [cpp, concurrency, futures, promises, async, threading]
 ---
 
@@ -399,7 +399,7 @@ signal.set_value();  // Signal ready
 
 ## Related Topics
 
-- **[Threads](05-threads.md)** - Thread basics
-- **[Thread Pools](09-thread-pools.md)** - Managed async execution
-- **[Condition Variables](07-condition-variables.md)** - Thread coordination
+- **[Threads](04-threads.md)** - Thread basics
+- **[Thread Pools](08-thread-pools.md)** - Managed async execution
+- **[Condition Variables](06-condition-variables.md)** - Thread coordination
 - **[std::async](https://en.cppreference.com/w/cpp/thread/async)** - Reference

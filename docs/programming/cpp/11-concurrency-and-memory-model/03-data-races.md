@@ -2,7 +2,7 @@
 id: data-races
 title: Data Races and Race Conditions
 sidebar_label: Data Races
-sidebar_position: 4
+sidebar_position: 3
 tags: [cpp, concurrency, data-races, threading, synchronization, bugs]
 ---
 
@@ -358,7 +358,7 @@ public:
 
 ## Related Topics
 
-- **[Atomics](02-atomics.md)** - Lock-free synchronization
-- **[Mutexes](06-mutexes.md)** - Mutual exclusion
+- **[Atomics](02-atomics-and-fences.md)** - Lock-free synchronization
+- **[Mutexes](05-mutexes.md)** - Mutual exclusion
 - **[C++ Memory Model](01-cpp-memory-model.md)** - Memory ordering
-- **[Threads](05-threads.md)** - Thread basics
+- **[Threads](04-threads.md)** - Thread basics

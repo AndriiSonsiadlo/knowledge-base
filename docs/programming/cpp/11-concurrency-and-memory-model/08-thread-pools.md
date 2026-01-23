@@ -2,7 +2,7 @@
 id: thread-pools
 title: Thread Pools
 sidebar_label: Thread Pools
-sidebar_position: 9
+sidebar_position: 8
 tags: [cpp, concurrency, thread-pools, threading, parallelism]
 ---
 
@@ -441,7 +441,7 @@ void efficientBatching() {
 
 ## Related Topics
 
-- **[Threads](05-threads.md)** - Thread basics
-- **[Futures and Promises](08-futures-and-promises.md)** - Async results
-- **[Condition Variables](07-condition-variables.md)** - Thread coordination
-- **[Mutexes](06-mutexes.md)** - Synchronization
+- **[Threads](04-threads.md)** - Thread basics
+- **[Futures and Promises](07-futures-and-promises.md)** - Async results
+- **[Condition Variables](06-condition-variables.md)** - Thread coordination
+- **[Mutexes](05-mutexes.md)** - Synchronization
