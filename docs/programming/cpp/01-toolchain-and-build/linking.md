@@ -10,8 +10,8 @@ tags: [c++, linker, symbols, libraries, executable]
 
 The linker combines multiple object files and libraries into a single executable, resolving symbol references and assigning final memory addresses.
 
-:::info Final Assembly
-Linking is like assembling a jigsaw puzzle - each object file is a piece, and the linker puts them together into a complete picture.
+:::info Link-Time Assembly
+Linking resolves symbols, assigns addresses, and creates the final executable from compiled pieces.
 :::
 
 ## What the Linker Does
@@ -20,13 +20,15 @@ Linking is like assembling a jigsaw puzzle - each object file is a piece, and th
 graph TD
     A[main.o] --> E[Linker]
     B[utils.o] --> E
-    C[libc.so] --> E
-    D[libstdc++.so] --> E
+    C[libmath.a static] --> E
+    D[libc.so dynamic] --> E
     E --> F[Executable]
     
-    A -->|Needs: foo| G[Symbol Resolution]
-    B -->|Provides: foo| G
+    A -->|Needs: add| G[Symbol Resolution]
+    B -->|Provides: add| G
     G --> E
+    
+    style F fill:#90EE90
 ```
 
 **Three main tasks**:
@@ -37,19 +39,16 @@ graph TD
 ---
 
 ## Symbol Resolution
-
-### Example: Undefined Symbol
-
-```cpp showLineNumbers 
+```cpp showLineNumbers
 // main.cpp
 extern int getValue();  // Declaration only
 
 int main() {
-    return getValue();  // Calls external function
+    return getValue();  // Undefined at compile time
 }
 
 // utils.cpp
-int getValue() {        // Definition
+int getValue() {       // Definition
     return 42;
 }
 ```
@@ -128,9 +127,8 @@ nm app | grep main
 
 ## One Definition Rule (ODR)
 
-C++ requires exactly one definition per symbol:
-
-```cpp showLineNumbers 
+Exactly one definition allowed per symbol.
+```cpp showLineNumbers
 // ❌ ODR violation
 // file1.cpp
 int global = 42;

@@ -219,7 +219,7 @@ Modern C++ projects rarely use compiler commands directly. Build systems manage 
 
 CMake is the de facto standard for C++ build configuration. It generates native build files for various platforms and compilers.
 
-```cmake
+```cmake showLineNumbers 
 # CMakeLists.txt - Project configuration
 cmake_minimum_required(VERSION 3.15)
 project(MyApp VERSION 1.0 LANGUAGES CXX)
@@ -296,7 +296,7 @@ cmake -DCMAKE_TOOLCHAIN_FILE=[vcpkg]/scripts/buildsystems/vcpkg.cmake ..
 
 Once installed, libraries are automatically found by CMake with simple `find_package()` commands. No manual path configuration needed.
 
-```cmake
+```cmake showLineNumbers 
 # Use installed libraries in CMakeLists.txt
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
