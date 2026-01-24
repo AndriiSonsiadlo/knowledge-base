@@ -1,7 +1,6 @@
 const FeatureList = [
 	{
 		title: "Easy to Use",
-		Svg: require("@site/static/img/undraw_docusaurus_mountain.svg").default,
 		description: (
 			<>
 				Docusaurus was designed from the ground up to be easily installed and
@@ -11,7 +10,6 @@ const FeatureList = [
 	},
 	{
 		title: "Focus on What Matters",
-		Svg: require("@site/static/img/undraw_docusaurus_tree.svg").default,
 		description: (
 			<>
 				Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
@@ -21,7 +19,6 @@ const FeatureList = [
 	},
 	{
 		title: "Powered by React",
-		Svg: require("@site/static/img/undraw_docusaurus_react.svg").default,
 		description: (
 			<>
 				Extend or customize your website layout by reusing React. Docusaurus can
@@ -31,11 +28,11 @@ const FeatureList = [
 	},
 ];
 
-function Feature({ Svg, title, description }) {
+function Feature({ title, description }) {
 	return (
 		<div>
 			<div className="text--center">
-				<Svg className="mx-auto h-52 w-52" role="img" />
+				{/* <Svg className="mx-auto h-52 w-52" role="img" /> */}
 			</div>
 			<div className="text--center padding-horiz--md">
 				<p className="mb-2 text-xl font-bold">{title}</p>

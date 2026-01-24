@@ -132,8 +132,7 @@ Scientific simulations, financial trading systems, and data processing pipelines
 speed. When processing millions of transactions per second or simulating weather patterns,
 performance is non-negotiable.
 
-**Examples**: Trading systems, particle physics simulations (CERN), machine learning frameworks (
-TensorFlow core)
+**Examples**: Trading systems, particle physics simulations (CERN), machine learning frameworks (TensorFlow core)
 
 ### 4. Embedded Systems
 
@@ -239,7 +238,7 @@ safety while avoiding code duplication.
 
 ### 3. Standard Template Library (STL)
 
-The STL provides battle-tested containers (vector, map, set), algorithms (sort, find, transform),
+The STL provides battle-tested containers (`vector`, `map`, `set`), algorithms (`sort`, `find`, `transform`),
 and iterators. These components work together seamlessly and are heavily optimized.
 
 ```cpp showLineNumbers 

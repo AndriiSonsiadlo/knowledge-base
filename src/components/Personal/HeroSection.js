@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { AnimatedGradientText } from "@/components/ui/animated-gradient-text";
 
 export default function HeroSection() {
-	const avatarUrl = useBaseUrl("/img/docusaurus.png");
+	const avatarUrl = useBaseUrl("/img/logo.png");
 	const emailIcon = useBaseUrl("/img/email.svg");
 	const xIcon = useBaseUrl("/img/x-logo.svg");
 	const githubIcon = useBaseUrl("/img/github.svg");
