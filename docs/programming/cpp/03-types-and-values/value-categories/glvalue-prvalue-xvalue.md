@@ -11,41 +11,40 @@ tags: [c++, value-categories, glvalue, prvalue, xvalue, cpp11]
 C++11 refined value categories into five types: lvalue, prvalue, xvalue, glvalue, and rvalue. Understanding these enables perfect forwarding and move semantics.
 
 :::info Category Tree
-```
-        expression
-       /          \
-   glvalue      rvalue
-   /    \       /    \
-lvalue xvalue prvalue
-```
+![value-categories](valuecategories.png)
 :::
 
 ## The Five Categories
 
 ### Primary Categories
-
-**lvalue**: Has identity, can't be moved from
+:::info lvalue
+Has identity, can't be moved from
 - Variables: `int x`
 - Dereferenced pointers: `*ptr`
 - Functions returning lvalue references: `getRef()`
+:::
 
-**prvalue**: No identity, can be moved from (pure rvalue)
+:::info prvalue
+No identity, can be moved from (pure rvalue)
 - Literals: `42`, `3.14`
 - Temporaries: `x + y`, `Point{1,2}`
 - Functions returning by value: `getValue()`
+:::
 
-**xvalue**: Has identity, can be moved from (expiring value)
+:::info xvalue
+Has identity, can be moved from (expiring value)
 - `std::move(x)`
 - Cast to rvalue reference: `static_cast<T&&>(x)`
 - Temporary materialization
+:::
 
 ### Composite Categories
 
-**glvalue** (generalized lvalue): Has identity
-- Includes: lvalue + xvalue
+`glvalue` (generalized `lvalue`): Has identity
+- Includes: `lvalue` + `xvalue`
 
-**rvalue**: Can be moved from
-- Includes: prvalue + xvalue
+`rvalue`: Can be moved from
+- Includes: `prvalue` + `xvalue`
 
 ---
 
@@ -178,11 +177,11 @@ int&& rr2 = 42;                  // ✅ prvalue → rvalue ref
 int&& rr3 = std::move(x);        // ✅ xvalue → rvalue ref
 ```
 
-| Category | Has Identity | Movable | Binds to T& | Binds to T&& | Binds to const T& |
-|----------|--------------|---------|-------------|--------------|-------------------|
-| lvalue | ✅ Yes | ❌ No | ✅ Yes | ❌ No | ✅ Yes |
-| prvalue | ❌ No | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes |
-| xvalue | ✅ Yes | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes |
+| Category  | Has Identity | Movable | Binds to T& | Binds to T&& | Binds to const T& |
+|-----------|--------------|---------|-------------|--------------|-------------------|
+| `lvalue`  | ✅ Yes        | ❌ No    | ✅ Yes       | ❌ No         | ✅ Yes             |
+| `prvalue` | ❌ No         | ✅ Yes   | ❌ No        | ✅ Yes        | ✅ Yes             |
+| `xvalue`  | ✅ Yes        | ✅ Yes   | ❌ No        | ✅ Yes        | ✅ Yes             |
 
 ---
 
@@ -227,7 +226,7 @@ wrapper(std::move(x)); // T = int, forwards as rvalue
 
 ## Move Semantics
 
-Understanding categories is key to move semantics:
+Understanding categories is key to `move` semantics:
 
 ```cpp showLineNumbers 
 class Buffer {
@@ -302,11 +301,11 @@ std::string s = make();  // No copy, no move with RVO
 ## Summary
 
 **Five categories**:
-- **lvalue**: Has address, can't move (variables)
-- **prvalue**: Pure temporary, can move (literals, function returns)
-- **xvalue**: Expiring value, can move (std::move result)
-- **glvalue**: lvalue or xvalue (has identity)
-- **rvalue**: prvalue or xvalue (can move from)
+- `lvalue`: Has address, can't move (variables)
+- `prvalue`: Pure temporary, can move (literals, function returns)
+- `xvalue`: Expiring value, can move (`std::move` result)
+- `glvalue`: `lvalue` or `xvalue` (has identity)
+- `rvalue`: `prvalue` or `xvalue` (can move from)
 
 **Key distinctions**:
 ```cpp showLineNumbers 
@@ -322,7 +321,7 @@ std::move(x).size()  // xvalue (member of xvalue)
 
 **Binding rules**:
 - `T&` binds to lvalues only
-- `T&&` binds to rvalues (prvalue + xvalue)
+- `T&&` binds to rvalues (`prvalue` + `xvalue`)
 - `const T&` binds to everything
 
 Understanding value categories is essential for:

@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, {useEffect, useState} from "react";
 import clsx from "clsx";
-import Link from "@docusaurus/Link";
-import {
-	ThemeClassNames,
-	useThemeConfig,
-	useColorMode,
-} from "@docusaurus/theme-common";
-import { BookOpen, Github, Menu, Moon, Search, Sun, X } from "lucide-react";
-import {
-	useHideableNavbar,
-	useNavbarMobileSidebar,
-} from "@docusaurus/theme-common/internal";
-import { translate } from "@docusaurus/Translate";
+
+import {ThemeClassNames, useThemeConfig,} from "@docusaurus/theme-common";
+import {useHideableNavbar, useNavbarMobileSidebar,} from "@docusaurus/theme-common/internal";
+import {translate} from "@docusaurus/Translate";
 import NavbarMobileSidebar from "@theme/Navbar/MobileSidebar";
 import styles from "./styles.module.css";
+
 function NavbarBackdrop(props) {
 	return (
 		<div

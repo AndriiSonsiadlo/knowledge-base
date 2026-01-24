@@ -34,18 +34,18 @@ C++ keywords have predefined meanings and cannot be used as variable/function na
 ### C++98 Keywords (63)
 
 ```cpp showLineNumbers 
-asm          auto        bool        break       case
-catch        char        class       const       const_cast
-continue     default     delete      do          double
-dynamic_cast else        enum        explicit    export
-extern       false       float       for         friend
-goto         if          inline      int         long
-mutable      namespace   new         operator    private
-protected    public      register    reinterpret_cast
-return       short       signed      sizeof      static
-static_cast  struct      switch      template    this
-throw        true        try         typedef     typeid
-typename     union       unsigned    using       virtual
+asm          auto        bool        break             case
+catch        char        class       const             const_cast
+continue     default     delete      do                double
+dynamic_cast else        enum        explicit          export
+extern       false       float       for               friend
+goto         if          inline      int               long
+mutable      namespace   new         operator          private
+protected    public      register    reinterpret_cast  static
+return       short       signed      sizeof            this
+static_cast  struct      switch      template          typeid
+throw        true        try         typedef           virtual
+typename     union       unsigned    using             
 void         volatile    wchar_t     while
 ```
 
@@ -57,11 +57,11 @@ decltype     noexcept    nullptr     static_assert
 thread_local
 ```
 
-### C++20 Added (9)
+### C++20 Added (10)
 
 ```cpp showLineNumbers 
 char8_t      concept     consteval   constinit   co_await
-co_return    co_yield    requires
+co_return    co_yield    requires    import      module
 ```
 
 ### Usage Examples
