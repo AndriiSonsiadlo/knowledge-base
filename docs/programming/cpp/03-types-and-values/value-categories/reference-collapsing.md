@@ -57,8 +57,9 @@ LRef &&   // int& && → int&
 RRef &    // int&& & → int&
 RRef &&   // int&& && → int&&
 ```
-
-**Only double rvalue reference stays rvalue reference!**
+:::warning Collapsing Rule
+**Only double `rvalue` reference stays `rvalue` reference!**
+:::
 
 ---
 
@@ -79,7 +80,7 @@ func(42);        // T = int, param = int&& (no collapsing)
 func(std::move(x)); // T = int, param = int&&
 ```
 
-**Universal reference** = rvalue reference in deduced context (template or auto)
+**Universal reference** = `rvalue` reference in deduced context (`template` or `auto`)
 
 ---
 

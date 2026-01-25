@@ -61,8 +61,9 @@ struct Good {
 sizeof(Good);  // 8 bytes (50% savings!)
 ```
 
-**Tip**: Order members largest to smallest to minimize padding.
-
+:::warning Tip
+Order members largest to smallest to minimize padding.
+:::
 ---
 
 ## offsetof Macro
@@ -125,7 +126,9 @@ struct Packed {
 #pragma pack(pop)
 ```
 
-⚠️ **Warning**: Packed structs can cause crashes on some architectures and are slower due to unaligned access.
+:::warning
+Packed structs can cause crashes on some architectures and are slower due to unaligned access.
+:::
 
 ---
 

@@ -450,4 +450,3 @@ new Widget();                           // Polymorphism (but use smart ptr!)
 ```
 
 **Golden rule:** Use stack unless you have a specific reason for heap. When using heap, prefer smart pointers and RAII wrappers over raw new/delete.
-```cpp

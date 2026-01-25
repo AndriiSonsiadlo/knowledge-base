@@ -8,7 +8,7 @@ tags: [c++, value-categories, glvalue, prvalue, xvalue, cpp11]
 
 # Value Categories (C++11)
 
-C++11 refined value categories into five types: lvalue, prvalue, xvalue, glvalue, and rvalue. Understanding these enables perfect forwarding and move semantics.
+C++11 refined value categories into five types: `lvalue`, `prvalue`, `xvalue`, `glvalue`, and `rvalue`. Understanding these enables perfect forwarding and move semantics.
 
 :::info Category Tree
 ![value-categories](valuecategories.png)
@@ -69,7 +69,7 @@ s.append(" world");      // s is lvalue, can call non-const methods
 **Properties**:
 - Can take address
 - May or may not be modifiable (depends on const)
-- Cannot bind to rvalue reference
+- Cannot bind to `rvalue` reference
 
 ### prvalue (Pure Rvalue)
 
@@ -92,7 +92,7 @@ getValue()               // Function returning by value → prvalue
 **Properties**:
 - No address
 - Always movable
-- Binds to rvalue reference or const lvalue reference
+- Binds to `rvalue` reference or `const lvalue` reference
 
 ### xvalue (Expiring Value)
 
@@ -115,8 +115,8 @@ getRRef()                // xvalue
 **Properties**:
 - Has identity (can be named)
 - Can be moved from
-- Result of std::move
-- Binds to rvalue reference
+- Result of `std::move`
+- Binds to `rvalue` reference
 
 ---
 
@@ -187,7 +187,7 @@ int&& rr3 = std::move(x);        // ✅ xvalue → rvalue ref
 
 ## Temporary Materialization
 
-prvalues convert to xvalues when binding to references:
+`prvalue`s convert to `xvalue`s when binding to references:
 
 ```cpp showLineNumbers 
 struct Point { int x, y; };
