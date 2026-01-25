@@ -152,8 +152,8 @@ graph TD
     B -->|Class with ctor| D[Both same]
     B -->|Class without ctor| C
     
-    C --> E[✅ Always safe]
-    D --> F[✅ Calls constructor]
+    C --> E["✅ Always safe"]
+    D --> F["✅ Calls constructor"]
 ```
 
 ## Performance
@@ -171,13 +171,13 @@ void compare() {
 
 ## When to Use Each
 
-| Scenario | Use |
-|----------|-----|
-| **Local fundamental** | Value init `{}` (safe) |
-| **Immediately assigning** | Default init (performance) |
-| **Class with ctor** | Either (same result) |
-| **Aggregate** | Value init `{}` (zeros members) |
-| **Dynamic allocation** | Value init `()` or `{}` |
+| Scenario                  | Use                             |
+|---------------------------|---------------------------------|
+| **Local fundamental**     | Value init `{}` (safe)          |
+| **Immediately assigning** | Default init (performance)      |
+| **Class with ctor**       | Either (same result)            |
+| **Aggregate**             | Value init `{}` (zeros members) |
+| **Dynamic allocation**    | Value init `()` or `{}`         |
 
 ## Common Patterns
 ```cpp showLineNumbers

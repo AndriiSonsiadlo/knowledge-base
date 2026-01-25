@@ -167,7 +167,7 @@ int y = {3.14};  // ❌ Error
 ## Quick Decision Guide
 ```mermaid
 graph TD
-    A[Need initialization?] -->|Safety| B[Use braces {}]
+    A[Need initialization?] -->|Safety| B["Use braces {}"]
     B -->|Exception 1| C[Container sizing]
     B -->|Exception 2| D[Avoid initializer_list]
     

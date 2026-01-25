@@ -167,15 +167,15 @@ public:
 ## Quick Decision Tree
 ```mermaid
 graph TD
-    A[Default Initialization] --> B{Storage?}
-    B -->|Automatic| C{Type?}
-    B -->|Static| D[Zero-initialized ✅]
+    A["Default Initialization"] --> B{"Storage?"}
+    B -->|Automatic| C{"Type?"}
+    B -->|Static| D["Zero-initialized ✅"]
     
-    C -->|Fundamental| E[Indeterminate ❌]
-    C -->|Class| F{Has constructor?}
+    C -->|Fundamental| E["Indeterminate ❌"]
+    C -->|Class| F{"Has constructor?"}
     
-    F -->|Yes| G[Constructor called ✅]
-    F -->|No| H[Members indeterminate ❌]
+    F -->|Yes| G["Constructor called ✅"]
+    F -->|No| H["Members indeterminate ❌"]
 ```
 
 ## Best Practices
