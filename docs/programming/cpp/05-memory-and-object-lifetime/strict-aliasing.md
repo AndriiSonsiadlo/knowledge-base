@@ -191,12 +191,12 @@ g++ -O2 -fsanitize=undefined code.cpp
 ```mermaid
 graph TD
     A[Need to reinterpret bits?] -->|Yes| B[C++20 available?]
-    B -->|Yes| C[std::bit_cast ✅]
-    B -->|No| D[std::memcpy ✅]
+    B -->|Yes| C["std::bit_cast ✅"]
+    B -->|No| D["std::memcpy ✅"]
     
     A -->|No| E[Just use normal code]
     
-    F[Pointer cast] -->|Never| G[❌ UB]
+    F[Pointer cast] -->|Never| G["❌ UB"]
 ```
 
 ## Summary
