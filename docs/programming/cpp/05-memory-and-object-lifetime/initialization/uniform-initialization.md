@@ -201,7 +201,41 @@ Widget w{};  // Calls Widget(), not Widget(initializer_list)
 
 ## Summary
 
-Uniform initialization with braces `{}` provides one syntax for all types. **Prevents narrowing** conversions (compile-time safety), **solves most vexing parse**, enables **direct STL container initialization**. Empty braces `{}` safely zero-initialize fundamentals. **Braces prefer `initializer_list` constructors** - use parentheses for container sizing or to avoid this. General rule: **prefer braces** for safety and consistency, use parentheses when specifically needed.
+:::info Uniform Initialization - Key Points
+**One Syntax for All Types:**
+- Fundamentals: `int x{42};`
+- Arrays: `int arr[]{1, 2, 3};`
+- Classes: `Widget w{10, 20};`
+- Containers: `std::vector<int> v{1, 2, 3};`
+- Empty braces: `int x{};` → zero-initialized
+
+**Key Safety Features:**
+- **Prevents narrowing**: `int x{3.14};` → compile error ✅
+- Catches data loss at compile-time (not runtime)
+- Forces explicit casts for type conversions
+- Safer than traditional `=` or `()` syntax
+
+**Solves Language Gotchas:**
+- **Most vexing parse**: `Widget w{};` unambiguously creates object
+- Traditional: `Widget w();` declares function ❌
+- **Direct container init**: No more verbose push_back loops
+
+**Initializer List Priority:**
+- Braces prefer `std::initializer_list` constructor
+- `vector<int> v{10}` → one element (10), not size
+- `vector<int> v(10)` → ten zeros
+- Use parentheses to avoid initializer_list constructor
+
+**When to Use Each:**
+- **Braces `{}`**: Default choice (safe, consistent)
+- **Parentheses `()`**: Container sizing, avoid initializer_list
+- **Assignment `=`**: Legacy code, simple cases
+
+**Common Gotchas:**
+- Empty braces call default ctor, not initializer_list
+- Narrowing errors are features, not bugs
+- Vector sizing requires parentheses: `vector<int>(100)`
+  :::
 ```cpp
 // Interview answer:
 // "Uniform initialization (C++11 braces) provides one syntax

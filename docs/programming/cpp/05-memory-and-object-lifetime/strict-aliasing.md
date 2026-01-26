@@ -201,7 +201,55 @@ graph TD
 
 ## Summary
 
-Strict aliasing rule: pointers of different types cannot point to same memory. Enables compiler optimizations (10-30% faster) by assuming no aliasing between unrelated types. Violations cause undefined behavior - code works in debug, breaks in release. **Allowed exceptions**: same type, `char*` (byte access), `void*` (generic), signed/unsigned variants, inheritance. **Safe type punning**: `std::memcpy` (C++11, always works), `std::bit_cast` (C++20, best), unions (implementation-defined). **Never** use pointer casts for type punning. Rule exists for performance; respect it or use `-fno-strict-aliasing` (slow).
+:::info Strict Aliasing - Key Points
+**The Rule:**
+- Pointers of different types cannot point to same memory
+- Compiler assumes no aliasing between unrelated types
+- Enables aggressive optimizations (10-30% faster)
+- Violation = undefined behavior (works in debug, breaks in release)
+
+**Why It Exists:**
+- Allows reordering operations safely
+- Enables register caching without memory checks
+- Compiler assumes `int*` and `float*` never alias
+- Can eliminate "redundant" operations
+
+**Allowed Aliasing Exceptions:**
+- **Same type**: `int*` with `int*`
+- **char* / unsigned char***: Can alias anything (byte access)
+- **void***: Generic pointer (can alias anything)
+- **Signed/unsigned**: `int*` with `unsigned*`
+- **Inheritance**: Base class pointer to derived object
+
+**Common Violations:**
+- Pointer cast type punning: `(float*)&int_var` ❌
+- Array trick: `(float*)int_array` ❌
+- Union type punning: Technically implementation-defined
+
+**Safe Type Punning Methods:**
+- **`std::memcpy`** (C++11): Always safe, optimizes well ✅
+- **`std::bit_cast`** (C++20): Type-safe, constexpr ✅
+- **Union**: Implementation-defined (mostly works) ⚠️
+- **Never**: Pointer casts (`reinterpret_cast` for punning) ❌
+
+**Consequences of Violation:**
+- Debug build: Often works (no optimization)
+- Release build: Broken (optimizer assumes no aliasing)
+- Behavior: Unpredictable, depends on compiler/flags
+- Hard to debug: Works sometimes, fails mysteriously
+
+**Detection and Prevention:**
+- Compile: `-Wstrict-aliasing=2` (warnings)
+- Runtime: `-fsanitize=undefined` (sanitizer)
+- Disable: `-fno-strict-aliasing` (debug only, slower)
+- Best: Use safe type-punning methods
+
+**Real-World Examples:**
+- Binary I/O: Use `std::memcpy` for portability
+- Serialization: char* for byte access (allowed)
+- Network protocols: `memcpy` to/from buffers
+- Avoid: Direct pointer casts for reinterpretation
+  :::
 ```cpp
 // Interview answer:
 // "Strict aliasing: accessing an object through incompatible

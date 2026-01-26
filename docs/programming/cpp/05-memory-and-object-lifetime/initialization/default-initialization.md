@@ -196,7 +196,24 @@ graph TD
 
 ## Summary
 
-Default initialization behavior: **automatic storage** (locals) = indeterminate for fundamentals (UB), **static storage** (globals) = always zero. Classes with default constructors always call constructor. Compiler-generated constructors don't initialize fundamental members. **Always explicitly initialize** fundamental types to avoid undefined behavior. Use value initialization `{}` or in-class initializers for safety.
+:::info Default Initialization - Key Points
+**Storage-Dependent Behavior:**
+- **Automatic (local)**: Fundamentals = indeterminate (UB if read) ❌
+- **Static/global**: Always zero-initialized ✅
+- **Class with constructor**: Calls default constructor
+- **Class without constructor**: Members stay indeterminate ❌
+
+**Critical Rules:**
+- Never read uninitialized local variables
+- Compiler-generated constructors don't initialize fundamental members
+- Static storage always zeroed before other initialization
+
+**Solutions:**
+- Always explicitly initialize fundamentals
+- Use value initialization `{}` for safety
+- Use in-class initializers (C++11)
+- Initialize members in constructor initializer list
+  :::
 ```cpp
 // Interview answer:
 // "Default initialization: local fundamentals get indeterminate

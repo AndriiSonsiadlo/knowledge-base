@@ -197,7 +197,36 @@ Point p;                    // x, y indeterminate
 
 ## Summary
 
-Value initialization with `{}` or `()` guarantees zero for fundamentals, default constructor for classes. **Always safe to read** after value initialization. For classes without constructors, value init zeros all members (unlike default init). Small performance cost is negligible vs safety. **Best practice**: use `{}` for fundamentals unless immediately assigning. Essential for `new` allocations and member initialization.
+:::info Value Initialization - Key Points
+**Guaranteed Safety:**
+- **Fundamentals**: Always zero (0, 0.0, false, nullptr) ✅
+- **Classes with constructor**: Calls default constructor
+- **Classes without constructor**: All members zeroed ✅
+- **Arrays**: All elements zeroed
+
+**Syntax Triggers:**
+- Empty braces: `int x{};`
+- Empty parentheses: `int x = int();`
+- With `new`: `new int()` or `new int{}`
+- Member init: `value{}` in initializer list
+
+**vs Default Initialization:**
+- Default (local): Indeterminate ❌
+- Value: Always zero ✅
+- Classes with ctor: Same behavior
+- Classes without ctor: Value zeros members ✅
+
+**When to Use:**
+- Default choice for fundamentals (always safe)
+- Dynamic allocation: `new int{}` not `new int`
+- Member initialization for guaranteed valid state
+- Aggregates without constructors
+
+**Performance:**
+- Tiny cost (~nanoseconds) to zero memory
+- Modern CPUs optimize zeroing efficiently
+- Safety benefit far outweighs minimal cost
+  :::
 ```cpp
 // Interview answer:
 // "Value initialization with empty braces {} guarantees

@@ -164,9 +164,45 @@ void safe() {
 
 ## Summary
 
-`new` allocates heap memory and constructs objects; `delete` destructs and deallocates. Arrays need `new[]`/`delete[]`. Common errors: memory leaks (missing delete), double delete (heap corruption), use-after-free (undefined behavior). **Modern C++ uses smart pointers** which provide automatic memory management, eliminating these entire bug categories.
+:::info new and delete - Key Points
+**Basic Operations:**
+- **`new`**: Allocates heap memory + constructs object
+- **`delete`**: Destructs object + deallocates memory
+- **`new[]`**: Allocates array on heap
+- **`delete[]`**: Destructs array + deallocates
+- **Critical**: Match `new` with `delete`, `new[]` with `delete[]`
+
+**Common Bugs:**
+- **Memory leak**: Forgot `delete` → memory never reclaimed
+- **Double delete**: `delete` twice → heap corruption, crash
+- **Use-after-free**: Access after `delete` → undefined behavior
+- **Wrong delete**: `delete` on `new[]` → undefined behavior
+- **Mixing**: Never mix single/array forms
+
+**Initialization Forms:**
+- `new int` → uninitialized (garbage) ❌
+- `new int()` → zero-initialized ✅
+- `new int{42}` → initialized to 42 ✅
+- `new int[10]()` → array, all zeros ✅
+
+**Safety Patterns:**
+- Set to `nullptr` after delete (safe to delete nullptr)
+- Check allocation success with nothrow: `new (nothrow)`
+- Modern code: use smart pointers instead
+
+**Modern C++ Alternatives:**
+- **`unique_ptr`**: Exclusive ownership, auto-deleted
+- **`shared_ptr`**: Reference-counted, shared ownership
+- **`make_unique/make_shared`**: Factory functions (safer)
+- Eliminates: leaks, double-deletes, use-after-free
+
+**Performance:**
+- Stack allocation: ~1ns (automatic)
+- Heap allocation: ~50-100ns (manual management)
+- Smart pointers: Minimal overhead, huge safety gain
+  :::
 ```cpp
-// Interview answer template:
+// Interview answer:
 // "new allocates on heap, requires manual delete. Every new needs
 // exactly one matching delete (new[] needs delete[]). Common bugs:
 // leaks (forgot delete), double-delete (crash), use-after-free (UB).

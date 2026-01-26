@@ -227,7 +227,53 @@ std::cout << is_aligned(p);  // False - misaligned
 
 ## Summary
 
-Alignment = addresses divisible by type size. Misaligned access is slow (x86) or crashes (ARM). Compiler aligns automatically and inserts struct padding. Order struct members large→small to minimize padding. Trailing padding ensures array elements stay aligned. Use `alignof` to query, `alignas` to specify (cache lines, SIMD). Packed structs remove padding but cause slow/unsafe access. Cache-line alignment (64 bytes) prevents false sharing in multithreaded code. Understand alignment to optimize memory layouts and avoid performance pitfalls.
+:::info Memory Alignment - Key Points
+**Alignment Requirements:**
+- Data at addresses divisible by its size
+- **x86-64**: Misaligned = 2-10x slower
+- **ARM/RISC**: Misaligned = crash
+- Compiler aligns automatically (inserts padding)
+
+**Natural Alignment Rules:**
+- `char`: 1-byte (any address)
+- `short`: 2-byte (even addresses)
+- `int`: 4-byte (divisible by 4)
+- `double`: 8-byte (divisible by 8)
+- `pointer`: 8-byte on 64-bit systems
+
+**Struct Padding:**
+- Compiler inserts padding to align members
+- Order matters: large→small minimizes waste
+- Trailing padding ensures array element alignment
+- Example: `char` (1) + `int` (4) + `char` (1) = 12 bytes (not 6!)
+
+**Optimization Strategy:**
+- Order members: largest types first
+- Fill gaps with smaller types
+- Bad: `char, double, char` = 24 bytes
+- Good: `double, char, char` = 16 bytes
+
+**Cache-Line Alignment (64 bytes):**
+- Prevents false sharing in multithreaded code
+- `alignas(64)` for thread-local counters
+- 10-100x speedup by avoiding cache thrashing
+
+**SIMD Alignment (16 bytes):**
+- Required for vectorized operations
+- `alignas(16) float vector[4]`
+- One instruction vs multiple with shuffles
+
+**Control Alignment:**
+- **Query**: `alignof(Type)` returns requirement
+- **Specify**: `alignas(N)` increases alignment
+- **Packed structs**: Remove padding (dangerous)
+
+**Packed Structures:**
+- Remove all padding with `__attribute__((packed))`
+- Causes slow/unsafe misaligned access
+- Only for: binary file formats, network protocols
+- Never for: program data structures
+  :::
 ```cpp
 // Interview answer:
 // "Alignment means data at addresses divisible by its size.

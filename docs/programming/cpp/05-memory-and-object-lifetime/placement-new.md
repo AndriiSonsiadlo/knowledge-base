@@ -195,9 +195,51 @@ for (size_t i = N; i > 0; --i) {
 
 ## Summary
 
-Placement new constructs objects in pre-allocated memory: `new (ptr) T(args)`. Memory must be properly sized (`sizeof(T)`) and aligned (`alignas(T)`). Objects need explicit destructor calls (`obj->~T()`) and cannot be deleted. Enables memory pools, custom allocators, and containers. Common errors: deleting placement new objects, insufficient buffers, missing destructors. Low-level facility for performance-critical or embedded code, rarely needed in application-level programming.
+:::info Placement new - Key Points
+**Core Concept:**
+- Constructs object in pre-allocated memory (no allocation)
+- Syntax: `new (address) Type(args)`
+- Separates construction from allocation
+- Enables custom memory management strategies
+
+**Memory Requirements:**
+- **Size**: Buffer must be ≥ `sizeof(T)`
+- **Alignment**: Must match `alignof(T)` (use `alignas`)
+- Violating either → undefined behavior or crash
+
+**Destructor Handling:**
+- **Must call explicitly**: `obj->~Type()`
+- **Cannot use delete**: Memory not from `new`
+- **Manual cleanup**: You manage object lifetime
+
+**Use Cases:**
+- **Memory pools**: Pre-allocate, construct on demand
+- **Custom allocators**: Separate allocation strategy
+- **Stack objects**: Object semantics with stack storage
+- **Containers**: How `vector` implements growth
+- **Embedded**: Fixed memory regions
+
+**Common Mistakes:**
+- Calling `delete` on placement new object → crash
+- Buffer too small → buffer overflow
+- Forgetting destructor → resource leaks
+- Misaligned buffer → crash on some platforms
+- Reusing memory without destroying first
+
+**Regular new vs Placement new:**
+- **Regular**: Allocate + construct (then destruct + deallocate)
+- **Placement**: Construct only (then destruct only)
+- **Regular**: Memory managed by new/delete
+- **Placement**: Memory managed separately by you
+
+**When to Use:**
+- Performance-critical memory management
+- Container implementations (internal use)
+- Memory-mapped hardware (embedded)
+- NOT for: Normal application code
+  :::
 ```cpp
-// Interview template:
+// Interview answer:
 // "Placement new constructs objects at a specified address
 // without allocating: new (buffer) T(args). Requires properly
 // sized/aligned buffer and explicit destructor call. Enables

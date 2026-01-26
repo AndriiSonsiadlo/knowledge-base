@@ -162,13 +162,14 @@ points.emplace_back(Point{50, 60});
 
 ## Quick Comparison
 
-| Feature | Aggregate | Class with Constructor |
-|---------|-----------|------------------------|
-| **Syntax** | `{1, 2}` | `(1, 2)` or `{1, 2}` |
-| **Boilerplate** | None | Constructor code |
-| **Encapsulation** | No | Yes |
-| **Validation** | No | Yes |
-| **Use case** | Plain data | Complex invariants |
+| Feature           | Aggregate  | Class with Constructor |
+|-------------------|------------|------------------------|
+| **Syntax**        | `{1, 2}`   | `(1, 2)` or `{1, 2}`   |
+| **Boilerplate**   | None       | Constructor code       |
+| **Encapsulation** | No         | Yes                    |
+| **Validation**    | No         | Yes                    |
+| **Use case**      | Plain data | Complex invariants     |
+
 ```cpp showLineNumbers
 // Aggregate (simple)
 struct Point { int x, y; };
@@ -186,7 +187,38 @@ public:
 
 ## Summary
 
-Aggregate initialization uses brace-enclosed lists for arrays and simple structs. **Requirements**: no user constructors, all public members, no inheritance, no virtual functions. Partial initialization zeros remaining members. **C++20 designated initializers** (`.x = 10`) make code self-documenting. Perfect for plain data structures; use classes with constructors when you need validation or encapsulation.
+:::info Aggregate Initialization - Key Points
+**What's an Aggregate:**
+- Array OR class with all of:
+    - No user-declared constructors
+    - No private/protected non-static members
+    - No base classes
+    - No virtual functions
+
+**Initialization Behavior:**
+- Braces initialize members in declaration order
+- Fewer initializers → remaining members zeroed
+- Partial initialization is safe (rest = zero)
+- Nested braces for nested aggregates
+
+**C++20 Designated Initializers:**
+- Syntax: `{.x = 10, .y = 20}`
+- Self-documenting (names make intent clear)
+- Can omit members (automatically zeroed)
+- Must be in declaration order
+
+**Best Practices:**
+- Include inner braces for clarity: `{{0, 0}, {10, 20}}`
+- Use designated initializers for readability
+- Order members large→small to minimize padding
+- For validation needs: use class with constructor
+
+**vs Constructor-Based Classes:**
+- Aggregates: Less boilerplate, plain data
+- Classes: Validation, invariants, encapsulation
+- Choose aggregates for simple data structures
+- Choose classes when you need control
+  :::
 ```cpp
 // Interview answer:
 // "Aggregate initialization uses braces to initialize arrays
