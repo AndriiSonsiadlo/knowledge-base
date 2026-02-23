@@ -61,19 +61,19 @@ The STL introduced the concept of generic containers and algorithms that work to
 ### Limitations
 
 ```cpp showLineNumbers 
-// ❌ No type inference
+// No type inference
 std::vector<std::map<std::string, std::vector<int>>>::iterator it;  // Verbose!
 
-// ❌ No lambda functions
+// No lambda functions
 bool isEven(int n) { return n % 2 == 0; }  // Separate function needed
 std::count_if(vec.begin(), vec.end(), isEven);
 
-// ❌ Manual memory management
+// Manual memory management
 Widget* ptr = new Widget();
 // ... use ptr ...
 delete ptr;  // Easy to forget!
 
-// ❌ No nullptr
+// No nullptr
 void* ptr = NULL;  // NULL is actually integer 0
 ```
 
@@ -243,7 +243,7 @@ std::vector<int> vec{1, 2, 3, 4, 5};
 
 // Prevents narrowing
 int x = 7.7;      // OK, silently truncates
-int y{7.7};       // ❌ Compilation error! Prevents bugs
+int y{7.7};       // Compilation error! Prevents bugs
 ```
 
 ### 8. Multithreading Support
@@ -349,7 +349,7 @@ auto unique = std::unique_ptr<Widget>(new Widget(42));  // Inconsistent!
 
 // C++14 - consistent
 auto shared = std::make_shared<Widget>(42);
-auto unique = std::make_unique<Widget>(42);  // ✅ Better
+auto unique = std::make_unique<Widget>(42);  // Better
 ```
 
 `make_unique` is safer than using `new` directly because it's exception-safe and prevents accidentally creating raw pointers.
@@ -695,21 +695,21 @@ if (result.has_value()) {
 
 | Feature | C++98 | C++11 | C++14 | C++17 | C++20 | C++23 |
 |---------|-------|-------|-------|-------|-------|-------|
-| auto | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Lambdas | ❌ | ✅ | ✅ Generic | ✅ | ✅ | ✅ |
-| Smart pointers | ❌ | ✅ | ✅ make_unique | ✅ | ✅ | ✅ |
-| Move semantics | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Range-for | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| nullptr | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| constexpr | ❌ | ✅ Limited | ✅ | ✅ Relaxed | ✅ | ✅ |
-| Structured bindings | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| optional/variant | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| filesystem | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Concepts | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Ranges | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Coroutines | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Modules | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| std::print | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| auto | No | Yes | Yes | Yes | Yes | Yes |
+| Lambdas | No | Yes | Generic | Yes | Yes | Yes |
+| Smart pointers | No | Yes | make_unique | Yes | Yes | Yes |
+| Move semantics | No | Yes | Yes | Yes | Yes | Yes |
+| Range-for | No | Yes | Yes | Yes | Yes | Yes |
+| nullptr | No | Yes | Yes | Yes | Yes | Yes |
+| constexpr | No | Limited | Yes | Relaxed | Yes | Yes |
+| Structured bindings | No | No | No | Yes | Yes | Yes |
+| optional/variant | No | No | No | Yes | Yes | Yes |
+| filesystem | No | No | No | Yes | Yes | Yes |
+| Concepts | No | No | No | No | Yes | Yes |
+| Ranges | No | No | No | No | Yes | Yes |
+| Coroutines | No | No | No | No | Yes | Yes |
+| Modules | No | No | No | No | Yes | Yes |
+| std::print | No | No | No | No | No | Yes |
 
 ---
 

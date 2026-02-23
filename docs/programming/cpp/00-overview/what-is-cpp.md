@@ -163,7 +163,7 @@ graph LR
 
 | Aspect             | C++                 | Python             | Java                | Rust                      |
 |--------------------|---------------------|--------------------|---------------------|---------------------------|
-| **Speed**          | ⚡⚡⚡⚡⚡               | ⚡                  | ⚡⚡⚡                 | ⚡⚡⚡⚡⚡                     |
+| **Speed**          | Very fast               | Slow                  | Moderate                 | Very fast                     |
 | **Memory Control** | Manual              | Automatic          | Automatic (GC)      | Ownership system          |
 | **Learning Curve** | Steep               | Gentle             | Moderate            | Very steep                |
 | **Safety**         | Manual              | Safe               | Safe                | Memory safe               |
@@ -427,11 +427,11 @@ issues, `-O2` enables optimizations, and `-o hello` names the output executable.
 
 C++ is a powerful, efficient language that combines:
 
-- ✅ **Low-level control** - Direct hardware access, manual memory management
-- ✅ **High-level abstractions** - Classes, templates, STL
-- ✅ **Performance** - Compiles to native code, zero-overhead abstractions
-- ✅ **Versatility** - Systems programming, games, scientific computing, embedded
-- ✅ **Industry standard** - Used in critical infrastructure worldwide
+- **Low-level control** - Direct hardware access, manual memory management
+- **High-level abstractions** - Classes, templates, STL
+- **Performance** - Compiles to native code, zero-overhead abstractions
+- **Versatility** - Systems programming, games, scientific computing, embedded
+- **Industry standard** - Used in critical infrastructure worldwide
 
 :::success When to Choose C++
 
