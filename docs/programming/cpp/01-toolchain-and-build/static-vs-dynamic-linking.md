@@ -85,17 +85,17 @@ ls -lh app
 
 ### Pros of Static Linking
 
-✅ **No runtime dependencies** - works anywhere  
-✅ **Faster startup** - no loading needed  
-✅ **Versioning control** - exact library version embedded  
-✅ **Easier deployment** - single file
+**No runtime dependencies** - works anywhere  
+**Faster startup** - no loading needed  
+**Versioning control** - exact library version embedded  
+**Easier deployment** - single file
 
 ### Cons of Static Linking
 
-❌ **Large executable size** - includes all library code  
-❌ **No updates** - must recompile to update library  
-❌ **Memory duplication** - each process has own copy  
-❌ **Longer link time** - more code to process
+**Large executable size** - includes all library code  
+**No updates** - must recompile to update library  
+**Memory duplication** - each process has own copy  
+**Longer link time** - more code to process
 
 ---
 
@@ -167,17 +167,17 @@ export LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH
 
 ### Pros of Dynamic Linking
 
-✅ **Small executable** - library code separate  
-✅ **Shared memory** - one copy for all processes  
-✅ **Easy updates** - replace library without recompiling  
-✅ **Faster linking** - less code to process
+**Small executable** - library code separate  
+**Shared memory** - one copy for all processes  
+**Easy updates** - replace library without recompiling  
+**Faster linking** - less code to process
 
 ### Cons of Dynamic Linking
 
-❌ **Runtime dependencies** - requires library files  
-❌ **Version conflicts** - "DLL hell"  
-❌ **Slower startup** - library loading overhead  
-❌ **Complex deployment** - must distribute libraries
+**Runtime dependencies** - requires library files  
+**Version conflicts** - "DLL hell"  
+**Slower startup** - library loading overhead  
+**Complex deployment** - must distribute libraries
 
 ---
 

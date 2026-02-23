@@ -71,7 +71,7 @@ class Widget {
 
 // main.cpp
 #include "widget.h"
-#include "widget.h"  // ❌ Error: redefinition of 'class Widget'
+#include "widget.h"  // Error: redefinition of 'class Widget'
 ```
 
 **Solution 1: Include Guards**
@@ -117,7 +117,7 @@ Macros perform text substitution before compilation. They're useful but dangerou
 
 double area = PI * r * r;  // Becomes: 3.14159 * r * r
 
-// ✅ Better alternative: const
+// Better alternative: const
 const double PI = 3.14159;
 constexpr int MAX_SIZE = 1000;
 ```
@@ -130,13 +130,13 @@ The preprocessor replaces `PI` with `3.14159` everywhere. Unlike `const`, macros
 #define SQUARE(x) ((x) * (x))
 
 int result = SQUARE(5);    // Becomes: ((5) * (5)) = 25
-int bad = SQUARE(2 + 3);   // Becomes: ((2 + 3) * (2 + 3)) = 25 ✅
+int bad = SQUARE(2 + 3);   // Becomes: ((2 + 3) * (2 + 3)) = 25
 
 // ⚠️ Without parentheses - bug!
 #define BAD_SQUARE(x) x * x
-int oops = BAD_SQUARE(2 + 3);  // Becomes: 2 + 3 * 2 + 3 = 11 ❌
+int oops = BAD_SQUARE(2 + 3);  // Becomes: 2 + 3 * 2 + 3 = 11
 
-// ✅ Better: inline function
+// Better: inline function
 inline int square(int x) { return x * x; }
 ```
 
@@ -155,7 +155,7 @@ int m = MAX(x++, 10);  // Expands to: ((x++) > (10) ? (x++) : (10))
 // Problem 2: No type checking
 MAX("hello", 42);  // Compiles but nonsensical!
 
-// ✅ Solution: template function
+// Solution: template function
 template<typename T>
 T max(T a, T b) { return a > b ? a : b; }
 ```
@@ -392,22 +392,22 @@ This shows exactly what the compiler sees after preprocessing. Useful for debugg
 ### Modern Alternatives
 
 ```cpp showLineNumbers 
-// ❌ Old style
+// Old style
 #define MAX 100
 #define SQUARE(x) ((x) * (x))
 
-// ✅ Modern C++
+// Modern C++
 constexpr int MAX = 100;
 constexpr int square(int x) { return x * x; }
 
-// ❌ Old debug logging
+// Old debug logging
 #ifdef DEBUG
     #define LOG(x) std::cout << x << "\n"
 #else
     #define LOG(x)
 #endif
 
-// ✅ Modern C++17
+// Modern C++17
 if constexpr (DEBUG) {
     std::cout << value << "\n";
 }

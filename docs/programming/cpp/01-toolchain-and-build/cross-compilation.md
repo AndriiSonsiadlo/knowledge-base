@@ -40,9 +40,9 @@ g++ main.cpp -o app      # Runs on x86-64
 
 # Cross-compilation
 arm-linux-gnueabihf-g++ main.cpp -o app  # For ARM
-./app                    # ❌ Won't run on x86-64!
+./app                    # Won't run on x86-64!
 scp app pi@raspberrypi:~/  # Transfer to target
-ssh pi@raspberrypi ./app   # ✅ Runs on ARM
+ssh pi@raspberrypi ./app   # Runs on ARM
 ```
 
 ## Cross-Compiler Toolchain

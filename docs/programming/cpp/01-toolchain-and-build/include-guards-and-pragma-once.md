@@ -24,7 +24,7 @@ class Widget {
 
 // main.cpp
 #include "widget.h"
-#include "widget.h"  // ❌ Error: redefinition of 'class Widget'
+#include "widget.h"  // Error: redefinition of 'class Widget'
 ```
 
 The preprocessor copies `widget.h` contents twice, causing duplicate class definition.
@@ -173,7 +173,7 @@ Even for inline functions, always use guards to avoid unnecessary reprocessing.
 ### Macro Name Collision
 
 ```cpp showLineNumbers 
-// ❌ Bad: Generic name
+// Bad: Generic name
 // util.h
 #ifndef UTIL_H  // Too common!
 #define UTIL_H
@@ -183,7 +183,7 @@ Even for inline functions, always use guards to avoid unnecessary reprocessing.
 // Another library's util.h uses same guard
 // Second util.h silently skipped!
 
-// ✅ Good: Specific name
+// Good: Specific name
 // myproject/util.h
 #ifndef MYPROJECT_UTIL_H_2024
 #define MYPROJECT_UTIL_H_2024
@@ -293,7 +293,7 @@ Or use IDE features to auto-insert guards.
 ```cpp showLineNumbers 
 // widget.h
 #ifndef WIDGET_H
-#define WIDGTE_H  // ❌ Typo! Doesn't match
+#define WIDGTE_H  // Typo! Doesn't match
 class Widget {};
 #endif
 ```
@@ -307,7 +307,7 @@ Typo means guard never defined → multiple inclusion still occurs.
 #ifndef WIDGET_H
 #define WIDGET_H
 class Widget {};
-// ❌ Missing #endif!
+// Missing #endif!
 
 // Causes compilation errors in files that include this
 ```
@@ -315,7 +315,7 @@ class Widget {};
 ### Incorrect Guard Scope
 
 ```cpp showLineNumbers 
-// ❌ Guard around include, not content
+// Guard around include, not content
 // widget.h
 #ifndef WIDGET_H
 #define WIDGET_H

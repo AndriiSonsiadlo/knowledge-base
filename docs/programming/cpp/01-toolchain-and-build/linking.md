@@ -59,10 +59,10 @@ g++ -c main.cpp -o main.o      # Creates undefined symbol: getValue
 g++ -c utils.cpp -o utils.o    # Defines: getValue
 
 # Link together
-g++ main.o utils.o -o app      # ✅ Linker resolves getValue
+g++ main.o utils.o -o app      # Linker resolves getValue
 
 # Missing definition
-g++ main.o -o app              # ❌ undefined reference to `getValue()'
+g++ main.o -o app              # undefined reference to `getValue()'
 ```
 
 The linker searches all object files and libraries to find where `getValue` is defined.
@@ -129,7 +129,7 @@ nm app | grep main
 
 Exactly one definition allowed per symbol.
 ```cpp showLineNumbers
-// ❌ ODR violation
+// ODR violation
 // file1.cpp
 int global = 42;
 
@@ -139,7 +139,7 @@ int global = 100;  // Error: multiple definitions!
 
 ```bash
 g++ file1.o file2.o -o app
-# ❌ multiple definition of `global'
+# multiple definition of `global'
 ```
 
 **Solution**: Use `extern` for declarations:
@@ -207,7 +207,7 @@ int main() { foo(); }
 
 ```bash
 g++ main.cpp -o app
-# ❌ undefined reference to `foo()'
+# undefined reference to `foo()'
 ```
 
 **Solution**: Implement `foo()` or link the library containing it.
@@ -215,7 +215,7 @@ g++ main.cpp -o app
 ### Multiple Definitions
 
 ```cpp showLineNumbers 
-// header.h (❌ Wrong - in header)
+// header.h (Wrong - in header)
 int global = 42;  // Defined in header
 
 // file1.cpp
@@ -227,7 +227,7 @@ int global = 42;  // Defined in header
 
 ```bash
 g++ file1.cpp file2.cpp -o app
-# ❌ multiple definition of `global'
+# multiple definition of `global'
 ```
 
 **Solution**: Declare in header, define in one .cpp:
@@ -243,10 +243,10 @@ int global = 42;    // Definition
 ### Wrong Library Order
 
 ```bash
-# ❌ Wrong order
+# Wrong order
 g++ -lmylib main.o  # Library before object that uses it
 
-# ✅ Correct order
+# Correct order
 g++ main.o -lmylib  # Object files before libraries
 ```
 

@@ -68,9 +68,9 @@ The tree respects operator precedence (`*` before `+`). Syntax errors are caught
 Checks types, scopes, and semantics:
 
 ```cpp showLineNumbers 
-int x = "hello";  // ❌ Type error: can't assign string to int
-foo();            // ❌ Error: 'foo' not declared
-int y = x + z;    // ✅ OK if z is int/compatible type
+int x = "hello";  // Type error: can't assign string to int
+foo();            // Error: 'foo' not declared
+int y = x + z;    // OK if z is int/compatible type
 ```
 
 **Checks performed**:
@@ -346,10 +346,10 @@ g++ -include pch.h main.cpp
 ### 2. Forward Declarations
 
 ```cpp showLineNumbers 
-// ❌ Slow - includes entire header
+// Slow - includes entire header
 #include "widget.h"
 
-// ✅ Fast - just declares
+// Fast - just declares
 class Widget;
 void process(Widget* w);
 ```
@@ -380,7 +380,7 @@ Prevents the compiler from instantiating templates in every translation unit.
 void foo();
 
 // main.cpp
-foo();  // ❌ undefined reference to `foo()'
+foo();  // undefined reference to `foo()'
 ```
 
 **Solution**: Implement `foo()` in a source file and link it.
@@ -393,7 +393,7 @@ void print(T value) {
     std::cout << value.name << "\n";  // Assumes T has 'name'
 }
 
-print(42);  // ❌ int has no member 'name'
+print(42);  // int has no member 'name'
 ```
 
 **Solution**: Add concept/static_assert or SFINAE.
@@ -404,7 +404,7 @@ print(42);  // ❌ int has no member 'name'
 void foo(int x) {}
 void foo(double x) {}
 
-foo(3.14f);  // ❌ Ambiguous: float converts to both int and double
+foo(3.14f);  // Ambiguous: float converts to both int and double
 ```
 
 ---

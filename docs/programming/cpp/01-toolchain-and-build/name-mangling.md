@@ -249,7 +249,7 @@ void calculate(int a, double b) {  // Wrong signature!
 
 // main.cpp
 #include "header.h"
-calculate(5, 10);  // ❌ Undefined reference to _Z9calculateii
+calculate(5, 10);  // Undefined reference to _Z9calculateii
                    // Implementation provides _Z9calculateid
 ```
 

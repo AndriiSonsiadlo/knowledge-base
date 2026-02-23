@@ -250,10 +250,10 @@ cmake -DBUILD_TESTS=OFF -DENABLE_LOGGING=ON ..
 ## Choosing a Build System
 
 **For new C++ projects:**
-- ✅ **CMake** - Industry standard, best choice for most projects
-- ✅ **Meson** - Modern alternative, simpler syntax
-- ❌ Make - Use only for Unix-only projects
-- ❌ Bazel - Only for very large monorepos
+- **CMake** - Industry standard, best choice for most projects
+- **Meson** - Modern alternative, simpler syntax
+- Make - Use only for Unix-only projects
+- Bazel - Only for very large monorepos
 
 **Quick decision guide:**
 ```mermaid

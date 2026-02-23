@@ -273,10 +273,10 @@ The `-O3` compiler recognizes the pattern and replaces the entire loop with a ma
 ### Preprocessing Errors
 
 ```cpp showLineNumbers 
-#include "missing.h"  // ❌ fatal error: missing.h: No such file or directory
+#include "missing.h"  // fatal error: missing.h: No such file or directory
 #define X Y
 #define Y X
-int x = X;  // ❌ Infinite macro expansion
+int x = X;  // Infinite macro expansion
 ```
 
 **Solution**: Check include paths, avoid circular macros.
@@ -284,9 +284,9 @@ int x = X;  // ❌ Infinite macro expansion
 ### Compilation Errors
 
 ```cpp showLineNumbers 
-int x = "hello";  // ❌ error: invalid conversion from 'const char*' to 'int'
+int x = "hello";  // error: invalid conversion from 'const char*' to 'int'
 template<typename T> T max(T a, T b);
-max(5, 3.14);  // ❌ error: no matching function (int vs double)
+max(5, 3.14);  // error: no matching function (int vs double)
 ```
 
 **Solution**: Fix type errors, template arguments.
@@ -298,7 +298,7 @@ max(5, 3.14);  // ❌ error: no matching function (int vs double)
 void foo();
 int main() { foo(); }
 
-// ❌ undefined reference to `foo()'
+// undefined reference to `foo()'
 ```
 
 **Solution**: Add missing source files, link required libraries.

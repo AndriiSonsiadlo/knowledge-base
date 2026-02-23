@@ -83,7 +83,7 @@ Headers declare the API; source files implement it.
 
 ## What Goes in Headers?
 
-### ✅ Should Include
+### Should Include
 
 ```cpp showLineNumbers 
 // Declarations
@@ -115,21 +115,21 @@ constexpr int MAX_SIZE = 1000;
 const double PI = 3.14159;
 ```
 
-### ❌ Should NOT Include
+### Should NOT Include
 
 ```cpp showLineNumbers 
-// ❌ Function definitions (unless inline)
+// Function definitions (unless inline)
 void function() {
     // implementation
 }
 
-// ❌ Variable definitions (unless const/constexpr)
+// Variable definitions (unless const/constexpr)
 int global_var = 42;
 
-// ❌ using namespace (pollutes all files that include this)
+// using namespace (pollutes all files that include this)
 using namespace std;
 
-// ❌ Implementation details
+// Implementation details
 static void internal_helper() {}
 ```
 
@@ -180,7 +180,7 @@ project/
 Headers should include everything they need:
 
 ```cpp showLineNumbers 
-// ❌ Bad: Depends on iostream being included first
+// Bad: Depends on iostream being included first
 // widget.h
 class Widget {
 public:
@@ -189,7 +189,7 @@ public:
     }
 };
 
-// ✅ Good: Self-contained
+// Good: Self-contained
 // widget.h
 #include <iostream>  // Includes what it needs
 
@@ -214,7 +214,7 @@ g++ -c widget.h  # Should work without errors
 Avoid including headers when forward declarations suffice:
 
 ```cpp showLineNumbers 
-// ❌ Unnecessary include
+// Unnecessary include
 // widget.h
 #include "database.h"  // Includes entire database header
 
@@ -222,7 +222,7 @@ class Widget {
     Database* db;  // Only uses pointer
 };
 
-// ✅ Better: Forward declare
+// Better: Forward declare
 // widget.h
 class Database;  // Forward declaration
 
@@ -252,7 +252,7 @@ class Widget {
 Don't rely on transitive includes:
 
 ```cpp showLineNumbers 
-// ❌ Bad: Relies on widget.h including vector
+// Bad: Relies on widget.h including vector
 // main.cpp
 #include "widget.h"  // Happens to include <vector>
 
@@ -260,7 +260,7 @@ int main() {
     std::vector<int> v;  // Works by accident!
 }
 
-// ✅ Good: Explicit includes
+// Good: Explicit includes
 // main.cpp
 #include <vector>    // Explicitly include what you use
 #include "widget.h"
@@ -339,7 +339,7 @@ int result = math::square(5);
 Avoid circular includes:
 
 ```cpp showLineNumbers 
-// ❌ Circular dependency
+// Circular dependency
 // a.h
 #include "b.h"
 class A {
@@ -356,7 +356,7 @@ class B {
 **Solution**: Forward declarations and pointers:
 
 ```cpp showLineNumbers 
-// ✅ Fixed with forward declarations
+// Fixed with forward declarations
 // a.h
 class B;  // Forward declaration
 class A {
@@ -408,7 +408,7 @@ g++ -I./include src/main.cpp
 ### Using namespace in Headers
 
 ```cpp showLineNumbers 
-// ❌ header.h
+// header.h
 using namespace std;  // Pollutes every file that includes this!
 
 class Widget {
@@ -419,7 +419,7 @@ class Widget {
 **Solution**: Always use fully qualified names in headers:
 
 ```cpp showLineNumbers 
-// ✅ header.h
+// header.h
 class Widget {
     std::vector<int> data;
 };
@@ -428,13 +428,13 @@ class Widget {
 ### Forgetting Include Guards
 
 ```cpp showLineNumbers 
-// ❌ No include guard
+// No include guard
 // widget.h
 class Widget {};
 
 // main.cpp
 #include "widget.h"
-#include "widget.h"  // ❌ Error: redefinition of 'Widget'
+#include "widget.h"  // Error: redefinition of 'Widget'
 ```
 
 **Solution**: See next section (include guards).

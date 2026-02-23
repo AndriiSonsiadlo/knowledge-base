@@ -330,7 +330,7 @@ Hiding internal symbols:
 ### Duplicate Symbols
 
 ```cpp showLineNumbers 
-// header.h (❌ Wrong)
+// header.h (Wrong)
 int global = 42;  // Defined in header
 
 // file1.cpp
@@ -359,7 +359,7 @@ int global = 42;    // Definition
 void missing_function();
 
 int main() {
-    missing_function();  // ❌ Undefined reference
+    missing_function();  // Undefined reference
 }
 ```
 

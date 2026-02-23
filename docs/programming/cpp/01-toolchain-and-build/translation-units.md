@@ -102,7 +102,7 @@ int main() {
 }
 ```
 
-✅ One definition (`math.cpp`), multiple declarations allowed.
+One definition (`math.cpp`), multiple declarations allowed.
 
 ### Invalid: Multiple Definitions
 
@@ -111,7 +111,7 @@ int main() {
 int global = 42;
 
 // file2.cpp (TU2)
-int global = 100;  // ❌ ODR violation!
+int global = 100;  // ODR violation!
 
 // Link error: multiple definition of 'global'
 ```
@@ -224,7 +224,7 @@ inline int square(int x) {
 // file2.cpp
 #include "header.h"  // square definition copied again
 
-// ✅ OK: Linker keeps one copy, discards duplicates
+// OK: Linker keeps one copy, discards duplicates
 ```
 
 **Requirements**: All definitions must be **identical**. The linker picks one and discards the rest.
@@ -236,7 +236,7 @@ inline int square(int x) {
 Templates must be fully visible in each TU that uses them:
 
 ```cpp showLineNumbers 
-// ❌ Wrong: Template split between header and source
+// Wrong: Template split between header and source
 // math.h
 template<typename T>
 T max(T a, T b);
@@ -249,7 +249,7 @@ T max(T a, T b) {
 
 // main.cpp
 #include "math.h"
-max(5, 10);  // ❌ Linker error: undefined reference
+max(5, 10);  // Linker error: undefined reference
 ```
 
 **Why?** The compiler needs the template definition to instantiate `max<int>` in main.cpp's TU.
@@ -260,7 +260,7 @@ max(5, 10);  // ❌ Linker error: undefined reference
 // math.h
 template<typename T>
 T max(T a, T b) {
-    return a > b ? a : b;  // ✅ Definition in header
+    return a > b ? a : b;  // Definition in header
 }
 ```
 
@@ -310,7 +310,7 @@ int main() {
 ### Minimizing TU Size
 
 ```cpp showLineNumbers 
-// ✅ Better: Forward declare when possible
+// Better: Forward declare when possible
 // widget.h
 class Database;  // Forward declaration (no need to include database.h)
 
