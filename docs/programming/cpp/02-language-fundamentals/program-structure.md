@@ -376,7 +376,7 @@ void helper() {
 Without forward declaration:
 ```cpp showLineNumbers 
 int main() {
-    helper();  // ❌ Error: 'helper' not declared
+    helper();  // Error: 'helper' not declared
     return 0;
 }
 

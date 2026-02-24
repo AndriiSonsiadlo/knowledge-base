@@ -108,10 +108,10 @@ int camelCase;
 int snake_case;
 
 // Invalid identifiers
-int 123value;    // ❌ Cannot start with digit
-int my-var;      // ❌ Hyphen not allowed
-int class;       // ❌ Keyword
-int my var;      // ❌ Space not allowed
+int 123value;    // Cannot start with digit
+int my-var;      // Hyphen not allowed
+int class;       // Keyword
+int my var;      // Space not allowed
 ```
 
 **Rules**:
@@ -151,12 +151,12 @@ class Widget {
 Avoid these patterns (reserved for implementation):
 
 ```cpp showLineNumbers 
-// ❌ Reserved by standard
+// Reserved by standard
 _Capital     // Names starting with _ followed by capital
 __double     // Names with double underscore
 std::_impl   // Anything in std namespace starting with _
 
-// ✅ OK
+// OK
 _lowercase   // OK in local scope
 my_var_      // Trailing underscore OK
 ```

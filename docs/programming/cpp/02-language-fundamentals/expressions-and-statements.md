@@ -408,8 +408,8 @@ y = x + 1;       // x=1 completes before this
 x = (a = 1, b = 2, a + b);  // a=1, then b=2, then add
 
 // Undefined behavior
-i = i++;         // ❌ UB: modifies i twice
-arr[i] = i++;    // ❌ UB: which i for index?
+i = i++;         // UB: modifies i twice
+arr[i] = i++;    // UB: which i for index?
 
 // Well-defined
 i = 1;
@@ -423,17 +423,17 @@ arr[i++] = 5;    // OK: i evaluated before increment
 ### Assignment in Condition
 
 ```cpp showLineNumbers 
-// ❌ Common mistake
+// Common mistake
 if (x = 5) {     // Assignment, not comparison!
     // Always executes (5 is true)
 }
 
-// ✅ Intended comparison
+// Intended comparison
 if (x == 5) {
     // Executes when x equals 5
 }
 
-// ✅ Intentional assignment (rare)
+// Intentional assignment (rare)
 if ((x = getValue()) != 0) {
     // Use x
 }
@@ -445,7 +445,7 @@ if ((x = getValue()) != 0) {
 x + 5;           // ⚠️ Legal but useless (value discarded)
 x == 5;          // ⚠️ Legal but useless (comparison unused)
 
-x = 5;           // ✅ Useful statement
+x = 5;           // Useful statement
 ```
 
 ---
