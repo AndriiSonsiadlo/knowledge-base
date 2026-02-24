@@ -85,8 +85,8 @@ int getValue() { return 42; }
 getValue()               // Function returning by value → prvalue
 
 // Cannot take address
-// int* p = &42;         // ❌ Error
-// int* p = &getValue(); // ❌ Error
+// int* p = &42;         // Error
+// int* p = &getValue(); // Error
 ```
 
 **Properties**:
@@ -162,26 +162,26 @@ a.m (where a is rvalue and m is non-static member)
 int x = 42;
 
 // lvalue references
-int& lr1 = x;                    // ✅ lvalue → lvalue ref
-// int& lr2 = 42;                // ❌ prvalue → lvalue ref
-// int& lr3 = std::move(x);      // ❌ xvalue → lvalue ref
+int& lr1 = x;                    // lvalue → lvalue ref
+// int& lr2 = 42;                // prvalue → lvalue ref
+// int& lr3 = std::move(x);      // xvalue → lvalue ref
 
 // const lvalue references (bind to everything)
-const int& clr1 = x;             // ✅ lvalue
-const int& clr2 = 42;            // ✅ prvalue
-const int& clr3 = std::move(x);  // ✅ xvalue
+const int& clr1 = x;             // lvalue
+const int& clr2 = 42;            // prvalue
+const int& clr3 = std::move(x);  // xvalue
 
 // rvalue references
-// int&& rr1 = x;                // ❌ lvalue → rvalue ref
-int&& rr2 = 42;                  // ✅ prvalue → rvalue ref
-int&& rr3 = std::move(x);        // ✅ xvalue → rvalue ref
+// int&& rr1 = x;                // lvalue → rvalue ref
+int&& rr2 = 42;                  // prvalue → rvalue ref
+int&& rr3 = std::move(x);        // xvalue → rvalue ref
 ```
 
 | Category  | Has Identity | Movable | Binds to T& | Binds to T&& | Binds to const T& |
 |-----------|--------------|---------|-------------|--------------|-------------------|
-| `lvalue`  | ✅ Yes        | ❌ No    | ✅ Yes       | ❌ No         | ✅ Yes             |
-| `prvalue` | ❌ No         | ✅ Yes   | ❌ No        | ✅ Yes        | ✅ Yes             |
-| `xvalue`  | ✅ Yes        | ✅ Yes   | ❌ No        | ✅ Yes        | ✅ Yes             |
+| `lvalue`  | Yes        | No    | Yes       | No         | Yes             |
+| `prvalue` | No         | Yes   | No        | Yes        | Yes             |
+| `xvalue`  | Yes        | Yes   | No        | Yes        | Yes             |
 
 ---
 
@@ -325,7 +325,7 @@ std::move(x).size()  // xvalue (member of xvalue)
 - `const T&` binds to everything
 
 Understanding value categories is essential for:
-- ✅ Move semantics
-- ✅ Perfect forwarding
-- ✅ Overload resolution
-- ✅ Template metaprogramming
+- Move semantics
+- Perfect forwarding
+- Overload resolution
+- Template metaprogramming

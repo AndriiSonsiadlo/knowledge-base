@@ -129,7 +129,7 @@ auto func(bool flag) {
     if (flag)
         return 1;      // int
     else
-        return 2.5;    // ❌ Error: different type (double)
+        return 2.5;    // Error: different type (double)
 }
 ```
 
@@ -176,15 +176,15 @@ auto lambda2 = [ptr = std::make_unique<int>(42)]() {
 ### When auto Helps
 
 ```cpp showLineNumbers 
-// ✅ Verbose without auto
+// Verbose without auto
 std::vector<int>::iterator it = vec.begin();
 std::unordered_map<std::string, std::vector<int>>::iterator it2 = map.begin();
 
-// ✅ Clean with auto
+// Clean with auto
 auto it = vec.begin();
 auto it2 = map.begin();
 
-// ✅ Template return types
+// Template return types
 auto result = std::make_pair(1, "hello");
 auto ptr = std::make_unique<Widget>();
 ```
@@ -192,16 +192,16 @@ auto ptr = std::make_unique<Widget>();
 ### When Explicit Types Help
 
 ```cpp showLineNumbers 
-// ❌ Unclear intent
+// Unclear intent
 auto x = getData();  // What type is x?
 
-// ✅ Clear intent
+// Clear intent
 Widget x = getData();
 
-// ❌ Surprising behavior
+// Surprising behavior
 auto x = {1, 2, 3};  // std::initializer_list<int>, not vector!
 
-// ✅ Explicit
+// Explicit
 std::vector<int> x = {1, 2, 3};
 ```
 
@@ -232,7 +232,7 @@ auto x{1};           // int (C++17)
 std::string getString() { return "hello"; }
 
 auto s = getString();  // Copy (if not RVO)
-auto& s = getString(); // ❌ Error: reference to temporary
+auto& s = getString(); // Error: reference to temporary
 
 // Solution: const reference or move
 const auto& s = getString();  // Extends lifetime
@@ -245,10 +245,10 @@ auto s = std::move(getString());  // Explicit move
 const std::vector<int> vec = {1, 2, 3};
 
 auto copy = vec;      // std::vector<int> (const dropped!)
-copy.push_back(4);    // ✅ OK: copy is non-const
+copy.push_back(4);    // OK: copy is non-const
 
 const auto copy2 = vec;  // const std::vector<int>
-copy2.push_back(4);      // ❌ Error: copy2 is const
+copy2.push_back(4);      // Error: copy2 is const
 ```
 
 ---
@@ -280,10 +280,10 @@ double price = 19.99;
 // All same type
 auto x = 1, y = 2, z = 3;  // All int
 
-// ❌ Different types not allowed
+// Different types not allowed
 auto a = 1, b = 2.5;  // Error: inconsistent deduction
 
-// ❌ Mixed pointers/values
+// Mixed pointers/values
 auto p = &x, v = x;   // Error: int* vs int
 ```
 

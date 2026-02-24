@@ -27,7 +27,7 @@ References to references aren't valid C++:
 int x = 42;
 int& r = x;
 
-// int& & rr = r;  // ❌ Error: reference to reference
+// int& & rr = r;  // Error: reference to reference
 ```
 
 But templates can create them:
@@ -236,7 +236,7 @@ void broken(T&& arg) {
     int x;
     broken(x);  // T = int&
                 // arg type: int& && 
-                // ❌ Error: invalid type!
+                // Error: invalid type!
 }
 ```
 
@@ -250,7 +250,7 @@ void working(T&& arg) {
     int x;
     working(x);  // T = int&
                  // arg type: int& && → int&
-                 // ✅ Valid lvalue reference
+                 // Valid lvalue reference
 }
 ```
 

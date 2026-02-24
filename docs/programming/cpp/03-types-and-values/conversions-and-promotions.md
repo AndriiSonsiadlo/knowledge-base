@@ -71,8 +71,8 @@ double d = 3.14;
 int i = d;          // ⚠️ Truncates fractional part (i = 3)
 
 // Brace initialization prevents narrowing
-int y{3.14};        // ❌ Error: narrowing
-int y = {3.14};     // ❌ Error
+int y{3.14};        // Error: narrowing
+int y = {3.14};     // Error
 int y = 3.14;       // ⚠️ Warning but allowed
 ```
 
@@ -121,7 +121,7 @@ class Base {};
 class Derived : public Base {};
 
 Derived d;
-Base* bp = &d;  // ✅ OK: upcast
+Base* bp = &d;  // OK: upcast
 
 // Base → Derived (requires cast, dangerous)
 Base b;

@@ -20,11 +20,11 @@ Every C++ expression has a type and a **value category**. Lvalues have persisten
 ```cpp showLineNumbers 
 int x = 42;  // x is lvalue, 42 is rvalue
 
-x = 10;      // ✅ OK: lvalue on left
-// 10 = x;   // ❌ Error: rvalue cannot be assigned to
+x = 10;      // OK: lvalue on left
+// 10 = x;   // Error: rvalue cannot be assigned to
 
-int* ptr = &x;     // ✅ OK: can take address of lvalue
-// int* p = &42;   // ❌ Error: cannot take address of rvalue
+int* ptr = &x;     // OK: can take address of lvalue
+// int* p = &42;   // Error: cannot take address of rvalue
 ```
 
 **Lvalue**: Has identity (name/address), persists beyond expression  
@@ -49,11 +49,11 @@ int* ptr = &x;
 
 // Functions returning references are lvalues
 int& getRef() { static int x = 0; return x; }
-getRef() = 100;      // ✅ OK: lvalue
+getRef() = 100;      // OK: lvalue
 
 // String literals are lvalues (special case)
 const char* p = "hello";  // "hello" is lvalue
-&"hello";            // ✅ OK: can take address
+&"hello";            // OK: can take address
 ```
 
 ---
@@ -92,12 +92,12 @@ Bind to lvalues only:
 ```cpp showLineNumbers 
 int x = 42;
 
-int& ref = x;        // ✅ OK: lvalue reference to lvalue
-// int& r2 = 42;     // ❌ Error: cannot bind to rvalue
+int& ref = x;        // OK: lvalue reference to lvalue
+// int& r2 = 42;     // Error: cannot bind to rvalue
 
 // Exception: const lvalue reference binds to anything
-const int& cref1 = x;   // ✅ OK: lvalue
-const int& cref2 = 42;  // ✅ OK: rvalue (lifetime extended!)
+const int& cref1 = x;   // OK: lvalue
+const int& cref2 = 42;  // OK: rvalue (lifetime extended!)
 ```
 
 :::success const& Magic
@@ -113,12 +113,12 @@ Bind to rvalues only:
 ```cpp showLineNumbers 
 int x = 42;
 
-int&& rref1 = 42;        // ✅ OK: rvalue reference to rvalue
-int&& rref2 = x + 1;     // ✅ OK: temporary
-// int&& rref3 = x;      // ❌ Error: cannot bind to lvalue
+int&& rref1 = 42;        // OK: rvalue reference to rvalue
+int&& rref2 = x + 1;     // OK: temporary
+// int&& rref3 = x;      // Error: cannot bind to lvalue
 
 // Convert lvalue to rvalue with std::move
-int&& rref4 = std::move(x);  // ✅ OK: explicit cast
+int&& rref4 = std::move(x);  // OK: explicit cast
 ```
 
 ---
@@ -130,10 +130,10 @@ void process(int&& x) {
     // Inside function, x has a name
     // Therefore x is an LVALUE, even though type is rvalue reference!
     
-    int& lref = x;       // ✅ OK: x is lvalue
-    // int&& rref = x;   // ❌ Error: x is lvalue
+    int& lref = x;       // OK: x is lvalue
+    // int&& rref = x;   // Error: x is lvalue
     
-    int&& rref = std::move(x);  // ✅ OK: explicit cast
+    int&& rref = std::move(x);  // OK: explicit cast
 }
 
 process(42);  // 42 is rvalue, binds to x
@@ -149,24 +149,24 @@ process(42);  // 42 is rvalue, binds to x
 int x = 10;
 
 // Lvalue reference
-int& r1 = x;              // ✅ Lvalue → lvalue ref
-// int& r2 = 42;          // ❌ Rvalue → lvalue ref
+int& r1 = x;              // Lvalue → lvalue ref
+// int& r2 = 42;          // Rvalue → lvalue ref
 
 // Const lvalue reference (universal)
-const int& r3 = x;        // ✅ Lvalue → const lvalue ref
-const int& r4 = 42;       // ✅ Rvalue → const lvalue ref
+const int& r3 = x;        // Lvalue → const lvalue ref
+const int& r4 = 42;       // Rvalue → const lvalue ref
 
 // Rvalue reference
-// int&& r5 = x;          // ❌ Lvalue → rvalue ref
-int&& r6 = 42;            // ✅ Rvalue → rvalue ref
-int&& r7 = std::move(x);  // ✅ Lvalue→rvalue (explicit)
+// int&& r5 = x;          // Lvalue → rvalue ref
+int&& r6 = 42;            // Rvalue → rvalue ref
+int&& r7 = std::move(x);  // Lvalue→rvalue (explicit)
 ```
 
 | Reference Type | Binds to Lvalue | Binds to Rvalue |
 |----------------|-----------------|-----------------|
-| `T&` | ✅ Yes | ❌ No |
-| `const T&` | ✅ Yes | ✅ Yes |
-| `T&&` | ❌ No | ✅ Yes |
+| `T&` | Yes | No |
+| `const T&` | Yes | Yes |
+| `T&&` | No | Yes |
 
 ---
 
@@ -182,11 +182,11 @@ getString();
 
 // Lifetime extended to ref's scope
 const std::string& ref = getString();
-std::cout << ref;  // ✅ OK: still valid
+std::cout << ref;  // OK: still valid
 
 // Also works with rvalue references
 std::string&& rref = getString();
-std::cout << rref;  // ✅ OK: still valid
+std::cout << rref;  // OK: still valid
 ```
 
 ---
@@ -282,11 +282,11 @@ int x = 5;
 ++x;  // Pre-increment: modifies x, returns lvalue (reference to x)
 x++;  // Post-increment: modifies x, returns rvalue (old value copy)
 
-int& r1 = ++x;  // ✅ OK: lvalue
-// int& r2 = x++;  // ❌ Error: rvalue
+int& r1 = ++x;  // OK: lvalue
+// int& r2 = x++;  // Error: rvalue
 
-(++x) = 10;  // ✅ OK: lvalue can be assigned
-// (x++) = 10;  // ❌ Error: rvalue cannot be assigned
+(++x) = 10;  // OK: lvalue can be assigned
+// (x++) = 10;  // Error: rvalue cannot be assigned
 ```
 
 ---
@@ -301,10 +301,10 @@ std::string s2 = "world";
 
 // Temporary from concatenation
 std::string s3 = s1 + s2;  // s1 + s2 is rvalue
-// (s1 + s2).append("!");  // ❌ Can't modify rvalue (pre-C++11)
+// (s1 + s2).append("!");  // Can't modify rvalue (pre-C++11)
 
 // In C++11+, temporaries can be used if class allows
-(s1 + s2).size();  // ✅ OK: const member function
+(s1 + s2).size();  // OK: const member function
 ```
 
 ### Perfect Forwarding
@@ -340,18 +340,18 @@ std::cout << v1.size();  // Undefined! Don't use moved-from objects
 
 ```cpp showLineNumbers 
 const std::string& getDangling() {
-    return "temporary";  // ❌ Returns reference to temporary!
+    return "temporary";  // Returns reference to temporary!
 }
 
 const std::string& ref = getDangling();
-std::cout << ref;  // ❌ Undefined: temporary destroyed
+std::cout << ref;  // Undefined: temporary destroyed
 ```
 
 ### Moving const Objects
 
 ```cpp showLineNumbers 
 const std::vector<int> cv = {1, 2, 3};
-std::vector<int> v2 = std::move(cv);  // ❌ Calls COPY! const prevents move
+std::vector<int> v2 = std::move(cv);  // Calls COPY! const prevents move
 ```
 
 ---

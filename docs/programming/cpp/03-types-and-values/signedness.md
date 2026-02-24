@@ -74,14 +74,14 @@ if (x < y) {  // ⚠️ Danger! x converts to large unsigned
 
 ```cpp showLineNumbers 
 int x = INT_MAX;  // 2147483647
-x++;  // ❌ Undefined behavior!
+x++;  // Undefined behavior!
 ```
 
 ### Unsigned Overflow (Well-Defined)
 
 ```cpp showLineNumbers 
 unsigned int x = UINT_MAX;  // 4294967295
-x++;  // ✅ Wraps to 0 (modulo arithmetic)
+x++;  // Wraps to 0 (modulo arithmetic)
 
 unsigned int y = 0;
 y--;  // Wraps to UINT_MAX
@@ -96,12 +96,12 @@ Unsigned wraps around: 0 - 1 = 2^32 - 1
 ### Negative Loop
 
 ```cpp showLineNumbers 
-// ❌ Infinite loop!
+// Infinite loop!
 for (unsigned int i = 10; i >= 0; i--) {
     // i never < 0 (unsigned!)
 }
 
-// ✅ Fix: use signed
+// Fix: use signed
 for (int i = 10; i >= 0; i--) {
     // Works correctly
 }
@@ -116,7 +116,7 @@ unsigned int b = 10;
 unsigned int diff = a - b;  // ⚠️ Wraps! diff = huge number
 int diff = a - b;           // Still wrong: computes unsigned then converts
 
-// ✅ Fix: cast before subtraction
+// Fix: cast before subtraction
 int diff = static_cast<int>(a) - static_cast<int>(b);  // -5
 ```
 

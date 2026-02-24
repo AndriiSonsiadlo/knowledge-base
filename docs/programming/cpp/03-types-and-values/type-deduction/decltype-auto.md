@@ -139,7 +139,7 @@ decltype(auto) func3() {
 ```cpp showLineNumbers 
 decltype(auto) bad() {
     int x = 42;
-    return (x);  // ❌ Returns int& to local variable!
+    return (x);  // Returns int& to local variable!
 }  // x destroyed, reference dangles
 ```
 :::
@@ -150,10 +150,10 @@ decltype(auto) bad() {
 
 | Syntax | Type Deduced | Preserves Ref | Preserves Const |
 |--------|--------------|---------------|-----------------|
-| `auto x = expr` | Template rules | ❌ No | ❌ No (top-level) |
-| `auto& x = expr` | Template + & | ✅ Yes | ✅ Yes |
-| `decltype(expr) x` | Exact type | ✅ Yes | ✅ Yes |
-| `decltype(auto) x = expr` | decltype rules | ✅ Yes | ✅ Yes |
+| `auto x = expr` | Template rules | No | No (top-level) |
+| `auto& x = expr` | Template + & | Yes | Yes |
+| `decltype(expr) x` | Exact type | Yes | Yes |
+| `decltype(auto) x = expr` | decltype rules | Yes | Yes |
 
 ---
 
@@ -221,32 +221,32 @@ decltype(auto) value = lazy.get();  // int&
 ### Use decltype(auto) When
 
 ```cpp showLineNumbers 
-// ✅ Perfect forwarding return types
+// Perfect forwarding return types
 template<typename T>
 decltype(auto) forward_call(T&& arg) {
     return some_function(std::forward<T>(arg));
 }
 
-// ✅ Preserving reference in generic code
+// Preserving reference in generic code
 template<typename Container>
 decltype(auto) getFirst(Container& c) {
     return c[0];  // Reference if Container returns reference
 }
 
-// ✅ Avoiding type repetition
+// Avoiding type repetition
 decltype(auto) result = complicated_expression();
 ```
 
 ### Use auto When
 
 ```cpp showLineNumbers 
-// ✅ Want a copy
+// Want a copy
 auto copy = vec[0];  // int (copy)
 
-// ✅ Don't want reference
+// Don't want reference
 auto value = get_reference();  // Copy even if returns reference
 
-// ✅ Type is obvious
+// Type is obvious
 auto count = vec.size();  // size_t
 ```
 
@@ -259,7 +259,7 @@ auto count = vec.size();  // size_t
 ```cpp showLineNumbers 
 decltype(auto) getLocal() {
     int x = 42;
-    return (x);  // ❌ Returns int& to local!
+    return (x);  // Returns int& to local!
 }
 ```
 
@@ -281,7 +281,7 @@ b = 10;  // OK: modifies x through reference
 const std::vector<int> cvec = {1, 2, 3};
 
 decltype(auto) elem = cvec[0];  // const int& (preserves const)
-elem = 42;  // ❌ Error: const
+elem = 42;  // Error: const
 ```
 
 ---

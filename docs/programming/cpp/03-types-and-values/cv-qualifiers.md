@@ -20,17 +20,17 @@ CV-qualifiers (`const` and `volatile`) modify type behavior. `const` prevents mo
 
 ```cpp showLineNumbers 
 const int x = 42;
-x = 10;  // ❌ Error: cannot modify const
+x = 10;  // Error: cannot modify const
 
 int y = 100;
-y = 200;  // ✅ OK: not const
+y = 200;  // OK: not const
 ```
 
 ### const Variables Must Initialize
 
 ```cpp showLineNumbers 
-const int x;        // ❌ Error: uninitialized const
-const int y = 42;   // ✅ OK
+const int x;        // Error: uninitialized const
+const int y = 42;   // OK
 ```
 
 ### const with Pointers
@@ -38,18 +38,18 @@ const int y = 42;   // ✅ OK
 ```cpp showLineNumbers 
 // Pointer to const (cannot modify value)
 const int* ptr1 = &x;
-*ptr1 = 10;  // ❌ Error
-ptr1 = &y;   // ✅ OK: can change pointer
+*ptr1 = 10;  // Error
+ptr1 = &y;   // OK: can change pointer
 
 // Const pointer (cannot change pointer)
 int* const ptr2 = &x;
-*ptr2 = 10;  // ✅ OK: can modify value
-ptr2 = &y;   // ❌ Error: cannot change pointer
+*ptr2 = 10;  // OK: can modify value
+ptr2 = &y;   // Error: cannot change pointer
 
 // Const pointer to const (both const)
 const int* const ptr3 = &x;
-*ptr3 = 10;  // ❌ Error
-ptr3 = &y;   // ❌ Error
+*ptr3 = 10;  // Error
+ptr3 = &y;   // Error
 
 // Read right-to-left
 const int* ptr;        // ptr is pointer to const int
@@ -65,12 +65,12 @@ int x = 42;
 
 // const reference (cannot modify through reference)
 const int& ref = x;
-ref = 10;  // ❌ Error
-x = 10;    // ✅ OK: x itself can change
+ref = 10;  // Error
+x = 10;    // OK: x itself can change
 
 // const reference can bind to temporary
-const int& ref2 = 42;  // ✅ OK: lifetime extended
-int& ref3 = 42;        // ❌ Error: non-const ref to temporary
+const int& ref2 = 42;  // OK: lifetime extended
+int& ref3 = 42;        // Error: non-const ref to temporary
 ```
 
 ### const Member Functions
@@ -83,19 +83,19 @@ public:
     
     // const member function (doesn't modify object)
     int getCount() const {
-        // count++;  // ❌ Error: modifies member
+        // count++;  // Error: modifies member
         return count;
     }
     
     // Non-const member function
     void increment() {
-        count++;  // ✅ OK
+        count++;  // OK
     }
 };
 
 const Counter c;
-c.getCount();    // ✅ OK: const function
-c.increment();   // ❌ Error: non-const function on const object
+c.getCount();    // OK: const function
+c.increment();   // Error: non-const function on const object
 ```
 
 ### mutable (Override const)
@@ -107,7 +107,7 @@ class Cache {
     
 public:
     std::string getData() const {
-        access_count++;  // ✅ OK: mutable
+        access_count++;  // OK: mutable
         return data;
     }
 };
@@ -134,8 +134,8 @@ int arr[value];  // OK: value is compile-time constant
 const int x = 10;           // Runtime or compile-time
 constexpr int y = 10;       // Must be compile-time
 
-const int cx = getValue();  // ✅ OK: runtime const
-constexpr int cy = getValue();  // ❌ Error: must be compile-time
+const int cx = getValue();  // OK: runtime const
+constexpr int cy = getValue();  // Error: must be compile-time
 ```
 
 ---
@@ -205,7 +205,7 @@ public:
 
 ```cpp showLineNumbers 
 void process(const std::vector<int>& data) {  // Won't modify
-    // data.push_back(5);  // ❌ Error: const
+    // data.push_back(5);  // Error: const
     
     for (int x : data) {  // OK to read
         std::cout << x;
@@ -232,7 +232,7 @@ int b = a;  // OK: copies value, b is non-const
 
 // Low-level const must match
 const int* p1 = &a;
-int* p2 = p1;  // ❌ Error: discards const
+int* p2 = p1;  // Error: discards const
 ```
 
 ---
