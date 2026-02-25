@@ -325,7 +325,7 @@ public:
 
 ```cpp showLineNumbers 
 void process(const std::string& s) noexcept {
-    std::string copy = s;  // ❌ Might throw bad_alloc!
+    std::string copy = s;  // Might throw bad_alloc!
 }
 // If throws, std::terminate is called
 ```
@@ -398,9 +398,9 @@ class T {
 ```
 
 **Benefits**:
-- ✅ Better performance (10-20% in hot paths)
-- ✅ Smaller binary size
-- ✅ Standard containers use move operations
-- ✅ Stronger exception safety guarantees
+- Better performance (10-20% in hot paths)
+- Smaller binary size
+- Standard containers use move operations
+- Stronger exception safety guarantees
 
 **Cost**: Must ensure function truly doesn't throw, or program terminates.

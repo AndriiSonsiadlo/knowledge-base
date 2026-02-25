@@ -40,41 +40,41 @@ print("hello");  // Calls print(const char*)
 
 Functions can differ by:
 
-✅ **Number of parameters**
+**Number of parameters**
 ```cpp showLineNumbers 
 void func(int x);
 void func(int x, int y);
 ```
 
-✅ **Type of parameters**
+**Type of parameters**
 ```cpp showLineNumbers 
 void func(int x);
 void func(double x);
 ```
 
-✅ **const/volatile qualifiers**
+**const/volatile qualifiers**
 ```cpp showLineNumbers 
 void func(int x);
-void func(const int x);  // ❌ Same (top-level const ignored)
+void func(const int x);  // Same (top-level const ignored)
 
 void func(int* p);
-void func(const int* p);  // ✅ Different (low-level const)
+void func(const int* p);  // Different (low-level const)
 
 void process(std::string& s);      // Lvalue
 void process(const std::string& s); // Lvalue (different)
 void process(std::string&& s);     // Rvalue
 ```
 
-✅ **Reference qualifiers**
+**Reference qualifiers**
 ```cpp showLineNumbers 
 void func(int& x);   // Lvalue reference
 void func(int&& x);  // Rvalue reference
 ```
 
-❌ **Return type only** (not allowed)
+**Return type only** (not allowed)
 ```cpp showLineNumbers 
 int func(int x);
-double func(int x);  // ❌ Error: differs only by return type
+double func(int x);  // Error: differs only by return type
 ```
 
 ---
@@ -124,8 +124,8 @@ print('A');      // char → int promotion → print(int)
 void func(int x, double y);
 void func(double x, int y);
 
-func(42, 3.14);    // ✅ OK: exact match on both
-// func(42, 42);   // ❌ Error: ambiguous!
+func(42, 3.14);    // OK: exact match on both
+// func(42, 42);   // Error: ambiguous!
                    // Both require one conversion
 ```
 
@@ -199,7 +199,7 @@ void func(int arr[10]);   // Still same as int*
 
 // All three are identical - no overloading!
 
-void func(int (&arr)[10]); // ✅ Different: reference to array
+void func(int (&arr)[10]); // Different: reference to array
 ```
 
 ---
@@ -208,7 +208,7 @@ void func(int (&arr)[10]); // ✅ Different: reference to array
 
 ```cpp showLineNumbers 
 void func(int x, int y = 0);
-void func(int x);  // ❌ Error: ambiguous with func(x, 0)
+void func(int x);  // Error: ambiguous with func(x, 0)
 
 // Call
 func(42);  // Which one? Ambiguous!
@@ -342,7 +342,7 @@ Complex c = a + b;  // Calls operator+
 void func(long x);
 void func(double x);
 
-func(42);  // ❌ Ambiguous! int→long and int→double both conversions
+func(42);  // Ambiguous! int→long and int→double both conversions
 ```
 
 ### Pointer/Bool Conversion
@@ -351,7 +351,7 @@ func(42);  // ❌ Ambiguous! int→long and int→double both conversions
 void func(int x);
 void func(bool x);
 
-func(nullptr);  // ❌ Ambiguous in some cases
+func(nullptr);  // Ambiguous in some cases
 ```
 
 ### Forwarding References

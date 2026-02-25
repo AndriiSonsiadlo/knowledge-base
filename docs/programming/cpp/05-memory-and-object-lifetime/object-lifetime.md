@@ -81,8 +81,8 @@ delete ptr;  // 4. Call destructor
 Widget* ptr = new Widget();
 delete ptr;  // Object destroyed
 
-ptr->use();  // ❌ Undefined behavior! Lifetime ended
-*ptr = Widget();  // ❌ UB
+ptr->use();  // Undefined behavior! Lifetime ended
+*ptr = Widget();  // UB
 ```
 
 ---
@@ -140,9 +140,9 @@ getString().size();  // OK: temporary lives for statement
 
 // Reference extends lifetime
 const std::string& ref = getString();  // Temporary lives until ref destroyed
-std::cout << ref;  // ✅ OK
+std::cout << ref;  // OK
 
-// ❌ Dangling reference
+// Dangling reference
 const std::string& bad() {
     return std::string("temp");  // Temporary destroyed!
 }
@@ -272,7 +272,7 @@ std::vector<int> v2 = std::move(v1);
 // v1 is still alive (lifetime continues)
 // But in valid-but-unspecified state
 
-// ✅ Can assign or destroy
+// Can assign or destroy
 v1 = {4, 5, 6};  // OK
 // v1 destroyed normally
 
@@ -289,7 +289,7 @@ std::cout << v1.size();  // Technically OK but don't rely on value
 ```cpp showLineNumbers 
 Widget* ptr = new Widget();
 delete ptr;
-ptr->method();  // ❌ Lifetime ended
+ptr->method();  // Lifetime ended
 ```
 
 ### Dangling Reference
@@ -297,7 +297,7 @@ ptr->method();  // ❌ Lifetime ended
 ```cpp showLineNumbers 
 Widget& getRef() {
     Widget w;
-    return w;  // ❌ Returns reference to destroyed object
+    return w;  // Returns reference to destroyed object
 }
 ```
 
@@ -306,7 +306,7 @@ Widget& getRef() {
 ```cpp showLineNumbers 
 Widget* ptr = new Widget();
 delete ptr;
-delete ptr;  // ❌ Lifetime already ended
+delete ptr;  // Lifetime already ended
 ```
 
 ### Accessing Before Construction
@@ -342,12 +342,12 @@ void example() {
     std::string s = "hello";
     View v(s);  // v depends on s
     
-    v.print();  // ✅ OK
+    v.print();  // OK
 }  // s destroyed AFTER v (reverse construction order)
 
 void broken() {
-    View v(std::string("temp"));  // ❌ Temporary destroyed!
-    v.print();  // ❌ data dangles
+    View v(std::string("temp"));  // Temporary destroyed!
+    v.print();  // data dangles
 }
 ```
 
@@ -387,9 +387,9 @@ wrapper(std::string("temp")); // Forwards rvalue
 
 **Lifetime bugs**:
 ```cpp showLineNumbers 
-delete ptr; ptr->use();  // ❌ Use after free
-return local;            // ❌ Return local by reference
-delete p; delete p;      // ❌ Double delete
+delete ptr; ptr->use();  // Use after free
+return local;            // Return local by reference
+delete p; delete p;      // Double delete
 ```
 
 **Best practices**:

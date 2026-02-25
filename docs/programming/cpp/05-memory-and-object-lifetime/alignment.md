@@ -23,8 +23,8 @@ CPUs read memory in chunks (4/8/16 bytes). Aligned data = one read. Misaligned =
 Memory:  [0][1][2][3][4][5][6][7]
          └─────────┘ 4-byte read
 
-Aligned int at [0]:     One read ✅
-Misaligned int at [1]:  Two reads ❌ (slower)
+Aligned int at [0]:     One read
+Misaligned int at [1]:  Two reads (slower)
 ```
 
 **Performance impact**: 2-10x slower for misaligned access on x86-64.
@@ -146,14 +146,14 @@ load_simd(unaligned);  // Multiple instructions + shuffles
 
 ## Optimal Struct Layout
 ```cpp showLineNumbers
-// ❌ Poor: 24 bytes (7 bytes wasted)
+// Poor: 24 bytes (7 bytes wasted)
 struct Poor {
     char a;      // 1 + 7 padding
     double b;    // 8
     char c;      // 1 + 7 padding
 };
 
-// ✅ Better: 16 bytes (6 bytes wasted)
+// Better: 16 bytes (6 bytes wasted)
 struct Better {
     double b;    // 8
     char a;      // 1
@@ -161,7 +161,7 @@ struct Better {
     // 6 bytes padding
 };
 
-// ✅ Best: 16 bytes (6 bytes used)
+// Best: 16 bytes (6 bytes used)
 struct Best {
     double b;    // 8
     int i;       // 4

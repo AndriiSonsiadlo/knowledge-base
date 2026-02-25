@@ -45,7 +45,7 @@ Point p = {10, 20};  // x=10, y=20 (declaration order)
 struct Point { int x, y; };
 struct Line { Point start, end; };
 
-Line line = {{0, 0}, {10, 20}};  // ✅ Clear structure
+Line line = {{0, 0}, {10, 20}};  // Clear structure
 
 // Can omit inner braces (less clear)
 Line line2 = {0, 0, 10, 20};  // Works but confusing
@@ -86,19 +86,19 @@ Config cfg = {.timeout = 5000, .debug_mode = true};
 
 ## Aggregate Requirements
 ```cpp showLineNumbers
-// ✅ Aggregate
+// Aggregate
 struct Good {
     int a;
     double b;
 };
 
-// ❌ Has constructor
+// Has constructor
 struct Bad1 {
     int a;
     Bad1(int x) : a(x) {}
 };
 
-// ❌ Has private members
+// Has private members
 struct Bad2 {
 private:
     int a;
@@ -106,12 +106,12 @@ public:
     int b;
 };
 
-// ❌ Has base class
+// Has base class
 struct Bad3 : Good {
     int c;
 };
 
-// ❌ Has virtual function
+// Has virtual function
 struct Bad4 {
     int a;
     virtual void func() {}
@@ -142,7 +142,7 @@ struct Widget {
     int c;
 };
 
-Widget w = {1, 2};  // {1, 2, 0} - c is zeroed ✅
+Widget w = {1, 2};  // {1, 2, 0} - c is zeroed
 ```
 
 **Safety**: Unspecified members value-initialized (zero for fundamentals).

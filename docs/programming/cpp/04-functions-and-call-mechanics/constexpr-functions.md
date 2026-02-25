@@ -22,7 +22,7 @@ constexpr int x = 42;
 constexpr double pi = 3.14159;
 
 // Use in compile-time contexts
-int arr[x];  // ✅ OK: x is compile-time constant
+int arr[x];  // OK: x is compile-time constant
 ```
 
 ---
@@ -37,7 +37,7 @@ constexpr int square(int x) {
 
 // Compile-time evaluation
 constexpr int result = square(5);  // Computed at compile-time
-int arr[result];  // ✅ OK: result is compile-time constant
+int arr[result];  // OK: result is compile-time constant
 
 // Can also run at runtime
 int n = 10;
@@ -58,7 +58,7 @@ constexpr int factorial(int n) {
     return n <= 1 ? 1 : n * factorial(n - 1);  // Only recursion
 }
 
-// ❌ Not allowed in C++11:
+// Not allowed in C++11:
 // - Local variables
 // - Multiple statements
 // - Loops
@@ -116,18 +116,18 @@ const int x = 10;           // Compile-time
 const int y = getValue();   // Runtime (depends on getValue)
 
 // constexpr: MUST be compile-time constant
-constexpr int a = 10;              // ✅ OK
-constexpr int b = getValue();      // ❌ Error if getValue not constexpr
+constexpr int a = 10;              // OK
+constexpr int b = getValue();      // Error if getValue not constexpr
 
 // In practice
 const int size1 = 10;
-int arr1[size1];  // ✅ OK (const works here)
+int arr1[size1];  // OK (const works here)
 
 const int size2 = getValue();
-int arr2[size2];  // ❌ Error: not compile-time constant
+int arr2[size2];  // Error: not compile-time constant
 
 constexpr int size3 = 10;
-int arr3[size3];  // ✅ OK (guaranteed compile-time)
+int arr3[size3];  // OK (guaranteed compile-time)
 ```
 
 **Rule**: `constexpr` is always compile-time; `const` might be runtime.
@@ -155,7 +155,7 @@ constexpr Point p(3, 4);
 constexpr int dist = p.distanceSquared();  // 25 at compile-time
 
 // Use in constant expressions
-int arr[dist];  // ✅ OK: array of 25 elements
+int arr[dist];  // OK: array of 25 elements
 ```
 
 ---
@@ -184,22 +184,22 @@ int result2 = compute(n);  // Evaluated at runtime (n not known)
 ## Requirements for constexpr Functions
 
 ```cpp showLineNumbers 
-// ✅ OK
+// OK
 constexpr int good(int x) {
     return x * 2;  // Simple computation
 }
 
-// ❌ Not OK
+// Not OK
 constexpr int bad1(int x) {
-    static int counter = 0;  // ❌ Static local variables
+    static int counter = 0;  // Static local variables
     return x + counter++;
 }
 
 constexpr int bad2() {
-    return rand();  // ❌ rand() not constexpr
+    return rand();  // rand() not constexpr
 }
 
-// C++11 ❌, C++14+ ✅
+// C++11, C++14+
 constexpr int maybe(int x) {
     int result = 0;  // Local variable
     for (int i = 0; i < x; ++i) {
@@ -273,7 +273,7 @@ constexpr bool is_valid_port(int port) {
 }
 
 static_assert(is_valid_port(8080), "Port must be valid");
-// static_assert(is_valid_port(70000), "Invalid"); // ❌ Compile error
+// static_assert(is_valid_port(70000), "Invalid"); // Compile error
 ```
 
 ---
@@ -287,10 +287,10 @@ consteval int must_be_compile_time(int x) {
     return x * x;
 }
 
-constexpr int result1 = must_be_compile_time(5);  // ✅ OK: compile-time
+constexpr int result1 = must_be_compile_time(5);  // OK: compile-time
 
 int n = 5;
-int result2 = must_be_compile_time(n);  // ❌ Error: runtime argument
+int result2 = must_be_compile_time(n);  // Error: runtime argument
 ```
 
 **Difference**: `constexpr` can be runtime, `consteval` must be compile-time.
@@ -349,10 +349,10 @@ switch (compute_hash(input)) {
 
 ```cpp showLineNumbers 
 constexpr int divide(int a, int b) {
-    return a / b;  // ❌ UB if b is 0
+    return a / b;  // UB if b is 0
 }
 
-// constexpr int x = divide(10, 0);  // ❌ Compile error (UB detected)
+// constexpr int x = divide(10, 0);  // Compile error (UB detected)
 ```
 
 ### Non-constexpr Dependencies
@@ -361,13 +361,13 @@ constexpr int divide(int a, int b) {
 int global = 42;
 
 constexpr int bad() {
-    return global;  // ❌ Error: global not constexpr
+    return global;  // Error: global not constexpr
 }
 
 constexpr int global_constexpr = 42;
 
 constexpr int good() {
-    return global_constexpr;  // ✅ OK
+    return global_constexpr;  // OK
 }
 ```
 
@@ -376,10 +376,10 @@ constexpr int good() {
 ```cpp showLineNumbers 
 constexpr int x = 42;
 
-constexpr int* ptr = &x;  // ❌ Error: address not compile-time constant
+constexpr int* ptr = &x;  // Error: address not compile-time constant
                           // (except in constexpr context)
 
-constexpr const int* ptr2 = &x;  // ❌ Still problematic
+constexpr const int* ptr2 = &x;  // Still problematic
 ```
 
 ---

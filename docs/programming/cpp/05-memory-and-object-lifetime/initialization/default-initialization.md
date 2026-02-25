@@ -19,13 +19,13 @@ Local fundamental types (int, double, pointers) = indeterminate values = undefin
 ### Automatic Storage (Local Variables)
 ```cpp showLineNumbers
 void function() {
-    int x;        // Indeterminate value ❌
-    double d;     // Indeterminate value ❌
-    int* ptr;     // Indeterminate pointer ❌
+    int x;        // Indeterminate value
+    double d;     // Indeterminate value
+    int* ptr;     // Indeterminate pointer
     
-    std::cout << x;    // ❌ UB: reading garbage
-    std::cout << d;    // ❌ UB
-    *ptr = 42;         // ❌ UB: pointer points nowhere
+    std::cout << x;    // UB: reading garbage
+    std::cout << d;    // UB
+    *ptr = 42;         // UB: pointer points nowhere
 }
 ```
 
@@ -33,15 +33,15 @@ void function() {
 
 ### Static Storage (Globals/Static)
 ```cpp showLineNumbers
-int global;              // Zero-initialized ✅
-static int file_static;  // Zero-initialized ✅
+int global;              // Zero-initialized
+static int file_static;  // Zero-initialized
 
 void function() {
-    static int local_static;  // Zero-initialized ✅
+    static int local_static;  // Zero-initialized
     
-    std::cout << global;        // ✅ Safe: 0
-    std::cout << file_static;   // ✅ Safe: 0
-    std::cout << local_static;  // ✅ Safe: 0
+    std::cout << global;        // Safe: 0
+    std::cout << file_static;   // Safe: 0
+    std::cout << local_static;  // Safe: 0
 }
 ```
 
@@ -51,8 +51,8 @@ void function() {
 
 | Storage | Scope | Initialization | Lifetime |
 |---------|-------|---------------|----------|
-| **Automatic** | Local | Indeterminate ❌ | Block scope |
-| **Static** | Global/Static | Zero ✅ | Program lifetime |
+| **Automatic** | Local | Indeterminate No | Block scope |
+| **Static** | Global/Static | Zero Yes | Program lifetime |
 
 ## Class Types
 
@@ -64,7 +64,7 @@ public:
     Widget() : value(42) {}  // Default constructor
 };
 
-Widget w;  // Calls Widget() ✅
+Widget w;  // Calls Widget()
 // w.value guaranteed to be 42
 ```
 
@@ -72,21 +72,21 @@ Widget w;  // Calls Widget() ✅
 
 ### Implicit Default Constructor
 ```cpp showLineNumbers
-// ❌ Dangerous
+// Dangerous
 class Point {
     int x, y;  // No constructor
 };
 
-Point p;  // x, y indeterminate! ❌
+Point p;  // x, y indeterminate!
 
-// ✅ Safe
+// Safe
 class SafePoint {
     int x, y;
 public:
     SafePoint() : x(0), y(0) {}  // Explicit init
 };
 
-SafePoint sp;  // x=0, y=0 ✅
+SafePoint sp;  // x=0, y=0
 ```
 
 **Lesson**: Compiler-generated default constructor doesn't initialize fundamental members.
@@ -99,8 +99,8 @@ public:
     File(const char* filename) { /* open file */ }
 };
 
-// File f;  // ❌ Error: default constructor deleted
-File f("data.txt");  // ✅ Must provide filename
+// File f;  // Error: default constructor deleted
+File f("data.txt");  // Must provide filename
 ```
 
 **Use**: Force required parameters at construction.
@@ -108,12 +108,12 @@ File f("data.txt");  // ✅ Must provide filename
 ## Arrays
 ```cpp showLineNumbers
 void function() {
-    int arr[10];  // All elements indeterminate ❌
-    std::cout << arr[0];  // ❌ UB
+    int arr[10];  // All elements indeterminate
+    std::cout << arr[0];  // UB
 }
 
-static int global_arr[10];  // All zeros ✅
-std::cout << global_arr[0];  // ✅ Safe: 0
+static int global_arr[10];  // All zeros
+std::cout << global_arr[0];  // Safe: 0
 ```
 
 ### Class Type Arrays
@@ -123,28 +123,28 @@ public:
     Widget() { std::cout << "Constructed\n"; }
 };
 
-Widget arr[3];  // Calls Widget() three times ✅
+Widget arr[3];  // Calls Widget() three times
 // All elements properly initialized
 ```
 
 ## Member Variables
 ```cpp showLineNumbers
-// ❌ Bad
+// Bad
 class Bad {
     int value;  // Not initialized!
 public:
     Bad() {}  // Constructor doesn't init value
     
-    int getValue() { return value; }  // ❌ Returns garbage
+    int getValue() { return value; }  // Returns garbage
 };
 
-// ✅ Good
+// Good
 class Good {
     int value;
 public:
     Good() : value(0) {}  // Initializer list
     
-    int getValue() { return value; }  // ✅ Returns 0
+    int getValue() { return value; }  // Returns 0
 };
 ```
 
@@ -169,13 +169,13 @@ public:
 graph TD
     A["Default Initialization"] --> B{"Storage?"}
     B -->|Automatic| C{"Type?"}
-    B -->|Static| D["Zero-initialized ✅"]
+    B -->|Static| D["Zero-initialized"]
     
-    C -->|Fundamental| E["Indeterminate ❌"]
+    C -->|Fundamental| E["Indeterminate"]
     C -->|Class| F{"Has constructor?"}
     
-    F -->|Yes| G["Constructor called ✅"]
-    F -->|No| H["Members indeterminate ❌"]
+    F -->|Yes| G["Constructor called"]
+    F -->|No| H["Members indeterminate"]
 ```
 
 ## Best Practices
@@ -198,10 +198,10 @@ graph TD
 
 :::info Default Initialization - Key Points
 **Storage-Dependent Behavior:**
-- **Automatic (local)**: Fundamentals = indeterminate (UB if read) ❌
-- **Static/global**: Always zero-initialized ✅
+- **Automatic (local)**: Fundamentals = indeterminate (UB if read)
+- **Static/global**: Always zero-initialized
 - **Class with constructor**: Calls default constructor
-- **Class without constructor**: Members stay indeterminate ❌
+- **Class without constructor**: Members stay indeterminate
 
 **Critical Rules:**
 - Never read uninitialized local variables

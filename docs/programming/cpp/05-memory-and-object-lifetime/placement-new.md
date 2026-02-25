@@ -21,9 +21,9 @@ Placement new = constructor call on existing memory. You manage memory separatel
 alignas(int) char buffer[sizeof(int)];  // Pre-allocated memory
 
 int* p = new (buffer) int(42);          // Construct at buffer
-std::cout << *p;                        // ✅ Works: 42
+std::cout << *p;                        // Works: 42
 
-p->~int();                              // ✅ Explicit destructor
+p->~int();                              // Explicit destructor
 // Don't delete p! Memory not from new
 ```
 
@@ -38,18 +38,18 @@ public:
     ~Widget() { std::cout << "~Widget\n"; }
 };
 
-// ✅ Correct: properly sized and aligned
+// Correct: properly sized and aligned
 alignas(Widget) char buffer[sizeof(Widget)];
 Widget* w = new (buffer) Widget(42);
 w->~Widget();
 
-// ❌ Wrong: too small
+// Wrong: too small
 char tiny[1];
-Widget* bad = new (tiny) Widget(42);    // ❌ Buffer overflow!
+Widget* bad = new (tiny) Widget(42);    // Buffer overflow!
 
-// ❌ Wrong: misaligned
+// Wrong: misaligned
 char unaligned[sizeof(Widget)];
-Widget* bad = new (unaligned) Widget(42); // ❌ May crash!
+Widget* bad = new (unaligned) Widget(42); // May crash!
 ```
 
 **Requirements**:
@@ -68,10 +68,10 @@ public:
 alignas(Resource) char buffer[sizeof(Resource)];
 
 Resource* r = new (buffer) Resource();  // Construct
-r->~Resource();                         // ✅ Explicit destructor
+r->~Resource();                         // Explicit destructor
 // buffer memory still exists, object destroyed
 
-// ❌ WRONG
+// WRONG
 delete r;  // Crash! buffer not from new
 ```
 
@@ -147,24 +147,24 @@ w2->~Widget();  // Destructs only (memory still exists)
 
 ## Common Mistakes
 ```cpp showLineNumbers
-// ❌ 1. Calling delete on placement new
+// 1. Calling delete on placement new
 alignas(Widget) char buffer[sizeof(Widget)];
 Widget* w = new (buffer) Widget();
-delete w;  // ❌ UB! buffer not from new
+delete w;  // UB! buffer not from new
 
-// ❌ 2. Buffer too small
+// 2. Buffer too small
 char small[1];
-Widget* w = new (small) Widget();  // ❌ Overflow
+Widget* w = new (small) Widget();  // Overflow
 
-// ❌ 3. Forgetting destructor
+// 3. Forgetting destructor
 {
     alignas(Widget) char buffer[sizeof(Widget)];
     Widget* w = new (buffer) Widget();
-}  // ❌ Destructor never called - leak!
+}  // Destructor never called - leak!
 
-// ❌ 4. Reusing without destroying
+// 4. Reusing without destroying
 Widget* w1 = new (buffer) Widget(1);
-Widget* w2 = new (buffer) Widget(2);  // ❌ Didn't destroy w1!
+Widget* w2 = new (buffer) Widget(2);  // Didn't destroy w1!
 ```
 
 ## Array Placement

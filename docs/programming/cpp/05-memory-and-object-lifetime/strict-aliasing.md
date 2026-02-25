@@ -21,7 +21,7 @@ Access object storage only through compatible pointer types. Incompatible access
 int x = 42;
 float* fp = reinterpret_cast<float*>(&x);
 
-*fp = 3.14f;  // ❌ UB: accessing int through float*
+*fp = 3.14f;  // UB: accessing int through float*
 // Compiler assumes int* and float* never alias
 // May optimize based on this assumption
 ```
@@ -50,20 +50,20 @@ Specific exceptions for practical programming:
 struct Widget { int x; };
 Widget w;
 
-// ✅ Same type
+// Same type
 Widget* wp = &w;
 
-// ✅ char*/unsigned char* can alias anything
+// char*/unsigned char* can alias anything
 char* cp = (char*)&w;  // Byte access
 
-// ✅ void* can alias anything
+// void* can alias anything
 void* vp = &w;  // Generic pointer
 
-// ✅ Signed/unsigned variants
+// Signed/unsigned variants
 int x;
 unsigned* up = (unsigned*)&x;
 
-// ✅ Base and derived (inheritance)
+// Base and derived (inheritance)
 struct Derived : Base {};
 Derived d;
 Base* bp = &d;
@@ -96,7 +96,7 @@ Three portable methods:
 int x = 42;
 float f;
 
-std::memcpy(&f, &x, sizeof(float));  // ✅ Safe reinterpretation
+std::memcpy(&f, &x, sizeof(float));  // Safe reinterpretation
 // Compiler optimizes to simple copy - no actual function call
 ```
 
@@ -107,7 +107,7 @@ std::memcpy(&f, &x, sizeof(float));  // ✅ Safe reinterpretation
 #include <bit>
 
 int x = 42;
-float f = std::bit_cast<float>(x);  // ✅ Type-safe, constexpr
+float f = std::bit_cast<float>(x);  // Type-safe, constexpr
 
 // Compile-time checks:
 static_assert(sizeof(int) == sizeof(float));  // Same size
@@ -125,7 +125,7 @@ union IntFloat {
 
 IntFloat u;
 u.i = 42;
-float f = u.f;  // ✅ Allowed (implementation-defined)
+float f = u.f;  // Allowed (implementation-defined)
 // Some compilers warn - memcpy more portable
 ```
 
@@ -133,35 +133,35 @@ float f = u.f;  // ✅ Allowed (implementation-defined)
 
 ## Common Violations
 ```cpp showLineNumbers
-// ❌ Classic violation
+// Classic violation
 int x = 42;
 float* fp = (float*)&x;
 *fp = 3.14f;  // UB
 
-// ❌ Array trick (still UB)
+// Array trick (still UB)
 int arr[1] = {42};
 float* fp = (float*)arr;
 float f = *fp;  // UB
 
-// ❌ Reinterpret cast
+// Reinterpret cast
 int x = 42;
 float f = *reinterpret_cast<float*>(&x);  // UB
 ```
 
 ## Real-World Example
 ```cpp showLineNumbers
-// ❌ Wrong: inspecting struct bytes
+// Wrong: inspecting struct bytes
 struct Data { int x; float y; };
 Data d;
-int* ip = (int*)&d.y;  // ❌ UB: accessing float through int*
+int* ip = (int*)&d.y;  // UB: accessing float through int*
 
-// ✅ Right: use char* for byte access
+// Right: use char* for byte access
 char* bytes = (char*)&d;
 for (size_t i = 0; i < sizeof(d); ++i) {
-    process_byte(bytes[i]);  // ✅ char* exception
+    process_byte(bytes[i]);  // char* exception
 }
 
-// ✅ Right: use memcpy
+// Right: use memcpy
 float y_copy;
 std::memcpy(&y_copy, &d.y, sizeof(float));
 ```
@@ -170,10 +170,10 @@ std::memcpy(&y_copy, &d.y, sizeof(float));
 
 | Method | Standard | Portable | Performance | Use |
 |--------|----------|----------|-------------|-----|
-| **Pointer cast** | ❌ UB | ❌ No | ⚠️ Breaks | Never |
-| **memcpy** | ✅ C++11 | ✅ Yes | ✅ Fast | Default |
-| **bit_cast** | ✅ C++20 | ✅ Yes | ✅ Fast | Modern |
-| **Union** | ⚠️ Ext | ⚠️ Mostly | ✅ Fast | Legacy |
+| **Pointer cast** | UB | No | ⚠️ Breaks | Never |
+| **memcpy** | C++11 | Yes | Fast | Default |
+| **bit_cast** | C++20 | Yes | Fast | Modern |
+| **Union** | ⚠️ Ext | ⚠️ Mostly | Fast | Legacy |
 
 ## Compiler Flags
 ```bash
@@ -191,12 +191,12 @@ g++ -O2 -fsanitize=undefined code.cpp
 ```mermaid
 graph TD
     A[Need to reinterpret bits?] -->|Yes| B[C++20 available?]
-    B -->|Yes| C["std::bit_cast ✅"]
-    B -->|No| D["std::memcpy ✅"]
+    B -->|Yes| C["std::bit_cast"]
+    B -->|No| D["std::memcpy"]
     
     A -->|No| E[Just use normal code]
     
-    F[Pointer cast] -->|Never| G["❌ UB"]
+    F[Pointer cast] -->|Never| G["UB"]
 ```
 
 ## Summary
@@ -222,15 +222,15 @@ graph TD
 - **Inheritance**: Base class pointer to derived object
 
 **Common Violations:**
-- Pointer cast type punning: `(float*)&int_var` ❌
-- Array trick: `(float*)int_array` ❌
+- Pointer cast type punning: `(float*)&int_var`
+- Array trick: `(float*)int_array`
 - Union type punning: Technically implementation-defined
 
 **Safe Type Punning Methods:**
-- **`std::memcpy`** (C++11): Always safe, optimizes well ✅
-- **`std::bit_cast`** (C++20): Type-safe, constexpr ✅
+- **`std::memcpy`** (C++11): Always safe, optimizes well
+- **`std::bit_cast`** (C++20): Type-safe, constexpr
 - **Union**: Implementation-defined (mostly works) ⚠️
-- **Never**: Pointer casts (`reinterpret_cast` for punning) ❌
+- **Never**: Pointer casts (`reinterpret_cast` for punning)
 
 **Consequences of Violation:**
 - Debug build: Often works (no optimization)

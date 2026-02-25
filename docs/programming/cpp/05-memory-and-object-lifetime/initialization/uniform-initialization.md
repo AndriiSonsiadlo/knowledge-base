@@ -28,7 +28,7 @@ int a{5};
 int b{5};
 int c[]{1, 2, 3};
 Widget w{10};
-std::vector<int> v{1, 2, 3};  // ✅ Direct!
+std::vector<int> v{1, 2, 3};  // Direct!
 ```
 
 ## Basic Syntax
@@ -53,11 +53,11 @@ double d = 1000000;
 int i = d;       // ⚠️ OK but dangerous
 
 // Braces: compile error
-int y{3.14};     // ❌ Error: narrowing
-int j{d};        // ❌ Error: narrowing
+int y{3.14};     // Error: narrowing
+int j{d};        // Error: narrowing
 
 char c = 1000;   // ⚠️ OK but truncated
-char d{1000};    // ❌ Error: narrowing
+char d{1000};    // Error: narrowing
 ```
 
 **Benefit**: Catches bugs at compile-time, not runtime.
@@ -80,10 +80,10 @@ std::vector<int> v{};  // Default constructor
 ## Solves Most Vexing Parse
 ```cpp showLineNumbers
 // Pre-C++11
-Widget w();  // ❌ Function declaration, not object!
+Widget w();  // Function declaration, not object!
 
 // C++11
-Widget w{};  // ✅ Unambiguous: creates object
+Widget w{};  // Unambiguous: creates object
 ```
 
 **Fix**: Braces cannot declare functions, always create objects.
@@ -161,7 +161,7 @@ std::string s = {"hello"};
 std::vector<int> v = {1, 2, 3};
 
 // Still prevents narrowing
-int y = {3.14};  // ❌ Error
+int y = {3.14};  // Error
 ```
 
 ## Quick Decision Guide
@@ -193,7 +193,7 @@ graph TD
 std::vector<int> v{10};  // ONE element, not size!
 
 // 2. Narrowing errors (feature, not bug)
-int x{3.14};  // ❌ Error (this is good!)
+int x{3.14};  // Error (this is good!)
 
 // 3. Empty braces call default constructor
 Widget w{};  // Calls Widget(), not Widget(initializer_list)
@@ -210,14 +210,14 @@ Widget w{};  // Calls Widget(), not Widget(initializer_list)
 - Empty braces: `int x{};` → zero-initialized
 
 **Key Safety Features:**
-- **Prevents narrowing**: `int x{3.14};` → compile error ✅
+- **Prevents narrowing**: `int x{3.14};` → compile error
 - Catches data loss at compile-time (not runtime)
 - Forces explicit casts for type conversions
 - Safer than traditional `=` or `()` syntax
 
 **Solves Language Gotchas:**
 - **Most vexing parse**: `Widget w{};` unambiguously creates object
-- Traditional: `Widget w();` declares function ❌
+- Traditional: `Widget w();` declares function
 - **Direct container init**: No more verbose push_back loops
 
 **Initializer List Priority:**

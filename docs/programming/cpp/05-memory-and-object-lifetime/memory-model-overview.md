@@ -203,42 +203,42 @@ Deallocation:
 
 ### Use Stack When:
 ```cpp showLineNumbers
-// ✅ Small objects
+// Small objects
 int x = 42;
 std::array<int, 100> arr;
 
-// ✅ Scope-limited lifetime
+// Scope-limited lifetime
 {
     Widget w;
 }  // Destroyed automatically
 
-// ✅ Performance-critical code
+// Performance-critical code
 void hotPath() {
     int temp[16];  // Stack is faster
     process(temp);
 }
 
-// ✅ RAII objects
+// RAII objects
 std::lock_guard<std::mutex> lock(mtx);  // Automatic unlock
 ```
 
 ### Use Heap When:
 ```cpp showLineNumbers
-// ✅ Large objects (exceed stack size)
+// Large objects (exceed stack size)
 int* huge = new int[1000000];  // 4 MB
 
-// ✅ Runtime-determined size
+// Runtime-determined size
 int* arr = new int[userInput];
 
-// ✅ Lifetime beyond scope
+// Lifetime beyond scope
 Widget* create() {
     return new Widget();  // Outlives function
 }
 
-// ✅ Polymorphism
+// Polymorphism
 Base* ptr = new Derived();  // Dynamic type
 
-// ✅ Shared ownership
+// Shared ownership
 std::shared_ptr<Resource> shared = std::make_shared<Resource>();
 ```
 
@@ -268,7 +268,7 @@ void heapBenchmark() {
 
 ### Stack Overflow
 ```cpp showLineNumbers
-// ❌ Stack overflow causes
+// Stack overflow causes
 void recursiveBomb() {
     recursiveBomb();  // Infinite recursion
 }
@@ -309,19 +309,19 @@ char* c = new char[150];  // Allocated elsewhere
 
 ### Memory Leaks
 ```cpp showLineNumbers
-// ❌ Leak
+// Leak
 void leak() {
     int* ptr = new int(42);
     // Never deleted!
 }
 
-// ✅ RAII solution
+// RAII solution
 void noLeak() {
     std::unique_ptr<int> ptr = std::make_unique<int>(42);
     // Automatically deleted
 }
 
-// ✅ Smart pointer for arrays
+// Smart pointer for arrays
 void arraySafe() {
     std::vector<int> vec(1000);  // Manages heap internally
     // Automatic cleanup

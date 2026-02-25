@@ -17,9 +17,9 @@ Every `new` requires exactly one `delete`. Missing = leak. Double = crash. Moder
 ## Basic Usage
 ```cpp showLineNumbers
 // Allocation + construction
-int* p = new int;           // Uninitialized ❌
-int* p = new int();         // Zero-initialized ✅
-int* p = new int{42};       // Direct initialization ✅
+int* p = new int;           // Uninitialized
+int* p = new int();         // Zero-initialized
+int* p = new int{42};       // Direct initialization
 
 delete p;                   // Deallocation + destruction
 p = nullptr;                // Prevent dangling pointer
@@ -31,12 +31,12 @@ p = nullptr;                // Prevent dangling pointer
 ```cpp showLineNumbers
 // Array allocation
 int* arr = new int[10];     // Allocate 10 ints
-int* arr = new int[10]();   // All zeros ✅
-int* arr = new int[10]{1,2,3}; // Partial init {1,2,3,0...0} ✅
+int* arr = new int[10]();   // All zeros
+int* arr = new int[10]{1,2,3}; // Partial init {1,2,3,0...0}
 
-delete[] arr;               // ✅ Array delete
+delete[] arr;               // Array delete
 
-// ❌ WRONG
+// WRONG
 delete arr;                 // Undefined behavior! Use delete[]
 ```
 
@@ -48,13 +48,13 @@ delete arr;                 // Undefined behavior! Use delete[]
 ```cpp showLineNumbers
 void leak() {
     int* p = new int(42);
-    return;                 // ❌ Forgot delete - memory leaked
+    return;                 // Forgot delete - memory leaked
 }
 
-// ✅ Fix with RAII
+// Fix with RAII
 void safe() {
     auto p = std::make_unique<int>(42);
-    return;                 // ✅ Auto-deleted
+    return;                 // Auto-deleted
 }
 ```
 
@@ -62,20 +62,20 @@ void safe() {
 ```cpp showLineNumbers
 int* p = new int(42);
 delete p;
-delete p;                   // ❌ Undefined behavior - heap corrupted
+delete p;                   // Undefined behavior - heap corrupted
 
-// ✅ Safe pattern
+// Safe pattern
 delete p;
 p = nullptr;
-delete p;                   // ✅ OK: deleting nullptr is no-op
+delete p;                   // OK: deleting nullptr is no-op
 ```
 
 ### Use After Free
 ```cpp showLineNumbers
 int* p = new int(42);
 delete p;
-*p = 10;                    // ❌ Undefined behavior - accessing freed memory
-std::cout << *p;            // ❌ May crash, return garbage, or "work"
+*p = 10;                    // Undefined behavior - accessing freed memory
+std::cout << *p;            // May crash, return garbage, or "work"
 ```
 
 ## Allocation Failure
@@ -106,16 +106,16 @@ if (!p) {
 
 ## Modern Alternatives
 ```cpp showLineNumbers
-// ❌ Old style (manual management)
+// Old style (manual management)
 Widget* w = new Widget();
 // ... use w ...
 delete w;
 
-// ✅ Modern (automatic management)
+// Modern (automatic management)
 auto w = std::make_unique<Widget>();
 // Auto-deleted when out of scope
 
-// ✅ Shared ownership
+// Shared ownership
 auto shared = std::make_shared<Widget>();
 // Deleted when last reference dies
 ```
@@ -127,22 +127,22 @@ auto shared = std::make_shared<Widget>();
 // Resource leak with early return
 void dangerous() {
     int* p = new int(42);
-    if (error) return;      // ❌ Leaks p
+    if (error) return;      // Leaks p
     delete p;
 }
 
 // Exception safety
 void risky() {
     int* p = new int(42);
-    might_throw();          // ❌ If throws, p leaks
+    might_throw();          // If throws, p leaks
     delete p;
 }
 
-// ✅ Solution: RAII
+// Solution: RAII
 void safe() {
     auto p = std::make_unique<int>(42);
-    if (error) return;      // ✅ Auto-cleaned
-    might_throw();          // ✅ Auto-cleaned on exception
+    if (error) return;      // Auto-cleaned
+    might_throw();          // Auto-cleaned on exception
 }
 ```
 
@@ -180,10 +180,10 @@ void safe() {
 - **Mixing**: Never mix single/array forms
 
 **Initialization Forms:**
-- `new int` → uninitialized (garbage) ❌
-- `new int()` → zero-initialized ✅
-- `new int{42}` → initialized to 42 ✅
-- `new int[10]()` → array, all zeros ✅
+- `new int` → uninitialized (garbage)
+- `new int()` → zero-initialized
+- `new int{42}` → initialized to 42
+- `new int[10]()` → array, all zeros
 
 **Safety Patterns:**
 - Set to `nullptr` after delete (safe to delete nullptr)

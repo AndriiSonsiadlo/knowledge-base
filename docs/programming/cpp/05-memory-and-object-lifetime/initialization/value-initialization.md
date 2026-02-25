@@ -24,8 +24,8 @@ double d{};     // 0.0
 bool b{};       // false
 int* ptr{};     // nullptr
 
-std::cout << x;    // ✅ Safe: 0
-std::cout << ptr;  // ✅ Safe: nullptr
+std::cout << x;    // Safe: 0
+std::cout << ptr;  // Safe: nullptr
 ```
 
 **Key**: Zero-initialization happens **before** any construction.
@@ -34,14 +34,14 @@ std::cout << ptr;  // ✅ Safe: nullptr
 ```cpp showLineNumbers
 void function() {
     // Default initialization (dangerous)
-    int a;       // Indeterminate ❌
-    double b;    // Indeterminate ❌
-    char* c;     // Indeterminate ❌
+    int a;       // Indeterminate
+    double b;    // Indeterminate
+    char* c;     // Indeterminate
     
     // Value initialization (safe)
-    int x{};     // 0 ✅
-    double y{};  // 0.0 ✅
-    char* z{};   // nullptr ✅
+    int x{};     // 0
+    double y{};  // 0.0
+    char* z{};   // nullptr
 }
 ```
 
@@ -49,12 +49,12 @@ void function() {
 
 | Type | Default Init | Value Init |
 |------|-------------|-----------|
-| `int` (local) | Indeterminate ❌ | 0 ✅ |
-| `double` (local) | Indeterminate ❌ | 0.0 ✅ |
-| `pointer` (local) | Indeterminate ❌ | nullptr ✅ |
-| `int` (static) | 0 ✅ | 0 ✅ |
-| Class with ctor | Calls ctor ✅ | Calls ctor ✅ |
-| Class without ctor | Members indeterminate ❌ | Members zeroed ✅ |
+| `int` (local) | Indeterminate No | 0 Yes |
+| `double` (local) | Indeterminate No | 0.0 Yes |
+| `pointer` (local) | Indeterminate No | nullptr Yes |
+| `int` (static) | 0 Yes | 0 Yes |
+| Class with ctor | Calls ctor Yes | Calls ctor Yes |
+| Class without ctor | Members indeterminate No | Members zeroed Yes |
 
 ## Class Types
 
@@ -83,42 +83,42 @@ struct Point {
     // No constructor
 };
 
-Point p1;    // Default init: x, y indeterminate ❌
-Point p2{};  // Value init: x=0, y=0 ✅
+Point p1;    // Default init: x, y indeterminate
+Point p2{};  // Value init: x=0, y=0
 
-std::cout << p1.x;  // ❌ UB
-std::cout << p2.x;  // ✅ Safe: 0
+std::cout << p1.x;  // UB
+std::cout << p2.x;  // Safe: 0
 ```
 
 **Benefit**: Simple aggregates safely zeroed with `{}`.
 
 ## Arrays
 ```cpp showLineNumbers
-int arr1[5];     // Indeterminate ❌
-int arr2[5]{};   // All zeros ✅
+int arr1[5];     // Indeterminate
+int arr2[5]{};   // All zeros
 
-std::cout << arr1[0];  // ❌ UB
-std::cout << arr2[0];  // ✅ Safe: 0
+std::cout << arr1[0];  // UB
+std::cout << arr2[0];  // Safe: 0
 
 // Multi-dimensional
-int matrix[3][3]{};  // All zeros ✅
+int matrix[3][3]{};  // All zeros
 ```
 
 ## Dynamic Allocation
 ```cpp showLineNumbers
-int* p1 = new int;      // Indeterminate ❌
-int* p2 = new int();    // 0 ✅
-int* p3 = new int{};    // 0 ✅
+int* p1 = new int;      // Indeterminate
+int* p2 = new int();    // 0
+int* p3 = new int{};    // 0
 
-std::cout << *p1;  // ❌ UB
-std::cout << *p2;  // ✅ Safe: 0
+std::cout << *p1;  // UB
+std::cout << *p2;  // Safe: 0
 
 delete p1; delete p2; delete p3;
 
 // Arrays
-int* arr1 = new int[10];     // Indeterminate ❌
-int* arr2 = new int[10]();   // All zeros ✅
-int* arr3 = new int[10]{};   // All zeros ✅
+int* arr1 = new int[10];     // Indeterminate
+int* arr2 = new int[10]();   // All zeros
+int* arr3 = new int[10]{};   // All zeros
 
 delete[] arr1; delete[] arr2; delete[] arr3;
 ```
@@ -152,18 +152,18 @@ graph TD
     B -->|Class with ctor| D[Both same]
     B -->|Class without ctor| C
     
-    C --> E["✅ Always safe"]
-    D --> F["✅ Calls constructor"]
+    C --> E["Always safe"]
+    D --> F["Calls constructor"]
 ```
 
 ## Performance
 ```cpp showLineNumbers
 void compare() {
     // Default: no cost, but dangerous
-    int arr1[1000000];  // Instant, but garbage ❌
+    int arr1[1000000];  // Instant, but garbage
     
     // Value: small cost, but safe
-    int arr2[1000000]{};  // ~microseconds, all zeros ✅
+    int arr2[1000000]{};  // ~microseconds, all zeros
 }
 ```
 
@@ -181,14 +181,14 @@ void compare() {
 
 ## Common Patterns
 ```cpp showLineNumbers
-// ✅ Safe patterns
+// Safe patterns
 int x{};                    // Zero
 int* p = new int{};         // Zero on heap
 int arr[10]{};              // All zeros
 struct Point { int x, y; };
 Point p{};                  // x=0, y=0
 
-// ❌ Dangerous patterns
+// Dangerous patterns
 int x;                      // Indeterminate
 int* p = new int;           // Indeterminate
 int arr[10];                // All indeterminate
@@ -199,9 +199,9 @@ Point p;                    // x, y indeterminate
 
 :::info Value Initialization - Key Points
 **Guaranteed Safety:**
-- **Fundamentals**: Always zero (0, 0.0, false, nullptr) ✅
+- **Fundamentals**: Always zero (0, 0.0, false, nullptr)
 - **Classes with constructor**: Calls default constructor
-- **Classes without constructor**: All members zeroed ✅
+- **Classes without constructor**: All members zeroed
 - **Arrays**: All elements zeroed
 
 **Syntax Triggers:**
@@ -211,10 +211,10 @@ Point p;                    // x, y indeterminate
 - Member init: `value{}` in initializer list
 
 **vs Default Initialization:**
-- Default (local): Indeterminate ❌
-- Value: Always zero ✅
+- Default (local): Indeterminate
+- Value: Always zero
 - Classes with ctor: Same behavior
-- Classes without ctor: Value zeros members ✅
+- Classes without ctor: Value zeros members
 
 **When to Use:**
 - Default choice for fundamentals (always safe)
