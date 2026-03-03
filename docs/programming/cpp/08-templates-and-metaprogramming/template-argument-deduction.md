@@ -46,7 +46,7 @@ const int cx = x;
 
 func(x);   // T = int, param type is int&
 func(cx);  // T = const int, param type is const int&
-// func(5);   // ❌ Error: can't bind rvalue to lvalue ref
+// func(5);   // Error: can't bind rvalue to lvalue ref
 ```
 
 **const reference:**
@@ -58,7 +58,7 @@ void func(const T& param) {
 
 func(x);   // T = int, param = const int&
 func(cx);  // T = int, param = const int& (const is redundant)
-func(5);   // ✅ OK: const ref binds to rvalue
+func(5);   // OK: const ref binds to rvalue
 ```
 
 **rvalue reference (forwarding reference):**
@@ -145,8 +145,8 @@ void func(T a, T b) {  // Both must be same type
     // ...
 }
 
-func(5, 10);      // ✅ T = int
-// func(5, 3.14);   // ❌ Error: conflicting types (int vs double)
+func(5, 10);      // T = int
+// func(5, 3.14);   // Error: conflicting types (int vs double)
 
 // Solution: Multiple template parameters
 template<typename T, typename U>
@@ -154,7 +154,7 @@ void func2(T a, U b) {
     // ...
 }
 
-func2(5, 3.14);  // ✅ T = int, U = double
+func2(5, 3.14);  // T = int, U = double
 ```
 
 ## Explicit Template Arguments
@@ -247,18 +247,18 @@ void func(T a, T b) {
     // ...
 }
 
-// ❌ Type mismatch
+// Type mismatch
 // func(5, 3.14);  // int vs double
 
-// ❌ Can't deduce from return type alone
+// Can't deduce from return type alone
 template<typename T>
 T convert(int value) {
     return static_cast<T>(value);
 }
-// auto x = convert(42);  // ❌ Can't deduce T
-auto x = convert<double>(42);  // ✅ Must specify
+// auto x = convert(42);  // Can't deduce T
+auto x = convert<double>(42);  // Must specify
 
-// ❌ Non-deduced context
+// Non-deduced context
 template<typename T>
 void func(typename std::vector<T>::iterator it) {
     // ...

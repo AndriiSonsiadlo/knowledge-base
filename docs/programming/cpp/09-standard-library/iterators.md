@@ -229,11 +229,11 @@ std::vector<int> vec = {1, 2, 3};
 
 // Regular iterator (can modify)
 std::vector<int>::iterator it = vec.begin();
-*it = 10;  // ✅ OK
+*it = 10;  // OK
 
 // const iterator (can't modify)
 std::vector<int>::const_iterator cit = vec.cbegin();
-// *cit = 10;  // ❌ Error
+// *cit = 10;  // Error
 
 // const container gives const_iterator
 const std::vector<int> cvec = {1, 2, 3};
@@ -483,21 +483,21 @@ void fast_access(Iter it) {
 ## Common Pitfalls
 
 ```cpp showLineNumbers 
-// ❌ Dereferencing end()
+// Dereferencing end()
 auto it = vec.end();
 *it;  // Undefined behavior!
 
-// ❌ Incrementing end()
+// Incrementing end()
 ++vec.end();  // Undefined behavior!
 
-// ❌ Using invalidated iterator
+// Using invalidated iterator
 vec.push_back(10);
 // old_iterator might be invalid
 
-// ❌ Comparing iterators from different containers
+// Comparing iterators from different containers
 vec1.begin() == vec2.begin();  // Undefined behavior!
 
-// ✅ Always check before dereferencing
+// Always check before dereferencing
 if (it != vec.end()) {
     *it;  // Safe
 }

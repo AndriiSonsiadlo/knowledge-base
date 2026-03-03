@@ -390,14 +390,14 @@ Parser<std::map<int, std::string>> p4;
 ## Function Templates Can't Be Partially Specialized
 
 ```cpp showLineNumbers 
-// ❌ Partial specialization not allowed for functions!
+// Partial specialization not allowed for functions!
 template<typename T>
 void process(T value) { /* ... */ }
 
 // template<typename T>
-// void process<T*>(T* value) { /* ❌ Error! */ }
+// void process<T*>(T* value) { /* Error! */ }
 
-// ✅ Solution: Overload or use class template
+// Solution: Overload or use class template
 template<typename T>
 void process(T value) { /* General */ }
 
@@ -421,7 +421,7 @@ class X<T*, T> { /* ... */ };
 
 // X<int*, int*> is ambiguous!
 // Both partials match equally
-// ❌ Compilation error
+// Compilation error
 ```
 
 Make sure specializations don't overlap ambiguously.

@@ -29,9 +29,9 @@ T add(T a, T b) {
     return a + b;
 }
 
-add(5, 10);      // ✅ int is Numeric
-add(3.14, 2.71); // ✅ double is Numeric
-// add("a", "b");   // ❌ Error: const char* doesn't satisfy Numeric
+add(5, 10);      // int is Numeric
+add(3.14, 2.71); // double is Numeric
+// add("a", "b");   // Error: const char* doesn't satisfy Numeric
 ```
 
 Much clearer than SFINAE!
@@ -127,9 +127,9 @@ T twice(T value) {
     return value * 2;
 }
 
-twice(5);      // ✅ OK: int supports these ops
-twice(3.14);   // ✅ OK: double supports these ops
-// twice("hi");   // ❌ Error: const char* doesn't support * 2
+twice(5);      // OK: int supports these ops
+twice(3.14);   // OK: double supports these ops
+// twice("hi");   // Error: const char* doesn't support * 2
 ```
 
 ## Simple Requirements
@@ -148,8 +148,8 @@ void process(const T& container) {
     }
 }
 
-process(std::vector<int>{1,2,3});  // ✅ Has size, begin, end
-// process(42);  // ❌ int doesn't have these methods
+process(std::vector<int>{1,2,3});  // Has size, begin, end
+// process(42);  // int doesn't have these methods
 ```
 
 ## Type Requirements
@@ -166,8 +166,8 @@ void info(const T&) {
     std::cout << "Container type\n";
 }
 
-info(std::vector<int>{});  // ✅ Has all these types
-// info(42);  // ❌ int doesn't have these types
+info(std::vector<int>{});  // Has all these types
+// info(42);  // int doesn't have these types
 ```
 
 ## Compound Requirements
@@ -285,9 +285,9 @@ T add(T a, U b) {
     return a + b;
 }
 
-add(5, 10);      // ✅ int + int
-add(3.14, 2);    // ✅ double + int
-// add("hello", 5); // ❌ const char* + int not addable
+add(5, 10);      // int + int
+add(3.14, 2);    // double + int
+// add("hello", 5); // const char* + int not addable
 ```
 
 ## Standard Concepts Overview

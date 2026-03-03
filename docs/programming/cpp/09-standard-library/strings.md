@@ -432,7 +432,7 @@ sv4.remove_suffix(1);   // "World"
 ```cpp showLineNumbers 
 std::string_view dangling() {
     std::string temp = "danger";
-    return temp;  // ❌ Returns view to destroyed string!
+    return temp;  // Returns view to destroyed string!
 }
 ```
 
@@ -574,20 +574,20 @@ std::string sentence = join(words, " ");  // "Hello World !"
 Understanding string performance characteristics.
 
 ```cpp showLineNumbers 
-// ❌ Inefficient: repeated concatenation
+// Inefficient: repeated concatenation
 std::string result;
 for (int i = 0; i < 1000; ++i) {
     result += std::to_string(i) + " ";  // Multiple allocations
 }
 
-// ✅ Better: reserve capacity
+// Better: reserve capacity
 std::string result;
 result.reserve(5000);  // Pre-allocate
 for (int i = 0; i < 1000; ++i) {
     result += std::to_string(i) + " ";
 }
 
-// ✅ Best: use stringstream for many concatenations
+// Best: use stringstream for many concatenations
 std::ostringstream oss;
 for (int i = 0; i < 1000; ++i) {
     oss << i << " ";
@@ -595,11 +595,11 @@ for (int i = 0; i < 1000; ++i) {
 std::string result = oss.str();
 
 // String copying is expensive for large strings
-void process(const std::string& str) {  // ✅ Pass by const reference
+void process(const std::string& str) {  // Pass by const reference
     // ...
 }
 
-void process2(std::string_view sv) {    // ✅ Even better (C++17)
+void process2(std::string_view sv) {    // Even better (C++17)
     // ...
 }
 ```

@@ -285,7 +285,7 @@ class Widget<int> {
     // Specialization
 };
 
-// ❌ Too late! Already used above
+// Too late! Already used above
 // template<>
 // class Widget<int> { ... };
 ```
@@ -369,14 +369,14 @@ std::unordered_map<Point, std::string, MyHash<Point>> map;
 ## Avoid Over-Specialization
 
 ```cpp showLineNumbers 
-// ❌ Bad: Too many specializations
+// Bad: Too many specializations
 template<> void process<int>();
 template<> void process<long>();
 template<> void process<short>();
 template<> void process<unsigned>();
 // ... 20 more specializations
 
-// ✅ Better: Use if constexpr or concepts
+// Better: Use if constexpr or concepts
 template<typename T>
 void process() {
     if constexpr (std::is_integral_v<T>) {
@@ -392,14 +392,14 @@ void process() {
 **Function templates:** Prefer overloading over specialization:
 
 ```cpp showLineNumbers 
-// ❌ Specialization (can cause surprises)
+// Specialization (can cause surprises)
 template<typename T>
 void func(T value) { std::cout << "Template\n"; }
 
 template<>
 void func<int>(int value) { std::cout << "Specialized\n"; }
 
-// ✅ Better: Overload
+// Better: Overload
 template<typename T>
 void func(T value) { std::cout << "Template\n"; }
 

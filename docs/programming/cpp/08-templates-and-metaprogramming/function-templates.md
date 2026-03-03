@@ -178,9 +178,9 @@ T min(T a, T b) {
     return (a < b) ? a : b;
 }
 
-min(5, 10);     // ✅ OK: int is totally_ordered
-min("a", "b");  // ✅ OK: const char* is totally_ordered
-// min(std::vector{1}, std::vector{2});  // ❌ Error: vector not comparable
+min(5, 10);     // OK: int is totally_ordered
+min("a", "b");  // OK: const char* is totally_ordered
+// min(std::vector{1}, std::vector{2});  // Error: vector not comparable
 ```
 
 Concepts make templates fail with clear error messages instead of cryptic template errors.

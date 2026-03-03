@@ -240,8 +240,8 @@ auto sum(Args... args) {
     return (args + ...);
 }
 
-sum(1, 2, 3);      // ✅ OK: all ints
-// sum(1, 2.5, 3);   // ❌ Error: 2.5 is not integral
+sum(1, 2, 3);      // OK: all ints
+// sum(1, 2.5, 3);   // Error: 2.5 is not integral
 ```
 
 :::success Variadic Template Essentials

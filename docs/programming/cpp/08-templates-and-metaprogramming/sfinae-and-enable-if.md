@@ -137,8 +137,8 @@ increment(T value) {
     return value + 1;
 }
 
-int x = increment(5);       // ✅ int is integral
-// double y = increment(3.14);  // ❌ Removed from overload set
+int x = increment(5);       // int is integral
+// double y = increment(3.14);  // Removed from overload set
 ```
 
 **How it works:**
@@ -176,8 +176,8 @@ sqrt(T value) {
     return std::sqrt(value);
 }
 
-auto x = sqrt(3.14);  // ✅ double
-// auto y = sqrt(5);     // ❌ int not floating point
+auto x = sqrt(3.14);  // double
+// auto y = sqrt(5);     // int not floating point
 ```
 
 ## Template Parameter enable_if
