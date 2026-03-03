@@ -38,7 +38,7 @@ Animal animal = dog;  // ⚠️ SLICING!
 // speak() calls Animal's version!
 
 animal.speak();  // "Animal sound" - not "Woof!"
-// animal.breed;  // ❌ Error: Animal has no breed member
+// animal.breed;  // Error: Animal has no breed member
 ```
 
 When you assign a Dog to an Animal, only the Animal parts are copied. The Dog-specific parts (breed member, overridden speak()) are gone.
@@ -75,7 +75,7 @@ processAnimal(dog);  // "Animal sound" - sliced!
 ## Preventing Slicing: Use Pointers
 
 ```cpp showLineNumbers 
-void processAnimal(Animal* a) {  // ✅ Pointer
+void processAnimal(Animal* a) {  // Pointer
     a->speak();  // Calls correct overridden version!
 }
 
@@ -88,7 +88,7 @@ Pointers and references preserve polymorphism. No copying, no slicing.
 ## Preventing Slicing: Use References
 
 ```cpp showLineNumbers 
-void processAnimal(const Animal& a) {  // ✅ Reference
+void processAnimal(const Animal& a) {  // Reference
     a.speak();  // Calls correct overridden version!
 }
 
@@ -119,7 +119,7 @@ for (auto& a : animals) {
 **Solution**: Store pointers (preferably smart pointers):
 
 ```cpp showLineNumbers 
-std::vector<std::unique_ptr<Animal>> animals;  // ✅ Pointers
+std::vector<std::unique_ptr<Animal>> animals;  // Pointers
 
 animals.push_back(std::make_unique<Dog>());
 animals.push_back(std::make_unique<Cat>());
@@ -134,7 +134,7 @@ for (auto& a : animals) {
 ```cpp showLineNumbers 
 Dog dog;
 Cat cat;
-Animal& ref = dog;  // ✅ Reference, no slicing
+Animal& ref = dog;  // Reference, no slicing
 
 ref = cat;  // ⚠️ Slicing!
 // Calls Animal::operator=(const Animal&)
@@ -178,7 +178,7 @@ g++ -Weffc++ file.cpp
 ## Real-World Example
 
 ```cpp showLineNumbers 
-// ❌ Bad: slicing
+// Bad: slicing
 std::vector<Animal> zoo;
 zoo.push_back(Dog());   // Sliced!
 zoo.push_back(Cat());   // Sliced!
@@ -188,7 +188,7 @@ for (auto& animal : zoo) {
     animal.speak();  // All say "Animal sound"
 }
 
-// ✅ Good: polymorphic collection
+// Good: polymorphic collection
 std::vector<std::unique_ptr<Animal>> zoo;
 zoo.push_back(std::make_unique<Dog>());
 zoo.push_back(std::make_unique<Cat>());

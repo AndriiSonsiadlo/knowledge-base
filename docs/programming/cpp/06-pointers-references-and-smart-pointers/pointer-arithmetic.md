@@ -59,9 +59,9 @@ ptr += 2;    // Move forward 2 elements
 int arr[5] = {10, 20, 30, 40, 50};
 int* ptr = arr;
 
-ptr[5];      // ❌ Undefined behavior
-ptr[100];    // ❌ Undefined behavior
-*(ptr - 1);  // ❌ Before array start
+ptr[5];      // Undefined behavior
+ptr[100];    // Undefined behavior
+*(ptr - 1);  // Before array start
 ```
 
 Compiler won't stop you - your responsibility!
@@ -87,7 +87,7 @@ Subtraction only valid for pointers into same array!
 int arr1[5], arr2[5];
 int* p1 = arr1;
 int* p2 = arr2;
-p1 - p2;  // ❌ Undefined behavior
+p1 - p2;  // Undefined behavior
 ```
 :::
 
@@ -98,16 +98,16 @@ int* p1 = arr;
 int* p2 = arr + 2;
 int* end = arr + 5;
 
-if (p1 < p2) {       // ✅ True: p1 comes before p2
+if (p1 < p2) {       // True: p1 comes before p2
     std::cout << "Earlier in memory\n";
 }
 
-if (p2 < end) {      // ✅ True: p2 before end
+if (p2 < end) {      // True: p2 before end
     std::cout << "Within bounds\n";
 }
 
 // One-past-end is valid for comparison
-if (p1 != end) {     // ✅ Valid comparison
+if (p1 != end) {     // Valid comparison
     // Don't dereference end!
 }
 ```
@@ -132,7 +132,7 @@ for (int* ptr = end - 1; ptr >= arr; --ptr) {
 
 :::success Modern Alternative
 ```cpp
-// ✅ Prefer range-based for
+// Prefer range-based for
 for (int value : arr) {
     std::cout << value << " ";
 }
@@ -171,12 +171,12 @@ int row = 1, col = 2;
 char buffer[10];
 char* ptr = buffer;
 
-// ❌ Writes past buffer
+// Writes past buffer
 for (int i = 0; i < 20; ++i) {
     *(ptr + i) = 'X';  // Undefined after i >= 10
 }
 
-// ✅ Safe version
+// Safe version
 for (int i = 0; i < 10; ++i) {
     *(ptr + i) = 'X';
 }
@@ -187,10 +187,10 @@ for (int i = 0; i < 10; ++i) {
 int arr[5] = {10, 20, 30, 40, 50};
 int* end = arr + 5;
 
-// ✅ Valid for comparison
+// Valid for comparison
 if (ptr != end) { }
 
-// ❌ Invalid to dereference
+// Invalid to dereference
 *end;  // Undefined behavior
 ```
 
@@ -199,11 +199,11 @@ if (ptr != end) { }
 int arr[] = {10, 20, 30};
 int* iptr = arr;
 
-// ❌ Treating as different type
+// Treating as different type
 char* cptr = reinterpret_cast<char*>(arr);
 cptr + 1;  // Moves 1 byte, not 1 int!
 
-int x = *(int*)(cptr + 1);  // ❌ Undefined behavior
+int x = *(int*)(cptr + 1);  // Undefined behavior
 ```
 
 ## Summary

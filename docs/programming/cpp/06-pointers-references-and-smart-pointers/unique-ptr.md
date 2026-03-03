@@ -78,10 +78,10 @@ process(std::unique_ptr<W>(new W), std::unique_ptr<G>(new G));
 ```cpp showLineNumbers
 auto ptr1 = std::make_unique<int>(42);
 
-// ❌ Cannot copy
+// Cannot copy
 // auto ptr2 = ptr1;  // Error: deleted copy constructor
 
-// ✅ Can move (transfers ownership)
+// Can move (transfers ownership)
 auto ptr2 = std::move(ptr1);
 // ptr1 is now nullptr
 // ptr2 owns the int
@@ -284,11 +284,11 @@ The array specialization changes the interface slightly: you can use subscript n
 For dynamic arrays, standard containers are almost always better than `unique_ptr` to arrays.
 
 ```cpp showLineNumbers 
-// ❌ unique_ptr to array
+// unique_ptr to array
 auto arr1 = std::make_unique<int[]>(10);
 // No size(), no bounds checking, no convenience methods
 
-// ✅ Use vector
+// Use vector
 std::vector<int> arr2(10);
 // Full container interface, bounds checking, growth
 ```
@@ -322,7 +322,7 @@ ptr->identify();  // "Derived" (polymorphic call)
 ```cpp showLineNumbers
 class Base {
 public:
-    virtual ~Base() = default;  // ✅ Must be virtual
+    virtual ~Base() = default;  // Must be virtual
 };
 
 // Without virtual destructor:
@@ -417,12 +417,12 @@ void process() {
     auto guard = std::make_unique<Resource>();
     
     if (error) {
-        return;  // ✅ Resource automatically released
+        return;  // Resource automatically released
     }
     
     // Use resource...
     
-    // ✅ Automatic cleanup on any exit path
+    // Automatic cleanup on any exit path
 }
 ```
 
@@ -451,25 +451,25 @@ Widget::~Widget() = default;  // unique_ptr knows how to delete Impl
 
 :::danger Pitfalls
 ```cpp
-// ❌ Forgetting std::move
+// Forgetting std::move
 void consume(std::unique_ptr<int> p) { }
 auto ptr = std::make_unique<int>(42);
 // consume(ptr);  // Error: cannot copy
-consume(std::move(ptr));  // ✅ Explicit transfer
+consume(std::move(ptr));  // Explicit transfer
 
-// ❌ Double ownership
+// Double ownership
 int* raw = new int(42);
 std::unique_ptr<int> p1(raw);
-std::unique_ptr<int> p2(raw);  // ❌ Both will delete!
+std::unique_ptr<int> p2(raw);  // Both will delete!
 
-// ❌ Deleting what unique_ptr manages
+// Deleting what unique_ptr manages
 auto ptr = std::make_unique<int>(42);
-delete ptr.get();  // ❌ Double delete when ptr destroyed
+delete ptr.get();  // Double delete when ptr destroyed
 
-// ❌ Storing get() result long-term
+// Storing get() result long-term
 int* raw = ptr.get();
 ptr.reset();
-*raw;  // ❌ Dangling pointer
+*raw;  // Dangling pointer
 ```
 :::
 

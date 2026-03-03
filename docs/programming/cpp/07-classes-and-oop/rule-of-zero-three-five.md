@@ -37,7 +37,7 @@ The compiler generates them when needed, but defaults only work for simple cases
 
 **If your class doesn't directly manage resources, don't define any special members.**
 ```cpp showLineNumbers
-// ✅ Rule of Zero - no special members needed
+// Rule of Zero - no special members needed
 class Person {
     std::string name;        // string manages its memory
     int age;                 // trivial type
@@ -54,8 +54,8 @@ class Person {
 };
 
 Person p1{"Alice", 30, {95, 87, 92}};
-Person p2 = p1;            // ✅ Copy works
-Person p3 = std::move(p1); // ✅ Move works
+Person p2 = p1;            // Copy works
+Person p3 = std::move(p1); // Move works
 // p1 is now moved-from (empty)
 ```
 
@@ -63,7 +63,7 @@ Person p3 = std::move(p1); // ✅ Move works
 
 ### Prefer RAII Wrappers
 ```cpp showLineNumbers
-// ❌ Manual resource management (need Rule of 5)
+// Manual resource management (need Rule of 5)
 class BadBuffer {
     char* data;
     size_t size;
@@ -74,7 +74,7 @@ public:
     // Need copy, move, assignment...
 };
 
-// ✅ Rule of Zero (standard types handle it)
+// Rule of Zero (standard types handle it)
 class GoodBuffer {
     std::vector<char> data;
     
@@ -130,7 +130,7 @@ If you need a destructor to clean up, compiler-generated copy will just copy the
 
 ### The Double-Delete Problem
 ```cpp showLineNumbers
-// ❌ Only defined destructor
+// Only defined destructor
 class Broken {
     int* data;
     
@@ -144,7 +144,7 @@ public:
 Broken b1(42);
 Broken b2 = b1;  // ⚠️ Both point to same memory
 // When b1 destructs: deletes memory
-// When b2 destructs: tries to delete same memory 💥 Crash!
+// When b2 destructs: tries to delete same memory Crash!
 ```
 
 ## Rule of Five (C++11+)
@@ -249,8 +249,8 @@ public:
 };
 
 Uncopyable u1;
-// Uncopyable u2 = u1;  // ❌ Error: copy deleted
-// Uncopyable u3 = std::move(u1);  // ❌ Error: move deleted
+// Uncopyable u2 = u1;  // Error: copy deleted
+// Uncopyable u3 = std::move(u1);  // Error: move deleted
 ```
 
 `= delete` is clearer than making functions private and gives better error messages.
@@ -300,7 +300,7 @@ class Example1 {
 public:
     // Declaring ANY constructor prevents default constructor
     Example1(int x) {}
-    // Example1 obj;  // ❌ Error: no default constructor
+    // Example1 obj;  // Error: no default constructor
 };
 
 class Example2 {
@@ -346,14 +346,14 @@ graph TD
     style D fill:#87CEEB
 ```
 ```cpp showLineNumbers
-// ✅ Rule of Zero (BEST)
+// Rule of Zero (BEST)
 class Widget {
     std::unique_ptr<Resource> resource;
     std::vector<int> data;
     // No special members needed!
 };
 
-// ✅ Rule of Five (only if you MUST manage resources)
+// Rule of Five (only if you MUST manage resources)
 class ManualResource {
     int* ptr;
     
@@ -365,7 +365,7 @@ public:
     ManualResource& operator=(ManualResource&&) noexcept;
 };
 
-// ✅ Explicit deletion (when copies/moves don't make sense)
+// Explicit deletion (when copies/moves don't make sense)
 class NonCopyable {
 public:
     NonCopyable() = default;

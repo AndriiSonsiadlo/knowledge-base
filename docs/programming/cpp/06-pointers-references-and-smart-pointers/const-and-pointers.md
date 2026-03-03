@@ -43,18 +43,18 @@ int x = 10, y = 20;
 
 // 1. Pointer to const (can't modify data)
 const int* ptr1 = &x;
-// *ptr1 = 30;  // ❌ Error
-ptr1 = &y;      // ✅ OK: can point elsewhere
+// *ptr1 = 30;  // Error
+ptr1 = &y;      // OK: can point elsewhere
 
 // 2. const pointer (can't change pointer)
 int* const ptr2 = &x;
-*ptr2 = 30;     // ✅ OK: can modify data
-// ptr2 = &y;   // ❌ Error: can't point elsewhere
+*ptr2 = 30;     // OK: can modify data
+// ptr2 = &y;   // Error: can't point elsewhere
 
 // 3. const pointer to const (can't change either)
 const int* const ptr3 = &x;
-// *ptr3 = 30;  // ❌ Error
-// ptr3 = &y;   // ❌ Error
+// *ptr3 = 30;  // Error
+// ptr3 = &y;   // Error
 ```
 
 ## Visual Guide
@@ -99,22 +99,22 @@ The position of `const` relative to `*` determines what's const. Before `*` (or 
 // Pointer to const - can't modify through pointer
 void read_data(const int* data, size_t size) {
     for (size_t i = 0; i < size; ++i) {
-        std::cout << data[i];  // ✅ Can read
-        // data[i] = 0;        // ❌ Cannot modify
+        std::cout << data[i];  // Can read
+        // data[i] = 0;        // Cannot modify
     }
 }
 
 // const pointer - pointer itself won't change
 void process(int* const ptr) {
-    *ptr = 42;          // ✅ Can modify data
-    // ptr = nullptr;   // ❌ Cannot change pointer
+    *ptr = 42;          // Can modify data
+    // ptr = nullptr;   // Cannot change pointer
 }
 
 // Both const
 void display(const int* const ptr) {
-    std::cout << *ptr;  // ✅ Can read
-    // *ptr = 10;       // ❌ Cannot modify
-    // ptr = nullptr;   // ❌ Cannot change pointer
+    std::cout << *ptr;  // Can read
+    // *ptr = 10;       // Cannot modify
+    // ptr = nullptr;   // Cannot change pointer
 }
 ```
 
@@ -132,10 +132,10 @@ const int* ptr = arr;
 std::cout << ptr[2];  // 3
 
 // Cannot modify through pointer
-// ptr[2] = 10;       // ❌ Error
+// ptr[2] = 10;       // Error
 
 // Array itself still modifiable
-arr[2] = 10;          // ✅ OK
+arr[2] = 10;          // OK
 std::cout << ptr[2];  // 10
 ```
 
@@ -151,18 +151,18 @@ const int* cptr = &x;
 
 // Remove const with const_cast
 int* ptr = const_cast<int*>(cptr);
-*ptr = 20;  // ✅ OK: x wasn't originally const
+*ptr = 20;  // OK: x wasn't originally const
 
 // Dangerous with originally const data
 const int y = 30;
 const int* cptr2 = &y;
 int* ptr2 = const_cast<int*>(cptr2);
-*ptr2 = 40;  // ❌ Undefined behavior: y was const!
+*ptr2 = 40;  // Undefined behavior: y was const!
 ```
 
 :::danger const_cast Rules
-- ✅ Safe: removing const from non-const data
-- ❌ Unsafe: modifying originally const data = UB
+- Safe: removing const from non-const data
+- Unsafe: modifying originally const data = UB
 - Use only when interfacing with badly-designed APIs
 :::
  
@@ -173,18 +173,18 @@ const affects what you can do with dynamically allocated memory through the poin
 ```cpp showLineNumbers 
 // Pointer to const on heap
 const int* ptr1 = new int(42);
-// *ptr1 = 10;  // ❌ Cannot modify
-delete ptr1;  // ✅ Can still delete
+// *ptr1 = 10;  // Cannot modify
+delete ptr1;  // Can still delete
 
 // const pointer to heap memory
 int* const ptr2 = new int(42);
-*ptr2 = 10;  // ✅ Can modify
-delete ptr2;  // ✅ Can delete
+*ptr2 = 10;  // Can modify
+delete ptr2;  // Can delete
 
 // Both const
 const int* const ptr3 = new int(42);
-// *ptr3 = 10;  // ❌ Cannot modify
-delete ptr3;  // ✅ Can delete
+// *ptr3 = 10;  // Cannot modify
+delete ptr3;  // Can delete
 ```
 
 The const qualifiers don't prevent deleting the memory, only modification through the pointer. Deletion is a memory management operation, not data modification.
@@ -217,10 +217,10 @@ public:
 };
 
 const Buffer cb;
-const int* data = cb.getData();  // ✅ Calls const version
+const int* data = cb.getData();  // Calls const version
 
 Buffer b;
-int* data2 = b.getData();  // ✅ Calls non-const version
+int* data2 = b.getData();  // Calls non-const version
 ```
 
 ## Summary

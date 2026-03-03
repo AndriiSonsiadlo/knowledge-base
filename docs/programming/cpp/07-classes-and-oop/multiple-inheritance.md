@@ -96,10 +96,10 @@ class Derived : public Base1, public Base2 {
 };
 
 Derived d;
-// d.print();  // ❌ Error: ambiguous! Which print()?
+// d.print();  // Error: ambiguous! Which print()?
 
-d.Base1::print();  // ✅ Explicitly specify Base1's version
-d.Base2::print();  // ✅ Explicitly specify Base2's version
+d.Base1::print();  // Explicitly specify Base1's version
+d.Base2::print();  // Explicitly specify Base2's version
 ```
 
 The compiler won't guess which base class member to use. You must be explicit.
@@ -118,7 +118,7 @@ public:
 };
 
 Derived d;
-d.print();  // ✅ Calls Derived's version
+d.print();  // Calls Derived's version
 ```
 
 ## The Diamond Problem
@@ -165,10 +165,10 @@ Bat inherits **two copies** of Animal - one through Mammal, one through WingedAn
 ```cpp showLineNumbers
 Bat bat;
 
-// ❌ Ambiguity: which Animal's age?
+// Ambiguity: which Animal's age?
 // bat.age = 5;  // Error: ambiguous
 
-// ❌ Ambiguity: which Animal's eat()?
+// Ambiguity: which Animal's eat()?
 // bat.eat();    // Error: ambiguous
 
 // Must disambiguate:
@@ -221,8 +221,8 @@ public:
 };
 
 Bat bat;
-bat.age = 5;   // ✅ No ambiguity - only one Animal!
-bat.eat();     // ✅ No ambiguity
+bat.age = 5;   // No ambiguity - only one Animal!
+bat.eat();     // No ambiguity
 
 bat.nurse();   // From Mammal
 bat.fly();     // From WingedAnimal
@@ -265,7 +265,7 @@ class Bat : public Mammal, public WingedAnimal {
 public:
     // Bat must initialize Animal directly!
     Bat(int a) 
-        : Animal(a),           // ✅ Most derived class initializes
+        : Animal(a),           // Most derived class initializes
           Mammal(a),           // These don't initialize Animal
           WingedAnimal(a) {}
 };
@@ -303,7 +303,7 @@ sizeof(VirtualDerived);  // 24 bytes (includes vptr for offset)
 
 ## When to Use Multiple Inheritance
 ```cpp showLineNumbers
-// ✅ Good: Combining independent interfaces
+// Good: Combining independent interfaces
 class Serializable {
 public:
     virtual std::string serialize() = 0;
@@ -318,7 +318,7 @@ class Shape : public Serializable, public Drawable {
     // Implements both interfaces
 };
 
-// ✅ Good: Mixins (small utility classes)
+// Good: Mixins (small utility classes)
 class NonCopyable {
 public:
     NonCopyable() = default;

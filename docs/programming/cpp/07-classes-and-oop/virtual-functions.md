@@ -177,18 +177,18 @@ public:
 
 class Derived : public Base {
 public:
-    void foo(double x) override {  // ❌ Error: doesn't override
+    void foo(double x) override {  // Error: doesn't override
         // Different parameter type!
     }
     
-    void bar() override {  // ❌ Error: doesn't override
+    void bar() override {  // Error: doesn't override
         // Missing const!
     }
     
-    void foo(int x) override {  // ✅ Correct override
+    void foo(int x) override {  // Correct override
     }
     
-    void bar() const override {  // ✅ Correct override
+    void bar() const override {  // Correct override
     }
 };
 ```
@@ -203,7 +203,7 @@ Always make base class destructor virtual if you'll delete through a base pointe
 ```cpp showLineNumbers
 class Base {
 public:
-    ~Base() {  // ❌ Not virtual!
+    ~Base() {  // Not virtual!
         std::cout << "~Base\n";
     }
 };
@@ -223,7 +223,7 @@ Base* ptr = new Derived();
 delete ptr;  // ⚠️ Only calls ~Base! Memory leak!
 // data is never deleted!
 
-// ✅ Fix: virtual destructor
+// Fix: virtual destructor
 class Base {
 public:
     virtual ~Base() { std::cout << "~Base\n"; }
@@ -248,7 +248,7 @@ public:
     virtual ~Shape() = default;   // Virtual destructor
 };
 
-// Shape s;  // ❌ Error: can't instantiate abstract class
+// Shape s;  // Error: can't instantiate abstract class
 
 class Circle : public Shape {
     double radius;
@@ -262,8 +262,8 @@ public:
     }
 };
 
-Circle c;      // ✅ OK: implemented all pure virtuals
-Shape* s = &c; // ✅ OK: polymorphic use
+Circle c;      // OK: implemented all pure virtuals
+Shape* s = &c; // OK: polymorphic use
 s->draw();     // Calls Circle::draw()
 ```
 
@@ -368,7 +368,7 @@ public:
 
 class MoreDerived : public Derived {
 public:
-    // void foo() override {}  // ❌ Error: foo is final
+    // void foo() override {}  // Error: foo is final
 };
 ```
 
@@ -378,7 +378,7 @@ class Sealed final {
     // Cannot be inherited from
 };
 
-// class Derived : public Sealed {};  // ❌ Error
+// class Derived : public Sealed {};  // Error
 ```
 
 ## Covariant Return Types

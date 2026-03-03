@@ -239,16 +239,16 @@ GUI frameworks typically use dynamic polymorphism (runtime type selection). Gene
 :::success Choosing Polymorphism Type
 
 **Dynamic Polymorphism:**
-- Runtime flexibility ✓
-- Single compiled version ✓
-- vtable overhead ✗
-- Can't inline ✗
+- Runtime flexibility
+- Single compiled version
+- vtable overhead
+- Can't inline
 
 **Static Polymorphism:**
-- Compile-time only ✗
-- Code duplication ✗
-- Zero overhead ✓
-- Can inline ✓
+- Compile-time only
+- Code duplication
+- Zero overhead
+- Can inline
 
 **Choose dynamic** for flexibility  
 **Choose static** for performance  

@@ -74,11 +74,11 @@ Copying a `shared_ptr` increments the reference count. The object persists as lo
 Always prefer `std::make_shared` over direct `new` for efficiency and exception safety.
 
 ```cpp showLineNumbers 
-// ✅ Preferred: make_shared (single allocation)
+// Preferred: make_shared (single allocation)
 auto ptr1 = std::make_shared<int>(42);
 auto ptr2 = std::make_shared<std::string>("hello");
 
-// ❌ Avoid: direct new (two allocations)
+// Avoid: direct new (two allocations)
 std::shared_ptr<int> ptr3(new int(42));
 ```
 
@@ -117,21 +117,21 @@ Reference count updates are thread-safe (atomic), but the pointed-to object is n
 std::shared_ptr<int> global_ptr = std::make_shared<int>(42);
 
 void thread1() {
-    auto local = global_ptr;  // ✅ Thread-safe copy
+    auto local = global_ptr;  // Thread-safe copy
     // Reference count increment is atomic
 }
 
 void thread2() {
-    auto local = global_ptr;  // ✅ Thread-safe copy
-    *local = 100;  // ❌ Data race if thread1 also modifies!
+    auto local = global_ptr;  // Thread-safe copy
+    *local = 100;  // Data race if thread1 also modifies!
 }
 ```
 
 Copying `shared_ptr`s between threads is safe - the reference count operations are atomic. However, if multiple threads access the pointed-to object, you need additional synchronization (mutex, atomic operations) to protect the data.
 
 :::warning Thread Safety
-- ✅ Control block operations (ref counting) are atomic
-- ❌ Object itself is NOT automatically protected
+- Control block operations (ref counting) are atomic
+- Object itself is NOT automatically protected
 - Need mutex/atomics to protect shared data
 :::
 
@@ -259,7 +259,7 @@ Pass by `raw pointer` or `reference` when the function doesn't need ownership. P
 class Node {
 public:
     std::shared_ptr<Node> next;
-    std::shared_ptr<Node> prev;  // ❌ Creates cycle!
+    std::shared_ptr<Node> prev;  // Creates cycle!
     ~Node() { std::cout << "~Node\n"; }
 };
 
@@ -296,7 +296,7 @@ Use `weak_ptr` to break circular references (covered in the next section).
 class Node {
 public:
     std::shared_ptr<Node> next;  // Strong reference forward
-    std::weak_ptr<Node> prev;    // ✅ Weak reference back
+    std::weak_ptr<Node> prev;    // Weak reference back
     ~Node() { std::cout << "~Node\n"; }
 };
 
@@ -446,7 +446,7 @@ Use `unique_ptr` unless you need shared ownership:
 class Widget : public std::enable_shared_from_this<Widget> {
 public:
     std::shared_ptr<Widget> getShared() {
-        return shared_from_this();  // ✅ Safe
+        return shared_from_this();  // Safe
     }
     
     void registerCallback() {
@@ -457,11 +457,11 @@ public:
     }
 };
 
-// ✅ Correct usage
+// Correct usage
 auto w = std::make_shared<Widget>();
 auto shared = w->getShared();
 
-// ❌ Wrong - creates second control block
+// Wrong - creates second control block
 std::shared_ptr<Widget> bad(this);  // DISASTER!
 ```
 
@@ -469,7 +469,7 @@ std::shared_ptr<Widget> bad(this);  // DISASTER!
 ```cpp
 class Bad {
     std::shared_ptr<Bad> getPtr() {
-        return std::shared_ptr<Bad>(this);  // ❌ Second control block!
+        return std::shared_ptr<Bad>(this);  // Second control block!
     }
 };
 

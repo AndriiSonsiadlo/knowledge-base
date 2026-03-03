@@ -36,15 +36,15 @@ private:
 };
 
 Widget w;
-w.publicData = 10;      // ✅ OK
-// w.protectedData = 10; // ❌ Error
-// w.privateData = 10;   // ❌ Error
+w.publicData = 10;      // OK
+// w.protectedData = 10; // Error
+// w.privateData = 10;   // Error
 ```
 
 **Access from outside class:**
-- `public` - ✅ Accessible
-- `protected` - ❌ Not accessible
-- `private` - ❌ Not accessible
+- `public` - Accessible
+- `protected` - Not accessible
+- `private` - Not accessible
 
 **Inside class (member functions):**
 - All members accessible regardless of access level
@@ -55,18 +55,18 @@ w.publicData = 10;      // ✅ OK
 
 ```cpp showLineNumbers 
 class MyClass {
-    int x;  // ❌ private by default
+    int x;  // private by default
 };
 
 struct MyStruct {
-    int x;  // ✅ public by default
+    int x;  // public by default
 };
 
 MyClass c;
-// c.x = 10;  // ❌ Error: private
+// c.x = 10;  // Error: private
 
 MyStruct s;
-s.x = 10;     // ✅ OK: public
+s.x = 10;     // OK: public
 ```
 
 :::success class vs struct
@@ -135,13 +135,13 @@ public:
 };
 
 void revealSecret(const Secret& s) {
-    std::cout << s.data;  // ✅ Can access private
+    std::cout << s.data;  // Can access private
 }
 
 class SecretKeeper {
 public:
     void peek(const Secret& s) {
-        std::cout << s.data;  // ✅ Can access private
+        std::cout << s.data;  // Can access private
     }
 };
 ```
@@ -178,11 +178,11 @@ public:
 };
 
 void Accessor::read(const Storage& s) {
-    std::cout << s.data;  // ✅ OK
+    std::cout << s.data;  // OK
 }
 
 void Accessor::write(Storage& s) {
-    // s.data = 100;  // ❌ Error: not a friend
+    // s.data = 100;  // Error: not a friend
 }
 ```
 
@@ -207,21 +207,21 @@ public:
 class Derived : public Base {
 public:
     void modify() {
-        protectedValue = 100;  // ✅ OK
-        // privateValue = 100;  // ❌ Error: private
+        protectedValue = 100;  // OK
+        // privateValue = 100;  // Error: private
     }
 };
 
 Derived d;
-// d.protectedValue = 100;  // ❌ Still protected from outside
+// d.protectedValue = 100;  // Still protected from outside
 ```
 
 **Access summary:**
 | Member | Same Class | Derived Class | Outside |
 |--------|-----------|---------------|---------|
-| public | ✅ | ✅ | ✅ |
-| protected | ✅ | ✅ | ❌ |
-| private | ✅ | ❌ | ❌ |
+| public | Yes | Yes | Yes |
+| protected | Yes | Yes | No |
+| private | Yes | No | No |
 
 ## Access Control in Inheritance
 
@@ -279,16 +279,16 @@ class Car2 : private Engine {
     // start() is private (hidden from users)
 public:
     void ignition() {
-        start();  // ✅ Can call privately inherited member
+        start();  // Can call privately inherited member
     }
 };
 
 Car1 c1;
-c1.start();  // ✅ Public inheritance
+c1.start();  // Public inheritance
 
 Car2 c2;
-// c2.start();  // ❌ Private inheritance hides it
-c2.ignition();  // ✅ Use public interface
+// c2.start();  // Private inheritance hides it
+c2.ignition();  // Use public interface
 ```
 
 Private inheritance hides the base class interface, making it an implementation detail. This is useful when you want to reuse base class implementation without exposing its interface.
@@ -309,7 +309,7 @@ public:
 };
 
 Derived d;
-d.protectedFunc();  // ✅ Now accessible (was protected in Base)
+d.protectedFunc();  // Now accessible (was protected in Base)
 ```
 
 This is useful when you want to expose specific base class members that would otherwise be hidden. It's commonly used to restore access to members hidden by private/protected inheritance.
@@ -326,7 +326,7 @@ private:
     class Inner {
     public:
         void access(Outer& o) {
-            o.secret = 100;  // ✅ Can access Outer's private members
+            o.secret = 100;  // Can access Outer's private members
         }
     };
     
@@ -358,15 +358,15 @@ public:
     static int publicCounter;
     
     static void increment() {
-        privateCounter++;    // ✅ OK in member function
+        privateCounter++;    // OK in member function
         protectedCounter++;
         publicCounter++;
     }
 };
 
-// Config::privateCounter++;     // ❌ Error: private
-// Config::protectedCounter++;   // ❌ Error: protected
-Config::publicCounter++;         // ✅ OK: public
+// Config::privateCounter++;     // Error: private
+// Config::protectedCounter++;   // Error: protected
+Config::publicCounter++;         // OK: public
 ```
 
 ## Summary

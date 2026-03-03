@@ -70,7 +70,7 @@ std::unique_ptr<int, decltype(&customDelete)> ptr2(
 std::unique_ptr<int, Deleter1> p1;
 std::unique_ptr<int, Deleter2> p2;
 
-// ❌ Different types - cannot assign
+// Different types - cannot assign
 // p1 = std::move(p2);  // Error
 
 // Size depends on deleter
@@ -88,7 +88,7 @@ auto d2 = [](int* p) { delete p; };
 std::shared_ptr<int> ptr1(new int(1), d1);
 std::shared_ptr<int> ptr2(new int(2), d2);
 
-// ✅ Same type despite different deleters
+// Same type despite different deleters
 ptr1 = ptr2;
 
 std::vector<std::shared_ptr<int>> vec = {ptr1, ptr2};

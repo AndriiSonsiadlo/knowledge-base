@@ -159,18 +159,18 @@ Widget w = createWidget();  // Direct construction in w's memory
 ```cpp showLineNumbers 
 std::vector<int> v1 = {1, 2, 3};
 
-// ✅ Good: Moving from local about to die
+// Good: Moving from local about to die
 std::vector<int> v2 = std::move(v1);
 // Don't use v1 after this!
 
-// ✅ Good: Moving into function
+// Good: Moving into function
 processData(std::move(v2));
 
-// ❌ Bad: Don't move and then use
+// Bad: Don't move and then use
 auto v3 = std::move(v1);
 v1.push_back(4);  // ⚠️ Undefined behavior!
 
-// ❌ Bad: Don't move from const
+// Bad: Don't move from const
 const std::vector<int> cv = {1,2,3};
 auto v4 = std::move(cv);  // Copies anyway! const can't be moved-from
 ```

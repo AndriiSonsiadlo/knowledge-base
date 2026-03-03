@@ -40,17 +40,17 @@ std::cout << ref;     // 200 (ref sees the change)
 
 ## Initialization Rules
 ```cpp showLineNumbers
-// ✅ Must initialize
+// Must initialize
 int x = 42;
 int& ref = x;
 
-// ❌ Cannot be uninitialized
+// Cannot be uninitialized
 int& bad_ref;  // Error
 
-// ❌ Cannot be null
+// Cannot be null
 int& null_ref = nullptr;  // Error
 
-// ❌ Cannot reseat
+// Cannot reseat
 int y = 100;
 ref = y;  // Copies value, doesn't reseat
 ```
@@ -81,18 +81,18 @@ Const references allow reading but prevent modification, making them ideal for p
 
 :::success Best Practice for Large Objects
 ```cpp
-// ❌ Expensive copy
+// Expensive copy
 void print(std::string s) {
     std::cout << s;
 }
 
-// ✅ No copy, can't modify
+// No copy, can't modify
 void print(const std::string& s) {
     std::cout << s;
     // s[0] = 'X';  // Error: const
 }
 
-print("Hello");  // ✅ Binds to temporary
+print("Hello");  // Binds to temporary
 ```
 :::
 
@@ -122,10 +122,10 @@ public:
 };
 
 Widget w;
-w.getName() = "New Name";  // ✅ Modifies through reference
+w.getName() = "New Name";  // Modifies through reference
 
 const Widget cw;
-// cw.getName() = "X";     // ❌ const version returns const&
+// cw.getName() = "X";     // const version returns const&
 ```
 
 Returning `non-const references` enables chaining and direct modification of internals. Returning `const references` provides efficient read access without allowing modification. This pattern is common for container element access (`vector::operator[]`) and getter methods.
@@ -137,17 +137,17 @@ Never return references to local variables. Locals are destroyed when the functi
 ```cpp showLineNumbers 
 int& dangerous() {
     int x = 42;
-    return x;  // ❌ x destroyed at return
+    return x;  // x destroyed at return
 }
 
 int& safe(int& param) {
-    return param;  // ✅ param outlives function
+    return param;  // param outlives function
 }
 
 class Safe {
     int data;
 public:
-    int& get() { return data; }  // ✅ member outlives call
+    int& get() { return data; }  // member outlives call
 };
 ```
 
@@ -170,10 +170,10 @@ For a more detailed explanation, see: [Move and copy semantics](../07-classes-an
 ```cpp showLineNumbers 
 int x = 10, y = 20, z = 30;
 
-// ❌ Can't store references in vector
+// Can't store references in vector
 // std::vector<int&> refs;  // Error
 
-// ✅ Can store reference_wrappers
+// Can store reference_wrappers
 std::vector<std::reference_wrapper<int>> refs;
 refs.push_back(std::ref(x));
 refs.push_back(std::ref(y));
@@ -192,9 +192,9 @@ References can't be stored in containers because they're not regular objects (ca
 | Feature         | Reference                 | Pointer           |
 |-----------------|---------------------------|-------------------|
 | Syntax          | `int& ref = x`            | `int* ptr = &x`   |
-| Null possible   | ❌ No                      | ✅ Yes (`nullptr`) |
-| Must initialize | ✅ Yes                     | ❌ No (but should) |
-| Can reassign    | ❌ No (always same object) | ✅ Yes             |
+| Null possible   | No                      | Yes (`nullptr`) |
+| Must initialize | Yes                     | No (but should) |
+| Can reassign    | No (always same object) | Yes             |
 | Dereference     | Automatic                 | Manual (`*ptr`)   |
 | Size            | Same as original          | 8 bytes (64-bit)  |
 

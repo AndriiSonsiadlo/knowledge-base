@@ -50,8 +50,8 @@ std::cout << value;     // 100 (changed!)
 :::warning Declaration Syntax
 ```cpp
 int* p1, p2;    // ⚠️ p1 is pointer, p2 is int!
-int *p3, *p4;   // ✅ Both are pointers
-int* p5;        // ✅ Best: one per line
+int *p3, *p4;   // Both are pointers
+int* p5;        // Best: one per line
 int* p6;
 ```
 :::
@@ -65,9 +65,9 @@ int* bad;            // garbage address
 int* ptr = nullptr;  // C++11: null pointer literal
 
 if (ptr) {
-    *ptr = 42;  // ✅ Safe: checked first
+    *ptr = 42;  // Safe: checked first
 }
-*ptr = 42;      // ❌ Crash! Dereferencing null pointer
+*ptr = 42;      // Crash! Dereferencing null pointer
 ```
 
 :::warning Rules
@@ -105,11 +105,11 @@ int* p1 = &a;
 int* p2 = &a;
 int* p3 = &b;
 
-if (p1 == p2) {  // ✅ True: both point to a
+if (p1 == p2) {  // True: both point to a
     std::cout << "Same address\n";
 }
 
-if (p1 != p3) {  // ✅ True: point to different objects
+if (p1 != p3) {  // True: point to different objects
     std::cout << "Different addresses\n";
 }
 ```
@@ -142,8 +142,8 @@ int* ptr = arr;
 sizeof(arr);  // 20 bytes (5 * 4)
 sizeof(ptr);  // 8 bytes (pointer size on 64-bit)
 
-// arr = ptr;  // ❌ Error: can't assign to array
-ptr = arr;     // ✅ OK: pointer can be reassigned
+// arr = ptr;  // Error: can't assign to array
+ptr = arr;     // OK: pointer can be reassigned
 ```
 
 :::info Array-Pointer Relationship
@@ -194,7 +194,7 @@ A dangling pointer points to memory that has been deallocated or is no longer va
 ```cpp showLineNumbers 
 int* dangling = new int(42);
 delete dangling;
-*dangling = 100;  // ❌ Undefined behavior: use-after-free
+*dangling = 100;  // Undefined behavior: use-after-free
 
 // Set to null after delete to catch errors
 delete dangling;
@@ -211,13 +211,13 @@ Returning a pointer to a local variable creates a dangling pointer because local
 ```cpp showLineNumbers 
 int* dangerous() {
     int x = 42;
-    return &x;  // ❌ Dangling: x destroyed when function returns
+    return &x;  // Dangling: x destroyed when function returns
 }
 
 int* ptr = dangerous();
-*ptr = 100;  // ❌ Undefined behavior
+*ptr = 100;  // Undefined behavior
 
-// ✅ Correct: return pointer to dynamic memory
+// Correct: return pointer to dynamic memory
 int* safe() {
     return new int(42);  // Caller must delete
 }
@@ -227,11 +227,11 @@ int* safe() {
 ```cpp showLineNumbers
 int* ptr = new int(42);
 delete ptr;
-*ptr = 100;     // ❌ Undefined behavior
+*ptr = 100;     // Undefined behavior
 
 // Solution: nullify after delete
 delete ptr;
-ptr = nullptr;  // ✅ Now safe to check
+ptr = nullptr;  // Now safe to check
 if (ptr) {
     *ptr = 100; // Won't execute
 }
@@ -241,13 +241,13 @@ if (ptr) {
 ```cpp showLineNumbers
 void leak() {
     int* ptr = new int(42);
-    // ❌ Never deleted - memory leaked
+    // Never deleted - memory leaked
 }
 
 void correct() {
     int* ptr = new int(42);
     // Use ptr...
-    delete ptr;  // ✅ Cleaned up
+    delete ptr;  // Cleaned up
 }
 ```
 
@@ -283,9 +283,9 @@ A `void*` is a generic pointer that can point to any type but must be cast befor
 int x = 42;
 void* vptr = &x;  // Can point to anything
 
-// *vptr;  // ❌ Error: can't dereference void*
+// *vptr;  // Error: can't dereference void*
 int* iptr = static_cast<int*>(vptr);  // Cast back to specific type
-*iptr = 100;  // ✅ OK after cast
+*iptr = 100;  // OK after cast
 
 // Used in C APIs
 void* memcpy(void* dest, const void* src, size_t n);

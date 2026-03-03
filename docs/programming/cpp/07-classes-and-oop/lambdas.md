@@ -145,12 +145,12 @@ By default, captured-by-value variables are const:
 int x = 10;
 
 auto lambda1 = [x]() { 
-    // x = 20;  // ❌ Error: x is const
+    // x = 20;  // Error: x is const
     return x;
 };
 
 auto lambda2 = [x]() mutable { 
-    x = 20;  // ✅ OK: modifies copy
+    x = 20;  // OK: modifies copy
     return x;
 };
 
@@ -283,19 +283,19 @@ auto y = lambda(3.14);   // double
 ## Captures and Object Lifetime
 
 ```cpp showLineNumbers 
-// ❌ Dangling reference
+// Dangling reference
 std::function<int()> makeFunc() {
     int x = 42;
-    return [&x]() { return x; };  // ❌ x destroyed!
+    return [&x]() { return x; };  // x destroyed!
 }
 
-// ✅ Capture by value
+// Capture by value
 std::function<int()> makeFunc() {
     int x = 42;
-    return [x]() { return x; };  // ✅ Copy of x
+    return [x]() { return x; };  // Copy of x
 }
 
-// ✅ Init capture with move
+// Init capture with move
 std::function<int()> makeFunc() {
     auto ptr = std::make_unique<int>(42);
     return [p = std::move(ptr)]() { return *p; };

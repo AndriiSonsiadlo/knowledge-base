@@ -153,13 +153,13 @@ if (auto locked = weak.lock()) {
 Directly checking and then accessing would have a race condition in multithreaded code.
 
 ```cpp showLineNumbers 
-// ❌ Race condition (don't do this)
+// Race condition (don't do this)
 if (!weak.expired()) {
     // Another thread might destroy last shared_ptr here!
     auto shared = weak.lock();  // Might return empty
 }
 
-// ✅ Safe: atomic check-and-lock
+// Safe: atomic check-and-lock
 if (auto shared = weak.lock()) {
     // Guaranteed to have valid shared_ptr here
     *shared = 100;
@@ -175,7 +175,7 @@ if (auto shared = weak.lock()) {
 class Node {
 public:
     std::shared_ptr<Node> next;
-    std::shared_ptr<Node> prev;  // ❌ Circular reference!
+    std::shared_ptr<Node> prev;  // Circular reference!
     ~Node() { std::cout << "~Node\n"; }
 };
 
@@ -397,16 +397,16 @@ std::shared_ptr<int> shared = std::make_shared<int>(42);
 std::weak_ptr<int> weak = shared;
 
 void thread1() {
-    auto locked = weak.lock();  // ✅ Thread-safe lock
+    auto locked = weak.lock();  // Thread-safe lock
     if (locked) {
-        *locked = 100;  // ❌ Data race if thread2 also modifies
+        *locked = 100;  // Data race if thread2 also modifies
     }
 }
 
 void thread2() {
-    auto locked = weak.lock();  // ✅ Thread-safe lock
+    auto locked = weak.lock();  // Thread-safe lock
     if (locked) {
-        *locked = 200;  // ❌ Data race with thread1
+        *locked = 200;  // Data race with thread1
     }
 }
 ```
@@ -414,9 +414,9 @@ void thread2() {
 Creating and destroying weak_ptrs, copying them, and calling `lock()` are all thread-safe. However, if multiple threads lock and access the object simultaneously, you need additional synchronization.
 
 :::info Thread Safety
-- ✅ `lock()` is thread-safe (atomic)
-- ✅ Creating/destroying weak_ptr is thread-safe
-- ❌ Object itself needs separate synchronization
+- `lock()` is thread-safe (atomic)
+- Creating/destroying weak_ptr is thread-safe
+- Object itself needs separate synchronization
 :::
 
 ## enable_shared_from_this
@@ -427,11 +427,11 @@ When you need to create a `shared_ptr` or `weak_ptr` to `this` inside a member f
 class Widget : public std::enable_shared_from_this<Widget> {
 public:
     std::weak_ptr<Widget> getWeakPtr() {
-        return weak_from_this();  // ✅ Safe
+        return weak_from_this();  // Safe
     }
     
     std::shared_ptr<Widget> getSharedPtr() {
-        return shared_from_this();  // ✅ Safe
+        return shared_from_this();  // Safe
     }
     
     void registerCallback() {
@@ -445,7 +445,7 @@ public:
 };
 
 auto widget = std::make_shared<Widget>();
-auto weak = widget->getWeakPtr();  // ✅ Correctly shares control block
+auto weak = widget->getWeakPtr();  // Correctly shares control block
 ```
 
 Never create a shared_ptr directly from `this` - it creates a second control block, causing double-delete. `enable_shared_from_this` provides the correct way to get shared ownership of `this`.
@@ -454,31 +454,31 @@ Never create a shared_ptr directly from `this` - it creates a second control blo
 
 :::danger Pitfalls
 ```cpp
-// ❌ Cannot dereference weak_ptr
+// Cannot dereference weak_ptr
 std::weak_ptr<int> weak = ...;
 // *weak;  // Error: no operator*
 
-// ❌ Checking expired separately
+// Checking expired separately
 if (!weak.expired()) {
     auto shared = weak.lock();  // ⚠️ Race: might expire here
 }
 
-// ✅ Use lock() directly
+// Use lock() directly
 if (auto shared = weak.lock()) {
     // Safe
 }
 
-// ❌ Creating from this
+// Creating from this
 class Bad {
     std::weak_ptr<Bad> getWeak() {
-        return std::weak_ptr<Bad>(this);  // ❌ Wrong!
+        return std::weak_ptr<Bad>(this);  // Wrong!
     }
 };
 
-// ✅ Use enable_shared_from_this
+// Use enable_shared_from_this
 class Good : public std::enable_shared_from_this<Good> {
     std::weak_ptr<Good> getWeak() {
-        return weak_from_this();  // ✅ Correct
+        return weak_from_this();  // Correct
     }
 };
 ```

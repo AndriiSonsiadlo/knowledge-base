@@ -44,7 +44,7 @@ The padding after `b` ensures `c` starts at an address divisible by 4 (its align
 
 Reordering members from largest to smallest minimizes padding waste.
 ```cpp showLineNumbers
-// ❌ Wasteful: 32 bytes
+// Wasteful: 32 bytes
 class Wasteful {
     char a;     // 1 byte + 7 padding
     double b;   // 8 bytes
@@ -52,7 +52,7 @@ class Wasteful {
     double d;   // 8 bytes
 };
 
-// ✅ Efficient: 24 bytes (25% smaller)
+// Efficient: 24 bytes (25% smaller)
 class Efficient {
     double b;   // 8 bytes
     double d;   // 8 bytes

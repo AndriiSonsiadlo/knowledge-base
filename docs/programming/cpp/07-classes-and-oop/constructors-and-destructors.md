@@ -49,11 +49,11 @@ class Widget {
     std::string name;
     
 public:
-    // ✅ Correct: initializer list
+    // Correct: initializer list
     Widget(int i, std::string n) 
         : id(i), name(n) {}
     
-    // ❌ Won't compile: can't assign to const
+    // Won't compile: can't assign to const
     Widget(int i, std::string n) {
         id = i;      // Error: id is const
         name = n;    // Works but inefficient (default construct + assign)
@@ -89,7 +89,7 @@ public:
     Widget(int val) : first(val), second(first * 2) {}
     // Order: Base → second → first (declaration order)
     
-    // ✅ Correct: match declaration order
+    // Correct: match declaration order
     Widget(int val) : second(val), first(val * 2) {}
 };
 
@@ -166,10 +166,10 @@ public:
 :::danger Delegation Rules
 **Cannot mix** delegation with member initialization:
 ```cpp
-// ❌ Error: can't have both
+// Error: can't have both
 Widget(int v) : Widget(v, "default"), value(42) {}
 
-// ✅ Choose one:
+// Choose one:
 Widget(int v) : Widget(v, "default") {}  // Delegation
 // OR
 Widget(int v) : value(v), name("default") {}  // Direct
@@ -189,14 +189,14 @@ void process(String s) {}
 
 process(100);  // ⚠️ Implicit: int → String(100)
 
-// ✅ Use explicit
+// Use explicit
 class String {
 public:
     explicit String(int size) {}
 };
 
-// process(100);  // ❌ Error: no implicit conversion
-process(String(100));  // ✅ OK: explicit conversion
+// process(100);  // Error: no implicit conversion
+process(String(100));  // OK: explicit conversion
 ```
 
 :::success Use explicit
@@ -218,7 +218,7 @@ public:
 };
 
 Widget w1;
-// Widget w2 = w1;  // ❌ Error: copy deleted
+// Widget w2 = w1;  // Error: copy deleted
 ```
 
 `= default` tells compiler to generate the default implementation. `= delete` prevents the function from being used at all.
@@ -249,7 +249,7 @@ public:
 **Solution**: Use RAII members that clean themselves up.
 ```cpp showLineNumbers
 class Resource {
-    std::unique_ptr<int[]> data;  // ✅ Cleans up automatically
+    std::unique_ptr<int[]> data;  // Cleans up automatically
     
 public:
     Resource(int size) : data(new int[size]) {
@@ -272,7 +272,7 @@ Always make base class destructor virtual if you'll delete through a base pointe
 ```cpp showLineNumbers
 class Base {
 public:
-    ~Base() {  // ❌ Not virtual!
+    ~Base() {  // Not virtual!
         std::cout << "~Base\n";
     }
 };
@@ -292,7 +292,7 @@ public:
 Base* ptr = new Derived();
 delete ptr;  // ⚠️ Only calls ~Base! Memory leak!
 
-// ✅ Fix: virtual destructor
+// Fix: virtual destructor
 class Base {
 public:
     virtual ~Base() { std::cout << "~Base\n"; }
@@ -353,7 +353,7 @@ public:
 
 class Derived : public Base {
 public:
-    using Base::Base;  // ✅ Inherit all Base constructors
+    using Base::Base;  // Inherit all Base constructors
     
     // Now have:
     // Derived(int x) : Base(x) {}

@@ -36,8 +36,8 @@ public:
 };
 
 Dog d("Buddy");
-d.eat();   // ✅ Inherited from Animal
-d.bark();  // ✅ Defined in Dog
+d.eat();   // Inherited from Animal
+d.bark();  // Defined in Dog
 ```
 
 **Key points:**
@@ -123,7 +123,7 @@ public:
     virtual ~Shape() = default;
 };
 
-// Shape s;  // ❌ Error: can't instantiate abstract class
+// Shape s;  // Error: can't instantiate abstract class
 
 class Rectangle : public Shape {
 public:
@@ -134,7 +134,7 @@ private:
     double width, height;
 };
 
-Rectangle r;  // ✅ OK: all pure virtuals implemented
+Rectangle r;  // OK: all pure virtuals implemented
 ```
 
 Abstract classes define interfaces that derived classes must implement.
@@ -152,7 +152,7 @@ public:
 
 class Derived : public Base {
 public:
-    void foo() override {  // ✅ Explicitly overriding
+    void foo() override {  // Explicitly overriding
         // If foo() doesn't exist in Base, compiler error
     }
     
@@ -160,11 +160,11 @@ public:
         // No further derived class can override bar()
     }
     
-    // void baz() override {}  // ❌ Error: nothing to override
+    // void baz() override {}  // Error: nothing to override
 };
 
 class MoreDerived : public Derived {
-    // void bar() override {}  // ❌ Error: bar is final
+    // void bar() override {}  // Error: bar is final
 };
 ```
 
@@ -201,7 +201,7 @@ Always make base class destructor virtual if you'll delete through base pointer:
 ```cpp showLineNumbers 
 class Base {
 public:
-    ~Base() { std::cout << "~Base\n"; }  // ❌ Not virtual!
+    ~Base() { std::cout << "~Base\n"; }  // Not virtual!
 };
 
 class Derived : public Base {
@@ -214,7 +214,7 @@ public:
 Base* ptr = new Derived();
 delete ptr;  // ⚠️ Only calls ~Base, not ~Derived! Memory leak!
 
-// ✅ Fix: virtual destructor
+// Fix: virtual destructor
 class Base {
 public:
     virtual ~Base() { std::cout << "~Base\n"; }
