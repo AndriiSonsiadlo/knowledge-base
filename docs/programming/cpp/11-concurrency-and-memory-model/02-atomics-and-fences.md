@@ -183,7 +183,7 @@ void writer() {
 void reader() {
     while (!ready.load(std::memory_order_relaxed)); // (3)
     std::atomic_thread_fence(std::memory_order_acquire);  // Fence!
-    assert(data == 42);  // ✅ Now guaranteed!
+    assert(data == 42);  // Now guaranteed!
 }
 ```
 
