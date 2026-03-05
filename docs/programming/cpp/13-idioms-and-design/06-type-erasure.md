@@ -25,9 +25,9 @@ struct Functor {
 };
 
 // How to store both?
-// ❌ Can't use common base class - they're unrelated types
-// ❌ Templates require knowing exact type at compile-time
-// ✅ Type erasure!
+// Can't use common base class - they're unrelated types
+// Templates require knowing exact type at compile-time
+// Type erasure!
 ```
 
 ## Basic Type Erasure Pattern

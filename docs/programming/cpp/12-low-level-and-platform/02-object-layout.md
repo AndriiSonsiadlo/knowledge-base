@@ -185,7 +185,7 @@ class Widget {
 
 ## Member Access Optimization
 ```cpp showLineNumbers
-// ❌ Poor layout (12 bytes wasted)
+// Poor layout (12 bytes wasted)
 struct Poor {
     char a;      // offset 0
     // 7 padding
@@ -195,7 +195,7 @@ struct Poor {
     // 7 padding
 };  // sizeof = 24
 
-// ✅ Optimized (6 bytes wasted)
+// Optimized (6 bytes wasted)
 struct Optimized {
     double b;    // offset 0
     char a;      // offset 8

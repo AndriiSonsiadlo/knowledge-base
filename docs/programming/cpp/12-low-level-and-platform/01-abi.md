@@ -110,18 +110,18 @@ public:
 ### ABI-Safe Changes
 
 ```cpp showLineNumbers
-// ✅ ABI-safe: adding non-virtual function
+// ABI-safe: adding non-virtual function
 class Widget {
     int value_;
 public:
     int getValue() const;
-    int calculate() const;  // ✅ OK: non-virtual, new
+    int calculate() const;  // OK: non-virtual, new
 };
 
-// ✅ ABI-safe: adding at end
+// ABI-safe: adding at end
 class Widget {
     int value_;
-    int newField_;  // ✅ OK: at end, existing offsets unchanged
+    int newField_;  // OK: at end, existing offsets unchanged
 public:
     int getValue() const;
 };
@@ -182,7 +182,7 @@ struct Widget::Impl {
 | macOS    | Clang     | Itanium C++ ABI |
 | Android  | Clang     | Itanium C++ ABI |
 
-**Compatibility**: GCC ↔ Clang (same ABI). MSVC ↔ GCC/Clang ❌.
+**Compatibility**: GCC ↔ Clang (same ABI). MSVC ↔ GCC/Clang.
 
 ## Checking ABI Compatibility
 

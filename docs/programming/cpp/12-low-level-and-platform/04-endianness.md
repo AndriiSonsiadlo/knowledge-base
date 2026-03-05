@@ -249,16 +249,16 @@ T byteSwap(T value) {
 
 ## Pitfalls
 ```cpp showLineNumbers
-// ❌ Wrong: direct binary write (not portable)
+// Wrong: direct binary write (not portable)
 uint32_t value = 0x12345678;
 file.write(reinterpret_cast<char*>(&value), sizeof(value));
 // Different byte order on different systems!
 
-// ✅ Right: convert to fixed byte order
+// Right: convert to fixed byte order
 uint32_t network_value = htonl(value);
 file.write(reinterpret_cast<char*>(&network_value), sizeof(network_value));
 
-// ❌ Wrong: type punning with endianness assumptions
+// Wrong: type punning with endianness assumptions
 union {
     uint32_t i;
     char bytes[4];

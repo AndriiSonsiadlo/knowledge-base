@@ -19,7 +19,7 @@ Non-copyable types can still be moved, allowing transfer of ownership without du
 Some resources should not or cannot be copied:
 
 ```cpp showLineNumbers
-// ❌ Copying these would be problematic
+// Copying these would be problematic
 class FileHandle {
     int fd_;  // File descriptor
     // Copying fd_ would create two handles to same file!
@@ -56,11 +56,11 @@ public:
 
 int main() {
     NonCopyable a;
-    NonCopyable b = a;      // ❌ Error: deleted copy constructor
+    NonCopyable b = a;      // Error: deleted copy constructor
     NonCopyable c;
-    c = a;                  // ❌ Error: deleted copy assignment
+    c = a;                  // Error: deleted copy assignment
     
-    NonCopyable d = std::move(a);  // ✅ OK: moved
+    NonCopyable d = std::move(a);  // OK: moved
 }
 ```
 
@@ -172,8 +172,8 @@ public:
 int main() {
     UniqueResource r1(42);
     
-    UniqueResource r2 = r1;           // ❌ Error: deleted copy
-    UniqueResource r3 = std::move(r1); // ✅ OK: moved
+    UniqueResource r2 = r1;           // Error: deleted copy
+    UniqueResource r3 = std::move(r1); // OK: moved
     
     // r1 is now in valid but unspecified state (data_ == nullptr)
     // r3 owns the resource
@@ -356,23 +356,23 @@ Many standard library types are non-copyable:
 
 // std::unique_ptr - move-only
 std::unique_ptr<int> p1 = std::make_unique<int>(42);
-std::unique_ptr<int> p2 = p1;            // ❌ Error
-std::unique_ptr<int> p3 = std::move(p1); // ✅ OK
+std::unique_ptr<int> p2 = p1;            // Error
+std::unique_ptr<int> p3 = std::move(p1); // OK
 
 // std::thread - move-only
 std::thread t1([]{ /* work */ });
-std::thread t2 = t1;            // ❌ Error
-std::thread t3 = std::move(t1); // ✅ OK
+std::thread t2 = t1;            // Error
+std::thread t3 = std::move(t1); // OK
 
 // std::ifstream - move-only (C++11+)
 std::ifstream f1("file.txt");
-std::ifstream f2 = f1;            // ❌ Error
-std::ifstream f3 = std::move(f1); // ✅ OK
+std::ifstream f2 = f1;            // Error
+std::ifstream f3 = std::move(f1); // OK
 
 // std::mutex - non-copyable, non-movable
 std::mutex m1;
-std::mutex m2 = m1;            // ❌ Error
-std::mutex m3 = std::move(m1); // ❌ Error
+std::mutex m2 = m1;            // Error
+std::mutex m3 = std::move(m1); // Error
 ```
 
 ## Checking Copyability
@@ -447,14 +447,14 @@ public:
 ### When to Make Non-Copyable
 
 ```cpp showLineNumbers
-// ✅ SHOULD be non-copyable:
+// SHOULD be non-copyable:
 class FileDescriptor;     // System resource
 class MutexLock;          // Lock state
 class ThreadPool;         // Manages threads
 class NetworkSocket;      // Network connection
 class DatabaseTransaction; // Transaction state
 
-// ❌ Should probably be copyable:
+// Should probably be copyable:
 class Point { int x, y; };          // Simple value
 class std::string;                  // Value semantics
 class std::vector<int>;             // Container

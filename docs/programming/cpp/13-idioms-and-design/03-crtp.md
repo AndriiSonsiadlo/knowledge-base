@@ -510,12 +510,12 @@ class Base {
     // ...
 };
 
-// ❌ Wrong - Derived doesn't inherit
+// Wrong - Derived doesn't inherit
 class Derived {
     // Won't work with Base<Derived>
 };
 
-// ✅ Correct
+// Correct
 class Derived : public Base<Derived> {
     // ...
 };
@@ -527,12 +527,12 @@ class Derived : public Base<Derived> {
 template<typename Derived>
 class Base {
 public:
-    // ❌ Problem: Derived incomplete here
+    // Problem: Derived incomplete here
     void problem() {
         Derived d;  // Error: incomplete type
     }
     
-    // ✅ OK: Only casting pointer
+    // OK: Only casting pointer
     void okay() {
         static_cast<Derived*>(this)->method();
     }

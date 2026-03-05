@@ -61,8 +61,8 @@ int c_calculate(double a, double b);
 #include "c_library.h"
 
 int main() {
-    c_function(42);               // ✅ Works
-    int result = c_calculate(3.14, 2.71);  // ✅ Works
+    c_function(42);               // Works
+    int result = c_calculate(3.14, 2.71);  // Works
 }
 ```
 
@@ -124,34 +124,34 @@ int main() {
 
 ## What Works in extern "C"
 ```cpp showLineNumbers
-// ✅ OK: Plain functions
+// OK: Plain functions
 extern "C" void func(int x);
 
-// ✅ OK: Function pointers
+// OK: Function pointers
 extern "C" typedef void (*callback_t)(int);
 
-// ✅ OK: POD structs
+// OK: POD structs
 extern "C" struct Point {
     int x, y;
 };
 
-// ❌ Can't: Overloaded functions
+// Can't: Overloaded functions
 extern "C" {
-    void func(int x);      // ❌ Error: overloading
+    void func(int x);      // Error: overloading
     void func(double x);   // not allowed in C
 }
 
-// ❌ Can't: Member functions
+// Can't: Member functions
 extern "C" {
     class Widget {
-        void method();  // ❌ Can't use extern "C" on members
+        void method();  // Can't use extern "C" on members
     };
 }
 
-// ❌ Can't: Templates
+// Can't: Templates
 extern "C" {
     template<typename T>
-    void func(T x);  // ❌ Error: templates not in C
+    void func(T x);  // Error: templates not in C
 }
 ```
 
@@ -159,7 +159,7 @@ extern "C" {
 
 ## Type Compatibility
 ```cpp showLineNumbers
-// ✅ Compatible types
+// Compatible types
 extern "C" {
     // C fundamental types work
     void func(int, double, char);
@@ -174,10 +174,10 @@ extern "C" {
     void process(int* arr, size_t len);
 }
 
-// ❌ Incompatible types
+// Incompatible types
 extern "C" {
-    // void func(std::string s);  // ❌ C++ class
-    // void func(std::vector<int> v);  // ❌ STL
+    // void func(std::string s);  // C++ class
+    // void func(std::vector<int> v);  // STL
 }
 ```
 
@@ -281,12 +281,12 @@ register_callback(callback_wrapper, &h);
 
 ## Exceptions and extern "C"
 ```cpp showLineNumbers
-// ❌ Don't throw exceptions across C boundary
+// Don't throw exceptions across C boundary
 extern "C" void risky() {
-    throw std::runtime_error("Error");  // ❌ UB if called from C!
+    throw std::runtime_error("Error");  // UB if called from C!
 }
 
-// ✅ Catch exceptions, return error codes
+// Catch exceptions, return error codes
 extern "C" int safe_function(int x) {
     try {
         might_throw(x);
@@ -316,7 +316,7 @@ gcc main.c -L. -lmycpplib -lstdc++ -o app
 
 ## Common Pitfalls
 ```cpp showLineNumbers
-// ❌ Forgetting extern "C"
+// Forgetting extern "C"
 // header.h
 void func(int x);  // C++ mangled name
 
@@ -324,7 +324,7 @@ void func(int x);  // C++ mangled name
 void func(int x);  // C linker looks for unmangled name
 // Linking error: undefined reference
 
-// ✅ Fixed
+// Fixed
 // header.h
 extern "C" void func(int x);
 ```

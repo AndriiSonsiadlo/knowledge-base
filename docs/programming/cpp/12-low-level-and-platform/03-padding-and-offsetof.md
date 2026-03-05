@@ -94,38 +94,38 @@ uint8_t* data_ptr = reinterpret_cast<uint8_t*>(base + data_offset);
 
 ## offsetof Requirements
 ```cpp showLineNumbers
-// ✅ OK: standard layout type
+// OK: standard layout type
 struct StandardLayout {
     int a;
     int b;
 };
-offsetof(StandardLayout, b);  // ✅ Defined
+offsetof(StandardLayout, b);  // Defined
 
-// ❌ UB: non-standard layout (virtual functions)
+// UB: non-standard layout (virtual functions)
 struct NonStandard {
     virtual void f();
     int x;
 };
-// offsetof(NonStandard, x);  // ❌ Undefined behavior!
+// offsetof(NonStandard, x);  // Undefined behavior!
 
-// ❌ UB: non-standard layout (base class)
+// UB: non-standard layout (base class)
 struct Base { int a; };
 struct Derived : Base { int b; };
-// offsetof(Derived, b);  // ❌ UB
+// offsetof(Derived, b);  // UB
 ```
 
 **Rule**: `offsetof` only safe for standard-layout types.
 
 ## Minimizing Padding
 ```cpp showLineNumbers
-// ❌ Poor: 24 bytes (12 wasted)
+// Poor: 24 bytes (12 wasted)
 struct Poor {
     char a;      // 1 + 7 padding
     double b;    // 8
     char c;      // 1 + 7 padding
 };
 
-// ✅ Better: 16 bytes (6 wasted)
+// Better: 16 bytes (6 wasted)
 struct Better {
     double b;    // 8
     char a;      // 1
@@ -133,7 +133,7 @@ struct Better {
     // 6 padding
 };
 
-// ✅ Best: 16 bytes (6 usefully filled)
+// Best: 16 bytes (6 usefully filled)
 struct Best {
     double b;    // 8
     int i;       // 4

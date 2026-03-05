@@ -39,32 +39,32 @@ g++ -g -O1 -fsanitize=address program.cpp -o program
 ```cpp showLineNumbers
 // 1. Heap buffer overflow
 int* arr = new int[10];
-arr[10] = 42;  // ❌ ASan: heap-buffer-overflow
+arr[10] = 42;  // ASan: heap-buffer-overflow
 
 // 2. Stack buffer overflow
 int arr[10];
-arr[10] = 42;  // ❌ ASan: stack-buffer-overflow
+arr[10] = 42;  // ASan: stack-buffer-overflow
 
 // 3. Use after free
 int* p = new int(42);
 delete p;
-*p = 100;  // ❌ ASan: heap-use-after-free
+*p = 100;  // ASan: heap-use-after-free
 
 // 4. Use after return
 int* return_local_address() {
     int local = 42;
-    return &local;  // ❌ ASan: stack-use-after-return
+    return &local;  // ASan: stack-use-after-return
 }
 
 // 5. Double free
 int* p = new int(42);
 delete p;
-delete p;  // ❌ ASan: attempting double-free
+delete p;  // ASan: attempting double-free
 
 // 6. Memory leak
 void leak() {
     int* p = new int(42);
-    // Forgot to delete  // ❌ ASan: memory leak
+    // Forgot to delete  // ASan: memory leak
 }
 ```
 
@@ -100,26 +100,26 @@ g++ -g -fsanitize=undefined program.cpp -o program
 ```cpp showLineNumbers
 // 1. Signed integer overflow
 int x = INT_MAX;
-x++;  // ❌ UBSan: signed integer overflow
+x++;  // UBSan: signed integer overflow
 
 // 2. Division by zero
-int x = 10 / 0;  // ❌ UBSan: division by zero
+int x = 10 / 0;  // UBSan: division by zero
 
 // 3. Null pointer dereference
 int* p = nullptr;
-*p = 42;  // ❌ UBSan: null pointer dereference
+*p = 42;  // UBSan: null pointer dereference
 
 // 4. Shift errors
-int x = 1 << 32;  // ❌ UBSan: shift exponent too large
+int x = 1 << 32;  // UBSan: shift exponent too large
 
 // 5. Invalid enum value
 enum Color { RED, GREEN, BLUE };
-Color c = static_cast<Color>(100);  // ❌ UBSan: invalid enum value
+Color c = static_cast<Color>(100);  // UBSan: invalid enum value
 
 // 6. Misaligned pointer
 char buffer[10];
 int* p = reinterpret_cast<int*>(buffer + 1);  // Misaligned
-*p = 42;  // ❌ UBSan: misaligned address
+*p = 42;  // UBSan: misaligned address
 ```
 
 ### UBSan Options
@@ -150,11 +150,11 @@ g++ -g -O1 -fsanitize=thread program.cpp -o program -pthread
 int shared = 0;  // Shared, unprotected
 
 void thread1() {
-    shared = 1;  // ❌ TSan: data race
+    shared = 1;  // TSan: data race
 }
 
 void thread2() {
-    shared = 2;  // ❌ TSan: data race
+    shared = 2;  // TSan: data race
 }
 
 int main() {
@@ -189,7 +189,7 @@ clang++ -g -O1 -fsanitize=memory program.cpp -o program
 ```cpp showLineNumbers
 void test() {
     int x;
-    std::cout << x;  // ❌ MSan: use of uninitialized value
+    std::cout << x;  // MSan: use of uninitialized value
 }
 ```
 
@@ -206,7 +206,7 @@ g++ -g -fsanitize=address program.cpp -o program
 ```cpp showLineNumbers
 void leak() {
     int* p = new int[100];
-    // Forgot to delete[]  // ❌ LSan: detected memory leaks
+    // Forgot to delete[]  // LSan: detected memory leaks
 }
 ```
 

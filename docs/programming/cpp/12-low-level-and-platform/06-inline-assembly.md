@@ -275,11 +275,11 @@ uint32_t read_cr0() {
 
 | Use Case                          | Use Assembly?       |
 |-----------------------------------|---------------------|
-| **CPU instructions not in C++**   | ✅ Yes               |
-| **Specific instruction sequence** | ✅ Yes               |
-| **Compiler intrinsic available**  | ❌ No, use intrinsic |
-| **General optimization**          | ❌ No, profile first |
-| **Portable code**                 | ❌ No                |
+| **CPU instructions not in C++**   | Yes               |
+| **Specific instruction sequence** | Yes               |
+| **Compiler intrinsic available**  | No, use intrinsic |
+| **General optimization**          | No, profile first |
+| **Portable code**                 | No                |
 
 ## Summary
 

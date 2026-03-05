@@ -185,12 +185,12 @@ int main() {
 
 ### Off-by-One Errors
 ```cpp showLineNumbers
-// ❌ Wrong
+// Wrong
 for (int i = 0; i <= arr.size(); ++i) {  // <= is wrong!
     arr[i] = 0;
 }
 
-// ✅ Correct
+// Correct
 for (int i = 0; i < arr.size(); ++i) {
     arr[i] = 0;
 }
@@ -198,23 +198,23 @@ for (int i = 0; i < arr.size(); ++i) {
 
 ### Uninitialized Variables
 ```cpp showLineNumbers
-// ❌ Bug
+// Bug
 int x;
 std::cout << x;  // Undefined behavior
 
-// ✅ Fixed
+// Fixed
 int x = 0;
 std::cout << x;
 ```
 
 ### Use After Free
 ```cpp showLineNumbers
-// ❌ Bug
+// Bug
 int* p = new int(42);
 delete p;
 std::cout << *p;  // Use after free!
 
-// ✅ Fixed
+// Fixed
 int* p = new int(42);
 delete p;
 p = nullptr;
@@ -224,14 +224,14 @@ auto p = std::make_unique<int>(42);
 
 ### Memory Leaks
 ```cpp showLineNumbers
-// ❌ Bug
+// Bug
 void leak() {
     int* p = new int(42);
     if (error) return;  // Forgot to delete!
     delete p;
 }
 
-// ✅ Fixed
+// Fixed
 void no_leak() {
     auto p = std::make_unique<int>(42);
     if (error) return;  // Auto-deleted

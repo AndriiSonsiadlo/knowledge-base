@@ -31,21 +31,21 @@ graph LR
 ## The Problem: Manual Resource Management
 
 ```cpp showLineNumbers 
-// ❌ Manual management - error prone!
+// Manual management - error prone!
 void processFile() {
     FILE* file = fopen("data.txt", "r");
     if (!file) return;
     
     // Process file...
     if (errorCondition) {
-        // 😱 Forgot to close! Memory leak!
+        // Forgot to close! Memory leak!
         return;
     }
     
     // More processing...
     if (someException) {
         throw std::runtime_error("Error");
-        // 😱 File not closed! Exception jumps over fclose!
+        // File not closed! Exception jumps over fclose!
     }
     
     fclose(file);  // Only reached if no early returns or exceptions
@@ -96,15 +96,15 @@ void processFile() {
     
     // Process file...
     if (errorCondition) {
-        return;  // ✅ File automatically closed!
+        return;  // File automatically closed!
     }
     
     if (someException) {
         throw std::runtime_error("Error");
-        // ✅ File automatically closed during stack unwinding!
+        // File automatically closed during stack unwinding!
     }
     
-    // ✅ File automatically closed when going out of scope
+    // File automatically closed when going out of scope
 }
 ```
 
@@ -204,7 +204,7 @@ void threadSafeFunction() {
     // ... work ...
     mtx.unlock();  // Easy to forget if exception occurs!
     
-    // ✅ RAII way - automatic unlock
+    // RAII way - automatic unlock
     std::lock_guard<std::mutex> lock(mtx);
     // ... work ...
     // Lock automatically released when 'lock' goes out of scope
@@ -258,7 +258,7 @@ public:
 void expensiveOperation() {
     Timer t("expensiveOperation");
     // Do work...
-    // ✅ Time automatically printed when function exits
+    // Time automatically printed when function exits
 }
 ```
 
@@ -288,7 +288,7 @@ std::mutex mtx;
 void criticalSection() {
     LockGuard<std::mutex> lock(mtx);
     // Critical code here
-    // ✅ Mutex automatically unlocked
+    // Mutex automatically unlocked
 }
 ```
 
@@ -322,11 +322,11 @@ void transferMoney(Database& db) {
     db.credit(account2, 100);
     
     if (validationFails) {
-        return;  // ✅ Auto-rollback!
+        return;  // Auto-rollback!
     }
     
     txn.commit();  // Explicit commit
-    // ✅ If commit throws, auto-rollback in destructor
+    // If commit throws, auto-rollback in destructor
 }
 ```
 
@@ -346,7 +346,7 @@ void exceptionSafeFunction() {
     // Even if exception occurs here...
     riskyOperation();
     
-    // ✅ All resources automatically cleaned up:
+    // All resources automatically cleaned up:
     // - w1 and g1 automatically deleted
     // - file automatically closed
     // - mutex automatically unlocked
@@ -375,13 +375,13 @@ graph TD
 | Aspect | Manual Management | RAII |
 |--------|-------------------|------|
 | **Cleanup** | Explicit calls | Automatic |
-| **Exception Safety** | ❌ Must manually handle | ✅ Guaranteed |
-| **Early Returns** | ❌ Easy to forget cleanup | ✅ Always cleans up |
+| **Exception Safety** | Must manually handle | Guaranteed |
+| **Early Returns** | Easy to forget cleanup | Always cleans up |
 | **Code Clarity** | Cluttered with cleanup | Clean, focused |
-| **Error Prone** | ❌ Very | ✅ Minimal |
+| **Error Prone** | Very | Minimal |
 
 ```cpp showLineNumbers 
-// ❌ Manual - 10 lines of error-prone code
+// Manual - 10 lines of error-prone code
 void manual() {
     Resource* r = acquire();
     if (!r) return;
@@ -395,7 +395,7 @@ void manual() {
     release(r);
 }
 
-// ✅ RAII - 3 lines, exception-safe
+// RAII - 3 lines, exception-safe
 void raii() {
     RAIIResource r;
     use(r);
@@ -436,7 +436,7 @@ void example() {
     // Do work...
     // guard.dismiss();  // Optionally cancel cleanup
     
-    // ✅ Cleanup automatically runs
+    // Cleanup automatically runs
 }
 ```
 
@@ -462,7 +462,7 @@ public:
 void usePooledResource() {
     PooledResource<Connection> conn(connectionPool);
     conn->query("SELECT ...");
-    // ✅ Connection automatically returned to pool
+    // Connection automatically returned to pool
 }
 ```
 
@@ -594,7 +594,7 @@ public:
 class Bad {
     ~Bad() {
         if (condition) {
-            throw std::runtime_error("Error");  // ❌ Never throw from destructor!
+            throw std::runtime_error("Error");  // Never throw from destructor!
         }
     }
 };
@@ -608,7 +608,7 @@ class Incomplete {
     FILE* file;
 public:
     Incomplete() : file(fopen("data.txt", "r")) {}
-    // ❌ No destructor! File handle leaked!
+    // No destructor! File handle leaked!
 };
 ```
 :::
@@ -621,7 +621,7 @@ public:
     DoubleFree() : data(new int(42)) {}
     ~DoubleFree() { delete data; }
     
-    // ❌ Default copy constructor copies pointer
+    // Default copy constructor copies pointer
     // Both objects will delete the same memory!
 };
 ```
@@ -633,11 +633,11 @@ public:
 
 RAII is the foundation of modern C++:
 
-- ✅ **Automatic cleanup** - no manual resource management
-- ✅ **Exception safe** - resources cleaned even during exceptions
-- ✅ **Deterministic** - cleanup happens at well-defined times
-- ✅ **Simple** - one place for acquire, one for release
-- ✅ **Composable** - RAII objects work together seamlessly
+- **Automatic cleanup** - no manual resource management
+- **Exception safe** - resources cleaned even during exceptions
+- **Deterministic** - cleanup happens at well-defined times
+- **Simple** - one place for acquire, one for release
+- **Composable** - RAII objects work together seamlessly
 
 **"Acquire in constructor, release in destructor"** - this simple rule makes C++ code robust, exception-safe, and maintainable.
 

@@ -40,12 +40,12 @@ while (status == 0) {
     // Wait
 }
 // Compiler: "status never changes in loop, optimize to infinite loop"
-// while (true) {}  ❌
+// while (true) {} 
 
 // With volatile
 volatile int status;
 while (status == 0) {
-    // Compiler must read status each iteration ✅
+    // Compiler must read status each iteration
 }
 ```
 
@@ -59,7 +59,7 @@ volatile int* port = (int*)0x40000000;
 // Compiler must not:
 // - Eliminate first write
 // - Reorder writes
-// Both writes happen in order ✅
+// Both writes happen in order
 ```
 
 ### Register Caching
@@ -69,12 +69,12 @@ int sensor_value;
 for (int i = 0; i < 1000; ++i) {
     if (sensor_value > 100) break;
 }
-// Compiler caches sensor_value in register ❌
+// Compiler caches sensor_value in register
 
 // With volatile
 volatile int sensor_value;
 for (int i = 0; i < 1000; ++i) {
-    if (sensor_value > 100) break;  // Reads from memory each time ✅
+    if (sensor_value > 100) break;  // Reads from memory each time
 }
 ```
 
@@ -136,28 +136,28 @@ int main() {
 
 ### Not Thread-Safe
 ```cpp showLineNumbers
-// ❌ WRONG: volatile doesn't make this thread-safe!
+// WRONG: volatile doesn't make this thread-safe!
 volatile int counter = 0;
 
 void thread_func() {
     for (int i = 0; i < 1000; ++i) {
-        counter++;  // ❌ RACE CONDITION!
+        counter++;  // RACE CONDITION!
     }
 }
 
-// ✅ CORRECT: Use atomic
+// CORRECT: Use atomic
 std::atomic<int> counter{0};
 
 void thread_func() {
     for (int i = 0; i < 1000; ++i) {
-        counter++;  // ✅ Thread-safe
+        counter++;  // Thread-safe
     }
 }
 ```
 
 ### No Memory Barriers
 ```cpp showLineNumbers
-// ❌ volatile doesn't prevent reordering across variables
+// volatile doesn't prevent reordering across variables
 volatile int flag;
 int data;
 
@@ -166,23 +166,23 @@ void producer() {
     flag = 1;
 }
 
-// ✅ Atomic provides proper synchronization
+// Atomic provides proper synchronization
 std::atomic<int> flag;
 int data;
 
 void producer() {
     data = 42;
-    flag.store(1, std::memory_order_release);  // ✅ Proper sync
+    flag.store(1, std::memory_order_release);  // Proper sync
 }
 ```
 
 ### No Atomicity Guarantee
 ```cpp showLineNumbers
-// ❌ Not atomic on all platforms
+// Not atomic on all platforms
 volatile long long value;
 value = 0x123456789ABCDEF0;  // May be two separate writes!
 
-// ✅ Guaranteed atomic
+// Guaranteed atomic
 std::atomic<long long> value;
 value = 0x123456789ABCDEF0;  // Atomic write
 ```
@@ -270,13 +270,13 @@ void uart_receive(char* buffer, size_t size) {
 // C++ standard: volatile has no thread synchronization semantics
 // Java/C#: volatile has memory barrier semantics (different!)
 
-// ❌ C++: Don't use for threading
+// C++: Don't use for threading
 volatile bool flag;
 
-// ✅ C++: Use atomic for threading
+// C++: Use atomic for threading
 std::atomic<bool> flag;
 
-// ✅ volatile only for hardware
+// volatile only for hardware
 volatile int* hardware_register;
 ```
 

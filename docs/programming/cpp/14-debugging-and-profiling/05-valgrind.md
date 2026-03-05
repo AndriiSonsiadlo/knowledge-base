@@ -46,26 +46,26 @@ valgrind -v --leak-check=full ./program
 ```cpp showLineNumbers
 // 1. Invalid read/write
 int arr[10];
-int x = arr[10];  // ❌ Invalid read of size 4
+int x = arr[10];  // Invalid read of size 4
 
 // 2. Use of uninitialized value
 int x;
-if (x == 5) {}  // ❌ Conditional jump depends on uninitialized value
+if (x == 5) {}  // Conditional jump depends on uninitialized value
 
 // 3. Invalid free
 int* p = new int;
 delete p;
-delete p;  // ❌ Invalid free() / delete
+delete p;  // Invalid free() / delete
 
 // 4. Memory leak
 void leak() {
     int* p = new int[100];
-    // No delete[]  // ❌ 400 bytes in 1 blocks definitely lost
+    // No delete[]  // 400 bytes in 1 blocks definitely lost
 }
 
 // 5. Mismatched free/delete
 int* p = new int[10];
-delete p;  // ❌ Mismatched free() / delete / delete[]
+delete p;  // Mismatched free() / delete / delete[]
 ```
 
 ### Valgrind Output
@@ -146,8 +146,8 @@ valgrind --tool=helgrind ./program
 
 int shared = 0;  // Not protected
 
-void thread1() { shared = 1; }  // ❌ Possible data race
-void thread2() { shared = 2; }  // ❌ Possible data race
+void thread1() { shared = 1; }  // Possible data race
+void thread2() { shared = 2; }  // Possible data race
 
 int main() {
     std::thread t1(thread1);

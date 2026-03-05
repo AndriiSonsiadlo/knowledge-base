@@ -22,7 +22,7 @@ class Widget {
     size_t size_;
     
 public:
-    // ❌ Problematic assignment
+    // Problematic assignment
     Widget& operator=(const Widget& other) {
         if (this == &other) return *this;  // Self-assignment check
         
@@ -63,7 +63,7 @@ public:
         std::copy(other.data_, other.data_ + size_, data_);
     }
     
-    // ✅ Copy-and-swap assignment
+    // Copy-and-swap assignment
     Widget& operator=(Widget other) {  // Pass by value - copies implicitly
         swap(*this, other);             // Non-throwing swap
         return *this;                   // Temp 'other' destroyed, takes old data
@@ -136,7 +136,7 @@ public:
         other.size_ = 0;
     }
     
-    // ✅ Unified assignment (handles both copy and move!)
+    // Unified assignment (handles both copy and move!)
     Widget& operator=(Widget other) noexcept {
         swap(*this, other);
         return *this;
@@ -241,7 +241,7 @@ Widget w2(20);
 try {
     w1 = w2;
     // Step 1: Create temporary 'other' by copying w2
-    //   If copy constructor throws → w1 unchanged ✅
+    //   If copy constructor throws → w1 unchanged
     
     // Step 2: Swap w1 with other (no-throw)
     //   Always succeeds
