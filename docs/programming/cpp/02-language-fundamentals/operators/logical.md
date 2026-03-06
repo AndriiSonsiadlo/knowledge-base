@@ -8,61 +8,78 @@ tags: [c++, operators, logical, boolean]
 
 # Logical Operators
 
-Brief introduction to the topic...
+`&&`, `||`, and `!` combine boolean conditions. The detail that matters is **short-circuit
+evaluation**: the right operand of `&&`/`||` is evaluated only when it can change the result. That
+behaviour is not a micro-optimisation — code routinely *depends* on it for correctness.
 
-:::info Key Concept
-Important information about this topic
+:::info Don't confuse with bitwise
+`&&`/`||` are logical (operate on truth values, short-circuit). `&`/`|` are
+[bitwise](./bitwise.md) (operate per bit, always evaluate both sides). `if (flags & MASK)` and
+`if (a && b)` mean very different things.
 :::
 
-## Overview
+## The operators
 
-Explanation of the concept...
+| Operator | Meaning | Short-circuits? | Result type |
+|----------|---------|-----------------|-------------|
+| `&&`     | logical AND | yes — stops if left is `false` | `bool` |
+| `\|\|`   | logical OR  | yes — stops if left is `true`  | `bool` |
+| `!`      | logical NOT | n/a | `bool` |
 
-## Example
+Any operand is contextually converted to `bool` first: `0`, `nullptr`, and `0.0` are `false`;
+everything else is `true`.
 
-```cpp showLineNumbers 
-// Example code
-#include <iostream>
+## Short-circuit evaluation
 
-int main() {
-    // TODO: Add relevant example
-    return 0;
-}
+```cpp showLineNumbers
+// Right side runs ONLY if ptr is non-null — this is the guard idiom.
+if (ptr != nullptr && ptr->ready()) { /* ... */ }
+
+// Right side runs ONLY if the cheap/likely check fails first.
+if (cache_hit(key) || expensive_lookup(key)) { /* ... */ }
 ```
 
-## Visualization
+:::danger Side effects hide here
+Because the right operand may not run, never bury required side effects in it.
 
-```mermaid
-graph TD
-    A[Concept] --> B[Implementation]
-    B --> C[Result]
+```cpp
+if (validate(x) && log_attempt(x)) { ... }   // log_attempt skipped when validate fails!
+```
+Order operands so the cheap/most-likely-decisive test comes first, and keep side effects out.
+:::
+
+## `!` and double negation
+
+```cpp showLineNumbers
+bool ok = !errors.empty();      // readable: "there are errors" negated
+bool b  = !!ptr;                // !! forces any value to a clean 0/1 bool
 ```
 
-## Best Practices
+## Returns `bool`, not the operand
 
-:::success DO
-- Follow these recommendations
-- Use modern C++ features
-:::
+Unlike Python or JavaScript, C++ `&&`/`||` always yield `bool` — never the surviving operand. There
+is no `a || default_value` idiom; use the ternary or `value_or`.
 
-:::danger DON'T
-- Avoid these common mistakes
-- Don't ignore edge cases
-:::
+```cpp showLineNumbers
+// auto name = user_input || "guest";        // WRONG: this is bool, not a string
+auto name = user_input.empty() ? "guest" : user_input;   // correct
+```
 
-## Common Pitfalls
+## Operator overloading caveat
 
-:::warning Watch Out
-Common mistakes and how to avoid them
-:::
+You *can* overload `operator&&` / `operator||` for custom types, but the overloads **lose
+short-circuiting** — both operands are always evaluated like a normal function call. This surprises
+readers, so it is almost always the wrong choice. See [Operator Overloading](./operator-overloading.md).
 
 ## Summary
 
-- Key takeaway 1
-- Key takeaway 2
-- Key takeaway 3
+- `&&`/`||` short-circuit; `&`/`|` (bitwise) do not.
+- The skipped operand is genuinely not evaluated — never put required side effects there.
+- Result is always `bool` — there is no "return the truthy operand" behaviour.
+- Avoid overloading `&&`/`||`; the overload silently drops short-circuiting.
 
-## Further Reading
+## Related
 
-- Related topics
-- Advanced resources
+- [Bitwise Operators](./bitwise.md) — the per-bit cousins
+- [Conditional Statements (if, switch)](../control-flow/if-switch.md)
+- [Conversions and Promotions](../../03-types-and-values/conversions-and-promotions.md) — contextual conversion to `bool`
