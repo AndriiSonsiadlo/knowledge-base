@@ -147,18 +147,13 @@ direct hardware control and minimal memory footprint.
 
 ```mermaid
 graph LR
-    A[C++] --> B[Low-level Control]
-    A --> C[High-level Abstractions]
+    A[C++] --> B[Low-level control]
+    A --> C[High-level abstractions]
     A --> D[Performance]
-    
-    B --> E[Like C, Rust]
-    C --> F[Like Python, Java]
-    D --> G[Faster than interpreted languages]
-    
-    style A fill:#4A90E2
-    style E fill:#90EE90
-    style F fill:#FFB6C1
-    style G fill:#FFD700
+
+    B --> E[like C, Rust]
+    C --> F[like Python, Java]
+    D --> G[faster than interpreted languages]
 ```
 
 | Aspect             | C++                 | Python             | Java                | Rust                      |
