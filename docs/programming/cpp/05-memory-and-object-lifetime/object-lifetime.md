@@ -220,7 +220,7 @@ int a = compute_a();
 
 // file2.cpp
 int b = compute_b();  // Uses 'a'
-// ⚠️ Order undefined! b might initialize before a
+// Order undefined! b might initialize before a
 ```
 
 **Solution**: Function-local static (lazy initialization):
@@ -276,7 +276,7 @@ std::vector<int> v2 = std::move(v1);
 v1 = {4, 5, 6};  // OK
 // v1 destroyed normally
 
-// ⚠️ Don't use without reassigning
+// Don't use without reassigning
 std::cout << v1.size();  // Technically OK but don't rely on value
 ```
 

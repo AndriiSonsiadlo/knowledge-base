@@ -65,15 +65,15 @@ Losing information (often warns):
 
 ```cpp showLineNumbers 
 int x = 1000;
-char c = x;         // ⚠️ Truncates (c = -24 on 8-bit char)
+char c = x;         // Truncates (c = -24 on 8-bit char)
 
 double d = 3.14;
-int i = d;          // ⚠️ Truncates fractional part (i = 3)
+int i = d;          // Truncates fractional part (i = 3)
 
 // Brace initialization prevents narrowing
 int y{3.14};        // Error: narrowing
 int y = {3.14};     // Error
-int y = 3.14;       // ⚠️ Warning but allowed
+int y = 3.14;       // Warning but allowed
 ```
 
 ---
@@ -125,7 +125,7 @@ Base* bp = &d;  // OK: upcast
 
 // Base → Derived (requires cast, dangerous)
 Base b;
-Derived* dp = static_cast<Derived*>(&b);  // ⚠️ Unsafe if b not Derived
+Derived* dp = static_cast<Derived*>(&b);  // Unsafe if b not Derived
 
 // void* ↔ other pointers
 int x = 42;
@@ -186,7 +186,7 @@ explicit operator double() const { /*...*/ }
 
 ```cpp showLineNumbers 
 int x = 1000000;
-short s = x;  // ⚠️ Overflow/truncation
+short s = x;  // Overflow/truncation
 
 // Use narrowing check
 short s = static_cast<short>(x);  // Explicit
@@ -201,7 +201,7 @@ if (x > SHRT_MAX || x < SHRT_MIN) {
 int x = -1;
 unsigned int y = 10;
 
-if (x < y) {  // ⚠️ False! x converts to huge unsigned
+if (x < y) {  // False! x converts to huge unsigned
     // Doesn't execute
 }
 ```

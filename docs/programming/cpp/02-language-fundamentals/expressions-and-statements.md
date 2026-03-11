@@ -442,8 +442,8 @@ if ((x = getValue()) != 0) {
 ### Expression as Statement
 
 ```cpp showLineNumbers 
-x + 5;           // ⚠️ Legal but useless (value discarded)
-x == 5;          // ⚠️ Legal but useless (comparison unused)
+x + 5;           // Legal but useless (value discarded)
+x == 5;          // Legal but useless (comparison unused)
 
 x = 5;           // Useful statement
 ```

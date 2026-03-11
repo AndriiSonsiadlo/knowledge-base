@@ -331,7 +331,7 @@ wrapper(20);     // Forwards as rvalue
 std::vector<int> v1 = {1, 2, 3};
 std::vector<int> v2 = std::move(v1);
 
-// ⚠️ v1 is now moved-from
+// v1 is now moved-from
 std::cout << v1.size();  // Undefined! Don't use moved-from objects
 // v1.clear();           // Must reset before using
 ```

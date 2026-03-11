@@ -105,7 +105,7 @@ int a = compute_a();
 // file2.cpp
 int b = compute_b();  // Uses 'a'
 
-// ⚠️ Order undefined across translation units!
+// Order undefined across translation units!
 // b might initialize before a
 ```
 

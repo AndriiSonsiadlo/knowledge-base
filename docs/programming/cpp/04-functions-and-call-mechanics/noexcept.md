@@ -57,7 +57,7 @@ void modern_style() noexcept {
 
 ```cpp showLineNumbers 
 void marked_noexcept() noexcept {
-    throw std::runtime_error("Oops");  // ⚠️ Compiles but dangerous!
+    throw std::runtime_error("Oops");  // Compiles but dangerous!
 }
 
 int main() {

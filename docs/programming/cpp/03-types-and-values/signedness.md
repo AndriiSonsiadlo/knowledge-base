@@ -56,7 +56,7 @@ unsigned char uc; // Guaranteed unsigned (0 to 255)
 int x = -1;
 unsigned int y = 1;
 
-if (x < y) {  // ⚠️ Danger! x converts to large unsigned
+if (x < y) {  // Danger! x converts to large unsigned
     // This doesn't execute! -1 becomes 4294967295
 }
 
@@ -113,7 +113,7 @@ for (int i = 10; i >= 0; i--) {
 unsigned int a = 5;
 unsigned int b = 10;
 
-unsigned int diff = a - b;  // ⚠️ Wraps! diff = huge number
+unsigned int diff = a - b;  // Wraps! diff = huge number
 int diff = a - b;           // Still wrong: computes unsigned then converts
 
 // Fix: cast before subtraction

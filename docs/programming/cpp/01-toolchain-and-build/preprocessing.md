@@ -132,7 +132,7 @@ The preprocessor replaces `PI` with `3.14159` everywhere. Unlike `const`, macros
 int result = SQUARE(5);    // Becomes: ((5) * (5)) = 25
 int bad = SQUARE(2 + 3);   // Becomes: ((2 + 3) * (2 + 3)) = 25
 
-// ⚠️ Without parentheses - bug!
+// Without parentheses - bug!
 #define BAD_SQUARE(x) x * x
 int oops = BAD_SQUARE(2 + 3);  // Becomes: 2 + 3 * 2 + 3 = 11
 

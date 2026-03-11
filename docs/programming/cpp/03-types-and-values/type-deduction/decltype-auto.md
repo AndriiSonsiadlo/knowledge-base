@@ -131,7 +131,7 @@ decltype(auto) func2() {
 
 decltype(auto) func3() {
     std::string s = "hello";
-    return (s);  // std::string& (expression!) ⚠️ Dangling!
+    return (s);  // std::string& (expression!) Dangling!
 }
 ```
 

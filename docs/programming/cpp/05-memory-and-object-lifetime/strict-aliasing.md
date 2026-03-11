@@ -170,10 +170,10 @@ std::memcpy(&y_copy, &d.y, sizeof(float));
 
 | Method | Standard | Portable | Performance | Use |
 |--------|----------|----------|-------------|-----|
-| **Pointer cast** | UB | No | ⚠️ Breaks | Never |
+| **Pointer cast** | UB | No | Breaks | Never |
 | **memcpy** | C++11 | Yes | Fast | Default |
 | **bit_cast** | C++20 | Yes | Fast | Modern |
-| **Union** | ⚠️ Ext | ⚠️ Mostly | Fast | Legacy |
+| **Union** | Ext | Mostly | Fast | Legacy |
 
 ## Compiler Flags
 ```bash
@@ -229,7 +229,7 @@ graph TD
 **Safe Type Punning Methods:**
 - **`std::memcpy`** (C++11): Always safe, optimizes well
 - **`std::bit_cast`** (C++20): Type-safe, constexpr
-- **Union**: Implementation-defined (mostly works) ⚠️
+- **Union**: Implementation-defined (mostly works)
 - **Never**: Pointer casts (`reinterpret_cast` for punning)
 
 **Consequences of Violation:**

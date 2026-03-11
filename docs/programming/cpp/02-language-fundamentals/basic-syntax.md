@@ -218,7 +218,7 @@ cout << "Hello\n";
 using namespace std;
 cout << "Hello\n";  // No std:: prefix
 
-// ⚠️ Avoid in headers - pollutes namespace
+// Avoid in headers - pollutes namespace
 ```
 
 ---

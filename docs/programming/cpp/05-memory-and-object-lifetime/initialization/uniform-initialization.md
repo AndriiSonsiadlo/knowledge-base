@@ -48,15 +48,15 @@ Widget w{10, 20};
 Catches silent data loss at compile-time.
 ```cpp showLineNumbers
 // Old style: silent truncation
-int x = 3.14;    // ⚠️ OK but x = 3 (data loss)
+int x = 3.14;    // OK but x = 3 (data loss)
 double d = 1000000;
-int i = d;       // ⚠️ OK but dangerous
+int i = d;       // OK but dangerous
 
 // Braces: compile error
 int y{3.14};     // Error: narrowing
 int j{d};        // Error: narrowing
 
-char c = 1000;   // ⚠️ OK but truncated
+char c = 1000;   // OK but truncated
 char d{1000};    // Error: narrowing
 ```
 
