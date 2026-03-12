@@ -142,7 +142,7 @@ public:
         
         if (oldHead) {
             result = oldHead->data;
-            delete oldHead;  // ⚠️ Unsafe - ABA problem!
+            delete oldHead;  // Unsafe - ABA problem!
             return true;
         }
         return false;
@@ -166,7 +166,7 @@ void writer() {
 
 void reader() {
     while (!ready.load(std::memory_order_relaxed)); // (3)
-    assert(data == 42);  // ⚠️ NOT GUARANTEED with relaxed!
+    assert(data == 42);  // NOT GUARANTEED with relaxed!
 }
 ```
 

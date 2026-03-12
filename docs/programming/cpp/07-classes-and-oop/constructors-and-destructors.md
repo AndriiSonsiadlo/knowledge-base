@@ -85,7 +85,7 @@ class Widget : public Base {
     int first;
     
 public:
-    // ⚠️ Misleading: first listed but second initializes first!
+    // Misleading: first listed but second initializes first!
     Widget(int val) : first(val), second(first * 2) {}
     // Order: Base → second → first (declaration order)
     
@@ -182,12 +182,12 @@ Prevent implicit conversions with single-argument constructors.
 ```cpp showLineNumbers
 class String {
 public:
-    String(int size) {}  // ⚠️ Allows implicit conversion
+    String(int size) {}  // Allows implicit conversion
 };
 
 void process(String s) {}
 
-process(100);  // ⚠️ Implicit: int → String(100)
+process(100);  // Implicit: int → String(100)
 
 // Use explicit
 class String {
@@ -236,7 +236,7 @@ public:
         
         if (someCondition()) {
             throw std::runtime_error("Init failed");
-            // ⚠️ data leaked! Destructor won't run!
+            // data leaked! Destructor won't run!
         }
     }
     
@@ -290,7 +290,7 @@ public:
 };
 
 Base* ptr = new Derived();
-delete ptr;  // ⚠️ Only calls ~Base! Memory leak!
+delete ptr;  // Only calls ~Base! Memory leak!
 
 // Fix: virtual destructor
 class Base {
@@ -312,7 +312,7 @@ Don't call virtual functions in constructors or destructors - they won't dispatc
 class Base {
 public:
     Base() {
-        init();  // ⚠️ Calls Base::init, not Derived::init!
+        init();  // Calls Base::init, not Derived::init!
     }
     
     virtual void init() { 

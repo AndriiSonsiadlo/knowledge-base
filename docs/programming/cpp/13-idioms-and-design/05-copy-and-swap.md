@@ -26,10 +26,10 @@ public:
     Widget& operator=(const Widget& other) {
         if (this == &other) return *this;  // Self-assignment check
         
-        delete[] data_;  // ⚠️ If next line throws, object is broken!
+        delete[] data_;  // If next line throws, object is broken!
         
         size_ = other.size_;
-        data_ = new int[size_];  // ⚠️ May throw!
+        data_ = new int[size_];  // May throw!
         std::copy(other.data_, other.data_ + size_, data_);
         
         return *this;

@@ -32,7 +32,7 @@ public:
 Dog dog;
 dog.breed = "Labrador";
 
-Animal animal = dog;  // ⚠️ SLICING!
+Animal animal = dog;  // SLICING!
 // Only Animal part is copied
 // breed is lost!
 // speak() calls Animal's version!
@@ -63,7 +63,7 @@ Base class copy constructor/assignment only handles base class members. It doesn
 Passing by value causes slicing:
 
 ```cpp showLineNumbers 
-void processAnimal(Animal a) {  // ⚠️ Pass by value
+void processAnimal(Animal a) {  // Pass by value
     a.speak();  // Always calls Animal::speak!
 }
 
@@ -103,7 +103,7 @@ References are usually the best choice for polymorphic parameters.
 Storing objects (not pointers) in containers causes slicing:
 
 ```cpp showLineNumbers 
-std::vector<Animal> animals;  // ⚠️ Stores Animal objects
+std::vector<Animal> animals;  // Stores Animal objects
 
 Dog dog;
 Cat cat;
@@ -136,7 +136,7 @@ Dog dog;
 Cat cat;
 Animal& ref = dog;  // Reference, no slicing
 
-ref = cat;  // ⚠️ Slicing!
+ref = cat;  // Slicing!
 // Calls Animal::operator=(const Animal&)
 // Only copies Animal parts of cat into dog's Animal part
 // dog is still a Dog, but with corrupted Animal data!

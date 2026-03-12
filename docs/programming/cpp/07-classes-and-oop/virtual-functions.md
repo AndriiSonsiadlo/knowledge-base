@@ -220,7 +220,7 @@ public:
 };
 
 Base* ptr = new Derived();
-delete ptr;  // ⚠️ Only calls ~Base! Memory leak!
+delete ptr;  // Only calls ~Base! Memory leak!
 // data is never deleted!
 
 // Fix: virtual destructor
@@ -413,7 +413,7 @@ Don't call virtual functions in constructors or destructors - they won't dispatc
 class Base {
 public:
     Base() {
-        init();  // ⚠️ Calls Base::init, not Derived::init!
+        init();  // Calls Base::init, not Derived::init!
     }
     
     virtual void init() { 
@@ -421,7 +421,7 @@ public:
     }
     
     virtual ~Base() {
-        cleanup();  // ⚠️ Calls Base::cleanup
+        cleanup();  // Calls Base::cleanup
     }
     
     virtual void cleanup() {
@@ -494,7 +494,7 @@ public:
 };
 
 Base* ptr = new Derived();
-ptr->print();  // "Derived: 10" ⚠️
+ptr->print();  // "Derived: 10"
 // Calls Derived::print (virtual dispatch)
 // But uses Base's default argument (static binding)!
 ```

@@ -275,7 +275,7 @@ struct Packed {
 #pragma pack(pop)
 ```
 
-⚠️ **Warning**: Packed structs cause slow/unsafe memory access. See [Alignment](../05-memory-and-object-lifetime/alignment.md).
+**Warning**: Packed structs cause slow/unsafe memory access. See [Alignment](../05-memory-and-object-lifetime/alignment.md).
 
 ## Summary
 

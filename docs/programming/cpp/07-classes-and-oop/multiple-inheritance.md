@@ -253,12 +253,12 @@ public:
 
 class Mammal : public virtual Animal {
 public:
-    Mammal(int a) : Animal(a) {}  // ⚠️ Ignored when Mammal is a base!
+    Mammal(int a) : Animal(a) {}  // Ignored when Mammal is a base!
 };
 
 class WingedAnimal : public virtual Animal {
 public:
-    WingedAnimal(int a) : Animal(a) {}  // ⚠️ Ignored when base!
+    WingedAnimal(int a) : Animal(a) {}  // Ignored when base!
 };
 
 class Bat : public Mammal, public WingedAnimal {

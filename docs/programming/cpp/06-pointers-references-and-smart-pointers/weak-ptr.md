@@ -460,7 +460,7 @@ std::weak_ptr<int> weak = ...;
 
 // Checking expired separately
 if (!weak.expired()) {
-    auto shared = weak.lock();  // ⚠️ Race: might expire here
+    auto shared = weak.lock();  // Race: might expire here
 }
 
 // Use lock() directly

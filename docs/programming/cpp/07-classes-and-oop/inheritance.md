@@ -212,7 +212,7 @@ public:
 };
 
 Base* ptr = new Derived();
-delete ptr;  // ⚠️ Only calls ~Base, not ~Derived! Memory leak!
+delete ptr;  // Only calls ~Base, not ~Derived! Memory leak!
 
 // Fix: virtual destructor
 class Base {
@@ -240,7 +240,7 @@ public:
 };
 
 Derived d;
-Base b = d;  // ⚠️ Slicing! y is lost
+Base b = d;  // Slicing! y is lost
 
 b.print();  // "Base" (not "Derived"!)
 // Only Base part was copied, Derived part lost

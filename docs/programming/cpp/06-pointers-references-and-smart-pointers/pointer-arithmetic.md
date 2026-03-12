@@ -29,7 +29,7 @@ Address    Value    Pointer Position
 0x1008     30       ptr + 2  (arr[2])
 0x100C     40       ptr + 3  (arr[3])
 0x1010     50       ptr + 4  (arr[4])
-0x1014     ??       ptr + 5  (⚠️ out of bounds!)
+0x1014     ??       ptr + 5  (out of bounds!)
 ```
 
 ## Basic Operations

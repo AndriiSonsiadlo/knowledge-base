@@ -231,7 +231,7 @@ void mightThrow() {
 
 // main.cpp
 try {
-    mightThrow();  // ⚠️ Only safe if same compiler/ABI
+    mightThrow();  // Only safe if same compiler/ABI
 } catch (...) {
 }
 ```

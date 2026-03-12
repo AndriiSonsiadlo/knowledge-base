@@ -142,7 +142,7 @@ public:
 };
 
 Broken b1(42);
-Broken b2 = b1;  // ⚠️ Both point to same memory
+Broken b2 = b1;  // Both point to same memory
 // When b1 destructs: deletes memory
 // When b2 destructs: tries to delete same memory Crash!
 ```

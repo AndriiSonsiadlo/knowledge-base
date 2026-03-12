@@ -49,7 +49,7 @@ std::cout << value;     // 100 (changed!)
 
 :::warning Declaration Syntax
 ```cpp
-int* p1, p2;    // ⚠️ p1 is pointer, p2 is int!
+int* p1, p2;    // p1 is pointer, p2 is int!
 int *p3, *p4;   // Both are pointers
 int* p5;        // Best: one per line
 int* p6;

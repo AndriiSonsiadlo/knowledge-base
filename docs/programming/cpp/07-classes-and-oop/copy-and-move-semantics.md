@@ -168,7 +168,7 @@ processData(std::move(v2));
 
 // Bad: Don't move and then use
 auto v3 = std::move(v1);
-v1.push_back(4);  // ⚠️ Undefined behavior!
+v1.push_back(4);  // Undefined behavior!
 
 // Bad: Don't move from const
 const std::vector<int> cv = {1,2,3};
