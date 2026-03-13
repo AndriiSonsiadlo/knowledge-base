@@ -227,59 +227,17 @@ std::cout << is_aligned(p);  // False - misaligned
 
 ## Summary
 
-:::info Memory Alignment - Key Points
-**Alignment Requirements:**
-- Data at addresses divisible by its size
-- **x86-64**: Misaligned = 2-10x slower
-- **ARM/RISC**: Misaligned = crash
-- Compiler aligns automatically (inserts padding)
+- **Alignment** = a type must start at an address divisible by its requirement (a power of two);
+  a struct's alignment is that of its strictest member.
+- **Padding** is inserted so each member is aligned and so array elements stay aligned — this makes
+  `sizeof` larger than the sum of member sizes.
+- **Order members large → small** to minimise padding; it's the cheapest layout optimisation there is.
+- `alignof(T)` queries the requirement; `alignas(N)` strengthens it (cache-line isolation, SIMD).
+- **Packed** structs drop padding — only for file/wire formats, never for in-memory data: misaligned
+  access is slow on x86 and faults on ARM.
 
-**Natural Alignment Rules:**
-- `char`: 1-byte (any address)
-- `short`: 2-byte (even addresses)
-- `int`: 4-byte (divisible by 4)
-- `double`: 8-byte (divisible by 8)
-- `pointer`: 8-byte on 64-bit systems
+## Related
 
-**Struct Padding:**
-- Compiler inserts padding to align members
-- Order matters: large→small minimizes waste
-- Trailing padding ensures array element alignment
-- Example: `char` (1) + `int` (4) + `char` (1) = 12 bytes (not 6!)
-
-**Optimization Strategy:**
-- Order members: largest types first
-- Fill gaps with smaller types
-- Bad: `char, double, char` = 24 bytes
-- Good: `double, char, char` = 16 bytes
-
-**Cache-Line Alignment (64 bytes):**
-- Prevents false sharing in multithreaded code
-- `alignas(64)` for thread-local counters
-- 10-100x speedup by avoiding cache thrashing
-
-**SIMD Alignment (16 bytes):**
-- Required for vectorized operations
-- `alignas(16) float vector[4]`
-- One instruction vs multiple with shuffles
-
-**Control Alignment:**
-- **Query**: `alignof(Type)` returns requirement
-- **Specify**: `alignas(N)` increases alignment
-- **Packed structs**: Remove padding (dangerous)
-
-**Packed Structures:**
-- Remove all padding with `__attribute__((packed))`
-- Causes slow/unsafe misaligned access
-- Only for: binary file formats, network protocols
-- Never for: program data structures
-  :::
-```cpp
-// Interview answer:
-// "Alignment means data at addresses divisible by its size.
-// Required for correctness (ARM crashes on misalignment) and
-// performance (x86 is 2-10x slower). Compiler inserts struct
-// padding to align members. Optimize by ordering large→small.
-// Cache-line alignment (64 bytes) prevents false sharing in
-// multithreaded code. Use alignof/alignas for explicit control."
-```
+- [Alignment and offsetof](../03-types-and-values/alignment-and-offsetof.md) — `alignof`/`alignas`/`offsetof` as language tools
+- [Padding and offsetof](../12-low-level-and-platform/03-padding-and-offsetof.md) — ABI, serialization, bit-fields
+- [Object Layout](../12-low-level-and-platform/02-object-layout.md) · [Strict Aliasing](./strict-aliasing.md)

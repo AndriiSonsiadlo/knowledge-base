@@ -6,182 +6,91 @@ sidebar_position: 8
 tags: [c++, alignment, offsetof, memory-layout, padding]
 ---
 
-# Alignment and offsetof
+# Alignment and `offsetof`
 
-Alignment ensures data is placed at memory addresses divisible by its size, improving CPU access speed. Padding fills gaps to maintain alignment.
+Every type has an **alignment**: an address it must start on, always a power of two. `char` can live
+anywhere; an `int` must sit at an address divisible by 4; a `double` at one divisible by 8. This page
+covers alignment *as a property of types* and the `offsetof` macro that reports where members land.
 
-## Alignment Basics
-
-```cpp showLineNumbers 
-struct Example {
-    char c;     // 1 byte
-    int i;      // 4 bytes
-};
-
-sizeof(Example);  // 8, not 5! (3 bytes padding after c)
-```
-
-**Why**: CPU reads memory in aligned chunks (typically 4 or 8 bytes). Misaligned access is slower or crashes on some platforms.
-
----
-
-## Alignment Requirements
-
-```cpp showLineNumbers 
-#include <iostream>
-
-std::cout << alignof(char) << "\n";    // 1
-std::cout << alignof(int) << "\n";     // 4
-std::cout << alignof(double) << "\n";  // 8
-std::cout << alignof(void*) << "\n";   // 8 (64-bit)
-```
-
-**Rule**: Type must be aligned to multiple of its size.
-
----
-
-## Struct Padding
-
-```cpp showLineNumbers 
-struct Bad {
-    char c;      // Offset 0, size 1
-    // 3 bytes padding
-    int i;       // Offset 4, size 4
-    char c2;     // Offset 8, size 1
-    // 7 bytes padding (for array alignment)
-};
-sizeof(Bad);  // 16 bytes
-
-struct Good {
-    int i;       // Offset 0, size 4
-    char c;      // Offset 4, size 1
-    char c2;     // Offset 5, size 1
-    // 2 bytes padding
-};
-sizeof(Good);  // 8 bytes (50% savings!)
-```
-
-:::warning Tip
-Order members largest to smallest to minimize padding.
+:::info This is the type-system view
+Here: `alignof`, `alignas`, and `offsetof` as language tools. For *why* padding exists, how to order
+members to shrink a struct, cache-line/SIMD alignment, and packing — see the canonical
+[Memory Alignment](../05-memory-and-object-lifetime/alignment.md) page. For the ABI / wire-format
+angle (serialization, bit-fields, standard-layout rules) see
+[Padding and offsetof](../12-low-level-and-platform/03-padding-and-offsetof.md).
 :::
----
 
-## offsetof Macro
+## `alignof` — a type's required alignment
 
-Get member offset within struct:
-
-```cpp showLineNumbers 
+```cpp showLineNumbers
 #include <cstddef>
 
-struct Point {
-    int x;
-    int y;
-    int z;
-};
+alignof(char);    // 1
+alignof(int);     // 4
+alignof(double);  // 8
+alignof(void*);   // 8 on a 64-bit target
 
-std::cout << offsetof(Point, x) << "\n";  // 0
-std::cout << offsetof(Point, y) << "\n";  // 4
-std::cout << offsetof(Point, z) << "\n";  // 8
+struct Widget { char c; int i; };
+alignof(Widget);  // 4 — a struct's alignment is that of its strictest member
 ```
 
----
+The corollary that surprises people: because members must each be aligned, the compiler inserts
+**padding**, so `sizeof` is usually larger than the sum of the member sizes.
 
-## Controlling Alignment
-
-### alignas (C++11)
-
-```cpp showLineNumbers 
-// Align to 16 bytes
-struct alignas(16) Aligned {
-    int x;
-    int y;
+```cpp showLineNumbers
+struct Example {
+    char c;   // offset 0
+    int  i;   // offset 4 — 3 bytes of padding sit between them
 };
-
-sizeof(Aligned);   // 16 (8 data + 8 padding)
-alignof(Aligned);  // 16
-
-// Align member
-struct Container {
-    alignas(64) char buffer[64];  // Cache-line aligned
-};
+sizeof(Example);   // 8, not 5
 ```
 
-### Packed Structs
+## `offsetof` — where a member sits
 
-```cpp showLineNumbers 
-// Remove padding (compiler-specific)
-struct __attribute__((packed)) Packed {
-    char c;
-    int i;
-    char c2;
-};
-sizeof(Packed);  // 6 (no padding)
+`offsetof(Type, member)` (from `<cstddef>`) returns the member's byte offset from the start of the
+object. It makes the padding above observable:
 
-// MSVC syntax
-#pragma pack(push, 1)
-struct Packed {
-    char c;
-    int i;
+```cpp showLineNumbers
+struct Record {
+    char  tag;    // offset 0
+    int   value;  // offset 4  (after 3 padding bytes)
+    short count;  // offset 8
 };
-#pragma pack(pop)
+
+offsetof(Record, tag);    // 0
+offsetof(Record, value);  // 4
+offsetof(Record, count);  // 8
 ```
 
-:::warning
-Packed structs can cause crashes on some architectures and are slower due to unaligned access.
+:::warning `offsetof` is only defined for standard-layout types
+Using it on a type with virtual functions or a non-trivial base is **undefined behaviour** — those
+types have no fixed, simple member offsets. Guard real code with a `static_assert`:
+
+```cpp
+static_assert(std::is_standard_layout_v<Record>);
+```
 :::
 
----
+## `alignas` — requesting stronger alignment
 
-## Practical Examples
+`alignas(N)` raises (never lowers) the alignment of a variable, member, or type. The two everyday
+uses — cache-line isolation and SIMD — are covered on the [canonical page](../05-memory-and-object-lifetime/alignment.md#common-use-cases); the syntax is:
 
-### Network Protocol
+```cpp showLineNumbers
+alignas(64) int hot_counter;          // start on a 64-byte boundary
 
-```cpp showLineNumbers 
-// Bad: padding wastes bandwidth
-struct Message {
-    char type;     // 1 byte
-    int length;    // 4 bytes (3 padding before)
-    char data[100];
-};  // 108 bytes (3 wasted)
-
-// Better: pack or reorder
-#pragma pack(push, 1)
-struct Message {
-    char type;
-    int length;
-    char data[100];
-};  // 105 bytes
-#pragma pack(pop)
+struct alignas(16) Vec4 { float v[4]; };   // whole type aligned to 16 (SIMD)
 ```
-
-### Cache Optimization
-
-```cpp showLineNumbers 
-// Align to cache line (64 bytes) to prevent false sharing
-struct alignas(64) Counter {
-    std::atomic<int> value;
-    char padding[60];  // Fill cache line
-};
-```
-
----
 
 ## Summary
 
-- **Alignment**: Memory addresses divisible by type size
-- **Padding**: Filler bytes for alignment
-- **sizeof**: Includes padding
-- **offsetof**: Member offset in struct
-- **alignas**: Control alignment
-- **Order members**: Large → small minimizes padding
+- Alignment is a per-type, power-of-two requirement; a struct inherits its strictest member's.
+- Padding makes `sizeof` exceed the member sizes; `offsetof` lets you see exactly where members land.
+- `offsetof` is well-defined only for standard-layout types — assert it.
+- `alignas(N)` strengthens alignment; the layout-optimisation details live on the canonical page.
 
-```cpp showLineNumbers 
-// Minimize padding
-struct Optimized {
-    double d;  // 8 bytes
-    int i;     // 4 bytes
-    short s;   // 2 bytes
-    char c;    // 1 byte
-    // 1 byte padding
-};  // 16 bytes total
-```
+## Related
+
+- [Memory Alignment](../05-memory-and-object-lifetime/alignment.md) — padding, ordering, cache lines, SIMD, packing
+- [Padding and offsetof](../12-low-level-and-platform/03-padding-and-offsetof.md) — serialization, bit-fields, standard layout
+- [Fundamental Types](./fundamental-types.md) · [Object Layout](../12-low-level-and-platform/02-object-layout.md)
