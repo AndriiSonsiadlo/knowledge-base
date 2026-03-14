@@ -236,13 +236,3 @@ Widget w{};  // Calls Widget(), not Widget(initializer_list)
 - Narrowing errors are features, not bugs
 - Vector sizing requires parentheses: `vector<int>(100)`
   :::
-```cpp
-// Interview answer:
-// "Uniform initialization (C++11 braces) provides one syntax
-// for all types. Key benefits: prevents narrowing conversions
-// at compile-time, solves most vexing parse, enables direct
-// container initialization. Empty braces safely zero-initialize.
-// Braces prefer initializer_list constructors - use parentheses
-// for container sizing. Default to braces for safety unless
-// you specifically need parentheses behavior."
-```

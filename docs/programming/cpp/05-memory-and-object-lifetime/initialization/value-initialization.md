@@ -227,14 +227,3 @@ Point p;                    // x, y indeterminate
 - Modern CPUs optimize zeroing efficiently
 - Safety benefit far outweighs minimal cost
   :::
-```cpp
-// Interview answer:
-// "Value initialization with empty braces {} guarantees
-// zero-initialization for fundamentals (0, 0.0, nullptr) and
-// calls default constructor for classes. Default initialization
-// leaves local fundamentals indeterminate (UB if read). For
-// classes without constructors, value init zeros members while
-// default leaves them indeterminate. Always prefer {} for safety
-// unless immediately assigning a value. Tiny performance cost
-// is worth preventing undefined behavior."
-```

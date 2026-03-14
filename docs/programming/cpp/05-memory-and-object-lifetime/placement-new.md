@@ -238,12 +238,3 @@ for (size_t i = N; i > 0; --i) {
 - Memory-mapped hardware (embedded)
 - NOT for: Normal application code
   :::
-```cpp
-// Interview answer:
-// "Placement new constructs objects at a specified address
-// without allocating: new (buffer) T(args). Requires properly
-// sized/aligned buffer and explicit destructor call. Enables
-// memory pools and custom allocators. Regular new does
-// allocate+construct; placement new only constructs. Used in
-// container implementations and performance-critical code."
-```

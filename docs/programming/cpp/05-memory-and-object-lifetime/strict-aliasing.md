@@ -250,13 +250,3 @@ graph TD
 - Network protocols: `memcpy` to/from buffers
 - Avoid: Direct pointer casts for reinterpretation
   :::
-```cpp
-// Interview answer:
-// "Strict aliasing: accessing an object through incompatible
-// pointer type is UB. Enables optimizations - compiler assumes
-// int* and float* never alias. Violations work in debug but
-// break in release. Safe type-punning: std::memcpy (always),
-// std::bit_cast (C++20), unions (mostly). Never use pointer
-// casts. Rule exists for performance, violations cause subtle
-// optimizer-dependent bugs."
-```

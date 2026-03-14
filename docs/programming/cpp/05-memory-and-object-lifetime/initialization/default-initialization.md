@@ -214,12 +214,3 @@ graph TD
 - Use in-class initializers (C++11)
 - Initialize members in constructor initializer list
   :::
-```cpp
-// Interview answer:
-// "Default initialization: local fundamentals get indeterminate
-// values (UB if read), static/global get zeros. Classes call
-// default constructor if available, but compiler-generated ones
-// don't initialize fundamental members. Solution: always
-// explicitly initialize fundamentals, use value initialization
-// {} or in-class initializers, initialize members in constructor."
-```

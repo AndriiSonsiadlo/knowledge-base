@@ -201,11 +201,3 @@ void safe() {
 - Heap allocation: ~50-100ns (manual management)
 - Smart pointers: Minimal overhead, huge safety gain
   :::
-```cpp
-// Interview answer:
-// "new allocates on heap, requires manual delete. Every new needs
-// exactly one matching delete (new[] needs delete[]). Common bugs:
-// leaks (forgot delete), double-delete (crash), use-after-free (UB).
-// Modern C++ uses unique_ptr/shared_ptr for automatic cleanup via
-// RAII, eliminating manual memory management and its associated bugs."
-```

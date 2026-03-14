@@ -219,12 +219,3 @@ public:
 - Choose aggregates for simple data structures
 - Choose classes when you need control
   :::
-```cpp
-// Interview answer:
-// "Aggregate initialization uses braces to initialize arrays
-// and simple structs. Aggregates must have no user constructors,
-// all public members, no base classes, no virtual functions.
-// Fewer initializers → rest are zeroed. C++20 adds designated
-// initializers (.x = 10) for clarity. Use for plain data;
-// use constructors when you need validation or invariants."
-```
