@@ -292,14 +292,3 @@ Objects contain:
 :::
 
 Use `offsetof` to query member positions. POD and standard layout types have predictable C-compatible layouts.
-
-```cpp
-// Interview answer:
-// "Object layout: members in declaration order plus alignment
-// padding. Virtual functions add vptr (8 bytes) pointing to
-// vtable. Single inheritance: base subobject first. Multiple
-// inheritance: multiple vptrs for multiple bases. Virtual
-// inheritance: shared base stored separately. Minimize padding
-// by ordering members large to small. Standard layout types
-// have C-compatible layout for first member."
-```

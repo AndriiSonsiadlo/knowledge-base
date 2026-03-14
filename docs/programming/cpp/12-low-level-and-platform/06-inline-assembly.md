@@ -295,14 +295,3 @@ Embeds native CPU instructions in C++ code.
 - Always: Use `volatile` for side effects
 - Not portable: Different compilers, different syntax
 :::
- 
-```cpp
-// Interview answer:
-// "Inline assembly embeds CPU instructions in C++. GCC uses
-// extended asm with input/output operands; MSVC has different
-// syntax and no x64 support. Use for hardware access or CPU
-// instructions unavailable in C++. Prefer compiler intrinsics
-// (__rdtsc, _mm_mfence) - more portable and optimizer-friendly.
-// Always use 'volatile' for side effects. Not portable - test
-// on target platform. Last resort after profiling shows need."
-```

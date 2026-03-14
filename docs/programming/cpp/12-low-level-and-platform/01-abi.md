@@ -272,14 +272,3 @@ ABI is the binary interface
 - Safe changes: append members, add non-virtual functions
 - Unsafe: reorder members, change virtuals, modify signatures
 :::
-
-```cpp
-// Interview answer:
-// "ABI is the binary interface: calling conventions, name
-// mangling, object layout, vtables. Breaking ABI (reordering
-// members, changing virtuals) requires recompiling dependents.
-// Safe changes: adding non-virtual functions, appending members.
-// Different compilers have different ABIs - GCC/Clang compatible
-// via Itanium ABI, MSVC uses Microsoft ABI. PIMPL pattern and
-// symbol versioning maintain ABI stability."
-```

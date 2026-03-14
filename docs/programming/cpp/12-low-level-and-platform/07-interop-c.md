@@ -364,15 +364,3 @@ Memory aid: `No MOTE` (what C can't handle)
 - `T` = Templates (C has no templates)
 - `E` = Exceptions (catch before boundary)
 :::
-
-```cpp
-// Interview answer:
-// "extern 'C' disables C++ name mangling for C compatibility.
-// C calls C++: wrap C headers in extern 'C' blocks. C++ calls C:
-// create C interface with opaque pointers hiding C++ classes.
-// Can't use overloading, templates, or members in extern 'C'.
-// Never throw exceptions across boundary - catch and return
-// error codes. Use C++ linker when mixing. Pattern: opaque
-// handle typedef, create/destroy/operate functions wrapping
-// C++ class methods."
-```

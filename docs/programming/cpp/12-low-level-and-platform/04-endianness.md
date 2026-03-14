@@ -282,14 +282,3 @@ u.i = 0x12345678;
 - Never write multi-byte types directly to files/network without conversion.
 - Compiler intrinsics (`__builtin_bswap32`) provide fast byte swapping. C++20 `std::endian` for compile-time detection.
 :::
-
-```cpp
-// Interview answer:
-// "Endianness is byte order for multi-byte values. Little-endian
-// (x86, ARM) stores LSB first; big-endian (network, some RISC)
-// stores MSB first. Network protocols use big-endian. For
-// portability, use htonl/ntohl (POSIX) to convert between host
-// and network byte order. Never write multi-byte values directly
-// to binary files/network - always convert to fixed endianness.
-// C++20 provides std::endian for compile-time detection."
-```

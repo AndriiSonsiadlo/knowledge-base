@@ -290,14 +290,3 @@ volatile int* hardware_register;
 - Prevents: Read/write optimization, caching, reordering
 - Doesn't provide: Atomicity, memory barriers, thread safety
 :::
-
-```cpp
-// Interview answer:
-// "volatile prevents compiler optimizations on variable access -
-// forces actual memory read/write every time. Use for hardware
-// registers, ISRs, signal handlers where value can change
-// unexpectedly outside normal program flow. NOT for threading -
-// use std::atomic instead. volatile doesn't provide atomicity
-// or memory barriers. Mainly for embedded/systems programming,
-// rarely used in application code."
-```
