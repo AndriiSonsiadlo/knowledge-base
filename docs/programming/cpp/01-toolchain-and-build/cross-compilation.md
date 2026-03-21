@@ -28,8 +28,6 @@ graph LR
     A[Host: x86-64 Linux] -->|Cross-Compile| B[Target Binary]
     B --> C[Target: ARM Raspberry Pi]
     
-    style A fill:#B4E5FF
-    style C fill:#FFE5B4
 ```
 
 ## Basic Concepts

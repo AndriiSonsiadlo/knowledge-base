@@ -28,7 +28,6 @@ graph TD
     B -->|Provides: add| G
     G --> E
     
-    style F fill:#90EE90
 ```
 
 **Three main tasks**:

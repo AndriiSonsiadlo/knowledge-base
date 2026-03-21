@@ -33,8 +33,6 @@ graph TD
     C --> H[Zero-cost Abstractions]
     C --> I[RAII & Smart Pointers]
     
-    style B fill:#87CEEB
-    style C fill:#98FB98
 ```
 
 ### Core Differences

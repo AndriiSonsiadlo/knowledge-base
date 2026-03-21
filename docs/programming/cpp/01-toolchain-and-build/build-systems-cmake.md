@@ -201,8 +201,6 @@ graph LR
     E --> F
     F --> G[Executable]
     
-    style D fill:#FFE5B4
-    style G fill:#90EE90
 ```
 
 Build systems track file timestamps and recompile only what changed.
@@ -265,7 +263,6 @@ graph TD
     
     B --> F[Best choice]
     
-    style F fill:#90EE90
 ```
 
 ## Summary

@@ -25,8 +25,6 @@ graph TD
     B --> D[Code copied into executable<br/>Larger file<br/>No dependencies]
     C --> E[Code loaded at runtime<br/>Smaller file<br/>Requires .so/.dll]
     
-    style B fill:#FFE5B4
-    style C fill:#B4E5FF
 ```
 
 | Aspect | Static (.a, .lib) | Dynamic (.so, .dll, .dylib) |

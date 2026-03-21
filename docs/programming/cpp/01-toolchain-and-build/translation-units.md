@@ -47,8 +47,6 @@ graph LR
     E -->|Link| G[Executable]
     F -->|Link| G
     
-    style B fill:#FFE5B4
-    style D fill:#FFE5B4
 ```
 
 Each .cpp file is independently preprocessed and compiled. They don't "see" each other until linking.

@@ -27,8 +27,6 @@ graph LR
     G --> H[Linker]
     H --> I[Executable]
     
-    style A fill:#e1f5ff
-    style I fill:#90EE90
 ```
 
 ---
@@ -400,8 +398,6 @@ graph LR
     C -->|as| D[.o]
     D -->|ld| E[exe]
     
-    style A fill:#87CEEB
-    style E fill:#90EE90
 ```
 
 **Key Takeaways**:
