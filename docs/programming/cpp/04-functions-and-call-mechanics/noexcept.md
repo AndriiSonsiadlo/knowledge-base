@@ -11,7 +11,7 @@ tags: [c++, noexcept, exceptions, optimization, cpp11]
 `noexcept` specifies that a function won't throw exceptions, enabling optimizations and stronger guarantees.
 
 :::info Performance & Safety
-`noexcept` allows compilers to optimize (no exception handling overhead) and enables move operations in standard containers.
+`noexcept` allows compilers to optimize (no exception handling overhead) and enables move operations in standard containers. For how it underpins the **strong exception guarantee**, see [Exception Safety](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md).
 :::
 
 ## Basic Usage
