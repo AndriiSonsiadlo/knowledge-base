@@ -30,8 +30,6 @@ graph TD
     D -->|owns| E[Object]
     D -->|ref count: 3| D
     
-    style E fill:#90EE90
-    style D fill:#FFE5B4
 ```
 ```
 Control Block contains:

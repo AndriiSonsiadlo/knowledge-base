@@ -155,8 +155,6 @@ graph TD
     B --> D[Bat]
     C --> D
     
-    style A fill:#FFE5B4
-    style D fill:#90EE90
 ```
 
 ### Diamond Problem Issues

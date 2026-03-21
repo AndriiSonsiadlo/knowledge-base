@@ -25,8 +25,6 @@ graph LR
     E --> F[Object Lifetime ENDS]
     F --> G[Memory Deallocated]
     
-    style C fill:#90EE90
-    style F fill:#FFB6C1
 ```
 
 ---

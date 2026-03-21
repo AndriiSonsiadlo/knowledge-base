@@ -160,8 +160,6 @@ Pointers are essential for dynamic memory allocation on the heap, where object l
 graph LR
     A[Stack: ptr] -->|points to| B[Heap: object]
     B -.->|must manually| C[delete]
-    style B fill:#ffcccc
-    style C fill:#ff6666
 ```
 
 ```cpp showLineNumbers

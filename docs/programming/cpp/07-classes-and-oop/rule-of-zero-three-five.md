@@ -341,9 +341,6 @@ graph TD
     C -->|Yes| D[Delete unwanted operations<br/>= delete]
     C -->|No| E[Rule of Five<br/>Define all 5]
     
-    style B fill:#90EE90
-    style E fill:#FFE5B4
-    style D fill:#87CEEB
 ```
 ```cpp showLineNumbers
 // Rule of Zero (BEST)

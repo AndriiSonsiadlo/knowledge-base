@@ -26,10 +26,6 @@ graph TD
     C[weak_ptr] -.->|observes count=0| D
     D -->|owns| E[Object]
     
-    style A fill:#90EE90
-    style B fill:#90EE90
-    style C fill:#FFE5B4
-    style E fill:#87CEEB
 ```
 ```
 Control Block:

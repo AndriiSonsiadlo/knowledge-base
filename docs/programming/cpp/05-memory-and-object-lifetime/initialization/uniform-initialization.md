@@ -174,7 +174,6 @@ graph TD
     C --> E[Use parentheses]
     D --> E
     
-    style B fill:#90EE90
 ```
 
 ## Key Benefits Summary

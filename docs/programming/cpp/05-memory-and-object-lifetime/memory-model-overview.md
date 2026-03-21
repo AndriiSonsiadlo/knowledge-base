@@ -27,9 +27,6 @@ graph TD
     C --> F[.data - Initialized]
     C --> G[.bss - Uninitialized]
     
-    style B fill:#FFE5B4
-    style D fill:#B4E5FF
-    style E fill:#FFB6C1
 ```
 
 ### Complete Address Space Layout

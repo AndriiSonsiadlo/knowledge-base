@@ -22,8 +22,6 @@ Smart pointer with exclusive ownership. Zero overhead, automatic cleanup, move-o
 graph LR
     A[unique_ptr] -->|owns| B[Object]
     B -.->|auto delete| C[~Object]
-    style B fill:#90EE90
-    style C fill:#FFB6C1
     
     D[unique_ptr source] -.->|after move| E[nullptr]
     F[unique_ptr dest] -->|takes ownership| B
