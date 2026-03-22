@@ -23,8 +23,6 @@ graph TD
     D --> H[Compiler chooses, no documentation]
     E --> I[No requirements - anything can happen]
     
-    style E fill:#FF6B6B
-    style B fill:#90EE90
 ```
 
 ### Why UB Exists

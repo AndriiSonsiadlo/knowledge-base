@@ -33,7 +33,6 @@ graph LR
     B --> C[join/detach]
     C --> D[Finished]
     
-    style B fill:#90EE90
 ```
 ```cpp
 #include <thread>

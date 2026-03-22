@@ -348,8 +348,6 @@ graph LR
     
     D[Ranges/Views] -->|Lazy| E[Direct Result]
     
-    style D fill:#90EE90
-    style E fill:#90EE90
 ```
 
 :::success

@@ -19,7 +19,6 @@ graph TD
     
     E[Result] --> F[Undefined Behavior!]
     
-    style F fill:#FF6B6B
 ```
 ```cpp
 // DATA RACE!

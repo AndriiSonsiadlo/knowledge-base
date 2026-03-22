@@ -54,8 +54,6 @@ graph TD
     A[Derived : Base&lt;Derived&gt;] --> B[Base&lt;Derived&gt;]
     B -->|static_cast| C[Derived::implementation]
     
-    style A fill:#B4E5FF
-    style C fill:#90EE90
 ```
 
 **Mechanism:**

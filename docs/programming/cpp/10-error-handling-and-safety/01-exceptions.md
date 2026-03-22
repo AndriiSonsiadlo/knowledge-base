@@ -410,9 +410,6 @@ graph TD
     B -->|Stronger| C[Strong Guarantee]
     C -->|Strongest| D[No-throw Guarantee]
     
-    style D fill:#90EE90
-    style C fill:#FFE4B5
-    style B fill:#FFB6C1
 ```
 
 ## Exception-Safe Coding Patterns

@@ -17,7 +17,6 @@ graph LR
     B -->|Use Resource| C[Destructor]
     C -->|Release Resource| D[Cleanup]
     
-    style B fill:#90EE90
 ```
 
 
@@ -364,8 +363,6 @@ graph TD
     F --> G[Destructors Called]
     G --> H[Resources Released]
     
-    style G fill:#90EE90
-    style H fill:#90EE90
 ```
 
 ---
