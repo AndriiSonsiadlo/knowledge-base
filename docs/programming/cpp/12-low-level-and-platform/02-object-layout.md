@@ -183,29 +183,6 @@ class Widget {
            | [sizeof=16, align=8]
 ```
 
-## Member Access Optimization
-```cpp showLineNumbers
-// Poor layout (12 bytes wasted)
-struct Poor {
-    char a;      // offset 0
-    // 7 padding
-    double b;    // offset 8
-    // 8 padding
-    char c;      // offset 16
-    // 7 padding
-};  // sizeof = 24
-
-// Optimized (6 bytes wasted)
-struct Optimized {
-    double b;    // offset 0
-    char a;      // offset 8
-    char c;      // offset 9
-    // 6 padding
-};  // sizeof = 16
-```
-
-**Rule**: Order members large → small for minimal padding.
-
 ## offsetof Macro
 ```cpp showLineNumbers
 #include <cstddef>
