@@ -57,9 +57,9 @@ flowchart LR
     M --> CC[11 Concurrency]
 ```
 
-- **New to C++:** 00 → 02 → 03 → 07 → 09. Enough to read and write real code.
-- **Coming from C:** skim 00–02, then 05 (lifetime), 06 (smart pointers), 13 (RAII) — that's where C++ diverges most.
-- **Systems / performance:** 01 (linking), 05 (memory), 11 (concurrency), 12 (ABI/layout), 14 (profiling).
+- <Icon icon="lucide:rocket" inline /> **New to C++:** 00 → 02 → 03 → 07 → 09. Enough to read and write real code.
+- <Icon icon="lucide:arrow-left-right" inline /> **Coming from C:** skim 00–02, then 05 (lifetime), 06 (smart pointers), 13 (RAII) — that's where C++ diverges most.
+- <Icon icon="lucide:cpu" inline /> **Systems / performance:** 01 (linking), 05 (memory), 11 (concurrency), 12 (ABI/layout), 14 (profiling).
 
 :::tip Conventions used across these docs
 - Code blocks compile against C++17 or later; version-specific features are tagged inline (e.g. *(C++20)*).
