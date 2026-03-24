@@ -354,34 +354,17 @@ This pattern is common for managing collections of polymorphic objects. Each vec
 
 ## Custom Deleters
 
-You can provide a custom deleter for non-standard cleanup (we'll cover this in detail in the [Custom Deleters](./custom-deleters.md) section).
+The nuance specific to `unique_ptr`: its deleter is **part of the type** — `unique_ptr<T, D>`. So two
+`unique_ptr`s with different deleters are different types, and a *stateful* deleter adds to the
+pointer's size (a stateless one stays zero-overhead).
 
-```cpp showLineNumbers 
-auto deleter = [](FILE* f) {
-    if (f) {
-        std::cout << "Closing file\n";
-        fclose(f);
-    }
-};
-
-std::unique_ptr<FILE, decltype(deleter)> file(
-    fopen("data.txt", "r"),
-    deleter
-);
-
-// File automatically closed when unique_ptr destroyed
-```
-
-Custom deleters enable using `unique_ptr` with resources that aren't heap-allocated (files, sockets, handles) or that need special cleanup beyond `delete`.
-
-:::warning Deleter in Type
 ```cpp showLineNumbers
-// Deleter type is part of unique_ptr type
-std::unique_ptr<int, CustomDeleter> ptr1;
-std::unique_ptr<int> ptr2;
-// ptr1 and ptr2 are DIFFERENT types
+std::unique_ptr<int, CustomDeleter> a;   // different type from...
+std::unique_ptr<int>                b;   // ...this one
 ```
-:::
+
+Full usage — wrapping `FILE*`, sockets, OS handles, arrays — is on the canonical
+[Custom Deleters](./custom-deleters.md) page.
 
 
 ## Performance

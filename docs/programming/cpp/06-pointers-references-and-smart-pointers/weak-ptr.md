@@ -417,66 +417,39 @@ Creating and destroying weak_ptrs, copying them, and calling `lock()` are all th
 
 ## enable_shared_from_this
 
-When you need to create a `shared_ptr` or `weak_ptr` to `this` inside a member function, inherit from `enable_shared_from_this`.
+To get a `weak_ptr` (or `shared_ptr`) to `this` from a member function, inherit from
+`std::enable_shared_from_this` and call `weak_from_this()`. It reuses the existing control block,
+which is the whole point — building a `weak_ptr`/`shared_ptr` from a raw `this` makes a *second*
+control block and double-frees.
 
-```cpp showLineNumbers 
+```cpp showLineNumbers
 class Widget : public std::enable_shared_from_this<Widget> {
 public:
-    std::weak_ptr<Widget> getWeakPtr() {
-        return weak_from_this();  // Safe
-    }
-    
-    std::shared_ptr<Widget> getSharedPtr() {
-        return shared_from_this();  // Safe
-    }
-    
-    void registerCallback() {
-        auto self = weak_from_this();
-        callbacks.push_back([self]() {
-            if (auto locked = self.lock()) {
-                locked->doWork();
-            }
-        });
-    }
+    std::weak_ptr<Widget> weakSelf() { return weak_from_this(); }   // safe
 };
-
-auto widget = std::make_shared<Widget>();
-auto weak = widget->getWeakPtr();  // Correctly shares control block
 ```
 
-Never create a shared_ptr directly from `this` - it creates a second control block, causing double-delete. `enable_shared_from_this` provides the correct way to get shared ownership of `this`.
+The full mechanism and the `shared_from_this` danger are covered on the canonical
+[shared_ptr](./shared-ptr.md#enable_shared_from_this) page.
 
-## Common Mistake: Creating from this
+## Common Pitfall: check-then-lock race
 
-:::danger Pitfalls
+A `weak_ptr` can't be dereferenced directly, and `expired()` is only a snapshot — between an
+`expired()` check and a later `lock()`, the object can be destroyed (especially across threads).
+**Lock first, then test the result**, so the `shared_ptr` keeps the object alive while you use it.
+
+:::danger
 ```cpp
-// Cannot dereference weak_ptr
-std::weak_ptr<int> weak = ...;
-// *weak;  // Error: no operator*
-
-// Checking expired separately
+// WRONG: object may expire between the check and the lock
 if (!weak.expired()) {
-    auto shared = weak.lock();  // Race: might expire here
+    auto sp = weak.lock();      // sp could be null here
+    sp->doWork();               // possible null deref
 }
 
-// Use lock() directly
-if (auto shared = weak.lock()) {
-    // Safe
+// CORRECT: a single atomic lock; the lock keeps it alive inside the block
+if (auto sp = weak.lock()) {
+    sp->doWork();               // guaranteed valid
 }
-
-// Creating from this
-class Bad {
-    std::weak_ptr<Bad> getWeak() {
-        return std::weak_ptr<Bad>(this);  // Wrong!
-    }
-};
-
-// Use enable_shared_from_this
-class Good : public std::enable_shared_from_this<Good> {
-    std::weak_ptr<Good> getWeak() {
-        return weak_from_this();  // Correct
-    }
-};
 ```
 :::
 

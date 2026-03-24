@@ -391,22 +391,17 @@ The aliased `shared_ptr` shares ownership of the `Widget` but points to its memb
 
 ## Custom Deleters
 
-`shared_ptr` supports custom deleters for non-standard cleanup, passed at construction time.
+The nuance specific to `shared_ptr`: unlike `unique_ptr`, its deleter is **type-erased** — stored in
+the control block, not in the type. So `shared_ptr<FILE>` with a custom deleter is still just
+`shared_ptr<FILE>`, which makes deleters easy to pass around (it rides along on the control-block
+allocation `shared_ptr` already pays for).
 
-```cpp showLineNumbers 
-auto deleter = [](FILE* f) {
-    if (f) {
-        std::cout << "Closing file\n";
-        fclose(f);
-    }
-};
-
-std::shared_ptr<FILE> file(fopen("data.txt", "r"), deleter);
-
-// File closed when last shared_ptr destroyed
+```cpp showLineNumbers
+std::shared_ptr<FILE> f(fopen("data.txt", "r"), [](FILE* p){ if (p) fclose(p); });
 ```
 
-Unlike `unique_ptr`, the deleter type isn't part of `shared_ptr`'s type, making it easier to work with. We'll cover custom deleters in detail in the next section.
+See the canonical [Custom Deleters](./custom-deleters.md) page for the full treatment and the
+`unique_ptr`-vs-`shared_ptr` comparison.
 
 ## Performance Considerations
 
