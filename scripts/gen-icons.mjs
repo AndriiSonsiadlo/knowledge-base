@@ -10,7 +10,14 @@ import { writeFileSync } from "node:fs";
 const require = createRequire(import.meta.url);
 const full = require("@iconify-json/lucide/icons.json");
 
-const WANT = ["rocket", "arrow-left-right", "cpu", "book-open", "wrench", "layers"];
+const WANT = [
+	// reading-path personas
+	"rocket", "arrow-left-right", "cpu",
+	// one per C++ section (overview landing map)
+	"book-open", "wrench", "braces", "shapes", "square-function", "memory-stick",
+	"pointer", "boxes", "blocks", "library", "shield-check", "waypoints",
+	"binary", "drafting-compass", "bug", "layers",
+];
 
 const out = { prefix: "lucide", icons: {}, width: full.width ?? 24, height: full.height ?? 24 };
 const missing = [];
