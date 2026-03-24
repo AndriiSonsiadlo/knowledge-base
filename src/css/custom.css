@@ -637,7 +637,19 @@ body {
 
 /* ============ Tables ============ */
 .markdown table {
-  @apply w-full border-collapse my-4 rounded-lg overflow-hidden;
+  @apply w-full my-4 rounded-lg overflow-hidden border;
+  /* border-separate (not collapse) so overflow-hidden clips the header's
+     colored corners to the radius — collapse leaves square corners. */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+[data-theme="light"] .markdown table {
+  @apply border-slate-200;
+}
+
+[data-theme="dark"] .markdown table {
+  @apply border-slate-700;
 }
 
 .markdown th {
