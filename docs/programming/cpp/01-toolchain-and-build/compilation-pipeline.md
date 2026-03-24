@@ -37,7 +37,8 @@ The preprocessor handles directives starting with `#` - includes, macros, condit
 
 **Input**: Source files (.cpp, .h)  
 **Output**: Preprocessed file (.i)  
-**Tool**: cpp (C preprocessor)
+**Tool**: cpp (C preprocessor)  
+**Deep dive**: [Preprocessing](./preprocessing.md) · [Headers and Includes](./headers-and-includes.md)
 
 ```cpp showLineNumbers 
 // main.cpp - before preprocessing
@@ -72,7 +73,8 @@ The compiler translates preprocessed C++ into assembly language. This is the "in
 
 **Input**: Preprocessed file (.i)  
 **Output**: Assembly file (.s)  
-**Tool**: cc1plus (compiler proper)
+**Tool**: cc1plus (compiler proper)  
+**Deep dive**: [Compilation Phase](./compilation.md) · [Name Mangling](./name-mangling.md)
 
 ```bash
 # Generate assembly
@@ -112,7 +114,8 @@ The assembler converts human-readable assembly into machine code (binary). Each 
 
 **Input**: Assembly file (.s)  
 **Output**: Object file (.o)  
-**Tool**: as (assembler)
+**Tool**: as (assembler)  
+**Deep dive**: [Assembling Phase](./assembling.md) · [Object Files and Symbols](./object-files-and-symbols.md)
 
 ```bash
 # Create object file
@@ -151,7 +154,8 @@ The linker combines multiple object files and libraries into a single executable
 
 **Input**: Object files (.o) + Libraries (.a, .so)  
 **Output**: Executable binary  
-**Tool**: ld (linker), or g++ (which calls ld)
+**Tool**: ld (linker), or g++ (which calls ld)  
+**Deep dive**: [Linking Process](./linking.md) · [Static vs Dynamic Linking](./static-vs-dynamic-linking.md)
 
 ```bash
 # Link object files
@@ -406,3 +410,10 @@ graph LR
 - Understanding stages helps debug build problems
 - Optimization happens during compilation
 - Linking resolves cross-file dependencies
+
+## Related
+
+- Stage deep-dives: [Preprocessing](./preprocessing.md) · [Compilation](./compilation.md) · [Assembling](./assembling.md) · [Linking](./linking.md)
+- [Translation Units](./translation-units.md) · [Object Files and Symbols](./object-files-and-symbols.md) · [Name Mangling](./name-mangling.md)
+- [Modules (C++20)](./modules.md) — the model that replaces textual `#include`
+- Build tools: [Build Systems / CMake](./build-systems-cmake.md) · [Makefiles](./makefiles.md)

@@ -12,6 +12,8 @@ The assembler converts human-readable assembly code into binary machine code (ob
 
 :::info Binary Translation
 Assembly is the last human-readable format. After this phase, everything is binary machine code.
+This page covers the *translation* step; the resulting file's anatomy — sections, the symbol table,
+relocations, visibility — is detailed in [Object Files and Symbols](./object-files-and-symbols.md).
 :::
 
 ## Assembly to Machine Code
