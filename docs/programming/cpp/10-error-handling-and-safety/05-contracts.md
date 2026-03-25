@@ -38,39 +38,34 @@ double sqrt(double x)
 }
 ```
 
-## Current State (C++20/23)
+## Current State (C++20 → C++26)
 
-:::warning
-**Contracts were removed from C++20** before finalization. The feature is being redesigned for a future standard (possibly C++26). Current C++ uses **assertions** and **documentation** to express contracts.
+:::warning A long road to standardization
+An early contracts design was **removed from C++20** before release. A reworked proposal
+(**P2900**) was **adopted for C++26** — but compiler support is still arriving, so in practice you
+still express contracts with assertions and documentation ([see below](#current-approaches)).
 :::
 
-### Proposed Syntax (Future C++)
-```cpp
-// Proposed contract syntax (not yet standardized):
+### C++26 syntax (P2900)
 
+Contracts attach to a function via two specifiers — `pre` (precondition) and `post` (postcondition,
+with an optional result binding) — plus a `contract_assert` statement for checks inside a body:
+
+```cpp showLineNumbers
 double sqrt(double x)
-    [[expects: x >= 0.0]]
-    [[ensures result: result * result == x]]
-{
-    double result = /* compute sqrt */;
-    return result;
-}
+    pre (x >= 0)              // precondition: checked on entry
+    post (r: r >= 0);         // postcondition: 'r' names the return value
 
-class BankAccount {
-    double balance_;
-    
-    [[invariant: balance_ >= 0.0]]
-    
-public:
-    void withdraw(double amount)
-        [[expects: amount > 0.0]]
-        [[expects: balance_ >= amount]]
-        [[ensures: balance_ == old(balance_) - amount]]
-    {
-        balance_ -= amount;
-    }
-};
+void process(std::span<int> data) {
+    contract_assert(!data.empty());   // statement-level check (the new assert)
+    // ...
+}
 ```
+
+On a violation the program calls the installed **contract-violation handler**; the build's chosen
+*evaluation semantic* (`ignore` / `observe` / `enforce`) decides whether that then terminates. Note
+the first C++26 cut has **no** dedicated class-invariant syntax — express invariants with `pre`/`post`
+on each public method.
 
 ## Current Approaches
 

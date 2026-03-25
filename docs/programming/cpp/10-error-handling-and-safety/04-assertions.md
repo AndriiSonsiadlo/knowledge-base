@@ -689,34 +689,22 @@ void authenticate(const std::string& password) {
 }
 ```
 
-## Assertion vs Contract Programming
-```cpp
-// C++20 Contracts (not yet standardized, but proposed)
-// [[expects: condition]]  - Precondition
-// [[ensures: condition]]  - Postcondition
-// [[assert: condition]]   - Assertion
+## Assertions as poor-man's contracts
 
-// Future syntax (proposed):
-double sqrt(double x)
-    [[expects: x >= 0]]
-    [[ensures result: result * result == x]]
-{
-    // Implementation...
-}
+Until language-level contracts land (C++26), `assert` is the standard way to check **preconditions**
+and **postconditions** inline:
 
-// Current workaround:
-double sqrtWithContract(double x) {
-    // Precondition
-    assert(x >= 0);
-    
-    double result = /* calculate sqrt */;
-    
-    // Postcondition
-    assert(std::abs(result * result - x) < 0.0001);
-    
-    return result;
+```cpp showLineNumbers
+double sqrt_checked(double x) {
+    assert(x >= 0);                       // precondition
+    double r = /* ... compute ... */;
+    assert(std::abs(r * r - x) < 1e-9);   // postcondition
+    return r;
 }
 ```
+
+For the full Design-by-Contract story — preconditions, postconditions, invariants, contract levels,
+and the C++26 `pre` / `post` / `contract_assert` syntax — see [Contracts](./05-contracts.md).
 
 ## Performance Considerations
 ```cpp
