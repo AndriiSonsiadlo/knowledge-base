@@ -103,6 +103,9 @@ std::string s4 = s1 + s2;      // Move (s1+s2 is temporary rvalue)
 - Has a name? It's an lvalue → copy
 - Temporary or `std::move()`? It's an rvalue → move
 
+The full taxonomy (glvalue / prvalue / xvalue) and the precise rules live in
+[Value Categories](../03-types-and-values/value-categories/lvalues-rvalues.md).
+
 ## Implementing Move
 
 Move operations should be `noexcept` and leave source in valid state:
@@ -191,6 +194,10 @@ wrapper(w);              // Forwards as lvalue (copy)
 wrapper(Widget());       // Forwards as rvalue (move)
 wrapper(std::move(w));   // Forwards as rvalue (move)
 ```
+
+`T&&` on a deduced template parameter is a *forwarding reference*, not a plain rvalue reference — the
+mechanism that lets `std::forward` recover the original value category is
+[Reference Collapsing](../03-types-and-values/value-categories/reference-collapsing.md).
 
 :::success Quick Reference
 

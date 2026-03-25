@@ -55,6 +55,8 @@ render(s);              // Don't know which until runtime
 - Can store different types in same container
 - Type determined while program runs
 
+The vtable machinery behind these calls is covered in [Virtual Functions](./virtual-functions.md).
+
 ## Static Polymorphism
 
 Uses templates. Type decided at compile-time:
@@ -92,6 +94,8 @@ render(r);      // Compiles to: r.draw() directly
 - Separate compiled version for each type
 - Can't store different types in same container easily
 - Type must be known at compile-time
+
+Giving static polymorphism a base-class-style interface is exactly the [CRTP](../13-idioms-and-design/03-crtp.md) idiom (shown under [Mixing Both Approaches](#mixing-both-approaches)).
 
 ## Performance Comparison
 
