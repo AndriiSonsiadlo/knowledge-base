@@ -184,6 +184,10 @@ delete[] arr;    // Array (must match allocation!)
 - Double delete = crash
 :::
 
+The full `new`/`delete` mechanics (arrays, allocation failure, alignment, placement) are in
+[new and delete](../05-memory-and-object-lifetime/new-and-delete.md). In modern code you rarely call
+them directly — [smart pointers](./unique-ptr.md) own the allocation and delete it for you.
+
 ## Common Dangers
 
 ### Dangling Pointers
@@ -248,6 +252,13 @@ void correct() {
     delete ptr;  // Cleaned up
 }
 ```
+
+:::tip Every danger above has one fix
+Dangling pointers, use-after-free, double-delete, and leaks are exactly the bugs that
+[RAII](../13-idioms-and-design/01-raii.md) and [smart pointers](./unique-ptr.md) eliminate — the
+owner's destructor deletes exactly once, on every exit path. Use raw *owning* pointers only at the
+lowest level; raw *non-owning* pointers (just observing) remain fine.
+:::
 
 ## Pointer to Pointer
 
