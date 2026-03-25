@@ -257,40 +257,17 @@ Uncopyable u1;
 
 ## Copy-and-Swap Idiom
 
-Implement both copy and move assignment using one function.
+A clean way to satisfy the Rule of Five: write a `noexcept` `swap` plus a single **by-value**
+assignment operator. That one function then serves as both copy- *and* move-assignment, with the
+strong exception guarantee, because the copy/move happens when the parameter is constructed.
+
 ```cpp showLineNumbers
-class Buffer {
-    char* data;
-    size_t size;
-    
-public:
-    // Constructor, destructor, copy constructor as before...
-    
-    // Swap member
-    void swap(Buffer& other) noexcept {
-        std::swap(data, other.data);
-        std::swap(size, other.size);
-    }
-    
-    // Unified assignment (note: parameter by value!)
-    Buffer& operator=(Buffer other) {
-        swap(other);  // Swap with parameter
-        return *this;
-        // other destructs, cleaning up our old data
-    }
-};
-
-Buffer b1(100);
-Buffer b2(200);
-
-b1 = b2;           // Copy: other constructed via copy
-b1 = std::move(b2); // Move: other constructed via move
+void swap(Buffer& o) noexcept { std::swap(data, o.data); std::swap(size, o.size); }
+Buffer& operator=(Buffer other) { swap(other); return *this; }   // 'other' is copied or moved at the call site
 ```
 
-**Benefits:**
-- One assignment operator handles both copy and move
-- Strong exception safety
-- Less code, less chance for bugs
+The full rationale — why by-value, the exception-safety argument, and the pitfalls — is on the
+dedicated [Copy-and-Swap](../13-idioms-and-design/05-copy-and-swap.md) page.
 
 ## Compiler Generation Rules
 

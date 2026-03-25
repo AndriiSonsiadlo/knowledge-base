@@ -305,6 +305,9 @@ public:
 **If your class has any virtual functions, make the destructor virtual!** Otherwise, deleting through a base pointer causes resource leaks.
 :::
 
+For *why* this works at the vtable level — and the alternative of a `protected` non-virtual
+destructor for non-polymorphic bases — see [Virtual Functions](./virtual-functions.md#virtual-destructors).
+
 ## Virtual Functions in Constructors/Destructors
 
 Don't call virtual functions in constructors or destructors - they won't dispatch to derived versions.
