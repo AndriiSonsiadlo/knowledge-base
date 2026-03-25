@@ -202,46 +202,19 @@ const Point& ref = getPoint();
 
 ---
 
-## Perfect Forwarding
+## Why the categories matter: move and forwarding
 
-Value categories enable perfect forwarding:
+The whole reason to separate xvalues from prvalues is to drive two features: **move semantics** (an
+rvalue source — prvalue *or* xvalue — selects the move constructor) and **perfect forwarding**
+(`std::forward` recovers the caller's original category). Both have dedicated pages:
 
-```cpp showLineNumbers 
-template<typename T>
-void wrapper(T&& arg) {
-    // arg is always lvalue (has name)
-    // But T encodes original value category
-    
-    // std::forward preserves value category
-    actual_function(std::forward<T>(arg));
-}
+- [Reference Collapsing](./reference-collapsing.md) — forwarding references and how `std::forward` works
+- [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md) — implementing move
 
-int x = 10;
-wrapper(x);           // T = int&, forwards as lvalue
-wrapper(10);          // T = int, forwards as rvalue
-wrapper(std::move(x)); // T = int, forwards as rvalue
-```
-
----
-
-## Move Semantics
-
-Understanding categories is key to `move` semantics:
-
-```cpp showLineNumbers 
-class Buffer {
-    int* data;
-public:
-    // Copy constructor (lvalue source)
-    Buffer(const Buffer& other);
-    
-    // Move constructor (rvalue source: prvalue or xvalue)
-    Buffer(Buffer&& other) noexcept;
-};
-
-Buffer b1 = getBuffer();      // Move (prvalue)
-Buffer b2 = std::move(b1);    // Move (xvalue)
-Buffer b3 = b1;               // Copy (lvalue)
+```cpp showLineNumbers
+Buffer b1 = getBuffer();      // move — prvalue source
+Buffer b2 = std::move(b1);    // move — xvalue source
+Buffer b3 = b1;               // copy — lvalue source
 ```
 
 ---
