@@ -372,85 +372,19 @@ void nestedExceptionExample() {
 }
 ```
 
-## Exception Safety Guarantees
+## Exception safety guarantees
 
-### Basic Guarantee
+How much a function promises about program state when an exception escapes — **basic**, **strong**,
+or **no-throw** — is a subject of its own. The four levels, the copy-and-swap commit pattern, and the
+rollback technique are covered on the [Exception Safety](./02-noexcept-and-strong-guarantee.md) page.
+The one-line version: do the throwing work on a copy, then commit with a `noexcept` move or swap.
 
-Program remains in valid state; no resource leaks:
-```cpp showLineNumbers 
-void basicGuarantee(std::vector<int>& vec, int value) {
-    vec.push_back(value);  // May throw, but vec remains valid
+```cpp showLineNumbers
+void strong(std::vector<int>& vec, int value) {
+    std::vector<int> temp = vec;   // work on a copy (may throw)
+    temp.push_back(value);
+    vec = std::move(temp);         // commit — noexcept, so this can't fail
 }
-```
-
-### Strong Guarantee
-
-Operation either succeeds completely or has no effect:
-```cpp showLineNumbers 
-#include <vector>
-
-void strongGuarantee(std::vector<int>& vec, int value) {
-    std::vector<int> temp = vec;  // Copy
-    temp.push_back(value);        // Modify copy
-    vec = std::move(temp);        // Commit (noexcept)
-}
-```
-
-### No-throw Guarantee
-
-Operation never throws exceptions:
-```cpp showLineNumbers 
-void noThrowGuarantee(int& a, int& b) noexcept {
-    std::swap(a, b);  // Guaranteed not to throw
-}
-```
-```mermaid
-graph TD
-    A[No Guarantee] -->|Weak| B[Basic Guarantee]
-    B -->|Stronger| C[Strong Guarantee]
-    C -->|Strongest| D[No-throw Guarantee]
-    
-```
-
-## Exception-Safe Coding Patterns
-
-### Copy-and-Swap Idiom
-```cpp showLineNumbers 
-class Widget {
-    int* data_;
-    size_t size_;
-    
-public:
-    Widget& operator=(const Widget& other) {
-        Widget temp(other);        // Copy (may throw)
-        swap(temp);                 // Swap (noexcept)
-        return *this;               // Strong guarantee
-    }
-    
-    void swap(Widget& other) noexcept {
-        std::swap(data_, other.data_);
-        std::swap(size_, other.size_);
-    }
-};
-```
-
-### Two-Phase Construction
-```cpp showLineNumbers 
-class Database {
-    Connection* conn_ = nullptr;
-    
-public:
-    Database() = default;  // noexcept
-    
-    void connect(const std::string& url) {
-        // Throwing operations after construction
-        conn_ = new Connection(url);
-    }
-    
-    ~Database() {
-        delete conn_;
-    }
-};
 ```
 
 ## Performance Considerations
