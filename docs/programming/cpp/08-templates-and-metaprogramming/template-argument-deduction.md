@@ -14,6 +14,13 @@ Template argument deduction lets the compiler figure out template parameters fro
 The compiler examines function arguments and deduces template parameters. Usually just works, but understanding the rules helps debug errors.
 :::
 
+:::note Same rules power `auto`
+`auto` deduction is template argument deduction in disguise — `auto x = expr;` deduces `x` exactly as
+a `template<class T> f(T)` would deduce `T`. So the rules here also explain
+[auto](../03-types-and-values/type-deduction/auto.md); the one exception is `auto` with braced
+initializers, noted on that page.
+:::
+
 ## Basic Deduction
 
 ```cpp showLineNumbers 

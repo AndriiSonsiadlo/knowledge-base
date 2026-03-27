@@ -8,7 +8,7 @@ tags: [c++, cpp20, concepts, requires, constraints]
 
 # Concepts and Requires Expressions (C++20)
 
-Concepts are named requirements for template arguments that replace SFINAE with readable constraints. Requires expressions are the building blocks that check if code compiles at compile-time.
+Concepts are named requirements for template arguments that replace [SFINAE and `enable_if`](./sfinae-and-enable-if.md) with readable constraints. Requires expressions are the building blocks that check if code compiles at compile-time.
 
 :::info Named Constraints with Readable Checks
 **Concepts** = Named sets of requirements (e.g., `std::integral<T>`)  

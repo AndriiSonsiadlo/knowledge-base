@@ -15,6 +15,13 @@ SFINAE (Substitution Failure Is Not An Error) is a fundamental C++ template mech
 **enable_if:** Enable/disable templates based on compile-time conditions
 :::
 
+:::tip In C++20, prefer concepts
+SFINAE works but is hard to read and produces brutal error messages.
+[Concepts and `requires`](./concepts-and-requires.md) express the same constraints with readable
+syntax and far better diagnostics. Reach for SFINAE only to support pre-C++20 compilers, or for
+detection patterns concepts don't cover.
+:::
+
 ## SFINAE Core Concept
 
 When the compiler tries to substitute template arguments and fails, that's not an error - the template is simply removed from the overload set.
