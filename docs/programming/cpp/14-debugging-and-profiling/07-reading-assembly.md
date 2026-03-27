@@ -356,3 +356,9 @@ mov  [result], eax  # Store return value
 ; 4. Follow control flow (jmp, je, call)
 ; 5. Find epilogue (leave, ret)
 ```
+
+## Related
+
+- [GDB](./02-gdb.md) — `disassemble` and stepping by instruction
+- [perf Tools](./06-perf-tools.md) — annotated hot paths
+- [Compilation Phase](../01-toolchain-and-build/compilation.md) · [Object Layout](../12-low-level-and-platform/02-object-layout.md)

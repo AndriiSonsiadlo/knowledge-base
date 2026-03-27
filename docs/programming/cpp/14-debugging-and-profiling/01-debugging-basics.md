@@ -291,3 +291,10 @@ g++ -dM -E - < /dev/null
 // 4. Use debugger for complex cases
 // 5. Fix and add regression test
 ```
+
+
+## Related
+
+- [GDB](./02-gdb.md) — the interactive debugger
+- [Sanitizers](./04-sanitizers.md) — catch memory/UB bugs at runtime
+- [Core Dumps](./03-core-dumps.md) — debug a crash after the fact

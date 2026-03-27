@@ -284,3 +284,9 @@ Core dump = crashed program's memory snapshot.
 # 5. info locals (see variables)
 # 6. Fix bug, recompile, test
 ``` 
+
+## Related
+
+- [GDB](./02-gdb.md) — open a core file for post-mortem analysis
+- [Debugging Basics](./01-debugging-basics.md)
+- [Sanitizers](./04-sanitizers.md) — often catch the bug before it dumps core

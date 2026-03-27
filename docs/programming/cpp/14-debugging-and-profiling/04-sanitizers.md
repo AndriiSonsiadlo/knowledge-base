@@ -380,3 +380,9 @@ g++ -g -O1 -fsanitize=thread program.cpp -pthread
 
 # CI: Run all tests with sanitizers enabled
 ```
+
+## Related
+
+- [Valgrind](./05-valgrind.md) — the no-recompile alternative: slower, but instruments any binary
+- [Debugging Basics](./01-debugging-basics.md) · [GDB](./02-gdb.md)
+- [Undefined Behavior](../10-error-handling-and-safety/06-undefined-behavior.md) — what UBSan exists to catch

@@ -422,3 +422,9 @@ h                   # help
 // 6. bt (if crash)
 // 7. q (quit)
 ```
+
+## Related
+
+- [Debugging Basics](./01-debugging-basics.md) — build flags and workflow
+- [Core Dumps](./03-core-dumps.md) — load a crash into GDB post-mortem
+- [Reading Assembly](./07-reading-assembly.md) — when source-level stepping is not enough

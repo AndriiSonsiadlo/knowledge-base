@@ -354,3 +354,9 @@ kcachegrind callgrind.out.*
 # Threads:
 valgrind --tool=helgrind ./program
 ```
+
+## Related
+
+- [Sanitizers](./04-sanitizers.md) — the compile-time alternative: needs a rebuild, but much faster
+- [perf Tools](./06-perf-tools.md) — sampling profiler vs Callgrind/Cachegrind
+- [Debugging Basics](./01-debugging-basics.md)

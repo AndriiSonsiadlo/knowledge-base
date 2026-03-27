@@ -374,3 +374,8 @@ valgrind --tool=cachegrind ./program
 # 5. Measure again
 perf stat ./program  # Compare before/after
 ```
+
+## Related
+
+- [Valgrind](./05-valgrind.md) — Callgrind/Cachegrind give exact (slow) profiles; perf samples (fast)
+- [Reading Assembly](./07-reading-assembly.md) — interpret the hot instructions perf points at
