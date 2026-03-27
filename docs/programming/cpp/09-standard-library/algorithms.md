@@ -535,3 +535,9 @@ std::transform(std::execution::par, vec.begin(), vec.end(), vec.begin(),
 **Always O(n log n) or better** when sorted  
 **Parallel (C++17)** = add execution policy for speedup
 :::
+
+## Related
+
+- [Iterators](./iterators.md) — algorithms operate on iterator ranges
+- [Ranges](./ranges.md) — the C++20 range-based form (`std::ranges::sort(v)`), no `begin()/end()` pairs
+- [Containers](./containers.md) — what supplies the iterators

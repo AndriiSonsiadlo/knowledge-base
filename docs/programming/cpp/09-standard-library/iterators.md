@@ -515,3 +515,9 @@ if (it != vec.end()) {
 **Range-for** = uses begin()/end() under the hood  
 **C++20** = iterator concepts for constraints
 :::
+
+## Related
+
+- [Containers](./containers.md) — supply iterators via `begin()`/`end()`
+- [Algorithms](./algorithms.md) — consume iterator ranges
+- [Ranges](./ranges.md) — wrap iterator pairs into single range objects

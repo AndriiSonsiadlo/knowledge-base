@@ -510,3 +510,9 @@ c.count(key);
 **stack/queue** = adapters for specific patterns  
 **priority_queue** = heap for priority operations
 :::
+
+## Related
+
+- [Iterators](./iterators.md) — how you traverse every container
+- [Algorithms](./algorithms.md) — generic operations over container contents
+- [Allocators](./allocators.md) — how containers obtain their memory
