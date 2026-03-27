@@ -297,6 +297,30 @@ int result2 = must_be_compile_time(n);  // Error: runtime argument
 
 ---
 
+## constinit (C++20)
+
+`constinit` completes the trio. It applies to **variables with static or thread storage**, not
+functions, and asserts that the variable is initialized at compile time — guaranteeing **constant
+initialization** and so eliminating that variable from the [static initialization order
+fiasco](../05-memory-and-object-lifetime/storage-duration.md). Unlike `constexpr`, the variable is
+*not* `const` afterwards — it can still be mutated at runtime.
+
+```cpp showLineNumbers
+constinit int counter = 7;      // guaranteed initialized at compile time...
+// counter is still mutable:
+void tick() { ++counter; }       // ...but not const
+
+// constinit int bad = std::time(nullptr);   // error: not a constant initializer
+```
+
+| Keyword | Applies to | Compile-time? | Result is `const`? |
+|---------|-----------|---------------|--------------------|
+| `constexpr` | functions, variables | *may* be evaluated at compile time | yes (variables) |
+| `consteval` | functions | **must** be compile time | n/a |
+| `constinit` | static/thread variables | **initialization** is compile time | **no** |
+
+---
+
 ## Performance Benefits
 
 ### Code Bloat Reduction
