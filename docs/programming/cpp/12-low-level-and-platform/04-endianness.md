@@ -16,6 +16,12 @@ Byte order in multi-byte values.
 Network protocols use **big-endian** (network byte order). x86/x86-64/ARM are typically **little-endian**.
 :::
 
+When does endianness actually matter? Only when you reinterpret the **bytes** of a multi-byte value
+— writing raw structs to a file or socket, or `memcpy`-ing into a typed buffer. Within a single
+program, ordinary arithmetic and comparisons never expose byte order, so day-to-day code can ignore
+it entirely. The trouble starts the moment those bytes cross a machine boundary; convert at the I/O
+edge with `htonl`/`ntohl` (or C++20 `std::endian` + `std::byteswap`), not deep in your logic.
+
 ## Little vs Big Endian
 ```cpp showLineNumbers
 uint32_t value = 0x12345678;

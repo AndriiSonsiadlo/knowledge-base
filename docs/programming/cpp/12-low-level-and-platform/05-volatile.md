@@ -14,6 +14,12 @@ tags: [cpp, volatile, hardware, optimization, memory-mapped]
 `volatile` ≠ thread-safe. Use `std::atomic` for multi-threading. `volatile` is for hardware/interrupts only.
 :::
 
+The reason is precise: `volatile` guarantees each access actually *happens* and isn't reordered
+relative to *other volatile accesses* — but it provides **no atomicity** and **no ordering** against
+ordinary (non-volatile) memory, which are exactly the two guarantees thread synchronisation needs.
+For state shared between threads use [`std::atomic`](../11-concurrency-and-memory-model/02-atomics-and-fences.md);
+keep `volatile` for memory-mapped hardware, interrupt handlers, and signal-touched variables.
+
 ## What volatile Does
 ```cpp showLineNumbers
 volatile int hardware_register;
