@@ -66,6 +66,11 @@ if (x < y) {  // Danger! x converts to large unsigned
 
 **Rule**: When mixing, signed converts to unsigned.
 
+This is the single most common signedness bug, and the conversion is **silent**. Enable
+`-Wsign-compare` (included in `-Wall`/`-Wextra`) so the compiler flags mixed comparisons. The exact
+conversion order is the *usual arithmetic conversions*, covered in
+[Conversions and Promotions](./conversions-and-promotions.md).
+
 ---
 
 ## Overflow Behavior
@@ -141,6 +146,13 @@ int temperature = -5;           // Can be negative
 unsigned int flags = 0xFF00;    // Bit flags
 size_t size = vec.size();       // Size (unsigned)
 ```
+
+:::tip Prefer signed for arithmetic
+Although the standard library uses unsigned `size_t` for sizes, the C++ Core Guidelines recommend
+**signed** integers for arithmetic and indexing — unsigned's wrap-around silently turns an "off by
+one" into "off by four billion". Treat unsigned as a tool for bit manipulation and deliberate modular
+arithmetic, not as a "this value can't be negative" annotation.
+:::
 
 ---
 

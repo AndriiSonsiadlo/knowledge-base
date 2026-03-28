@@ -78,6 +78,11 @@ uint32_t b;   // Unsigned 32 bits
 // Use these for platform-independent code
 ```
 
+Reach for these whenever the **exact** width matters — binary file formats, network protocols,
+hardware registers — where `int`'s "at least 16 bits, usually 32" is too vague. One caveat:
+`int8_t`/`uint8_t` are almost always aliases for `char`/`unsigned char`, so printing one with
+`std::cout` shows a character, not a number.
+
 ---
 
 ## Floating-Point Types
@@ -106,6 +111,13 @@ std::cout << "float: " << f << "\n";    // ~0.333333343267
 std::cout << "double: " << d << "\n";   // ~0.333333333333333
 ```
 
+:::warning Floating-point is approximate
+These types follow IEEE-754, which stores values in **binary** — so `0.1` has no exact
+representation and `0.1 + 0.2 != 0.3`. Never compare floats with `==`; compare within a small
+tolerance (epsilon) instead. `double` is the sensible default; reserve `float` for memory/bandwidth
+pressure (large arrays, GPUs).
+:::
+
 ---
 
 ## Character Types
@@ -128,6 +140,10 @@ char c = 65;    // Same as 'A' (ASCII)
 c++;            // Now 66 ('B')
 int x = c;      // Implicit conversion
 ```
+
+Plain `char` is a *distinct* type from both `signed char` and `unsigned char`, and **whether it is
+signed is implementation-defined** — never assume. The `charN_t` types exist to make text encoding
+explicit in the type system: `char8_t` for UTF-8, `char16_t`/`char32_t` for UTF-16/32.
 
 ---
 
@@ -222,6 +238,10 @@ auto l = 42L;         // long
 auto iter = vec.begin();  // std::vector<int>::iterator
 ```
 
+`auto` deduces the type from the initializer using the template-deduction rules — see
+[auto](./type-deduction/auto.md) for the details (including the spots where it surprises you, like
+dropping references and `const`).
+
 ---
 
 ## Type Aliases
@@ -238,6 +258,9 @@ using IntPtr = int*;
 ulong count = 1000;
 IntPtr ptr = &x;
 ```
+
+Prefer `using` over `typedef`: it reads left-to-right like an assignment and — unlike `typedef` — it
+can be templated, e.g. `template<class T> using Vec = std::vector<T>;`.
 
 ---
 
