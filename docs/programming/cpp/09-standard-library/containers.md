@@ -96,6 +96,38 @@ constexpr size_t size = arr.size();  // 5
 - Want STL algorithms with C arrays
 - Performance critical (no heap allocation)
 
+## std::span - Non-Owning View (C++20)
+
+`std::span<T>` is **not a container** — it's a borrowed `{pointer, length}` view over *someone else's*
+contiguous storage (a `vector`, `array`, C array, or any contiguous range). It owns nothing and
+copies nothing, so it's the right parameter type for "a sequence of `T`, whatever holds it."
+
+```cpp showLineNumbers
+#include <span>
+
+void sum(std::span<const int> data) {     // accepts vector, array, C array — no template, no copy
+    int total = 0;
+    for (int x : data) total += x;         // size travels with the span
+}
+
+std::vector<int> v{1, 2, 3};
+std::array<int, 3> a{4, 5, 6};
+int raw[]{7, 8, 9};
+sum(v); sum(a); sum(raw);                  // all bind to the same span parameter
+sum(std::span{v}.subspan(1));              // a window over part of v, still no copy
+```
+
+:::warning A span is a borrow — watch lifetime
+A `span` is only valid while the storage it points at is alive and not reallocated. Returning a span
+to a local, or holding one across a `vector` `push_back` (which may reallocate), dangles — the same
+hazard as a [raw pointer](../06-pointers-references-and-smart-pointers/raw-pointers.md) or
+[string_view](./strings.md).
+:::
+
+**When to use:**
+- Function parameters that accept any contiguous sequence without templating or copying
+- Passing a *subrange* (`first`, `last`, `subspan`) without slicing the underlying container
+
 ## std::deque - Double-Ended Queue
 
 Fast insertion/removal at both ends. Not contiguous.
