@@ -14,6 +14,12 @@ Constructs objects in pre-allocated memory **without allocating**. Separates con
 Placement new = constructor call on existing memory. You manage memory separately and must call destructor explicitly.
 :::
 
+You rarely write placement new directly — it's the machinery *inside* `std::vector` (constructing
+elements into raw capacity ahead of `size()`), `std::optional`/`std::variant` (an object that may or
+may not exist), and custom [allocators](../09-standard-library/allocators.md). Two rules ride along:
+the buffer must be correctly sized **and** [aligned](./alignment.md) for the type, and because you
+bypassed `new` you must call the destructor **explicitly** (`p->~T()`) — never `delete`.
+
 ## Basic Syntax
 ```cpp showLineNumbers
 #include <new>  // Required

@@ -14,6 +14,12 @@ Object slicing occurs when you copy a derived class object to a base class objec
 Copying derived object to base object only copies the base part. Derived data and virtual function overrides are lost!
 :::
 
+The root cause is always the same: handling a polymorphic object **by value**. A `Base` variable is
+exactly `Base`-sized, so assigning a `Derived` into it copies only the base subobject and leaves a
+plain `Base` (vtable included) — the override is gone. The cure is equally simple: pass and store
+polymorphic types by **reference, pointer, or smart pointer**, never by value. See
+[Virtual Functions](./virtual-functions.md).
+
 ## Basic Slicing Example
 
 ```cpp showLineNumbers 
