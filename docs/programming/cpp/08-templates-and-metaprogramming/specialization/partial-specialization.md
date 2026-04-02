@@ -14,6 +14,13 @@ Partial specialization lets you specialize templates for a pattern of types, not
 Partial specialization = specialize for type patterns. Full specialization = one exact type. Partial = whole categories of types.
 :::
 
+:::warning Only class and variable templates
+**Function templates cannot be partially specialized** — reach for overloading instead. Partial
+specialization applies to class templates (and, since C++14, variable templates). This is exactly the
+machinery behind the standard library's type traits — `std::is_pointer`, `std::remove_reference`,
+iterator traits are all class templates with partial specializations (see [Type Traits](../type-traits.md)).
+:::
+
 ## Basic Partial Specialization
 
 ```cpp showLineNumbers 

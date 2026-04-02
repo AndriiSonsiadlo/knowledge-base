@@ -14,6 +14,13 @@ Type traits are compile-time tools that query and transform types. They power te
 Type traits answer questions about types at compile-time: Is it a pointer? Is it const? Can it be copied? No runtime cost!
 :::
 
+Under the hood a trait is just a class template with [partial
+specializations](./specialization/partial-specialization.md): the primary template gives the default
+answer, and specializations match patterns like `T*` or `const T`. Two naming conventions cut the
+boilerplate — a **`_v`** suffix is the value (`std::is_pointer_v<T>` instead of
+`std::is_pointer<T>::value`), and a **`_t`** suffix is the resulting type
+(`std::remove_const_t<T>` instead of `std::remove_const<T>::type`). Prefer the `_v`/`_t` forms.
+
 ## Basic Type Traits
 
 ```cpp showLineNumbers 
