@@ -10,6 +10,14 @@ tags: [c++, stl, io, streams, iostream, fstream, stringstream]
 
 The **iostream** library provides facilities for input/output operations through streams. It's a type-safe, extensible alternative to C's `printf/scanf`.
 
+:::tip Two things that bite beginners
+- **Check stream state.** Reads can fail; an input stream converts to `false` in a boolean context
+  when they do, so `if (std::cin >> x)` is the idiomatic "did that read succeed?" test. After a
+  failure the stream *stays* failed until you `clear()` it.
+- **`std::endl` is not `'\n'`.** `endl` writes a newline **and flushes** the buffer — and in a loop
+  that flush is a real cost. Prefer `'\n'` and let the stream flush when it needs to.
+:::
+
 ## Stream Hierarchy
 ```mermaid
 graph TD

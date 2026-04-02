@@ -21,6 +21,12 @@ ptr + 1;  // Moves by sizeof(int) = 4 bytes, not 1 byte!
 Compiler handles math: `ptr + n` → `ptr + (n * sizeof(type))`
 :::
 
+The scaling is convenient; the danger is precise. Pointer arithmetic is only **defined within a
+single array**, plus the one-past-the-end position (which you may form but not dereference).
+Computing a pointer before the start, or more than one past the end — *even if you never dereference
+it* — is undefined behavior. That missing bounds information is exactly what iterators and
+[`std::span`](../09-standard-library/containers.md) carry for you.
+
 ## Memory Layout
 ```
 Address    Value    Pointer Position
