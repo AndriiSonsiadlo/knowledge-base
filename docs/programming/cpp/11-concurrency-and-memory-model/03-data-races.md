@@ -10,6 +10,15 @@ tags: [cpp, concurrency, data-races, threading, synchronization, bugs]
 
 A **data race** occurs when two or more threads access the same memory location concurrently, at least one access is a write, and there's no synchronization between them. Data races cause **undefined behavior**.
 
+:::info Data race ≠ race condition
+The terms are often conflated. A **data race** is the precise, language-level condition above, and is
+always undefined behavior. A **race condition** is the broader *logic* bug where the result depends
+on thread timing — and it can exist even in fully synchronized, well-defined code (classic example:
+check-then-act, where another thread changes the value between your check and your action).
+Removing data races with [atomics](./02-atomics-and-fences.md) or [mutexes](./05-mutexes.md) does
+**not** automatically remove race conditions; those require correct *logic*, not just race-free *access*.
+:::
+
 ## What is a Data Race?
 ```mermaid
 graph TD
