@@ -551,19 +551,19 @@ add_test(NAME MyLibTests COMMAND test_suite)
 ## Best Practices
 
 :::success Do's
-✅ Use `target_*` commands (not global `include_directories()`)  
-✅ Put `cmake_minimum_required()` first  
-✅ Version your project  
-✅ Use out-of-source builds  
-✅ Set C++ standard with `target_compile_features()`
+Use `target_*` commands (not global `include_directories()`)  
+Put `cmake_minimum_required()` first  
+Version your project  
+Use out-of-source builds  
+Set C++ standard with `target_compile_features()`
 :::
 
 :::danger Don'ts
-❌ Don't use `file(GLOB)` for source files  
-❌ Don't set global compiler flags  
-❌ Don't use absolute paths  
-❌ Don't build in source directory  
-❌ Don't use `link_directories()`
+Don't use `file(GLOB)` for source files  
+Don't set global compiler flags  
+Don't use absolute paths  
+Don't build in source directory  
+Don't use `link_directories()`
 :::
 
 ## Quick Template

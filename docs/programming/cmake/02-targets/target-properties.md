@@ -724,10 +724,10 @@ install(TARGETS myapp mylib
 1. **Setting global properties instead of target properties**
 
    ```cmake showLineNumbers 
-   # ❌ Bad - affects all targets
+   # Bad - affects all targets
    set(CMAKE_CXX_STANDARD 17)
    
-   # ✅ Good - affects only this target
+   # Good - affects only this target
    set_target_properties(myapp PROPERTIES CXX_STANDARD 17)
    ```
 

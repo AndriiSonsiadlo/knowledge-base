@@ -39,15 +39,15 @@ add_library(mylib STATIC
 
 **Pros:**
 
-- ✅ No runtime dependencies
-- ✅ Faster runtime (no dynamic linking overhead)
-- ✅ Easier distribution
+- No runtime dependencies
+- Faster runtime (no dynamic linking overhead)
+- Easier distribution
 
 **Cons:**
 
-- ❌ Larger executable size
-- ❌ Code duplication if used by multiple executables
-- ❌ Cannot update library without recompiling
+- Larger executable size
+- Code duplication if used by multiple executables
+- Cannot update library without recompiling
 
 ```cmake showLineNumbers 
 # Example
@@ -75,15 +75,15 @@ add_library(mylib SHARED
 
 **Pros:**
 
-- ✅ Smaller executables
-- ✅ Code shared between executables
-- ✅ Can update library without recompiling app
+- Smaller executables
+- Code shared between executables
+- Can update library without recompiling app
 
 **Cons:**
 
-- ❌ Runtime dependencies (must distribute `.so`/`.dll`)
-- ❌ Slightly slower (dynamic linking)
-- ❌ Version compatibility issues
+- Runtime dependencies (must distribute `.so`/`.dll`)
+- Slightly slower (dynamic linking)
+- Version compatibility issues
 
 ```cmake showLineNumbers 
 # Example

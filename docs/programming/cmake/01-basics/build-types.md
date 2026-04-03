@@ -24,11 +24,11 @@ set(CMAKE_BUILD_TYPE Debug)
 
 **Characteristics:**
 
-- ❌ No optimization (`-O0`)
-- ✅ Debug symbols (`-g`)
-- ✅ Assertions enabled
-- 📦 Large binaries
-- 🐌 Slow runtime
+- No optimization (`-O0`)
+- Debug symbols (`-g`)
+- Assertions enabled
+- Large binaries
+- Slow runtime
 
 **Command line:**
 
@@ -52,11 +52,11 @@ set(CMAKE_BUILD_TYPE Release)
 
 **Characteristics:**
 
-- ✅ Full optimization (`-O3` or `/O2`)
-- ❌ No debug symbols
-- ❌ Assertions disabled (`-DNDEBUG`)
-- 📦 Smaller binaries
-- 🚀 Fast runtime
+- Full optimization (`-O3` or `/O2`)
+- No debug symbols
+- Assertions disabled (`-DNDEBUG`)
+- Smaller binaries
+- Fast runtime
 
 **Command line:**
 
@@ -80,11 +80,11 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 **Characteristics:**
 
-- ✅ Optimization (`-O2`)
-- ✅ Debug symbols (`-g`)
-- ❌ Assertions disabled
-- 📦 Larger than Release
-- 🚀 Fast runtime
+- Optimization (`-O2`)
+- Debug symbols (`-g`)
+- Assertions disabled
+- Larger than Release
+- Fast runtime
 
 **Command line:**
 
@@ -112,11 +112,11 @@ set(CMAKE_BUILD_TYPE MinSizeRel)
 
 **Characteristics:**
 
-- ⚠️ Size optimization (`-Os`)
-- ❌ No debug symbols
-- ❌ Assertions disabled
-- 📦 Smallest binaries
-- ⚡ Moderate runtime speed
+- Size optimization (`-Os`)
+- No debug symbols
+- Assertions disabled
+- Smallest binaries
+- Moderate runtime speed
 
 **Command line:**
 
@@ -134,10 +134,10 @@ cmake -DCMAKE_BUILD_TYPE=MinSizeRel ..
 
 | Build Type | Optimization | Debug Symbols | Assertions | Use Case |
 |------------|-------------|---------------|------------|----------|
-| **Debug** | None | ✅ | ✅ | Development |
-| **Release** | Maximum | ❌ | ❌ | Production |
-| **RelWithDebInfo** | High | ✅ | ❌ | Profiling |
-| **MinSizeRel** | Size | ❌ | ❌ | Embedded |
+| **Debug** | None | Yes | Yes | Development |
+| **Release** | Maximum | No | No | Production |
+| **RelWithDebInfo** | High | Yes | No | Profiling |
+| **MinSizeRel** | Size | No | No | Embedded |
 
 ## Compiler Flags by Build Type
 

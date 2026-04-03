@@ -493,20 +493,20 @@ target_include_directories(myapp PRIVATE
 1. **Use target-based commands**
 
    ```cmake showLineNumbers 
-   # ✅ Good
+   # Good
    target_include_directories(myapp PRIVATE include/)
    
-   # ❌ Avoid
+   # Avoid
    include_directories(include/)
    ```
 
 2. **Explicit source lists**
 
    ```cmake showLineNumbers 
-   # ✅ Good
+   # Good
    add_executable(myapp main.cpp utils.cpp)
    
-   # ❌ Avoid
+   # Avoid
    file(GLOB SOURCES "*.cpp")
    add_executable(myapp ${SOURCES})
    ```

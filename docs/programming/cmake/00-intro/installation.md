@@ -58,7 +58,7 @@ Download the installer from [cmake.org/download](https://cmake.org/download/)
 
 1. Download the `.msi` installer
 2. Run installer
-3. ✅ Check "Add CMake to system PATH"
+3. Check "Add CMake to system PATH"
 4. Complete installation
 
 **Alternative - Chocolatey:**
@@ -112,7 +112,7 @@ code --install-extension twxs.cmake
 
 ### CLion
 
-CMake support is **built-in** - no setup needed! ✨
+CMake support is **built-in** - no setup needed!
 
 ### Visual Studio
 

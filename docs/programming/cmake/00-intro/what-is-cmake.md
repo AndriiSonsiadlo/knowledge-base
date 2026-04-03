@@ -95,10 +95,10 @@ cmake --build .
 
 | Feature         | CMake       | Make        | Autotools  |
 |-----------------|-------------|-------------|------------|
-| Cross-platform  | ✅ Excellent | ❌ Unix-only | ⚠️ Complex |
-| Learning curve  | ⚠️ Moderate | ✅ Simple    | ❌ Steep    |
-| IDE integration | ✅ Excellent | ❌ Limited   | ❌ Limited  |
-| Modern C++      | ✅ Yes       | ❌ Manual    | ❌ Manual   |
+| Cross-platform  | Excellent | Unix-only |  Complex |
+| Learning curve  |  Moderate | Simple    | Steep    |
+| IDE integration | Excellent | Limited   | Limited  |
+| Modern C++      | Yes       | Manual    | Manual   |
 
 :::warning Remember
 CMake files are named `CMakeLists.txt` (case-sensitive!) and must be in your project root and

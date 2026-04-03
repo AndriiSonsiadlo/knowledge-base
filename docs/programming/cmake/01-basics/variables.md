@@ -59,10 +59,10 @@ set(LOCAL_VAR "value")  # Only in current scope
 
 function(my_function)
     set(FUNC_VAR "inside")  # Only in function
-    message(STATUS ${FUNC_VAR})  # ✅ Works
+    message(STATUS ${FUNC_VAR})  # Works
 endfunction()
 
-message(STATUS ${FUNC_VAR})  # ❌ Undefined!
+message(STATUS ${FUNC_VAR})  # Undefined!
 ```
 
 ### PARENT_SCOPE
@@ -73,7 +73,7 @@ function(set_parent)
 endfunction()
 
 set_parent()
-message(STATUS ${MY_VAR})  # ✅ "value"
+message(STATUS ${MY_VAR})  # "value"
 ```
 
 ### Cache Variables (Global/Persistent)
@@ -227,10 +227,10 @@ endif()
 When passing lists to commands, don't quote them:
 
 ```cmake showLineNumbers 
-# ✅ Correct
+# Correct
 add_executable(myapp ${SOURCES})
 
-# ❌ Wrong - treated as single argument
+# Wrong - treated as single argument
 add_executable(myapp "${SOURCES}")
 ```
 
@@ -401,10 +401,10 @@ set(x main.cpp)     # Unclear purpose
 ```cmake showLineNumbers 
 set(MY_VAR "value with spaces")
 
-# ❌ Wrong - split into multiple arguments
+# Wrong - split into multiple arguments
 message(STATUS ${MY_VAR})
 
-# ✅ Correct
+# Correct
 message(STATUS "${MY_VAR}")
 ```
 
