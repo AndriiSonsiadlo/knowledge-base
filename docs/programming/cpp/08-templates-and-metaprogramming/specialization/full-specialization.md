@@ -14,6 +14,12 @@ Full specialization provides a completely custom implementation for specific tem
 Full specialization = brand new implementation for specific types. `Template<int>` can be totally different from `Template<double>`.
 :::
 
+Unlike [partial specialization](./partial-specialization.md), full specialization works for **both
+class and function templates** — but for functions it's usually the wrong tool: a plain **overload**
+is simpler, composes with overload resolution, and avoids the subtle rule that a function
+specialization doesn't participate in overload ranking. Rule of thumb: overload functions, specialize
+classes, and use full specialization mainly for trait-style "one exact type → one exact answer" cases.
+
 ## Function Template Specialization
 
 ```cpp showLineNumbers 
