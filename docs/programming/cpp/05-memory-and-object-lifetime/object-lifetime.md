@@ -14,6 +14,12 @@ Object lifetime spans from construction to destruction. Understanding lifetime i
 An object's lifetime begins when its constructor completes and ends when its destructor begins.
 :::
 
+The practical weight of that rule: touching an object **before** its constructor finishes or
+**after** its destructor begins is undefined behavior — the root of dangling references,
+use-after-free, and the "don't call virtual functions from a constructor or destructor" rule. Binding
+a resource's lifetime to an object's is exactly what [RAII](../13-idioms-and-design/01-raii.md) does,
+which is why it underpins safe C++.
+
 ## Lifetime Phases
 
 ```mermaid
