@@ -14,6 +14,13 @@ Function overloading allows multiple functions with the same name but different 
 Overload resolution happens at compile-time based on argument types, not runtime values.
 :::
 
+Resolution looks only at the **parameters**, ranking each viable candidate by how well the arguments
+match — an exact match beats a promotion, which beats a standard conversion. The single best-ranked
+candidate wins; a tie is an *ambiguity* error. Two things commonly trip people up: the **return type
+alone cannot distinguish overloads**, and overloading (same scope, resolved at compile time) is a
+different mechanism from *overriding* a [virtual function](../07-classes-and-oop/virtual-functions.md)
+(across base/derived, resolved at runtime).
+
 ## Basic Overloading
 
 ```cpp showLineNumbers 

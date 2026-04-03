@@ -15,6 +15,12 @@ Variadic templates accept any number of arguments of any types. They're the foun
 Functions can accept 0, 1, 2, or any number of arguments!
 :::
 
+The classic technique is **recursion**: peel one argument off the pack, handle it, then recurse on
+the rest, with a non-template (or empty) base case to stop. Since C++17, [fold
+expressions](./fold-expressions.md) collapse that whole pattern into a single line for reductions
+like "sum all" or "print all" — reach for a fold first, and fall back to recursion only when each
+element needs genuinely different handling.
+
 ## Basic Variadic Template
 
 ```cpp showLineNumbers 
