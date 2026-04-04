@@ -23,7 +23,7 @@ is self-contained — follow the cross-links.
 |   | Section | What it covers |
 |---|---------|----------------|
 | <Icon icon="lucide:book-open" inline /> | [Introduction](./00-intro/what-is-cmake.md) | What CMake is, installing it, your first project |
-| <Icon icon="lucide:wrench" inline /> | [Basics](./01-basics/cmakelists-structure.md) | `CMakeLists.txt` structure, variables, commands, build types |
+| <Icon icon="lucide:wrench" inline /> | [Basics](./01-basics/cmakelists-structure.md) | `CMakeLists.txt` structure, variables, commands, build types, presets |
 | <Icon icon="lucide:target" inline /> | [Targets](./02-targets/executables.md) | Executables, libraries, target properties, linking |
 | <Icon icon="lucide:package" inline /> | [Dependencies](./03-dependencies/find-package.md) | `find_package`, FetchContent, ExternalProject |
 | <Icon icon="lucide:folder-tree" inline /> | [Project Organization](./04-project-organization/best-practices.md) | Multi-directory layouts, `add_subdirectory`, modern patterns |
