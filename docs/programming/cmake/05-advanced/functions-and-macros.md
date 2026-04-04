@@ -554,7 +554,7 @@ endfunction()
 
 :::warning Avoid These Mistakes
 
-**❌ Forgetting PARENT_SCOPE in functions:**
+**Forgetting PARENT_SCOPE in functions:**
 
 ```cmake showLineNumbers 
 function(get_value result)
@@ -562,7 +562,7 @@ function(get_value result)
 endfunction()
 ```
 
-**✅ Correct:**
+**Correct:**
 
 ```cmake showLineNumbers 
 function(get_value result)
@@ -570,7 +570,7 @@ function(get_value result)
 endfunction()
 ```
 
-**❌ Using return() in macros:**
+**Using return() in macros:**
 
 ```cmake showLineNumbers 
 macro(bad_macro)
@@ -578,7 +578,7 @@ macro(bad_macro)
 endmacro()
 ```
 
-**✅ Use function:**
+**Use function:**
 
 ```cmake showLineNumbers 
 function(good_function)

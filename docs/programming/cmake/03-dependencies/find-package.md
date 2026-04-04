@@ -218,10 +218,10 @@ endif()
 ```cmake showLineNumbers 
 find_package(ZLIB REQUIRED)
 
-# ✅ Modern way - use imported target
+# Modern way - use imported target
 target_link_libraries(myapp PRIVATE ZLIB::ZLIB)
 
-# ❌ Old way - manual include/link
+# Old way - manual include/link
 target_include_directories(myapp PRIVATE ${ZLIB_INCLUDE_DIRS})
 target_link_libraries(myapp PRIVATE ${ZLIB_LIBRARIES})
 ```
@@ -459,15 +459,15 @@ endif()
 1. **Wrong package name**
 
    ```cmake showLineNumbers 
-   find_package(opencv)  # ❌ Wrong
-   find_package(OpenCV)  # ✅ Correct (case-sensitive!)
+   find_package(opencv)  # Wrong
+   find_package(OpenCV)  # Correct (case-sensitive!)
    ```
 
 2. **Missing components**
 
    ```cmake showLineNumbers 
-   find_package(Qt5)  # ❌ No components
-   find_package(Qt5 COMPONENTS Core Widgets)  # ✅ Specify
+   find_package(Qt5)  # No components
+   find_package(Qt5 COMPONENTS Core Widgets)  # Specify
    ```
 
 3. **Package not in standard location**

@@ -570,45 +570,45 @@ When should you use each?
 
 ### Use FetchContent When
 
-✅ **Dependency is not commonly system-installed**
+**Dependency is not commonly system-installed**
 
 - Header-only libraries (Eigen, GLM)
 - Modern C++ libraries (fmt, spdlog, json)
 - Specialized libraries
 
-✅ **You need a specific version**
+**You need a specific version**
 
 - Ensures all developers use the same version
 - Reproducible builds across systems
 
-✅ **Simplifying setup for users**
+**Simplifying setup for users**
 
 - No installation prerequisites
 - Works out of the box
 
-✅ **Active development**
+**Active development**
 
 - Easy to test new versions
 - Can point to development branches
 
 ### Use find_package() When
 
-✅ **Large, stable dependencies**
+**Large, stable dependencies**
 
 - OpenCV, Qt, Boost
 - These are huge and slow to build
 
-✅ **System integration is important**
+**System integration is important**
 
 - OpenSSL, zlib, pthread
 - These often have system-specific optimization
 
-✅ **Binary compatibility matters**
+**Binary compatibility matters**
 
 - Multiple applications sharing libraries
 - System-wide updates apply to all apps
 
-✅ **Deployment requirements**
+**Deployment requirements**
 
 - Package managers (apt, yum, brew)
 - Linux distributions prefer system libraries

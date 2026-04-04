@@ -443,19 +443,19 @@ This helps CMake understand the full build graph, important for Ninja generator.
 
 :::warning Common Pitfalls
 
-**❌ Relative paths in OUTPUT:**
+**Relative paths in OUTPUT:**
 
 ```cmake showLineNumbers 
 OUTPUT file.cpp  # Wrong - unclear which directory
 ```
 
-**✅ Absolute paths:**
+**Absolute paths:**
 
 ```cmake showLineNumbers 
 OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/file.cpp
 ```
 
-**❌ Forgetting dependencies:**
+**Forgetting dependencies:**
 
 ```cmake showLineNumbers 
 # Missing DEPENDS - won't rebuild when template changes
@@ -465,7 +465,7 @@ add_custom_command(
 )
 ```
 
-**✅ Include dependencies:**
+**Include dependencies:**
 
 ```cmake showLineNumbers 
 add_custom_command(

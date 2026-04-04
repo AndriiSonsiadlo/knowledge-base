@@ -21,12 +21,12 @@ The shift from "directory-based" to "target-based" CMake is fundamental. Old CMa
 This is the single most important rule for maintainable CMake projects.
 
 ```cmake showLineNumbers 
-# ❌ Old style - affects everything in directory
+# Old style - affects everything in directory
 include_directories(include/)
 add_definitions(-DFEATURE=1)
 link_libraries(somelib)
 
-# ✅ Modern style - affects only specific target
+# Modern style - affects only specific target
 add_executable(myapp main.cpp)
 target_include_directories(myapp PRIVATE include/)
 target_compile_definitions(myapp PRIVATE FEATURE=1)
@@ -42,7 +42,7 @@ Always use `PRIVATE`, `PUBLIC`, or `INTERFACE` - never omit them.
 ```cmake showLineNumbers 
 add_library(mylib mylib.cpp)
 
-# ✅ Explicit visibility
+# Explicit visibility
 target_include_directories(mylib
     PRIVATE src/          # Only mylib needs this
     PUBLIC include/       # Mylib and its users need this
@@ -65,18 +65,18 @@ target_link_libraries(mylib
 Don't use `file(GLOB)` to collect source files - CMake won't detect when you add/remove files.
 
 ```cmake showLineNumbers 
-# ❌ Bad - CMake won't know about new files
+# Bad - CMake won't know about new files
 file(GLOB SOURCES "src/*.cpp")
 add_executable(myapp ${SOURCES})
 
-# ✅ Good - explicit list
+# Good - explicit list
 add_executable(myapp
     src/main.cpp
     src/utils.cpp
     src/config.cpp
 )
 
-# ✅ Also good - variable with explicit list
+# Also good - variable with explicit list
 set(SOURCES
     src/main.cpp
     src/utils.cpp
@@ -92,11 +92,11 @@ add_executable(myapp ${SOURCES})
 Never build in your source directory. Always use a separate build directory.
 
 ```bash
-# ✅ Correct - out-of-source build
+# Correct - out-of-source build
 cmake -S . -B build
 cmake --build build
 
-# ❌ Wrong - pollutes source directory
+# Wrong - pollutes source directory
 cmake .
 make
 ```
@@ -113,7 +113,7 @@ make
 Use a recent version but be realistic about user requirements.
 
 ```cmake showLineNumbers 
-# ✅ Good - modern but widely available
+# Good - modern but widely available
 cmake_minimum_required(VERSION 3.15)
 
 # 3.15: target_link_directories(), better generator expressions
@@ -132,18 +132,18 @@ cmake_minimum_required(VERSION 3.15)
 Prefer feature requirements over directly setting `CMAKE_CXX_STANDARD`.
 
 ```cmake showLineNumbers 
-# ✅ Best - portable and clear
+# Best - portable and clear
 add_executable(myapp main.cpp)
 target_compile_features(myapp PRIVATE cxx_std_17)
 
-# ✅ Also good - explicit property
+# Also good - explicit property
 set_target_properties(myapp PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
-# ❌ Avoid - global setting affects all targets
+# Avoid - global setting affects all targets
 set(CMAKE_CXX_STANDARD 17)
 ```
 
@@ -386,12 +386,12 @@ Now users can `find_package(MyProject)` after installation.
 ### Don't Use Global Commands
 
 ```cmake showLineNumbers 
-# ❌ Don't do this
+# Don't do this
 include_directories(include/)
 link_directories(/usr/local/lib)
 add_definitions(-DDEBUG)
 
-# ✅ Do this
+# Do this
 target_include_directories(myapp PRIVATE include/)
 target_link_libraries(myapp PRIVATE somelib)
 target_compile_definitions(myapp PRIVATE DEBUG)
@@ -400,20 +400,20 @@ target_compile_definitions(myapp PRIVATE DEBUG)
 ### Don't Modify CMAKE_CXX_FLAGS Directly
 
 ```cmake showLineNumbers 
-# ❌ Avoid
+# Avoid
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
-# ✅ Better
+# Better
 target_compile_options(myapp PRIVATE -Wall)
 ```
 
 ### Don't Use Absolute Paths
 
 ```cmake showLineNumbers 
-# ❌ Breaks on other systems
+# Breaks on other systems
 include_directories(/home/user/myproject/include)
 
-# ✅ Use relative or generated paths
+# Use relative or generated paths
 target_include_directories(myapp PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
@@ -491,7 +491,7 @@ message(STATUS "")
 ### Cache Expensive Operations
 
 ```cmake showLineNumbers 
-# ✅ Check once, cache result
+# Check once, cache result
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
@@ -527,21 +527,21 @@ cmake --build build --parallel 8
 
 :::success Essential Best Practices
 
-✅ **Use target commands** (`target_*` not global commands)  
-✅ **Always specify visibility** (PRIVATE/PUBLIC/INTERFACE)  
-✅ **Avoid file(GLOB)** for source files  
-✅ **Out-of-source builds** always  
-✅ **CMake 3.15+** minimum version  
-✅ **target_compile_features()** for C++ standard  
-✅ **find_package()** for system libraries  
-✅ **FetchContent** for header-only/small libs  
-✅ **Enable warnings** per-target  
-✅ **Set default build type**  
-✅ **Document options** with comments  
-✅ **Test on multiple platforms**  
-✅ **Use generator expressions** for conditionals  
-✅ **Create ALIAS targets** for consistency  
-✅ **Make libraries installable**
+**Use target commands** (`target_*` not global commands)  
+**Always specify visibility** (PRIVATE/PUBLIC/INTERFACE)  
+**Avoid file(GLOB)** for source files  
+**Out-of-source builds** always  
+**CMake 3.15+** minimum version  
+**target_compile_features()** for C++ standard  
+**find_package()** for system libraries  
+**FetchContent** for header-only/small libs  
+**Enable warnings** per-target  
+**Set default build type**  
+**Document options** with comments  
+**Test on multiple platforms**  
+**Use generator expressions** for conditionals  
+**Create ALIAS targets** for consistency  
+**Make libraries installable**
 :::
 
 ## Example: Complete Modern Project

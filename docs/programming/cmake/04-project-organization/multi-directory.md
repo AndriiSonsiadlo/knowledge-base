@@ -632,11 +632,11 @@ set_target_properties(audio_mp3 PROPERTIES
 
 :::warning Common Mistakes
 
-❌ **Circular dependencies** between directories  
-❌ **Global commands** affecting all subdirectories  
-❌ **Forgetting to add subdirectory** to root  
-❌ **Wrong build order** causing link errors  
-❌ **Mixing business logic with CMake** code
+**Circular dependencies** between directories  
+**Global commands** affecting all subdirectories  
+**Forgetting to add subdirectory** to root  
+**Wrong build order** causing link errors  
+**Mixing business logic with CMake** code
 :::
 
 Multi-directory projects require discipline but provide excellent scalability and maintainability for growing codebases.

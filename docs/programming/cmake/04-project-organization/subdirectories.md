@@ -259,7 +259,7 @@ add_subdirectory(app)   # Then app that uses libraries
 If `app` depends on targets from `libs`, they must be added in this order. Wrong order causes errors:
 
 ```cmake showLineNumbers 
-add_subdirectory(app)   # ❌ Error: 'mylib' target not found
+add_subdirectory(app)   # Error: 'mylib' target not found
 add_subdirectory(libs)  # Defines mylib too late
 ```
 
@@ -516,11 +516,11 @@ endif()
 
 :::warning Common Pitfalls
 
-❌ **Wrong order** causing "target not found" errors  
-❌ **Assuming variables propagate** back to parent  
-❌ **Overusing global commands** in root affecting all subdirs  
-❌ **Circular dependencies** between subdirectories  
-❌ **Modifying parent directory properties** from child
+**Wrong order** causing "target not found" errors  
+**Assuming variables propagate** back to parent  
+**Overusing global commands** in root affecting all subdirs  
+**Circular dependencies** between subdirectories  
+**Modifying parent directory properties** from child
 :::
 
 ## Quick Reference

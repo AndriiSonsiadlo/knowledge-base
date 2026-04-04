@@ -402,7 +402,7 @@ add_custom_target(show_genex ALL
 
 :::warning Pitfalls
 
-**❌ Using in set() commands**
+**Using in set() commands**
 
 ```cmake showLineNumbers 
 # Doesn't work - evaluated too late
@@ -410,7 +410,7 @@ set(MY_VAR $<CONFIG>)
 message(STATUS "${MY_VAR}")  # Prints the genex, not value
 ```
 
-**❌ Using in if() statements**
+**Using in if() statements**
 
 ```cmake showLineNumbers 
 # Doesn't work
@@ -419,7 +419,7 @@ if($<CONFIG:Debug>)  # if() evaluates during configure
 endif()
 ```
 
-**✅ Correct usage - in target commands:**
+**Correct usage - in target commands:**
 
 ```cmake showLineNumbers 
 target_compile_definitions(myapp PRIVATE
@@ -449,14 +449,14 @@ target_compile_definitions(myapp PRIVATE
 **Example of when NOT to use:**
 
 ```cmake showLineNumbers 
-# ❌ Over-complicated
+# Over-complicated
 set(SOURCES 
     main.cpp
     $<$<PLATFORM_ID:Windows>:windows.cpp>
     $<$<PLATFORM_ID:Linux>:linux.cpp>
 )
 
-# ✅ Simpler and clearer
+# Simpler and clearer
 if(WIN32)
     set(SOURCES main.cpp windows.cpp)
 elseif(UNIX)
