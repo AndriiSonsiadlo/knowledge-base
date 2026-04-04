@@ -8,6 +8,18 @@ tags: [ c++, cmake ]
 
 # Finding External Packages
 
+:::tip Which dependency mechanism?
+CMake offers three, in rough order of preference:
+
+- **`find_package()`** (this page) — use a dependency that's **already installed** on the system.
+- **[FetchContent](./fetchcontent.md)** — **download and build** a dependency as part of your
+  configure step; the modern default when you can't assume it's installed.
+- **[ExternalProject](./external-projects.md)** — build a dependency at **build time** as a separate
+  project (for non-CMake builds or superbuilds).
+
+Prefer `find_package` when the library is available, and fall back to FetchContent otherwise.
+:::
+
 ## What is find_package()?
 
 `find_package()` locates external libraries and sets up variables/targets for using them.
@@ -316,59 +328,16 @@ project/
 
 ## Writing Custom Find Modules
 
-```cmake showLineNumbers  title="cmake/modules/FindMyLib.cmake"
-# Find include directory
-find_path(MyLib_INCLUDE_DIR
-    NAMES mylib.h
-    PATHS /usr/include /usr/local/include
-)
+When a library ships neither a CMake **config** package nor a bundled **module**, you can write your
+own `FindXxx.cmake` that locates its headers and libraries and exposes a clean imported target. That
+is a topic in itself — the full walkthrough (`find_path`/`find_library`,
+`find_package_handle_standard_args`, version extraction, imported targets) lives on the
+[Find Modules](../05-advanced/find-modules.md) page. From a consumer's side you only point CMake at
+the module directory:
 
-# Find library
-find_library(MyLib_LIBRARY
-    NAMES mylib
-    PATHS /usr/lib /usr/local/lib
-)
-
-# Set version (if possible)
-if(EXISTS "${MyLib_INCLUDE_DIR}/mylib_version.h")
-    file(READ "${MyLib_INCLUDE_DIR}/mylib_version.h" version_header)
-    string(REGEX MATCH "VERSION ([0-9]+\\.[0-9]+\\.[0-9]+)" _ "${version_header}")
-    set(MyLib_VERSION ${CMAKE_MATCH_1})
-endif()
-
-# Standard handling
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MyLib
-    REQUIRED_VARS MyLib_LIBRARY MyLib_INCLUDE_DIR
-    VERSION_VAR MyLib_VERSION
-)
-
-# Create imported target
-if(MyLib_FOUND AND NOT TARGET MyLib::MyLib)
-    add_library(MyLib::MyLib UNKNOWN IMPORTED)
-    set_target_properties(MyLib::MyLib PROPERTIES
-        IMPORTED_LOCATION "${MyLib_LIBRARY}"
-        INTERFACE_INCLUDE_DIRECTORIES "${MyLib_INCLUDE_DIR}"
-    )
-endif()
-
-# Set output variables
-if(MyLib_FOUND)
-    set(MyLib_LIBRARIES ${MyLib_LIBRARY})
-    set(MyLib_INCLUDE_DIRS ${MyLib_INCLUDE_DIR})
-endif()
-
-mark_as_advanced(MyLib_INCLUDE_DIR MyLib_LIBRARY)
-```
-
-**Usage:**
-
-```cmake showLineNumbers 
+```cmake showLineNumbers title="Using a custom module"
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
-
-find_package(MyLib REQUIRED)
-
-add_executable(app main.cpp)
+find_package(MyLib REQUIRED)              # picks up cmake/modules/FindMyLib.cmake
 target_link_libraries(app PRIVATE MyLib::MyLib)
 ```
 
