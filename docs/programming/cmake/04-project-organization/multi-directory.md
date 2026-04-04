@@ -8,6 +8,11 @@ tags: [cmake, project-structure, organization, subdirectories]
 
 # Multi-Directory Projects
 
+This page is about *how to structure* a project across directories. It leans on
+[`add_subdirectory()`](./subdirectories.md) throughout — read that first if you're unsure how scope,
+ordering, and target visibility work across directory boundaries. For the modern principles that tie
+it together, see [Best Practices](./best-practices.md).
+
 ## Why Multiple Directories?
 
 As projects grow, keeping everything in one directory becomes unmanageable. Multi-directory organization provides:

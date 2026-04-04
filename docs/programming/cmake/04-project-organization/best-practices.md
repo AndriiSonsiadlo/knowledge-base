@@ -334,6 +334,9 @@ endif()
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 ```
 
+What each build type actually sets — flags, `NDEBUG`, optimization — is covered in
+[Build Types](../01-basics/build-types.md).
+
 ## Installation
 
 Make libraries installable and discoverable:

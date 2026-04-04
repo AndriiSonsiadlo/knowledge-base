@@ -8,6 +8,10 @@ tags: [cmake, subdirectories, add_subdirectory, scope]
 
 # Working with Subdirectories
 
+This page is the **mechanics** of `add_subdirectory()` — scope, ordering, and how targets and
+variables cross directory boundaries. For how to *lay out* a real multi-component project on top of
+it, see [Multi-Directory Projects](./multi-directory.md).
+
 ## The add_subdirectory() Command
 
 `add_subdirectory()` tells CMake to process another directory containing its own `CMakeLists.txt`. This is fundamental for organizing multi-component projects.
