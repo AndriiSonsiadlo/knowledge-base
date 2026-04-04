@@ -17,6 +17,8 @@ const WANT = [
 	"book-open", "wrench", "braces", "shapes", "square-function", "memory-stick",
 	"pointer", "boxes", "blocks", "library", "shield-check", "waypoints",
 	"binary", "drafting-compass", "bug", "layers",
+	// CMake sections
+	"target", "package", "folder-tree", "flask-conical", "settings",
 ];
 
 const out = { prefix: "lucide", icons: {}, width: full.width ?? 24, height: full.height ?? 24 };

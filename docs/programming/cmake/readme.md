@@ -2,163 +2,75 @@
 title: Overview of CMake
 sidebar_label: Overview
 sidebar_position: 1
-tags: [ c++, cmake ]
+tags: [c++, cmake]
 ---
 
-# CMake Overview
+# CMake Knowledge Base
 
-A comprehensive, user-friendly guide to CMake organized for easy reference and learning.
+CMake is a **build-system generator**: you describe your project once in `CMakeLists.txt`, and CMake
+emits the native build files (Makefiles, Ninja, Visual Studio, Xcode) for whatever platform you're
+on. These docs cover **modern, target-based CMake (3.15+)** — the `target_*` style that replaced the
+old global-variable approach — from first project to dependencies, testing, and the advanced bits.
 
-## Documentation Structure
+:::info How this is organised
+Roughly in learning order: **Intro → Basics → Targets** is the core you use every day; **Dependencies**,
+**Organization**, **Advanced**, and **Testing** are the layers you add as projects grow. Each folder
+is self-contained — follow the cross-links.
+:::
 
-### Introduction
+## Sections
 
-Start here if you're new to CMake:
+|   | Section | What it covers |
+|---|---------|----------------|
+| <Icon icon="lucide:book-open" inline /> | [Introduction](./00-intro/what-is-cmake.md) | What CMake is, installing it, your first project |
+| <Icon icon="lucide:wrench" inline /> | [Basics](./01-basics/cmakelists-structure.md) | `CMakeLists.txt` structure, variables, commands, build types |
+| <Icon icon="lucide:target" inline /> | [Targets](./02-targets/executables.md) | Executables, libraries, target properties, linking |
+| <Icon icon="lucide:package" inline /> | [Dependencies](./03-dependencies/find-package.md) | `find_package`, FetchContent, ExternalProject |
+| <Icon icon="lucide:folder-tree" inline /> | [Project Organization](./04-project-organization/best-practices.md) | Multi-directory layouts, `add_subdirectory`, modern patterns |
+| <Icon icon="lucide:drafting-compass" inline /> | [Advanced](./05-advanced/generator-expressions.md) | Generator expressions, functions/macros, find modules, custom commands |
+| <Icon icon="lucide:flask-conical" inline /> | [Testing](./06-testing/ctest-basics.md) | CTest basics and integrating tests into the build |
 
-- **[What is CMake?](intro/what-is-cmake)** - Understanding the build system generator
-- **[Installation](intro/installing-cmake)** - Getting CMake set up on your system
-- **[First Project](intro/first-project)** - Your first CMake project step-by-step
+## Suggested reading paths
 
-### Basics
+```mermaid
+flowchart LR
+    I[Introduction] --> B[Basics]
+    B --> T[Targets]
+    T --> D[Dependencies]
+    T --> O[Organization]
+    T --> A[Advanced]
+    T --> TE[Testing]
+```
 
-Core concepts you'll use daily:
+- <Icon icon="lucide:rocket" inline /> **New to CMake:** [Introduction](./00-intro/what-is-cmake.md) → [Basics](./01-basics/cmakelists-structure.md) → [Targets](./02-targets/executables.md). Enough to build a real app.
+- <Icon icon="lucide:package" inline /> **Pulling in a library:** [find_package](./03-dependencies/find-package.md) → [FetchContent](./03-dependencies/fetchcontent.md), then [linking](./02-targets/linking.md).
+- <Icon icon="lucide:folder-tree" inline /> **Scaling a project:** [Subdirectories](./04-project-organization/subdirectories.md) → [Multi-Directory](./04-project-organization/multi-directory.md) → [Best Practices](./04-project-organization/best-practices.md).
 
-- **[CMakeLists.txt Structure](basics/cmakelists-structure)** - Anatomy of a CMakeLists file
-- **[Variables](basics/variables)** - Working with CMake variables and lists
-- **[Commands](basics/commands)** - Essential CMake commands reference
-- **[Build Types](basics/build-types)** - Debug, Release, and other configurations
+## Quick reference
 
-### Targets
-
-Understanding executables and libraries:
-
-- **[Executables](targets/executables)** - Creating and configuring executables
-- **[Libraries](targets/libraries)** - Static, shared, and interface libraries
-- **[Target Properties](targets/target-properties)** - Configuring target-specific settings
-- **[Linking](targets/linking)** - Understanding library linking
-
-### Dependencies
-
-Managing external libraries:
-
-- **[find_package()](dependencies/find-package)** - Finding installed packages
-- **[FetchContent](dependencies/fetchcontent)** - Downloading dependencies at configure time
-- **[ExternalProject](dependencies/external-projects)** - Building external projects
-
-### Project Organization
-
-Structuring larger projects:
-
-- **[Multi-Directory Projects](project-organization/multi-directory)** - Organizing code
-- **[Subdirectories](project-organization/subdirectories)** - Using add_subdirectory
-- **[Best Practices](project-organization/best-practices)** - Modern CMake patterns
-
-### Advanced Topics
-
-Level up your CMake skills:
-
-- **[Generator Expressions](advanced/generator-expressions)** - Conditional compilation
-- **[Functions and Macros](advanced/functions-and-macros)** - Reusable CMake code
-- **[Find Modules](advanced/find-modules)** - Writing custom package finders
-- **[Custom Commands](advanced/custom-commands)** - Extending the build process
-
-### Testing
-
-Adding tests to your project:
-
-- **[CTest Basics](testing/ctest-basics)** - Introduction to CTest
-- **[Test Integration](testing/integration)** - Integrating tests in your project
-
-## Quick References
-
-### Common Commands
-
-```cmake showLineNumbers  title="CMake Basics"
-# Project setup
+```cmake showLineNumbers title="CMakeLists.txt essentials"
 cmake_minimum_required(VERSION 3.15)
-project(MyProject VERSION 1.0)
+project(MyProject VERSION 1.0 LANGUAGES CXX)
 
-# Executables and libraries
 add_executable(myapp main.cpp)
 add_library(mylib STATIC lib.cpp)
 
-# Linking
-target_link_libraries(myapp PRIVATE mylib)
+target_link_libraries(myapp PRIVATE mylib)          # who depends on whom
+target_include_directories(myapp PRIVATE include/)  # scoped to this target
+target_compile_features(myapp PRIVATE cxx_std_17)   # request a standard
 
-# Include directories
-target_include_directories(myapp PRIVATE include/)
-
-# Compile features
-target_compile_features(myapp PRIVATE cxx_std_17)
-
-# Finding packages
 find_package(Threads REQUIRED)
 ```
 
-### Build Workflow
-
-```bash title="Terminal"
-# Configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-
-# Build
-cmake --build build
-
-# Test
-ctest --test-dir build
-
-# Install
-cmake --install build --prefix /usr/local
+```bash title="Build workflow"
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release   # configure
+cmake --build build -j                           # build (parallel)
+ctest --test-dir build                           # test
+cmake --install build --prefix /usr/local        # install
 ```
 
-## Documentation Conventions
-
-Throughout this knowledge base:
-
-:::info Information Boxes
-Provide helpful context and explanations
+:::tip Conventions used across these docs
+- Examples target **CMake 3.15+** and the modern **target-based** style (`target_*` over global `set()`).
+- The golden rule throughout: **set properties on targets with `PRIVATE`/`PUBLIC`/`INTERFACE` scope**, not globally.
+- Admonitions flag the important bits: `info` context, `tip` guidance, `warning`/`danger` foot-guns.
 :::
-
-:::success Best Practices
-Highlight recommended approaches
-:::
-
-:::warning Common Pitfalls
-Alert you to potential issues
-:::
-
-:::danger Anti-Patterns
-Identify and avoid bad practices
-:::
-
-## Code Examples
-
-All code examples are **complete and ready to use**. They follow modern CMake practices (3.15+) and include:
-
-- Full listings with syntax highlighting
-- Comments explaining key concepts
-- Practical, real-world scenarios
-- Both simple and complex examples
-
-## Finding What You Need
-
-### By Topic
-
-- **Getting Started**: See Introduction section
-- **Day-to-Day Usage**: See Basics and Targets sections
-- **Project Structure**: See Project Organization section
-- **External Dependencies**: See Dependencies section
-- **Advanced Features**: See Advanced Topics section
-
-### By Use Case
-
-- **Simple Application**: First Project → Executables
-- **Library Development**: Libraries → Target Properties
-- **Multi-Library Project**: Subdirectories → Linking
-- **Using External Libs**: `find_package()` → FetchContent
-
----
-
-**Remember**: CMake is a tool for building software. The best way to learn is by doing. Start with simple projects and gradually incorporate more features as you need them.
-
-Happy building! 🎉
