@@ -8,6 +8,12 @@ tags: [ c++, cmake ]
 
 # Executable Targets
 
+A **target** is the unit of modern CMake. Once `add_executable()` (or `add_library()`) creates one,
+you stop reaching for global commands and configure *that target* directly —
+`target_link_libraries`, `target_include_directories`, `target_compile_features` — so every setting
+stays scoped to it. See [Target Properties](./target-properties.md) and [Linking](./linking.md) for
+that workflow.
+
 ## Creating Executables
 
 The `add_executable()` command creates a build target for an executable program.

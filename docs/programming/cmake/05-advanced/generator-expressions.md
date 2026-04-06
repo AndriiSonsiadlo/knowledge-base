@@ -16,6 +16,14 @@ The syntax uses `$<...>` and looks unusual, but it's powerful for expressing com
 
 **Why they exist:** Some information isn't known during configuration. For example, with multi-config generators (Visual Studio, Xcode), the build type isn't determined until you actually build. Generator expressions let you handle this elegantly.
 
+:::tip Three phases, not two
+CMake runs in **configure** (reads `CMakeLists.txt`, fills the cache) → **generate** (writes the
+native build files) → the native tool **builds**. Ordinary `if()` and variables resolve at *configure*
+time; generator expressions resolve later, at *generate* time — the only point where per-config and
+per-target facts are known. That's exactly why `$<CONFIG:Debug>` can branch on Debug-vs-Release under
+Visual Studio even though one configure produced all configurations.
+:::
+
 ## Basic Syntax
 
 ```cmake showLineNumbers 
