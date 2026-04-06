@@ -16,6 +16,12 @@ This approach is particularly powerful for modern C++ development where you want
 
 The key distinction: FetchContent downloads during the CMake configure step and makes the dependency's targets immediately available for use in your `CMakeLists.txt`. This means you can link against fetched libraries just like local targets.
 
+:::info Choosing a dependency mechanism
+FetchContent is the modern default when a dependency isn't already installed on the system. For the
+full `find_package` vs FetchContent vs [ExternalProject](./external-projects.md) trade-off, see the
+[decision guide](./find-package.md).
+:::
+
 ## Basic Usage
 
 ### Setup

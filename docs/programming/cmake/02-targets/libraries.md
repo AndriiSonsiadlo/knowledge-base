@@ -8,6 +8,11 @@ tags: [ c++, cmake ]
 
 # Library Targets
 
+This page covers creating libraries and attaching their *usage requirements* (include dirs,
+compile definitions). The `PRIVATE`/`PUBLIC`/`INTERFACE` scope those requirements travel under is the
+single most important idea in modern CMake — it's explained in full on
+[Linking](./linking.md#visibility-keywords-the-heart-of-modern-cmake).
+
 ## Types of Libraries
 
 CMake supports several library types, each with different use cases.

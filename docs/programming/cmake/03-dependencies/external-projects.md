@@ -16,6 +16,12 @@ The key characteristic of ExternalProject is that it creates custom build target
 
 ExternalProject is particularly useful for large dependencies, projects that don't use CMake, or when you need complete control over the build process of dependencies.
 
+:::info Choosing a dependency mechanism
+ExternalProject is the heaviest of the three options — reach for it for non-CMake dependencies or
+superbuilds. For most modern needs [FetchContent](./fetchcontent.md) is simpler; see the
+[decision guide](./find-package.md) to choose.
+:::
+
 ## When to Use ExternalProject
 
 Understanding when to use ExternalProject versus alternatives is crucial for project architecture decisions.
