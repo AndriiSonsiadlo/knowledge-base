@@ -19,6 +19,9 @@ const WANT = [
 	"binary", "drafting-compass", "bug", "layers",
 	// CMake sections
 	"target", "package", "folder-tree", "flask-conical", "settings",
+	// Boost sections
+	"hammer", "puzzle", "type", "repeat", "sigma", "calculator",
+	"hard-drive", "network", "database", "clock", "git-fork",
 ];
 
 const out = { prefix: "lucide", icons: {}, width: full.width ?? 24, height: full.height ?? 24 };
