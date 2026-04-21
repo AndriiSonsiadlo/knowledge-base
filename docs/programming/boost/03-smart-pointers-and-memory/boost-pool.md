@@ -75,11 +75,10 @@ the end. Just don't keep using pointers into a pool after it dies.
 
 :::warning Not a general allocator
 A pool only allocates one block size efficiently. It is the wrong tool for variable-sized or large
-allocations. For alignment-sensitive buffers (SIMD, cache lines) see [Boost.Align](./boost-align.md).
+allocations. For alignment-sensitive buffers (SIMD, cache lines) use Boost.Align.
 :::
 
 ## See also
 
-- [Boost.Align](./boost-align.md) — aligned allocation for SIMD and hardware buffers.
 - [Smart Pointers Overview](./smart-ptr-overview.md) — owning pooled objects safely.
-- [Boost.Intrusive](../04-containers/intrusive.md) — allocation-free containers that pair well with pools.
+- [Boost.Intrusive](../04-containers/boost-intrusive.md) — allocation-free containers that pair well with pools.
