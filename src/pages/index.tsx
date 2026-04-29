@@ -46,17 +46,17 @@ export default function Home(): ReactNode {
 								</p>
 
 								<p className="text-base md:text-lg leading-relaxed">
-									I've built this space to organize and document everything I'm
+									I’ve built this space to organize and document everything I’m
 									learning – from programming languages and computer science
 									fundamentals to data structures, algorithms, and machine
 									learning. Each section contains detailed explanations,
-									practical examples, and the insights I've gathered along the
+									practical examples, and the insights I’ve gathered along the
 									way.
 								</p>
 
 								<div className="pt-4">
 									<p className="text-sm text-slate-400 italic">
-										This is more than just notes – it's my way of deepening
+										This is more than just notes – it’s my way of deepening
 										understanding, tracking progress, and sharing knowledge that
 										I find valuable. I use it to explore topics thoroughly,
 										experiment with code, and build a solid foundation in
