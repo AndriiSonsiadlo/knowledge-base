@@ -1,5 +1,6 @@
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import CategoryGrid from "@components/CategoryGrid";
+import GlassCard from "@components/GlassCard";
 import Heading from "@theme/Heading";
 import Layout from "@theme/Layout";
 import clsx from "clsx";
@@ -30,12 +31,7 @@ export default function Home(): ReactNode {
 				<main className={clsx("container mx-auto px-4 relative z-10")}>
 					{/* Header Section */}
 					<div className="py-16 md:py-20 flex flex-col items-center justify-center">
-						<div
-							className={clsx(
-								styles.glassCard,
-								"p-8 md:p-16 rounded-3xl text-center w-full md:w-3/4 lg:w-2/3",
-							)}
-						>
+						<GlassCard className="p-8 md:p-16 text-center w-full md:w-3/4 lg:w-2/3">
 							<Heading
 								as="h1"
 								className="text-5xl md:text-6xl font-bold mb-6 bg-clip-text drop-shadow-lg text-transparent bg-gradient-to-r from-purple-400 via-blue-300 to-purple-300 dark:from-purple-600 dark:via-blue-400 dark:to-purple-700 leading-tight md:leading-snug"
@@ -50,17 +46,17 @@ export default function Home(): ReactNode {
 								</p>
 
 								<p className="text-base md:text-lg leading-relaxed">
-									I’ve built this space to organize and document everything I’m
+									I've built this space to organize and document everything I'm
 									learning – from programming languages and computer science
 									fundamentals to data structures, algorithms, and machine
 									learning. Each section contains detailed explanations,
-									practical examples, and the insights I’ve gathered along the
+									practical examples, and the insights I've gathered along the
 									way.
 								</p>
 
 								<div className="pt-4">
 									<p className="text-sm text-slate-400 italic">
-										This is more than just notes – it’s my way of deepening
+										This is more than just notes – it's my way of deepening
 										understanding, tracking progress, and sharing knowledge that
 										I find valuable. I use it to explore topics thoroughly,
 										experiment with code, and build a solid foundation in
@@ -68,14 +64,14 @@ export default function Home(): ReactNode {
 									</p>
 								</div>
 							</div>
-						</div>
+						</GlassCard>
 					</div>
 
 					{/* Categories Section - Same Gradient */}
 					<div className="pb-16 md:pb-20">
-						<div className={styles.glassCard}>
+						<GlassCard>
 							<CategoryGrid />
-						</div>
+						</GlassCard>
 					</div>
 				</main>
 			</div>
