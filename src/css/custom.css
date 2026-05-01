@@ -366,6 +366,20 @@ kbd {
   width: 13.5rem;
 }
 
+/* With 6 category links plus the GitHub icon, the navbar runs out of room
+   and items overlap well above Infima's default 996px mobile breakpoint.
+   Switch to the hamburger sidebar earlier so items never have to compete
+   for space with the search box and right-hand icons. */
+@media (max-width: 1400px) {
+  .navbar__toggle {
+    display: inherit;
+  }
+
+  .navbar__item {
+    display: none;
+  }
+}
+
 code[class^='codeBlockLines_'] {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -892,6 +906,48 @@ button {
   @apply transition-colors duration-300;
 }
 
+
+/* ============ Footer ============ */
+/* Docusaurus' default footer stacks every link on its own line
+   (line-height: 2 per item), which makes a short link list very tall.
+   Wrap links horizontally instead so the footer stays compact. */
+.footer__links {
+  margin-bottom: 1rem;
+}
+
+.footer__col {
+  margin-bottom: 0;
+}
+
+.footer__title {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.footer__items {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.25rem;
+  row-gap: 0.25rem;
+}
+
+.footer__item {
+  margin-top: 0;
+}
+
+.footer__link-item {
+  line-height: 1.6;
+}
+
+.footer__bottom {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 996px) {
+  .footer__col {
+    margin-bottom: 1rem;
+  }
+}
 
 /* ============ Memraid Graphs / Flowcharts ============ */
 .docusaurus-mermaid-container svg {
