@@ -10,6 +10,7 @@ interface CategoryCardProps {
 	icon: React.ReactNode;
 	href: string;
 	color: "purple" | "blue" | "cyan" | "green" | "pink";
+	index?: number;
 }
 
 export default function CategoryCard({
@@ -18,6 +19,7 @@ export default function CategoryCard({
 	icon,
 	href,
 	color = "purple",
+	index = 0,
 }: CategoryCardProps): ReactNode {
 	return (
 		<Link to={href} className={clsx(styles.cardLink, "no-underline")}>
@@ -28,9 +30,12 @@ export default function CategoryCard({
 					styles.categoryCard,
 					styles[`card-${color}`],
 				)}
+				style={{ animationDelay: `${index * 90}ms` }}
 			>
 				<div className="flex items-start gap-4 h-full">
-					<div className="text-4xl flex-shrink-0">{icon}</div>
+					<div className={clsx("text-4xl flex-shrink-0", styles.cardIcon)}>
+						{icon}
+					</div>
 					<div className="flex-1">
 						<h3 className={styles.cardTitle}>{label}</h3>
 						<p className={styles.cardDescription}>{description}</p>

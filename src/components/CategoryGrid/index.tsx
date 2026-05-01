@@ -77,7 +77,7 @@ export default function CategoryGrid(): ReactNode {
 
 				<div className={styles.grid}>
 					{categories.map((category, idx) => (
-						<CategoryCard key={idx} {...category} />
+						<CategoryCard key={idx} index={idx} {...category} />
 					))}
 				</div>
 			</div>
