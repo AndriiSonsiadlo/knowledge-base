@@ -9,10 +9,30 @@ interface RecentDocSummary {
   description?: string;
   permalink: string;
   lastUpdatedAt: number;
+  section: string;
 }
 
 interface RecentDocsPluginData {
   docs?: RecentDocSummary[];
+}
+
+const SECTION_LABELS: Record<string, string> = {
+  programming: "Programming",
+  "game-development": "Game Development",
+  "computer-science": "Computer Science",
+  "data-structures-algorithms": "Data & Algorithms",
+  "data-tools": "Data Tools",
+  "machine-learning": "Machine Learning",
+};
+
+function formatSectionLabel(section: string): string {
+  return (
+    SECTION_LABELS[section] ??
+    section
+      .split("-")
+      .map((part) => part[0]?.toUpperCase() + part.slice(1))
+      .join(" ")
+  );
 }
 
 function formatRelativeDate(timestamp: number): string {
@@ -62,9 +82,14 @@ export default function RecentDocs(): ReactNode | null {
               to={doc.permalink}
               className="block h-full text-inherit no-underline"
             >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--brand-accent)]">
-                Updated {formatRelativeDate(doc.lastUpdatedAt)}
-              </p>
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
+                <span className="rounded-full bg-[var(--brand-primary-10)] px-2.5 py-1 text-[var(--brand-primary-dark)] dark:bg-[var(--brand-primary-20)] dark:text-[var(--brand-primary-lightest)]">
+                  {formatSectionLabel(doc.section)}
+                </span>
+                <span className="text-[var(--brand-accent)]">
+                  Updated {formatRelativeDate(doc.lastUpdatedAt)}
+                </span>
+              </div>
               <Heading as="h3" className="mb-2 text-xl">
                 {doc.title}
               </Heading>

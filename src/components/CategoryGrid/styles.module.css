@@ -17,6 +17,7 @@ html[data-theme="light"] .categoryGrid {
 }
 
 .sectionTitle {
+	display: inline-block;
 	background: linear-gradient(
 		to right,
 		var(--brand-primary-light),
@@ -24,6 +25,7 @@ html[data-theme="light"] .categoryGrid {
 		var(--brand-primary)
 	);
 	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
 	background-clip: text;
 	color: transparent;
 }

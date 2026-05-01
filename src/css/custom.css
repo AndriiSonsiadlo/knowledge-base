@@ -508,11 +508,11 @@ div[class^='docItemContainer_'] article img {
   --ifm-footer-background-color: #ececec;
   --ifm-footer-title-color: #2f2f2f;
   --ifm-footer-link-color: #282828;
-  --ifm-navbar-background-color: rgb(248 246 251 / 0.92);
+  --ifm-navbar-background-color: rgb(232 225 240 / 0.96);
 }
 
 .footer--dark {
-  --ifm-footer-background-color: #303846;
+  --ifm-footer-background-color: #252d3a;
 }
 
 [data-theme="dark"] {

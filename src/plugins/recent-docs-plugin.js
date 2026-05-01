@@ -25,6 +25,7 @@ module.exports = function recentDocsPlugin(_context, options = {}) {
           description: doc.description,
           permalink: doc.permalink,
           lastUpdatedAt: doc.lastUpdatedAt,
+          section: doc.id.split("/")[0],
         }));
 
       actions.setGlobalData({ docs });
