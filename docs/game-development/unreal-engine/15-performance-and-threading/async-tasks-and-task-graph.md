@@ -23,9 +23,9 @@ before the task that was supposed to produce it has finished.
 
 ```mermaid
 flowchart LR
-    A["Task A\n(load data)"] --> C["Task C\n(process, depends on A & B)"]
-    B["Task B\n(load data)"] --> C
-    C --> D["Task D\n(finalize, depends on C)"]
+    A["Task A<br/>(load data)"] --> C["Task C<br/>(process, depends on A & B)"]
+    B["Task B<br/>(load data)"] --> C
+    C --> D["Task D<br/>(finalize, depends on C)"]
 
     subgraph Pool["Shared worker thread pool"]
         direction TB
@@ -195,3 +195,4 @@ engine version's `Tasks/Task.h` before relying on a signature not shown above.
 - [Garbage collection](../02-cpp-in-unreal/garbage-collection.md) — why `UObject` access needs the game
   thread specifically.
 - [Epic — Common Memory and CPU Performance Considerations](https://dev.epicgames.com/documentation/unreal-engine/common-memory-and-cpu-performance-considerations-in-unreal-engine)
+

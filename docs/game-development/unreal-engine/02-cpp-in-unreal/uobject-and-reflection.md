@@ -35,13 +35,13 @@ itself.
 
 ```mermaid
 flowchart LR
-    H["MyActor.h\n(UCLASS / UPROPERTY / UFUNCTION)"] --> UHT[Unreal Header Tool]
+    H["MyActor.h<br/>(UCLASS / UPROPERTY / UFUNCTION)"] --> UHT[Unreal Header Tool]
     UHT --> G["MyActor.generated.h"]
     H --> CPP[Your compiler]
     G --> CPP
     CPP --> BIN[Compiled binary]
-    BIN --> RT["Reflection database\n(UClass / FProperty / UFunction)"]
-    RT --> Uses["Blueprint · Details panel ·\nSerialization · GC · Replication"]
+    BIN --> RT["Reflection database<br/>(UClass / FProperty / UFunction)"]
+    RT --> Uses["Blueprint · Details panel ·<br/>Serialization · GC · Replication"]
 ```
 
 This is why every reflected header must `#include "MyActor.generated.h"` as its **last** include, and
@@ -165,3 +165,4 @@ ordinary C++, which is exactly the trap, because everything around it doesn't.
 - [Exposing C++ to Blueprint](../04-blueprint-interop/exposing-cpp-to-blueprint.md) — the specifiers
   that matter most for the Blueprint bridge.
 - [Epic — Reflection System in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/reflection-system-in-unreal-engine)
+

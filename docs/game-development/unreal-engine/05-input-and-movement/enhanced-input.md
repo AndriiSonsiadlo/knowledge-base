@@ -28,12 +28,12 @@ hold-to-fire) out of your gameplay code and into data you can tune without recom
 
 ```mermaid
 flowchart LR
-    Key["Raw hardware input\n(key, gamepad stick, mouse axis)"]
-    IMC["UInputMappingContext\n(asset: key -> action + modifiers/triggers)"]
-    Sub["UEnhancedInputLocalPlayerSubsystem\n(per-player stack of active contexts, by priority)"]
-    IA["UInputAction\n(named, typed: bool / Axis1D / Axis2D / Axis3D)"]
-    EIC["UEnhancedInputComponent\n(BindAction: Action + TriggerEvent -> UFUNCTION)"]
-    Gameplay["Your handler\nFInputActionValue"]
+    Key["Raw hardware input<br/>(key, gamepad stick, mouse axis)"]
+    IMC["UInputMappingContext<br/>(asset: key -> action + modifiers/triggers)"]
+    Sub["UEnhancedInputLocalPlayerSubsystem<br/>(per-player stack of active contexts, by priority)"]
+    IA["UInputAction<br/>(named, typed: bool / Axis1D / Axis2D / Axis3D)"]
+    EIC["UEnhancedInputComponent<br/>(BindAction: Action + TriggerEvent -> UFUNCTION)"]
+    Gameplay["Your handler<br/>FInputActionValue"]
 
     Key --> IMC
     IMC -->|"added to"| Sub
@@ -197,3 +197,4 @@ will always succeed.
   `UEnhancedInputLocalPlayerSubsystem` belongs to.
 - [Epic — Enhanced Input in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/enhanced-input-in-unreal-engine)
 - [Epic — UEnhancedInputComponent API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/EnhancedInput/UEnhancedInputComponent)
+

@@ -39,7 +39,7 @@ flowchart TB
     FTL --> WL["Wear-Leveling Logic"]
     Map --> Blocks["NAND Blocks"]
     subgraph Blocks
-        B1["Block: many Pages\n(erase granularity)"]
+        B1["Block: many Pages<br/>(erase granularity)"]
         B2["Block: many Pages"]
     end
 ```
@@ -133,3 +133,4 @@ guarantee it, which matters for databases relying on `fsync` durability guarante
 - [NVMe & Storage Interfaces](./nvme-and-storage-interfaces.md)
 - [Storage: HDD, SSD & NVMe — Overview](./intro.md)
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md)
+

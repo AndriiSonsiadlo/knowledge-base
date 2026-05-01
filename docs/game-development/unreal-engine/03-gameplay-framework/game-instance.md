@@ -25,7 +25,7 @@ vanishes the instant the player loads the next map.
 
 ```mermaid
 flowchart TD
-    GI["UGameInstance\n(one per game session / one per PIE instance)"]
+    GI["UGameInstance<br/>(one per game session / one per PIE instance)"]
     W1["UWorld — Level A"]
     W2["UWorld — Level B (after travel)"]
     GM1["AGameModeBase (Level A)"]
@@ -129,3 +129,4 @@ where each machine genuinely is separate.
 - [Subsystems](../02-cpp-in-unreal/subsystems.md) — `UGameInstanceSubsystem`, the preferred way to add
   GameInstance-scoped managers.
 - [Epic — UGameInstance API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/UGameInstance)
+

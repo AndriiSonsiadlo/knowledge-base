@@ -65,13 +65,13 @@ HTTP's wire format itself.
 ```mermaid
 flowchart TB
     subgraph H1["HTTP/1.1"]
-        A1["One request in flight per TCP connection\n(pipelining exists but is rarely used)"]
+        A1["One request in flight per TCP connection<br/>(pipelining exists but is rarely used)"]
     end
     subgraph H2["HTTP/2"]
-        A2["Multiple streams multiplexed\nover one TCP connection"]
+        A2["Multiple streams multiplexed<br/>over one TCP connection"]
     end
     subgraph H3["HTTP/3"]
-        A3["Multiple streams multiplexed\nover QUIC (UDP-based) — avoids\nTCP head-of-line blocking"]
+        A3["Multiple streams multiplexed<br/>over QUIC (UDP-based) — avoids<br/>TCP head-of-line blocking"]
     end
 ```
 
@@ -181,3 +181,4 @@ theoretical risk. See [TLS & Encryption Basics](./tls-and-encryption-basics.md).
 - [TLS & Encryption Basics](./tls-and-encryption-basics.md)
 - [DNS](./dns.md)
 - [Transport Layer: TCP & UDP](../computer-networks/transport-layer-tcp-udp.md)
+

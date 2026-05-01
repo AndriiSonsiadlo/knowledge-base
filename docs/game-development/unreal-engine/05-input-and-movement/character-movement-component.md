@@ -30,11 +30,11 @@ this — usually without realizing that's what you signed up for.
 ```mermaid
 flowchart TD
     Input["AddMovementInput(WorldDirection, Scale)"]
-    Accum["Accumulated input vector\n(cleared and consumed each frame)"]
+    Accum["Accumulated input vector<br/>(cleared and consumed each frame)"]
     Move["UCharacterMovementComponent::TickComponent"]
-    Mode["Movement mode dispatch\nMOVE_Walking / MOVE_Falling / MOVE_Flying / MOVE_Swimming / MOVE_Custom"]
-    RootMotion["Root motion source\n(anim montage or ability), if active"]
-    Net["Client prediction + server reconciliation\n(UNetworkPredictionInterface)"]
+    Mode["Movement mode dispatch<br/>MOVE_Walking / MOVE_Falling / MOVE_Flying / MOVE_Swimming / MOVE_Custom"]
+    RootMotion["Root motion source<br/>(anim montage or ability), if active"]
+    Net["Client prediction + server reconciliation<br/>(UNetworkPredictionInterface)"]
 
     Input --> Accum
     Accum --> Move
@@ -162,3 +162,4 @@ defaults.
 - [Anim instance in C++](../07-animation/anim-instance-in-cpp.md) — reading movement state for
   animation blending.
 - [Epic — UCharacterMovementComponent API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/GameFramework/UCharacterMovementComponent)
+

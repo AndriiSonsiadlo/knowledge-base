@@ -39,11 +39,11 @@ flowchart TB
     end
 
     subgraph ClientA["Owning client"]
-        CAP["Actor proxy: ROLE_AutonomousProxy\n(this client's possessed pawn)"]
+        CAP["Actor proxy: ROLE_AutonomousProxy<br/>(this client's possessed pawn)"]
     end
 
     subgraph ClientB["Other client"]
-        CBP["Actor proxy: ROLE_SimulatedProxy\n(someone else's pawn, interpolated)"]
+        CBP["Actor proxy: ROLE_SimulatedProxy<br/>(someone else's pawn, interpolated)"]
     end
 
     SA -- "replicated properties + RPCs" --> CAP
@@ -186,3 +186,4 @@ directly rather than `HasAuthority()`.
 - [Designing for later multiplayer](./designing-for-later-multiplayer.md) — keeping authority checks in
   place even in a single-player-first project.
 - [Epic — Networking overview](https://dev.epicgames.com/documentation/unreal-engine/networking-overview-for-unreal-engine)
+

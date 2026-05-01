@@ -32,7 +32,7 @@ flowchart TD
     Tick["UCharacterMovementComponent::TickComponent"]
     Dispatch{"MovementMode == MOVE_Custom?"}
     PhysCustom["Your override: PhysCustom(DeltaTime, Iterations)"]
-    SubDispatch{"switch on CustomMovementMode\n(your own enum, cast to uint8)"}
+    SubDispatch{"switch on CustomMovementMode<br/>(your own enum, cast to uint8)"}
     WallRun["PhysWallRun(...)"]
     Climb["PhysClimb(...)"]
 
@@ -200,3 +200,4 @@ building on it; the pattern is stable but internals shift between engine version
   rules that also apply to a movement component subclass.
 - [Epic — UCharacterMovementComponent API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/GameFramework/UCharacterMovementComponent)
 - [Epic — FCharacterNetworkMoveData reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/FCharacterNetworkMoveData)
+

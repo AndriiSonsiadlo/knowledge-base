@@ -28,16 +28,16 @@ any thread-safe C++ code then read as if it were just a local variable.
 ```mermaid
 flowchart TD
     subgraph GT["Game thread"]
-        Owner["Owning Pawn / Character\nvelocity, movement mode, aim rotation..."]
-        NIA["NativeInitializeAnimation()\nruns once, cache TWeakObjectPtr to owner"]
-        NUA["NativeUpdateAnimation(DeltaSeconds)\nread Owner, write UPROPERTY fields"]
+        Owner["Owning Pawn / Character<br/>velocity, movement mode, aim rotation..."]
+        NIA["NativeInitializeAnimation()<br/>runs once, cache TWeakObjectPtr to owner"]
+        NUA["NativeUpdateAnimation(DeltaSeconds)<br/>read Owner, write UPROPERTY fields"]
     end
     subgraph AnyT["Game thread OR worker thread"]
-        NTSUA["NativeThreadSafeUpdateAnimation(DeltaSeconds)\nBlueprintThreadSafeUpdateAnimation (event)\nread cached UPROPERTY fields only"]
+        NTSUA["NativeThreadSafeUpdateAnimation(DeltaSeconds)<br/>BlueprintThreadSafeUpdateAnimation (event)<br/>read cached UPROPERTY fields only"]
     end
     Owner --> NIA
     Owner -->|read-only, game thread only| NUA
-    NUA -->|writes| Cache["UPROPERTY(BlueprintReadOnly) fields\nSpeed, bIsInAir, AimYaw..."]
+    NUA -->|writes| Cache["UPROPERTY(BlueprintReadOnly) fields<br/>Speed, bIsInAir, AimYaw..."]
     Cache -->|read-only| NTSUA
     Cache -->|read-only| AG["AnimGraph"]
 ```
@@ -184,3 +184,4 @@ your engine version if you mix Control Rig into a multithreaded AnimGraph.
   state every update, for state that changes rarely.
 - [Epic — UAnimInstance API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/Animation/UAnimInstance)
 - [Epic — Animation Blueprints](https://dev.epicgames.com/documentation/unreal-engine/animation-blueprints-in-unreal-engine)
+

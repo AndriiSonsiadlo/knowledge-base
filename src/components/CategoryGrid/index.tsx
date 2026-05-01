@@ -80,8 +80,8 @@ export default function CategoryGrid(): ReactNode {
             Categories
           </Heading>
           <p className={`${styles.sectionDescription} text-lg mx-auto`}>
-            Explore comprehensive guides and structured learning paths across
-            computer science, programming, and AI.
+            Explore structured learning paths across programming, systems, data,
+            machine learning, and game development.
           </p>
         </div>
 

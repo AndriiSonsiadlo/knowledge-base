@@ -23,8 +23,8 @@ code sits at the top, consuming subsystems it does not own.
 
 ```mermaid
 flowchart TB
-    Core["Core / CoreUObject\n(containers, reflection, UObject base)"]
-    Engine["Engine module\n(World, Actor, Level plumbing)"]
+    Core["Core / CoreUObject<br/>(containers, reflection, UObject base)"]
+    Engine["Engine module<br/>(World, Actor, Level plumbing)"]
 
     subgraph Subsystems["Engine subsystems (siblings, not a hierarchy)"]
         Rendering[Rendering]
@@ -35,9 +35,9 @@ flowchart TB
         Networking[Networking / Replication]
     end
 
-    GameplayFramework["Gameplay framework\nGameMode, GameState, PlayerController,\nPawn/Character, Actor, ActorComponent"]
+    GameplayFramework["Gameplay framework<br/>GameMode, GameState, PlayerController,<br/>Pawn/Character, Actor, ActorComponent"]
 
-    YourGame["Your game module\n(C++ classes + Blueprint subclasses)"]
+    YourGame["Your game module<br/>(C++ classes + Blueprint subclasses)"]
 
     Core --> Engine
     Engine --> Subsystems
@@ -118,3 +118,4 @@ you test networked. See [Game mode and game state](../03-gameplay-framework/game
 - [UObject and reflection](../02-cpp-in-unreal/uobject-and-reflection.md) — what `Core`/`CoreUObject`
   actually provide.
 - [Epic's Gameplay Framework overview](https://dev.epicgames.com/documentation/unreal-engine/gameplay-framework-in-unreal-engine) — authoritative source for the framework classes.
+

@@ -40,10 +40,10 @@ flowchart TD
         W1["Parallel-for, background work"]
     end
 
-    GT -->|"ENQUEUE_RENDER_COMMAND\n(value copy)"| RT
+    GT -->|"ENQUEUE_RENDER_COMMAND<br/>(value copy)"| RT
     RT --> RHIT
     GT -->|"async audio commands"| AT
-    GT -->|"UE::Tasks::Launch\nAsyncTask"| Workers
+    GT -->|"UE::Tasks::Launch<br/>AsyncTask"| Workers
     Workers -->|"AsyncTask(GameThread, ...)"| GT
 ```
 
@@ -235,3 +235,4 @@ for teardown and rare synchronization points, not steady-state per-frame code.
 - [Garbage collection](../02-cpp-in-unreal/garbage-collection.md) — why the GC assumes single-threaded
   access to the `UObject` graph.
 - [Epic — Threaded Rendering in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/threaded-rendering-in-unreal-engine)
+

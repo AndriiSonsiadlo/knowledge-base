@@ -35,7 +35,7 @@ flowchart TD
     SightConf["UAISenseConfig_Sight"]
     HearConf["UAISenseConfig_Hearing"]
     DamageConf["UAISenseConfig_Damage"]
-    Stimuli["Stimuli sources\n(other actors registered with UAIPerceptionSystem)"]
+    Stimuli["Stimuli sources<br/>(other actors registered with UAIPerceptionSystem)"]
 
     Controller -->|Possess| Pawn
     Controller --> BB
@@ -191,3 +191,4 @@ source of an AI that "forgets" a target it's still actively looking at, or never
   drives the AI instead of a Behavior Tree.
 - [Epic — AI Perception](https://dev.epicgames.com/documentation/unreal-engine/ai-perception-in-unreal-engine)
 - [Epic — AAIController](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/AIModule/AAIController)
+

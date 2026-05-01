@@ -43,7 +43,7 @@ Bit pattern   Unsigned value   Two's complement (signed) value
 ```mermaid
 flowchart LR
     subgraph "4-bit two's complement number line"
-    A["1000\n-8"] --> B["1111\n-1"] --> C["0000\n0"] --> D["0111\n7"]
+    A["1000<br/>-8"] --> B["1111<br/>-1"] --> C["0000<br/>0"] --> D["0111<br/>7"]
     end
 ```
 
@@ -133,3 +133,4 @@ negative.
 - [Floating Point](./floating-point.md)
 - [Bit Manipulation Techniques](./techniques.md)
 - C++ signedness reference: [Signedness](../../programming/cpp/03-types-and-values/signedness.md)
+

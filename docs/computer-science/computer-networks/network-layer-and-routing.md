@@ -69,8 +69,8 @@ handing out fixed class-based blocks (the old, now-obsolete Class A/B/C system).
 
 ```mermaid
 flowchart LR
-    Pkt["Incoming packet\ndest = 203.0.113.50"] --> R{Router}
-    R -->|"Look up longest-matching prefix\nin routing table"| Table[(Routing Table)]
+    Pkt["Incoming packet<br/>dest = 203.0.113.50"] --> R{Router}
+    R -->|"Look up longest-matching prefix<br/>in routing table"| Table[(Routing Table)]
     Table -->|"203.0.113.0/24 → next hop 10.0.0.1"| R
     R -->|"Forward out the matching interface"| Out["Next hop toward destination"]
 ```
@@ -161,3 +161,4 @@ a gateway they weren't expecting to need. Always double check host count math: a
 - [Data Link Layer](./data-link-layer.md)
 - [Transport Layer: TCP & UDP](./transport-layer-tcp-udp.md)
 - [DNS](../protocols/dns.md) — resolves names to the IP addresses this layer routes on.
+

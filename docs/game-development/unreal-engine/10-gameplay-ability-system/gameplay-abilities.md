@@ -21,12 +21,12 @@ server in ways that only show up under real network conditions.
 
 ```mermaid
 flowchart TD
-    Spec["FGameplayAbilitySpec\n(ability class + level + source)"]
+    Spec["FGameplayAbilitySpec<br/>(ability class + level + source)"]
     Grant["ASC-GiveAbility-Spec-"]
     Handle["FGameplayAbilitySpecHandle"]
     Activate["ASC-TryActivateAbility-Handle-"]
-    Instance["UGameplayAbility instance\n(or the CDO, per instancing policy)"]
-    Tasks["UAbilityTask(s)\nasync waits: montage, input, delay"]
+    Instance["UGameplayAbility instance<br/>(or the CDO, per instancing policy)"]
+    Tasks["UAbilityTask(s)<br/>async waits: montage, input, delay"]
     End["EndAbility / CancelAbility"]
 
     Spec --> Grant --> Handle --> Activate --> Instance --> Tasks --> End
@@ -168,3 +168,4 @@ paths, must reach `EndAbility` or `CancelAbility`.
 - [Gameplay tags](./gameplay-tags.md) — how tag requirements gate `CanActivateAbility`.
 - [GAS replication and prediction](./gas-replication-and-prediction.md) — what `NetExecutionPolicy` actually buys you.
 - [Epic — Ability Blueprint API reference](https://dev.epicgames.com/documentation/unreal-engine/BlueprintAPI/Ability)
+

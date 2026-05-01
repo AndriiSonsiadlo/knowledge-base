@@ -35,8 +35,8 @@ relational model isn't the best fit for every shape of data.
 ```mermaid
 flowchart TD
     P["Network Partition Occurs"] --> Choice{"Choose one"}
-    Choice -->|"Favor Consistency (CP)"| CP["Reject/queue requests to the\nminority side until partition heals"]
-    Choice -->|"Favor Availability (AP)"| AP["Keep serving reads/writes on both\nsides — may return stale data"]
+    Choice -->|"Favor Consistency (CP)"| CP["Reject/queue requests to the<br/>minority side until partition heals"]
+    Choice -->|"Favor Availability (AP)"| AP["Keep serving reads/writes on both<br/>sides — may return stale data"]
 ```
 
 :::info The precise statement
@@ -137,3 +137,4 @@ this staleness.
 - [Transactions & ACID](./transactions-and-acid.md)
 - [Relational Model & SQL](./relational-model-and-sql.md)
 - [Databases — Overview](./intro.md)
+

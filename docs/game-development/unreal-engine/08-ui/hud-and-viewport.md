@@ -30,9 +30,9 @@ why a "UI marker" drawn in the wrong space drifts as the camera moves.
 ```mermaid
 flowchart TD
     PC["APlayerController"]
-    HUD["AHUD\n(spawned per PlayerController)"]
-    Canvas["UCanvas\n(HUD's main draw surface, rebuilt per frame)"]
-    DebugCanvas["Debug canvas\n(separate surface, survives some capture/screenshot paths differently)"]
+    HUD["AHUD<br/>(spawned per PlayerController)"]
+    Canvas["UCanvas<br/>(HUD's main draw surface, rebuilt per frame)"]
+    DebugCanvas["Debug canvas<br/>(separate surface, survives some capture/screenshot paths differently)"]
     Viewport["Game viewport (SViewport)"]
     Widgets["UUserWidgets added via AddToViewport"]
 
@@ -160,3 +160,4 @@ relationship.
   the object that owns `GetHUD()` and typically creates top-level widgets.
 - [Epic — API: AHUD](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/AHUD)
 - [Epic — User Interfaces and HUDs](https://dev.epicgames.com/documentation/unreal-engine/user-interfaces-and-huds-in-unreal-engine)
+

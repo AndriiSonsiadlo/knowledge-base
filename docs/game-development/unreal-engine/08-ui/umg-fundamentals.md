@@ -29,12 +29,12 @@ the wrong work at the wrong time, or a widget instance nobody released.
 
 ```mermaid
 flowchart TD
-    UW["UUserWidget instance\n(created, not yet visible)"]
+    UW["UUserWidget instance<br/>(created, not yet visible)"]
     CW["CreateWidget<UMyWidget>(OwningController, Class)"]
     ATV["AddToViewport(ZOrder)"]
-    Slate["Underlying SWidget tree\n(built once, on construction)"]
+    Slate["Underlying SWidget tree<br/>(built once, on construction)"]
     Panel["Panel widget (Canvas/VerticalBox/...)"]
-    Slot["Slot on the panel\n(Anchors, Size, Padding, Order)"]
+    Slot["Slot on the panel<br/>(Anchors, Size, Padding, Order)"]
     Child["Child widget"]
 
     CW --> UW
@@ -223,3 +223,4 @@ dirty flag instead of doing it unconditionally in `NativeTick`.
   `UPROPERTY`/`UFUNCTION` rules that make `BindWidget` and widget events work from Blueprint.
 - [Epic — Unreal Motion Graphics UMG UI Designer](https://dev.epicgames.com/documentation/unreal-engine/umg-ui-designer-for-unreal-engine)
 - [Epic — API: UUserWidget](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/UMG/Blueprint/UUserWidget)
+

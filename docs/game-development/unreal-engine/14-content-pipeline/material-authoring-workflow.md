@@ -27,12 +27,12 @@ recompilation, no hitch.
 
 ```mermaid
 flowchart TD
-    Master["Master Material\n(UMaterial)\nfull graph, all parameters exposed"]
-    Master --> MI1["Material Instance: M_Rock_Base\n(constant, edit-time)"]
+    Master["Master Material<br/>(UMaterial)<br/>full graph, all parameters exposed"]
+    Master --> MI1["Material Instance: M_Rock_Base<br/>(constant, edit-time)"]
     Master --> MI2["Material Instance: M_Metal_Base"]
-    MI1 --> MI1a["Material Instance: M_Rock_Mossy\n(child instance, overrides moss params)"]
+    MI1 --> MI1a["Material Instance: M_Rock_Mossy<br/>(child instance, overrides moss params)"]
     MI1 --> MI1b["Material Instance: M_Rock_Cracked"]
-    MI2 --> MID["Material Instance Dynamic\n(runtime-created, per-actor)"]
+    MI2 --> MID["Material Instance Dynamic<br/>(runtime-created, per-actor)"]
     MID -.SetScalarParameterValue.-> Runtime[Actor at runtime — damage fade, color swap]
 ```
 
@@ -188,3 +188,4 @@ assuming a logic bug elsewhere.
 - [Asset naming and organization](./asset-naming-and-organization.md) — naming conventions for master
   materials, functions, and instance hierarchies.
 - [Epic — Unreal Engine Materials](https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-materials)
+

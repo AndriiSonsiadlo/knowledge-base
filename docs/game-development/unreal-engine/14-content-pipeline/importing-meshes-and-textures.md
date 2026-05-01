@@ -28,10 +28,10 @@ project — which is exactly why documenting the *right* defaults per asset cate
 
 ```mermaid
 flowchart LR
-    Source["Source file\n(.fbx, .png, .tga, .exr)"] --> Import["Import dialog\n(per-type settings)"]
-    Import --> Package["UAsset in Content Browser\n(settings baked into serialized asset)"]
-    Package --> Cook["Cook\n(platform-specific derived data built from settings)"]
-    Cook --> Runtime["Runtime footprint\n(GPU memory, disk size, load time)"]
+    Source["Source file<br/>(.fbx, .png, .tga, .exr)"] --> Import["Import dialog<br/>(per-type settings)"]
+    Import --> Package["UAsset in Content Browser<br/>(settings baked into serialized asset)"]
+    Package --> Cook["Cook<br/>(platform-specific derived data built from settings)"]
+    Cook --> Runtime["Runtime footprint<br/>(GPU memory, disk size, load time)"]
 ```
 
 Import settings are not cosmetic — they're inputs to the derived-data build that happens at cook time
@@ -209,3 +209,4 @@ pipeline documentation that assumes one or the other.
 - [Cooking and the derived data cache](./cooking-and-derived-data-cache.md) — what happens to these
   settings at cook time.
 - [Epic — Nanite Virtualized Geometry](https://dev.epicgames.com/documentation/unreal-engine/nanite-virtualized-geometry-in-unreal-engine)
+

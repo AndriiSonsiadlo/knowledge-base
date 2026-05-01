@@ -72,8 +72,8 @@ client had to wait for the server to choose a cipher suite before sending its ow
 
 ```mermaid
 flowchart TB
-    Root["Root CA certificate\n(pre-trusted by OS/browser)"] --> Inter["Intermediate CA certificate\n(signed by root)"]
-    Inter --> Leaf["Server certificate for example.com\n(signed by intermediate)"]
+    Root["Root CA certificate<br/>(pre-trusted by OS/browser)"] --> Inter["Intermediate CA certificate<br/>(signed by root)"]
+    Inter --> Leaf["Server certificate for example.com<br/>(signed by intermediate)"]
 ```
 
 Your OS/browser ships with a built-in list of trusted **root CAs**. A server presents its own
@@ -153,3 +153,4 @@ by default, but "passive" mixed content (images) may still load with only a warn
 - [Application Protocols — Overview](./intro.md)
 - [HTTP & HTTPS](./http-and-https.md)
 - [Transport Layer: TCP & UDP](../computer-networks/transport-layer-tcp-udp.md)
+

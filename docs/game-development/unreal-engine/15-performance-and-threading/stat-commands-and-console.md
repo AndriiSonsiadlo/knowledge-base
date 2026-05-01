@@ -24,11 +24,11 @@ updated every frame. Each group targets a different layer of the frame:
 
 ```mermaid
 flowchart TD
-    Unit["stat unit\nFrame / Game / Draw / GPU / RHIT"] --> Decide{"Which stage is high?"}
-    Decide -->|"Game high"| Game["stat game\nper-system gameplay tick time"]
-    Decide -->|"Draw / GPU high"| Scene["stat scenerendering\nrendering breakdown"]
-    Decide -->|"GPU high"| GPU["stat gpu\nGPU pass timings"]
-    Decide -->|"suspect memory"| Mem["stat memory / stat llm\nallocation breakdown"]
+    Unit["stat unit<br/>Frame / Game / Draw / GPU / RHIT"] --> Decide{"Which stage is high?"}
+    Decide -->|"Game high"| Game["stat game<br/>per-system gameplay tick time"]
+    Decide -->|"Draw / GPU high"| Scene["stat scenerendering<br/>rendering breakdown"]
+    Decide -->|"GPU high"| GPU["stat gpu<br/>GPU pass timings"]
+    Decide -->|"suspect memory"| Mem["stat memory / stat llm<br/>allocation breakdown"]
 ```
 
 `stat unit` is the entry point specifically because it's a triage tool — it tells you which of the later,
@@ -178,3 +178,4 @@ listed here.
   LLM in more depth.
 - [GPU profiling](../12-rendering/gpu-profiling.md) — dedicated GPU-side tooling beyond `stat gpu`.
 - [Epic — Stat Commands in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/stat-commands-in-unreal-engine)
+

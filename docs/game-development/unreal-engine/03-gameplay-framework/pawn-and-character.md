@@ -27,8 +27,8 @@ fighting its movement component instead of using it.
 
 ```mermaid
 flowchart TD
-    Pawn["APawn\nowns components, possessable, no movement opinion"]
-    Char["ACharacter\n+ UCapsuleComponent (root)\n+ USkeletalMeshComponent\n+ UCharacterMovementComponent"]
+    Pawn["APawn<br/>owns components, possessable, no movement opinion"]
+    Char["ACharacter<br/>+ UCapsuleComponent (root)<br/>+ USkeletalMeshComponent<br/>+ UCharacterMovementComponent"]
     Pawn -->|"extends"| Char
 
     Pawn -.you choose the root component.-> RootA["e.g. UStaticMeshComponent"]
@@ -157,3 +157,4 @@ move at all).
 - [Actor components](./actor-components.md) — the component/attachment rules `ACharacter`'s capsule,
   mesh, and movement component all follow.
 - [Epic — Pawn class reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/APawn)
+

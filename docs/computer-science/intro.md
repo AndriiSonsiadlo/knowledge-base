@@ -35,6 +35,7 @@ reasoning.
 | <Icon icon="lucide:network" inline /> | [Computer Networks](./computer-networks/intro.md) | OSI/TCP-IP models, data link, IP, TCP/UDP |
 | <Icon icon="lucide:globe" inline /> | [Application Protocols](./protocols/intro.md) | DNS, HTTP/HTTPS, TLS |
 | <Icon icon="lucide:database" inline /> | [Databases](./databases/intro.md) | Relational model, indexing, ACID, NoSQL/CAP |
+| <Icon icon="lucide:waypoints" inline /> | [Algorithms & Data Structures](./algorithms/intro.md) | Searching, sorting, complexity trade-offs, and problem-solving patterns |
 
 ## Suggested Reading Path
 

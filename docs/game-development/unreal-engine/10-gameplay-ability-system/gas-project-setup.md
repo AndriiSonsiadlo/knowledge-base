@@ -20,11 +20,11 @@ systems (save games, UI, replication assumptions) start depending on it.
 
 ```mermaid
 flowchart TD
-    Plugin["GameplayAbilities plugin\n(enabled in .uproject / .uplugin)"]
-    BuildCS["YourModule.Build.cs\nPublicDependencyModuleNames"]
-    Interface["IAbilitySystemInterface\non your Pawn/Character or PlayerState"]
-    ASC["UAbilitySystemComponent\nlives on Character or PlayerState"]
-    AttrSet["UAttributeSet\nowned by / registered with the ASC"]
+    Plugin["GameplayAbilities plugin<br/>(enabled in .uproject / .uplugin)"]
+    BuildCS["YourModule.Build.cs<br/>PublicDependencyModuleNames"]
+    Interface["IAbilitySystemInterface<br/>on your Pawn/Character or PlayerState"]
+    ASC["UAbilitySystemComponent<br/>lives on Character or PlayerState"]
+    AttrSet["UAttributeSet<br/>owned by / registered with the ASC"]
 
     Plugin --> BuildCS
     BuildCS --> Interface
@@ -189,3 +189,4 @@ see abilities silently failing to activate only on respawn, check that you're re
 - [Attributes and attribute sets](./attributes-and-attribute-sets.md) — what lives on the ASC alongside abilities.
 - [Modules and plugins](../01-toolchain-and-build/modules-and-plugins.md) — how `Build.cs` dependencies resolve in general.
 - [Epic — Gameplay Ability System for Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/gameplay-ability-system-for-unreal-engine)
+

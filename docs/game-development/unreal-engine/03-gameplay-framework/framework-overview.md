@@ -28,12 +28,12 @@ recreated when you didn't expect it to be.
 
 ```mermaid
 flowchart TD
-    GM["AGameModeBase\n(server-only, never replicates)"]
-    GS["AGameStateBase\n(replicated to all clients)"]
-    PC["APlayerController\n(one per player, input + possession)"]
-    PS["APlayerState\n(one per player, always relevant/replicated)"]
-    Pawn["APawn / ACharacter\n(the physical avatar)"]
-    AC["UActorComponent / USceneComponent\n(owned by the Pawn)"]
+    GM["AGameModeBase<br/>(server-only, never replicates)"]
+    GS["AGameStateBase<br/>(replicated to all clients)"]
+    PC["APlayerController<br/>(one per player, input + possession)"]
+    PS["APlayerState<br/>(one per player, always relevant/replicated)"]
+    Pawn["APawn / ACharacter<br/>(the physical avatar)"]
+    AC["UActorComponent / USceneComponent<br/>(owned by the Pawn)"]
 
     GM -->|spawns| GS
     GM -->|spawns on login| PC
@@ -130,3 +130,4 @@ failure mode.
 - [Exposing C++ to Blueprint](../04-blueprint-interop/exposing-cpp-to-blueprint.md) — these classes are
   the ones you'll subclass in Blueprint most often.
 - [Epic — Gameplay Framework overview](https://dev.epicgames.com/documentation/unreal-engine/gameplay-framework-in-unreal-engine)
+

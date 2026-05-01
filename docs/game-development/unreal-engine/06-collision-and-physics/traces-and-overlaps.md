@@ -29,8 +29,8 @@ crash anything, it just quietly eats frame budget.
 flowchart LR
     Q["Query"] --> Shape{"Shape?"}
     Shape -->|"point-to-point"| Line["Line trace"]
-    Shape -->|"volume moved through space"| Sweep["Sweep\n(box/sphere/capsule)"]
-    Shape -->|"volume, no movement"| Overlap["Overlap\n(stationary volume test)"]
+    Shape -->|"volume moved through space"| Sweep["Sweep<br/>(box/sphere/capsule)"]
+    Shape -->|"volume, no movement"| Overlap["Overlap<br/>(stationary volume test)"]
 
     Q --> Filter{"Filter by?"}
     Filter -->|"one named channel + response matrix"| ByChannel["...ByChannel"]
@@ -174,3 +174,4 @@ object-type query against its type. Don't mix the two mental models: if you conf
   simulated bodies, not just queries.
 - [Damage and hit handling](./damage-and-hit-handling.md) — turning an `FHitResult` into applied damage.
 - [Epic — Traces with raycasts](https://dev.epicgames.com/documentation/unreal-engine/traces-with-raycasts-in-unreal-engine)
+

@@ -28,11 +28,11 @@ transition. Skipping CommonUI on a controller-supported project means reinventin
 
 ```mermaid
 flowchart TD
-    Router["UCommonUIActionRouterBase\n(input routing + focus)"]
-    Stack["UCommonActivatableWidgetStack\n(a Widget Switcher that tracks activation)"]
-    HUD["HUD screen\n(UCommonActivatableWidget, always active)"]
-    Pause["Pause menu\n(UCommonActivatableWidget, pushed on top)"]
-    Dialog["Confirm dialog\n(UCommonActivatableWidget, pushed on top of Pause)"]
+    Router["UCommonUIActionRouterBase<br/>(input routing + focus)"]
+    Stack["UCommonActivatableWidgetStack<br/>(a Widget Switcher that tracks activation)"]
+    HUD["HUD screen<br/>(UCommonActivatableWidget, always active)"]
+    Pause["Pause menu<br/>(UCommonActivatableWidget, pushed on top)"]
+    Dialog["Confirm dialog<br/>(UCommonActivatableWidget, pushed on top of Pause)"]
 
     Router -->|tracks leafmost active widget| Stack
     Stack --> HUD
@@ -162,3 +162,4 @@ present in your specific engine build.
   bindings route through.
 - [Epic — CommonUI overview](https://dev.epicgames.com/documentation/unreal-engine/common-ui-plugin-for-advanced-user-interfaces-in-unreal-engine)
 - [Epic — API: CommonUI plugin classes](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/CommonUI)
+

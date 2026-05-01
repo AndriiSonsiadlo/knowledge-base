@@ -30,20 +30,20 @@ understand that a Behavior Tree is continuously re-selecting which branch is all
 flowchart TD
     Root["Root"]
     Sel["Selector: Combat"]
-    SeqAttack["Sequence: Attack\n(decorator: Blackboard.HasTarget)"]
+    SeqAttack["Sequence: Attack<br/>(decorator: Blackboard.HasTarget)"]
     TaskAttack["Task: Attack Target"]
     SeqPatrol["Sequence: Patrol"]
     TaskMove["Task: Move To Patrol Point"]
-    Service["Service: Update Nearest Enemy\n(attached to Selector)"]
+    Service["Service: Update Nearest Enemy<br/>(attached to Selector)"]
 
     Root --> Sel
     Sel --> SeqAttack
     Sel --> SeqPatrol
     SeqAttack --> TaskAttack
     SeqPatrol --> TaskMove
-    Service -.ticks while Selector is active,\nwrites Blackboard.HasTarget.-> Sel
+    Service -.ticks while Selector is active,<br/>writes Blackboard.HasTarget.-> Sel
 
-    BB[("Blackboard\nHasTarget: bool\nTargetActor: Object\nPatrolPoint: Vector")]
+    BB[("Blackboard<br/>HasTarget: bool<br/>TargetActor: Object<br/>PatrolPoint: Vector")]
     Service -->|writes| BB
     SeqAttack -->|reads via decorator| BB
     TaskAttack -->|reads TargetActor| BB
@@ -177,3 +177,4 @@ tighten the interval if the reaction needs to feel instant, but that costs more 
   a comparison of when each fits better.
 - [Epic — Behavior Trees](https://dev.epicgames.com/documentation/unreal-engine/behavior-trees-in-unreal-engine)
 - [Epic — Behavior Tree Blackboard](https://dev.epicgames.com/documentation/unreal-engine/behavior-tree-blackboard-in-unreal-engine)
+

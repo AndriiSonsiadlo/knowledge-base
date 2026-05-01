@@ -27,12 +27,12 @@ contexts (cooking, editor tooling, PIE).
 
 ```mermaid
 flowchart TD
-    Ctor["Constructor\n(no World yet, may run on the CDO)"]
-    Reg["Component registration\n(components attached to the World)"]
-    PIC["PostInitializeComponents\n(gameplay-only, after components exist)"]
-    BP["BeginPlay\n(this actor is fully live in the World)"]
-    Tick["Tick — every frame\n(only if bCanEverTick)"]
-    EP["EndPlay(EEndPlayReason)\n(about to leave the World)"]
+    Ctor["Constructor<br/>(no World yet, may run on the CDO)"]
+    Reg["Component registration<br/>(components attached to the World)"]
+    PIC["PostInitializeComponents<br/>(gameplay-only, after components exist)"]
+    BP["BeginPlay<br/>(this actor is fully live in the World)"]
+    Tick["Tick — every frame<br/>(only if bCanEverTick)"]
+    EP["EndPlay(EEndPlayReason)<br/>(about to leave the World)"]
     Destroy["Destroyed / garbage collected"]
 
     Ctor --> Reg --> PIC --> BP --> Tick
@@ -154,3 +154,4 @@ level of detail you need for gameplay code, and consult engine source for anythi
   `Destroy()`.
 - [World and levels](./world-and-levels.md) — level streaming as a trigger for `EndPlay`.
 - [Epic — AActor API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/AActor)
+

@@ -26,12 +26,12 @@ bounds.
 
 ```mermaid
 flowchart TD
-    WP["UWorldPartition\n(owned by the persistent level)"]
-    Hash["Runtime Hash\n(UWorldPartitionRuntimeSpatialHash)"]
-    Grid["Runtime Grid\n(cell size, loading range)"]
-    Cell["Streaming Cell\n(group of actors, one per grid square)"]
-    Source["Streaming Source\n(player pawn, camera, custom provider)"]
-    HLOD["HLOD actor\n(merged proxy for a distant cell)"]
+    WP["UWorldPartition<br/>(owned by the persistent level)"]
+    Hash["Runtime Hash<br/>(UWorldPartitionRuntimeSpatialHash)"]
+    Grid["Runtime Grid<br/>(cell size, loading range)"]
+    Cell["Streaming Cell<br/>(group of actors, one per grid square)"]
+    Source["Streaming Source<br/>(player pawn, camera, custom provider)"]
+    HLOD["HLOD actor<br/>(merged proxy for a distant cell)"]
 
     WP --> Hash --> Grid --> Cell
     Source -->|distance test each tick| Cell
@@ -150,3 +150,4 @@ before scripting a build pipeline around it.
 - [World and levels](../03-gameplay-framework/world-and-levels.md) — how `UWorld` and persistent levels
   relate to World Partition's single-level model.
 - [Epic — World Partition](https://dev.epicgames.com/documentation/unreal-engine/world-partition-in-unreal-engine)
+

@@ -23,13 +23,13 @@ explains why some node choices are expensive and others are free.
 
 ```mermaid
 flowchart LR
-    UMat["UMaterial\n(the graph, compiles a base shader)"]
-    UMIC["UMaterialInstanceConstant\n(baked parameter overrides,\nedited in-editor)"]
-    UMID["UMaterialInstanceDynamic\n(runtime-only overrides,\ncreated in C++/Blueprint)"]
+    UMat["UMaterial<br/>(the graph, compiles a base shader)"]
+    UMIC["UMaterialInstanceConstant<br/>(baked parameter overrides,<br/>edited in-editor)"]
+    UMID["UMaterialInstanceDynamic<br/>(runtime-only overrides,<br/>created in C++/Blueprint)"]
 
     UMat -->|"Parent"| UMIC
     UMIC -->|"Parent (or UMaterial directly)"| UMID
-    UMID -.->|"SetScalarParameterValue, etc.\nno shader recompile"| UMID
+    UMID -.->|"SetScalarParameterValue, etc.<br/>no shader recompile"| UMID
 ```
 
 A parent `UMaterial` owns the graph and therefore the shader permutations that get compiled — domain,
@@ -165,3 +165,4 @@ after assignment.
 - [Post process and view extensions](./post-process-and-view-extensions.md) — the Post Process domain
   in practice.
 - [Epic — Substrate Materials](https://dev.epicgames.com/documentation/unreal-engine/substrate-materials-in-unreal-engine)
+

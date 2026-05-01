@@ -27,10 +27,10 @@ and it either never reaches the client, or exposes server-only logic that should
 ```mermaid
 flowchart LR
     subgraph Server["Server / listen server host only"]
-        GM["AGameModeBase\nrules, spawning, win conditions"]
+        GM["AGameModeBase<br/>rules, spawning, win conditions"]
     end
     subgraph Replicated["Replicated to every client"]
-        GS["AGameStateBase\nmatch state, player list, shared scores"]
+        GS["AGameStateBase<br/>match state, player list, shared scores"]
     end
     GM -->|spawns, reads GameStateClass| GS
     GM -.HasAuthority() true only here.-> GM
@@ -161,3 +161,4 @@ never gets there.
 - [World and levels](./world-and-levels.md) — `APlayerStart` and per-level GameMode overrides via World
   Settings.
 - [Epic — Game Mode and Game State](https://dev.epicgames.com/documentation/unreal-engine/game-mode-and-game-state-in-unreal-engine)
+

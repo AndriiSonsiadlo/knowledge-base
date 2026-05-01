@@ -27,12 +27,12 @@ frustrating things to debug blind.
 
 ```mermaid
 flowchart LR
-    A["Actor spawned on server\nbReplicates = true"] --> R{"Relevant to\nthis connection?"}
-    R -- "no" --> Skip["Not replicated to this client\n(not created there)"]
-    R -- "yes" --> Ch["Actor channel opened\non this client"]
-    Ch --> Init["Initial replication:\nall replicated properties sent"]
-    Init --> Delta["Delta replication:\nonly properties that changed since\nlast net update are re-sent"]
-    Delta --> Notify["RepNotify callbacks fire\non the client for changed properties"]
+    A["Actor spawned on server<br/>bReplicates = true"] --> R{"Relevant to<br/>this connection?"}
+    R -- "no" --> Skip["Not replicated to this client<br/>(not created there)"]
+    R -- "yes" --> Ch["Actor channel opened<br/>on this client"]
+    Ch --> Init["Initial replication:<br/>all replicated properties sent"]
+    Init --> Delta["Delta replication:<br/>only properties that changed since<br/>last net update are re-sent"]
+    Delta --> Notify["RepNotify callbacks fire<br/>on the client for changed properties"]
 ```
 
 Actor replication answers "does this actor exist on this client at all, and when." Property replication
@@ -239,3 +239,4 @@ regardless of how correctly the property is registered.
 - [Relevancy and Replication Graph](./relevancy-and-replication-graph.md) — what actually controls
   whether an actor channel exists for a given client.
 - [Epic — Actor replication](https://dev.epicgames.com/documentation/unreal-engine/actor-replication-in-unreal-engine)
+

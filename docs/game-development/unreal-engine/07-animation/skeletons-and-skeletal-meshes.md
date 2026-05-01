@@ -27,11 +27,11 @@ animation on any mesh.
 
 ```mermaid
 flowchart TD
-    Skel["USkeleton\nbone hierarchy, bone names,\nsockets, virtual bones,\nretarget/curve metadata"]
-    Mesh1["USkeletalMesh (Character A)\ngeometry, skin weights,\nmorph targets, LODs"]
-    Mesh2["USkeletalMesh (Character B)\ndifferent geometry,\nsame skeleton"]
-    Phys["UPhysicsAsset\nrigid bodies + constraints\nper bone"]
-    Anim["UAnimSequence / UAnimMontage /\nUAnimBlueprint"]
+    Skel["USkeleton<br/>bone hierarchy, bone names,<br/>sockets, virtual bones,<br/>retarget/curve metadata"]
+    Mesh1["USkeletalMesh (Character A)<br/>geometry, skin weights,<br/>morph targets, LODs"]
+    Mesh2["USkeletalMesh (Character B)<br/>different geometry,<br/>same skeleton"]
+    Phys["UPhysicsAsset<br/>rigid bodies + constraints<br/>per bone"]
+    Anim["UAnimSequence / UAnimMontage /<br/>UAnimBlueprint"]
 
     Skel -->|shared by| Mesh1
     Skel -->|shared by| Mesh2
@@ -135,3 +135,4 @@ asset per mesh rather than assuming it travels with the skeleton.
   rigid bodies and constraints do once simulated.
 - [Epic — Skeletal mesh animation system](https://dev.epicgames.com/documentation/unreal-engine/skeletal-mesh-animation-system-in-unreal-engine)
 - [Epic — USkeletalMesh API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/Engine/USkeletalMesh)
+

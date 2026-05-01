@@ -29,9 +29,9 @@ Skipping it means writing that collision-avoidance logic yourself, badly, on eve
 ```mermaid
 flowchart TD
     Capsule["UCapsuleComponent (Character root)"]
-    Arm["USpringArmComponent\nTargetArmLength, socket at arm's length\nruns collision probe each tick"]
-    Cam["UCameraComponent\nattached at arm's socket"]
-    PC["APlayerController\nowns ControlRotation"]
+    Arm["USpringArmComponent<br/>TargetArmLength, socket at arm's length<br/>runs collision probe each tick"]
+    Cam["UCameraComponent<br/>attached at arm's socket"]
+    PC["APlayerController<br/>owns ControlRotation"]
 
     Capsule --> Arm
     Arm --> Cam
@@ -161,3 +161,4 @@ camera.
 - [Character movement component](./character-movement-component.md) —
   `bOrientRotationToMovement` and the other rotation-relevant tunables.
 - [Epic — Camera and spring arm setup](https://dev.epicgames.com/documentation/unreal-engine/BlueprintAPI/SpringArm)
+

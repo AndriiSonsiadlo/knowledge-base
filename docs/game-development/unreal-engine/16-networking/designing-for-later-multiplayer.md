@@ -30,14 +30,14 @@ accounting of what's cheap to retrofit and what genuinely isn't.
 ```mermaid
 flowchart LR
     subgraph Cheap["Cheap to add later"]
-        C1["Marking properties Replicated\n+ GetLifetimeReplicatedProps"]
+        C1["Marking properties Replicated<br/>+ GetLifetimeReplicatedProps"]
         C2["Enabling bReplicates on an actor"]
         C3["Tuning NetCullDistance / dormancy"]
     end
     subgraph Expensive["Expensive to add later"]
-        E1["Retrofitting HasAuthority() checks\ninto logic that assumed local == authoritative"]
-        E2["Splitting client-only state out of\nassumed-single-copy gameplay objects"]
-        E3["Converting direct state mutation\ninto Server-RPC-gated mutation"]
+        E1["Retrofitting HasAuthority() checks<br/>into logic that assumed local == authoritative"]
+        E2["Splitting client-only state out of<br/>assumed-single-copy gameplay objects"]
+        E3["Converting direct state mutation<br/>into Server-RPC-gated mutation"]
     end
 
     Cheap -. "mechanical, additive" .-> Ship["Ship single-player now"]
@@ -182,3 +182,4 @@ folder, but it's worth flagging as part of the same "what did single-player-firs
 - [Dedicated servers and Online Subsystem](./dedicated-servers-and-online-subsystem.md) — the session
   layer that's genuinely fine to defer entirely.
 - [Epic — Networking overview](https://dev.epicgames.com/documentation/unreal-engine/networking-overview-for-unreal-engine)
+

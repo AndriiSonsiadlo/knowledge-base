@@ -25,9 +25,9 @@ belongs on is the single most common early mistake in multiplayer Unreal code.
 
 ```mermaid
 flowchart TD
-    Conn["Network connection\n(or local input, in single-player)"]
-    PC["APlayerController\ninput, camera, possession"]
-    PS["APlayerState\nname, score, ping — always relevant"]
+    Conn["Network connection<br/>(or local input, in single-player)"]
+    PC["APlayerController<br/>input, camera, possession"]
+    PS["APlayerState<br/>name, score, ping — always relevant"]
     Pawn1["APawn (life 1)"]
     Pawn2["APawn (life 2, after respawn)"]
 
@@ -146,3 +146,4 @@ needs to be visible to everyone, it belongs on `PlayerState`, not `PlayerControl
 - [Actor lifecycle](./actor-lifecycle.md) — `OnPossess`/`OnRep_PlayerState` in the context of the full
   spawn/init sequence.
 - [Epic — Gameplay Framework: Player Controllers and Player States](https://dev.epicgames.com/documentation/unreal-engine/gameplay-framework-in-unreal-engine)
+

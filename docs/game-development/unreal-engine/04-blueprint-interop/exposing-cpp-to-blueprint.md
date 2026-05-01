@@ -31,17 +31,17 @@ two to a function:
 
 ```mermaid
 flowchart TB
-    P[UPROPERTY] --> Edit{Editable in\nDetails panel?}
-    P --> BP{Visible to\nBlueprint graphs?}
-    P --> Dir{Read-only or\nread/write?}
+    P[UPROPERTY] --> Edit{Editable in<br/>Details panel?}
+    P --> BP{Visible to<br/>Blueprint graphs?}
+    P --> Dir{Read-only or<br/>read/write?}
     Edit -->|EditAnywhere / EditDefaultsOnly / EditInstanceOnly| E1[Editor exposure]
     BP -->|BlueprintReadOnly / BlueprintReadWrite| B1[Graph exposure]
     Dir --> B1
 
-    F[UFUNCTION] --> Call{Callable from\na Blueprint graph?}
+    F[UFUNCTION] --> Call{Callable from<br/>a Blueprint graph?}
     F --> Impl{Who implements it?}
     Call -->|BlueprintCallable / BlueprintPure| C1[Graph call]
-    Impl -->|native / BlueprintImplementableEvent /\nBlueprintNativeEvent| I1[Implementation site]
+    Impl -->|native / BlueprintImplementableEvent /<br/>BlueprintNativeEvent| I1[Implementation site]
 ```
 
 A property can be editor-visible without being Blueprint-visible (a designer-tunable value a graph
@@ -175,3 +175,4 @@ into a Tick-driven graph. "Pure" describes side-effect-free semantics, not memoi
 - [Blueprint function libraries](./blueprint-function-libraries.md) — exposing static, stateless
   functions instead of per-instance members.
 - [Epic — UFunctions in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/ufunctions-in-unreal-engine)
+

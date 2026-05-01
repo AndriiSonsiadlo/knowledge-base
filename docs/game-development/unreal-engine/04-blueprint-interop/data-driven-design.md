@@ -27,13 +27,13 @@ balancing a hundred items means opening a hundred assets.
 
 ```mermaid
 flowchart TB
-    Struct["FItemData : FTableRowBase\n(C++ schema)"] --> DT["UDataTable\n(CSV / JSON rows)"]
+    Struct["FItemData : FTableRowBase<br/>(C++ schema)"] --> DT["UDataTable<br/>(CSV / JSON rows)"]
     DT -->|"FindRow<FItemData>(RowName)"| Runtime1[Runtime lookup by name]
 
-    PDA["UPrimaryDataAsset subclass\n(GetPrimaryAssetId override)"] --> AM[UAssetManager registry]
+    PDA["UPrimaryDataAsset subclass<br/>(GetPrimaryAssetId override)"] --> AM[UAssetManager registry]
     AM -->|"LoadPrimaryAsset() — async"| Runtime2[Loaded on demand by ID]
 
-    Curve["UCurveFloat / UCurveTable\n(FRichCurve keys)"] -->|"GetFloatValue(Time)"| Runtime3[Continuous value at runtime]
+    Curve["UCurveFloat / UCurveTable<br/>(FRichCurve keys)"] -->|"GetFloatValue(Time)"| Runtime3[Continuous value at runtime]
 ```
 
 - **`UDataTable`** is a table: one C++ struct defines the columns, rows are imported from CSV/JSON, and
@@ -158,3 +158,4 @@ compiler warning — only a runtime `nullptr`.
 - [UObject and the reflection system](../02-cpp-in-unreal/uobject-and-reflection.md) — how `USTRUCT`
   and `UPROPERTY` make the row schema reflectable in the first place.
 - [Epic — Data-Driven Gameplay Elements](https://dev.epicgames.com/documentation/unreal-engine/data-driven-gameplay-elements-in-unreal-engine)
+

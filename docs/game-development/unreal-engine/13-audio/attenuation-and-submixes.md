@@ -29,9 +29,9 @@ misbehave together.
 
 ```mermaid
 flowchart TD
-    Sound["Playing sound\n(FWaveInstance)"]
-    Atten["Attenuation\n(FSoundAttenuationSettings)\ndistance, shape, spatialization, occlusion"]
-    Voice["Rendered voice\n(post-attenuation gain + pan)"]
+    Sound["Playing sound<br/>(FWaveInstance)"]
+    Atten["Attenuation<br/>(FSoundAttenuationSettings)<br/>distance, shape, spatialization, occlusion"]
+    Voice["Rendered voice<br/>(post-attenuation gain + pan)"]
 
     Sound --> Atten --> Voice
 
@@ -39,7 +39,7 @@ flowchart TD
     Voice -->|"submix send"| SubB["USoundSubmix: Reverb (via effect send)"]
     SubA --> Master["Master Submix"]
     SubB --> Master
-    Bus["UAudioBus\n(named audio stream, not a mix destination)"]
+    Bus["UAudioBus<br/>(named audio stream, not a mix destination)"]
     Voice -.->|"SetAudioBusSendPostEffect"| Bus
     Master --> Output["Platform output"]
 ```
@@ -255,3 +255,4 @@ consulted — check your project's platform audio settings for the active spatia
 - [Collision channels and responses](../06-collision-and-physics/collision-channels-and-responses.md) —
   the trace-channel model occlusion checks are built on.
 - [Epic — Spatialization and sound attenuation](https://dev.epicgames.com/documentation/unreal-engine/spatialization-and-sound-attenuation-in-unreal-engine)
+

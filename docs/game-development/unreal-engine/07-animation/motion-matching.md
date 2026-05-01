@@ -30,11 +30,11 @@ frequent direction changes) that a state machine would need dozens of blend spac
 
 ```mermaid
 flowchart TD
-    Data["Motion capture library\n(many clips: walk, run, turns, stops,\npivots, strafes...)"]
-    DB["Pose Search Database\nindexed poses + their trajectories"]
-    Query["Runtime query:\ncurrent pose + desired future trajectory\n(from input/movement)"]
-    Search["Search()\nfinds closest matching pose in the database"]
-    Output["Selected pose/clip segment\nplayed this frame, blended from current pose"]
+    Data["Motion capture library<br/>(many clips: walk, run, turns, stops,<br/>pivots, strafes...)"]
+    DB["Pose Search Database<br/>indexed poses + their trajectories"]
+    Query["Runtime query:<br/>current pose + desired future trajectory<br/>(from input/movement)"]
+    Search["Search()<br/>finds closest matching pose in the database"]
+    Output["Selected pose/clip segment<br/>played this frame, blended from current pose"]
 
     Data -->|offline indexing| DB
     Query --> Search
@@ -127,3 +127,4 @@ not by default.
   to be authored against (or retargeted to) your character's skeleton.
 - [Epic — Motion Matching overview](https://dev.epicgames.com/documentation/unreal-engine/motion-matching-in-unreal-engine)
 - [Epic — Pose Search / Motion Matching API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/PoseSearch)
+

@@ -27,9 +27,9 @@ into a Shipping build.
 
 ```mermaid
 flowchart TD
-    Cond{Condition should always be true} -->|fatal if false| Check["check(Cond)\ncrash / debugger break"]
-    Cond -->|report but continue| Ensure["ensure(Cond)\nlog once + debugger break, then continue"]
-    Cond -->|side-effecting expr| Verify["verify(Cond)\nlike check, but Cond always evaluated"]
+    Cond{Condition should always be true} -->|fatal if false| Check["check(Cond)<br/>crash / debugger break"]
+    Cond -->|report but continue| Ensure["ensure(Cond)<br/>log once + debugger break, then continue"]
+    Cond -->|side-effecting expr| Verify["verify(Cond)<br/>like check, but Cond always evaluated"]
 ```
 
 `check` is for conditions where continuing is worse than crashing — an invariant that, if false, means
@@ -145,3 +145,4 @@ look identical in the log.
 - [Coding standard and naming](./coding-standard-and-naming.md) — Epic's broader style guidance this
   logging/assertion usage sits inside.
 - [Epic — Unity to Unreal Engine FAQ: exceptions](https://dev.epicgames.com/documentation/unreal-engine/unity-to-unreal-engine-frequently-asked-questions-faq)
+

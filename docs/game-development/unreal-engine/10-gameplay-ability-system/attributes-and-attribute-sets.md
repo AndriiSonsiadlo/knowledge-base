@@ -20,10 +20,10 @@ compiler; it's enforced by you, in two specific virtual functions.
 
 ```mermaid
 flowchart LR
-    GE["GameplayEffect modifier\n(+10 to Health)"]
-    Pre["PreAttributeChange /\nPreAttributeBaseChange\n(clamp before the value lands)"]
-    Data["FGameplayAttributeData\nBaseValue + CurrentValue"]
-    Post["PostGameplayEffectExecute\n(react after an instant/periodic GE)"]
+    GE["GameplayEffect modifier<br/>(+10 to Health)"]
+    Pre["PreAttributeChange /<br/>PreAttributeBaseChange<br/>(clamp before the value lands)"]
+    Data["FGameplayAttributeData<br/>BaseValue + CurrentValue"]
+    Post["PostGameplayEffectExecute<br/>(react after an instant/periodic GE)"]
 
     GE --> Pre --> Data --> Post
 ```
@@ -165,3 +165,4 @@ duration-based buff changing `CurrentValue`, hook `PreAttributeChange` or bind t
 - [GAS project setup](./gas-project-setup.md) — where the attribute set's owning ASC lives.
 - [GAS C++ patterns](./gas-cpp-patterns.md) — the accessor macros and base-class patterns used above.
 - [Epic — FGameplayAttributeData](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/GameplayAbilities/FGameplayAttributeData)
+

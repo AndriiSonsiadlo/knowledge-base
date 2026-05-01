@@ -28,18 +28,18 @@ rather than treating every UFUNCTION the same.
 ```mermaid
 flowchart LR
     subgraph Client["Owning client"]
-        CI["Player input:\nPressFireButton()"]
+        CI["Player input:<br/>PressFireButton()"]
     end
     subgraph Server["Server"]
-        SV["ServerFire_Implementation()\nvalidates + applies authoritative effect"]
+        SV["ServerFire_Implementation()<br/>validates + applies authoritative effect"]
     end
-    subgraph Others["All connected clients\n(including caller)"]
-        MC["Multicast_PlayFireEffects()\ncosmetic only"]
+    subgraph Others["All connected clients<br/>(including caller)"]
+        MC["Multicast_PlayFireEffects()<br/>cosmetic only"]
     end
 
-    CI -- "Server RPC\n(client -> server)" --> SV
-    SV -- "NetMulticast RPC\n(server -> everyone)" --> MC
-    SV -. "Client RPC\n(server -> one specific client)" .-> CI
+    CI -- "Server RPC<br/>(client -> server)" --> SV
+    SV -- "NetMulticast RPC<br/>(server -> everyone)" --> MC
+    SV -. "Client RPC<br/>(server -> one specific client)" .-> CI
 ```
 
 A `Server` RPC only ever travels client-to-server. A `Client` RPC only ever travels server-to-one-client
@@ -228,3 +228,4 @@ rather than shipping large structures over an RPC.
 - [Movement replication and prediction](./movement-replication-and-prediction.md) — `UCharacterMovementComponent`'s
   own specialized use of Server RPCs for move requests.
 - [Epic — RPCs in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/rpcs-in-unreal-engine)
+

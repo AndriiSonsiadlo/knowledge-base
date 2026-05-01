@@ -29,9 +29,9 @@ scriptable, exits with a pass/fail code, runs headless on a build agent that has
 
 ```mermaid
 flowchart TD
-    CLI["ProjectName.exe / UnrealEditor-Cmd.exe\n-run=CommandletName param=value"] --> Engine["Engine boot: raw environment"]
+    CLI["ProjectName.exe / UnrealEditor-Cmd.exe<br/>-run=CommandletName param=value"] --> Engine["Engine boot: raw environment"]
     Engine -->|"no game, no level, no actors"| Main["UCommandlet::Main(const FString& Params)"]
-    Main --> Logic["Your batch logic:\nasset scan, validation, export"]
+    Main --> Logic["Your batch logic:<br/>asset scan, validation, export"]
     Logic --> Exit["return int32 exit code"]
     Exit -->|"0"| CIPass["CI step: pass"]
     Exit -->|"non-zero"| CIFail["CI step: fail build"]
@@ -209,3 +209,4 @@ needed before reading the result, rather than assuming it "just happens" between
 - [Editor Utility Widgets](./editor-utility-widgets.md) — the interactive, human-in-the-loop counterpart
   to a headless commandlet for the same kind of batch operation.
 - [Epic — UCommandlet API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/UCommandlet)
+

@@ -22,9 +22,9 @@ isn't going to catch it happening.
 
 ```mermaid
 flowchart LR
-    App["Running game/editor\n(trace channels enabled)"] -->|"live network trace\nor .utrace file"| Store["Unreal Trace Store"]
-    Store --> Insights["Unreal Insights\n(Timing view, tracks per thread)"]
-    Insights --> You["You: read overlapping tracks,\nfind the actual bottleneck"]
+    App["Running game/editor<br/>(trace channels enabled)"] -->|"live network trace<br/>or .utrace file"| Store["Unreal Trace Store"]
+    Store --> Insights["Unreal Insights<br/>(Timing view, tracks per thread)"]
+    Insights --> You["You: read overlapping tracks,<br/>find the actual bottleneck"]
 ```
 
 A trace is just a stream of timestamped events tagged with a channel (`cpu`, `frame`, and others,
@@ -186,3 +186,4 @@ menu locations against your installed engine version.
 - [GPU profiling](../12-rendering/gpu-profiling.md) — the GPU-side counterpart when the bottleneck is on
   the render thread or GPU rather than the game thread.
 - [Epic — Unreal Insights Overview](https://dev.epicgames.com/documentation/unreal-engine/unreal-insights-overview)
+

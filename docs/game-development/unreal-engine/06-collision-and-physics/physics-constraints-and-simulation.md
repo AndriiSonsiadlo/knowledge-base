@@ -28,16 +28,16 @@ all.
 
 ```mermaid
 flowchart TD
-    PC["UPhysicsConstraintComponent\ntwo actors, one joint"]
-    PC --> Limits["Angular/linear limits\n(locked / limited / free per axis)"]
-    PC --> Drives["Drives\n(motor toward a target position/velocity)"]
+    PC["UPhysicsConstraintComponent<br/>two actors, one joint"]
+    PC --> Limits["Angular/linear limits<br/>(locked / limited / free per axis)"]
+    PC --> Drives["Drives<br/>(motor toward a target position/velocity)"]
 
-    PA["UPhysicsAsset\n(one per SkeletalMesh)"]
-    PA --> Bodies["Rigid bodies\n(one per simulated bone)"]
-    PA --> Joints["Constraints\n(one per bone-parent pair)\nsame limits/drives as above"]
+    PA["UPhysicsAsset<br/>(one per SkeletalMesh)"]
+    PA --> Bodies["Rigid bodies<br/>(one per simulated bone)"]
+    PA --> Joints["Constraints<br/>(one per bone-parent pair)<br/>same limits/drives as above"]
 
     SkelMesh["USkeletalMeshComponent"] -->|"references"| PA
-    SkelMesh -->|"SetAllBodiesSimulatePhysics + PhysicsBlendWeight"| Ragdoll["Ragdoll state\n(blended with animation)"]
+    SkelMesh -->|"SetAllBodiesSimulatePhysics + PhysicsBlendWeight"| Ragdoll["Ragdoll state<br/>(blended with animation)"]
     PA --> Ragdoll
 ```
 
@@ -140,3 +140,4 @@ an animated pose.
 - [Skeletons and skeletal meshes](../07-animation/skeletons-and-skeletal-meshes.md) — the bone hierarchy a
   physics asset's bodies attach to.
 - [Epic — Physics Asset reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/UPhysicsAsset)
+

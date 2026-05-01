@@ -20,8 +20,7 @@ const SECTION_LABELS: Record<string, string> = {
   programming: "Programming",
   "game-development": "Game Development",
   "computer-science": "Computer Science",
-  "data-structures-algorithms": "Data & Algorithms",
-  "data-tools": "Data Tools",
+  "data-tools": "Data Science",
   "machine-learning": "Machine Learning",
 };
 

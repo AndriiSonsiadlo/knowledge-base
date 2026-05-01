@@ -27,11 +27,11 @@ content unlocks, or platform storefront package-size rules.
 
 ```mermaid
 flowchart LR
-    Src["Source + assets"] --> Build["Build\ncompile the chosen target"]
-    Build --> Cook["Cook\nconvert assets to platform-ready cooked format"]
-    Cook --> Stage["Stage\nlay out cooked content + binaries as a deployable tree"]
-    Stage --> Pak["Pak\npack staged content into .pak archive(s)"]
-    Pak --> Chunk["Chunk (optional)\nsplit into multiple pak files by content group"]
+    Src["Source + assets"] --> Build["Build<br/>compile the chosen target"]
+    Build --> Cook["Cook<br/>convert assets to platform-ready cooked format"]
+    Cook --> Stage["Stage<br/>lay out cooked content + binaries as a deployable tree"]
+    Stage --> Pak["Pak<br/>pack staged content into .pak archive(s)"]
+    Pak --> Chunk["Chunk (optional)<br/>split into multiple pak files by content group"]
     Chunk --> Deploy["Deploy / distribute"]
 ```
 
@@ -200,3 +200,4 @@ package will succeed. Run at least one full `BuildCookRun` with `-pak` before a 
 - [Asset manager and soft references](../14-content-pipeline/asset-manager-and-soft-references.md) — primary asset labels and chunk assignment.
 - [Release checklist](./release-checklist.md) — packaging validation as part of a shipping pass.
 - [Epic — Packaging Unreal Engine Projects](https://dev.epicgames.com/documentation/unreal-engine/packaging-unreal-engine-projects)
+

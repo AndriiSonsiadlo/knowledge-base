@@ -21,11 +21,11 @@ scripts to do what the framework already does with reusable nodes.
 
 ```mermaid
 flowchart LR
-    Comp["UPCGComponent\n(attached to an actor)"]
-    Graph["UPCGGraph\n(the authored node network)"]
-    Data["PCG Data\n(Point Data, Spatial Data, Attribute Sets)"]
-    Nodes["Nodes\n(sample, filter, transform)"]
-    Out["Output\n(spawned meshes/actors, ISM instances)"]
+    Comp["UPCGComponent<br/>(attached to an actor)"]
+    Graph["UPCGGraph<br/>(the authored node network)"]
+    Data["PCG Data<br/>(Point Data, Spatial Data, Attribute Sets)"]
+    Nodes["Nodes<br/>(sample, filter, transform)"]
+    Out["Output<br/>(spawned meshes/actors, ISM instances)"]
 
     Comp -->|runs| Graph
     Graph --> Nodes
@@ -141,3 +141,4 @@ edits to leave unrelated output untouched.
   with Data Layer state.
 - [World Partition](./world-partition.md) — the grid PCG-driven content streams through at world scale.
 - [Epic — Procedural Content Generation Framework](https://dev.epicgames.com/documentation/unreal-engine/procedural-content-generation-framework-in-unreal-engine)
+

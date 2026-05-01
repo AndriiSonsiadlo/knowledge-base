@@ -27,15 +27,15 @@ specifically to avoid both of those.
 
 ```mermaid
 flowchart TD
-    Montage["UAnimMontage\ncomposed of one or more sections\nplayed into a Slot"]
-    Slot["Animation Slot\n(a named pose-link entry point\nin the AnimGraph)"]
-    Notify["UAnimNotify\nfires once, at a single time"]
-    NotifyState["UAnimNotifyState\nfires NotifyBegin / NotifyTick / NotifyEnd\nover a duration"]
+    Montage["UAnimMontage<br/>composed of one or more sections<br/>played into a Slot"]
+    Slot["Animation Slot<br/>(a named pose-link entry point<br/>in the AnimGraph)"]
+    Notify["UAnimNotify<br/>fires once, at a single time"]
+    NotifyState["UAnimNotifyState<br/>fires NotifyBegin / NotifyTick / NotifyEnd<br/>over a duration"]
 
     Montage -->|Montage_Play| Slot
     Montage --> Notify
     Montage --> NotifyState
-    Notify -->|BlueprintImplementableEvent / C++ override| Gameplay["Gameplay code\n(damage window, VFX, sound)"]
+    Notify -->|BlueprintImplementableEvent / C++ override| Gameplay["Gameplay code<br/>(damage window, VFX, sound)"]
     NotifyState -->|begin/tick/end| Gameplay
 ```
 
@@ -164,3 +164,4 @@ inertial blending for a specific montage.
   of a notify-driven hit trace.
 - [Epic — Montage API reference](https://dev.epicgames.com/documentation/unreal-engine/BlueprintAPI/Montage)
 - [Epic — Using anim notifies](https://dev.epicgames.com/documentation/unreal-engine/using-and-creating-anim-notifies-in-unreal-engine)
+

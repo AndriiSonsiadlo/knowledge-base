@@ -27,12 +27,12 @@ skip.
 ```mermaid
 flowchart TD
     subgraph Framework["Automation Test Framework"]
-        Simple["IMPLEMENT_SIMPLE_AUTOMATION_TEST\nunit / feature logic, no world needed"]
-        Functional["Functional Tests\nAFunctionalTest / AEditorFunctionalTest\nspawn a level, drive gameplay, assert"]
+        Simple["IMPLEMENT_SIMPLE_AUTOMATION_TEST<br/>unit / feature logic, no world needed"]
+        Functional["Functional Tests<br/>AFunctionalTest / AEditorFunctionalTest<br/>spawn a level, drive gameplay, assert"]
     end
-    Simple --> Flags["EAutomationTestFlags\napplication context + filter/priority bits"]
+    Simple --> Flags["EAutomationTestFlags<br/>application context + filter/priority bits"]
     Functional --> Flags
-    Flags --> Discovery["Session Frontend / Test Automation window\ndiscovers all registered tests"]
+    Flags --> Discovery["Session Frontend / Test Automation window<br/>discovers all registered tests"]
     Discovery --> RunEditor["Run inside editor: Window > Test Automation"]
     Discovery --> RunHeadless["Run headless: -ExecCmds=\"Automation RunTests ...\""]
     RunHeadless --> CI["CI pipeline: exit code + log/report"]
@@ -237,3 +237,4 @@ builds the same way editor-only code is stripped — see
 - [Logging and assertions](../02-cpp-in-unreal/logging-and-assertions.md) — `ensure`/`check` as the complement to explicit test assertions.
 - [Debugging in Visual Studio](./debugging-in-visual-studio.md) — attaching a debugger to a failing test run.
 - [Epic — Automation Test Framework in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/automation-test-framework-in-unreal-engine)
+

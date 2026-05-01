@@ -22,10 +22,10 @@ stops being answerable by reading code.
 
 ```mermaid
 flowchart TD
-    Hierarchy["Tag hierarchy\nAbility.Fire.Fireball\nState.Debuff.Stunned"]
-    Container["FGameplayTagContainer\n(a set of tags on an actor/ASC)"]
-    Req["Tag requirements\n(Ability/Effect: Required / Blocked / Source / Target)"]
-    Cue["Gameplay Cue tag\nGameplayCue.Fireball.Impact"]
+    Hierarchy["Tag hierarchy<br/>Ability.Fire.Fireball<br/>State.Debuff.Stunned"]
+    Container["FGameplayTagContainer<br/>(a set of tags on an actor/ASC)"]
+    Req["Tag requirements<br/>(Ability/Effect: Required / Blocked / Source / Target)"]
+    Cue["Gameplay Cue tag<br/>GameplayCue.Fireball.Impact"]
 
     Hierarchy --> Container
     Container --> Req
@@ -150,3 +150,4 @@ like `State.Buff.Shielded`. Write requirements against the most specific tag tha
 - [Gameplay cues](./gameplay-cues.md) — tags as the routing key for cosmetic effects.
 - [GAS C++ patterns](./gas-cpp-patterns.md) — organizing native tag declarations at project scale.
 - [Epic — FGameplayTag API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/GameplayTags/FGameplayTag)
+

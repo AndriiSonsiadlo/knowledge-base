@@ -21,10 +21,10 @@ cue can be triggered from C++, Blueprint, or a Gameplay Effect asset without car
 
 ```mermaid
 flowchart LR
-    Trigger["Ability or GameplayEffect\nExecuteGameplayCue / AddGameplayCue"]
+    Trigger["Ability or GameplayEffect<br/>ExecuteGameplayCue / AddGameplayCue"]
     Tag["GameplayCue.* tag"]
-    Manager["Gameplay Cue Manager\nresolves tag to a handler asset"]
-    Notify["GameplayCueNotify_Static or\nGameplayCueNotify_Actor"]
+    Manager["Gameplay Cue Manager<br/>resolves tag to a handler asset"]
+    Notify["GameplayCueNotify_Static or<br/>GameplayCueNotify_Actor"]
 
     Trigger --> Tag --> Manager --> Notify
 ```
@@ -123,3 +123,4 @@ tags actually resolve to a handler in the Gameplay Cue Manager, especially after
 - [Gameplay effects](./gameplay-effects.md) — how durational effects add/remove cues automatically.
 - [Gameplay abilities](./gameplay-abilities.md) — executing one-shot cues directly from ability logic.
 - [Epic — Gameplay Cue Notify Blueprint API](https://dev.epicgames.com/documentation/unreal-engine/BlueprintAPI/GameplayCueNotify)
+

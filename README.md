@@ -78,10 +78,10 @@ This starts a local server to preview your production build.
 The documentation lives in the `docs` folder, organized into main categories. Each category has its
 own folder with subcategories inside. For example:
 
-- `docs/programming/` contains Python and C++ content
-- `docs/computer-science/` covers OS, architecture, and memory management
-- `docs/data-structures-algorithms/` has sorting and searching algorithms
-- `docs/data-tools/` focuses on data processing tools like Pandas
+- `docs/programming/` contains Python, C++, and language/tooling content
+- `docs/game-development/` covers Unreal Engine, gameplay systems, and shipping workflows
+- `docs/computer-science/` covers systems, architecture, memory, networking, and algorithms
+- `docs/data-tools/` is the Data Science section, focused on analysis and practical data workflows
 - `docs/machine-learning/` contains ML fundamentals and neural networks
 
 The navigation is defined in `sidebars.js`, which controls how everything appears in the sidebar

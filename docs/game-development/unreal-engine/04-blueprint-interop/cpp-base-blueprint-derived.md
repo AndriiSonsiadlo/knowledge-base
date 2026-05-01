@@ -28,10 +28,10 @@ drifts from the original the first time either one gets a bugfix).
 
 ```mermaid
 flowchart TB
-    Cpp["AWeapon (C++)\nFireCooldown, Ammo, TraceFire()\nBlueprintNativeEvent: PlayMuzzleEffect()"]
-    Cpp --> Pistol["BP_Weapon_Pistol\noverrides defaults + PlayMuzzleEffect"]
-    Cpp --> Rifle["BP_Weapon_Rifle\noverrides defaults + PlayMuzzleEffect"]
-    Cpp --> Shotgun["BP_Weapon_Shotgun\noverrides defaults + PlayMuzzleEffect"]
+    Cpp["AWeapon (C++)<br/>FireCooldown, Ammo, TraceFire()<br/>BlueprintNativeEvent: PlayMuzzleEffect()"]
+    Cpp --> Pistol["BP_Weapon_Pistol<br/>overrides defaults + PlayMuzzleEffect"]
+    Cpp --> Rifle["BP_Weapon_Rifle<br/>overrides defaults + PlayMuzzleEffect"]
+    Cpp --> Shotgun["BP_Weapon_Shotgun<br/>overrides defaults + PlayMuzzleEffect"]
 ```
 
 The C++ class never lists its Blueprint subclasses — it doesn't know they exist, and it doesn't need
@@ -138,3 +138,4 @@ this pattern, not a contradiction.
   asset per variant is the better fit.
 - [C++ versus Blueprint](../00-overview/cpp-vs-blueprint.md) — the split this pattern implements.
 - [Epic — Creating C++ classes for use with Blueprints](https://dev.epicgames.com/documentation/unreal-engine/coding-in-unreal-engine-blueprint-vs-cplusplus)
+

@@ -39,12 +39,12 @@ without the game thread doing per-sample work:
 
 ```mermaid
 flowchart TD
-    Asset["USoundBase asset\n(USoundWave / UMetaSoundSource)"]
-    Comp["UAudioComponent\n(owns playback state, attenuation overrides)"]
-    Active["FActiveSound\n(game-thread, one per playing instance)"]
-    Wave["FWaveInstance(s)\n(per-frame render request)"]
-    Voice["FMixerSourceVoice\n(audio render thread)"]
-    Submix["Submix graph\n(USoundSubmix chain)"]
+    Asset["USoundBase asset<br/>(USoundWave / UMetaSoundSource)"]
+    Comp["UAudioComponent<br/>(owns playback state, attenuation overrides)"]
+    Active["FActiveSound<br/>(game-thread, one per playing instance)"]
+    Wave["FWaveInstance(s)<br/>(per-frame render request)"]
+    Voice["FMixerSourceVoice<br/>(audio render thread)"]
+    Submix["Submix graph<br/>(USoundSubmix chain)"]
     Out["Platform audio output"]
 
     Asset --> Comp --> Active --> Wave --> Voice --> Submix --> Out
@@ -218,3 +218,4 @@ target.
 - [Delegates and events](../02-cpp-in-unreal/delegates-and-events.md) — the pattern behind
   `UAudioComponent`'s completion callbacks (`OnAudioFinished`, `OnAudioPlaybackPercent`).
 - [Epic — Audio Mixer overview](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/AudioMixer)
+

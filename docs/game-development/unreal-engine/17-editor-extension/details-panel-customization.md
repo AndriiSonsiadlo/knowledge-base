@@ -40,8 +40,8 @@ the same module, and it's easy to reach for the wrong one:
 ```mermaid
 flowchart TD
     Module[Your Editor module] -->|StartupModule| Get["FModuleManager::GetModuleChecked<FPropertyEditorModule>(\"PropertyEditor\")"]
-    Get --> RegClass["RegisterCustomClassLayout(\n  ClassName,\n  FOnGetDetailCustomizationInstance)"]
-    Get --> RegProp["RegisterCustomPropertyTypeLayout(\n  StructName,\n  FOnGetPropertyTypeCustomizationInstance)"]
+    Get --> RegClass["RegisterCustomClassLayout(<br/>  ClassName,<br/>  FOnGetDetailCustomizationInstance)"]
+    Get --> RegProp["RegisterCustomPropertyTypeLayout(<br/>  StructName,<br/>  FOnGetPropertyTypeCustomizationInstance)"]
 
     RegClass --> Detail[IDetailCustomization::CustomizeDetails]
     RegProp --> Header[IPropertyTypeCustomization::CustomizeHeader]
@@ -291,3 +291,4 @@ error. Decide explicitly whether children should exist.
 - [Editor Utility Widgets](./editor-utility-widgets.md) — a Slate-free alternative when the tool doesn't
   need to hook into the Details panel specifically.
 - [Epic — Property Editor module reference](https://dev.epicgames.com/documentation/unreal-engine/API/Editor/PropertyEditor)
+

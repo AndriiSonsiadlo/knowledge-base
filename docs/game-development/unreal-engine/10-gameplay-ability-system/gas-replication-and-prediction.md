@@ -20,10 +20,10 @@ up under real latency, which is a much harder bug to catch in local testing than
 ```mermaid
 flowchart TD
     Client["Client: TryActivateAbility"]
-    Predict["Local prediction:\napply effects/animation immediately\nusing a Prediction Key"]
-    Server["Server: receives RPC,\nruns the real activation"]
-    Confirm["Server confirms\n(prediction key accepted)"]
-    Reject["Server rejects\n(prediction key rejected -\nclient rolls back predicted changes)"]
+    Predict["Local prediction:<br/>apply effects/animation immediately<br/>using a Prediction Key"]
+    Server["Server: receives RPC,<br/>runs the real activation"]
+    Confirm["Server confirms<br/>(prediction key accepted)"]
+    Reject["Server rejects<br/>(prediction key rejected -<br/>client rolls back predicted changes)"]
 
     Client --> Predict
     Client -->|RPC| Server
@@ -121,3 +121,4 @@ ability activation path GAS manages for you) is not covered in the sources used 
 - [Gameplay effects](./gameplay-effects.md) — the effects that ride along with a predicted activation.
 - [GAS project setup](./gas-project-setup.md) — where the ASC lives, which affects who needs to see its replication.
 - [Epic — Gameplay Ability System for Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/gameplay-ability-system-for-unreal-engine)
+

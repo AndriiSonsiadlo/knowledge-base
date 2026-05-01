@@ -21,11 +21,11 @@ project's cooldown-display convention.
 
 ```mermaid
 flowchart TD
-    Tags["Centralized native tag namespace\n(one file, all project tags)"]
-    AbilityBase["UMyGameplayAbility\n(project base class)"]
-    EffectBase["UMyGameplayEffect\n(project base class)"]
-    AttrSet["UMyAttributeSet\n+ ATTRIBUTE_ACCESSORS per attribute"]
-    Leaf["Concrete abilities/effects\n(Blueprint or C++, derive from bases)"]
+    Tags["Centralized native tag namespace<br/>(one file, all project tags)"]
+    AbilityBase["UMyGameplayAbility<br/>(project base class)"]
+    EffectBase["UMyGameplayEffect<br/>(project base class)"]
+    AttrSet["UMyAttributeSet<br/>+ ATTRIBUTE_ACCESSORS per attribute"]
+    Leaf["Concrete abilities/effects<br/>(Blueprint or C++, derive from bases)"]
 
     Tags --> AbilityBase
     Tags --> EffectBase
@@ -182,3 +182,4 @@ code branches on it → native; purely data/designer-facing → config or in-edi
 - [Gameplay abilities](./gameplay-abilities.md) — the base class settings (instancing, net execution policy) worth centralizing.
 - [Coding standard and naming](../02-cpp-in-unreal/coding-standard-and-naming.md) — the project-wide naming rules this extends.
 - [Epic — Gameplay Ability System for Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/gameplay-ability-system-for-unreal-engine)
+

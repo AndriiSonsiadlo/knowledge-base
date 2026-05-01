@@ -24,11 +24,11 @@ an afternoon.
 
 ```mermaid
 flowchart LR
-    Mat["Post Process material\n(Material Domain = Post Process)"]
-    Blend["Blendable on a camera/volume\n(Blendable Location picks the pipeline point)"]
-    VE["ISceneViewExtension\n(registered with FSceneViewExtensions)"]
-    Hook["PreRenderView_RenderThread /\nSubscribeToPostProcessingPass"]
-    RDGPass["Custom RDG pass\n(only reachable from C++)"]
+    Mat["Post Process material<br/>(Material Domain = Post Process)"]
+    Blend["Blendable on a camera/volume<br/>(Blendable Location picks the pipeline point)"]
+    VE["ISceneViewExtension<br/>(registered with FSceneViewExtensions)"]
+    Hook["PreRenderView_RenderThread /<br/>SubscribeToPostProcessingPass"]
+    RDGPass["Custom RDG pass<br/>(only reachable from C++)"]
 
     Mat --> Blend
     VE --> Hook --> RDGPass
@@ -148,3 +148,4 @@ non-material state, injecting a custom compute pass, or hooking a specific named
 - [Render thread model](./render-thread-model.md) — why `PreRenderView_RenderThread` runs where it
   does relative to game-thread view setup.
 - [Epic — Post Process Effects](https://dev.epicgames.com/documentation/unreal-engine/post-process-effects-in-unreal-engine)
+

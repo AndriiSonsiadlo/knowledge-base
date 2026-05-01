@@ -27,10 +27,10 @@ scripting one.
 
 ```mermaid
 flowchart TD
-    OT["Object Type\n(what this thing IS)\ne.g. WorldStatic, Pawn, PhysicsBody"]
-    TC["Trace Channel\n(what this query IS ASKING)\ne.g. Visibility, Camera, custom Weapon"]
-    Resp["Response per channel\nIgnore / Overlap / Block"]
-    Preset["Collision Preset\n(named bundle of Object Type + all channel responses)"]
+    OT["Object Type<br/>(what this thing IS)<br/>e.g. WorldStatic, Pawn, PhysicsBody"]
+    TC["Trace Channel<br/>(what this query IS ASKING)<br/>e.g. Visibility, Camera, custom Weapon"]
+    Resp["Response per channel<br/>Ignore / Overlap / Block"]
+    Preset["Collision Preset<br/>(named bundle of Object Type + all channel responses)"]
 
     OT -->|"has a response to each"| Resp
     TC -->|"queried against"| Resp
@@ -144,3 +144,4 @@ the instance.
   physics simulation, not just queries.
 - [Epic — Collision reference guide](https://dev.epicgames.com/documentation/unreal-engine/collision-reference-in-unreal-engine)
 - [Epic — Traces with raycasts](https://dev.epicgames.com/documentation/unreal-engine/traces-with-raycasts-in-unreal-engine)
+

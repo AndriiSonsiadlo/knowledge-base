@@ -26,11 +26,11 @@ framework has five moving parts that only make sense together:
 
 ```mermaid
 flowchart TD
-    ASC["UAbilitySystemComponent\n(one per actor, the hub)"]
-    Attr["UAttributeSet\nholds FGameplayAttributeData (Health, Mana, ...)"]
-    Ability["UGameplayAbility\nan activatable action (CDO or instanced)"]
-    Effect["UGameplayEffect\na data asset: modifies attributes, grants tags"]
-    Tag["FGameplayTag / FGameplayTagContainer\nstate, requirements, routing"]
+    ASC["UAbilitySystemComponent<br/>(one per actor, the hub)"]
+    Attr["UAttributeSet<br/>holds FGameplayAttributeData (Health, Mana, ...)"]
+    Ability["UGameplayAbility<br/>an activatable action (CDO or instanced)"]
+    Effect["UGameplayEffect<br/>a data asset: modifies attributes, grants tags"]
+    Tag["FGameplayTag / FGameplayTagContainer<br/>state, requirements, routing"]
 
     ASC --> Attr
     ASC -->|grants and activates| Ability
@@ -121,3 +121,4 @@ system usually means rewriting that system, not wrapping it.
 - [Gameplay abilities](./gameplay-abilities.md) — what an ability actually is and how it runs.
 - [Gameplay effects](./gameplay-effects.md) — how attribute changes and buffs are expressed as data.
 - [Epic — Gameplay Ability System for Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/gameplay-ability-system-for-unreal-engine)
+

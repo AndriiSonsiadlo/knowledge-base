@@ -29,10 +29,10 @@ item — Editor Utility Widgets are explicitly the escape hatch for that.
 
 ```mermaid
 flowchart TD
-    CppBase["UEditorUtilityWidget subclass (C++)\nBlueprintCallable operations"] --> EUW["Editor Utility Widget Blueprint\n(UMG designer, Blueprint graph)"]
+    CppBase["UEditorUtilityWidget subclass (C++)<br/>BlueprintCallable operations"] --> EUW["Editor Utility Widget Blueprint<br/>(UMG designer, Blueprint graph)"]
     EUW -->|"Run in Editor Utility Widget tab"| Window["Docked/floating tool window inside the editor"]
 
-    EUB["Editor Utility Blueprint\n(no widget — headless tool logic)"] -->|"Run"| Script["One-shot script: batch operation, no UI"]
+    EUB["Editor Utility Blueprint<br/>(no widget — headless tool logic)"] -->|"Run"| Script["One-shot script: batch operation, no UI"]
 
     Factory["UEditorUtilityWidgetBlueprintFactory : UFactory"] -->|"Create New > Editor Utility Widget"| EUW
     Lib["UEditorUtilityLibrary"] -->|"GetSelectedAssets(), GetSelectedActors()"| CppBase
@@ -220,3 +220,4 @@ before copying the list above verbatim.
 - [Editor-only modules](./editor-modules.md) — `Blutility` and `EditorScriptingUtilities` are both
   editor-only dependencies that must stay out of runtime modules.
 - [Epic — Editor Utility Widgets](https://dev.epicgames.com/documentation/unreal-engine/BlueprintAPI/EditorUtilityWidget)
+

@@ -35,9 +35,9 @@ need it, without hand-rolling a loading system." AssetManager is the registry an
 ```mermaid
 flowchart TD
     subgraph Registry["UAssetManager — registry + policy"]
-        Scan["ScanPathsForPrimaryAssets /\nScanPrimaryAssetTypesFromConfig"]
-        Scan --> Registered["Registered Primary Assets\n(FPrimaryAssetId -> FAssetData)"]
-        Registered --> Rules["PrimaryAssetRules\n(Priority, ChunkId, CookRule)"]
+        Scan["ScanPathsForPrimaryAssets /<br/>ScanPrimaryAssetTypesFromConfig"]
+        Scan --> Registered["Registered Primary Assets<br/>(FPrimaryAssetId -> FAssetData)"]
+        Registered --> Rules["PrimaryAssetRules<br/>(Priority, ChunkId, CookRule)"]
     end
 
     subgraph Loader["FStreamableManager — actual loading"]
@@ -316,3 +316,4 @@ described above.
 - [Subsystems](../02-cpp-in-unreal/subsystems.md) — where a game-specific loading-screen manager built
   on top of StreamableManager typically lives.
 - [Epic — Asset Management in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/asset-management-in-unreal-engine)
+

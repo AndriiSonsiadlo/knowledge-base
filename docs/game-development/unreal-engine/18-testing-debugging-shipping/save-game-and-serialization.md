@@ -29,11 +29,11 @@ explicitly version your save format.
 
 ```mermaid
 flowchart TD
-    Save["USaveGame subclass\nUPROPERTY(SaveGame) members"]
-    Serialize["UGameplayStatics::SaveGameToSlot\nserializes via FObjectAndNameAsStringProxyArchive"]
-    Disk["Platform save slot / file\nbinary blob + engine/custom version headers"]
-    Load["UGameplayStatics::LoadGameFromSlot\ndeserializes back into a USaveGame instance"]
-    Version["FArchive custom versions\nstamped at save time, read at load time"]
+    Save["USaveGame subclass<br/>UPROPERTY(SaveGame) members"]
+    Serialize["UGameplayStatics::SaveGameToSlot<br/>serializes via FObjectAndNameAsStringProxyArchive"]
+    Disk["Platform save slot / file<br/>binary blob + engine/custom version headers"]
+    Load["UGameplayStatics::LoadGameFromSlot<br/>deserializes back into a USaveGame instance"]
+    Version["FArchive custom versions<br/>stamped at save time, read at load time"]
 
     Save --> Serialize --> Disk
     Disk --> Load --> Save
@@ -41,7 +41,7 @@ flowchart TD
     Version -.checked during.-> Load
 
     Load --> Branch{"Version < current?"}
-    Branch -->|yes| Migrate["Custom migration code\nfill in new fields, remap old ones"]
+    Branch -->|yes| Migrate["Custom migration code<br/>fill in new fields, remap old ones"]
     Branch -->|no| Direct["Load directly"]
     Migrate --> Save
 ```
@@ -253,3 +253,4 @@ otherwise hitch on the game thread.
 - [UObject and reflection](../02-cpp-in-unreal/uobject-and-reflection.md) — how `UPROPERTY` reflection is what automatic serialization walks.
 - [Release checklist](./release-checklist.md) — save compatibility as a pre-ship verification item.
 - [Epic — Saving and Loading Your Game](https://dev.epicgames.com/documentation/unreal-engine/saving-and-loading-your-game-in-unreal-engine)
+

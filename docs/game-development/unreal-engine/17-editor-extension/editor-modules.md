@@ -37,8 +37,8 @@ concrete `Build.cs` and `.uplugin` shape that keeps editor code from ever reachi
 ```mermaid
 flowchart TD
     subgraph Plugin["MyToolPlugin (.uplugin)"]
-        RT["MyToolRuntime\nType: Runtime\nships in every config"]
-        ED["MyToolEditor\nType: Editor\nnever ships"]
+        RT["MyToolRuntime<br/>Type: Runtime<br/>ships in every config"]
+        ED["MyToolEditor<br/>Type: Editor<br/>never ships"]
     end
 
     ED -->|"Build.cs PublicDependencyModuleNames"| RT
@@ -271,3 +271,4 @@ systems it customizes.
 - [Details panel customization](./details-panel-customization.md) — the most common thing an `Editor`
   module exists to hold.
 - [Epic — Modules in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-modules)
+

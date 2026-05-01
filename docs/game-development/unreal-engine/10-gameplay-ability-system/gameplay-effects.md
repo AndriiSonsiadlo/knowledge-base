@@ -22,9 +22,9 @@ debugging GAS combat actually is.
 ```mermaid
 flowchart LR
     GE["UGameplayEffect asset"]
-    Dur["Duration Policy\nInstant / HasDuration / Infinite"]
-    Mod["Modifiers\n(+N, x N, override, to an attribute)"]
-    Exec["Executions\n(UGameplayEffectExecutionCalculation)"]
+    Dur["Duration Policy<br/>Instant / HasDuration / Infinite"]
+    Mod["Modifiers<br/>(+N, x N, override, to an attribute)"]
+    Exec["Executions<br/>(UGameplayEffectExecutionCalculation)"]
     Stack["Stacking rules"]
 
     GE --> Dur
@@ -174,3 +174,4 @@ aura) can accumulate without bound. Always set a limit deliberately, even a gene
 - [Gameplay abilities](./gameplay-abilities.md) — what applies effects in the first place.
 - [Gameplay tags](./gameplay-tags.md) — how effects grant and require tags.
 - [Epic — GameplayAbilities plugin API index](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/GameplayAbilities)
+

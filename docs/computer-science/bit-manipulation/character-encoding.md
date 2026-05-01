@@ -47,10 +47,10 @@ are unambiguous:
 
 ```mermaid
 flowchart LR
-    A["First byte high bits"] -->|"0"| B["1-byte char\n(ASCII, 0x00-0x7F)"]
-    A -->|"110"| C["2-byte char\n+ 1 continuation byte"]
-    A -->|"1110"| D["3-byte char\n+ 2 continuation bytes"]
-    A -->|"11110"| E["4-byte char\n+ 3 continuation bytes"]
+    A["First byte high bits"] -->|"0"| B["1-byte char<br/>(ASCII, 0x00-0x7F)"]
+    A -->|"110"| C["2-byte char<br/>+ 1 continuation byte"]
+    A -->|"1110"| D["3-byte char<br/>+ 2 continuation bytes"]
+    A -->|"11110"| E["4-byte char<br/>+ 3 continuation bytes"]
 ```
 
 Worked example: encoding `é` (`U+00E9`, decimal 233) falls in the `U+0080`-`U+07FF` range, so it
@@ -122,3 +122,4 @@ charset>` tag, or an explicit encoding parameter when opening a file — rather 
 - [Binary, Hex, and Bitwise Building Blocks](./basics.md)
 - [Integers & Two's Complement](./integers-and-twos-complement.md)
 - [Bit Manipulation Techniques](./techniques.md)
+

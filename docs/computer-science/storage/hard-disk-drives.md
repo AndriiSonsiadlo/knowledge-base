@@ -33,7 +33,7 @@ underneath it.
 ```mermaid
 flowchart LR
     subgraph HDD["HDD Assembly"]
-        Spindle["Spindle Motor\n(spins platters at fixed RPM)"] --- Platter1["Platter(s)"]
+        Spindle["Spindle Motor<br/>(spins platters at fixed RPM)"] --- Platter1["Platter(s)"]
         Actuator["Actuator Arm"] --- Head["Read/Write Head"]
         Head -. "flies above surface" .- Platter1
     end
@@ -126,3 +126,4 @@ used" drives.
 - [SSDs & NAND Flash](./ssd-and-nand-flash.md)
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md)
 - [Databases](../databases/intro.md)
+

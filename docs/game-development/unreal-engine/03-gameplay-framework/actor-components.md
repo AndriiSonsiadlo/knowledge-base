@@ -26,13 +26,13 @@ don't need a transform and you've added an invisible offset/rotation nobody aske
 
 ```mermaid
 flowchart TD
-    AC["UActorComponent\nno transform — logic-only\n(inventory, stat tracking, tags)"]
-    SC["USceneComponent\n+ transform, can attach\n(cameras, arms, empty sockets)"]
-    PC["UPrimitiveComponent\n+ rendering/collision\n(meshes, capsules)"]
+    AC["UActorComponent<br/>no transform — logic-only<br/>(inventory, stat tracking, tags)"]
+    SC["USceneComponent<br/>+ transform, can attach<br/>(cameras, arms, empty sockets)"]
+    PC["UPrimitiveComponent<br/>+ rendering/collision<br/>(meshes, capsules)"]
     AC -->|extends| SC
     SC -->|extends| PC
 
-    Root["Actor's RootComponent\n(a USceneComponent)"] --> Child1["Attached USceneComponent"]
+    Root["Actor's RootComponent<br/>(a USceneComponent)"] --> Child1["Attached USceneComponent"]
     Child1 --> Child2["Attached USceneComponent"]
     Root -.non-scene components have no place in this tree.-x AC
 ```
@@ -126,3 +126,4 @@ parent" bugs.
   `PostInitializeComponents` and `BeginPlay`.
 - [Framework overview](./framework-overview.md) — how components fit under Actor in the bigger picture.
 - [Epic — Components in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/components-in-unreal-engine)
+

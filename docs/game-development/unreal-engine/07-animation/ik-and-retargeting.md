@@ -29,15 +29,15 @@ foot-placement patterns built on Control Rig) solve the second.
 ```mermaid
 flowchart TD
     subgraph Authoring["Authoring / retargeting (offline, per pair of skeletons)"]
-        SrcRig["IK Rig (Source)\ngoals + solvers on the source skeleton"]
-        DstRig["IK Rig (Target)\ngoals + solvers on the target skeleton"]
-        Retargeter["IK Retargeter\nmaps source goals to target goals,\nchain by chain"]
+        SrcRig["IK Rig (Source)<br/>goals + solvers on the source skeleton"]
+        DstRig["IK Rig (Target)<br/>goals + solvers on the target skeleton"]
+        Retargeter["IK Retargeter<br/>maps source goals to target goals,<br/>chain by chain"]
         SrcRig --> Retargeter
         DstRig --> Retargeter
     end
     subgraph Runtime["Runtime (every frame, one character)"]
-        FBIK["Full Body IK\nsolves a full-body pose to satisfy goals"]
-        FootPlace["Foot placement (Control Rig / AnimGraph)\ntraces ground, adjusts foot + pelvis"]
+        FBIK["Full Body IK<br/>solves a full-body pose to satisfy goals"]
+        FootPlace["Foot placement (Control Rig / AnimGraph)<br/>traces ground, adjusts foot + pelvis"]
     end
     Retargeter -->|produces retargeted animations| Anim["UAnimSequence for target skeleton"]
     Anim --> Runtime
@@ -130,3 +130,4 @@ constraint satisfaction.
   replacement for retargeting or foot IK.
 - [Epic — IK Rig overview](https://dev.epicgames.com/documentation/unreal-engine/ik-rig-in-unreal-engine)
 - [Epic — IK Retargeter overview](https://dev.epicgames.com/documentation/unreal-engine/ik-retargeter-in-unreal-engine)
+

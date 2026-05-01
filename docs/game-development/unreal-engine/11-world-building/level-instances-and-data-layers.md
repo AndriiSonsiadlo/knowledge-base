@@ -23,14 +23,14 @@ the job.
 ```mermaid
 flowchart LR
     subgraph Composition
-        LA["Level Asset\n(a .umap of actors)"]
+        LA["Level Asset<br/>(a .umap of actors)"]
         LI1["ALevelInstance #1"]
         LI2["ALevelInstance #2"]
         LA --> LI1
         LA --> LI2
     end
     subgraph Variants
-        DL["Data Layer\n(UDataLayerAsset)"]
+        DL["Data Layer<br/>(UDataLayerAsset)"]
         ActorA[Actor A]
         ActorB[Actor B]
         DL -.tags.-> ActorA
@@ -147,3 +147,4 @@ that content instead.
 - [Streaming and budgets](./streaming-and-budgets.md) — how Data Layer state changes interact with
   streaming load.
 - [Epic — Data Layers](https://dev.epicgames.com/documentation/unreal-engine/data-layers-in-unreal-engine)
+

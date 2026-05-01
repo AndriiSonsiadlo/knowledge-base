@@ -28,21 +28,21 @@ desyncs in multiplayer.
 
 ```mermaid
 flowchart TD
-    Hit["OnComponentHit / NotifyHit\n(physical collision)"]
-    Overlap["OnComponentBeginOverlap\n(overlap-only collision)"]
+    Hit["OnComponentHit / NotifyHit<br/>(physical collision)"]
+    Overlap["OnComponentBeginOverlap<br/>(overlap-only collision)"]
 
-    Hit --> Decide["Gameplay code decides:\nis this damage?"]
+    Hit --> Decide["Gameplay code decides:<br/>is this damage?"]
     Overlap --> Decide
 
     Decide -->|"point/hitscan"| PD["UGameplayStatics::ApplyPointDamage"]
     Decide -->|"generic (no hit location)"| AD["UGameplayStatics::ApplyDamage"]
     Decide -->|"explosion/AoE"| RD["UGameplayStatics::ApplyRadialDamage"]
 
-    PD --> TD["AActor::TakeDamage\n(virtual, override per actor)"]
+    PD --> TD["AActor::TakeDamage<br/>(virtual, override per actor)"]
     AD --> TD
     RD --> TD
 
-    TD --> BP["ReceiveAnyDamage / ReceivePointDamage\n(Blueprint events, BlueprintAuthorityOnly)"]
+    TD --> BP["ReceiveAnyDamage / ReceivePointDamage<br/>(Blueprint events, BlueprintAuthorityOnly)"]
     TD --> Health["Your health/armor logic"]
 ```
 
@@ -191,3 +191,4 @@ else.
   bodies as a source of hit events.
 - [Epic — Using the OnHit event](https://dev.epicgames.com/documentation/unreal-engine/using-the-onhit-event)
 - [Epic — Damage in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/damage-in-unreal-engine)
+

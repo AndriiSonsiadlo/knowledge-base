@@ -30,14 +30,14 @@ building one that's just a differently-shaped Sound Cue.
 ```mermaid
 flowchart TD
     subgraph Graph["MetaSound graph (runs continuously)"]
-        In["Inputs\n(float / bool / trigger / enum / object)"]
-        Nodes["DSP nodes\n(oscillators, filters, envelopes, mixers)"]
+        In["Inputs<br/>(float / bool / trigger / enum / object)"]
+        Nodes["DSP nodes<br/>(oscillators, filters, envelopes, mixers)"]
         Out["Outputs"]
         In --> Nodes --> Out
     end
 
-    Source["UMetaSoundSource\n(has audio output, is a USoundBase, playable)"]
-    Patch["UMetaSoundPatch\n(no mandatory I/O, used as a node inside other graphs)"]
+    Source["UMetaSoundSource<br/>(has audio output, is a USoundBase, playable)"]
+    Patch["UMetaSoundPatch<br/>(no mandatory I/O, used as a node inside other graphs)"]
     Comp["UAudioComponent"]
     Gameplay["Gameplay code (C++/Blueprint)"]
 
@@ -233,3 +233,4 @@ parameter changes as "next block, not this sample" rather than assuming sample-a
 - [Exposing C++ to Blueprint](../04-blueprint-interop/exposing-cpp-to-blueprint.md) — the
   `UFUNCTION(BlueprintCallable)` pattern used above to let designers trigger `Fire()` from Blueprint.
 - [Epic — MetaSounds overview](https://dev.epicgames.com/documentation/unreal-engine/API/Plugins/MetasoundEngine)
+

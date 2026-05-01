@@ -46,7 +46,7 @@ binary64 (64 bits total):
 
 ```mermaid
 flowchart LR
-    S["Sign\n1 bit"] --> E["Exponent\n8 (float) / 11 (double) bits, biased"] --> F["Fraction\n23 (float) / 52 (double) bits"]
+    S["Sign<br/>1 bit"] --> E["Exponent<br/>8 (float) / 11 (double) bits, biased"] --> F["Fraction<br/>23 (float) / 52 (double) bits"]
 ```
 
 The value is reconstructed as:
@@ -133,3 +133,4 @@ data.
 - [Integers & Two's Complement](./integers-and-twos-complement.md)
 - [Binary, Hex, and Bitwise Building Blocks](./basics.md)
 - [Character Encoding](./character-encoding.md)
+

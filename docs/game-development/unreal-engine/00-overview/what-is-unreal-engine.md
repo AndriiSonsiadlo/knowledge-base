@@ -30,8 +30,8 @@ flowchart TB
         YourGame[YourGame module]
     end
     Core --> Engine --> YourGame
-    YourGame --> EditorBuild["Editor build\n(Editor + Runtime modules)"]
-    YourGame --> RuntimeBuild["Packaged build\n(Runtime modules only)"]
+    YourGame --> EditorBuild["Editor build<br/>(Editor + Runtime modules)"]
+    YourGame --> RuntimeBuild["Packaged build<br/>(Runtime modules only)"]
     Plugins["Plugins (bundles of modules + content)"] -.enable per project.-> YourGame
 ```
 
@@ -131,3 +131,4 @@ needs — switching later means re-provisioning the whole toolchain. See
 - [Unreal Build Tool](../01-toolchain-and-build/unreal-build-tool.md) — how `.Build.cs` files become a
   compiled binary.
 - [Epic's official engine architecture overview](https://dev.epicgames.com/documentation/unreal-engine/understanding-the-basics-of-unreal-engine) — authoritative source for editor/tooling structure.
+

@@ -66,11 +66,11 @@ These solve two genuinely different problems and are easy to conflate:
 flowchart TB
     subgraph FC["Flow Control"]
         direction LR
-        R["Receiver's buffer is nearly full"] -->|"advertises a smaller\nreceive window (rwnd)"| Snd1["Sender slows down\nto protect the receiver"]
+        R["Receiver's buffer is nearly full"] -->|"advertises a smaller<br/>receive window (rwnd)"| Snd1["Sender slows down<br/>to protect the receiver"]
     end
     subgraph CC["Congestion Control"]
         direction LR
-        N["Packet loss / delay suggests\nnetwork path is congested"] -->|"sender shrinks its\ncongestion window (cwnd)"| Snd2["Sender slows down\nto protect the network"]
+        N["Packet loss / delay suggests<br/>network path is congested"] -->|"sender shrinks its<br/>congestion window (cwnd)"| Snd2["Sender slows down<br/>to protect the network"]
     end
 ```
 
@@ -171,3 +171,4 @@ guarantees without TCP's specific head-of-line-blocking behavior.
 - [OSI & TCP/IP Models](./osi-and-tcp-ip-models.md)
 - [HTTP & HTTPS](../protocols/http-and-https.md) — HTTP/1.1 and HTTP/2 run over TCP; HTTP/3 runs over UDP-based QUIC.
 - [DNS](../protocols/dns.md) — primarily UDP-based.
+

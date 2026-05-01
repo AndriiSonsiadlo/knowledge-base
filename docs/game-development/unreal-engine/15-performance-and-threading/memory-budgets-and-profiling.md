@@ -22,8 +22,8 @@ instead of discovering it's blown after the fact.
 
 ```mermaid
 flowchart TD
-    Total["Total memory budget\n(platform- or device-profile-defined)"] --> Streaming["Streaming pools\n(textures, RenderAsset streamer)"]
-    Total --> Static["Static/loaded content\n(levels, non-streaming assets)"]
+    Total["Total memory budget<br/>(platform- or device-profile-defined)"] --> Streaming["Streaming pools<br/>(textures, RenderAsset streamer)"]
+    Total --> Static["Static/loaded content<br/>(levels, non-streaming assets)"]
     Total --> Engine["Engine + subsystem overhead"]
     Total --> Game["Gameplay allocations"]
 
@@ -193,3 +193,4 @@ identically across all RHIs. Verify tag names and CVar behavior against your tar
 - [Streaming and budgets](../11-world-building/streaming-and-budgets.md) — level- and world-partition-side
   streaming budget concerns that compound with the texture streaming pool covered here.
 - [Epic — Optimizing Packaged Game Size for iOS Projects](https://dev.epicgames.com/documentation/unreal-engine/optimizing-packaged-game-size-for-ios-projects-in-unreal-engine)
+

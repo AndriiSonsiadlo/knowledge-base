@@ -30,13 +30,13 @@ UI can't actually be translated.
 
 ```mermaid
 flowchart LR
-    Source["Source text in code/content\nNSLOCTEXT / LOCTEXT / string tables"]
-    Gather["Gather Text commandlet\n(scans source + assets)"]
-    Manifest["Localization manifest (.manifest)\n+ per-culture archive (.archive)"]
-    Translate["Translation\n(.po export/import or in-editor)"]
+    Source["Source text in code/content<br/>NSLOCTEXT / LOCTEXT / string tables"]
+    Gather["Gather Text commandlet<br/>(scans source + assets)"]
+    Manifest["Localization manifest (.manifest)<br/>+ per-culture archive (.archive)"]
+    Translate["Translation<br/>(.po export/import or in-editor)"]
     Compile["Compile Text commandlet"]
-    LocRes[".locres binary resource\nper culture, per target"]
-    Runtime["FText resolves live\nagainst active culture at runtime"]
+    LocRes[".locres binary resource<br/>per culture, per target"]
+    Runtime["FText resolves live<br/>against active culture at runtime"]
 
     Source --> Gather --> Manifest --> Translate --> Compile --> LocRes --> Runtime
 ```
@@ -163,3 +163,4 @@ the final `FText::Format` call rather than converting to `FString` and back.
   widget property.
 - [Epic — Text Localization](https://dev.epicgames.com/documentation/unreal-engine/localizing-content-in-unreal-engine)
 - [Epic — API: FText](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Core/FText)
+

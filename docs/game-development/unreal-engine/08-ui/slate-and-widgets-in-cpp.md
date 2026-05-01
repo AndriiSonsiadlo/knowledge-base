@@ -26,9 +26,9 @@ management.
 
 ```mermaid
 flowchart TD
-    UMGWidget["UUserWidget (UObject)\nyour game-facing wrapper"]
-    SlateTree["SWidget tree (TSharedRef-owned)\nwhat actually paints"]
-    SNewCall["SNew(SVerticalBox)\n+ Slot() calls"]
+    UMGWidget["UUserWidget (UObject)<br/>your game-facing wrapper"]
+    SlateTree["SWidget tree (TSharedRef-owned)<br/>what actually paints"]
+    SNewCall["SNew(SVerticalBox)<br/>+ Slot() calls"]
     Widget1["SNew(STextBlock)"]
     Widget2["SNew(SButton)"]
 
@@ -181,3 +181,4 @@ another's.
   `OnClicked`, `OnTextChanged`, and similar Slate event bindings.
 - [Epic — Slate UI Framework](https://dev.epicgames.com/documentation/unreal-engine/slate-ui-framework-in-unreal-engine)
 - [Epic — API: SWidget](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/SlateCore/Widgets/SWidget)
+

@@ -41,7 +41,7 @@ Decimal: 1101 1010 0110 1111 (binary) = 0xDA6F = 55919
 
 ```mermaid
 flowchart LR
-    B["Binary: 11011010\n(8 bits)"] -->|group into nibbles| N1["1101"] & N2["1010"]
+    B["Binary: 11011010<br/>(8 bits)"] -->|group into nibbles| N1["1101"] & N2["1010"]
     N1 --> H1["0xD"]
     N2 --> H2["0xA"]
     H1 --> R["Hex: 0xDA"]
@@ -115,3 +115,4 @@ Everything from "set this flag" to "count the 1 bits in this word" (see
 - [Integers & Two's Complement](./integers-and-twos-complement.md)
 - [Bit Manipulation Techniques](./techniques.md)
 - C++ operator reference: [Bitwise Operators](../../programming/cpp/02-language-fundamentals/operators/bitwise.md)
+

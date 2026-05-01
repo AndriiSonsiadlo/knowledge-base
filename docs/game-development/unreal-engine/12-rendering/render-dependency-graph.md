@@ -22,12 +22,12 @@ going through RDG in modern UE code is both harder and more fragile than writing
 
 ```mermaid
 flowchart TD
-    Declare["Declare pass parameters\n(FRDGBuilder::AllocParameters)"]
+    Declare["Declare pass parameters<br/>(FRDGBuilder::AllocParameters)"]
     Add["AddPass(EventName, Params, Flags, Lambda)"]
-    Graph["Graph accumulates passes + resources\nfor this frame only"]
-    Cull["Compile: derive dependencies from\nwhich passes touch which resources"]
-    Clear["ClearUnusedGraphResources\nnulls resources the shader permutation doesn't use"]
-    Execute["Execute(): lambdas run in dependency order,\ntransient resources allocated/freed as needed"]
+    Graph["Graph accumulates passes + resources<br/>for this frame only"]
+    Cull["Compile: derive dependencies from<br/>which passes touch which resources"]
+    Clear["ClearUnusedGraphResources<br/>nulls resources the shader permutation doesn't use"]
+    Execute["Execute(): lambdas run in dependency order,<br/>transient resources allocated/freed as needed"]
 
     Declare --> Add --> Graph --> Cull --> Clear --> Execute
 ```
@@ -131,3 +131,4 @@ two tools show your pass as unattributed time.
 - [GPU profiling](./gpu-profiling.md) — reading the `RDG_GPU_STAT_SCOPE`/`RDG_EVENT_SCOPE` output back
   out with `stat gpu`, ProfileGPU, and RenderDoc.
 - [Epic — Render Dependency Graph](https://dev.epicgames.com/documentation/unreal-engine/render-dependency-graph-in-unreal-engine)
+

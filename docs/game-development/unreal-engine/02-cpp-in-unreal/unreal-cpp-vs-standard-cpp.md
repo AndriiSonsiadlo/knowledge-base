@@ -30,16 +30,16 @@ diverge at three specific boundaries:
 ```mermaid
 flowchart LR
     subgraph "Language features"
-    Exc["Exceptions\ndisabled"]
-    RTTI["dynamic_cast / typeid\ndiscouraged, use Cast<>"]
+    Exc["Exceptions<br/>disabled"]
+    RTTI["dynamic_cast / typeid<br/>discouraged, use Cast<>"]
     end
     subgraph "Standard library"
-    STL["std::vector/map/string\nnot reflectable"]
+    STL["std::vector/map/string<br/>not reflectable"]
     end
     subgraph "Unreal replacements"
     ChkEns["check / ensure / verify"]
     CastT["Cast<T>() for UObjects"]
-    UContainers["TArray / TMap / TSet /\nFString / FName / FText"]
+    UContainers["TArray / TMap / TSet /<br/>FString / FName / FText"]
     end
     Exc --> ChkEns
     RTTI --> CastT
@@ -117,3 +117,4 @@ that subsystem uses and stay consistent through it.
 - [Coding standard and naming](./coding-standard-and-naming.md) — Epic's current, more permissive
   guidance on when the standard library is the better choice.
 - [Epic — Epic C++ Coding Standard for Unreal Engine: Use of standard libraries](https://dev.epicgames.com/documentation/unreal-engine/epic-cplusplus-coding-standard-for-unreal-engine)
+

@@ -29,16 +29,16 @@ itself an O(actors × connections) cost that becomes the bottleneck before your 
 
 ```mermaid
 flowchart TD
-    Tick["Server replication tick"] --> Loop["For each connection:\nfor each replicated actor..."]
-    Loop --> Check{"IsNetRelevantFor()\n+ distance/cull check\n+ bAlwaysRelevant"}
-    Check -- "not relevant" --> Close["Close/never-open actor channel\n(actor doesn't exist on this client)"]
+    Tick["Server replication tick"] --> Loop["For each connection:<br/>for each replicated actor..."]
+    Loop --> Check{"IsNetRelevantFor()<br/>+ distance/cull check<br/>+ bAlwaysRelevant"}
+    Check -- "not relevant" --> Close["Close/never-open actor channel<br/>(actor doesn't exist on this client)"]
     Check -- "relevant" --> Dorm{"Dormant?"}
-    Dorm -- "yes, unchanged" --> Skip["Skip re-sending;\nchannel stays open, no traffic"]
+    Dorm -- "yes, unchanged" --> Skip["Skip re-sending;<br/>channel stays open, no traffic"]
     Dorm -- "no / just woke" --> Send["Replicate properties this tick"]
 
     subgraph RepGraph["Replication Graph (opt-in plugin)"]
-        Nodes["Actors pre-sorted into nodes:\nAlwaysRelevant, GridSpatialization2D, ..."]
-        Nodes --> Gather["Per connection: gather only the\nrelevant nodes' actor lists"]
+        Nodes["Actors pre-sorted into nodes:<br/>AlwaysRelevant, GridSpatialization2D, ..."]
+        Nodes --> Gather["Per connection: gather only the<br/>relevant nodes' actor lists"]
     end
 ```
 
@@ -197,3 +197,4 @@ relevancy system's plumbing, and a project must tell it how your actors should b
 - [Designing for later multiplayer](./designing-for-later-multiplayer.md) — why cull distances and
   dormancy are cheap to set correctly from day one, unlike a Replication Graph migration.
 - [Epic — Relevancy for networking](https://dev.epicgames.com/documentation/unreal-engine/relevancy-for-networking-in-unreal-engine)
+

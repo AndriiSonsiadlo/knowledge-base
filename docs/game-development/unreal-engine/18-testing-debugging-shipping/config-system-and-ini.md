@@ -32,15 +32,15 @@ file on disk is "the" config; each is one layer.
 
 ```mermaid
 flowchart TD
-    Base["Engine/Config/Base.ini\nengine-wide, never edit"]
-    BaseCat["Engine/Config/Base<Category>.ini\ne.g. BaseEngine.ini, BaseGame.ini"]
+    Base["Engine/Config/Base.ini<br/>engine-wide, never edit"]
+    BaseCat["Engine/Config/Base<Category>.ini<br/>e.g. BaseEngine.ini, BaseGame.ini"]
     BasePlat["Engine/Config/<Platform>/Base<Platform><Category>.ini"]
-    DefaultCat["<Project>/Config/Default<Category>.ini\nyour project's committed settings"]
-    PlatCat["<Project>/Config/<Platform>/<Platform><Category>.ini\nper-platform project overrides"]
-    UserCat["Saved/Config/.../<Category>.ini\nlocal machine, not shipped, not source-controlled"]
+    DefaultCat["<Project>/Config/Default<Category>.ini<br/>your project's committed settings"]
+    PlatCat["<Project>/Config/<Platform>/<Platform><Category>.ini<br/>per-platform project overrides"]
+    UserCat["Saved/Config/.../<Category>.ini<br/>local machine, not shipped, not source-controlled"]
 
     Base --> BaseCat --> BasePlat --> DefaultCat --> PlatCat --> UserCat
-    UserCat --> Merged["Merged, effective config\nwhat the running process sees"]
+    UserCat --> Merged["Merged, effective config<br/>what the running process sees"]
 ```
 
 Each arrow is "read after, and allowed to override or append to." The engine-level `Base*.ini` files
@@ -209,3 +209,4 @@ is invisible to every other machine and disappears on your own next launch.
 - [Save game and serialization](./save-game-and-serialization.md) — config persists settings; save games persist player state — different systems, easy to conflate.
 - [Packaging and build targets](./packaging-and-build-targets.md) — which config layers actually ship inside a packaged build's pak files.
 - [Epic — Configuration Files in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/configuration-files-in-unreal-engine)
+

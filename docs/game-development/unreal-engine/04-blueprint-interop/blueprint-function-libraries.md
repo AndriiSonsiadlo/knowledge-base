@@ -28,7 +28,7 @@ that a single bugfix reaches everywhere at once.
 
 ```mermaid
 flowchart LR
-    L["UGameplayMathLibrary\n(UBlueprintFunctionLibrary)\nno instances, no state"]
+    L["UGameplayMathLibrary<br/>(UBlueprintFunctionLibrary)<br/>no instances, no state"]
     A[BP_Weapon_Pistol] -->|"ApplyDamageFalloff()"| L
     B[BP_Enemy_Grunt] -->|"ApplyDamageFalloff()"| L
     C["Any Blueprint graph"] -->|"ApplyDamageFalloff()"| L
@@ -122,3 +122,4 @@ it's operating in, and you'll pass a `UObject*` explicitly and call `Object->Get
 - [Blueprint performance](./blueprint-performance.md) — the cost model behind the `BlueprintPure` note
   above.
 - [Epic — Blueprint Function Libraries](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/Kismet/UBlueprintFunctionLibrary)
+

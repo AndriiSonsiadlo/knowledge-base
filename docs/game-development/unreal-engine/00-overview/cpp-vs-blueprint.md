@@ -23,8 +23,8 @@ through specifiers rather than reimplementing engine-level logic in graphs.
 
 ```mermaid
 flowchart TB
-    CppBase["C++ base class\n(systems, data structures, performance-critical logic)"]
-    CppBase -->|"UPROPERTY / UFUNCTION\nexpose to Blueprint"| BpDerived["Blueprint-derived class\n(composition, content, tuning)"]
+    CppBase["C++ base class<br/>(systems, data structures, performance-critical logic)"]
+    CppBase -->|"UPROPERTY / UFUNCTION<br/>expose to Blueprint"| BpDerived["Blueprint-derived class<br/>(composition, content, tuning)"]
     BpDerived --> Content["Placed in levels, tuned by designers"]
 ```
 
@@ -131,3 +131,4 @@ structural logic) into Blueprint-editable properties rather than C++ constants.
 - [Blueprint function libraries](../04-blueprint-interop/blueprint-function-libraries.md) — the
   `UBlueprintFunctionLibrary` pattern in depth.
 - [Epic's C++ vs Blueprint guidance](https://dev.epicgames.com/documentation/unreal-engine/coding-in-unreal-engine-blueprint-vs-cplusplus) — the authoritative source for this split.
+

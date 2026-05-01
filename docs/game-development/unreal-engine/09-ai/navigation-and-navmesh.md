@@ -27,11 +27,11 @@ runtime.
 
 ```mermaid
 flowchart TD
-    Geo["Level geometry\n(static meshes, BSP, landscape)"]
-    Volume["ANavMeshBoundsVolume\nbounds the generation region"]
-    Recast["ARecastNavMesh\nrasterizes geometry into walkable polygons"]
-    Modifiers["Nav modifiers\n(NavModifierComponent, NavArea markup)"]
-    NavSys["UNavigationSystemV1\nowns generation + serves queries"]
+    Geo["Level geometry<br/>(static meshes, BSP, landscape)"]
+    Volume["ANavMeshBoundsVolume<br/>bounds the generation region"]
+    Recast["ARecastNavMesh<br/>rasterizes geometry into walkable polygons"]
+    Modifiers["Nav modifiers<br/>(NavModifierComponent, NavArea markup)"]
+    NavSys["UNavigationSystemV1<br/>owns generation + serves queries"]
     Query["Query: FindPathToLocation, MoveTo, EQS Pathfinding test"]
 
     Geo --> Recast
@@ -176,3 +176,4 @@ it just produces paths that don't fit the collision that will actually walk them
   `NavAgentProps` and the capsule that defines them live.
 - [Epic — Navigation System in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/navigation-system-in-unreal-engine)
 - [Epic — Nav Mesh Areas](https://dev.epicgames.com/documentation/unreal-engine/navigation-mesh-areas-in-unreal-engine)
+

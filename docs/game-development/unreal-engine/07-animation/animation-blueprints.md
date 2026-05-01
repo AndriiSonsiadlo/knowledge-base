@@ -27,14 +27,14 @@ gameplay objects from a graph that may run off the game thread).
 ```mermaid
 flowchart LR
     subgraph GameThread["Game thread — Update phase"]
-        EG["EventGraph\nBlueprint events: Blueprint Update Animation,\nreads gameplay state, sets AnimInstance variables"]
+        EG["EventGraph<br/>Blueprint events: Blueprint Update Animation,<br/>reads gameplay state, sets AnimInstance variables"]
     end
     subgraph WorkerThread["Worker thread (if enabled) — Evaluate phase"]
-        AG["AnimGraph\nstate machines, blend nodes, pose links\nreads the variables EventGraph set"]
+        AG["AnimGraph<br/>state machines, blend nodes, pose links<br/>reads the variables EventGraph set"]
     end
     Owner["Owning Pawn / Character"] -->|read only in Update| EG
     EG -->|writes UAnimInstance member variables| AG
-    AG -->|produces| Pose["Final pose\nfor the USkeletalMeshComponent"]
+    AG -->|produces| Pose["Final pose<br/>for the USkeletalMeshComponent"]
 ```
 
 The **EventGraph** runs on the game thread and behaves like any other Blueprint event graph: it responds
@@ -123,3 +123,4 @@ you can (see [AnimInstance in C++](./anim-instance-in-cpp.md) for the caching pa
   splitting an anim instance between a C++ base and a Blueprint AnimBP.
 - [Epic — Animation Blueprints](https://dev.epicgames.com/documentation/unreal-engine/animation-blueprints-in-unreal-engine)
 - [Epic — UAnimBlueprint API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Runtime/Engine/Animation/UAnimBlueprint)
+

@@ -26,13 +26,13 @@ type for all three either wastes cycles or breaks localization outright.
 ```mermaid
 flowchart LR
     subgraph Mutable text
-    FS["FString\ndynamic char array"]
+    FS["FString<br/>dynamic char array"]
     end
     subgraph Interned identifier
-    FN["FName\nglobal string table, case-insensitive"]
+    FN["FName<br/>global string table, case-insensitive"]
     end
     subgraph Localizable text
-    FT["FText\nculture-aware, source string + translation"]
+    FT["FText<br/>culture-aware, source string + translation"]
     end
     FS -- "ToString() / FName(*Str)" --> FN
     FN -- "ToString()" --> FS
@@ -131,3 +131,4 @@ character buffer" rather than relying on a specific internal layout.
 - [Coding standard and naming](./coding-standard-and-naming.md) — the `TEXT()` and static-`FName`
   guidance in Epic's own style rules.
 - [Epic — Unreal Engine Uproperties: Strings](https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-uproperties)
+

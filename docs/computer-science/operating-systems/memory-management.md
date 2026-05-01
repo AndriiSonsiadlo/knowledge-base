@@ -34,12 +34,12 @@ hardware translation mechanism itself (page tables, the MMU, the TLB) is covered
 
 ```mermaid
 flowchart TB
-    CPU["CPU issues virtual address"] --> MMU{"MMU: page in\nphysical memory?"}
+    CPU["CPU issues virtual address"] --> MMU{"MMU: page in<br/>physical memory?"}
     MMU -- "yes (TLB/page table hit)" --> RAM["Access physical page in RAM"]
     MMU -- "no: page fault" --> OS["OS page-fault handler"]
-    OS --> Full{"Free physical\nframe available?"}
+    OS --> Full{"Free physical<br/>frame available?"}
     Full -- yes --> Load["Load page from disk into a free frame"]
-    Full -- no --> Evict["Run page-replacement policy:\nchoose a resident page to evict"]
+    Full -- no --> Evict["Run page-replacement policy:<br/>choose a resident page to evict"]
     Evict --> Load
     Load --> Resume["Update page table, resume instruction"]
     Resume --> RAM
@@ -135,3 +135,4 @@ smaller working sets) rather than to tune the replacement algorithm further.
   there once published).
 - [Processes & Threads](./processes-and-threads.md) — each process's private address space.
 - [Storage](../storage/intro.md) — where swapped-out pages ultimately live.
+

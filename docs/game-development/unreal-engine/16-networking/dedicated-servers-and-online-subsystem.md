@@ -31,15 +31,15 @@ matchmaking code onto gameplay that assumed direct IP connects is a real rewrite
 ```mermaid
 flowchart TB
     subgraph Build["Build targets"]
-        Game["Game target\n(client + listen server capable)"]
-        Server["Server target\nEBuildTargetType::Server\nheadless, no rendering"]
-        Client["Client target\nEBuildTargetType::Client\noptional, strips server-only code"]
+        Game["Game target<br/>(client + listen server capable)"]
+        Server["Server target<br/>EBuildTargetType::Server<br/>headless, no rendering"]
+        Client["Client target<br/>EBuildTargetType::Client<br/>optional, strips server-only code"]
     end
 
     subgraph Runtime["Session layer"]
-        OSS["Online Subsystem / Online Services\n(Steam, EOS, Null)"]
+        OSS["Online Subsystem / Online Services<br/>(Steam, EOS, Null)"]
         OSS --> Sessions["Create/Find/Join session"]
-        Sessions --> Travel["ClientTravel / ServerTravel\nto the actual game map"]
+        Sessions --> Travel["ClientTravel / ServerTravel<br/>to the actual game map"]
     end
 
     Server --> Runtime
@@ -218,3 +218,4 @@ anything a client needs to read into `AGameStateBase` (which does replicate) ins
 - [Designing for later multiplayer](./designing-for-later-multiplayer.md) — what to keep in place in a
   single-player-first project so a dedicated server / session layer can be added later without a rewrite.
 - [Epic — Dedicated servers](https://dev.epicgames.com/documentation/unreal-engine/setting-up-dedicated-servers-in-unreal-engine)
+

@@ -23,12 +23,12 @@ mid-production instead of at asset-import time.
 ```mermaid
 flowchart TD
     Asset["Source mesh (millions of tris)"]
-    Clusters["Cluster hierarchy\n(~128 triangles per cluster)"]
-    Stream["Streamed cluster data\n(on-demand, resident set)"]
-    Cull["GPU-driven cluster culling\n+ LOD cluster-group selection"]
-    Raster["Rasterize\n(software rasterizer for tiny triangles,\nhardware rasterizer for larger ones)"]
-    VBuffer["Visibility buffer\n(triangle/cluster ID per pixel)"]
-    Material["Deferred material resolve\n(one shader pass per material bucket)"]
+    Clusters["Cluster hierarchy<br/>(~128 triangles per cluster)"]
+    Stream["Streamed cluster data<br/>(on-demand, resident set)"]
+    Cull["GPU-driven cluster culling<br/>+ LOD cluster-group selection"]
+    Raster["Rasterize<br/>(software rasterizer for tiny triangles,<br/>hardware rasterizer for larger ones)"]
+    VBuffer["Visibility buffer<br/>(triangle/cluster ID per pixel)"]
+    Material["Deferred material resolve<br/>(one shader pass per material bucket)"]
 
     Asset --> Clusters --> Stream --> Cull --> Raster --> VBuffer --> Material
 ```
@@ -129,3 +129,4 @@ debug tooling or a gameplay system depends on either, it needs a non-Nanite path
 - [Landscape and foliage](../11-world-building/landscape-and-foliage.md) — Nanite's most common
   large-scale use case and where masked-material cost tends to show up first.
 - [Epic — Nanite Virtualized Geometry](https://dev.epicgames.com/documentation/unreal-engine/nanite-virtualized-geometry-in-unreal-engine)
+

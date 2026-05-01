@@ -21,13 +21,13 @@ that ships on more than one hardware tier — apply them before reaching for som
 
 ```mermaid
 flowchart TD
-    Actor["An Actor in the world"] --> Q1{"Does it need to tick\nevery single frame?"}
-    Q1 -->|No| Interval["TickInterval / disable tick,\nuse a Timer instead"]
-    Q1 -->|Yes| Q2{"Is it far from / behind\nthe camera?"}
+    Actor["An Actor in the world"] --> Q1{"Does it need to tick<br/>every single frame?"}
+    Q1 -->|No| Interval["TickInterval / disable tick,<br/>use a Timer instead"]
+    Q1 -->|Yes| Q2{"Is it far from / behind<br/>the camera?"}
     Q2 -->|Yes| Cull["Culled: frustum / occlusion / distance"]
-    Q2 -->|"Not visible but relevant"| Sig["Significance Manager:\nlower fidelity by distance/relevance"]
+    Q2 -->|"Not visible but relevant"| Sig["Significance Manager:<br/>lower fidelity by distance/relevance"]
     Q2 -->|No| Full["Full-fidelity tick, render, LOD 0"]
-    Full --> LOD["LODs still reduce cost\nas distance increases"]
+    Full --> LOD["LODs still reduce cost<br/>as distance increases"]
 ```
 
 Every one of these is a variation on the same idea: don't spend full-fidelity CPU/GPU work on something
@@ -217,3 +217,4 @@ isolated asset preview.
 - [Blueprint performance](../04-blueprint-interop/blueprint-performance.md) — the same tick/LOD patterns
   from the Blueprint-authoring side.
 - [Epic — Significance Manager in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/significance-manager-in-unreal-engine)
+

@@ -94,25 +94,16 @@ const config = {
             position: "left",
             label: "Computer Science",
             description:
-              "Deep dive into OS, architecture, memory management, and processor design.",
+              "Deep dive into systems, architecture, memory, networking, and core algorithms.",
             icon: "⚙️",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "dataStructuresSidebar",
-            position: "left",
-            label: "Data & Algorithms",
-            description:
-              "Explore sorting, searching, and fundamental algorithm design patterns.",
-            icon: "📊",
           },
           {
             type: "docSidebar",
             sidebarId: "dataToolsSidebar",
             position: "left",
-            label: "Data Tools",
+            label: "Data Science",
             description:
-              "Practical data processing tools for analysis, ETL, querying, visualization, and performance optimization.",
+              "Practical analysis, wrangling, ETL, querying, visualization, and notebook-first workflows.",
             icon: "🔧",
           },
           {
@@ -153,15 +144,15 @@ const config = {
                 to: "/docs/programming/intro",
               },
               {
+                label: "Game Development",
+                to: "/docs/category/unreal-engine-5",
+              },
+              {
                 label: "Computer Science",
                 to: "/docs/computer-science/intro",
               },
               {
-                label: "Data & Algorithms",
-                to: "/docs/data-structures-algorithms/intro",
-              },
-              {
-                label: "Data Tools",
+                label: "Data Science",
                 to: "/docs/data-tools",
               },
               {

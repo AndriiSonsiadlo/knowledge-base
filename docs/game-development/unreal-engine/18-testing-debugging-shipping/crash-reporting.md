@@ -27,13 +27,13 @@ stop happening; it means you find out about them from reviews instead of from da
 
 ```mermaid
 flowchart TD
-    Crash["Crash occurs\n(engine or game code)"] --> Capture["Crash Reporter Client\ncaptures minidump / full dump"]
+    Crash["Crash occurs<br/>(engine or game code)"] --> Capture["Crash Reporter Client<br/>captures minidump / full dump"]
     Capture --> Local{"Attended?"}
     Local -->|Yes, interactive| Prompt["User prompted to send report"]
     Local -->|"-unattended (CI, dedicated server)"| AutoSend["Sent automatically, no prompt"]
     Prompt --> Upload
-    AutoSend --> Upload["Upload to a Crash Report Server\n(your own, or a third-party service)"]
-    Upload --> Symbolicate["Symbolication\nmatch dump addresses to .pdb symbols"]
+    AutoSend --> Upload["Upload to a Crash Report Server<br/>(your own, or a third-party service)"]
+    Upload --> Symbolicate["Symbolication<br/>match dump addresses to .pdb symbols"]
     Symbolicate --> Stack["Readable call stack"]
     Stack --> Triage["Bug triage / fix"]
 ```
@@ -184,3 +184,4 @@ references still applies.
 - [Automation and functional tests](./automation-and-functional-tests.md) — `-unattended` mode shared between headless test runs and unattended crash report submission.
 - [Release checklist](./release-checklist.md) — verifying the crash-reporting pipeline before shipping.
 - [Epic — Crash Reporting in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/crash-reporting-in-unreal-engine)
+

@@ -28,13 +28,13 @@ sites as need that same reasoning.
 
 ```mermaid
 flowchart LR
-    Context["Contexts\n(Querier, TargetActor, ...)\nframe of reference"]
-    Gen["Generators\nproduce Items\n(points on navmesh, actors of class, grid...)"]
+    Context["Contexts<br/>(Querier, TargetActor, ...)<br/>frame of reference"]
+    Gen["Generators<br/>produce Items<br/>(points on navmesh, actors of class, grid...)"]
     Test1["Test: Distance"]
     Test2["Test: Line of sight"]
     Test3["Test: Path cost"]
     Score["Weighted score per Item"]
-    Filter["Filters\ndrop Items outside limits"]
+    Filter["Filters<br/>drop Items outside limits"]
     Best["Best Item(s)"]
 
     Context --> Gen
@@ -151,3 +151,4 @@ that depends on it.
   how most projects invoke EQS, writing the winning item to a blackboard key.
 - [Epic — Environment Query System](https://dev.epicgames.com/documentation/unreal-engine/environment-query-system-in-unreal-engine)
 - [Epic — EQS Test Reference](https://dev.epicgames.com/documentation/unreal-engine/environment-query-system-tests-in-unreal-engine)
+

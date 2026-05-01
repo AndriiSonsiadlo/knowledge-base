@@ -33,14 +33,14 @@ which matters a lot once a project has hundreds of them.
 ```mermaid
 flowchart TD
     User["Designer: right-click Content Browser"] --> Menu["Create Advanced Asset > MyCategory > MyWeaponDefinition"]
-    Menu --> Factory["UMyWeaponDefinitionFactory : UFactory\nFactoryCreateNew()"]
+    Menu --> Factory["UMyWeaponDefinitionFactory : UFactory<br/>FactoryCreateNew()"]
     Factory --> Asset["New UMyWeaponDefinition instance saved to disk"]
 
-    Asset -->|"selected in Content Browser"| Actions["FAssetTypeActions_MyWeaponDefinition\n: FAssetTypeActions_Base"]
+    Asset -->|"selected in Content Browser"| Actions["FAssetTypeActions_MyWeaponDefinition<br/>: FAssetTypeActions_Base"]
     Actions --> Color["GetTypeColor() / GetCategories()"]
     Actions --> Open["OpenAssetEditor() on double-click"]
 
-    Asset -->|"needs a thumbnail"| Thumb["UMyWeaponDefinitionThumbnailRenderer\n: UThumbnailRenderer"]
+    Asset -->|"needs a thumbnail"| Thumb["UMyWeaponDefinitionThumbnailRenderer<br/>: UThumbnailRenderer"]
     Thumb --> Draw["Draw(Object, Canvas, ...)"]
 
     Actions -.registered in.-> AssetTools[IAssetTools / AssetToolsModule]
@@ -281,3 +281,4 @@ ini entry at all — verify which applies to your project before relying on the 
 - [Editor Utility Widgets](./editor-utility-widgets.md) — a designer-facing alternative for
   batch-creating or editing these assets beyond the single-asset factory flow.
 - [Epic — Asset Tools API reference](https://dev.epicgames.com/documentation/unreal-engine/API/Developer/AssetTools)
+

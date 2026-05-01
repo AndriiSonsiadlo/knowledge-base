@@ -28,21 +28,21 @@ and for an entire team sharing the same already-built results (shared DDC).
 ```mermaid
 flowchart TD
     subgraph EditorContent["Editor-side content"]
-        Uasset["UAsset\n(platform-agnostic, editable)"]
-        Settings["Import/build settings\n(compression, LOD, Nanite, shader permutations)"]
+        Uasset["UAsset<br/>(platform-agnostic, editable)"]
+        Settings["Import/build settings<br/>(compression, LOD, Nanite, shader permutations)"]
     end
 
-    Uasset --> Key["DDC Key\n= hash(asset content + settings + platform + format version)"]
+    Uasset --> Key["DDC Key<br/>= hash(asset content + settings + platform + format version)"]
     Settings --> Key
 
-    Key -->|"cache hit"| Local["Local DDC\n(on-disk, this machine)"]
-    Key -->|"miss locally, check next"| Shared["Shared DDC\n(network cache, whole team)"]
+    Key -->|"cache hit"| Local["Local DDC<br/>(on-disk, this machine)"]
+    Key -->|"miss locally, check next"| Shared["Shared DDC<br/>(network cache, whole team)"]
     Shared -->|"hit"| Local
-    Key -->|"miss everywhere"| Build["Actually build the derived data\n(compile shader / build mesh LODs / compress texture)"]
+    Key -->|"miss everywhere"| Build["Actually build the derived data<br/>(compile shader / build mesh LODs / compress texture)"]
     Build --> Local
     Build -->|"push back for teammates"| Shared
 
-    Local --> Cooked["Cooked, platform-specific asset\nin the packaged build"]
+    Local --> Cooked["Cooked, platform-specific asset<br/>in the packaged build"]
 ```
 
 The DDC is a cache keyed by a hash of everything that determines the output — change the source asset,
@@ -187,3 +187,4 @@ project's own `Engine.ini` DDC backend graph and your target engine version's co
 - [AssetManager and soft references](./asset-manager-and-soft-references.md) — `ChunkId`/`CookRule`
   primary asset rules that determine what a cook actually includes.
 - [Epic — Cooking Content and Creating Chunks](https://dev.epicgames.com/documentation/unreal-engine/cooking-content-and-creating-chunks-in-unreal-engine)
+

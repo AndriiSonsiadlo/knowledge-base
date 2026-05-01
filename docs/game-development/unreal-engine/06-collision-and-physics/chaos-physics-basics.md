@@ -26,14 +26,14 @@ tunnels through the floor" bugs. Both are one-line fixes once you know which kno
 
 ```mermaid
 flowchart TD
-    Body["Rigid body\n(FBodyInstance on a UPrimitiveComponent)"]
-    Body --> Sim["Simulating\nSolver owns the transform.\nForces, gravity, collision response apply."]
-    Body --> Kin["Kinematic\nGame/animation code owns the transform.\nStill collides, but nothing pushes it."]
+    Body["Rigid body<br/>(FBodyInstance on a UPrimitiveComponent)"]
+    Body --> Sim["Simulating<br/>Solver owns the transform.<br/>Forces, gravity, collision response apply."]
+    Body --> Kin["Kinematic<br/>Game/animation code owns the transform.<br/>Still collides, but nothing pushes it."]
 
     Sim -->|"SetSimulatePhysics(false)"| Kin
     Kin -->|"SetSimulatePhysics(true)"| Sim
 
-    Solver["Chaos solver\nphysics substeps, separate from game tick"] --> Sim
+    Solver["Chaos solver<br/>physics substeps, separate from game tick"] --> Sim
     GameTick["Game thread tick"] --> Kin
 ```
 
@@ -135,3 +135,4 @@ you intend to trace against.
 - [Physics constraints and simulation](./physics-constraints-and-simulation.md) — joints, physics assets,
   and ragdolls built on top of simulating bodies.
 - [Epic — Physics in Unreal Engine](https://dev.epicgames.com/documentation/unreal-engine/physics-in-unreal-engine)
+

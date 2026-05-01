@@ -418,8 +418,8 @@ kbd {
   width: 13.5rem;
 }
 
-/* With 6 category links plus the GitHub icon, the navbar runs out of room
-   and items overlap well above Infima's default 996px mobile breakpoint.
+/* With 5 category links plus the GitHub icon, the navbar still runs out of
+   room above Infima's default 996px mobile breakpoint.
    Switch to the hamburger sidebar earlier so items never have to compete
    for space with the search box and right-hand icons. */
 @media (max-width: 1400px) {
@@ -504,11 +504,13 @@ div[class^='docItemContainer_'] article img {
   --ifm-transition-fast: 150ms;
   --docusaurus-highlighted-code-line-bg: var(--brand-primary-10);
   --docusaurus-highlighted-code-line-border-left-color: var(--brand-primary);
-  --ifm-footer-color: #545454;
-  --ifm-footer-background-color: #ececec;
-  --ifm-footer-title-color: #2f2f2f;
-  --ifm-footer-link-color: #282828;
-  --ifm-navbar-background-color: rgb(232 225 240 / 0.96);
+  --ifm-footer-color: #494756;
+  --ifm-footer-background-color: #ddd6e6;
+  --ifm-footer-title-color: #252338;
+  --ifm-footer-link-color: #252338;
+  --ifm-navbar-background-color: rgb(232 225 240 / 0.82);
+  --navbar-border-color: rgb(var(--brand-primary-rgb) / 0.16);
+  --footer-border-color: rgb(var(--brand-primary-rgb) / 0.12);
 }
 
 .footer--dark {
@@ -529,7 +531,36 @@ div[class^='docItemContainer_'] article img {
   --ifm-footer-color: #8a8a8a;
   --ifm-footer-title-color: #e5e5e5;
   --ifm-footer-link-color: #e0e0e5;
-  --ifm-navbar-background-color: rgb(18 12 30 / 0.88);
+  --ifm-navbar-background-color: rgb(18 12 30 / 0.72);
+  --navbar-border-color: rgb(255 255 255 / 0.08);
+  --footer-border-color: rgb(255 255 255 / 0.08);
+}
+
+.navbar {
+  background: var(--ifm-navbar-background-color);
+  border-bottom: 1px solid var(--navbar-border-color);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 10px 30px rgb(15 23 42 / 0.08);
+}
+
+.footer,
+.footer--dark {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.18), rgb(255 255 255 / 0)),
+    var(--ifm-footer-background-color);
+  border-top: 1px solid var(--footer-border-color);
+}
+
+[data-theme="dark"] .navbar {
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.28);
+}
+
+[data-theme="dark"] .footer,
+[data-theme="dark"] .footer--dark {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.03), rgb(255 255 255 / 0)),
+    #191524;
 }
 
 /* ============ Global Styles ============ */
