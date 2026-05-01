@@ -380,11 +380,6 @@ kbd {
   }
 }
 
-code[class^='codeBlockLines_'] {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
 div[class^='tableOfContents_'] {
   font-weight: 500;
 
