@@ -1,11 +1,48 @@
 .categoryGrid {
 	padding: 4rem 1rem;
 	width: 100%;
-	background: linear-gradient(to bottom, transparent, rgba(139, 92, 246, 0.05));
+	background: linear-gradient(
+		to bottom,
+		transparent,
+		rgb(var(--brand-primary-rgb) / 0.08)
+	);
 }
 
 html[data-theme="light"] .categoryGrid {
-	background: linear-gradient(to bottom, transparent, rgba(139, 92, 246, 0.03));
+	background: linear-gradient(
+		to bottom,
+		transparent,
+		rgb(var(--brand-primary-rgb) / 0.04)
+	);
+}
+
+.sectionTitle {
+	background: linear-gradient(
+		to right,
+		var(--brand-primary-light),
+		var(--brand-accent-light),
+		var(--brand-primary)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+html[data-theme="light"] .sectionTitle {
+	background: linear-gradient(
+		to right,
+		var(--brand-primary-dark),
+		var(--brand-accent),
+		var(--brand-primary)
+	);
+}
+
+.sectionDescription {
+	color: #cbd5e1;
+}
+
+html[data-theme="light"] .sectionDescription {
+	color: #475569;
 }
 
 .grid {

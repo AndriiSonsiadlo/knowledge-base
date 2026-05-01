@@ -50,6 +50,7 @@ const config = {
       ({
         docs: {
           sidebarPath: "./sidebars.js",
+          showLastUpdateTime: true,
           editUrl:
             "https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/",
         },
@@ -213,6 +214,7 @@ const config = {
   plugins: [
     ["./src/plugins/webpack-alias.js", {}],
     ["./src/plugins/tailwind-config.js", {}],
+    ["./src/plugins/recent-docs-plugin.js", { limit: 6 }],
     [
       "ideal-image",
       /** @type {import('@docusaurus/plugin-ideal-image').PluginOptions} */
