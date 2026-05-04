@@ -123,7 +123,7 @@ gameplay code should rely on.
 
 ## Gotchas
 
-:::warning BeginPlay order across actors is not guaranteed
+:::warning[BeginPlay order across actors is not guaranteed]
 Unreal does not promise that actor A's `BeginPlay` runs before actor B's, even if A is "supposed to" set
 something up that B depends on. Don't write `BeginPlay` code that assumes another specific actor has
 already initialized — use a delegate/event the dependent actor subscribes to, a deferred check, or move
@@ -131,7 +131,7 @@ the dependency to a point (like a `GameMode` callback) that's guaranteed to run 
 exist.
 :::
 
-:::caution The constructor is not a safe place for world queries
+:::caution[The constructor is not a safe place for world queries]
 `GetWorld()` can return null or a CDO's transient world in the constructor, and spawning other actors or
 reading level data there is unsupported. Move anything that needs a real `UWorld` to
 `PostInitializeComponents` or `BeginPlay`.

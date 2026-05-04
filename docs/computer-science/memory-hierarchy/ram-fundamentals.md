@@ -116,7 +116,7 @@ This is the DRAM-level version of the same locality principle that motivates CPU
 
 ## Edge Cases & Pitfalls
 
-:::warning Refresh isn't free, but it's not usually your bottleneck
+:::warning[Refresh isn't free, but it's not usually your bottleneck]
 Refresh briefly makes a row unavailable for normal access, and refresh traffic scales with DRAM
 density. On mainstream systems this overhead is a small, well-amortized background cost — but it's
 part of why simply adding more DRAM capacity doesn't scale bandwidth for free, and it matters more on

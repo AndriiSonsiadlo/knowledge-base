@@ -10,7 +10,7 @@ tags: [sanitizers, asan, ubsan, tsan, msan, memory-safety]
 
 Compiler-based runtime tools that detect bugs: memory errors, undefined behavior, data races, memory leaks. Much faster than Valgrind, part of GCC/Clang.
 
-:::info Compile-Time Instrumentation
+:::info[Compile-Time Instrumentation]
 Sanitizers add checks during compilation. Catch bugs at runtime with minimal overhead (2-3x slowdown vs 10-100x for Valgrind).
 :::
 
@@ -334,7 +334,7 @@ make test
 - Keep `-fno-omit-frame-pointer` for better stack traces
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Combine TSan with ASan/MSan (incompatible)
 - Deploy with sanitizers (performance/size)
 - Ignore sanitizer warnings (all are real bugs)

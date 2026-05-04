@@ -17,7 +17,7 @@ which must be built into `.a`/`.lib`/`.so` files first.
 This page walks through the realistic options, from "let the package manager do it" to "build it
 yourself with b2".
 
-:::tip Pick the lightest option that works
+:::tip[Pick the lightest option that works]
 For most projects a system package or a package manager (vcpkg/Conan) is enough. Only download and
 build the source tree yourself when you need a specific version, custom build flags, or a platform your
 package manager does not serve.
@@ -95,7 +95,7 @@ Two directories matter for using Boost:
   resolves. For header-only libraries, this is all you need.
 - **`stage/lib/`** — where built `.a`/`.so`/`.lib` files appear after you run b2.
 
-:::note Header path vs header root
+:::note[Header path vs header root]
 You point the compiler at the directory that *contains* `boost/`, not at `boost/` itself. With the
 tarball above that directory is `boost_1_85_0`, so the flag is `-I/path/to/boost_1_85_0`.
 :::
@@ -123,7 +123,7 @@ You can narrow the build and tune it — useful because building everything is s
 ./b2 --prefix=/opt/boost install
 ```
 
-:::warning b2 is its own world
+:::warning[b2 is its own world]
 b2 has an extensive syntax for toolsets, variants, and properties that is easy to get lost in. This page
 shows only enough to produce usable libraries. For the full treatment — toolsets, `user-config.jam`,
 addressing models, and layout options — see
@@ -176,7 +176,7 @@ int main() {
 }
 ```
 
-:::warning Link order and runtime path
+:::warning[Link order and runtime path]
 On most linkers, libraries listed with `-l` must come *after* the object files that use them. And for
 shared libraries you may also need the runtime loader to find them at launch (for example via
 `LD_LIBRARY_PATH` or an rpath). Which libraries need linking at all is covered in

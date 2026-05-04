@@ -76,7 +76,7 @@ include_directories(include)
 add_executable(myapp src/main.cpp)
 ```
 
-:::info Understanding Each Line
+:::info[Understanding Each Line]
 
 - `cmake_minimum_required()` - Ensures compatibility
 - `project()` - Names your project, sets variables like `PROJECT_NAME`
@@ -191,7 +191,7 @@ cmake -G "Xcode" ..
 
 ## Modern CMake Approach
 
-:::warning Better Practice
+:::warning[Better Practice]
 The example above works, but modern CMake uses **target-based** configuration:
 :::
 
@@ -225,7 +225,7 @@ target_include_directories(myapp PRIVATE include)
 | `cmake --build build --target myapp` | Build specific target |
 | `cmake --build build --parallel 8` | Build with 8 parallel jobs |
 
-:::info Pro Tip
+:::info[Pro Tip]
 Modern CMake syntax: `cmake -S . -B build` is clearer than `cd build && cmake ..`
 :::
 

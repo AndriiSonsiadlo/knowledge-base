@@ -165,7 +165,7 @@ project that's only ever shipped full rebuilds is more work than planning for it
 
 ## Gotchas
 
-:::warning A Development-config package still exposes debug tooling
+:::warning[A Development-config package still exposes debug tooling]
 A package built with `-clientconfig=Development` keeps console commands, most logging, and
 `ensure`-level diagnostics available — fine for internal QA builds, wrong for anything given to players
 or reviewers. Confirm the configuration in your `BuildCookRun` invocation matches your intended audience;
@@ -173,7 +173,7 @@ see the Shipping-strips-more-than-performance warning in
 [Build configurations and targets](../01-toolchain-and-build/build-configurations-and-targets.md).
 :::
 
-:::warning Content invisible to the cooker doesn't ship, even if it works in PIE
+:::warning[Content invisible to the cooker doesn't ship, even if it works in PIE]
 The cooker only includes assets it can trace a reference path to (a level reference, an asset manager
 rule, a direct load path) — content that's only ever loaded via a dynamically-constructed soft path
 string, or an asset with no discoverable reference, can be silently missing from a packaged build while
@@ -181,13 +181,13 @@ working fine in the editor where everything is already loaded. Always smoke-test
 just PIE.
 :::
 
-:::caution Chunk 0 is not optional
+:::caution[Chunk 0 is not optional]
 Even with chunking enabled, there's always a base chunk (chunk 0) containing whatever wasn't explicitly
 assigned elsewhere plus anything needed to reach the point where other chunks can be requested. Don't
 assume you can chunk away *everything* from the initial install — some minimum content set is unavoidable.
 :::
 
-:::warning `-skipstage` and cook-only CI passes don't validate the full pipeline
+:::warning[`-skipstage` and cook-only CI passes don't validate the full pipeline]
 A cook-only CI job (fast, good for catching missing/broken content early) does not exercise staging,
 pak archiving, or platform-specific packaging steps — a green cook-only CI run is not proof that a full
 package will succeed. Run at least one full `BuildCookRun` with `-pak` before a release candidate.

@@ -13,7 +13,7 @@ a DOM-style `value` type (object, array, string, number, bool, null), a SAX-styl
 and a serializer — all designed for performance, with a `memory_resource` interface for custom
 allocation and no dependency on exceptions for error reporting.
 
-:::info The problem it solves
+:::info[The problem it solves]
 C++ has no standard JSON library. PropertyTree can read JSON but loses type information (everything
 becomes a string) and ignores `null`. Third-party libraries like nlohmann/json are popular but
 external dependencies. Boost.JSON gives you production-quality JSON with the same trust chain as
@@ -73,7 +73,7 @@ int main() {
 | boolean | `as_bool()` | `bool` |
 | null | `is_null()` | `json::value{}` |
 
-:::tip Kind checking
+:::tip[Kind checking]
 Use `jv.kind()` or `jv.is_object()`, `jv.is_string()`, etc. before calling `as_*()` — accessing
 the wrong kind throws `std::invalid_argument`.
 :::
@@ -147,7 +147,7 @@ json::static_resource mr(buf, sizeof(buf));
 auto jv = json::parse(R"({"key": "value"})", &mr);
 ```
 
-:::note Performance
+:::note[Performance]
 Boost.JSON is designed for speed. It uses short-string optimisation, avoids unnecessary copies,
 and allows zero-allocation parsing via memory resources. Benchmarks regularly show it competitive
 with RapidJSON.

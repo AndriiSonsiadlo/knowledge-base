@@ -10,7 +10,7 @@ tags: [c++, name-mangling, abi, linking, symbols]
 
 Name mangling (name decoration) encodes C++ function signatures into unique symbol names for the linker. This enables function overloading and namespaces while maintaining linkage compatibility.
 
-:::info Why Mangle?
+:::info[Why Mangle?]
 C++ supports function overloading (multiple functions with same name), but linkers only understand unique symbol names. Mangling creates unique names by encoding type information.
 :::
 
@@ -375,7 +375,7 @@ demangle(typeid(std::vector<int>).name());  // Human-readable
 - Document exported symbols
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Rely on mangled names directly in code
 - Change function signatures in stable ABIs
 - Mix compilers with different mangling schemes

@@ -10,7 +10,7 @@ tags: [c++, types, primitives, int, float, char, bool]
 
 C++ provides built-in fundamental types for integers, floating-point numbers, characters, and booleans.
 
-:::info Type System
+:::info[Type System]
 C++ is statically typed - every variable has a type known at compile-time, enabling type checking and optimization.
 :::
 
@@ -111,7 +111,7 @@ std::cout << "float: " << f << "\n";    // ~0.333333343267
 std::cout << "double: " << d << "\n";   // ~0.333333333333333
 ```
 
-:::warning Floating-point is approximate
+:::warning[Floating-point is approximate]
 These types follow IEEE-754, which stores values in **binary** — so `0.1` has no exact
 representation and `0.1 + 0.2 != 0.3`. Never compare floats with `==`; compare within a small
 tolerance (epsilon) instead. `double` is the sensible default; reserve `float` for memory/bandwidth

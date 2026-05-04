@@ -13,7 +13,7 @@ of its components filled gaps in the standard library and were later adopted —
 `all_of`/`any_of`/`none_of` in C++11 — while others like Boyer-Moore string search and `gather`
 remain Boost-only.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The standard `<algorithm>` header is powerful but incomplete. Common operations — clamping a value,
 hex-encoding a buffer, searching a string with a fast algorithm — required hand-rolled code or
 third-party snippets. Boost.Algorithm collects these into a single, peer-reviewed header set.
@@ -88,7 +88,7 @@ int main() {
 }
 ```
 
-:::tip When to reach for Boyer-Moore
+:::tip[When to reach for Boyer-Moore]
 For short patterns or one-off searches, `std::string::find` is fine. Boyer-Moore pays off when you
 search for the **same long pattern** across many texts — the precomputed skip table amortises setup.
 :::
@@ -149,7 +149,7 @@ int main() {
 | `clamp` | `std::clamp` | C++17 |
 | Boyer-Moore searcher | `std::boyer_moore_searcher` | C++17 |
 
-:::note What remains Boost-only
+:::note[What remains Boost-only]
 `one_of`, `hex`/`unhex`, `gather`, and the `_equal` predicate variants have no standard equivalents.
 If you need them, Boost.Algorithm is still the canonical source.
 :::

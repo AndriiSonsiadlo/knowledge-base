@@ -57,7 +57,7 @@ has no `goto`.
 
 ## Hard rules
 
-:::danger You cannot jump over an initialization
+:::danger[You cannot jump over an initialization]
 A `goto` that enters the scope of a variable with a non-trivial initializer is **ill-formed** — the
 compiler rejects it. This protects you from using an object that was never constructed.
 

@@ -153,13 +153,13 @@ PublicDependencyModuleNames.AddRange(new string[]
 
 ## Gotchas
 
-:::warning Don't capture raw `this` in an OnClicked/OnTextChanged lambda that could outlive the widget
+:::warning[Don't capture raw `this` in an OnClicked/OnTextChanged lambda that could outlive the widget]
 Slate delegates fire asynchronously relative to widget destruction in some cases (deferred ticks, timers).
 A raw `this` capture that fires after the owning object is destroyed is a use-after-free with no GC
 safety net. Use `SharedThis(this)` (pinned) or a `TWeakPtr` capture, not a bare `this`.
 :::
 
-:::caution SNew vs SAssignNew is not a style choice
+:::caution[SNew vs SAssignNew is not a style choice]
 If you need to call a method on the widget after construction — `SetText`, `SetEnabled`, `RequestFocus`
 — you need the handle `SAssignNew` gives you. `SNew` alone is fine only when the widget is fully
 configured by its Slate arguments and never touched again.

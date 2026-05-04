@@ -50,7 +50,7 @@ sudo port install cmake
 
 ### Windows
 
-:::info Recommended Method
+:::info[Recommended Method]
 Download the installer from [cmake.org/download](https://cmake.org/download/)
 :::
 
@@ -159,7 +159,7 @@ mkdir build && cd build
 cmake ..
 ```
 
-:::warning Common Issues
+:::warning[Common Issues]
 
 - **cmake: command not found** → Path not set correctly
 - **Old version** → Update using package manager or install from source

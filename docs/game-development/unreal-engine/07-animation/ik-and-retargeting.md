@@ -106,14 +106,14 @@ behavior — verify the specific pelvis/interpolation settings against your engi
 production foot-placement rig from this description alone.
 :::
 
-:::warning IK Retargeter output still needs a sanity pass
+:::warning[IK Retargeter output still needs a sanity pass]
 Automatic chain mapping handles most proportion differences well, but extreme proportion mismatches
 (a quadruped target retargeted from a biped source, for instance) can produce technically-valid but
 visually wrong poses — always preview retargeted animations on the actual target character rather than
 trusting the mapping blind.
 :::
 
-:::caution Full Body IK has a real per-frame cost
+:::caution[Full Body IK has a real per-frame cost]
 Every additional goal and every extra solver iteration is more work the CPU has to do every frame, for
 every character running that IK. Don't reach for FBIK by default for something a simple two-bone IK node
 or a baked animation could solve just as well — reserve it for cases that genuinely need whole-body

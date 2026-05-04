@@ -14,7 +14,7 @@ without any manual simplification. It gives you exact arithmetic where floating-
 representation error is unacceptable — financial calculations, symbolic computation, or any domain
 where `0.1 + 0.2 != 0.3` is a problem.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Floating-point arithmetic introduces rounding at every step. When you need results that are *exactly*
 correct — not approximately correct — you need a different representation. Rational numbers
 (fractions of integers) are closed under addition, subtraction, multiplication, and division, and
@@ -72,7 +72,7 @@ int main() {
 }
 ```
 
-:::danger Overflow with small integer types
+:::danger[Overflow with small integer types]
 `rational<int>` can overflow if the numerator or denominator grows beyond `INT_MAX` during
 intermediate computations. For calculations involving large values, use `rational<long long>` or
 combine with [Boost.Multiprecision](./boost-multiprecision.md)'s `cpp_int` for unbounded precision:
@@ -117,7 +117,7 @@ int main() {
 }
 ```
 
-:::note No implicit conversion to float
+:::note[No implicit conversion to float]
 `rational_cast<double>(r)` is explicit by design. Implicit conversion would silently discard the
 exactness that is the whole point of using rationals.
 :::

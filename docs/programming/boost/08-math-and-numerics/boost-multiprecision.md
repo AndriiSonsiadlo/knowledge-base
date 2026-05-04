@@ -13,7 +13,7 @@ extended precision**. It ships its own pure-C++ backends (`cpp_int`, `cpp_dec_fl
 and optional wrappers around GMP, MPFR, and other external libraries — all behind a single,
 expression-template-powered interface that looks and feels like built-in arithmetic.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Built-in types cap out at 64 bits for integers and ~18 significant digits for `double`. Cryptography,
 combinatorics, financial calculations, and scientific computing regularly need more. Writing bignum
 arithmetic from scratch is error-prone; Multiprecision gives you drop-in types that work with standard
@@ -81,7 +81,7 @@ int main() {
 | `mpz_int` | unlimited integer | GMP (external) |
 | `mpfr_float_50` | 50 decimal digits | MPFR (external) |
 
-:::tip When to use GMP/MPFR backends
+:::tip[When to use GMP/MPFR backends]
 The `cpp_*` backends are portable and header-only — no external dependency. GMP and MPFR backends
 are significantly faster for large operands (thousands of digits) because they use hand-tuned
 assembly. If performance matters and you can accept the dependency, prefer them.
@@ -109,7 +109,7 @@ int main() {
 }
 ```
 
-:::warning auto and expression templates
+:::warning[auto and expression templates]
 Using `auto` with Multiprecision arithmetic can capture the expression-template proxy instead of
 the evaluated result. If you need the actual value, assign to an explicit type or use
 `cpp_int result = ...;`. Alternatively, disable expression templates:

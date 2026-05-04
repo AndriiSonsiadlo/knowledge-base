@@ -13,7 +13,7 @@ themselves** rather than in separately allocated nodes. This means zero per-elem
 better cache locality, and the ability to place a single object in **multiple containers
 simultaneously** — something no standard container can do.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Standard containers own their elements: inserting into a `std::list` copies or moves the object into
 a heap-allocated node. This has three costs — the allocation itself, the extra indirection on
 traversal, and the fact that an object can only live in one container at a time. Intrusive containers
@@ -74,7 +74,7 @@ int main() {
 }
 ```
 
-:::danger The container does not own the elements
+:::danger[The container does not own the elements]
 When an intrusive container is destroyed or cleared, it **unlinks** elements but does **not** free
 them. If your objects are heap-allocated, you must delete them yourself. Destroying an object that
 is still linked into a container is undefined behaviour.
@@ -163,7 +163,7 @@ int main() {
 | `splay_set` | — | self-adjusting splay tree |
 | `treap` | — | tree + heap priority |
 
-:::tip When intrusive containers shine
+:::tip[When intrusive containers shine]
 - **High-frequency insert/remove** where per-node allocation is too expensive (game engines, OS
   kernels, network stacks).
 - **Objects that must live in multiple indexes** simultaneously (e.g. a connection tracked by both
@@ -197,7 +197,7 @@ int main() {
 }
 ```
 
-:::note auto_unlink disables constant-time size()
+:::note[auto_unlink disables constant-time size()]
 Containers using `auto_unlink` hooks cannot track their size in O(1) because elements may leave at
 any time without notifying the container's size counter. You must pass
 `constant_time_size<false>` to the container.

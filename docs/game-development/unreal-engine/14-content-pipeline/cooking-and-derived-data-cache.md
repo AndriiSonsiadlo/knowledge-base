@@ -147,7 +147,7 @@ on a typical iteration cook.
 
 ## Gotchas
 
-:::warning A cold DDC after an engine upgrade is expected, not a regression
+:::warning[A cold DDC after an engine upgrade is expected, not a regression]
 Upgrading engine versions frequently changes shader compiler versions and derived-data format versions,
 which changes the DDC key for a huge swath of your project's assets simultaneously. The first cook (and
 often the first several editor sessions, since opening a material triggers the same shader-compile
@@ -155,14 +155,14 @@ path) after an engine upgrade being dramatically slower than usual is the DDC do
 supposed to — rebuilding invalidated data — not a sign something is broken.
 :::
 
-:::caution Local DDC is disposable — don't treat it as backup or source of truth
+:::caution[Local DDC is disposable — don't treat it as backup or source of truth]
 Deleting your local DDC folder is always safe from a correctness standpoint (everything in it is
 reproducible from source assets and settings) but not free — expect the next cook or the next several
 editor operations to be slow while it rebuilds. Never rely on the DDC as a substitute for actually
 committing source assets to version control; it caches build *outputs*, not the assets themselves.
 :::
 
-:::warning Shared DDC being unreachable silently degrades to local-only, not a hard failure
+:::warning[Shared DDC being unreachable silently degrades to local-only, not a hard failure]
 If the shared DDC endpoint is misconfigured or unreachable, builds typically fall back to treating
 every lookup as a local miss rather than erroring loudly — which shows up as "cooks got mysteriously
 slow for the whole team" rather than an obvious connection-failure message. `GetUsingSharedDDC()` and

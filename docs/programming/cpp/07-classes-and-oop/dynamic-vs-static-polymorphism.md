@@ -10,7 +10,7 @@ tags: [c++, polymorphism, templates, virtual-functions]
 
 C++ supports two forms of polymorphism: dynamic (runtime, using virtual functions) and static (compile-time, using templates). Each has different trade-offs.
 
-:::info Two Types of Polymorphism
+:::info[Two Types of Polymorphism]
 **Dynamic** = runtime flexibility with virtual functions (slight overhead)  
 **Static** = compile-time with templates (zero overhead but more code)
 :::

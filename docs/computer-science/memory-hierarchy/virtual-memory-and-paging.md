@@ -89,7 +89,7 @@ TLB misses.
 
 ## Edge Cases & Pitfalls
 
-:::warning TLB misses are a real, measurable cost
+:::warning[TLB misses are a real, measurable cost]
 A TLB miss doesn't just cost a lookup — it can trigger a full multi-level page-table walk, which is
 several extra memory accesses before the original access can even proceed. Workloads that scatter
 accesses across many pages (large sparse data structures, huge hash tables) can suffer noticeably from

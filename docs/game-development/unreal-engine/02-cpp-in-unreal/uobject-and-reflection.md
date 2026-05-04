@@ -137,18 +137,18 @@ void StartNextRound();
 
 ## Gotchas
 
-:::warning GENERATED_BODY() position and the last-include rule
+:::warning[GENERATED_BODY() position and the last-include rule]
 `GENERATED_BODY()` must be the first line in the class/struct body, and `#include "ClassName.generated.h"`
 must be the last include in the header. Violating either produces UHT errors that look nothing like
 the actual mistake.
 :::
 
-:::warning meta specifiers are editor-only
+:::warning[meta specifiers are editor-only]
 Metadata (`meta = (...)`) is stripped from cooked builds and is never visible to running game code.
 Don't read it back at runtime — it isn't there.
 :::
 
-:::caution A non-reflected member is invisible to the engine, silently
+:::caution[A non-reflected member is invisible to the engine, silently]
 A plain `float Speed;` with no `UPROPERTY` compiles fine — and then never serializes, never shows in
 the Details panel, and is never GC-tracked if it's a pointer. There's no warning; it just behaves like
 ordinary C++, which is exactly the trap, because everything around it doesn't.

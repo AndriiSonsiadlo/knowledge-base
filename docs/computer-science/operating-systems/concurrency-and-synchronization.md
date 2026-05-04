@@ -119,13 +119,13 @@ pthread_mutex_unlock(&lock);
 
 ## Edge Cases & Pitfalls
 
-:::danger Deadlock from inconsistent lock ordering
+:::danger[Deadlock from inconsistent lock ordering]
 If thread A locks mutex 1 then tries to lock mutex 2, while thread B locks mutex 2 then tries to lock
 mutex 1, both can end up waiting on each other forever. This is a circular-wait deadlock — the fix is
 a consistent global lock ordering, as noted above.
 :::
 
-:::warning Spurious wakeups and lost wakeups
+:::warning[Spurious wakeups and lost wakeups]
 `pthread_cond_wait()` can return even if no one called `signal`/`broadcast` (a "spurious wakeup" is
 explicitly permitted by POSIX), so the awaited condition must always be re-checked in a loop, not
 assumed true on wakeup. Conversely, signaling a condition variable *before* a waiter starts waiting

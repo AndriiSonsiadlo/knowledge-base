@@ -111,14 +111,14 @@ The AnimGraph's transition rules read `Speed` and `bIsInAir` as plain variables 
 no idea a `UCharacterMovementComponent` exists; that decoupling is exactly what
 [AnimInstance in C++](./anim-instance-in-cpp.md) is about.
 
-:::warning A transition rule that never returns false is a transition that never fires the other way
+:::warning[A transition rule that never returns false is a transition that never fires the other way]
 Bidirectional transitions rely on `TransitionReturnVal` — the same rule graph evaluated one way for entry
 and the negated way for exit. If your rule graph short-circuits to always-true (a common copy-paste bug
 when duplicating a transition), the state machine will thrash between two states every frame instead of
 settling.
 :::
 
-:::caution Don't fake a continuous blend with several discrete states
+:::caution[Don't fake a continuous blend with several discrete states]
 Adding a "Walk," "Jog," and "Sprint" state with hard transitions between them for what is really one
 speed-driven range is more transitions to maintain and a worse visual result than one blend space with
 walk/jog/sprint samples placed at their real speeds. Reach for a state machine only where the modes are

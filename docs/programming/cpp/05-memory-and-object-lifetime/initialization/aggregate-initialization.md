@@ -10,7 +10,7 @@ tags: [c++, initialization, aggregates, structs, arrays]
 
 Initialize arrays and simple structs using brace-enclosed lists without constructors. Concise syntax for multiple members.
 
-:::info What's an Aggregate?
+:::info[What's an Aggregate?]
 Array OR class with: no user constructors, no private/protected members, no base classes, no virtual functions.
 :::
 
@@ -187,7 +187,7 @@ public:
 
 ## Summary
 
-:::info Aggregate Initialization - Key Points
+:::info[Aggregate Initialization - Key Points]
 **What's an Aggregate:**
 - Array OR class with all of:
     - No user-declared constructors

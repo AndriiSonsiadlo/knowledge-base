@@ -79,7 +79,7 @@ int8_t neg_five = static_cast<int8_t>(~five + 1); // -5
 
 ## Edge Cases & Pitfalls
 
-:::danger Signed integer overflow is undefined behavior in C/C++
+:::danger[Signed integer overflow is undefined behavior in C/C++]
 Unlike unsigned overflow (which wraps predictably, modulo 2ⁿ), **signed** integer overflow is
 undefined behavior. Compilers are allowed to assume it never happens — and optimize accordingly —
 so `x + 1 < x` as an "overflow check" can be silently deleted by the optimizer. Use
@@ -87,7 +87,7 @@ so `x + 1 < x` as an "overflow check" can be silently deleted by the optimizer. 
 instead of relying on wraparound.
 :::
 
-:::warning Signed/unsigned comparison is a classic footgun
+:::warning[Signed/unsigned comparison is a classic footgun]
 When a signed and an unsigned integer of the same width are compared, the signed value is
 implicitly converted to unsigned first — a negative number becomes a huge positive one:
 

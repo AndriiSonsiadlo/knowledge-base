@@ -112,7 +112,7 @@ An honest comparison, not a marketing one:
 | Reuse outside AI | AI-specific | General-purpose — used for non-AI gameplay logic too |
 | Team familiarity | Most UE engineers already know it | Steeper first-adoption cost if your team has years of BT muscle memory |
 
-:::caution Don't switch for novelty
+:::caution[Don't switch for novelty]
 StateTree is not strictly better — it's a different shape for a different kind of logic. An AI that's
 fundamentally "always chase the best target you can find" is a Behavior Tree problem (priority
 selection over dynamic conditions); an AI that's fundamentally "I am in one of these five modes with

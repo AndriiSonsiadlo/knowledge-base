@@ -145,20 +145,20 @@ void AInteractableActor::PlayInteractionFeedback_Implementation()
 
 ## Gotchas
 
-:::warning Never call FunctionName_Implementation directly for its own dispatch
+:::warning[Never call FunctionName_Implementation directly for its own dispatch]
 Calling `PlayInteractionFeedback_Implementation()` instead of `PlayInteractionFeedback()` from other
 C++ code skips the check for a Blueprint override entirely. Always call the plain `UFUNCTION` name —
 the generated code decides whether to run the Blueprint override or fall through to
 `_Implementation`.
 :::
 
-:::caution BlueprintImplementableEvent has no native fallback
+:::caution[BlueprintImplementableEvent has no native fallback]
 If no Blueprint subclass implements a `BlueprintImplementableEvent`, calling it is simply a no-op —
 there is no compile error and no runtime warning. If a function needs a sane default behaviour, use
 `BlueprintNativeEvent` instead.
 :::
 
-:::warning BlueprintPure functions are not cached
+:::warning[BlueprintPure functions are not cached]
 A `BlueprintPure` function re-runs every time an input pin is pulled, including once per frame if wired
 into a Tick-driven graph. "Pure" describes side-effect-free semantics, not memoization — an expensive
 `BlueprintPure` function is a real performance cost. See

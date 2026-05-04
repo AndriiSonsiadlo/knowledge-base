@@ -60,7 +60,7 @@ add_executable(myapp
 )
 ```
 
-:::info Including Headers
+:::info[Including Headers]
 Header files are optional but recommended - helps IDEs index them.
 :::
 
@@ -291,7 +291,7 @@ target_link_libraries(myapp PRIVATE
 - `PUBLIC` - This target and dependents need it (rarely used for executables)
 - `INTERFACE` - Only dependents need it (not applicable to executables)
 
-:::info Executables Usually Use PRIVATE
+:::info[Executables Usually Use PRIVATE]
 Executables typically use `PRIVATE` since nothing depends on them.
 :::
 

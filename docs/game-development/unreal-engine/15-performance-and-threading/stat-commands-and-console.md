@@ -151,13 +151,13 @@ which `stat` groups to enable by hand each time.
 
 ## Gotchas
 
-:::warning Numbers from a Debug build are not representative
+:::warning[Numbers from a Debug build are not representative]
 `stat unit` and friends measure real wall-clock time on each thread, and a Debug (or non-optimized)
 build's overhead dwarfs the difference you're trying to measure. Always profile in a Development (or
 better, Test/Shipping-with-stats) configuration.
 :::
 
-:::caution stat unit tells you which stage, not which system
+:::caution[stat unit tells you which stage, not which system]
 A high **Game** number tells you the game thread is the bottleneck; it does not tell you which actor,
 component, or subsystem inside that number is responsible. Don't stop at `stat unit` and start guessing —
 drop into `stat game` (or Unreal Insights, for a full breakdown) before touching code.

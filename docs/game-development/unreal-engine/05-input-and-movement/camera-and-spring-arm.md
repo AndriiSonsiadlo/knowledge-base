@@ -131,14 +131,14 @@ not by disabling lag and adding your own `FInterpTo` on top.
 
 ## Traps
 
-:::warning Don't set bUsePawnControlRotation on both the pawn and the spring arm
+:::warning[Don't set bUsePawnControlRotation on both the pawn and the spring arm]
 If the pawn turns to face `ControlRotation` (`bUseControllerRotationYaw = true`) *and* the spring arm
 also reads `ControlRotation`, the camera rotation gets applied twice relative to the world — once via
 the pawn's own actor rotation, once via the arm reading the same rotation again. Pick exactly one thing
 that reads `ControlRotation` directly: either the pawn body, or the spring arm, not both.
 :::
 
-:::caution Camera attached directly to the mesh skips collision probing entirely
+:::caution[Camera attached directly to the mesh skips collision probing entirely]
 Attaching `UCameraComponent` to the skeletal mesh or capsule instead of a spring arm's socket means no
 collision test runs — nothing pulls the camera out of the wall it just clipped into. If you see a
 project doing this "for simplicity," the simplicity is the bug.

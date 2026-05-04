@@ -13,7 +13,7 @@ flexible, more informative, and *customisable* family of macros. It is one of th
 that [Boost.Core](./boost-core.md) itself allows, which tells you how foundational it is: Boost code
 sprinkles `BOOST_ASSERT` everywhere to document and enforce its own invariants.
 
-:::info Why not just use `<cassert>`?
+:::info[Why not just use `<cassert>`?]
 The C `assert` macro is rigid. It is controlled only by the global `NDEBUG` switch, it always aborts,
 and you cannot intercept a failure to log it, throw, or break into a debugger gracefully. Boost.Assert
 keeps the familiar syntax but lets you control *all* of that per-translation-unit.
@@ -46,7 +46,7 @@ void f() {
 }
 ```
 
-:::warning BOOST_ASSERT vs BOOST_VERIFY
+:::warning[BOOST_ASSERT vs BOOST_VERIFY]
 `BOOST_ASSERT(expr)` may compile `expr` *away entirely* when assertions are disabled. Never put a
 required side effect inside it — if `do_work()` matters, use `BOOST_VERIFY(do_work())`, not
 `BOOST_ASSERT(do_work())`.
@@ -96,7 +96,7 @@ void assertion_failed_msg(char const* expr, char const* msg,
 } // namespace boost
 ```
 
-:::tip One handler, whole program
+:::tip[One handler, whole program]
 The handler is an ordinary function with external linkage, so defining it once in a single `.cpp` file
 changes the behaviour of every `BOOST_ASSERT` in your program that was compiled with
 `BOOST_ENABLE_ASSERT_HANDLER`. This is a clean way to make a long-running service log and recover
@@ -131,7 +131,7 @@ expanding to the enclosing function's name (the best of `__func__`, `__PRETTY_FU
 An assertion documents a **programmer error** — a precondition or invariant that should *never* be
 false if the code is correct. It is not error handling.
 
-:::danger Do not validate untrusted input with assertions
+:::danger[Do not validate untrusted input with assertions]
 If a condition can legitimately be false at runtime (malformed user input, a missing file, a network
 timeout), throw an exception or return an error — do **not** assert. Assertions can be compiled out, so
 relying on them for real validation means the check vanishes in release builds, which can become a

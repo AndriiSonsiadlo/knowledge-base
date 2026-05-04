@@ -13,7 +13,7 @@ stacks that never take a mutex, never block on a lock, and never cause priority 
 the right tool when latency spikes from mutex contention are unacceptable: audio pipelines, market
 data feeds, inter-thread messaging in real-time systems.
 
-:::info The problem it solves
+:::info[The problem it solves]
 A mutex-based queue is correct, but under contention one thread can block while another holds the lock.
 In latency-sensitive code, even brief blocking is a problem. Lock-free structures guarantee that at
 least one thread always makes progress, and wait-free structures guarantee that *every* thread makes
@@ -28,7 +28,7 @@ progress — no thread can starve.
 | `boost::lockfree::stack<T>` | multiple | multiple | optional | no (lock-free) |
 | `boost::lockfree::spsc_queue<T>` | single | single | yes (fixed) | yes |
 
-:::tip spsc_queue for the common case
+:::tip[spsc_queue for the common case]
 If your design has exactly one producer and one consumer (logging, audio callback to processing
 thread), `spsc_queue` is the best choice — it is wait-free, cache-friendly, and has the lowest
 overhead.
@@ -67,7 +67,7 @@ int main() {
 }
 ```
 
-:::warning push and pop can fail
+:::warning[push and pop can fail]
 `push` returns `false` when the queue is full (bounded mode). `pop` returns `false` when empty. You
 must handle these cases — typically with a retry loop or a fallback strategy.
 :::
@@ -127,7 +127,7 @@ flowchart LR
 Lock-free containers require `T` to be **trivially copyable** and **trivially destructible**. This
 means no `std::string`, no `std::vector` — use indices, pointers, or POD structs.
 
-:::danger Non-trivial types are rejected
+:::danger[Non-trivial types are rejected]
 If `T` has a non-trivial copy constructor or destructor, the code will not compile. For complex data,
 push a pointer or an index into a separate pre-allocated buffer.
 :::

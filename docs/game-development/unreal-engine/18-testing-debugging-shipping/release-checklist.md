@@ -152,19 +152,19 @@ UnrealEditor-Cmd.exe "D:/MyGame/MyGame.uproject" \
 
 ## Gotchas
 
-:::warning "It worked last time we checked" is not a release gate
+:::warning["It worked last time we checked" is not a release gate]
 Every item above needs to be re-verified against the specific build being released, not assumed to still
 hold from an earlier pass — a config change, a save-format edit, or a new content reference made in the
 final days before release is exactly the kind of change most likely to be unverified against this list.
 :::
 
-:::caution This list is a starting point, not a certification substitute
+:::caution[This list is a starting point, not a certification substitute]
 Console/storefront platforms typically have their own mandatory certification checklists (TRC/XR/Lotcheck
 equivalents) with requirements well beyond what's listed here — this checklist covers Unreal-specific
 technical risk, not platform business/certification requirements.
 :::
 
-:::warning A checklist run by one person under deadline pressure tends to get shortened
+:::warning[A checklist run by one person under deadline pressure tends to get shortened]
 The value of a written checklist degrades fast if it's silently trimmed under time pressure by whoever
 happens to be running it. Treat skipped items as an explicit, logged decision ("skipped save-compat check
 for this hotfix, no save format changes since last release"), not a silent omission.

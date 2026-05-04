@@ -21,7 +21,7 @@ Any function is a coroutine if its body uses one of three keywords:
 | `co_yield` | produce a value and suspend (the generator pattern) |
 | `co_return` | finish the coroutine, optionally with a value |
 
-:::warning C++20 ships the engine, not the car
+:::warning[C++20 ships the engine, not the car]
 C++20 standardised the **low-level machinery** (`std::coroutine_handle`, the `promise_type`
 protocol) but almost no ready-to-use types. A usable `std::generator` arrives in **C++23**; `task`
 and async types still come from libraries (cppcoro, Asio, libunifex) or your own glue. Expect to
@@ -102,7 +102,7 @@ When you write a coroutine, the compiler rewrites it around two cooperating piec
 You rarely write this by hand once you have a generator/task type — but knowing it exists explains
 the error messages.
 
-:::danger Dangling references in coroutine parameters
+:::danger[Dangling references in coroutine parameters]
 A coroutine's parameters are copied into the frame, but **references and views are copied as
 references** — if the referent dies during a suspension, you have a dangling reference. Be especially
 careful passing `std::string_view`, `span`, or `const T&` into a coroutine that suspends.

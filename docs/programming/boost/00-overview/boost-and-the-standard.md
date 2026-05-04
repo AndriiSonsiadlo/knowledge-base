@@ -14,7 +14,7 @@ built and battle-tested in Boost, then proposed to the ISO committee, and the be
 `std`. Understanding this lineage is the key to a practical question every modern C++ developer faces —
 *should I use `boost::X` or `std::X`?*
 
-:::info Why this matters
+:::info[Why this matters]
 Many Boost libraries now have a standard-library twin. On a current toolchain the `std::` version is
 usually the right default: no extra dependency, no link step, and it is guaranteed to be there. Reach for
 the Boost version when you need a feature `std` lacks, an older compiler forces your hand, or Boost simply
@@ -92,7 +92,7 @@ int value = 0;
 boost::optional<int&> ref = value;   // a rebindable reference-like optional
 ```
 
-:::tip Default to std, escalate to Boost
+:::tip[Default to std, escalate to Boost]
 A good rule of thumb: write new code against `std::`, and reach for `boost::` only when you hit a concrete
 limitation. This keeps dependencies lean while leaving Boost available for the cases that need it.
 :::
@@ -113,13 +113,13 @@ The twins are similar, not identical. A few differences that bite during migrati
 - **`filesystem` error reporting.** Both offer throwing and `error_code` overloads, but exact exception
   types and a few path-handling corner cases differ between the Boost and `std` versions.
 
-:::warning Migration is rarely a pure find-and-replace
+:::warning[Migration is rarely a pure find-and-replace]
 Swapping `boost::` for `std::` across a codebase usually compiles for the easy 90% and then fails on these
 edge cases. Migrate a component at a time and lean on your test suite, especially around `variant`
 exception safety and `optional<T&>`.
 :::
 
-:::note Boost keeps moving too
+:::note[Boost keeps moving too]
 Standardisation does not freeze the Boost version. Boost often continues to evolve a library after its
 `std` twin ships — adding features, performance work, or new variants — which is another reason the two
 can diverge over time.

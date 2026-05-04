@@ -10,7 +10,7 @@ tags: [c++, pointers, const, immutability]
 
 `const` with pointers creates three distinct scenarios. Understanding the difference prevents bugs and documents intent.
 
-:::info Reading Rule
+:::info[Reading Rule]
 **Read declarations right-to-left:**
 - `const int* ptr` = "ptr is a pointer to const int"
 - `int* const ptr` = "ptr is a const pointer to int"
@@ -160,7 +160,7 @@ int* ptr2 = const_cast<int*>(cptr2);
 *ptr2 = 40;  // Undefined behavior: y was const!
 ```
 
-:::danger const_cast Rules
+:::danger[const_cast Rules]
 - Safe: removing const from non-const data
 - Unsafe: modifying originally const data = UB
 - Use only when interfacing with badly-designed APIs
@@ -225,25 +225,25 @@ int* data2 = b.getData();  // Calls non-const version
 
 ## Summary
 
-:::info Three forms
+:::info[Three forms]
 - `const T*` → can't modify data, can move pointer
 - `T* const` → can modify data, can't move pointer  
 - `const T* const` → can't modify data or pointer
 :::
 
-:::info Reading guide
+:::info[Reading guide]
 - Read right-to-left
 - Before `*` → data is const
 - After `*` → pointer is const
 :::
 
-:::info Common patterns
+:::info[Common patterns]
 - `const T*` for function parameters (read-only)
 - `T* const` for member pointers (fixed location)
 - `const T* const` for maximum protection
 :::
 
-:::info Type conversions
+:::info[Type conversions]
 - Non-const → const: implicit (safe)
 - const → non-const: requires `const_cast` (dangerous)
 :::

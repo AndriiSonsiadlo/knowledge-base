@@ -441,7 +441,7 @@ This helps CMake understand the full build graph, important for Ninja generator.
 8. **Use BYPRODUCTS** - for files created but not as main OUTPUT
    :::
 
-:::warning Common Pitfalls
+:::warning[Common Pitfalls]
 
 **Relative paths in OUTPUT:**
 

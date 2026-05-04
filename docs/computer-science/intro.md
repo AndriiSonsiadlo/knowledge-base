@@ -13,7 +13,7 @@ built on top of all of it. Pages favor **why the layer exists and what breaks wh
 over trivia — grade-school basics (binary counting, "what is a computer") are skipped or covered in
 one line.
 
-:::info How this is organised
+:::info[How this is organised]
 Bottom-up on hardware (CPU → Memory → Storage → Buses), then up through the **Operating System** that
 multiplexes that hardware, then out to **Networks**, **Protocols**, and **Databases** — the systems
 built using everything below them. See the [Overview](./overview/intro.md) page for the full
@@ -57,7 +57,7 @@ flowchart LR
 - <Icon icon="lucide:server" inline /> **Backend / infrastructure focus:** [Operating Systems](./operating-systems/intro.md) → [Computer Networks](./computer-networks/intro.md) → [Application Protocols](./protocols/intro.md) → [Databases](./databases/intro.md).
 - <Icon icon="lucide:cpu" inline /> **Performance engineering:** [CPU & Processor Architecture](./cpu-architecture/intro.md) (all pages) → [Memory Hierarchy & RAM](./memory-hierarchy/intro.md) → [Assembly & Low-Level Programming](./assembly/intro.md).
 
-:::tip Conventions used across these docs
+:::tip[Conventions used across these docs]
 - Diagrams are Mermaid; tables are preferred over prose for comparisons.
 - Admonitions flag the important bits: `info` for context, `warning`/`danger` for real foot-guns
   (security issues, performance traps).

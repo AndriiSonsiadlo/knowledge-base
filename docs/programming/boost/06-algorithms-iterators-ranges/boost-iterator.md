@@ -13,7 +13,7 @@ the standard iterator interface demands. Its two core pieces are `iterator_facad
 a complete iterator from a handful of primitives — and `iterator_adaptor` — which wraps an existing
 iterator and overrides specific operations.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Writing a correct STL iterator by hand means implementing five nested types, up to seven operators,
 and getting the const/non-const interplay right. A single oversight causes hard-to-diagnose
 compilation failures. `iterator_facade` reduces this to three or four simple functions; the library
@@ -66,7 +66,7 @@ int main() {
 The three functions — `increment`, `equal`, `dereference` — are all you need for a forward iterator.
 Add `decrement` for bidirectional, plus `advance` and `distance_to` for random access.
 
-:::tip Traversal tags
+:::tip[Traversal tags]
 Boost.Iterator uses its own traversal tag hierarchy (`incrementable`, `single_pass`, `forward`,
 `bidirectional`, `random_access`) that is finer-grained than the standard iterator categories. The
 library maps them to `std::iterator_traits` categories automatically.
@@ -171,7 +171,7 @@ int main() {
 }
 ```
 
-:::warning filter_iterator needs the end
+:::warning[filter_iterator needs the end]
 `make_filter_iterator` requires the **end** iterator as a third argument so it knows where to stop
 skipping. Forgetting it is a compilation error — not a silent bug.
 :::

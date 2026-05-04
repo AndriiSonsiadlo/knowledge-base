@@ -13,7 +13,7 @@ tags: [c++, boost, function, callable, type-erasure]
 type. It was the direct ancestor of `std::function`, standardised in C++11, and remains one of the
 clearest examples of Boost libraries graduating into the language.
 
-:::info The problem it solves
+:::info[The problem it solves]
 C++ has many kinds of callables — free functions, member functions, lambdas, `operator()` objects —
 but they all have different types. Storing "something callable with signature `int(double)`" in a
 variable, a container, or a callback slot requires **type erasure**. `boost::function` provides
@@ -71,7 +71,7 @@ int main() {
 }
 ```
 
-:::danger Calling an empty function throws
+:::danger[Calling an empty function throws]
 Unlike raw function pointers (which are undefined behaviour when null-called), an empty
 `boost::function` throws `boost::bad_function_call`. Always check with `if (f)` before calling, or
 design the API so that the function is never empty.
@@ -149,7 +149,7 @@ int main() {
 - Larger callables are heap-allocated.
 - Every call goes through an indirect function pointer (virtual-call-like overhead).
 
-:::warning Not free
+:::warning[Not free]
 For hot inner loops or performance-critical callbacks, prefer templates or `auto` parameters that
 avoid type erasure entirely. `boost::function` is for **interface boundaries** where you need to
 store heterogeneous callables — not for tight numerical kernels.
@@ -166,7 +166,7 @@ store heterogeneous callables — not for tight numerical kernels.
 | `target()` / `target_type()` | yes | yes |
 | Available pre-C++11 | yes | no |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++11 and later, prefer `std::function` — it is standard, widely optimised, and interchangeable
 with `boost::function` in almost all cases. Use `boost::function` only when targeting a pre-C++11
 toolchain. See [Boost and the C++ Standard](../00-overview/boost-and-the-standard.md) for the

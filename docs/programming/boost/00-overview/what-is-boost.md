@@ -13,7 +13,7 @@ with facilities the language committee either hasn't standardised yet or never w
 header-heavy, and deliberately written to the same quality bar as `std` — to the point that Boost is
 the single largest source of *future* standard-library features.
 
-:::info Key characteristics
+:::info[Key characteristics]
 **Standard-track**: many components (`shared_ptr`, `optional`, `variant`, `filesystem`, `thread`) graduated into the ISO C++ standard.
 **Mostly header-only**: most libraries need no separate build step — just add the include path.
 **Peer-reviewed**: every library passes a formal community review before acceptance.
@@ -51,7 +51,7 @@ one license, and one release cadence. They range from tiny header-only helpers t
 | Mid-size libraries | `Filesystem`, `Program_options`, `Date_Time` | Focused, sometimes compiled |
 | Large subsystems | `Asio`, `Spirit`, `Graph`, `Serialization` | Whole frameworks in themselves |
 
-:::note Capitalisation convention
+:::note[Capitalisation convention]
 By convention library names are capitalised and prefixed in prose — *Boost.Asio*, *Boost.Optional* —
 but the code lives in lowercase headers (`<boost/asio.hpp>`) and the `boost::` namespace
 (`boost::optional`).
@@ -97,7 +97,7 @@ linking (`Filesystem`, `Thread`, `Program_options`, ...) are covered in
 - **Portability** — [Boost.Config](../01-build-and-integration/boost-config.md) abstracts away
   compiler and platform differences.
 
-:::warning Boost is not "free" to depend on
+:::warning[Boost is not "free" to depend on]
 Boost is large. Pulling in even one library brings a sprawling web of internal headers, which inflates
 compile times and binary size. Prefer the [standard equivalent](./boost-and-the-standard.md) when one
 exists and your toolchain supports it; reach for Boost when it genuinely adds something `std` lacks.

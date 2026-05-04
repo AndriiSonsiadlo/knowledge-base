@@ -10,7 +10,7 @@ tags: [cpp, copy-and-swap, idioms, exception-safety, assignment]
 
 Copy-and-swap is an elegant technique for implementing assignment operators that provides strong exception safety and eliminates code duplication by leveraging the copy constructor and a non-throwing swap function.
 
-:::info Exception-Safe Assignment
+:::info[Exception-Safe Assignment]
 Copy-and-swap guarantees strong exception safety: if an exception occurs during assignment, the object remains unchanged. The idiom unifies copy and move assignment into a single function.
 :::
 
@@ -517,7 +517,7 @@ public:
 - Use for resource-managing classes
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Forget to implement move constructor
 - Make swap throwing
 - Use when traditional assignment is more efficient

@@ -117,14 +117,14 @@ whether it should do anything at all rather than always running once registered.
 
 ## Gotchas
 
-:::warning Post process materials can't reach outside their Blendable Location's data
+:::warning[Post process materials can't reach outside their Blendable Location's data]
 A material set to run before Bloom doesn't have access to the same buffers as one running after
 Tonemapping — Blendable Location isn't just "when," it changes resolution and color space too. Picking
 the wrong location for what the material actually needs to sample produces a visually wrong result, not
 a compile error.
 :::
 
-:::caution A view extension outlives the object that registered it if you're not careful
+:::caution[A view extension outlives the object that registered it if you're not careful]
 `ISceneViewExtension`-derived objects are typically ref-counted and held by `FSceneViewExtensions`
 independent of whatever gameplay object created them. If a `UMyComponent` creates and holds a
 `TSharedPtr<FMySceneViewExtension>`, destroying the component doesn't automatically deregister the
@@ -132,7 +132,7 @@ extension — make sure teardown explicitly stops it (for example, gating it ina
 `TSceneViewExtensionIsActiveFunction` before the owning object goes away).
 :::
 
-:::warning Don't reach for a view extension for something a post process material can do
+:::warning[Don't reach for a view extension for something a post process material can do]
 Writing a full `ISceneViewExtension` with `PreRenderView_RenderThread` and a hand-written RDG pass is
 substantially more code and more places to get threading wrong than authoring a Post Process domain
 material. Reserve the C++ path for work a material graph genuinely can't express — reading arbitrary

@@ -125,7 +125,7 @@ using only a handful of CPU cores.
 
 ## Edge Cases & Pitfalls
 
-:::danger DMA and cache coherence
+:::danger[DMA and cache coherence]
 A DMA write lands directly in RAM — it does not go through the CPU's caches. If the CPU has a stale
 copy of that memory region cached, it can read old data after a DMA transfer completes unless the
 system either invalidates the relevant cache lines or uses cache-coherent DMA hardware (common on
@@ -133,7 +133,7 @@ modern platforms, but not universal, especially in embedded/real-time systems). 
 source of "the data is wrong but only sometimes" bugs in low-level driver code.
 :::
 
-:::warning Interrupt storms
+:::warning[Interrupt storms]
 A misbehaving or extremely high-throughput device can raise interrupts faster than the CPU can
 service them, spending all available CPU time in interrupt handlers and starving normal work. Modern
 NIC drivers mitigate this with **interrupt coalescing** (batch several completions into one interrupt)

@@ -208,19 +208,19 @@ deadlocks instead of the small synchronization points they're meant to be.
 
 ## Gotchas
 
-:::warning A `check(IsInGameThread())` at the top of a function is not decoration
+:::warning[A `check(IsInGameThread())` at the top of a function is not decoration]
 It's the fastest way to convert a silent, timing-dependent memory corruption bug into an immediate, loud
 assert failure at the exact call site that got it wrong — instead of a crash report from a player with no
 repro steps three weeks later. Add it to any function that assumes game-thread ownership.
 :::
 
-:::warning Capturing `this` by reference in an async lambda is a lifetime bug waiting to happen
+:::warning[Capturing `this` by reference in an async lambda is a lifetime bug waiting to happen]
 If the owning object can be destroyed before the lambda runs (almost always true for anything that
 outlives a single frame), capture a `TWeakObjectPtr` and re-validate it once you're back on the game
 thread, not a raw pointer captured "because it was convenient."
 :::
 
-:::caution Blocking one thread on another defeats the reason the split exists
+:::caution[Blocking one thread on another defeats the reason the split exists]
 Calling `Wait()`/`BusyWait()` on a task, or blocking the game thread on a render-thread fence, every
 frame reintroduces the serial bottleneck the whole threading model exists to avoid. Reserve blocking waits
 for teardown and rare synchronization points, not steady-state per-frame code.

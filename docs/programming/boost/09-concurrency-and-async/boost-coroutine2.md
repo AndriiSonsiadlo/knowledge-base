@@ -14,7 +14,7 @@ support), Boost coroutines carry their own stack and can yield from any depth in
 library offers two types: `pull_type` (the caller pulls values from the coroutine) and `push_type`
 (the caller pushes values into the coroutine).
 
-:::info The problem it solves
+:::info[The problem it solves]
 Generators, cooperative state machines, and pipeline stages all need a function that can *pause*,
 return a value, and later *resume* from where it left off. Without coroutines you are forced into
 callback spaghetti, explicit state machines, or threads — all of which are harder to read and maintain.
@@ -148,14 +148,14 @@ int main() {
 | Overhead per coroutine | stack allocation + context switch | frame allocation only |
 | Standard | no | yes |
 
-:::note When to use which
+:::note[When to use which]
 Stackful coroutines (Boost.Coroutine2) are simpler when you need to yield from deep call chains.
 Stackless coroutines (C++20) are more efficient when you can restructure code to yield only at
 explicit suspension points. For new code on C++20 compilers, prefer the standard coroutines; use
 Boost.Coroutine2 on older toolchains or when deep-yield is essential.
 :::
 
-:::warning Boost.Coroutine (v1) is deprecated
+:::warning[Boost.Coroutine (v1) is deprecated]
 The original `Boost.Coroutine` (without the "2") is deprecated. Always use `Boost.Coroutine2`.
 :::
 

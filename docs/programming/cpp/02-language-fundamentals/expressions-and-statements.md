@@ -10,7 +10,7 @@ tags: [c++, expressions, statements, syntax, fundamentals]
 
 Expressions produce values; statements perform actions. Understanding the distinction is fundamental to C++ programming.
 
-:::info Key Difference
+:::info[Key Difference]
 **Expression**: Evaluates to a value (`5 + 3`, `x > 0`)  
 **Statement**: Complete instruction that executes (`int x = 5;`, `return 0;`)
 :::

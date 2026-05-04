@@ -14,7 +14,7 @@ strands for serialization, timers, signal handling, and the foundation on which
 [networking](../11-networking/asio-networking.md) and [Beast](../11-networking/boost-beast.md) are
 built. Asio is the basis of the Networking TS and a strong candidate for future standardisation.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Blocking I/O wastes threads — one thread per connection does not scale. Asio implements the
 **proactor pattern**: you initiate an operation (read, write, connect, wait) and supply a callback;
 the library delivers the result when the OS completes the operation, all driven by a single event
@@ -70,7 +70,7 @@ int main() {
 }
 ```
 
-:::tip Always check the error code
+:::tip[Always check the error code]
 Every Asio completion handler receives a `boost::system::error_code` as its first argument. A
 cancelled operation delivers `boost::asio::error::operation_aborted` — do not treat it as a fatal
 error.
@@ -138,7 +138,7 @@ int main() {
 }
 ```
 
-:::note Header-only or compiled
+:::note[Header-only or compiled]
 Asio can be used header-only by defining `BOOST_ASIO_HEADER_ONLY`, but the default build links
 against Boost.System. With Boost 1.69+, `boost::system::error_code` is header-only, making
 standalone Asio effectively header-only too.
@@ -153,7 +153,7 @@ standalone Asio effectively header-only too.
 | `io_context`-per-thread | Each thread owns its context; partition work by connection |
 | Coroutines (`co_await`) | Modern async: readable, composable, no callback nesting |
 
-:::warning Do not block inside a handler
+:::warning[Do not block inside a handler]
 A handler that blocks (sleeps, does heavy CPU work, calls a synchronous API) stalls the entire
 `io_context`. Offload blocking work to a separate thread or thread pool.
 :::

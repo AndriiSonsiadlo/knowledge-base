@@ -10,7 +10,7 @@ tags: [c++, stl, algorithms, sort, find, transform]
 
 STL algorithms are generic functions that work with any container through iterators. They provide tested, optimized implementations of common operations. Never write your own sort or search - use the STL!
 
-:::info Algorithms + Iterators = Generic Code
+:::info[Algorithms + Iterators = Generic Code]
 Algorithms work on ranges defined by iterators. One algorithm works with vector, list, array, or any container providing compatible iterators.
 :::
 

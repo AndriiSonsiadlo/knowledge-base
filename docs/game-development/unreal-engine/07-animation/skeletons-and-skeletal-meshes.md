@@ -110,7 +110,7 @@ Reduction Tool and related 5.8 Skeletal Editor changes — verify against your e
 on those specific tools.
 :::
 
-:::warning Retargeting isn't automatic just because you share a skeleton
+:::warning[Retargeting isn't automatic just because you share a skeleton]
 Sharing a `USkeleton` guarantees an animation *plays* on any mesh bound to it, but it does not guarantee
 the result looks right if the meshes have very different bone-length proportions (a child character vs.
 an adult, for instance). For meaningfully different proportions, use the IK Rig / IK Retargeter workflow
@@ -118,7 +118,7 @@ an adult, for instance). For meaningfully different proportions, use the IK Rig 
 just to reuse animations.
 :::
 
-:::caution A UPhysicsAsset targets specific bone proportions
+:::caution[A UPhysicsAsset targets specific bone proportions]
 A physics asset's rigid body sizes and constraint limits are fit to one skeletal mesh's proportions.
 Reusing a physics asset built for a large character on a small one (even if they share a skeleton) tends
 to produce collision volumes that don't match the visible mesh — regenerate or hand-tune the physics

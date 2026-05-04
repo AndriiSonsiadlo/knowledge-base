@@ -13,7 +13,7 @@ their standard output and error, pipe data in, set environment variables, and wa
 asynchronously monitor completion. It replaces platform-specific calls like `fork`/`exec`, `popen`,
 or `CreateProcess` with a single portable API.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Launching a child process from C++ is surprisingly platform-dependent: POSIX uses `fork`/`exec`
 with file-descriptor plumbing, Windows uses `CreateProcess` with `STARTUPINFO` handles. Error
 handling, pipe setup, and environment manipulation differ completely. Boost.Process wraps all of
@@ -94,7 +94,7 @@ int main() {
 }
 ```
 
-:::warning Close the input pipe
+:::warning[Close the input pipe]
 Many child programs (like `sort`, `cat`, `wc`) only produce output after receiving EOF on stdin.
 Call `in_stream.pipe().close()` to signal end of input, or the child will block forever.
 :::
@@ -143,7 +143,7 @@ int main() {
 }
 ```
 
-:::note Boost.Process v2
+:::note[Boost.Process v2]
 Boost 1.84+ ships a redesigned **Boost.Process v2** with tighter Asio integration, `async_pipe`,
 and a process-handle concept. If you are starting new code, consider v2. The examples above use the
 v1 API which remains available and widely deployed.

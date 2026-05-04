@@ -10,7 +10,7 @@ tags: [c++, linker, symbols, libraries, executable]
 
 The linker combines multiple object files and libraries into a single executable, resolving symbol references and assigning final memory addresses.
 
-:::info Link-Time Assembly
+:::info[Link-Time Assembly]
 Linking resolves symbols, assigns addresses, and creates the final executable from compiled pieces.
 :::
 

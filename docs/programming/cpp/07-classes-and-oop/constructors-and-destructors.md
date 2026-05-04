@@ -10,7 +10,7 @@ tags: [c++, classes, constructors, destructors, lifecycle, raii]
 
 Constructors initialize objects and allocate resources. Destructors clean up when objects are destroyed. Together they enable RAII (Resource Acquisition Is Initialization).
 
-:::info Object Lifecycle
+:::info[Object Lifecycle]
 **Birth** → Constructor runs  
 **Life** → Object is usable  
 **Death** → Destructor runs (automatic cleanup)
@@ -103,7 +103,7 @@ Widget w(5);
 2. Member variables (declaration order)
 3. Constructor body
 
-:::warning Order Matters
+:::warning[Order Matters]
 Always list initializers in declaration order to avoid confusion. Compiler may warn if order doesn't match.
 :::
 
@@ -163,7 +163,7 @@ public:
 };
 ```
 
-:::danger Delegation Rules
+:::danger[Delegation Rules]
 **Cannot mix** delegation with member initialization:
 ```cpp
 // Error: can't have both
@@ -262,7 +262,7 @@ public:
 };
 ```
 
-:::info Constructor Exception Safety
+:::info[Constructor Exception Safety]
 Members that were successfully constructed before the exception **will** have their destructors called. Only the object's destructor won't run.
 :::
 
@@ -301,7 +301,7 @@ public:
 // Now delete ptr calls both ~Derived and ~Base
 ```
 
-:::danger Always Virtual
+:::danger[Always Virtual]
 **If your class has any virtual functions, make the destructor virtual!** Otherwise, deleting through a base pointer causes resource leaks.
 :::
 
@@ -337,7 +337,7 @@ Derived d;  // Output: "Base init"
 
 **Why?** During Base's constructor, the object is still just a Base - the Derived part hasn't been constructed yet. Virtual dispatch uses the current type.
 
-:::warning Construction Phases
+:::warning[Construction Phases]
 - During Base constructor → object is a Base
 - During Derived constructor → object becomes Derived
 - During Derived destructor → object becomes Base again
@@ -414,32 +414,32 @@ vec2.clear();  // Calls 1000 destructors
 
 ## Summary
 
-:::info Constructor basics:
+:::info[Constructor basics:]
 - Initialize objects, same name as class, no return type
 - Use initializer list (required for const/reference, efficient for all)
 - Initialization order: bases → members (declaration order) → body
 :::
 
-:::info Destructor basics:
+:::info[Destructor basics:]
 - Clean up resources, runs automatically
 - Destruction order: body → members (reverse) → bases (reverse)
 - Make virtual if base class with virtual functions
 :::
 
-:::info Modern features:
+:::info[Modern features:]
 - Delegating constructors avoid code duplication
 - `explicit` prevents implicit conversions
 - `= default` uses compiler-generated version
 - `= delete` prevents function use
 :::
 
-:::info Safety:
+:::info[Safety:]
 - Use RAII members for exception safety in constructors
 - Never call virtual functions in constructors/destructors
 - Always virtual destructor for polymorphic base classes
 :::
 
-:::info Advanced:
+:::info[Advanced:]
 - Inheriting constructors with `using Base::Base`
 - Placement new for custom memory management
 - Trivial destructors enable optimizations

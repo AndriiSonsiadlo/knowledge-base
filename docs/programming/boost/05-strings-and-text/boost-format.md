@@ -13,7 +13,7 @@ syntax. Unlike `printf`, it catches type mismatches at run time instead of silen
 garbage, and unlike manual `ostringstream` chaining, it keeps the format string readable. It was
 the go-to formatting tool in C++ until `std::format` arrived in C++20.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `printf` is concise but unsafe — pass a `double` where it expects `int` and you get undefined
 behaviour. `ostringstream` is safe but verbose — building a formatted message means chaining
 `<<` with manipulators. `boost::format` combines the readability of a format string with the
@@ -84,7 +84,7 @@ int main() {
 }
 ```
 
-:::warning Mixing positional and printf-style placeholders
+:::warning[Mixing positional and printf-style placeholders]
 You can use `%1%` positional syntax or `%s`/`%d` printf syntax, but do not mix both in one
 format string. Pick one style per call.
 :::
@@ -124,7 +124,7 @@ int main() {
 | Header | `<cstdio>` | `<boost/format.hpp>` | `<format>` |
 | Performance | fast | moderate | fast |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++20 and later, prefer `std::format` — it is faster, catches errors at compile time, and
 needs no dependency. Boost.Format remains useful on pre-C++20 toolchains or when you need its
 `%N%` positional syntax in existing codebases. See

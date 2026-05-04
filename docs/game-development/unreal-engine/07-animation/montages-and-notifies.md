@@ -136,14 +136,14 @@ displacement has to match the animation frame-for-frame. `FRepRootMotionMontage`
 payload that keeps root motion from a montage in sync for networked characters, carrying the montage
 reference, playback position, and the authoritative root motion source state.
 
-:::warning A montage plays into a Slot the AnimGraph must actually expose
+:::warning[A montage plays into a Slot the AnimGraph must actually expose]
 `Montage_Play` succeeds even if the target slot isn't wired into the currently-active AnimGraph state —
 the montage will be "playing" by every query, but you'll see no visual change, because nothing in the
 graph is sampling that slot right now. Make sure the slot node sits somewhere reachable from whatever
 state machine state is active when you expect the montage to show.
 :::
 
-:::caution NotifyTick runs every frame the notify state is active, for every character playing it
+:::caution[NotifyTick runs every frame the notify state is active, for every character playing it]
 Heavy per-tick logic (traces, allocations) in `NotifyTick` scales with concurrent players of that
 animation. If the work doesn't need per-frame precision, do it once in `NotifyBegin` / `NotifyEnd` instead.
 :::

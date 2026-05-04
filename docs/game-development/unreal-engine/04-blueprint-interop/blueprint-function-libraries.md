@@ -92,20 +92,20 @@ noisy fast once a project has more than one or two libraries.
 
 ## Gotchas
 
-:::warning A function library cannot hold per-call state
+:::warning[A function library cannot hold per-call state]
 There is no instance, so there is nowhere to keep a cache, a counter, or a "last computed" value
 between calls. If logic needs to remember something across calls, it belongs on a
 [subsystem](../02-cpp-in-unreal/subsystems.md) or an actor/component, not a function library.
 :::
 
-:::caution BlueprintPure functions still run their full body on every pull
+:::caution[BlueprintPure functions still run their full body on every pull]
 Marking a function `BlueprintPure` changes how it looks in the graph, not how often it executes. An
 expensive `BlueprintPure` function wired into several places in a Tick-driven graph runs its full body
 each time — there is no memoization. See [Blueprint performance](./blueprint-performance.md) for where
 this actually costs frame time.
 :::
 
-:::warning WorldContextObject is a convention, not automatic
+:::warning[WorldContextObject is a convention, not automatic]
 Forgetting the `meta = (WorldContextObject = "...")` specifier on a static function that needs
 `GetWorld()` doesn't fail to compile — it just means the function has no way to resolve which world
 it's operating in, and you'll pass a `UObject*` explicitly and call `Object->GetWorld()` inside instead.

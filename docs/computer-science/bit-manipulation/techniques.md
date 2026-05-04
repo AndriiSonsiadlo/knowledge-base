@@ -91,7 +91,7 @@ several hash-selected bits set per element) all use bitmask operations as their 
 
 ## Edge Cases & Pitfalls
 
-:::warning XOR-swap: a clever trick you should not use
+:::warning[XOR-swap: a clever trick you should not use]
 ```cpp
 a ^= b;
 b ^= a;
@@ -103,7 +103,7 @@ alias the *same* memory location (`a ^= b` zeroes it out on the first line). It'
 renaming. Treat this as a historical curiosity, not production code.
 :::
 
-:::danger Shifting by the full width (or more) is undefined behavior
+:::danger[Shifting by the full width (or more) is undefined behavior]
 `1u << 32` on a 32-bit type is undefined behavior in C/C++, not `0`. Always check that the shift
 amount is strictly less than the type's bit width, especially when the shift amount is
 computed/user-controlled.

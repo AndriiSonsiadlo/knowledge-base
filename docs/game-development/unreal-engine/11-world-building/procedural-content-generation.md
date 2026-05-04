@@ -114,20 +114,20 @@ PCG-scattered foliage benefits from the same Nanite instancing story as hand-pai
 
 ## Gotchas
 
-:::warning Runtime generation is not free just because it's "procedural"
+:::warning[Runtime generation is not free just because it's "procedural"]
 A graph that regenerates every frame based on a moving actor can cost more than the manual placement it
 replaced. Use the generation trigger deliberately — generate once on load for static dressing, and reserve
 continuous runtime generation for content that genuinely needs to react to gameplay in real time.
 :::
 
-:::caution Point Data isn't actors — debug at the right layer
+:::caution[Point Data isn't actors — debug at the right layer]
 Because most of the graph operates on Point Data and only the final spawner node produces real
 actors/instances, a bug earlier in the chain (wrong density, points in the wrong place) won't show up as
 a visible symptom until spawning. Use the PCG Editor Mode's data preview per node rather than only judging
 by final output.
 :::
 
-:::caution Seed changes ripple downstream
+:::caution[Seed changes ripple downstream]
 Point generation is seeded for determinism; changing a sampler's seed or the graph's structure upstream
 can reshuffle every downstream point's random values, not just add new ones. Don't expect small graph
 edits to leave unrelated output untouched.

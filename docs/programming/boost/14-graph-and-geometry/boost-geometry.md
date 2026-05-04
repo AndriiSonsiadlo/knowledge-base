@@ -13,7 +13,7 @@ polygons, and multi-geometries in two or three dimensions. It supports Cartesian
 geographic coordinate systems, and provides a wide set of spatial algorithms — distance, area,
 intersection, union, convex hull, and more.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Spatial computation is tricky: intersection tests need numerical robustness, geographic
 calculations involve geodesics, and API designs vary wildly between geometry libraries.
 Boost.Geometry provides one generic interface that works whether your coordinates are pixel
@@ -129,7 +129,7 @@ int main() {
 }
 ```
 
-:::tip Strategy pattern
+:::tip[Strategy pattern]
 Every algorithm accepts an optional **strategy** parameter that controls the underlying formula.
 For geographic distance you can choose Vincenty (default, accurate), Haversine (faster, less
 precise), or Thomas. Pass the strategy as the last argument:
@@ -156,7 +156,7 @@ bg::read_wkt("LINESTRING(0 0, 1 1, 2 0)", line);
 std::cout << bg::wkt(line) << "\n";
 ```
 
-:::note Registering custom types
+:::note[Registering custom types]
 You don't have to use the built-in models. Macros like `BOOST_GEOMETRY_REGISTER_POINT_2D` adapt
 your own point struct to the Boost.Geometry concept, so algorithms work on your existing data
 without wrappers.

@@ -136,20 +136,20 @@ ItemDisplayName` hard-codes English word order into the binary and can't be fixe
 
 ## Gotchas
 
-:::warning FString for player-facing text is a localization bug, not a style nit
+:::warning[FString for player-facing text is a localization bug, not a style nit]
 `FString`/`FString::Printf` have no namespace, no key, and nothing for the gather step to find — text
 built this way is invisible to the entire localization pipeline. It compiles, displays correctly in the
 dev culture, and stays permanently untranslated until someone notices in QA, often close to a ship date.
 :::
 
-:::caution Editing a NSLOCTEXT/LOCTEXT source string doesn't retranslate it — but changing the key does
+:::caution[Editing a NSLOCTEXT/LOCTEXT source string doesn't retranslate it — but changing the key does]
 The archive matches translations to text by namespace/key, not by the current source string. Editing the
 English source string in place updates what's displayed in the dev culture without invalidating existing
 translations tied to that key (they'll silently be stale until someone notices and re-gathers/re-reviews).
 Changing the *key* instead orphans the old translation entirely and requires a fresh one.
 :::
 
-:::caution Don't build FText::Format arguments from a raw FString when a proper FText source exists
+:::caution[Don't build FText::Format arguments from a raw FString when a proper FText source exists]
 Wrapping a translated fragment via `FText::FromString` after you've already flattened it to a plain string
 elsewhere throws away that fragment's own localization identity. Keep `FText` all the way from source to
 the final `FText::Format` call rather than converting to `FString` and back.

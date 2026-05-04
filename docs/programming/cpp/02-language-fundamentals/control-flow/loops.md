@@ -39,7 +39,7 @@ for (auto& item : items)       item.price *= 1.1;      // mutate in place: non-c
 for (auto [key, val] : table)  use(key, val);          // structured bindings over a map (C++17)
 ```
 
-:::tip Choosing the loop variable
+:::tip[Choosing the loop variable]
 - `const auto&` — read elements without copying (the default).
 - `auto&` — modify elements in place.
 - `auto` (by value) — only when you genuinely want a copy to mutate locally.
@@ -62,7 +62,7 @@ nest into a function and `return`-ing, rather than reaching for [`goto`](./goto-
 
 ## Common pitfalls
 
-:::warning Iterator/index invalidation
+:::warning[Iterator/index invalidation]
 Modifying a container *while* looping over it can invalidate the iterator or index you are using.
 
 ```cpp
@@ -73,7 +73,7 @@ v.erase(std::remove_if(v.begin(), v.end(), pred), v.end());   // erase–remove 
 ```
 :::
 
-:::warning Unsigned counters and reverse loops
+:::warning[Unsigned counters and reverse loops]
 `for (size_t i = n - 1; i >= 0; --i)` never terminates — an unsigned value is always `>= 0`, so it
 wraps around instead of going negative. Loop with a signed index, or use iterators / `i-- ` tricks.
 :::

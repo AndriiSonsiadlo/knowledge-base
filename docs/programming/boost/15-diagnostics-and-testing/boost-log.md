@@ -13,7 +13,7 @@ log records from *consuming* them. It supports multiple sinks (console, file, sy
 by severity or custom attributes, configurable formatting, and features like automatic file
 rotation and scoped attributes.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `std::cerr << "error: " << msg << "\n"` does not scale. You need severity levels, timestamps,
 thread IDs, structured fields, log rotation, and the ability to turn logging categories on and
 off without recompiling. Boost.Log provides all of this with a framework that separates what you
@@ -60,7 +60,7 @@ g++ -std=c++17 trivial.cpp -lboost_log -lboost_log_setup -lboost_thread -lpthrea
 ./trivial
 ```
 
-:::note Compiled library
+:::note[Compiled library]
 Boost.Log is one of the few Boost libraries that **must be compiled** — you link against
 `-lboost_log`. For CMake, use `find_package(Boost REQUIRED COMPONENTS log log_setup)`.
 :::
@@ -153,13 +153,13 @@ void handle_request(int id) {
 }
 ```
 
-:::tip Structured logging
+:::tip[Structured logging]
 Scoped attributes are the key to structured logging in Boost.Log. Attach user IDs, request IDs,
 or transaction IDs as attributes, then format or filter on them — this is far more useful than
 embedding them in the message string.
 :::
 
-:::warning Thread safety
+:::warning[Thread safety]
 Boost.Log is thread-safe by default — the core serialises access to sinks. However, this means
 high-throughput logging can become a contention point. For hot paths, consider an asynchronous
 sink (`asynchronous_sink`) that buffers records and writes them on a background thread.

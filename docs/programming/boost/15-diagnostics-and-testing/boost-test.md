@@ -13,7 +13,7 @@ assertion macros, test organisation into suites, fixtures, and data-driven testi
 of the first full-featured C++ testing frameworks and remains widely used, particularly in
 projects that already depend on Boost.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Writing ad-hoc test harnesses with `assert()` and `main()` gets painful fast: no structured
 output, no test isolation, no way to continue after a failure. Boost.Test gives you a framework
 that discovers and runs tests automatically, reports results cleanly, and keeps going when one
@@ -41,7 +41,7 @@ g++ -std=c++17 test_math.cpp -lboost_unit_test_framework -o test_math
 ./test_math
 ```
 
-:::note Header-only mode
+:::note[Header-only mode]
 Boost.Test can run header-only (no linking) if you define `BOOST_TEST_MODULE` before including
 `<boost/test/included/unit_test.hpp>` (note the `included/` path). This is convenient for small
 projects but increases compile time in larger ones.
@@ -70,7 +70,7 @@ BOOST_CHECK_NO_THROW(expr);            // expr does not throw
 BOOST_CHECK_MESSAGE(cond, "msg");      // custom failure message
 ```
 
-:::danger BOOST_CHECK vs BOOST_REQUIRE
+:::danger[BOOST_CHECK vs BOOST_REQUIRE]
 Use `REQUIRE` when a failure makes subsequent checks meaningless (e.g. a pointer is null — no
 point dereferencing it). Use `CHECK` by default so the test reports all failures, not just the
 first.
@@ -155,7 +155,7 @@ BOOST_DATA_TEST_CASE(squares,
 | Matchers | Limited | Yes (rich) | Yes (rich) |
 | Part of Boost | Yes | No | No |
 
-:::tip Choosing a framework
+:::tip[Choosing a framework]
 If your project already uses Boost, Boost.Test integrates with zero extra dependencies. For
 greenfield projects, Catch2 (header-only, BDD-style sections) and Google Test (rich matchers,
 mocking via GMock) are popular alternatives.

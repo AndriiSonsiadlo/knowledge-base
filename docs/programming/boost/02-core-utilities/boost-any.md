@@ -13,7 +13,7 @@ tags: [ c++, boost, any, type-erasure ]
 *open, unknown* set — you can store an `int` today and a `std::vector<std::string>` tomorrow in the same
 variable. This is classic **type erasure**, and it inspired C++17's `std::any`.
 
-:::info When you genuinely do not know the type
+:::info[When you genuinely do not know the type]
 `any` is for the rare situation where the set of possible types is open-ended or only known by external
 data — plugin systems, scripting bridges, generic property bags, message buses. If you can enumerate the
 types up front, a variant is almost always the better tool.
@@ -44,7 +44,7 @@ int main() {
 }
 ```
 
-:::warning any_cast is exact-match only
+:::warning[any_cast is exact-match only]
 `boost::any_cast<long>(a)` on an `any` holding an `int` **throws** — type erasure remembers the precise
 `typeid`, and there is no arithmetic conversion. Cast to the type you stored, then convert.
 :::
@@ -114,7 +114,7 @@ flowchart LR
 | virtual interface | open, shares behaviour | compile-time on interface | vtable dispatch | polymorphic behaviour |
 | `any` | open, unrelated types | runtime (`any_cast`) | type check + maybe heap | truly unknown types |
 
-:::tip Reach for variant first
+:::tip[Reach for variant first]
 Most "I need a flexible value" problems actually have a small, known set of types — use a variant and
 let the compiler check exhaustiveness. Choose `any` only when the types are genuinely open and share no
 common interface, because all the safety moves to *runtime*.
@@ -133,7 +133,7 @@ C++17 standardised the concept as `std::any`, with essentially the same interfac
 | In-place build | `boost::any(...)` | `std::make_any<T>`, `emplace` |
 | Small-object optimisation | implementation-dependent | typically yes |
 
-:::note Which to use
+:::note[Which to use]
 On C++17+, prefer `std::any` — it is standard, needs no dependency, and commonly stores small types
 without heap allocation. Use `boost::any` for pre-C++17 toolchains or code already inside the Boost
 dependency graph. See [Boost and the C++ Standard](../00-overview/boost-and-the-standard.md).

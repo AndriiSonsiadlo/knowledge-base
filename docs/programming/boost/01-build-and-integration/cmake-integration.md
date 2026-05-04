@@ -14,7 +14,7 @@ the include directories, link libraries, and compile definitions automatically. 
 whole flow: locating Boost, the two discovery mechanisms, the imported targets, the configuration
 knobs, and pulling Boost in with `FetchContent` when no system copy exists.
 
-:::info The one rule that prevents most pain
+:::info[The one rule that prevents most pain]
 Link against the **imported targets** (`Boost::headers`, `Boost::filesystem`, ...), never against raw
 variables like `${Boost_LIBRARIES}`. Targets propagate include directories and definitions
 transitively, so a single `target_link_libraries` call configures the consumer correctly.
@@ -84,7 +84,7 @@ target_link_libraries(server PRIVATE
     Boost::program_options)
 ```
 
-:::tip COMPONENTS is only for compiled libraries
+:::tip[COMPONENTS is only for compiled libraries]
 A frequent mistake is listing a header-only library, e.g. `COMPONENTS optional`, which makes
 `find_package` fail because there is no `libboost_optional` to find. For header-only code, just link
 `Boost::headers` and include the header. The split is explained in
@@ -128,7 +128,7 @@ flowchart TD
   newer Boost versions — hence the occasional "imported targets not available for Boost version"
   warning when an old CMake meets a new Boost.
 
-:::warning Old CMake plus new Boost
+:::warning[Old CMake plus new Boost]
 If you see `New Boost version may have incorrect or missing dependencies` or missing
 `Boost::` targets, you are almost certainly in **module mode** with a CMake too old for your Boost.
 Fixes: upgrade CMake, set `Boost_NO_BOOST_CMAKE` appropriately, or prefer config mode by ensuring
@@ -158,7 +158,7 @@ find_package(Boost 1.81 REQUIRED COMPONENTS filesystem)
 - **`Boost_DEBUG`** — set `ON` temporarily to make the finder print exactly which paths and variants
   it considered; invaluable when discovery misbehaves.
 
-:::note Result variables still exist
+:::note[Result variables still exist]
 `find_package` also sets `Boost_FOUND`, `Boost_VERSION`, `Boost_INCLUDE_DIRS`, and `Boost_LIBRARIES`.
 They remain for legacy scripts, but prefer the imported targets — they propagate usage requirements
 that the bare variables do not.
@@ -191,7 +191,7 @@ dependencies), which matters because configuring all of Boost is slow. The same 
 targets appear whether Boost was found on the system or fetched, so the rest of your CMake is
 identical.
 
-:::tip Prefer a package manager for FetchContent-style workflows
+:::tip[Prefer a package manager for FetchContent-style workflows]
 Downloading Boost through CMake works, but a dedicated [package manager](./package-managers.md) —
 vcpkg or Conan — caches binaries, resolves versions, and supplies a toolchain file that makes
 `find_package(Boost)` "just work". For most teams that is less friction than a raw `FetchContent`

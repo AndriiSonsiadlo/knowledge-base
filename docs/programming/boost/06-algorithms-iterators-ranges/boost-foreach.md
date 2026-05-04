@@ -12,7 +12,7 @@ tags: [c++, boost, foreach, iteration, legacy]
 lack the C++11 range-for loop. It was an essential tool in the C++03 era; today it is obsolete —
 the language-level `for (auto& x : container)` does the same thing, more safely and more readably.
 
-:::info The problem it solved
+:::info[The problem it solved]
 Before C++11, iterating a container required writing `for (std::vector<int>::iterator it = v.begin();
 it != v.end(); ++it)` — verbose, error-prone, and hard to read. `BOOST_FOREACH` compressed that
 into a single macro call that looked almost like the range-for syntax that would come later.
@@ -65,7 +65,7 @@ flowchart LR
 | Custom type with `begin`/`end` | user-defined | yes |
 | Rvalue temporary | `get_vector()` | yes (copies the range) |
 
-:::warning Rvalue ranges are copied
+:::warning[Rvalue ranges are copied]
 When you pass a temporary (rvalue) to `BOOST_FOREACH`, it copies the entire container to prevent
 dangling. This is safe but potentially expensive for large containers.
 :::
@@ -125,7 +125,7 @@ int main() {
 | Init statement | no | yes (C++20) |
 | Breakpoints | hit macro internals | clean single-step |
 
-:::danger Do not use BOOST_FOREACH in new code
+:::danger[Do not use BOOST_FOREACH in new code]
 There is no reason to use this macro in any project compiled with C++11 or later. It exists only for
 backwards compatibility with C++03 codebases. If you encounter it in legacy code, replacing it with
 a range-for loop is a safe, mechanical refactor.

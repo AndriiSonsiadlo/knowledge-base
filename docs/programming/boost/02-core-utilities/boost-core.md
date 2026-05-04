@@ -14,7 +14,7 @@ that it depends on almost nothing — at most Boost.Config and Boost.Assert. Tha
 lets `shared_ptr`, `optional`, `asio`, and dozens of others build on top of it without dragging in a
 sprawling dependency graph.
 
-:::info What "Core" means here
+:::info[What "Core" means here]
 Boost.Core is deliberately tiny and *boring*. Each header solves one small problem — taking a real
 address, wrapping a reference, forbidding copies — and does so with no transitive baggage. If you find
 yourself reaching for one of these helpers, you almost certainly already have it available.
@@ -57,7 +57,7 @@ int main() {
 }
 ```
 
-:::note Standardised
+:::note[Standardised]
 `std::addressof` (C++11) and the `constexpr` version (C++17) do the same job. Prefer `std::addressof`
 on a modern toolchain; reach for `boost::addressof` only in code that must also build pre-C++11.
 :::
@@ -96,7 +96,7 @@ class FileHandle : private boost::noncopyable {
 };
 ```
 
-:::tip Modern alternative
+:::tip[Modern alternative]
 Since C++11 you can simply write `Type(const Type&) = delete;`. `noncopyable` still reads well as
 self-documenting intent, but `= delete` is the idiomatic choice in new code.
 :::
@@ -196,7 +196,7 @@ void f(int used, int debug_only) {
 | `span` | non-owning contiguous views | `std::span` (C++20) |
 | `ignore_unused` | portable unused-warning suppression | `[[maybe_unused]]` (C++17) |
 
-:::tip Rule of thumb
+:::tip[Rule of thumb]
 On a modern toolchain, prefer the `std` equivalent where one exists (see
 [Boost and the standard](../00-overview/boost-and-the-standard.md)). Use Boost.Core for the pieces
 `std` never grew (`demangle`, `lightweight_test`, `ignore_unused`) or when you must support older

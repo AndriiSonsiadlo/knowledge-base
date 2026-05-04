@@ -212,28 +212,28 @@ void AUnderwaterVolume::OnActorEnter(AActor* EnteringActor)
 
 ## Gotchas
 
-:::warning Submix effects run on the sum, not per-source
+:::warning[Submix effects run on the sum, not per-source]
 An effect added via `AddSubmixEffect` processes the mixed-down signal of everything routed into that
 submix — it cannot target one source differently from another once they're in the same submix. If you
 need per-source processing (a unique filter on one specific emitter), that belongs on the source effect
 chain or the attenuation settings, not a submix effect.
 :::
 
-:::warning Occlusion lags because it's asynchronous
+:::warning[Occlusion lags because it's asynchronous]
 Occlusion is resolved via async line traces (`NotifyActiveSoundOcclusionTraceDone` fires once a trace
 completes), not synchronously every tick. Expect a frame or more of latency between geometry changing
 and the occlusion attenuation updating — don't chase "why is occlusion one frame late" as if it were a
 bug.
 :::
 
-:::caution Attenuation shape extents don't auto-scale with actor scale
+:::caution[Attenuation shape extents don't auto-scale with actor scale]
 `AttenuationShapeExtents` is authored in world units on the attenuation asset/settings block; scaling
 the actor the sound is attached to does not resize the attenuation shape to match. If you scale an actor
 up or down at runtime, adjust the attenuation override to match, or the sound's falloff radius will
 visibly disagree with the object producing it.
 :::
 
-:::caution A shared USoundAttenuation asset is shared — edits are global
+:::caution[A shared USoundAttenuation asset is shared — edits are global]
 Because `USoundAttenuation` assets are meant to be reused, editing one in the editor changes falloff
 behavior for every sound referencing it project-wide, not just the one you're currently tuning. Use a
 per-instance `AdjustAttenuation`/`SetAttenuationOverrides` call in C++ when you need a one-off variant

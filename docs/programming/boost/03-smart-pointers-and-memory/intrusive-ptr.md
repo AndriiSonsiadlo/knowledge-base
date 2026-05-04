@@ -13,7 +13,7 @@ managed object** rather than in a separate control block. The pointer itself is 
 and grabbing or releasing a reference costs nothing more than an integer increment on memory you were
 already touching.
 
-:::info Intrusive vs non-intrusive
+:::info[Intrusive vs non-intrusive]
 [`shared_ptr`](./shared-ptr.md) is *non-intrusive*: it allocates a control block beside the object.
 `intrusive_ptr` is *intrusive*: the count is a member of the object, so there is no extra allocation
 and `sizeof(intrusive_ptr<T>) == sizeof(T*)`.
@@ -68,13 +68,13 @@ flowchart LR
   can safely create a new `intrusive_ptr` from a raw pointer at any time (unlike `shared_ptr`, which
   would create a second control block).
 
-:::warning No weak_ptr equivalent
+:::warning[No weak_ptr equivalent]
 Because there is no separate control block, `intrusive_ptr` has **no companion `weak_ptr`**. If you
 need non-owning observers that can detect destruction, use [`shared_ptr`/`weak_ptr`](./shared-ptr.md)
 instead.
 :::
 
-:::danger Mixing raw delete and intrusive_ptr
+:::danger[Mixing raw delete and intrusive_ptr]
 The object frees itself when the count hits zero. Never `delete` an object that an `intrusive_ptr`
 still owns, and never hand the same raw pointer to two independent count schemes.
 :::

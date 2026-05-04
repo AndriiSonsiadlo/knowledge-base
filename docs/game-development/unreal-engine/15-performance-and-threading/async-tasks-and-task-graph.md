@@ -161,20 +161,20 @@ atomics through task bodies.
 
 ## Gotchas
 
-:::warning FNonAbandonableTask cannot be cancelled mid-run
+:::warning[FNonAbandonableTask cannot be cancelled mid-run]
 The "non-abandonable" contract means the task will finish once started, even if the system that requested
 it no longer needs the result. If a job genuinely needs to be interruptible, design it to check a
 cancellation flag from inside `DoWork()` and exit early — the task framework itself won't stop it for you.
 :::
 
-:::warning Don't touch UObjects from inside a task body
+:::warning[Don't touch UObjects from inside a task body]
 Whether it's `UE::Tasks::Launch`, the Task Graph, or `FAsyncTask::DoWork()`, the body runs on a pool
 worker thread, not the game thread. Read [Engine threading model](./engine-threading-model.md) for why
 that makes any `UObject` read or write there a crash risk, and hop back via
 `AsyncTask(ENamedThreads::GameThread, ...)` before touching one.
 :::
 
-:::caution Declared prerequisites are the only ordering guarantee you get
+:::caution[Declared prerequisites are the only ordering guarantee you get]
 Tasks without a prerequisite edge between them can and will run in any order, including simultaneously.
 "It happened to run in the right order in my testing" is not a guarantee — wire the actual dependency with
 `UE::Tasks::Prerequisites(...)` (or the Task Graph's `FGraphEventArray`) instead of relying on submission

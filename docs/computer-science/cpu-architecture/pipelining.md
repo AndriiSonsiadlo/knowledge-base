@@ -89,7 +89,7 @@ underperforms what the hardware is capable of.
 
 ## Edge Cases & Pitfalls
 
-:::danger Branch mispredictions are expensive
+:::danger[Branch mispredictions are expensive]
 On a deep pipeline (15-20+ stages on some x86-64 chips), a mispredicted branch means every
 speculatively-fetched instruction after it must be discarded — a **pipeline flush** that can cost
 10-20 cycles. Unpredictable branches (data-dependent, essentially random) are one of the most common

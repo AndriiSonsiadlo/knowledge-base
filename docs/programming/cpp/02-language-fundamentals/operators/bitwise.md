@@ -11,7 +11,7 @@ tags: [c++, operators, bitwise, bit-manipulation]
 Bitwise operators manipulate the individual bits of integer values. They are the building blocks of
 flag sets, masks, packed data, and low-level protocol code.
 
-:::info Where to go deeper
+:::info[Where to go deeper]
 This page is the C++ operator reference. For the *algorithmic* side — counting bits, isolating the
 lowest set bit, parity tricks — see [Bit Manipulation Techniques](../../../../computer-science/bit-manipulation/techniques.md).
 :::
@@ -52,7 +52,7 @@ p ^=  Exec;                    // toggle a flag
 
 ## Shifts: the sharp edges
 
-:::warning Two real traps
+:::warning[Two real traps]
 - **Shift by ≥ the type width is undefined behaviour.** `x << 32` on a 32-bit `int` is UB, not 0.
 - **Right-shifting a *negative* signed value is implementation-defined** (arithmetic on every
   mainstream compiler, but not guaranteed by the standard pre-C++20).

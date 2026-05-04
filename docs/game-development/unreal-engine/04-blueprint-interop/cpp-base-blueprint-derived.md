@@ -105,7 +105,7 @@ the parent class as a decision made early, not something to change casually mid-
 
 ## Gotchas
 
-:::warning Changing a C++ default does not touch instances that already overrode it
+:::warning[Changing a C++ default does not touch instances that already overrode it]
 `EditDefaultsOnly` properties are copied into each Blueprint subclass's Class Default Object (CDO) the
 first time they're touched in the editor. If a designer already set `BP_Weapon_Rifle`'s
 `FireCooldownSeconds` explicitly, bumping the C++ default later does **not** change that Blueprint's
@@ -114,14 +114,14 @@ Auditing which subclasses have drifted from the current C++ default is a manual 
 something the compiler catches.
 :::
 
-:::caution Construction order: native constructor, then CDO, then Blueprint defaults
+:::caution[Construction order: native constructor, then CDO, then Blueprint defaults]
 The C++ constructor runs first and sets the values you wrote in the `.cpp`. The Blueprint's Class
 Default Object then applies any values the Blueprint editor overrode. If you need a value that a
 Blueprint subclass can never override, don't rely on `EditDefaultsOnly` — compute it in C++ without
 exposing it for edit, or enforce it in `PostInitProperties()`.
 :::
 
-:::warning Abstract does not mean "cannot be subclassed"
+:::warning[Abstract does not mean "cannot be subclassed"]
 `UCLASS(Abstract)` blocks placing or spawning the class itself; it says nothing about Blueprint
 subclassing, which is controlled independently by `Blueprintable`/`NotBlueprintable`. Combining
 `Abstract, Blueprintable` — a base only Blueprint subclasses can instantiate — is the normal shape for

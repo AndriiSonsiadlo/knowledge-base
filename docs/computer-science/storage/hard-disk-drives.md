@@ -63,7 +63,7 @@ Total access time = Seek time + Rotational latency + Transfer time
 | 10,000 | ~6.0 ms | ~3.0 ms |
 | 15,000 | ~4.0 ms | ~2.0 ms |
 
-:::info Why sequential I/O is fast and random I/O is slow
+:::info[Why sequential I/O is fast and random I/O is slow]
 If consecutive reads are on the same or an adjacent track, seek time drops to nearly zero and
 rotational latency is paid once for a large run of data — this is **sequential I/O**, and it's close
 to the drive's raw media bandwidth. **Random I/O** pays a full seek and rotational-latency penalty
@@ -85,13 +85,13 @@ workloads like OLTP database indexes or swap files.
 
 ## Edge Cases & Pitfalls
 
-:::warning Fragmentation compounds seek cost
+:::warning[Fragmentation compounds seek cost]
 When a filesystem scatters a single file's blocks across non-adjacent tracks (fragmentation), what
 should be one sequential read becomes many small seeks. This is a much bigger deal on HDDs than on
 SSDs, which is why HDD-oriented filesystems and defragmentation tools exist at all.
 :::
 
-:::danger Mechanical wear is not optional
+:::danger[Mechanical wear is not optional]
 Every HDD eventually fails mechanically — bearing wear, head crashes, or motor failure — regardless of
 how carefully it's used. Unlike flash wear (which scales with writes), HDD mechanical failure is
 largely time- and usage-independent in onset, so backups/RAID redundancy matter even for "lightly

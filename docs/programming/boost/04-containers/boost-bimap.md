@@ -13,7 +13,7 @@ mapping `A <-> B`, you can efficiently look up `B` from `A` *and* `A` from `B`. 
 built on top of [Boost.MultiIndex](./boost-multi-index.md), but it exposes a much simpler,
 map-like interface tuned for the two-key use case.
 
-:::info The problem it solves
+:::info[The problem it solves]
 You have a one-to-one mapping (country codes to country names, enum values to strings, user IDs to
 usernames) and need to search in both directions. The usual workaround — maintaining two
 `std::map`s that mirror each other — is tedious, error-prone, and doubles the memory used for keys.
@@ -127,7 +127,7 @@ int main() {
 }
 ```
 
-:::tip When bimap is the right choice
+:::tip[When bimap is the right choice]
 Use `bimap` when the mapping is genuinely **bidirectional** — you need to go from A to B and from B
 to A with roughly equal frequency. If you only ever look up in one direction, a plain `std::map` is
 simpler and sufficient.
@@ -142,7 +142,7 @@ simpler and sufficient.
 | Erase | single call, both views updated | must erase from both maps |
 | Complexity | slightly more verbose type declaration | straightforward but error-prone |
 
-:::warning Duplicates on either side
+:::warning[Duplicates on either side]
 With the default `set_of` on both sides, inserting a pair whose left **or** right key already exists
 will fail silently (returns an iterator to the existing element). If you need duplicates on one
 side, switch that side to `multiset_of`.

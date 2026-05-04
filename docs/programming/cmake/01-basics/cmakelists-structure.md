@@ -63,7 +63,7 @@ endif()
 cmake_minimum_required(VERSION 3.15)
 ```
 
-:::info Why This Matters
+:::info[Why This Matters]
 
 * Ensures CMake features you use are available
 * Prevents cryptic errors from older versions
@@ -282,32 +282,32 @@ target_link_libraries(myapp PRIVATE mylib Threads::Threads)
 target_compile_options(myapp PRIVATE -Wall -Wextra)
 ```
 
-:::info **Executables vs Libraries**:
+:::info[**Executables vs Libraries**:]
 
 * `add_executable()` defines a binary that can be run.
 * `add_library()` defines a library (`STATIC`, `SHARED`, or `INTERFACE`) that can be linked to other targets.
 :::
 
-:::info **Target properties**:
+:::info[**Target properties**:]
 
 * Using `target_*` commands (`target_include_directories`, `target_link_libraries`, `target_compile_options`, etc.) applies properties **only to that target**, avoiding global side effects and making dependencies explicit.
 :::
 
-:::info **Linking dependencies**:
+:::info[**Linking dependencies**:]
 
 * Link libraries using `target_link_libraries()`.
 * Modern CMake prefers linking **targets** (like `mylib` or imported targets such as `Threads::Threads`) rather than raw library paths.
 * Target-based linking automatically propagates include directories, compile options, and other necessary settings to dependent targets.
 :::
 
-:::info **Include directories**:
+:::info[**Include directories**:]
 
 * `PRIVATE`: Only for this target.
 * `PUBLIC`: For this target and anything linking to it.
 * `INTERFACE`: Only for targets linking to this one (used for header-only libraries).
 :::
 
-:::info **Compile options**:
+:::info[**Compile options**:]
 
 * Use `target_compile_options()` instead of global flags like `CMAKE_CXX_FLAGS`.
 * Allows different targets to have different warning levels or optimizations.
@@ -345,7 +345,7 @@ install(DIRECTORY include/
 )
 ```
 
-:::info Key Points
+:::info[Key Points]
 
 * `TARGETS` specifies which targets (executables or libraries) to install.
 * `RUNTIME` is for executables or DLLs.
@@ -369,7 +369,7 @@ cmake --install build --prefix /usr/local
 
 If no `--prefix` is given, CMake uses the default install directory, which varies by platform.
 
-:::info Advanced Notes
+:::info[Advanced Notes]
 
 * You can create **component-based installations** to separate binaries, libraries, and documentation.
 * `install()` works in combination with `CPack` to generate packages (like `.deb`, `.rpm`, or `.zip`).
@@ -396,7 +396,7 @@ if(BUILD_TESTS)
 endif()
 ```
 
-:::info Key Points
+:::info[Key Points]
 
 * `enable_testing()` must be called once to activate CTest support.
 * `add_test(NAME <test_name> COMMAND <executable>)` registers a test that can be run with `ctest`.
@@ -468,7 +468,7 @@ file(GLOB SOURCES "src/*.cpp")
 add_executable(myapp ${SOURCES})
 ```
 
-:::danger Avoid GLOB
+:::danger[Avoid GLOB]
 CMake won't detect new files added after initial configuration. Prefer explicit lists.
 :::
 
@@ -558,7 +558,7 @@ Use out-of-source builds
 Set C++ standard with `target_compile_features()`
 :::
 
-:::danger Don'ts
+:::danger[Don'ts]
 Don't use `file(GLOB)` for source files  
 Don't set global compiler flags  
 Don't use absolute paths  

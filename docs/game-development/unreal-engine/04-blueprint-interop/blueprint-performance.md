@@ -95,20 +95,20 @@ Blueprint or C++.
 
 ## Gotchas
 
-:::warning Blueprint Nativization does not exist in UE5
+:::warning[Blueprint Nativization does not exist in UE5]
 Earlier engine versions offered "Blueprint Nativization," which converted Blueprint graphs to generated
 C++ at cook time. It does not exist in UE5 — projects that used it still function, but nativization is
 not an available optimization path going forward. If a performance problem is real, the fix is moving
 the specific hot logic to hand-written C++, not flipping a nativization setting.
 :::
 
-:::caution BlueprintPure functions are not free just because they lack an exec pin
+:::caution[BlueprintPure functions are not free just because they lack an exec pin]
 As covered in [Exposing C++ to Blueprint](./exposing-cpp-to-blueprint.md), a `BlueprintPure` function
 re-runs its full body every time an input pin pulls it — there is no caching. Wiring an expensive pure
 function into several places in a Tick graph multiplies its cost by every pull, silently.
 :::
 
-:::warning Don't convert what you haven't measured
+:::warning[Don't convert what you haven't measured]
 Converting a rarely-called Blueprint function to C++ trades Blueprint's fast iteration (edit, compile,
 play — no engine rebuild) for a real engineering cost, to save time that was never actually on the
 critical path. Reserve conversion for logic a profiler has actually flagged.

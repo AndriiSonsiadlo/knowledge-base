@@ -10,7 +10,7 @@ tags: [c++, object-slicing, polymorphism, pitfalls]
 
 Object slicing occurs when you copy a derived class object to a base class object. The derived parts are "sliced off" and lost.
 
-:::info The Slicing Problem
+:::info[The Slicing Problem]
 Copying derived object to base object only copies the base part. Derived data and virtual function overrides are lost!
 :::
 

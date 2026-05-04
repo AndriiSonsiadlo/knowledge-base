@@ -14,7 +14,7 @@ raw pointer's lifetime to an object's scope, so memory and other resources are r
 and exception-safely. Most of the family was later folded into the standard library — but Boost still
 offers a few members `std` never adopted.
 
-:::info The whole family at a glance
+:::info[The whole family at a glance]
 `shared_ptr`, `weak_ptr`, `scoped_ptr`, `intrusive_ptr`, plus the array cousins `scoped_array` and
 `shared_array`. Each encodes a different *ownership policy* — who owns the object, how many owners
 there can be, and where the bookkeeping lives.
@@ -54,7 +54,7 @@ flowchart TD
   stores the count inside the object, so the pointer is a single machine word with no separate
   allocation.
 
-:::tip Prefer `std` when you can
+:::tip[Prefer `std` when you can]
 Since C++11 the standard versions cover the common cases and integrate with the rest of `std`.
 Reach for the Boost versions when you need something they add — `intrusive_ptr` (no `std` analogue),
 or when you must support a pre-C++11 toolchain.

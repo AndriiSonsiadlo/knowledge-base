@@ -10,7 +10,7 @@ tags: [c++, smart-pointers, weak-ptr, reference-counting, cpp11]
 
 Non-owning observer of `shared_ptr`-managed objects. Doesn't increase reference count, enables checking if object still exists.
 
-:::info Non-Owning Observer
+:::info[Non-Owning Observer]
 **Watches without owning** - object can be deleted while weak_ptrs exist
 - Doesn't increase reference count
 - Breaks circular references
@@ -409,7 +409,7 @@ void thread2() {
 
 Creating and destroying weak_ptrs, copying them, and calling `lock()` are all thread-safe. However, if multiple threads lock and access the object simultaneously, you need additional synchronization.
 
-:::info Thread Safety
+:::info[Thread Safety]
 - `lock()` is thread-safe (atomic)
 - Creating/destroying weak_ptr is thread-safe
 - Object itself needs separate synchronization
@@ -468,35 +468,35 @@ sizeof(std::weak_ptr<int>) == sizeof(std::shared_ptr<int>)
 
 ## Summary
 
-:::info Core features:
+:::info[Core features:]
 - Non-owning observer (doesn't increase count)
 - Breaks circular references
 - Safe check if object exists
 - Must lock() to access
 :::
 
-:::info Key operations:
+:::info[Key operations:]
 - `weak = shared` - create from shared_ptr
 - `weak.expired()` - check if deleted
 - `weak.lock()` - convert to shared_ptr (atomic)
 - `weak.use_count()` - get strong ref count
 :::
 
-:::info Use cases:
+:::info[Use cases:]
 - Break cycles (linked structures, parent-child)
 - Observer pattern (don't keep observers alive)
 - Caching (don't prevent deletion)
 - Callbacks (object might be destroyed)
 :::
 
-:::info Guidelines:
+:::info[Guidelines:]
 - Strong forward, weak backward
 - Parent owns child (strong)
 - Child observes parent (weak)
 - Always use `lock()` for atomic check-and-access
 :::
 
-:::info Thread safety:
+:::info[Thread safety:]
 - Control operations are thread-safe
 - Object access needs separate synchronization
 :::

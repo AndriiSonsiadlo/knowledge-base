@@ -14,7 +14,7 @@ The two dominant choices — **vcpkg** (Microsoft) and **Conan** (JFrog) — bot
 integrate with [CMake](./cmake-integration.md) through a toolchain file, and both let you pull in only
 the Boost modules you need rather than the whole 160-library distribution.
 
-:::info The shared idea
+:::info[The shared idea]
 A package manager builds (or downloads a prebuilt) Boost, then hands CMake a *toolchain file*. With
 that toolchain in place your `CMakeLists.txt` does nothing special — the ordinary
 `find_package(Boost REQUIRED COMPONENTS ...)` simply finds the manager's copy. Your build scripts stay
@@ -80,7 +80,7 @@ A *triplet* (`x64-linux`, `x64-windows-static`, `arm64-osx`, ...) encodes the ta
 whether libraries are static or shared — vcpkg's equivalent of the `link=static` choice you would pass
 to [b2](./boost-build-b2.md).
 
-:::tip Prefer manifest mode
+:::tip[Prefer manifest mode]
 Manifest mode keeps the dependency set in version control, so a fresh checkout reproduces the exact
 build. Classic mode is convenient for one-off experimentation but drifts between machines.
 :::
@@ -162,7 +162,7 @@ build_type=Release
 conan install . -pr:h=android-arm64 -pr:b=default --build=missing
 ```
 
-:::warning Keep the profile and your project in sync
+:::warning[Keep the profile and your project in sync]
 The compiler, standard library, and `build_type` in the active profile determine the ABI of the Boost
 binaries Conan produces. If your CMake project compiles with a different standard or runtime than the
 profile declares, you can hit the same link-time and ODR problems described on the
@@ -199,7 +199,7 @@ Boost arrived.
 | Component granularity | Per-library ports/options | Often one big `libboost-all-dev` |
 | Best for | Cross-platform, multi-version, CI | Quick local setup, throwaway work |
 
-:::tip Choosing between them
+:::tip[Choosing between them]
 Use a **package manager** when you need reproducible, pinned, cross-platform builds — especially in
 CI. Reach for a **system package** (covered in [Installing Boost](../00-overview/installation.md))
 when you just want a recent Boost on your own machine and don't care about exact versions. Between the

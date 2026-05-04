@@ -108,13 +108,13 @@ type, Epic's own guidance says to prefer it, provided you don't mix idioms withi
 
 ## Gotchas
 
-:::warning A missing type prefix isn't a compile error, just a readability regression
+:::warning[A missing type prefix isn't a compile error, just a readability regression]
 Nothing stops you from naming a `UObject`-derived class `HealthComponent` instead of
 `UHealthComponent`. It compiles fine and immediately reads as inconsistent with the rest of the
 codebase and the engine's own source.
 :::
 
-:::caution Don't mix Unreal idioms and STL idioms in the same API surface
+:::caution[Don't mix Unreal idioms and STL idioms in the same API surface]
 Taking a `TArray` parameter and internally converting to `std::vector` (or vice versa) inside one
 function is exactly the mixing Epic's own guidance warns against — pick one per API boundary.
 :::

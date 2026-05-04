@@ -13,7 +13,7 @@ operations and Voronoi diagrams**. It was originally developed for Electronic De
 (EDA) and VLSI layout, where coordinates are on a fixed grid and exact integer arithmetic avoids
 the robustness issues of floating-point geometry.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Floating-point polygon operations can fail on edge cases — cracks appear at intersections,
 containment tests give wrong answers near boundaries. When your domain uses integer or
 fixed-point coordinates (chip layout, pixel grids, tile maps), Boost.Polygon gives you exact
@@ -78,7 +78,7 @@ int main() {
 }
 ```
 
-:::tip Operator overloads
+:::tip[Operator overloads]
 Boost.Polygon overloads `+=` (union), `*=` (intersection), `-=` (difference), and `^=`
 (symmetric difference) on polygon sets, making boolean expressions read naturally:
 `result = (a + b) - c`.
@@ -134,7 +134,7 @@ curves.
 | Typical domain | Chip layout, pixel grids | GIS, CAD, game engines |
 | WKT support | No | Yes |
 
-:::note When to choose which
+:::note[When to choose which]
 Use **Boost.Polygon** when coordinates are integers and you need robust boolean operations or
 Voronoi diagrams. Use **Boost.Geometry** when you work with floating-point, geographic
 coordinates, or need the broader algorithm set (convex hull, buffer, spatial indices).
@@ -158,7 +158,7 @@ namespace boost { namespace polygon {
 }}
 ```
 
-:::warning Header weight
+:::warning[Header weight]
 Boost.Polygon is header-only but pulls in a significant amount of template machinery. Isolate
 heavy Voronoi or boolean-op code in its own translation unit to limit compile-time impact on the
 rest of your build.

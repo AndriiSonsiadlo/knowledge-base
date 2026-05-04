@@ -10,7 +10,7 @@ tags: [cpp, policy-based-design, templates, design-patterns, generic-programming
 
 Policy-based design decomposes complex behaviors into independent policy classes combined through templates. Each policy defines one aspect of behavior, and policies are mixed together to create flexible, reusable components.
 
-:::info Compile-Time Strategy Pattern
+:::info[Compile-Time Strategy Pattern]
 Think of policies as compile-time strategy patterns. Instead of runtime polymorphism with virtual functions, policies provide compile-time composition of behaviors with zero runtime overhead.
 :::
 
@@ -632,7 +632,7 @@ void use_policy(PolicyBased<T>& obj) {
 - Use concepts (C++20) to constrain policies
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Over-engineer with too many policies
 - Mix policies with runtime polymorphism unnecessarily
 - Forget to document policy interfaces

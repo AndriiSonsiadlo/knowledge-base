@@ -10,7 +10,7 @@ tags: [c++, build-systems, cmake, make, automation]
 
 Build systems automate compilation, dependency management, and linking. They track changes and rebuild only what's necessary, making large C++ projects manageable.
 
-:::info Why Build Systems?
+:::info[Why Build Systems?]
 Manual compilation (`g++ *.cpp`) doesn't scale beyond a few files. Build systems handle dependencies, incremental builds, platform differences, and external libraries.
 :::
 

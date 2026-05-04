@@ -10,7 +10,7 @@ tags: [c++, initialization, default-init, undefined-behavior]
 
 Object created without explicit initializer. Behavior depends on type and storage duration. **Dangerous for fundamental types in local scope.**
 
-:::warning Undefined Values
+:::warning[Undefined Values]
 Local fundamental types (int, double, pointers) = indeterminate values = undefined behavior when read.
 :::
 
@@ -187,7 +187,7 @@ graph TD
 - Use value initialization `{}` for safety
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Read uninitialized local variables
 - Rely on implicit zero for local variables
 - Assume compiler-generated constructors initialize members
@@ -196,7 +196,7 @@ graph TD
 
 ## Summary
 
-:::info Default Initialization - Key Points
+:::info[Default Initialization - Key Points]
 **Storage-Dependent Behavior:**
 - **Automatic (local)**: Fundamentals = indeterminate (UB if read)
 - **Static/global**: Always zero-initialized

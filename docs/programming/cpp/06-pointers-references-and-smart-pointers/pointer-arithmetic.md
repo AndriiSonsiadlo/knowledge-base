@@ -10,7 +10,7 @@ tags: [c++, pointers, arithmetic, arrays, memory]
 
 Pointer arithmetic navigates contiguous memory with automatic scaling by type size. Essential for arrays but dangerous without bounds checking.
 
-:::info Automatic Scaling
+:::info[Automatic Scaling]
 ```cpp
 int arr[5] = {10, 20, 30, 40, 50};
 int* ptr = arr;
@@ -60,7 +60,7 @@ ptr += 2;    // Move forward 2 elements
 *ptr;        // 40
 ```
 
-:::warning No Bounds Checking
+:::warning[No Bounds Checking]
 ```cpp
 int arr[5] = {10, 20, 30, 40, 50};
 int* ptr = arr;
@@ -87,7 +87,7 @@ int* p2 = arr;      // Points to arr[0]
 ptrdiff_t diff = p1 - p2;  // 2 elements
 ```
 
-:::info Only Same Array
+:::info[Only Same Array]
 Subtraction only valid for pointers into same array!
 ```cpp
 int arr1[5], arr2[5];
@@ -214,21 +214,21 @@ int x = *(int*)(cptr + 1);  // Undefined behavior
 
 ## Summary
 
-:::info Core mechanics
+:::info[Core mechanics]
 - `ptr + n` moves by `n * sizeof(type)` bytes
 - `ptr[i]` is syntactic sugar for `*(ptr + i)`
 - Subtraction gives element count, not bytes
 - Comparison works for same-array pointers
 :::
 
-:::info Valid operations
+:::info[Valid operations]
 - Addition: `ptr + n`, `ptr++`, `ptr += n`
 - Subtraction: `ptr - n`, `ptr--`, `ptr1 - ptr2`
 - Comparison: `<`, `>`, `<=`, `>=`, `==`, `!=`
 - Dereference: `*ptr`, `ptr[i]`
 :::
 
-:::danger Dangers
+:::danger[Dangers]
 - No bounds checking (compiler won't stop you)
 - Buffer overflows (security vulnerabilities)
 - One-past-end dereference (valid for comparison only)

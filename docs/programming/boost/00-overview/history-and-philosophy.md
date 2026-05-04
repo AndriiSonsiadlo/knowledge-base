@@ -14,7 +14,7 @@ who co-founded the project — wanted a place to incubate the library ideas that
 had *not* included. Boost became that place: an open, community-run workshop where C++ libraries could
 be designed, scrutinised, and hardened in the open before anyone proposed them for the standard.
 
-:::info The one-line origin story
+:::info[The one-line origin story]
 Boost exists because the C++ standard library was deliberately small, and standardisation is slow. A
 group of committee members wanted to keep building high-quality, portable libraries *between* standard
 revisions — and to do it in public, with peer review, under a permissive license.
@@ -62,7 +62,7 @@ The mechanics, conducted largely on the Boost developers' mailing list, look lik
 4. The review manager reads the reviews and issues a verdict — accept, accept with conditions, or
    reject — along with a rationale.
 
-:::note Acceptance is not forever
+:::note[Acceptance is not forever]
 Acceptance is a quality gate, not a popularity contest, and the bar is high — well-regarded libraries
 have been rejected and resubmitted after redesign. The mailing list remains the project's backbone for
 proposals, design debate, and release coordination.
@@ -89,7 +89,7 @@ feel the way they do.
   the language further than the standard had at the time — and discovering the rough edges that later
   feed back into the language itself.
 
-:::tip Read this as a quality signal
+:::tip[Read this as a quality signal]
 When you pick up a Boost library, you are getting something that survived public review, is documented,
 and is expected to compile on compilers you may never personally touch. That is the practical payoff of
 these principles.
@@ -112,7 +112,7 @@ That last point about binaries is the practical headline: you can ship a closed-
 Boost without burying a license notice in your application's About box. This made Boost safe to adopt
 across industry.
 
-:::tip When in doubt, the license is friendly
+:::tip[When in doubt, the license is friendly]
 The Boost Software License is one of the most permissive in common use. For most teams it raises no
 legal concerns — but always confirm with whoever owns licensing decisions at your organisation.
 :::

@@ -105,7 +105,7 @@ verified — the kernel will re-ARP before using it if it's expired.
 
 ## Edge Cases & Pitfalls
 
-:::warning ARP has no authentication
+:::warning[ARP has no authentication]
 Any device on a LAN can reply to an ARP request (or send unsolicited ARP replies) claiming to own an
 IP address it doesn't. This is the basis of **ARP spoofing/poisoning**, used in man-in-the-middle
 attacks on local networks — a major reason switched, isolated VLANs and features like **Dynamic ARP

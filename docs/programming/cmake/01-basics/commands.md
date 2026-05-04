@@ -54,7 +54,7 @@ add_executable(target_name
 )
 ```
 
-:::info Header Files
+:::info[Header Files]
 Including headers is optional but helps IDEs index them.
 :::
 
@@ -260,7 +260,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 ```
 
-:::warning Use Sparingly
+:::warning[Use Sparingly]
 Prefer `target_compile_features()` for C++ standard and portable options.
 :::
 
@@ -467,7 +467,7 @@ macro(macro_name arg1)
 endmacro()
 ```
 
-:::warning Function vs Macro
+:::warning[Function vs Macro]
 
 - **Function**: Creates new scope, use `PARENT_SCOPE` to modify parent
 - **Macro**: No new scope, directly modifies caller's scope

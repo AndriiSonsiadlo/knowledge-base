@@ -13,7 +13,7 @@ memory regions, memory-mapped files, named mutexes and condition variables, and 
 most powerful feature is the ability to place STL-compatible containers — vectors, maps, strings —
 directly in shared memory so that multiple processes can read and modify them without serialization.
 
-:::info The problem it solves
+:::info[The problem it solves]
 When two processes need to share data, the options are sockets, pipes, files, or shared memory. Shared
 memory is the fastest — no kernel copies, no serialization — but the POSIX and Windows APIs are
 completely different and managing offsets manually is error-prone. Boost.Interprocess wraps this in a
@@ -85,7 +85,7 @@ int main() {
 }
 ```
 
-:::warning Pointers do not work across processes
+:::warning[Pointers do not work across processes]
 A raw pointer in shared memory is useless to another process — the segment may be mapped at a
 different virtual address. Use `offset_ptr` (Boost.Interprocess provides this) instead of raw
 pointers for anything stored in shared memory.
@@ -152,7 +152,7 @@ int main() {
 }
 ```
 
-:::tip Shared memory versus memory-mapped files
+:::tip[Shared memory versus memory-mapped files]
 Shared memory is faster (no filesystem overhead) but volatile — it vanishes on reboot. Memory-mapped
 files persist but involve filesystem I/O. Choose based on whether you need persistence.
 :::
@@ -168,7 +168,7 @@ bip::named_mutex::remove("MyMutex");
 bip::message_queue::remove("mq");
 ```
 
-:::danger Leaked shared memory
+:::danger[Leaked shared memory]
 If a process crashes without calling `remove`, the shared memory segment remains in the OS. On Linux,
 check `/dev/shm/` for stale segments. Use RAII wrappers (`remove_shared_memory_on_destroy`) to
 reduce the risk.

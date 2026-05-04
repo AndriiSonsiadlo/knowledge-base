@@ -10,7 +10,7 @@ tags: [c++, templates, type-traits, metaprogramming]
 
 Type traits are compile-time tools that query and transform types. They power template metaprogramming and SFINAE, letting you write code that adapts to different types automatically.
 
-:::info Compile-Time Type Information
+:::info[Compile-Time Type Information]
 Type traits answer questions about types at compile-time: Is it a pointer? Is it const? Can it be copied? No runtime cost!
 :::
 

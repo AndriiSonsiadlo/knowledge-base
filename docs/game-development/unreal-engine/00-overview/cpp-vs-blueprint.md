@@ -99,7 +99,7 @@ public:
 
 ## Failure modes of both extremes
 
-:::warning All-Blueprint gameplay logic
+:::warning[All-Blueprint gameplay logic]
 Whole gameplay systems built entirely in Blueprint graphs tend to degrade the same way over a
 project's lifetime: growing, hard-to-navigate graphs; merge conflicts that can't be resolved with a
 text diff, only by redoing one person's changes; and per-frame logic that's measurably slower than the
@@ -107,14 +107,14 @@ equivalent C++ once profiled. It's the natural failure mode of "no engineer want
 class," not a deliberate architectural choice.
 :::
 
-:::warning All-C++, no exposed surface
+:::warning[All-C++, no exposed surface]
 The opposite failure is a C++ class that hardcodes every tunable value and every level-specific
 behavior, leaving designers no lever to pull without filing a ticket. This defeats Blueprint's actual
 purpose and turns every content iteration into an engineering bottleneck — usually a sign that
 `UPROPERTY(EditAnywhere)` and `BlueprintImplementableEvent` were skipped where they were needed.
 :::
 
-:::caution Recompiling C++ is not free
+:::caution[Recompiling C++ is not free]
 A C++ change forces a rebuild and, depending on what changed, an editor restart — much slower than a
 Blueprint edit. This is itself a reason to push genuinely volatile, frequently-tuned values (not
 structural logic) into Blueprint-editable properties rather than C++ constants.

@@ -10,7 +10,7 @@ tags: [c++, preprocessor, macros, includes, compilation]
 
 The preprocessor is a text manipulation tool that runs before compilation. It handles `#include`, `#define`, `#ifdef`, and other directives, producing pure C++ code for the compiler.
 
-:::info Text Substitution
+:::info[Text Substitution]
 The preprocessor doesn't understand C++ - it only does text replacement. This makes it powerful but dangerous if misused.
 :::
 
@@ -381,7 +381,7 @@ This shows exactly what the compiler sees after preprocessing. Useful for debugg
 - Document complex macros thoroughly
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Use macros when templates/inline functions work
 - Forget parentheses in macro arguments
 - Rely on macro side effects (like `x++`)

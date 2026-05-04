@@ -10,7 +10,7 @@ tags: [cpp, debugging, gdb, breakpoints, watchpoints]
 
 Systematic techniques for finding and fixing bugs: compilation flags, assertions, logging, debuggers. Understanding debugging tools is essential for efficient development.
 
-:::info Debug vs Release
+:::info[Debug vs Release]
 **Debug builds** (`-g -O0`): symbols, no optimization, debugger-friendly  
 **Release builds** (`-O2/-O3`): optimized, hard to debug, production-ready
 :::

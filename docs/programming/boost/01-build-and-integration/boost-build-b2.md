@@ -14,7 +14,7 @@ declarative language called Jam. For most of Boost's history this was the canoni
 install the compiled libraries, so even if you never author a Jamfile yourself you will run into `b2`
 the first time you build Boost from source.
 
-:::info What you actually need to know
+:::info[What you actually need to know]
 The vast majority of Boost users today never touch a Jamfile. They consume Boost through
 [CMake](./cmake-integration.md), a [package manager](./package-managers.md), or a system package, and
 only invoke `b2` once — to compile the handful of [non-header-only libraries](../00-overview/header-only-vs-compiled.md).
@@ -38,7 +38,7 @@ Program_options, and friends), the workflow is always the same two steps: bootst
 sources and write an initial `project-config.jam`. After that, `./b2` with no arguments builds all
 the compiled libraries using sensible defaults and drops the results in `stage/lib`.
 
-:::note Header-only libraries need no build at all
+:::note[Header-only libraries need no build at all]
 `b2` only produces artifacts for the compiled libraries. Header-only components (the majority of
 Boost) work the moment the include root is on your compiler's search path. See
 [header-only vs compiled](../00-overview/header-only-vs-compiled.md) for the split.
@@ -98,7 +98,7 @@ knowing, because they map directly onto questions you will be asked when packagi
 - **`--with-LIB` / `--without-LIB`** — build a subset instead of everything, which is dramatically
   faster when you only need one or two compiled libraries.
 
-:::warning Match the ABI between Boost and your application
+:::warning[Match the ABI between Boost and your application]
 `variant`, `runtime-link`, the standard-library version, and the toolset all contribute to the binary
 interface. If Boost was built `release / runtime-link=shared` with one compiler and you link it into a
 `debug / runtime-link=static` application built with another, you can get link-time failures or — worse
@@ -154,7 +154,7 @@ Almost certainly not. Boost.Build is excellent at building *Boost*, but the wide
 consolidated around CMake plus a package manager. Jam is an unfamiliar language to most teams, IDE and
 tooling support is thin, and integrating non-Boost dependencies is awkward.
 
-:::tip Recommended path for consumers
+:::tip[Recommended path for consumers]
 Build or obtain Boost once — via `b2 install`, a [package manager](./package-managers.md), or your OS
 package — then consume it from your project with [CMake](./cmake-integration.md). Author Jamfiles only
 if you are contributing to Boost itself.

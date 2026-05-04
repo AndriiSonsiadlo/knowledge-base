@@ -165,13 +165,13 @@ be — not something to notice only once cert fails.
 
 ## Gotchas
 
-:::warning A PIE memory number is not a shipping memory number
+:::warning[A PIE memory number is not a shipping memory number]
 The editor keeps editor-only data resident that a packaged build never loads, and a Development build's
 allocator behavior differs from Shipping. Always validate a real memory budget against a packaged,
 platform-target build, not a PIE session in the editor.
 :::
 
-:::caution Over-budget streaming doesn't fail loudly
+:::caution[Over-budget streaming doesn't fail loudly]
 When the render-asset streamer exceeds its pool, it doesn't crash — it demotes mip levels and evicts,
 which shows up as textures popping to lower resolution under memory pressure rather than an error. Check
 `GetMemoryOverBudget()` or the streaming stat groups proactively; don't wait for visibly blurry textures

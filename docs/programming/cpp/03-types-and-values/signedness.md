@@ -147,7 +147,7 @@ unsigned int flags = 0xFF00;    // Bit flags
 size_t size = vec.size();       // Size (unsigned)
 ```
 
-:::tip Prefer signed for arithmetic
+:::tip[Prefer signed for arithmetic]
 Although the standard library uses unsigned `size_t` for sizes, the C++ Core Guidelines recommend
 **signed** integers for arithmetic and indexing — unsigned's wrap-around silently turns an "off by
 one" into "off by four billion". Treat unsigned as a tool for bit manipulation and deliberate modular

@@ -14,7 +14,7 @@ the language had to anonymous functions — lazy expressions composed from place
 higher-order combinators. Today it remains relevant as the expression layer behind
 [Boost.Spirit](../05-strings-and-text/boost-spirit.md) semantic actions.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Pre-C++11 C++ had no lambdas. Writing a one-off functor for `std::for_each` or a Spirit semantic
 action meant declaring a whole class. Phoenix lets you write `_1 * _1 + 1` directly in the
 algorithm call, producing a function object at compile time through expression templates.
@@ -121,7 +121,7 @@ int main() {
 }
 ```
 
-:::tip When Phoenix still matters
+:::tip[When Phoenix still matters]
 If you use Boost.Spirit, you will encounter Phoenix — it is the standard way to write semantic
 actions. Outside of Spirit, C++11 lambdas are almost always a better choice.
 :::
@@ -137,7 +137,7 @@ actions. Outside of Spirit, C++11 lambdas are almost always a better choice.
 | Spirit integration | native | works but more verbose |
 | Learning curve | steep | low |
 
-:::note Legacy status
+:::note[Legacy status]
 Phoenix was essential before C++11. In modern C++ it is a niche tool — reach for it when working
 with Spirit, and prefer lambdas everywhere else.
 :::

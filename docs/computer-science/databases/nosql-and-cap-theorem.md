@@ -39,7 +39,7 @@ flowchart TD
     Choice -->|"Favor Availability (AP)"| AP["Keep serving reads/writes on both<br/>sides — may return stale data"]
 ```
 
-:::info The precise statement
+:::info[The precise statement]
 In any distributed data store, you can't simultaneously guarantee Consistency, Availability, and
 Partition tolerance. In practice, partition tolerance isn't optional — a distributed system must
 survive dropped/delayed messages, because networks fail — so the real, forced choice only appears
@@ -91,14 +91,14 @@ RETURN friend.name, p.name
 
 ## Edge Cases & Pitfalls
 
-:::warning "NoSQL" is not one thing
+:::warning["NoSQL" is not one thing]
 Key-value, document, column-family, and graph databases have almost nothing in common technically
 beyond "not the relational model." Choosing "a NoSQL database" without picking a specific data model
 for your access patterns is a category error — the right question is which family fits your queries,
 not whether to avoid SQL.
 :::
 
-:::danger Eventual consistency has real application consequences
+:::danger[Eventual consistency has real application consequences]
 In an AP system, a client can write a value, immediately read from a different replica, and see the
 *old* value — this is not a bug, it's the explicit trade-off being made. Applications built on AP
 stores must be designed to tolerate (or explicitly work around, e.g. via read-your-writes techniques)

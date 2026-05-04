@@ -10,7 +10,7 @@ tags: [c++, references, aliases, pointers]
 
 A reference is an alias - another name for an existing object. Unlike pointers, references cannot be null, must be initialized, and cannot be reseated.
 
-:::info Reference = Alias
+:::info[Reference = Alias]
 Not a new variable, just another name for the same memory location.
 ```cpp
 int x = 42;
@@ -201,21 +201,21 @@ References can't be stored in containers because they're not regular objects (ca
 
 ## Summary
 
-:::info References vs Pointers
+:::info[References vs Pointers]
 - Reference = alias (same object)
 - Pointer = variable storing address
 - References safer (no null, no reassignment)
 - Pointers more flexible (nullable, reassignable)
 :::
 
-:::info Key rules
+:::info[Key rules]
 - Must initialize at declaration
 - Cannot be null or reseated
 - Assignment copies values, doesn't reseat
 - Perfect for function parameters
 :::
 
-:::info Usage patterns
+:::info[Usage patterns]
 - `const T&` for read-only parameters (large objects)
 - `T&` for modifiable parameters
 - Return `T&` for member access

@@ -194,7 +194,7 @@ void AMyWeapon::BindToGenerator()
 
 ## Gotchas
 
-:::warning Triggers are edges, not state
+:::warning[Triggers are edges, not state]
 Setting a trigger doesn't leave a "true" value sitting around for the graph to poll — it fires once, on
 the render block it was received in. If a shot happens between render blocks in a way that gets
 coalesced, or you call `SetTriggerParameter` before the component has actually started playing, the
@@ -202,7 +202,7 @@ event can be missed entirely. Call `Play()` (or confirm `IsPlaying()`) before fi
 triggers on a component you don't `bAutoActivate`.
 :::
 
-:::warning A Patch cannot be played directly
+:::warning[A Patch cannot be played directly]
 `UMetaSoundPatch` deliberately has no mandatory inputs or outputs and is not a `USoundBase` — trying to
 assign one where a playable sound is expected (an `UAudioComponent::SetSound` call, a
 `SpawnSoundAtLocation`) is a type error, not a runtime warning. If you authored something as a Patch and
@@ -210,7 +210,7 @@ later want to play it standalone, wrap it as a node inside a Source graph rather
 reclassify the asset.
 :::
 
-:::caution Parameter names must match the graph's pin names exactly
+:::caution[Parameter names must match the graph's pin names exactly]
 `SetFloatParameter`/`SetTriggerParameter` take an `FName` that has to match an input pin's name in the
 graph verbatim. There's no compile-time check tying your C++ string literal to the graph — a renamed
 pin in the MetaSound editor silently breaks every C++ call site using the old name, with no error beyond

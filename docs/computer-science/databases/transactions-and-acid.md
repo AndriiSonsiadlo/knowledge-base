@@ -69,7 +69,7 @@ or may not permit:
 | Repeatable Read | Prevented | Prevented | Possible |
 | Serializable | Prevented | Prevented | Prevented |
 
-:::info Standard vs. real implementations
+:::info[Standard vs. real implementations]
 The ANSI SQL definitions describe permitted *phenomena*, not a specific mechanism — real databases
 vary. PostgreSQL's "Repeatable Read", for example, is implemented via snapshot isolation and in
 practice also prevents phantom reads, which is stricter than the ANSI SQL requirement. Always check a
@@ -112,7 +112,7 @@ COMMIT;
 
 ## Edge Cases & Pitfalls
 
-:::danger Lost updates
+:::danger[Lost updates]
 Read Committed does not prevent a "read-modify-write" race: two transactions can both read a balance
 of 100, both compute "100 - 50 = 50" in application code, and both write 50 back — one transaction's
 decrement is silently lost. Preventing this needs either Repeatable Read/Serializable, or an explicit

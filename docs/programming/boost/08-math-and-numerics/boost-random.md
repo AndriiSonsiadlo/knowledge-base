@@ -14,7 +14,7 @@ the source of randomness from the shape of the output. It is the direct ancestor
 for its extra engines, extra distributions, and for codebases that need to support pre-C++11
 compilers.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `rand()` is global state, low quality, and gives you only uniform integers in `[0, RAND_MAX]`.
 Real applications need different distributions (normal, Poisson, Bernoulli), reproducible seeding,
 and independent generator instances. Boost.Random — and later `<random>` — formalise the separation
@@ -63,7 +63,7 @@ flowchart LR
 | `taus88` | acceptable | very fast | 12 bytes | Minimal state, short period |
 | `random_device` | crypto-quality | varies | none | Non-deterministic, OS entropy |
 
-:::note random_device for seeding
+:::note[random_device for seeding]
 `boost::random::random_device` reads from the operating system's entropy pool (`/dev/urandom` on
 Linux, `CryptGenRandom` on Windows). Use it to **seed** a fast engine like `mt19937`, not as the
 engine itself — it is slow and may block.
@@ -121,7 +121,7 @@ int main() {
 }
 ```
 
-:::warning Do not use for cryptography
+:::warning[Do not use for cryptography]
 Engines like `mt19937` are **not** cryptographically secure — their internal state can be
 reconstructed from 624 consecutive outputs. For security-sensitive randomness, use
 `boost::random::random_device` directly or a dedicated crypto library.
@@ -157,7 +157,7 @@ int main() {
 | Header-only | yes | yes (standard) |
 | Pre-C++11 support | yes | no |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++11 and later, `<random>` is fine for most use cases — the API is the same because it came
 from Boost. Reach for Boost.Random when you need an engine or distribution not in `<random>`, or
 when targeting a pre-C++11 toolchain.

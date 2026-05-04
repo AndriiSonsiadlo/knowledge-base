@@ -103,7 +103,7 @@ target_link_libraries(game PRIVATE graphics_lib)
 # graphics_lib is separate file loaded at runtime
 ```
 
-:::info Symbol Visibility
+:::info[Symbol Visibility]
 For shared libraries, consider using `CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` or explicit export macros.
 :::
 
@@ -136,7 +136,7 @@ add_library(audio_plugin MODULE
 # void* handle = dlopen("libaudio_plugin.so", RTLD_LAZY);
 ```
 
-:::warning MODULE vs SHARED
+:::warning[MODULE vs SHARED]
 `MODULE` libraries are NOT linked, only loaded at runtime with `dlopen`/`LoadLibrary`.
 :::
 

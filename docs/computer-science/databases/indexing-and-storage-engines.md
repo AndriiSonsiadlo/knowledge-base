@@ -105,13 +105,13 @@ SELECT * FROM customers WHERE first_name = 'A';                        -- index 
 
 ## Edge Cases & Pitfalls
 
-:::warning Indexes aren't free
+:::warning[Indexes aren't free]
 Every index speeds up matching reads but slows down every `INSERT`/`UPDATE`/`DELETE` on that table,
 because the index itself must be kept up to date. An over-indexed, write-heavy table can end up
 spending more I/O maintaining indexes than doing the actual write.
 :::
 
-:::danger Leading-column rule for composite indexes
+:::danger[Leading-column rule for composite indexes]
 A composite (multi-column) B-tree index is only usable for queries that filter on a **prefix** of its
 columns, left to right. An index on `(last_name, first_name)` cannot be used to efficiently search by
 `first_name` alone — the database falls back to a full scan.

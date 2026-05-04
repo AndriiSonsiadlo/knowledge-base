@@ -10,7 +10,7 @@ tags: [cpp, object-layout, memory, vtable, inheritance]
 
 How C++ objects are arranged in memory: data members, padding, vtables, base class subobjects. Understanding layout is crucial for binary compatibility and optimization.
 
-:::info Memory Organization
+:::info[Memory Organization]
 Objects = members + padding + vtable pointer (if virtual) + base class subobjects (if inheritance)
 :::
 

@@ -13,7 +13,7 @@ separates the *representation* of a graph from the *algorithms* that run on it, 
 implementation of Dijkstra or BFS works with adjacency lists, adjacency matrices, or any
 user-defined graph type that models the right concepts.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Graphs show up everywhere — dependency resolution, network routing, task scheduling, social
 networks — yet the C++ standard library has no graph abstraction. BGL fills that gap with a rich
 set of algorithms and a generic interface that lets you plug in your own data structure if the
@@ -121,7 +121,7 @@ int main() {
 }
 ```
 
-:::tip Named parameters
+:::tip[Named parameters]
 BGL uses **named parameters** (`distance_map(...)`, `predecessor_map(...)`, `weight_map(...)`) so
 you only supply the maps you care about. Defaults exist for the rest — weight defaults to 1 for
 unweighted algorithms.
@@ -186,7 +186,7 @@ int main() {
 }
 ```
 
-:::warning Compile times
+:::warning[Compile times]
 BGL is heavily templated. Complex graph types with bundled properties can produce long compile
 times and verbose error messages. Using `adjacency_list` with `vecS`/`vecS` keeps things
 manageable.

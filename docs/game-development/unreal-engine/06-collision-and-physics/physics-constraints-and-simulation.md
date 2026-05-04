@@ -116,14 +116,14 @@ blend weight from `1.0` back toward `0.0` over time — usually driven by a time
 rather than snapping it, which is what avoids the character's mesh popping instantly back to an animated
 pose from wherever the ragdoll settled.
 
-:::warning SetSimulatePhysics(true) on the mesh isn't enough by itself
+:::warning[SetSimulatePhysics(true) on the mesh isn't enough by itself]
 Calling `SetSimulatePhysics(true)` on a `USkeletalMeshComponent` alone doesn't ragdoll every bone — you
 also need `SetAllBodiesSimulatePhysics(true)` (or per-body control) to actually enable simulation on the
 individual bodies the physics asset defines, and `SetCollisionProfileName(TEXT("Ragdoll"))` so the bodies
 collide with the world instead of just each other.
 :::
 
-:::caution CharacterMovementComponent fights a simulating capsule
+:::caution[CharacterMovementComponent fights a simulating capsule]
 `UCharacterMovementComponent` expects to own the capsule's transform. Entering ragdoll without first
 setting movement mode to `MOVE_None` (or disabling the movement component) means the movement component
 keeps trying to correct the capsule back to where it thinks the character should be, fighting the physics

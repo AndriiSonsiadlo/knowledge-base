@@ -608,7 +608,7 @@ ctest -D Experimental  # Run and submit to dashboard
 
 ## Common Issues
 
-:::warning Troubleshooting
+:::warning[Troubleshooting]
 
 **Tests not found:**
 

@@ -93,19 +93,19 @@ single-frame investigation, `stat gpu`, `profilegpu`, and RenderDoc are the tool
 
 ## Gotchas
 
-:::warning stat gpu numbers include CPU-side dispatch overhead alongside GPU time
+:::warning[stat gpu numbers include CPU-side dispatch overhead alongside GPU time]
 Reading `stat gpu` categories as pure GPU execution time without cross-checking `stat unit` for CPU/GPU
 balance can mislead you into optimizing the wrong side of a CPU-bound frame. Check both before deciding
 where to spend optimization effort.
 :::
 
-:::caution An untagged custom RDG pass hides inside a generic bucket
+:::caution[An untagged custom RDG pass hides inside a generic bucket]
 If you added a custom pass through RDG without an `RDG_GPU_STAT_SCOPE`, it doesn't disappear from
 `stat gpu` — it gets folded into whatever generic category it happens to fall under, which makes it
 look like someone else's code is expensive. Tag your own passes before profiling them.
 :::
 
-:::warning ProfileGPU captures one frame — a spike you can't reliably reproduce won't show up
+:::warning[ProfileGPU captures one frame — a spike you can't reliably reproduce won't show up]
 `profilegpu` is a single-frame snapshot triggered on demand. An intermittent frame spike needs to
 actually be happening at the moment you trigger the capture, or a broader trace-based tool (Unreal
 Insights) is the better fit than repeatedly guessing at the right frame to snapshot.

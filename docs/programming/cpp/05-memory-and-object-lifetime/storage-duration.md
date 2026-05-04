@@ -10,7 +10,7 @@ tags: [c++, storage-duration, lifetime, memory]
 
 Storage duration defines when and where objects are created and destroyed. C++ has four storage durations: automatic, static, dynamic, and thread.
 
-:::info Lifetime Determines Behavior
+:::info[Lifetime Determines Behavior]
 Storage duration affects performance, thread-safety, and memory management strategy.
 :::
 

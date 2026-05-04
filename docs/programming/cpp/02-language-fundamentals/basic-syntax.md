@@ -10,7 +10,7 @@ tags: [c++, syntax, fundamentals, basics]
 
 C++ syntax defines how code is written and structured. Understanding basic syntax is essential for writing valid C++ programs.
 
-:::info Case Sensitive
+:::info[Case Sensitive]
 C++ is case-sensitive: `variable`, `Variable`, and `VARIABLE` are three different identifiers.
 :::
 

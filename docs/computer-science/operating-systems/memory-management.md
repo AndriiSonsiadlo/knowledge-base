@@ -53,7 +53,7 @@ flowchart TB
 | **LRU (Least Recently Used)** | Evict the page that hasn't been accessed for the longest time | Good approximation of "won't be needed soon" for typical workloads | Exact LRU needs per-access timestamps/tracking — expensive in hardware/software at scale |
 | **Clock / Second-chance** | Approximate LRU cheaply: a "use" bit per page, a rotating pointer; a page with `use = 1` is spared once (bit cleared) and the pointer advances, otherwise it's evicted | Cheap to implement, close to LRU in practice | Slightly less accurate than true LRU |
 
-:::warning Bélády's anomaly
+:::warning[Bélády's anomaly]
 For the FIFO algorithm specifically, it's possible to construct an access pattern where *adding more*
 physical frames *increases* the number of page faults — the opposite of what you'd expect. This was
 demonstrated by László Bélády in 1969 and is a classic gotcha: "just add more RAM" is not guaranteed
@@ -89,7 +89,7 @@ file later).
 
 ## Edge Cases & Pitfalls
 
-:::danger Thrashing
+:::danger[Thrashing]
 If the combined working set of all runnable processes exceeds physical memory, the system can enter
 thrashing: nearly every scheduling quantum triggers a page fault, the CPU spends almost all its time
 waiting on disk I/O to service faults rather than running code, and overall throughput can collapse

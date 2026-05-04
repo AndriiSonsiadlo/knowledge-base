@@ -10,7 +10,7 @@ tags: [c++, copy, move, semantics, performance]
 
 Copy creates a duplicate of an object. Move transfers ownership of resources from one object to another. Understanding when each happens is crucial for performance and correctness.
 
-:::info Copy vs Move
+:::info[Copy vs Move]
 **Copy** = Duplicate the data (can be expensive)  
 **Move** = Transfer ownership (cheap, just pointer swap)
 :::

@@ -105,13 +105,13 @@ one actor's root `USceneComponent` to a component on the other — `AActor::Atta
 
 ## Gotchas
 
-:::warning Attachment cycles are not supported
+:::warning[Attachment cycles are not supported]
 A `USceneComponent` can't end up as its own ancestor through a chain of attachments — the engine does
 not detect or resolve this for you gracefully. Keep attachment hierarchies acyclic by construction; this
 usually only becomes a risk when attachment targets are chosen dynamically at runtime.
 :::
 
-:::caution SetupAttachment vs AttachToComponent is not interchangeable
+:::caution[SetupAttachment vs AttachToComponent is not interchangeable]
 `SetupAttachment` only works before a component is registered (constructor time). Calling it later is a
 no-op or an assertion depending on engine build; use `AttachToComponent` for anything happening after
 `BeginPlay`. Getting this backwards is a common source of "my component just doesn't move with its

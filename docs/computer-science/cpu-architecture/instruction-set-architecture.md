@@ -51,7 +51,7 @@ flowchart TB
 | Typical use | Desktops, servers (x86-64) | Mobile, embedded, and increasingly servers/desktops (Apple Silicon, AWS Graviton) |
 | Design tradeoff | Denser code, more complex decode hardware | Simpler decode, relies on the compiler to schedule instructions well |
 
-:::info The distinction has blurred
+:::info[The distinction has blurred]
 Modern x86-64 chips decode CISC instructions into simpler internal **micro-ops** (µops) and execute
 those with a RISC-like pipeline internally. The CISC/RISC label today says more about the *external*
 instruction encoding than about the actual execution hardware.
@@ -76,7 +76,7 @@ know how many bytes the *next* instruction will need until it has decoded the cu
 
 ## Edge Cases & Pitfalls
 
-:::warning ISA extensions fragment the landscape
+:::warning[ISA extensions fragment the landscape]
 Not every x86-64 CPU supports every instruction. Extensions like AVX-512 (wide vector math) or AES-NI
 (hardware AES) must be feature-detected at runtime (`CPUID` on x86) before use, or the program will
 crash with an illegal-instruction fault on older/different hardware.

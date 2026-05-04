@@ -14,7 +14,7 @@ HTTP (request, response, fields, body) and a complete WebSocket implementation �
 async support. Beast does not try to be a web framework; it gives you the protocol primitives and
 lets you compose them.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Asio gives you TCP sockets. Turning raw bytes into structured HTTP messages or WebSocket frames is
 a substantial amount of work: chunked transfer encoding, upgrade handshakes, header parsing, frame
 masking. Beast handles all of that while staying in the Asio style — same patterns, same completion
@@ -79,7 +79,7 @@ parameter. Several built-in body types cover common needs:
 | `empty_body` | HEAD requests or responses with no content |
 | `buffer_body` | Caller-provided buffer, useful for incremental reads |
 
-:::tip Streaming large responses
+:::tip[Streaming large responses]
 Use `http::response_parser` with `buffer_body` to read a response chunk by chunk instead of
 loading it all into memory. This is how you download a 2 GB file without allocating 2 GB of RAM.
 :::
@@ -125,7 +125,7 @@ int main() {
 }
 ```
 
-:::note Coroutine support
+:::note[Coroutine support]
 The `co_await` style requires C++20 coroutines and `use_awaitable`. Beast also works with
 callbacks, `yield_context` (stackful coroutines via Boost.Coroutine2), and futures.
 :::
@@ -191,7 +191,7 @@ void handle_request(beast::tcp_stream& stream) {
 }
 ```
 
-:::warning Beast is not a framework
+:::warning[Beast is not a framework]
 Beast gives you HTTP message types and I/O operations — it is not Express or Flask. Routing,
 middleware, session management, and templating are your responsibility. Libraries like
 Boost.URL can help with URL parsing.

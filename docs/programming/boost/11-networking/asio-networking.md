@@ -14,7 +14,7 @@ name resolution, SSL/TLS, and higher-level protocols like HTTP (via [Beast](./bo
 This page covers the **networking** side of Asio; for the core event-loop and async model see
 [Boost.Asio](../09-concurrency-and-async/boost-asio.md).
 
-:::info The problem it solves
+:::info[The problem it solves]
 The C++ standard has no networking library (the Networking TS has stalled). Asio fills that gap with a
 portable, production-grade socket API that works identically on Linux, macOS, and Windows — and does
 so asynchronously, so a single thread can manage thousands of connections.
@@ -54,7 +54,7 @@ int main() {
 }
 ```
 
-:::note Linking
+:::note[Linking]
 Asio requires linking against Boost.System and platform threading libraries:
 `g++ -std=c++17 tcp_client.cpp -lboost_system -pthread`
 :::
@@ -136,7 +136,7 @@ sequenceDiagram
     S->>C: echoed data
 ```
 
-:::tip shared_from_this pattern
+:::tip[shared_from_this pattern]
 Every async callback captures a `shared_ptr` to the session (`self`). This ensures the session stays
 alive until all pending operations complete — even if the server forgets about it. This pattern is
 universal in Asio-based code.
@@ -204,7 +204,7 @@ stream.handshake(net::ssl::stream_base::client);
 // now read/write through 'stream' as usual
 ```
 
-:::warning OpenSSL dependency
+:::warning[OpenSSL dependency]
 SSL support requires linking `-lssl -lcrypto` in addition to `-lboost_system`. The OpenSSL
 development headers must be installed.
 :::

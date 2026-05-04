@@ -10,7 +10,7 @@ tags: [c++, placement-new, memory, construction, advanced]
 
 Constructs objects in pre-allocated memory **without allocating**. Separates construction from allocation for custom memory management.
 
-:::info Construction Only
+:::info[Construction Only]
 Placement new = constructor call on existing memory. You manage memory separately and must call destructor explicitly.
 :::
 
@@ -201,7 +201,7 @@ for (size_t i = N; i > 0; --i) {
 
 ## Summary
 
-:::info Placement new - Key Points
+:::info[Placement new - Key Points]
 **Core Concept:**
 - Constructs object in pre-allocated memory (no allocation)
 - Syntax: `new (address) Type(args)`

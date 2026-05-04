@@ -103,14 +103,14 @@ Not confirmed against 5.7 in the sources consulted for exact default schema feat
 your engine version before assuming a particular default configuration.
 :::
 
-:::warning A sparse database produces confident-looking bad matches
+:::warning[A sparse database produces confident-looking bad matches]
 The search always returns *a* best match, even if nothing in the database is actually close to the
 query — it doesn't fail loudly, it just plays whatever scored highest, which can look like a plausible
 pose that's subtly wrong (a walk pose during what should be a run). Treat visible seams or "almost right"
 motion as a database coverage gap first, before assuming the schema or trajectory prediction is at fault.
 :::
 
-:::caution Don't adopt Motion Matching just because it's the newest option
+:::caution[Don't adopt Motion Matching just because it's the newest option]
 For a locomotion set that a blend space and small state machine already handle well, Motion Matching adds
 capture, schema, and runtime-search overhead for a quality gain that may not be visible to players. Reach
 for it when the movement space is genuinely broad enough that hand-authored blending is the bottleneck,

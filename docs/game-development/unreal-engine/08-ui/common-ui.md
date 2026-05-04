@@ -132,14 +132,14 @@ list before `CommonUI`/`CommonInput` module dependencies will resolve.
 
 ## Gotchas
 
-:::warning Plain UMG has no concept of "which screen is on top"
+:::warning[Plain UMG has no concept of "which screen is on top"]
 If you're stacking a HUD, a pause menu, and a confirmation dialog with plain `UUserWidget` and manual
 `AddToViewport`/`SetVisibility` calls, you are responsible for every bit of input-consumption and focus
 bookkeeping CommonUI would otherwise give you — and it's very easy to end up with input leaking through
 to a widget underneath the one the player thinks they're interacting with.
 :::
 
-:::caution A widget stack is not just a Widget Switcher
+:::caution[A widget stack is not just a Widget Switcher]
 `UCommonActivatableWidgetStack` looks like a specialized `UWidgetSwitcher`, but pushing/popping also drives
 activation state and focus/input routing through `UCommonUIActionRouterBase`. Swapping children directly
 on the underlying switcher instead of using `AddWidget`/`RemoveWidget` leaves the router's idea of what's

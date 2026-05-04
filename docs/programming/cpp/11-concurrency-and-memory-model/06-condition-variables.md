@@ -10,7 +10,7 @@ tags: [cpp, concurrency, condition-variables, synchronization, threading]
 
 **Condition variables** allow threads to wait for specific conditions to become true, enabling efficient thread coordination beyond simple mutexes.
 
-:::warning Always wait with a predicate
+:::warning[Always wait with a predicate]
 A condition variable can wake up **spuriously** — `wait()` may return without any `notify`. So always
 pass the predicate form, `cv.wait(lock, []{ return ready; })`, which loops until the condition holds;
 the bare `cv.wait(lock)` is almost always a bug. The predicate also closes the *lost wakeup* race: if

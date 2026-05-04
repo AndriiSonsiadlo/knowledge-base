@@ -12,7 +12,7 @@ This page is the **low-level / ABI** view: how padding affects a struct's on-the
 and how `offsetof` lets you address members by raw byte offset for serialization and memory-mapped
 I/O.
 
-:::info Prerequisite
+:::info[Prerequisite]
 The fundamentals — what alignment is, why padding exists, how to order members to shrink a struct —
 live on the canonical [Memory Alignment](../05-memory-and-object-lifetime/alignment.md) page. The
 language-level `alignof`/`alignas`/`offsetof` reference is in
@@ -57,7 +57,7 @@ char*    base     = reinterpret_cast<char*>(&packet);
 uint8_t* data_ptr = reinterpret_cast<uint8_t*>(base + offsetof(NetworkPacket, data));
 ```
 
-:::warning Standard-layout only
+:::warning[Standard-layout only]
 `offsetof` on a type with virtual functions, multiple/virtual inheritance, or mixed-access members
 is **undefined behaviour** — such types have no flat, portable offset table. See
 [Object Layout](./02-object-layout.md) for what the vtable pointer does to a class.

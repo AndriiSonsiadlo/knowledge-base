@@ -130,20 +130,20 @@ float GetFalloffMultiplier(float Distance) const
 
 ## Gotchas
 
-:::warning Do not cache a FindRow pointer beyond its local scope
+:::warning[Do not cache a FindRow pointer beyond its local scope]
 `FindRow<T>()` returns a pointer into the table's own row storage. If the table gets reimported or
 reloaded — routine during content iteration — anything holding onto that pointer is now dangling. Look
 the row up again each time you need it; don't stash it in a member variable.
 :::
 
-:::caution An unregistered PrimaryDataAsset type won't cook or async-load
+:::caution[An unregistered PrimaryDataAsset type won't cook or async-load]
 `UPrimaryDataAsset` subclasses only participate in `UAssetManager` discovery and async loading if their
 asset type is registered in the project's Primary Asset rules (Project Settings → Asset Manager, backed
 by `DefaultGame.ini`). Skip that step and `LoadPrimaryAsset` calls silently find nothing, and the assets
 may not even be included in a packaged build.
 :::
 
-:::warning DataTable row names must be valid, unique FNames
+:::warning[DataTable row names must be valid, unique FNames]
 The leftmost column of an imported CSV/JSON becomes the row name and doubles as the lookup key. Blank,
 duplicate, or renamed row names break every `FindRow` call site that references the old name, with no
 compiler warning — only a runtime `nullptr`.

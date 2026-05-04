@@ -13,7 +13,7 @@ standard library. Many of today's standard facilities — `shared_ptr`, `optiona
 standardised. These docs cover the libraries you actually reach for in real projects: what each one
 solves, when to prefer it over the standard equivalent, and the gotchas that bite people.
 
-:::info How this is organised
+:::info[How this is organised]
 Roughly outside-in: **Introduction → Build & Integration** get you compiling against Boost; the
 middle sections (**Core**, **Smart Pointers**, **Containers**, **Strings**, **Algorithms**) are the
 day-to-day utilities; the later sections (**Concurrency**, **I/O**, **Networking**, **Serialization**,
@@ -70,7 +70,7 @@ flowchart LR
 - <Icon icon="lucide:network" inline /> **Networking / servers:** [Asio](./09-concurrency-and-async/boost-asio.md) → [Asio networking](./11-networking/asio-networking.md) → [Beast](./11-networking/boost-beast.md) → [JSON](./12-serialization-and-data/boost-json.md).
 - <Icon icon="lucide:cpu" inline /> **Systems / performance:** [Intrusive](./04-containers/boost-intrusive.md), [Lockfree](./09-concurrency-and-async/boost-lockfree.md), [Interprocess](./09-concurrency-and-async/boost-interprocess.md), [Pool](./03-smart-pointers-and-memory/boost-pool.md) and [Stacktrace](./15-diagnostics-and-testing/boost-stacktrace.md).
 
-:::tip Conventions used across these docs
+:::tip[Conventions used across these docs]
 - Examples assume a recent Boost (1.7x+) and compile against C++17 or later; version notes are tagged inline where they matter.
 - Admonitions flag the important bits: `info` for context, `tip` for guidance, `note` for asides, `warning`/`danger` for foot-guns.
 - Where a Boost library has since been standardised, the page says so and points at the [`std` equivalent](../cpp/09-standard-library/utilities.md) so you can choose deliberately.

@@ -13,7 +13,7 @@ into typed C++ variables. Instead of hand-rolling `getopt` wrappers or writing f
 loops, you declare options with names, types, and defaults in one place, and the library handles
 parsing, validation, help text generation, and multi-source composition.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Every non-trivial command-line tool needs option parsing — flags, positional args, defaults, help
 text. Doing this with raw `argc`/`argv` is tedious and error-prone. `getopt` helps on POSIX but is
 not portable and only handles `char` options. Boost.Program_options gives you a declarative,
@@ -144,7 +144,7 @@ db.port=5433
 db.name=myapp
 ```
 
-:::tip Multi-source composition
+:::tip[Multi-source composition]
 `store()` does not overwrite values already in the `variables_map`. Call it once per source in
 priority order: command-line first, then config file, then environment variables. The first source
 to set a value wins.
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
 }
 ```
 
-:::warning notify() can throw
+:::warning[notify() can throw]
 `notify()` is where required-option checks and notifier callbacks run. Always call it *after* all
 `store()` calls, and be ready to catch `po::error` (or its subclasses like `required_option`).
 :::

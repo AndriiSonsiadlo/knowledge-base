@@ -40,7 +40,7 @@ double sqrt(double x)
 
 ## Current State (C++20 → C++26)
 
-:::warning A long road to standardization
+:::warning[A long road to standardization]
 An early contracts design was **removed from C++20** before release. A reworked proposal
 (**P2900**) was **adopted for C++26** — but compiler support is still arriving, so in practice you
 still express contracts with assertions and documentation ([see below](#current-approaches)).

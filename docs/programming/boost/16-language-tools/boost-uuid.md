@@ -13,7 +13,7 @@ Identifiers** — the 128-bit values you see written as `f47ac10b-58cc-4372-a567
 need an identifier that is globally unique without coordinating with a central server or database
 sequence, a UUID is the standard answer, and Boost.UUID is the idiomatic way to produce one in C++.
 
-:::info What a UUID actually is
+:::info[What a UUID actually is]
 A UUID is 128 bits (16 bytes) with a defined layout (RFC 4122). The canonical text form is 36
 characters: 32 hex digits in five hyphen-separated groups, `8-4-4-4-12`. A handful of bits encode the
 *version* (how it was generated) and the *variant* (the layout family). Boost.UUID gives you the raw
@@ -95,7 +95,7 @@ int main() {
 }
 ```
 
-:::note v3 vs v5
+:::note[v3 vs v5]
 The older `name_generator_md5` produces version-3 (MD5-based) UUIDs. Prefer the SHA1-based
 `name_generator_sha1` (version 5) for new code; MD5 only matters for interoperating with systems that
 already mandate v3.
@@ -147,7 +147,7 @@ int main() {
 }
 ```
 
-:::tip Storing UUIDs compactly
+:::tip[Storing UUIDs compactly]
 The text form is 36 bytes; the binary form is only 16. For databases or wire protocols, store the raw
 bytes — iterate `id.begin()`/`id.end()`, or copy `id.data` directly — and reserve the string form for
 logs and human-facing output.
@@ -181,7 +181,7 @@ int main() {
 
 ## Thread-safety
 
-:::warning random_generator is not thread-safe to share
+:::warning[random_generator is not thread-safe to share]
 A single `random_generator` wraps mutable PRNG state. Calling `operator()` on the **same** instance
 from multiple threads concurrently is a data race. The simple, fast fix is to give each thread its own
 generator (for example a `thread_local` instance); do **not** guard one shared generator with a mutex

@@ -150,20 +150,20 @@ UGE_PoisonDOT::UGE_PoisonDOT()
 
 ## Gotchas
 
-:::warning Instant effects cannot modify CurrentValue-only state
+:::warning[Instant effects cannot modify CurrentValue-only state]
 Instant effects write to `BaseValue` directly — there's no "current" for them to expire out of. If you
 need a temporary change that reverts automatically, it must be `HasDuration` or `Infinite`, not `Instant`
 with a manual timer bolted on.
 :::
 
-:::caution Snapshot vs non-snapshot attribute capture changes behavior under buffs
+:::caution[Snapshot vs non-snapshot attribute capture changes behavior under buffs]
 `bSnapshot = true` on an `FGameplayEffectAttributeCaptureDefinition` captures the attribute's value at
 *application* time; `false` re-reads it live every time the effect executes (relevant for periodic
 effects). A DOT that should scale with the caster's *current* spell power, not their power when the DOT
 was first applied, needs `bSnapshot = false`.
 :::
 
-:::caution Stacking policy defaults can silently produce unlimited stacks
+:::caution[Stacking policy defaults can silently produce unlimited stacks]
 Without an explicit `StackLimitCount`, a stackable effect applied repeatedly (e.g., by a fast-ticking
 aura) can accumulate without bound. Always set a limit deliberately, even a generous one.
 :::

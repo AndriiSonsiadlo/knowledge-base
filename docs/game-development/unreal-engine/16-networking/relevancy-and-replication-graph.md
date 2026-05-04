@@ -170,19 +170,19 @@ relevancy path covers the problem.
 
 ## Gotchas
 
-:::warning An irrelevant actor doesn't exist on the client — not "exists but empty"
+:::warning[An irrelevant actor doesn't exist on the client — not "exists but empty"]
 Code on a client that assumes a replicated actor reference is always valid because "it's replicated"
 will null-deref or silently no-op the moment that actor stops being relevant and its channel closes.
 Guard client-side access to replicated actor references the same way you'd guard any pointer that can
 legitimately be null.
 :::
 
-:::caution Dormancy silently swallows changes if you forget to wake the actor
+:::caution[Dormancy silently swallows changes if you forget to wake the actor]
 `NetDormancy = DORM_DormantAll` with no corresponding `FlushNetDormancy()` call at the point of change is
 a very easy way to write an actor that updates correctly on the server and never reaches any client.
 :::
 
-:::warning The Replication Graph is an architecture change, not a config toggle
+:::warning[The Replication Graph is an architecture change, not a config toggle]
 Enabling the plugin without writing a project-specific `UReplicationGraph` subclass that actually routes
 your actor classes into nodes will not replicate your actors correctly by default — it replaces the
 relevancy system's plumbing, and a project must tell it how your actors should be bucketed.

@@ -139,19 +139,19 @@ already assigned the parent material.
 
 ## Gotchas
 
-:::warning Never edit a UMaterialInstanceConstant at runtime
+:::warning[Never edit a UMaterialInstanceConstant at runtime]
 Modifying a `UMaterialInstanceConstant`'s parameters through code forces the material system to treat
 it like an editor edit — expensive, and not what it's designed for at runtime. Create a
 `UMaterialInstanceDynamic` for anything gameplay code needs to change per-frame or per-instance.
 :::
 
-:::caution Translucent materials are not a drop-in replacement for Opaque
+:::caution[Translucent materials are not a drop-in replacement for Opaque]
 Beyond the blending cost itself, translucent materials lose some deferred-rendering features and, per
 [Nanite](./nanite.md), aren't supported on Nanite meshes at all — an unsupported blend mode there falls
 back silently to a default material.
 :::
 
-:::warning A material built for the wrong domain fails quietly
+:::warning[A material built for the wrong domain fails quietly]
 There's no compile error for putting Surface-domain logic into a Post Process material — inputs just
 mean something different or evaluate to nothing. Confirm domain first when a material "does nothing"
 after assignment.

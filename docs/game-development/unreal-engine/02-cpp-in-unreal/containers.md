@@ -105,18 +105,18 @@ Cache.Add(MoveTemp(Names));   // moves instead of copying the array
 
 ## Gotchas
 
-:::warning A custom struct in a TMap/TSet needs GetTypeHash
+:::warning[A custom struct in a TMap/TSet needs GetTypeHash]
 Forgetting to define `GetTypeHash` for a struct used as a `TMap` key or `TSet` element is a compile
 error, not a silent bug — but the error message points at container internals, not your struct, which
 makes it look scarier than it is.
 :::
 
-:::warning TArray iterators invalidate on reallocation
+:::warning[TArray iterators invalidate on reallocation]
 Adding to a `TArray` while holding a pointer or iterator into it (including a range-based `for` over
 the same array) is the same class of bug as with `std::vector` — the backing buffer can move.
 :::
 
-:::caution TMap/TSet iteration order is not insertion order
+:::caution[TMap/TSet iteration order is not insertion order]
 Don't rely on it for anything user-visible or replicated; if order matters, use a `TArray` or sort
 explicitly.
 :::

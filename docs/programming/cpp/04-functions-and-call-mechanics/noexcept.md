@@ -10,7 +10,7 @@ tags: [c++, noexcept, exceptions, optimization, cpp11]
 
 `noexcept` specifies that a function won't throw exceptions, enabling optimizations and stronger guarantees.
 
-:::info Performance & Safety
+:::info[Performance & Safety]
 `noexcept` allows compilers to optimize (no exception handling overhead) and enables move operations in standard containers. For how it underpins the **strong exception guarantee**, see [Exception Safety](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md).
 :::
 
@@ -145,7 +145,7 @@ vec.push_back(Widget{});  // Triggers potential reallocation
 
 **Why**: If move throws during vector reallocation, strong exception guarantee is broken. So vector copies instead (inefficient but safe).
 
-:::warning Critical for Performance
+:::warning[Critical for Performance]
 Mark move constructors/assignments `noexcept` or standard containers won't use them!
 :::
 
@@ -370,7 +370,7 @@ static_assert(noexcept(vec[0]));         // true (no bounds checking)
 - Use conditional `noexcept` for templates
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Mark functions `noexcept` if they might throw
 - Throw from destructors
 - Throw from `noexcept` functions (causes terminate)

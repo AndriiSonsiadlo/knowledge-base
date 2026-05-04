@@ -10,7 +10,7 @@ tags: [core-dump, debugging, crash, post-mortem]
 
 Core dump = snapshot of crashed program's memory. Essential for debugging crashes in production where debugger can't be attached.
 
-:::info Crash Snapshot
+:::info[Crash Snapshot]
 Core dump preserves: stack, heap, registers, loaded libraries. Analyze crash **after** it happened.
 :::
 
@@ -249,7 +249,7 @@ gdb -batch -ex "bt" -ex "info locals" -ex "quit" $BINARY $CORE
 - Analyze cores from production crashes
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Enable cores in production (large files, sensitive data)
 - Delete cores before analysis
 - Mix binaries and cores from different versions

@@ -102,7 +102,7 @@ sequenceDiagram
     C->>D: Deassert CS
 ```
 
-:::info SPI is a de facto standard, not a formal spec
+:::info[SPI is a de facto standard, not a formal spec]
 Unlike I2C (formally specified by NXP/Philips) or USB (formally specified by USB-IF), **SPI has no
 single official specification**. It originated as a Motorola feature on early-1980s microcontrollers,
 described in a Motorola application note, and became a de facto industry convention. This is why SPI
@@ -147,13 +147,13 @@ both I2C and SPI as configurable options on the same chip).
 
 ## Edge Cases & Pitfalls
 
-:::warning I2C address collisions
+:::warning[I2C address collisions]
 Two devices of the same model on one I2C bus (e.g., two identical sensors) often ship with the same
 fixed 7-bit address, causing a collision. Many parts expose one or two address-select pins to work
 around this; if not, an I2C multiplexer chip is the usual fix.
 :::
 
-:::danger Don't mix voltage levels without translation
+:::danger[Don't mix voltage levels without translation]
 I2C and SPI signal levels depend entirely on the pull-up/supply voltage each device expects (commonly
 3.3 V or 5 V). Wiring a 5V device's SDA/SCL directly to a 3.3V-only microcontroller can exceed the
 input tolerance of the 3.3V part — use a level shifter, don't assume compatibility.

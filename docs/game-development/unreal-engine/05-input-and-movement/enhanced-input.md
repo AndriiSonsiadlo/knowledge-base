@@ -168,13 +168,13 @@ void AMyCharacter::HandleMove(const FInputActionValue& Value)
 
 ## Traps
 
-:::warning Binding on the wrong TriggerEvent
+:::warning[Binding on the wrong TriggerEvent]
 `ETriggerEvent::Triggered` fires every tick the input is active and non-zero — correct for movement,
 wrong for a one-shot action like jump or a menu toggle, which should bind `Started` (edge, fires once
 on press). Binding a toggle to `Triggered` makes it fire repeatedly for as long as the key is held.
 :::
 
-:::caution No mapping context means no input, silently
+:::caution[No mapping context means no input, silently]
 An `UInputAction` with a live binding but no `UInputMappingContext` added to the subsystem produces no
 input, no warning, no error — the bind succeeds, the action asset exists, nothing happens. This is the
 single most common "my input doesn't work" bug in Enhanced Input projects; check

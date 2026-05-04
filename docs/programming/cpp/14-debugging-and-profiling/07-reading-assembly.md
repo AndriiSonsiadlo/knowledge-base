@@ -10,7 +10,7 @@ tags: [assembly, optimization, disassembly, performance]
 
 Understanding compiler-generated assembly helps verify optimizations, debug performance issues, and understand low-level behavior.
 
-:::info Why Read Assembly?
+:::info[Why Read Assembly?]
 **Verify optimizations**, debug weird performance, understand compiler decisions, learn CPU architecture. Not needed daily, but invaluable when needed.
 :::
 

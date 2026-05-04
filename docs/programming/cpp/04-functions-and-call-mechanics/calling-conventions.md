@@ -10,7 +10,7 @@ tags: [c++, calling-conventions, abi, platform, assembly]
 
 Calling conventions define how functions receive parameters and return values at the assembly level - register usage, stack cleanup, and parameter passing order.
 
-:::info Platform Specific
+:::info[Platform Specific]
 Calling conventions vary by architecture (x86, x64, ARM) and compiler. Understanding them helps with debugging, interop, and low-level optimization.
 :::
 

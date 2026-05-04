@@ -12,7 +12,7 @@ Every type has an **alignment**: an address it must start on, always a power of 
 anywhere; an `int` must sit at an address divisible by 4; a `double` at one divisible by 8. This page
 covers alignment *as a property of types* and the `offsetof` macro that reports where members land.
 
-:::info This is the type-system view
+:::info[This is the type-system view]
 Here: `alignof`, `alignas`, and `offsetof` as language tools. For *why* padding exists, how to order
 members to shrink a struct, cache-line/SIMD alignment, and packing — see the canonical
 [Memory Alignment](../05-memory-and-object-lifetime/alignment.md) page. For the ABI / wire-format
@@ -62,7 +62,7 @@ offsetof(Record, value);  // 4
 offsetof(Record, count);  // 8
 ```
 
-:::warning `offsetof` is only defined for standard-layout types
+:::warning[`offsetof` is only defined for standard-layout types]
 Using it on a type with virtual functions or a non-trivial base is **undefined behaviour** — those
 types have no fixed, simple member offsets. Guard real code with a `static_assert`:
 

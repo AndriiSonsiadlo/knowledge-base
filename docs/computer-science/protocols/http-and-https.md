@@ -136,7 +136,7 @@ an extra round trip.
 
 ## Edge Cases & Pitfalls
 
-:::danger Plain HTTP is not just "less secure" — it's actively tamperable
+:::danger[Plain HTTP is not just "less secure" — it's actively tamperable]
 Anyone on the network path between client and server (a public Wi-Fi operator, an ISP, an on-path
 attacker) can read *and modify* plain HTTP traffic. This includes injecting ads, tracking scripts, or
 malware into unencrypted pages — a real, historically documented practice by some ISPs, not a

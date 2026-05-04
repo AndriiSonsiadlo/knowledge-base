@@ -168,21 +168,21 @@ after a memory-budget review finds it.
 
 ## Gotchas
 
-:::warning A single hard reference on a widely-used class taxes every consumer
+:::warning[A single hard reference on a widely-used class taxes every consumer]
 If your base `AWeaponActor` C++ class hard-references a `UDataTable` of all weapon stats, then loading
 *any* subclass of `AWeaponActor` — including ones that only ever need their own row — loads the entire
 table's referenced assets. Push wide, rarely-fully-needed data behind `TSoftObjectPtr` or split it into
 smaller per-weapon `UPrimaryDataAsset`s instead of one giant table with asset-valued columns.
 :::
 
-:::caution Blueprint hard references are invisible in C++ diffs
+:::caution[Blueprint hard references are invisible in C++ diffs]
 A Blueprint graph can hard-reference an asset (e.g., a `Static Mesh` pin default) with nothing in the
 C++ header to show for it. When you're chasing an unexplained memory spike, check Blueprint-only
 subclasses too — the Reference Viewer doesn't care where the reference was authored, but grepping
 `.h`/`.cpp` files for `TObjectPtr` will miss it entirely.
 :::
 
-:::warning `TSoftObjectPtr::Get()` after garbage collection
+:::warning[`TSoftObjectPtr::Get()` after garbage collection]
 Once a soft reference's target has been garbage collected (nothing else keeps it alive), `.Get()`
 silently goes back to returning `nullptr` even though `.ToSoftObjectPath()` still holds a valid path.
 Don't cache the raw pointer across frames without also holding a strong keep-alive (a

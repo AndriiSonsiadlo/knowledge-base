@@ -147,13 +147,13 @@ desyncs on client" bugs.
 
 ## Gotchas
 
-:::warning Never call SetHealth (or any attribute setter) from outside the attribute set/GameplayEffect pipeline
+:::warning[Never call SetHealth (or any attribute setter) from outside the attribute set/GameplayEffect pipeline]
 Setting an attribute directly from gameplay code bypasses `PreAttributeChange` clamping, doesn't go
 through the ASC's aggregation, and won't replicate correctly. Route every attribute change through a
 `UGameplayEffect`, even a trivial "instant, +N" one for programmer-triggered changes.
 :::
 
-:::caution PostGameplayEffectExecute does not fire for duration/infinite modifiers
+:::caution[PostGameplayEffectExecute does not fire for duration/infinite modifiers]
 It only fires for instant and periodic executions against `BaseValue`. If you need to react to a
 duration-based buff changing `CurrentValue`, hook `PreAttributeChange` or bind to the ASC's
 `GetGameplayAttributeValueChangeDelegate` instead — don't expect `PostGameplayEffectExecute` to catch it.

@@ -74,7 +74,7 @@ switch (token) {
 }
 ```
 
-:::warning Fall-through is implicit
+:::warning[Fall-through is implicit]
 Without `break`, control falls into the next case. Occasionally intended, usually a bug. Mark the
 deliberate cases with `[[fallthrough]];` (C++17) so the compiler stops warning *and* the intent is
 documented:

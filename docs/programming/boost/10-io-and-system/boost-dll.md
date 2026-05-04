@@ -13,7 +13,7 @@ runtime, import functions and variables by name, and build plugin architectures 
 functionality can be added without recompiling the host application. It replaces the platform-specific
 `dlopen`/`LoadLibrary` dance with a single, type-safe C++ API.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Loading shared libraries at runtime is fully platform-dependent: POSIX uses `dlopen` + `dlsym`,
 Windows uses `LoadLibrary` + `GetProcAddress`, macOS has its own quirks with `@rpath`. Error
 messages differ, symbol decoration rules differ, and none of it is type-safe. Boost.DLL wraps all
@@ -69,7 +69,7 @@ int main() {
 }
 ```
 
-:::warning Symbol names and C++ mangling
+:::warning[Symbol names and C++ mangling]
 C++ function names are mangled by the compiler. To export a function with a predictable name, either
 declare it `extern "C"` or use `BOOST_DLL_ALIAS` (see below). Without one of these, `get<>()` will
 fail to find the symbol.
@@ -129,7 +129,7 @@ int main() {
 }
 ```
 
-:::tip BOOST_DLL_ALIAS vs extern "C"
+:::tip[BOOST_DLL_ALIAS vs extern "C"]
 `BOOST_DLL_ALIAS` exports a mangling-safe symbol without requiring `extern "C"`, and it works with
 overloaded functions, static member functions, and lambdas. Prefer it over raw `extern "C"` exports
 for any non-trivial plugin interface.

@@ -13,7 +13,7 @@ program. It is invaluable for diagnostics: you can attach a stack trace to an ex
 on assertion failure, or dump it in a signal handler for post-mortem debugging. It directly
 inspired C++23's `std::stacktrace`.
 
-:::info The problem it solves
+:::info[The problem it solves]
 When something goes wrong in production, knowing *what* went wrong is only half the story — you
 need to know *where*. A debugger is not always available. Boost.Stacktrace captures the call
 chain at any point in the program so you can log it, attach it to an error report, or print it
@@ -63,7 +63,7 @@ and the corresponding library to link:
 | `windbg` | `BOOST_STACKTRACE_USE_WINDBG` | (automatic) | Windows | Uses DbgHelp |
 | Basic (default) | (none) | `-lboost_stacktrace_basic` | Any | Mangled names only |
 
-:::tip Choosing a backend
+:::tip[Choosing a backend]
 On Linux, prefer `backtrace` — it gives demangled names and line numbers with minimal overhead.
 On Windows, `windbg` is the natural choice. Use `noop` to compile out stack traces in release
 builds with zero cost.
@@ -127,7 +127,7 @@ int main() {
 }
 ```
 
-:::warning Async-signal safety
+:::warning[Async-signal safety]
 Most Boost.Stacktrace operations are **not** async-signal-safe. Inside a signal handler, use only
 `safe_dump_to()`, which writes raw addresses to a file. Decode the dump later with
 `boost::stacktrace::stacktrace::from_dump()` in a separate process.
@@ -154,7 +154,7 @@ for (const auto& frame : st) {
 | Signal-safe dump | `safe_dump_to()` | Not specified |
 | Compiler support | GCC, Clang, MSVC | GCC 12+, MSVC 19.34+ |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++23 with a supporting compiler, prefer `std::stacktrace` for portability. Use
 Boost.Stacktrace when you need signal-safe dumps, backend selection, or must support pre-C++23
 toolchains. See [Boost and the standard](../00-overview/boost-and-the-standard.md) for more

@@ -57,7 +57,7 @@ cover every area AI needs to path through, and the navigation system rasterizes 
 volume. A level with no bounds volume has no navmesh at all — `MoveTo` calls fail everywhere, which is
 the single most common "why isn't my AI moving" bug in a fresh project.
 
-:::caution Bounds volumes don't overlap-merge visually
+:::caution[Bounds volumes don't overlap-merge visually]
 Multiple `ANavMeshBoundsVolume` actors can coexist and their generated regions simply union — there's no
 need for one giant volume. Keep them tight around actual play space; an oversized volume costs
 generation time and memory for empty space no agent will ever stand in.
@@ -158,7 +158,7 @@ agent. The reverse — a navmesh generated too small for your capsule — lets t
 own collision then can't physically walk, so it clips or gets stuck against geometry the path said was
 clear.
 
-:::warning Capsule and navmesh agent radius must agree
+:::warning[Capsule and navmesh agent radius must agree]
 If you resize a character's capsule after the navmesh was baked (or you support multiple agent sizes —
 a crouching state, a large enemy type), you need a matching navigation agent entry (`Project Settings >
 Navigation Mesh > Supported Agents`) and, for static generation, a rebake. A mismatch doesn't error —

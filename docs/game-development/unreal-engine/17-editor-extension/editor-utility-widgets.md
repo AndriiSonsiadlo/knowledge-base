@@ -181,7 +181,7 @@ PrivateDependencyModuleNames.AddRange(new string[]
 
 ## Gotchas
 
-:::warning Editor Utility Widgets run in the editor process — they can crash the editor, not just the tool
+:::warning[Editor Utility Widgets run in the editor process — they can crash the editor, not just the tool]
 Because the widget executes with full editor access (asset registry, `GEditor`, live actors), an
 unhandled null dereference or an infinite loop in the Blueprint graph takes down the whole editor
 session, not a sandboxed tool process. Treat `BlueprintCallable` C++ entry points the same as any other
@@ -189,14 +189,14 @@ editor-facing API: validate inputs defensively, because a designer's Blueprint g
 call them with an empty array or a null object.
 :::
 
-:::warning Don't confuse Editor Utility Widget with a normal UMG widget shown at runtime
+:::warning[Don't confuse Editor Utility Widget with a normal UMG widget shown at runtime]
 `UEditorUtilityWidget` and its Blueprint assets only make sense inside the editor — they are not a way
 to build in-game UI, and referencing `UEditorUtilityLibrary` selection queries from a runtime widget
 either does nothing meaningful or won't compile into a Shipping build in the first place, since
 `Blutility` is an editor-only module.
 :::
 
-:::caution BlueprintImplementableEvent vs BlueprintCallable — pick the right direction
+:::caution[BlueprintImplementableEvent vs BlueprintCallable — pick the right direction]
 `GetSelectedAssetsOfClass` and `ApplyNamingConvention` are things the Blueprint asks C++ to *do*
 (`BlueprintCallable`); `OnBatchOperationComplete` is something C++ tells the Blueprint *happened*
 (`BlueprintImplementableEvent`, or `BlueprintNativeEvent` if C++ needs a default implementation too).

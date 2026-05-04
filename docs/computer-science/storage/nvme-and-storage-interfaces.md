@@ -68,7 +68,7 @@ command format itself is leaner (fewer round trips per operation) than AHCI's.
 | Designed for | Rotating magnetic media | Flash / non-volatile memory |
 | Typical link | SATA (~6 Gb/s) | PCIe lanes (multiple GB/s, scales with lane count/generation) |
 
-:::info M.2 is a connector, not a protocol
+:::info[M.2 is a connector, not a protocol]
 "M.2 SSD" tells you the physical card shape and connector — it says nothing about whether the drive
 speaks SATA or NVMe. An M.2 slot can carry SATA signaling, PCIe/NVMe signaling, or both depending on
 motherboard wiring; two visually identical M.2 drives can have very different performance because one
@@ -90,7 +90,7 @@ uses the SATA/AHCI protocol and the other uses NVMe over PCIe. Always check the 
 
 ## Edge Cases & Pitfalls
 
-:::warning "NVMe" and "PCIe Gen X" are separate claims
+:::warning["NVMe" and "PCIe Gen X" are separate claims]
 A drive's PCIe generation (which bounds link bandwidth) and its use of the NVMe protocol are both
 worth checking independently — a drive can support NVMe on an older, slower PCIe generation and be
 bandwidth-limited well below what a newer-generation NVMe drive achieves, even though both are

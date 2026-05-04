@@ -10,7 +10,7 @@ tags: [gdb, debugging, breakpoints, watchpoints, backtrace]
 
 GNU Debugger (GDB) is the standard debugger for C/C++ on Linux. Allows stepping through code, inspecting variables, setting breakpoints, and analyzing crashes.
 
-:::info Compile for Debugging
+:::info[Compile for Debugging]
 Always compile with `-g` flag: `g++ -g -O0 program.cpp -o program`
 :::
 

@@ -87,21 +87,21 @@ default translucency reflection behavior.
 
 ## Gotchas
 
-:::warning High instance counts and Hardware Ray Tracing don't mix well by default
+:::warning[High instance counts and Hardware Ray Tracing don't mix well by default]
 Scenes with more than roughly 100,000 instances can see a significant Hardware Ray Tracing scene
 update cost. If a level is instance-heavy (dense foliage, large-scale procedural placement), profile
 GI cost with Hardware Ray Tracing on before shipping it as the default — Software Ray Tracing's Global
 Tracing mode may be the cheaper and more predictable choice at that scale.
 :::
 
-:::caution Don't leave both ray tracing representations resident by accident
+:::caution[Don't leave both ray tracing representations resident by accident]
 If your project enables Hardware Ray Tracing, explicitly setting
 `r.DistanceFields.SupportEvenIfHardwareRayTracingSupported=0` avoids silently paying the memory and
 scene update cost of the Software Ray Tracing distance field representation you're not using for
 Lumen's primary path.
 :::
 
-:::warning Far Field needs HLOD, not just World Partition
+:::warning[Far Field needs HLOD, not just World Partition]
 Enabling `r.LumenScene.FarField` without building World Partition HLODs for the level won't give you
 the extended range you're expecting — Far Field traces specifically against the HLOD representation.
 :::

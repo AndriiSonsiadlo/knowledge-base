@@ -102,14 +102,14 @@ present to edit at all, so Live Coding is scoped to your project's own modules b
 is a difference in *what's available to edit*, not in how Live Coding itself behaves. See
 [Installation and versions](./installation-and-versions.md) for the two install paths.
 
-:::warning Don't trust Live Coding after a header shape change
+:::warning[Don't trust Live Coding after a header shape change]
 If you've just added a `UPROPERTY`, added a `UFUNCTION`, or changed a class's inheritance, restart
 the editor before continuing to iterate. Continuing to Live Coding-patch on top of a stale layout is
 a common source of confusing, hard-to-diagnose corruption or crashes — the safe habit is: shape
 change means restart, no exceptions.
 :::
 
-:::warning Be mindful of hot reload in coding style, too
+:::warning[Be mindful of hot reload in coding style, too]
 Epic's own C++ coding standard calls out minimizing unnecessary dependencies specifically to keep
 hot-reload/Live Coding iteration fast, and cautions against inlining or heavy template use in
 functions that are likely to change frequently during iteration, since those patterns increase what

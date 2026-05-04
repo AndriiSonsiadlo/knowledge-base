@@ -10,7 +10,7 @@ tags: [cpp, crtp, templates, design-patterns, static-polymorphism]
 
 CRTP is a template pattern where a class `Derived` inherits from a template base class `Base<Derived>`, passing itself as a template argument. This enables compile-time polymorphism without virtual functions.
 
-:::info Static Polymorphism
+:::info[Static Polymorphism]
 CRTP provides polymorphic behavior at compile-time through templates rather than runtime through virtual functions. Zero overhead, but less flexible than dynamic polymorphism.
 :::
 
@@ -549,7 +549,7 @@ The derived class is incomplete during base class definition. Only pointer/refer
 - Consider concepts (C++20) for better error messages
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Mix CRTP and virtual functions unnecessarily
 - Create deep CRTP hierarchies (compile-time cost)
 - Use CRTP when runtime polymorphism needed

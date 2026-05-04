@@ -13,7 +13,7 @@ provides an iterator-based interface — you get a begin/end pair and walk throu
 range-for loop. It is lighter than a full parser and more flexible than a single call to
 `boost::split`.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Splitting a string on a delimiter is easy; splitting it on *rules* is harder. CSV fields may be
 quoted and contain the delimiter itself. Fixed-width records have columns at byte offsets, not
 around a separator. Boost.Tokenizer handles these cases with interchangeable separator policies
@@ -84,7 +84,7 @@ int main() {
 }
 ```
 
-:::tip When to reach for a real CSV library
+:::tip[When to reach for a real CSV library]
 `escaped_list_separator` handles basic quoted-field CSV. If you need multiline fields, BOM
 handling, or RFC 4180 edge cases, consider a dedicated CSV parser instead.
 :::
@@ -142,7 +142,7 @@ int main() {
 }
 ```
 
-:::note Tokenizer versus split
+:::note[Tokenizer versus split]
 `boost::split` eagerly fills a vector with all tokens at once. `boost::tokenizer` produces them
 lazily through an iterator, which avoids allocating a vector when you only need to scan the
 tokens once. Choose `split` when you need random access to all tokens; choose `tokenizer` when

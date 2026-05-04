@@ -15,7 +15,7 @@ is the **open-addressing family**: `boost::unordered_flat_map`, `boost::unordere
 `boost::unordered_node_map`, and `boost::unordered_node_set`, which consistently outperform
 `std::unordered_map` in benchmarks.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `std::unordered_map` is specified to use separate chaining (a linked list per bucket). This
 guarantees pointer stability on rehash but pays for it with poor cache locality and high per-node
 memory overhead. Many real-world workloads — lookup tables, caches, symbol tables — do not need
@@ -98,7 +98,7 @@ int main() {
 }
 ```
 
-:::tip When heterogeneous lookup matters
+:::tip[When heterogeneous lookup matters]
 In hot loops where you construct lookup keys from `const char*` or `string_view`, avoiding the
 temporary `std::string` allocation can measurably reduce latency. The standard added transparent
 hashing in C++20 for `std::unordered_map`; the Boost version works on C++11 and later.
@@ -135,7 +135,7 @@ int main() {
 
 ## Choosing the right container
 
-:::note Decision guide
+:::note[Decision guide]
 - Need **pointer / reference stability** across insertions? Use `unordered_node_map` (faster than
   `std::unordered_map`, still stable).
 - Need **maximum lookup speed** and don't hold pointers into the container? Use
@@ -155,7 +155,7 @@ int main() {
 | Heterogeneous lookup | yes (C++11+) | yes (C++20) |
 | Bucket API | not applicable | `bucket()`, `bucket_count()` |
 
-:::warning Pointer invalidation in flat containers
+:::warning[Pointer invalidation in flat containers]
 `unordered_flat_map` and `unordered_flat_set` may **invalidate all iterators and references** on
 insertion or rehash — just like `std::vector`. Do not hold pointers or references into a flat
 container across mutations. If you need stability, use the `node` variants.

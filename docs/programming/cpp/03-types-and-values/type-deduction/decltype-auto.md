@@ -10,7 +10,7 @@ tags: [c++, decltype-auto, type-deduction, cpp14]
 
 `decltype(auto)` (C++14) combines `auto` convenience with `decltype` precision - deduces type while preserving references and const.
 
-:::info Best of Both Worlds
+:::info[Best of Both Worlds]
 `auto` is convenient but drops references. `decltype` preserves them but verbose. `decltype(auto)` gives both.
 :::
 
@@ -95,7 +95,7 @@ decltype(auto) b = ref;  // int& (ref is reference)
 decltype(auto) c = (x);  // int& (parentheses → expression)
 ```
 
-:::danger Parentheses Matter
+:::danger[Parentheses Matter]
 ```cpp showLineNumbers 
 int x = 42;
 
@@ -135,7 +135,7 @@ decltype(auto) func3() {
 }
 ```
 
-:::warning Dangling References
+:::warning[Dangling References]
 ```cpp showLineNumbers 
 decltype(auto) bad() {
     int x = 42;

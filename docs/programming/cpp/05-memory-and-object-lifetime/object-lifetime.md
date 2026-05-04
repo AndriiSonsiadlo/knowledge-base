@@ -10,7 +10,7 @@ tags: [c++, lifetime, construction, destruction, raii]
 
 Object lifetime spans from construction to destruction. Understanding lifetime is critical for memory safety, RAII, and avoiding undefined behavior.
 
-:::info Construction to Destruction
+:::info[Construction to Destruction]
 An object's lifetime begins when its constructor completes and ends when its destructor begins.
 :::
 

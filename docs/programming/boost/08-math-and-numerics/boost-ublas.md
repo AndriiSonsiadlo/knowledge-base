@@ -13,7 +13,7 @@ standard linear-algebra operations: addition, scalar multiplication, inner/outer
 multiplication, and element access. It uses **expression templates** for lazy evaluation, avoiding
 temporaries in compound expressions. uBLAS is header-only and requires no external BLAS library.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The C++ standard library has no vector/matrix types for linear algebra. Writing your own risks
 bugs in indexing, memory layout, and operator overloading. uBLAS gives you correct, tested
 containers with natural mathematical syntax (`A * x + b`) and support for dense, sparse, banded,
@@ -50,7 +50,7 @@ int main() {
 }
 ```
 
-:::note Indexing starts at 0
+:::note[Indexing starts at 0]
 uBLAS uses `operator()` for element access, not `operator[]`. Indexing is zero-based:
 `v(0)` is the first element, `A(0, 1)` is row 0, column 1.
 :::
@@ -162,7 +162,7 @@ int main() {
 }
 ```
 
-:::warning uBLAS is not a high-performance BLAS
+:::warning[uBLAS is not a high-performance BLAS]
 uBLAS provides correct, portable linear algebra with a clean C++ API, but it does **not** match
 the performance of optimised BLAS implementations (OpenBLAS, MKL, ATLAS) or modern C++ libraries
 like Eigen. For performance-critical numerical code — large matrix decompositions, iterative

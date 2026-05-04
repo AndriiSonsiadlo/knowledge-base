@@ -8,7 +8,7 @@ tags: [ c++, cmake ]
 
 # Finding External Packages
 
-:::tip Which dependency mechanism?
+:::tip[Which dependency mechanism?]
 CMake offers three, in rough order of preference:
 
 - **`find_package()`** (this page) — use a dependency that's **already installed** on the system.
@@ -85,7 +85,7 @@ Searches for:
 - `CMAKE_MODULE_PATH`
 - CMake's built-in modules
 
-:::info Automatic Detection
+:::info[Automatic Detection]
 CMake tries both modes automatically. Use `CONFIG` or `MODULE` to force one.
 :::
 
@@ -423,7 +423,7 @@ if(NOT MyPackage_FOUND)
 endif()
 ```
 
-:::warning Common Issues
+:::warning[Common Issues]
 
 1. **Wrong package name**
 

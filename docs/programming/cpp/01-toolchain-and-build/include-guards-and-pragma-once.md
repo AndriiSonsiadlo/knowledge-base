@@ -10,7 +10,7 @@ tags: [c++, include-guards, pragma-once, preprocessor, headers]
 
 Include guards prevent multiple inclusion of the same header file, avoiding redefinition errors. Two methods exist: traditional include guards and `#pragma once`.
 
-:::info Problem Solved
+:::info[Problem Solved]
 Without guards, including a header twice causes "redefinition" errors. Guards ensure header contents appear only once per translation unit.
 :::
 
@@ -351,7 +351,7 @@ find . -name "*.h" -exec sh -c \
 - Check guards with `grep` or linters
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Forget guards on any header file
 - Use generic names like `UTIL_H`
 - Have typos in guard macros

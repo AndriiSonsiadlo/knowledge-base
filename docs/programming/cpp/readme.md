@@ -12,7 +12,7 @@ binary, through the language and standard library, down to the memory model, ABI
 use to debug and profile. Pages favour **why it behaves this way** over syntax dumps, and link to
 each other instead of repeating themselves.
 
-:::info How this is organised
+:::info[How this is organised]
 Three loose tiers: the **foundation** (Overview, Toolchain, Language Fundamentals), the **language
 and library** you write every day (Types through Standard Library), and the **systems-level and
 tooling** layers (Error Handling through Debugging). Each folder is a self-contained topic; follow
@@ -62,7 +62,7 @@ flowchart LR
 - <Icon icon="lucide:arrow-left-right" inline /> **Coming from C:** skim [Overview](./00-overview/what-is-cpp.md) and [Language Fundamentals](./02-language-fundamentals/basic-syntax.md), then [Memory & Object Lifetime](./05-memory-and-object-lifetime/memory-model-overview.md), [Smart Pointers](./06-pointers-references-and-smart-pointers/unique-ptr.md) and [RAII](./13-idioms-and-design/01-raii.md) — that's where C++ diverges most.
 - <Icon icon="lucide:cpu" inline /> **Systems / performance:** [Toolchain](./01-toolchain-and-build/linking.md), [Memory](./05-memory-and-object-lifetime/memory-model-overview.md), [Concurrency](./11-concurrency-and-memory-model/01-cpp-memory-model.md), [Low-Level & Platform](./12-low-level-and-platform/01-abi.md) and [Debugging & Profiling](./14-debugging-and-profiling/01-debugging-basics.md).
 
-:::tip Conventions used across these docs
+:::tip[Conventions used across these docs]
 - Code blocks compile against C++17 or later; version-specific features are tagged inline (e.g. *(C++20)*).
 - Admonitions flag the important bits: `info` for context, `tip` for guidance, `warning`/`danger` for foot-guns.
 - Diagrams are Mermaid; data tables prefer plain words over decorative symbols.

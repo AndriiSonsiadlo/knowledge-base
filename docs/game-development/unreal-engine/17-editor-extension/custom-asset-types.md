@@ -246,20 +246,20 @@ PrivateDependencyModuleNames.AddRange(new string[]
 
 ## Gotchas
 
-:::warning A factory with no SupportedClass or bCreateNew=false silently doesn't appear
+:::warning[A factory with no SupportedClass or bCreateNew=false silently doesn't appear]
 If your new asset type doesn't show up under "Create Advanced Asset" at all, check the factory's
 constructor first — a missing `SupportedClass` assignment or `bCreateNew` left at its default is the
 usual cause, and there's no error logged for it; it just isn't there.
 :::
 
-:::warning RegisterAssetTypeActions/UnregisterAssetTypeActions must be symmetric
+:::warning[RegisterAssetTypeActions/UnregisterAssetTypeActions must be symmetric]
 Same failure mode as Details customizations: unregister in `ShutdownModule` using the exact
 `TSharedRef` you registered, not a newly constructed instance — `AssetTools` compares by reference, and
 mismatched registration/unregistration leaks the actions object and can leave stale entries in the
 Content Browser's type filter menu after a plugin reload.
 :::
 
-:::caution All three pieces are editor-only — keep them out of your runtime module
+:::caution[All three pieces are editor-only — keep them out of your runtime module]
 `UFactory`, `FAssetTypeActions_Base`, and `UThumbnailRenderer` all depend on `UnrealEd`/`AssetTools` and
 have no reason to exist in a `Runtime`-typed module. See
 [Editor-only modules](./editor-modules.md) for why that dependency can't ship.

@@ -10,7 +10,7 @@ tags: [c++, keywords, tokens, identifiers, literals]
 
 Tokens are the smallest units of a C++ program. Keywords are reserved words with special meaning that cannot be used as identifiers.
 
-:::info Lexical Analysis
+:::info[Lexical Analysis]
 The compiler breaks source code into tokens during lexical analysis (first phase of compilation).
 :::
 

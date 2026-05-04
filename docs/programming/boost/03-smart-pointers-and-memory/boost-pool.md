@@ -13,7 +13,7 @@ size**. Instead of asking the system allocator for each object — which is comp
 to fragment the heap — a pool grabs memory in large chunks and carves it into uniform blocks linked on
 a free list. Allocation and deallocation become little more than a pointer swap.
 
-:::info When a pool wins
+:::info[When a pool wins]
 The general-purpose `new`/`malloc` must handle any size and be thread-safe and robust. A pool gives
 that up in exchange for speed: same-size blocks, simple bookkeeping, near-zero fragmentation. Ideal
 for node-based structures (tree/list nodes), particles, events, or any high-churn small object.
@@ -67,13 +67,13 @@ int main() {
 std::list<int, boost::fast_pool_allocator<int>> fast_list;
 ```
 
-:::tip object_pool is RAII for whole arenas
+:::tip[object_pool is RAII for whole arenas]
 `object_pool`'s destructor reclaims *every* block it ever handed out, even ones you forgot to
 `destroy`. That makes it a tidy "arena": allocate freely during a phase, then drop the whole pool at
 the end. Just don't keep using pointers into a pool after it dies.
 :::
 
-:::warning Not a general allocator
+:::warning[Not a general allocator]
 A pool only allocates one block size efficiently. It is the wrong tool for variable-sized or large
 allocations. For alignment-sensitive buffers (SIMD, cache lines) use Boost.Align.
 :::

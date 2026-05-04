@@ -10,7 +10,7 @@ tags: [c++, virtual-functions, vtables, polymorphism, dynamic-dispatch]
 
 Virtual functions enable runtime polymorphism through dynamic dispatch. Understanding how they work (`vtables`) helps you understand their cost and use them effectively.
 
-:::info Runtime Polymorphism
+:::info[Runtime Polymorphism]
 **Virtual functions** = Call correct function based on actual object type  
 **vtables** = Mechanism that makes virtual functions work  
 **Cost** = Small overhead (~2-3ns per call + 8 bytes per object)
@@ -232,7 +232,7 @@ public:
 // Now delete ptr calls ~Derived, then ~Base
 ```
 
-:::danger Virtual Destructor Rule
+:::danger[Virtual Destructor Rule]
 **If your class has any virtual functions, make the destructor virtual!** Otherwise deleting through base pointer leaks resources.
 :::
 
@@ -499,7 +499,7 @@ ptr->print();  // "Derived: 10"
 // But uses Base's default argument (static binding)!
 ```
 
-:::warning Avoid Different Defaults
+:::warning[Avoid Different Defaults]
 Don't use different default arguments in overridden functions. Default arguments are bound at compile-time, not runtime.
 :::
 
@@ -567,21 +567,21 @@ RTTI information is stored with the `vtable`, enabling `dynamic_cast` and `typei
 
 ## Summary
 
-:::info Virtual functions
+:::info[Virtual functions]
 - Enable runtime polymorphism (dynamic dispatch)
 - Use `virtual` keyword in base class
 - Use `override` in derived class (catches errors)
 - Call correct function based on actual object type
 :::
 
-:::info vtables mechanism
+:::info[vtables mechanism]
 - Each class gets one `vtable` (function pointer table)
 - Each object gets one `vptr` (points to class's `vtable`)
 - Virtual call: load `vptr` → index `vtable` → call function
 - 2-3ns overhead per call + 8 bytes per object
 :::
 
-:::info Best practices
+:::info[Best practices]
 - Always use `override` keyword
 - Virtual destructor if base class has virtual functions
 - Pure virtual (`= 0`) for interfaces
@@ -589,21 +589,21 @@ RTTI information is stored with the `vtable`, enabling `dynamic_cast` and `typei
 - Avoid different default arguments
 :::
 
-:::info Special cases
+:::info[Special cases]
 - Multiple inheritance: multiple `vptr`s
 - Covariant return types: can return derived type
 - Don't call virtuals in constructor/destructor
 - Devirtualization when compiler knows exact type
 :::
 
-:::info Costs
+:::info[Costs]
 - Memory: 8 bytes per object (`vptr`)
 - CPU: 2-3ns per call (vs 1ns direct call)
 - Can't inline virtual calls (usually)
 - Usually negligible in practice
 :::
 
-:::info Alternatives
+:::info[Alternatives]
 - Templates (static polymorphism, zero overhead)
 - Function pointers (manual `vtable`)
 - std::variant + std::visit (value-based polymorphism)

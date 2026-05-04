@@ -11,7 +11,7 @@ tags: [cpp, abi, binary-compatibility, low-level, linking]
 ABI defines how compiled code interacts at the binary level: calling conventions, name mangling,
 object layout, exception handling. Binary compatibility depends on ABI stability.
 
-:::info Binary Contract
+:::info[Binary Contract]
 **API** = source code contract (headers)  
 **ABI** = binary code contract (compiled libraries)  
 Breaking ABI → must recompile everything
@@ -247,7 +247,7 @@ try {
 - Test binary compatibility
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 
 - Change virtual function order
 - Reorder class members in public API
@@ -258,7 +258,7 @@ try {
 
 ## Summary
 
-:::info ABI
+:::info[ABI]
 ABI is the binary interface
 - Calling conventions (register usage)
 - ABI compatibility (binary contracts)

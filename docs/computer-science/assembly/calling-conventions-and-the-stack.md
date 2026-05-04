@@ -53,7 +53,7 @@ Registers are also split into two ownership classes:
 |---|---|
 | `rax`, `rcx`, `rdx`, `rsi`, `rdi`, `r8`-`r11` | `rbx`, `rbp`, `rsp`, `r12`-`r15` |
 
-:::info Why `r10` and `r11` are caller-saved
+:::info[Why `r10` and `r11` are caller-saved]
 The ABI deliberately leaves `r10`/`r11` caller-saved and unused for argument passing so that
 trampoline/PLT (dynamic linking) stubs and syscall wrappers have scratch registers available without
 having to spill anything.
@@ -132,14 +132,14 @@ Two things this real example makes concrete:
 
 ## Edge Cases & Pitfalls
 
-:::warning Stack alignment
+:::warning[Stack alignment]
 The System V ABI requires `rsp` to be 16-byte aligned at the point of a `call` instruction. Manually
 written assembly that pushes an odd number of 8-byte values before calling a function that uses SSE
 instructions (which often require 16-byte-aligned memory operands) can crash with an alignment fault
 that only reproduces intermittently, depending on the caller's stack depth.
 :::
 
-:::danger Mismatched calling conventions are a silent ABI break
+:::danger[Mismatched calling conventions are a silent ABI break]
 Calling a function compiled for the Microsoft x64 calling convention (Windows: `rcx`, `rdx`, `r8`,
 `r9`) from code that assumes System V (`rdi`, `rsi`, `rdx`, `rcx`, ...) will read garbage arguments
 with no compiler error — the mismatch is a link-time/runtime problem, not a type error. This is why

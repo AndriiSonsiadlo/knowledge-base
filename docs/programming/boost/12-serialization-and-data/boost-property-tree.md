@@ -13,7 +13,7 @@ for JSON, XML, INI, and INFO formats. It is designed for reading and writing con
 the kind of task where you want `config.get<int>("server.port")` without pulling in a full-blown
 parsing library.
 
-:::info The problem it solves
+:::info[The problem it solves]
 C++ has no built-in config-file reader. Hand-rolling parsers for JSON or INI is tedious and
 fragile. PropertyTree gives you a single tree type that can ingest multiple formats and lets you
 navigate values with dot-separated paths.
@@ -117,7 +117,7 @@ for (auto& [_, item] : tree.get_child("tags")) {
 }
 ```
 
-:::warning PropertyTree is not a JSON library
+:::warning[PropertyTree is not a JSON library]
 PropertyTree's JSON parser is intentionally simple: it does not preserve types (everything is a
 string internally), does not handle `null`, and does not distinguish numbers from strings. For
 rigorous JSON processing, use [Boost.JSON](./boost-json.md).
@@ -140,7 +140,7 @@ int main() {
 }
 ```
 
-:::note XML attributes
+:::note[XML attributes]
 XML attributes are accessible under a special `<xmlattr>` key:
 `tree.get<std::string>("root.element.<xmlattr>.id")`.
 :::

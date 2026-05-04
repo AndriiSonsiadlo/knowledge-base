@@ -10,7 +10,7 @@ tags: [c++, lambdas, closures, cpp11, functional]
 
 Lambdas (C++11) are anonymous functions that can capture variables from surrounding scope, enabling functional programming patterns and convenient callbacks.
 
-:::info Syntactic Sugar
+:::info[Syntactic Sugar]
 Lambdas are compiler-generated function objects (functors). The lambda `[](){}` creates an unnamed class with `operator()`.
 :::
 
@@ -335,7 +335,7 @@ process([](int x) { std::cout << x; });  // No overhead
 - Mark non-modifying lambdas `const` (default)
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Capture by reference if lambda outlives scope
 - Use `[=]` when you mean specific captures
 - Forget `mutable` when modifying captured values

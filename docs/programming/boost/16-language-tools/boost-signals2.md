@@ -14,7 +14,7 @@ any number of interested callbacks (the **slots**) are invoked in response, with
 or caring who they are. It is the C++ analogue of Qt's signals and slots, the event systems in GUI
 toolkits, and the publish/subscribe pattern generally.
 
-:::info Signals2, not Signals
+:::info[Signals2, not Signals]
 The original Boost.Signals library is **deprecated**. Signals2 is its thread-safe successor and the
 one you should use today — the headers live under `<boost/signals2/...>` and the API lives in
 `boost::signals2`. The "2" is the only thing that changed in the name; conceptually it is the same
@@ -132,7 +132,7 @@ int main() {
 }
 ```
 
-:::tip This is why Signals2 pairs so well with shared_ptr
+:::tip[This is why Signals2 pairs so well with shared_ptr]
 Lifetime-tracked slots eliminate the most common observer-pattern bug: an observer that is destroyed
 while the subject still holds a pointer to it. Model your observers with
 [`shared_ptr`](../03-smart-pointers-and-memory/shared-ptr.md) and let `track`/`track_foreign` do the
@@ -171,7 +171,7 @@ int main() {
 }
 ```
 
-:::note Iterating slot results lazily evaluates the slots
+:::note[Iterating slot results lazily evaluates the slots]
 A combiner is handed an *input iterator range*. Each time it dereferences the iterator, the
 corresponding slot actually runs. That means a short-circuiting combiner (stop at the first slot that
 returns `true`) genuinely avoids calling the remaining slots.
@@ -191,7 +191,7 @@ and combiners observe a consistent snapshot of the connected slots.
 | Lifetime tracking | Limited | `shared_ptr`/`weak_ptr` based |
 | Compiled component | Required linking | Header-only |
 
-:::warning Thread-safe machinery, not thread-safe slots
+:::warning[Thread-safe machinery, not thread-safe slots]
 Signals2 protects its own internal state and the connection list. It does **not** make *your slot
 bodies* safe — if two threads fire a signal and the slots touch shared data, you still need your own
 synchronization inside those slots. Also note the signal's mutex is held while slots run, so a slot

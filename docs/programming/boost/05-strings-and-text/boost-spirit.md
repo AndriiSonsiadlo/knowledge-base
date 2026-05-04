@@ -14,7 +14,7 @@ ANTLR), you express the grammar as C++ expressions that the compiler turns into 
 parser. The modern incarnation is **Spirit.X3**, a header-only, C++14-based rewrite that compiles
 faster and is easier to use than its predecessor Spirit.Qi.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Regex handles flat patterns; hand-rolled parsers handle everything but are tedious and
 error-prone. Spirit sits in between: you describe the grammar declaratively, and the library
 compiles it into an efficient parser — no separate build step, no generated files, just C++.
@@ -158,7 +158,7 @@ flowchart LR
 | Semantic actions | complex, Boost.Phoenix-based | lambdas |
 | Learning curve | steep | moderate |
 
-:::warning Compile times
+:::warning[Compile times]
 Spirit is template-heavy. Even X3 can slow builds on large grammars. Keep parsers in dedicated
 translation units to isolate the template cost. Consider precompiled headers for the Spirit
 includes.
@@ -176,7 +176,7 @@ Spirit is powerful but not always the right tool:
 | Configuration file parsing | [Boost.PropertyTree](../12-serialization-and-data/boost-property-tree.md) |
 | Performance-critical tight loops | hand-rolled parser or re2c |
 
-:::tip Start small
+:::tip[Start small]
 Define small, testable parsers and compose them. Spirit's operator overloading makes it
 tempting to write an entire grammar in one expression — resist that urge until the pieces work
 individually.

@@ -10,11 +10,11 @@ tags: [c++, templates, partial-specialization, template-specialization]
 
 Partial specialization lets you specialize templates for a pattern of types, not just one specific type. It's like "for all pointer types" or "for all pairs of same types."
 
-:::info Pattern Matching
+:::info[Pattern Matching]
 Partial specialization = specialize for type patterns. Full specialization = one exact type. Partial = whole categories of types.
 :::
 
-:::warning Only class and variable templates
+:::warning[Only class and variable templates]
 **Function templates cannot be partially specialized** — reach for overloading instead. Partial
 specialization applies to class templates (and, since C++14, variable templates). This is exactly the
 machinery behind the standard library's type traits — `std::is_pointer`, `std::remove_reference`,

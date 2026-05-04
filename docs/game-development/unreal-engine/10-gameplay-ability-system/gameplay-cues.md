@@ -99,19 +99,19 @@ the cue.
 
 ## Gotchas
 
-:::warning Do not put gameplay logic in a GameplayCueNotify
+:::warning[Do not put gameplay logic in a GameplayCueNotify]
 If a design need seems to require it ("the cue also needs to apply a slow effect"), that's a sign the
 slow effect belongs in the Gameplay Effect or ability that triggered the cue, not in the cue itself. Keep
 the cue's `OnExecute`/`OnActive`/`OnRemove` strictly presentational.
 :::
 
-:::caution Static vs Actor is a real cost decision, not a style choice
+:::caution[Static vs Actor is a real cost decision, not a style choice]
 Defaulting every cue to `GameplayCueNotify_Actor` "just in case it needs to persist later" spawns and
 replicates an actor for effects that don't need one. Start with `GameplayCueNotify_Static` and only
 promote to `Actor` when a cue genuinely needs to track state across `WhileActive`.
 :::
 
-:::caution Cue tags follow the same hierarchy discipline as any other gameplay tag
+:::caution[Cue tags follow the same hierarchy discipline as any other gameplay tag]
 A `GameplayCue.` tag with no matching registered notify silently does nothing — there's no compile-time
 link between the tag used to trigger a cue and the notify asset registered to handle it. Verify new cue
 tags actually resolve to a handler in the Gameplay Cue Manager, especially after a tag rename.

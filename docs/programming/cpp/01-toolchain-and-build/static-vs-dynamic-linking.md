@@ -10,7 +10,7 @@ tags: [c++, linking, static, dynamic, shared-libraries]
 
 Linking can be **static** (library code copied into executable) or **dynamic** (library loaded at runtime). Each has trade-offs in size, deployment, and performance.
 
-:::info Key Difference
+:::info[Key Difference]
 **Static**: Self-contained executable, larger size  
 **Dynamic**: Smaller executable, requires library files at runtime
 :::

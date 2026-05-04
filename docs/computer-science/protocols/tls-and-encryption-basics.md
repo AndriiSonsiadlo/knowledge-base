@@ -105,7 +105,7 @@ $ curl -v https://example.com/ -o /dev/null 2>&1 | grep -i 'SSL connection\|subj
 
 ## Edge Cases & Pitfalls
 
-:::danger Mixed content quietly breaks HTTPS's guarantees
+:::danger[Mixed content quietly breaks HTTPS's guarantees]
 A page served over HTTPS that loads even one resource (a script, an image, a stylesheet) over plain
 HTTP reopens the door to man-in-the-middle tampering — an attacker can modify that one HTTP resource
 to attack the otherwise-secure page. Modern browsers block "active" mixed content (scripts, iframes)

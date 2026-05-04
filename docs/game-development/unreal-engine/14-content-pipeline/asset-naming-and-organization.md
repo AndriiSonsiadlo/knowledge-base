@@ -183,14 +183,14 @@ be resident.
 
 ## Gotchas
 
-:::warning Case-only differences between assets break on case-sensitive platforms
+:::warning[Case-only differences between assets break on case-sensitive platforms]
 `Content Browser` search and Windows filesystems are case-insensitive by default, but cooked builds on
 some platforms and source control systems (git on Linux/macOS) are case-sensitive. Two assets differing
 only in case (`SM_Rock` vs `SM_rock`) can both exist in your working copy and silently collide or
 duplicate on a teammate's case-sensitive checkout. Never rely on case alone to disambiguate.
 :::
 
-:::caution Renaming and moving assets requires "Fix Up Redirectors," not just a rename
+:::caution[Renaming and moving assets requires "Fix Up Redirectors," not just a rename]
 Renaming or moving a `.uasset` in the Content Browser leaves a redirector (a thin stub pointing to the
 new location) so existing hard references don't break immediately. Redirectors accumulate silently and
 add lookup indirection; run "Fix Up Redirectors in Folder" after bulk renames, and don't rename/move
@@ -198,7 +198,7 @@ assets by manipulating files directly on disk outside the editor — that breaks
 leaving a redirector behind.
 :::
 
-:::warning A convention nobody enforces decays within a few sprints
+:::warning[A convention nobody enforces decays within a few sprints]
 The single biggest predictor of whether a naming convention survives is whether it's checked somewhere
 other than code review memory — either an automated validator (above) or a recurring, lightweight audit
 pass. A convention that lives only in a wiki page gets followed by the person who wrote the wiki page

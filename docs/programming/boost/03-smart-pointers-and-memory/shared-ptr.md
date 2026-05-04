@@ -13,7 +13,7 @@ own the same object, and the object is destroyed exactly when the last owner goe
 direct ancestor of `std::shared_ptr` — the standard version is essentially this design after a decade
 of field testing.
 
-:::info Two allocations vs one
+:::info[Two allocations vs one]
 A naive `shared_ptr<T>(new T)` allocates twice: once for the object, once for the **control block**
 that holds the reference counts. `boost::make_shared<T>(args...)` fuses both into a single allocation
 — faster, more cache-friendly, and it can't leak if the constructor throws.
@@ -78,7 +78,7 @@ void use(const boost::weak_ptr<Node>& w) {
 }
 ```
 
-:::danger Cycles of strong pointers leak silently
+:::danger[Cycles of strong pointers leak silently]
 If a parent owns its children with `shared_ptr` and each child owns its parent with `shared_ptr`,
 nothing is ever freed and no error is reported. Make exactly one direction `weak_ptr`.
 :::
@@ -122,7 +122,7 @@ or mutating the *same* `shared_ptr` instance from two threads. See
 | Mutate the *same* `shared_ptr` from two threads | No (needs external sync) |
 | Access the managed object from two threads | Depends on the object |
 
-:::tip Prefer std::shared_ptr in new code
+:::tip[Prefer std::shared_ptr in new code]
 `std::shared_ptr` (C++11) has the same semantics and integrates with `std::weak_ptr`,
 `std::make_shared`, and allocators. Use `boost::shared_ptr` for pre-C++11 code or interop with Boost
 APIs (such as older [Asio](../09-concurrency-and-async/boost-asio.md) signatures).

@@ -103,20 +103,20 @@ running the passes) timelines, rather than conflating the two.
 
 ## Gotchas
 
-:::warning Don't hold onto RDG resource pointers past graph execution
+:::warning[Don't hold onto RDG resource pointers past graph execution]
 `FRDGTextureRef`, `FRDGBufferRef`, and friends are only meaningful for the lifetime of the
 `FRDGBuilder` that created them. Trying to reuse one across frames, or stash it somewhere that outlives
 `Execute()`, is using a transient handle after the thing it points at may have been freed.
 :::
 
-:::caution Declare only the resources a pass actually needs
+:::caution[Declare only the resources a pass actually needs]
 Every resource in a pass parameter struct becomes a dependency edge. Over-declaring resources "just in
 case" doesn't just waste a few bytes — it can force RDG to keep resources alive longer or serialize
 passes that could otherwise run in parallel. Use `ClearUnusedGraphResources` when a shader has
 permutations that don't all touch every parameter.
 :::
 
-:::warning Match the profiling scope to the tool you're using
+:::warning[Match the profiling scope to the tool you're using]
 `RDG_EVENT_SCOPE` (RenderDoc/Insights), `RDG_GPU_STAT_SCOPE` (`stat gpu`), and
 `RDG_CSV_STAT_EXCLUSIVE_SCOPE` (CSV profiler) aren't interchangeable — adding only one means the other
 two tools show your pass as unattributed time.

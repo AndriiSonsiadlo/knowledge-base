@@ -13,7 +13,7 @@ blocks of lock-free programming. It is the predecessor of `std::atomic` from C++
 to be useful on platforms where compiler support for atomics is incomplete or where you need features
 like `atomic_ref` or `wait/notify` before C++20.
 
-:::info The problem it solves
+:::info[The problem it solves]
 When two threads touch the same variable without synchronization, the result is a data race — undefined
 behaviour. Mutexes fix this but are expensive. Atomic operations give you fine-grained, lock-free
 access to individual variables with precise control over how memory operations are ordered across cores.
@@ -65,7 +65,7 @@ flowchart LR
     AR --> SC[seq_cst]
 ```
 
-:::warning Relaxed is not "free"
+:::warning[Relaxed is not "free"]
 `memory_order_relaxed` is the cheapest ordering but the hardest to reason about. It guarantees
 atomicity (no torn reads) but nothing about the order in which other threads see surrounding writes.
 Use it only for independent counters or statistics — never for flags that guard shared data.
@@ -95,7 +95,7 @@ public:
 };
 ```
 
-:::tip weak versus strong
+:::tip[weak versus strong]
 `compare_exchange_weak` may fail spuriously (return `false` even when the value matches `expected`).
 It is cheaper on some architectures and is the right choice inside a retry loop. Use
 `compare_exchange_strong` when you need a single, definitive attempt.
@@ -155,7 +155,7 @@ void notifier() {
 | Platform portability | high (fallback to locks) | compiler-dependent |
 | Needs linking | `-lboost_atomic` | no |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++11 and later, prefer `std::atomic` for most work — it is always available and needs no extra
 dependency. Reach for `boost::atomic` when you need wait/notify on pre-C++20 compilers, or when
 targeting a platform where the compiler's built-in atomics are unreliable.

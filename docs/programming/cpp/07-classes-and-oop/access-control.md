@@ -10,7 +10,7 @@ tags: [c++, classes, access-control, encapsulation, public, private, protected]
 
 Access control (`public`, `private`, `protected`) enables encapsulation by controlling which code can access class members.
 
-:::info Three Access Levels
+:::info[Three Access Levels]
 **public** = accessible everywhere (interface)  
 **private** = accessible only in class (implementation)  
 **protected** = accessible in class and derived classes (inheritance)
@@ -146,7 +146,7 @@ public:
 };
 ```
 
-:::warning Use Friends Sparingly
+:::warning[Use Friends Sparingly]
 - Breaks encapsulation
 - One-way relationship (not symmetric)
 - **Good uses:** Operator overloads, tightly-coupled classes
@@ -255,7 +255,7 @@ class PrivateDerived : private Base {
 };
 ```
 
-:::info Inheritance Types
+:::info[Inheritance Types]
 **public** - "is-a" relationship (maintains interface)  
 **protected** - rarely used  
 **private** - "implemented-in-terms-of" (hides base interface)
@@ -371,37 +371,37 @@ Config::publicCounter++;         // OK: public
 
 ## Summary
 
-:::info Three access levels
+:::info[Three access levels]
 - `public` - interface (accessible everywhere)
 - `protected` - inheritance (accessible in derived classes)
 - `private` - implementation (accessible only in class)
 :::
 
-:::info Defaults
+:::info[Defaults]
 - `class` defaults to private
 - `struct` defaults to public
 - Choice is stylistic (same otherwise)
 :::
 
-:::info Encapsulation
+:::info[Encapsulation]
 - Protects invariants through controlled access
 - Hides implementation details
 - Provides clear interface
 :::
 
-:::info Inheritance access
+:::info[Inheritance access]
 - `public` inheritance - "is-a" relationship
 - `protected` inheritance - rarely used
 - `private` inheritance - implementation detail
 :::
 
-:::info Friend
+:::info[Friend]
 - Grants access to private members
 - Breaks encapsulation (use sparingly)
 - One-way relationship
 :::
 
-:::info Best practices
+:::info[Best practices]
 - Make data members private
 - Provide public accessor methods
 - Use protected for inheritance needs

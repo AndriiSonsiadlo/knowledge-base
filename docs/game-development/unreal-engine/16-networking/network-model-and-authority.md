@@ -152,20 +152,20 @@ void AMyCharacter::Tick(float DeltaSeconds)
 
 ## Gotchas
 
-:::warning PIE with one client hides authority bugs
+:::warning[PIE with one client hides authority bugs]
 Play-In-Editor with a single client (or "Play as Listen Server" with one player) often makes
 `HasAuthority()` true everywhere you test, because the local machine is both client and server. Test
 with **at least two clients and a dedicated server** (`-server` / a separate PIE client count) before
 trusting that authority-gated code actually works.
 :::
 
-:::caution Don't confuse "owns the connection" with "has authority"
+:::caution[Don't confuse "owns the connection" with "has authority"]
 `GetLocalRole() == ROLE_AutonomousProxy` means "I am this client's possessed pawn," not "I am allowed to
 change gameplay state." Only the server (`ROLE_Authority`) is allowed to mutate authoritative state.
 Client-owned prediction only ever *previews* what the server will decide.
 :::
 
-:::warning HasAuthority() on a component doesn't ask the component
+:::warning[HasAuthority() on a component doesn't ask the component]
 `UActorComponent` has no independent role — its `GetOwnerRole()` / authority checks defer to the owning
 actor's role. Don't expect a component to have a different authority state than the actor that owns it.
 :::

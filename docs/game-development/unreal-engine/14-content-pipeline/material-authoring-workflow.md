@@ -154,7 +154,7 @@ in M combinations).
 
 ## Gotchas
 
-:::warning Never call `SetScalarParameterValue` on a shared constant instance
+:::warning[Never call `SetScalarParameterValue` on a shared constant instance]
 If a `UStaticMeshComponent`'s material slot still points at a `UMaterialInstanceConstant` you never
 converted to a MID, calling a `Set*ParameterValue` on it either fails or (in older engine behavior)
 mutates the asset, corrupting the editor-authored asset shared by every other actor using it. Always go
@@ -162,7 +162,7 @@ through `CreateAndSetMaterialInstanceDynamic` (or `UMaterialInstanceDynamic::Cre
 parameters at runtime.
 :::
 
-:::caution Static switch parameters are not free, and they're not dynamic
+:::caution[Static switch parameters are not free, and they're not dynamic]
 Every distinct combination of static switch values *that some instance actually uses* is a separate
 compiled shader permutation, cached and loaded independently. A master material with five independent
 static switches has up to 32 theoretical permutations — the engine only compiles the ones actually
@@ -172,7 +172,7 @@ generate and cache permutations nobody ships with. And because they're baked at 
 vector parameter or a texture parameter instead.
 :::
 
-:::warning Parameter name typos fail silently
+:::warning[Parameter name typos fail silently]
 `SetScalarParameterValue(TEXT("Damage"), Value)` against a master material that actually exposes
 `DamageAmount` compiles, runs, and does nothing — there's no warning. If a runtime parameter tweak
 appears to have no visual effect, verify the parameter name against the master material graph before

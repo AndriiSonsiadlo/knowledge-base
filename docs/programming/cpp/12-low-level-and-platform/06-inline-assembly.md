@@ -10,7 +10,7 @@ tags: [cpp, assembly, inline-asm, low-level, optimization]
 
 Embed assembly instructions directly in C++ code for performance-critical operations, hardware access, or platform-specific features unavailable in C++.
 
-:::warning Platform-Specific
+:::warning[Platform-Specific]
 Assembly is **not portable**. Different syntax for GCC/Clang (AT&T/Intel) vs MSVC. Use only when necessary.
 :::
 
@@ -263,7 +263,7 @@ uint32_t read_cr0() {
 - Test on target platform
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Use for premature optimization
 - Assume portability across compilers
 - Forget clobber lists (causes subtle bugs)
@@ -284,7 +284,7 @@ uint32_t read_cr0() {
 ## Summary
 
 
-:::info Inline assembly
+:::info[Inline assembly]
 Embeds native CPU instructions in C++ code.
 - Memory aid: "Last Resort Only"
 - Syntax: `asm("code" : outputs : inputs : clobbers)`

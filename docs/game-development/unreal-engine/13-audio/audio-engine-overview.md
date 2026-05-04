@@ -182,21 +182,21 @@ void AMyAmbientEmitter::BeginPlay()
 
 ## Gotchas
 
-:::warning Fire-and-forget helpers give you nothing to stop
+:::warning[Fire-and-forget helpers give you nothing to stop]
 `PlaySoundAtLocation` and `PlaySound2D` don't return a component — there is nothing to call
 `FadeOut`/`Stop` on later. If a sound might need to be interrupted (a looping engine sound, a voice
 line that can be skipped), use `SpawnSoundAtLocation`/`SpawnSoundAttached` from the start rather than
 retrofitting a handle in later.
 :::
 
-:::warning Voice count is finite — virtualization is not a bug
+:::warning[Voice count is finite — virtualization is not a bug]
 When many sounds play at once, quiet/distant ones lose their real render voice ("virtualize") rather
 than getting cut instantly, then reallocate a voice if they become audible again. If a sound seems to
 randomly cut and resume, check `MaxChannels` and per-sound concurrency settings before assuming a scripting
 bug.
 :::
 
-:::caution Don't confuse the asset with the instance
+:::caution[Don't confuse the asset with the instance]
 `USoundBase` is shared across every actor playing it. Mutating something you think is "this instance's
 volume" by editing the asset changes it for every concurrent playback, everywhere. Per-instance state
 lives on the `UAudioComponent` (`SetVolumeMultiplier`, `AdjustAttenuation`, `SetTriggerParameter`), never

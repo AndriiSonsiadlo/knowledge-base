@@ -13,7 +13,7 @@ It ships **special functions** (gamma, beta, Bessel, error functions, elliptic i
 suite of **statistical distributions** with PDF/CDF/quantile support, **root-finding** algorithms,
 and **numerical integration** (quadrature) — all as header-only, precision-aware templates.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The C++ standard library gives you `sin`, `cos`, `exp`, and a handful of others. Real numerical
 work — hypothesis testing, signal processing, computational physics — needs functions like the
 incomplete beta, Bessel functions of the first kind, or the quantile of a chi-squared distribution.
@@ -47,7 +47,7 @@ int main() {
 }
 ```
 
-:::tip C++17 added some of these
+:::tip[C++17 added some of these]
 C++17 brought `std::beta`, `std::tgamma`, `std::cyl_bessel_j`, and a few others. Boost.Math
 still covers far more functions and works on pre-C++17 compilers. It also provides error-handling
 policies that the standard versions lack.
@@ -111,7 +111,7 @@ int main() {
 }
 ```
 
-:::note Newton-Raphson needs derivatives
+:::note[Newton-Raphson needs derivatives]
 `newton_raphson_iterate` converges quadratically but requires the first derivative. `halley_iterate`
 needs first and second derivatives for cubic convergence. If you only have `f(x)`, use `bisect` or
 `bracket_and_solve_root`.
@@ -162,7 +162,7 @@ int main() {
 }
 ```
 
-:::warning Performance consideration
+:::warning[Performance consideration]
 Boost.Math is header-only and template-heavy. Instantiating many distributions or special functions
 across different types will increase compile times. Consider using explicit instantiation in a `.cpp`
 file if build times become a problem.

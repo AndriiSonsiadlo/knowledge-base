@@ -100,7 +100,7 @@ signaling rate is the fact that actually matters for "will this be fast enough":
 | USB4 40Gbps | USB4 (v1.0) | 40 Gbit/s |
 | USB4 80Gbps | USB4 v2.0 | 80 Gbit/s |
 
-:::info Marketing names change, signaling rates don't
+:::info[Marketing names change, signaling rates don't]
 The USB-IF has renamed the same underlying signaling rates more than once (e.g., "SuperSpeed+" became
 "USB 3.2 Gen 2x1" became the current plain-language "USB 10Gbps"). When comparing devices, look for the
 **Gbps figure**, not the version number — "USB 3.2" alone is ambiguous between 5, 10, and 20 Gbit/s
@@ -109,7 +109,7 @@ depending on which "Gen" a specific product implements.
 
 ## Edge Cases & Pitfalls
 
-:::danger USB-C is a connector, not a speed or protocol guarantee
+:::danger[USB-C is a connector, not a speed or protocol guarantee]
 A USB-C **port** or **cable** tells you nothing on its own about what speed, power, or even which
 protocol it carries. USB-C is a connector/cable mechanical standard that different things get
 tunneled through: USB 2.0 High-Speed, USB4, DisplayPort Alt Mode, Thunderbolt, and USB-PD can all use
@@ -118,7 +118,7 @@ bottleneck or fail to charge a device that needs USB4 speeds or high-wattage Pow
 visual way to tell the cables apart.
 :::
 
-:::warning Isochronous transfers can silently drop data
+:::warning[Isochronous transfers can silently drop data]
 Because isochronous transfers are not retried, a busy or marginal USB link can drop audio/video
 samples rather than stall — this shows up as audible glitches or dropped video frames rather than an
 error message, which can be confusing to debug.

@@ -99,7 +99,7 @@ exactly that — a cache, with the "derived" in the name meaning the same thing 
 else on this page. Deleting it costs you a slow shader-recompile pass the next time you open the
 project; it loses no data.
 
-:::warning "Safe to delete" still means "expect a slow rebuild"
+:::warning["Safe to delete" still means "expect a slow rebuild"]
 Deleting `Intermediate/`, `Saved/`, and `DerivedDataCache/` will not corrupt your project, but it
 does throw away every cached build product. The next editor launch or compile will be noticeably
 slower — full UHT pass, full shader compile — because there's nothing left to reuse. Don't do this

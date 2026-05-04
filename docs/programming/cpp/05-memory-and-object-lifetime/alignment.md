@@ -10,7 +10,7 @@ tags: [c++, alignment, memory, performance, padding]
 
 Data arranged at addresses that are multiples of its size. Required for correctness on some architectures, critical for performance on all.
 
-:::info Hardware Requirement
+:::info[Hardware Requirement]
 **x86-64**: Misaligned = 2-10x slower  
 **ARM/RISC**: Misaligned = crash  
 Compiler aligns automatically, but understanding helps optimize struct layouts.

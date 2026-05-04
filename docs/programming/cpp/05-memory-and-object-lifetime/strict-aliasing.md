@@ -10,7 +10,7 @@ tags: [c++, strict-aliasing, type-punning, undefined-behavior, optimization]
 
 Pointers of different types cannot point to the same memory (with exceptions). Enables compiler optimizations but causes undefined behavior when violated.
 
-:::danger Undefined Behavior
+:::danger[Undefined Behavior]
 Accessing an object through an incompatible pointer type = UB, even if it "works" in debug. Compiler assumes no aliasing and optimizes accordingly.
 :::
 
@@ -201,7 +201,7 @@ graph TD
 
 ## Summary
 
-:::info Strict Aliasing - Key Points
+:::info[Strict Aliasing - Key Points]
 **The Rule:**
 - Pointers of different types cannot point to same memory
 - Compiler assumes no aliasing between unrelated types

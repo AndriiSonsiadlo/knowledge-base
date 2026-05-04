@@ -152,7 +152,7 @@ is what most "interrupt a lower-priority behavior when a condition becomes true"
 and it only works because the decorator sits on a **higher**-priority sibling in a Selector — it has no
 lower-priority sibling to abort if you put it in the wrong place in the tree.
 
-:::warning Abort mode only matters if there's something to abort
+:::warning[Abort mode only matters if there's something to abort]
 `LowerPriority` and `Both` require the decorator to actually have lower-priority siblings under the
 same Selector that could be running. A decorator on the only child of a Sequence, or on the
 highest-priority child when nothing else is running, has nothing to interrupt — the abort mode setting
@@ -160,7 +160,7 @@ does nothing observable and the bug report becomes "my AI doesn't react," when t
 structure, not the decorator.
 :::
 
-:::caution Services tick on an interval, not on write
+:::caution[Services tick on an interval, not on write]
 A Service's `Interval`/`RandomDeviation` means the blackboard value it maintains can be up to one
 interval stale. If a decorator with `LowerPriority` abort depends on a value a Service writes, the
 reaction time to that condition is bounded by the Service's interval, not by decorator-checking speed —

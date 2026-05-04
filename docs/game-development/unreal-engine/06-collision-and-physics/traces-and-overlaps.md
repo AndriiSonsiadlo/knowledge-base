@@ -152,14 +152,14 @@ complex-collision line trace, complex-collision sweep. Reach for complex traces 
 per-triangle accuracy (aim-down-sights hit detection against foliage, precise melee against a detailed
 mesh) — everything else should trace against simple collision.
 
-:::warning Multi variants still stop enumerating after the first block
+:::warning[Multi variants still stop enumerating after the first block]
 `...Multi...` functions return every *overlapping* hit plus the first blocking hit — they do not continue
 past a blocking hit to find more blocks behind it. If you need "everything along this entire line
 regardless of blocking," you're describing a different query (typically several `Single` traces
 re-issued past each hit point), not a `Multi` call.
 :::
 
-:::caution ByObjectType ignores the response matrix entirely
+:::caution[ByObjectType ignores the response matrix entirely]
 `...ByObjectType` queries filter purely on the target's object type — they never consult
 `ECollisionResponse` at all, so a component set to `Ignore` a trace channel can still be returned by an
 object-type query against its type. Don't mix the two mental models: if you configured a custom

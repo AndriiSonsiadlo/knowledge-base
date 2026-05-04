@@ -10,7 +10,7 @@ tags: [c++, templates, generic-programming, function-templates]
 
 Function templates let you write one function that works with different types. The compiler generates specific versions for each type you use.
 
-:::info Write Once, Use for Any Type
+:::info[Write Once, Use for Any Type]
 Templates = blueprints. The compiler stamps out type-specific versions as needed.
 :::
 

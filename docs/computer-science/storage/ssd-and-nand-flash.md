@@ -65,7 +65,7 @@ so it can be reused. This copy-then-erase cycle is the root cause of write ampli
 Packing more bits per cell means distinguishing more voltage levels per read, which is slower and more
 error-prone — hence the speed/endurance trade-off against density/cost as you go from SLC toward QLC.
 
-:::info The SLC cache trick
+:::info[The SLC cache trick]
 Many TLC/QLC consumer SSDs dedicate a portion of flash to run in fast SLC mode as a write cache,
 absorbing bursts of incoming writes at high speed and flushing them to native TLC/QLC in the
 background. This is why a **sustained** random or large sequential write can be dramatically slower
@@ -88,14 +88,14 @@ host.
 
 ## Edge Cases & Pitfalls
 
-:::warning Endurance is finite and workload-dependent
+:::warning[Endurance is finite and workload-dependent]
 Every flash block tolerates a limited number of program/erase cycles before it becomes unreliable.
 Write-heavy workloads (logging, caching layers, databases without care for write amplification) burn
 through that budget faster — this is why SSDs specify endurance in **TBW** (terabytes written) or
 **DWPD** (drive writes per day), not just capacity.
 :::
 
-:::danger Power loss during a write can corrupt in-flight data
+:::danger[Power loss during a write can corrupt in-flight data]
 Because a logical write may touch the mapping table, a new physical page, and pending garbage
 collection simultaneously, sudden power loss mid-operation can leave the FTL's metadata inconsistent.
 Enterprise SSDs mitigate this with power-loss-protection capacitors; consumer SSDs typically do not

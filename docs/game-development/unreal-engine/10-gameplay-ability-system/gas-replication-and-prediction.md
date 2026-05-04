@@ -95,14 +95,14 @@ if (GetCurrentActivationInfo().GetActivationPredictionKey().IsValidKey())
 
 ## Gotchas
 
-:::warning Full replication mode on many actors is a bandwidth trap
+:::warning[Full replication mode on many actors is a bandwidth trap]
 It's tempting to leave every ASC on `Full` because it "just works" in testing with two clients. At real
 player counts, every active effect on every `Full`-mode actor replicates in detail to every relevant
 client — switch AI and non-owner-relevant actors to `Minimal` before this becomes a live performance
 problem, not after.
 :::
 
-:::caution A rejected prediction is a visible correction, not a silent one
+:::caution[A rejected prediction is a visible correction, not a silent one]
 When a predicted activation gets rejected, the player sees whatever was predicted (animation started,
 cue played) snap back. Minimize this by keeping `CanActivateAbility`/cost/cooldown checks consistent
 between what the client can observe and what the server will actually enforce — don't let client and

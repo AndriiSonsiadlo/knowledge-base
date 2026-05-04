@@ -130,7 +130,7 @@ frame. Keep generator item counts as small as the gameplay need allows, put chea
 first, and don't run an expensive query every tick from a Service — a BT task triggered on a state
 change, or an interval-gated Service, is the usual pattern.
 
-:::warning FEnvQueryRequest::Execute is asynchronous
+:::warning[FEnvQueryRequest::Execute is asynchronous]
 `Execute` queues the query; the callback fires later, not on the same call stack. Don't assume the
 result is available immediately after calling `Execute`, and don't call it from code that expects a
 synchronous return — that's what `RunInstantQuery` (synchronous, no time-slicing) exists for, and it

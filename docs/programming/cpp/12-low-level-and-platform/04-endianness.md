@@ -12,7 +12,7 @@ Byte order in multi-byte values.
 - **Little-endian** stores least significant byte first
 - **big-endian** stores most significant byte first. Critical for binary I/O and network protocols.
 
-:::info Network Byte Order
+:::info[Network Byte Order]
 Network protocols use **big-endian** (network byte order). x86/x86-64/ARM are typically **little-endian**.
 :::
 
@@ -275,7 +275,7 @@ u.i = 0x12345678;
 
 ## Summary
 
-:::info Endianness
+:::info[Endianness]
 **Endianness** is byte order in multi-byte values
 - Little-endian: `0x12345678 → [78][56][34][12]` (LSB first)
 - Big-endian:    `0x12345678 → [12][34][56][78]` (MSB first)

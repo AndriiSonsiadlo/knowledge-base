@@ -13,7 +13,7 @@ removal at both ends. When the buffer is full, pushing a new element **overwrite
 reallocation, no shifting, just a modular index advance. This makes it the natural container for
 sliding windows, bounded logs, streaming data, and any scenario where you want "the last N items."
 
-:::info The problem it solves
+:::info[The problem it solves]
 A `std::deque` grows without bound. A `std::vector` with manual index wrapping is error-prone and
 re-invents a known data structure. `circular_buffer` encapsulates the ring logic behind a
 standard-container interface: random access, iterators, `push_back`, `push_front`, `pop_back`,
@@ -163,14 +163,14 @@ int main() {
 }
 ```
 
-:::tip When to use circular_buffer
+:::tip[When to use circular_buffer]
 - **Bounded logs** — keep the last N events without unbounded growth.
 - **Sliding windows** — rolling averages, medians, or any windowed computation.
 - **Producer/consumer queues** — fixed-size buffer between threads (combine with your own locking).
 - **Audio / signal processing** — delay lines, sample history buffers.
 :::
 
-:::warning Not thread-safe by default
+:::warning[Not thread-safe by default]
 `circular_buffer` has no internal synchronisation. If one thread writes while another reads, you
 must protect the buffer with a mutex or other synchronisation mechanism. For a lock-free
 single-producer / single-consumer queue, see

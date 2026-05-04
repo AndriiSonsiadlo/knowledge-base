@@ -66,7 +66,7 @@ Speedup(N) = 1 / ((1 − p) + p / N)
 | 90% | 3.1x | 7.8x | 10x |
 | 99% | 3.9x | 39.3x | 100x |
 
-:::info The takeaway
+:::info[The takeaway]
 Even a small serial fraction caps your maximum speedup, no matter how many cores you add. Finding and
 eliminating serial bottlenecks (locks, single-threaded I/O, a shared queue) usually matters more than
 adding more cores.

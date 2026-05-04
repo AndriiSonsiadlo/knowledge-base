@@ -130,14 +130,14 @@ effect tag gating never needs one.
 
 ## Gotchas
 
-:::warning Tag hierarchy naming is a one-way door
+:::warning[Tag hierarchy naming is a one-way door]
 Renaming a tag (`Status.Stunned` to `State.Debuff.Stunned`) breaks every Blueprint asset, config entry,
 and data table row that references the old string, since tags are matched by name, not by a stable ID.
 Settle on a naming convention (a root per category — `Ability.`, `State.`, `GameplayCue.`, `Event.`)
 before content production starts, not after.
 :::
 
-:::caution Partial tag matching means broad tags block more than you expect
+:::caution[Partial tag matching means broad tags block more than you expect]
 A container check against `State.Debuff` matches every tag under it. An ability blocked by a broad tag
 like `State` (rather than the specific `State.Debuff.Stunned`) will also block on tags you didn't intend,
 like `State.Buff.Shielded`. Write requirements against the most specific tag that expresses the intent.

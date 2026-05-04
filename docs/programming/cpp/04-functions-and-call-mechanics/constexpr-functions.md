@@ -10,7 +10,7 @@ tags: [c++, constexpr, compile-time, optimization, cpp11]
 
 `constexpr` indicates values or functions can be evaluated at compile-time, enabling compile-time computation and optimization.
 
-:::info Compile-Time Execution
+:::info[Compile-Time Execution]
 `constexpr` functions execute during compilation when possible, producing constants that can be used in array sizes, template arguments, and other constant expressions.
 :::
 
@@ -417,7 +417,7 @@ constexpr const int* ptr2 = &x;  // Still problematic
 - Prefer `constexpr` over macros
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Mark functions `constexpr` if they can't be evaluated at compile-time
 - Use `constexpr` for runtime-only operations
 - Assume `constexpr` always means compile-time (can be runtime)

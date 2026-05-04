@@ -10,7 +10,7 @@ tags: [c++, ecosystem, c-vs-cpp, comparison, tools, libraries]
 
 The C++ ecosystem encompasses compilers, build systems, package managers, IDEs, libraries, and testing frameworks. Understanding this landscape is crucial for effective C++ development.
 
-:::info Ecosystem Maturity
+:::info[Ecosystem Maturity]
 C++ has 40+ years of tooling evolution, resulting in diverse, battle-tested tools for every platform and use case.
 :::
 
@@ -631,7 +631,7 @@ The C++ ecosystem provides:
 - **Testing & analysis** - Google Test, Catch2, ASan, clang-tidy
 - **Active community** - Conferences, books, online resources
 
-:::info Key Takeaway
+:::info[Key Takeaway]
 C++ has evolved from a language with minimal tooling to one with a comprehensive, mature ecosystem rivaling any modern language. The key is knowing which tools to use for your specific needs.
 :::
 

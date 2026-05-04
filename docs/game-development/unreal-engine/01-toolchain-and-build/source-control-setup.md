@@ -98,13 +98,13 @@ stored as regular Git blobs and bloat the repository the same way `Binaries/` wo
 *.wav filter=lfs diff=lfs merge=lfs -text
 ```
 
-:::warning A committed binary is in history forever
+:::warning[A committed binary is in history forever]
 Adding `.gitattributes` after binary files have already been committed as regular blobs doesn't
 retroactively move them into LFS — history still holds the original blobs. Set up LFS tracking
 *before* the first `Content/` commit, not after you notice the repository is large.
 :::
 
-:::warning Two people editing the same .uasset without locking is a silent conflict
+:::warning[Two people editing the same .uasset without locking is a silent conflict]
 Unlike text files, Git cannot merge two divergent edits to the same binary asset — the result is
 "theirs" or "ours," never a real merge, and Git won't necessarily warn you loudly which one you got.
 If your team edits shared binary assets concurrently, either enable Git LFS file locking

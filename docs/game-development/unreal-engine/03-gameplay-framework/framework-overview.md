@@ -104,7 +104,7 @@ void AMyPickupActor::OnOverlapBegin(AActor* OtherActor)
 
 ## Gotchas
 
-:::warning Don't assume every player has a PlayerController on every machine
+:::warning[Don't assume every player has a PlayerController on every machine]
 A `APlayerController` only fully exists (with valid input, camera, and replicated properties) on the
 server and on the one client it belongs to. On every *other* client, a remote player is represented by
 their `Pawn` and `PlayerState`, not a usable `PlayerController`. Code that does
@@ -112,7 +112,7 @@ their `Pawn` and `PlayerState`, not a usable `PlayerController`. Code that does
 common source of silent no-ops or crashes once you test with more than one client.
 :::
 
-:::caution "The player" is not one object
+:::caution["The player" is not one object]
 New Unreal developers reach for `GameMode` to store per-player score because it's the first class they
 learn. `GameMode` is server-only and un-replicated — put per-player, client-visible data on
 `PlayerState` instead. See [Game mode and game state](./game-mode-and-game-state.md) for the concrete

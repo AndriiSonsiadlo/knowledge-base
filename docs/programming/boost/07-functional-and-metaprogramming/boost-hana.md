@@ -14,7 +14,7 @@ type computations are expressed as ordinary value computations on heterogeneous 
 The result is metaprogramming code that reads like regular C++ — `constexpr` functions,
 algorithms, and containers instead of nested `typename` and `::type` boilerplate.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Traditional C++ metaprogramming (MPL-style) works entirely in the type system — `mpl::vector`,
 `mpl::transform`, `mpl::at<>` — producing unreadable code and brutal compiler errors. Hana moves
 this work into the value domain using `constexpr`, so you write `hana::transform(tuple, f)` instead
@@ -75,7 +75,7 @@ int main() {
 }
 ```
 
-:::warning filter requires compile-time predicates
+:::warning[filter requires compile-time predicates]
 Unlike runtime `std::remove_if`, `hana::filter` changes the *type* of the resulting tuple (different
 elements, different length). The predicate must return a compile-time boolean — a `hana::bool_c`, not
 a runtime `bool`.
@@ -180,7 +180,7 @@ flowchart LR
 | Error messages | very poor | moderate | good |
 | Compile times | slow | moderate | fast |
 
-:::tip When to choose Hana
+:::tip[When to choose Hana]
 For any new metaprogramming on C++14 or later, prefer Hana over MPL and Fusion. It is faster to
 compile, easier to read, and produces better error messages. Use MPL/Fusion only when maintaining
 legacy code or targeting C++03/C++11.

@@ -13,7 +13,7 @@ small helpers that predate [Boost.Core](./boost-core.md). Over time many of its 
 absorbed into Core or standardised into `std`, so today Utility is best understood as a *grab-bag with
 a long memory* — useful classics still live here, and a lot of Boost code includes it out of habit.
 
-:::info Historical role
+:::info[Historical role]
 Before Boost had a dedicated "Core" library, Utility was where tiny shared helpers went. As the
 dependency-hygiene story improved, the truly fundamental pieces (`addressof`, `ref`, `noncopyable`)
 migrated to Core. Utility kept the more specialised odds and ends described below.
@@ -62,7 +62,7 @@ int main() {
 }
 ```
 
-:::note Standardised
+:::note[Standardised]
 `std::next` and `std::prev` (C++11, in `<iterator>`) supersede these. Prefer them in new code.
 :::
 
@@ -109,7 +109,7 @@ bool starts_with(boost::string_view s, boost::string_view prefix) {
 }
 ```
 
-:::tip Prefer std::string_view
+:::tip[Prefer std::string_view]
 On C++17+, `std::string_view` is the right choice. Boost's version exists for older toolchains and for
 code already inside the Boost dependency graph.
 :::
@@ -155,7 +155,7 @@ This is exactly the technique standard containers use internally to make `std::v
 stateless allocator for free. It is the most enduringly useful piece of Boost.Utility, often pulled in
 by container and smart-pointer implementations.
 
-:::info Why EBO matters
+:::info[Why EBO matters]
 Without compression, every empty helper object would bloat each element by at least one byte (and often
 more after alignment). In a container holding millions of nodes, that adds up. EBO via base-class
 layout makes "policy" types truly free.

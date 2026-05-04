@@ -13,7 +13,7 @@ in C++11. The standard adopted Boost.Chrono almost verbatim, so the two APIs are
 Where Boost.Chrono still adds value today is its **process CPU clocks** — clocks that measure how
 much CPU time (user or system) a process has consumed — which `std::chrono` does not provide.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `clock()` from `<ctime>` returns a count with platform-dependent resolution and semantics. On some
 systems it measures wall time, on others CPU time. Boost.Chrono gives you distinct clock types with
 well-defined behaviour: `system_clock` for wall time, `steady_clock` for monotonic intervals, and
@@ -43,7 +43,7 @@ int main() {
 }
 ```
 
-:::note duration_cast
+:::note[duration_cast]
 Converting from a finer to a coarser resolution requires an explicit `duration_cast` — it truncates,
 not rounds. This prevents accidental precision loss.
 :::
@@ -82,7 +82,7 @@ int main() {
 | `process_cpu_clock` | Combined (real, user, system) | Yes |
 | `thread_clock` | CPU time for the calling thread | Yes |
 
-:::tip Process clocks — the unique feature
+:::tip[Process clocks — the unique feature]
 `std::chrono` has `system_clock`, `steady_clock`, and `high_resolution_clock`, but no process or
 thread CPU clocks. If you need to measure how much CPU your code actually consumed (excluding I/O
 waits and other processes), `process_user_cpu_clock` is the tool.
@@ -144,7 +144,7 @@ int main() {
 | I/O formatting | Built-in | C++20 `std::format` |
 | `duration_cast` | Yes | Yes |
 
-:::note Migration
+:::note[Migration]
 If you only need durations, time_points, and the three standard clocks, `std::chrono` is a direct
 replacement — the API was designed to be source-compatible. Keep Boost.Chrono when you use the
 process or thread CPU clocks.

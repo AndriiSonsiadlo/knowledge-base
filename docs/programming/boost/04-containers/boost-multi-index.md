@@ -13,7 +13,7 @@ same set of elements. Instead of maintaining separate `std::map`s and `std::unor
 you must keep in sync manually, you declare all your access patterns up front and the library
 handles the bookkeeping. Think of it as an in-memory database table with multiple columns indexed.
 
-:::info The problem it solves
+:::info[The problem it solves]
 You have a collection of records and you need to look them up by name (ordered), by ID (hashed),
 and iterate them in insertion order. The naive approach — three separate containers pointing at the
 same data — is error-prone: every insert, update, and erase must touch all three, and a missed
@@ -131,7 +131,7 @@ int main() {
 }
 ```
 
-:::danger Never cast away const to modify elements
+:::danger[Never cast away const to modify elements]
 Modifying an element through a const-cast on the iterator bypasses the index update logic. The
 container's internal invariants break silently — lookups on other indexes will return wrong results
 or crash. Always use the `modify` member function.
@@ -167,7 +167,7 @@ using LogTable = boost::multi_index_container<
 >;
 ```
 
-:::tip Think of it as a database
+:::tip[Think of it as a database]
 If you find yourself maintaining parallel containers and writing synchronisation logic, stop and
 consider `multi_index_container`. Declare the indexes you need, let the library maintain them, and
 focus on your domain logic instead.

@@ -10,7 +10,7 @@ tags: [c++, stl, iterators, ranges, algorithms]
 
 Iterators are the glue between containers and algorithms. They provide a uniform interface for traversing and accessing elements in different container types, enabling generic algorithms.
 
-:::info Iterator Abstraction
+:::info[Iterator Abstraction]
 Iterators abstract away container details. Algorithms work with any container through iterators, not caring if it's a vector, list, or custom type.
 :::
 

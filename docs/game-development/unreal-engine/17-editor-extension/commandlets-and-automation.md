@@ -172,20 +172,20 @@ if (!FParse::Value(*Params, TEXT("TargetPlatform="), TargetPlatform))
 
 ## Gotchas
 
-:::warning There is no UWorld, no actors, no viewport — don't assume gameplay systems are up
+:::warning[There is no UWorld, no actors, no viewport — don't assume gameplay systems are up]
 Code paths that assume `GetWorld()` returns something meaningful, or that a `GameInstance` exists, will
 either return null or crash inside a commandlet. Stick to asset-registry, `UObject`-reflection, and
 config-level operations unless you've explicitly loaded a world yourself.
 :::
 
-:::warning Exit code is your CI contract — don't let an exception mid-Main lose it
+:::warning[Exit code is your CI contract — don't let an exception mid-Main lose it]
 If `Main` needs to signal failure, return a non-zero `int32` deliberately; don't rely on a crash or
 `check()` failure to communicate a validation failure, because a hard crash can leave the process exit
 code ambiguous to the calling script depending on platform and crash-reporter configuration. Catch what
 you can, log, and return an explicit non-zero value on the failure path shown above.
 :::
 
-:::caution Commandlets are excluded from some module Types
+:::caution[Commandlets are excluded from some module Types]
 Recall from [Editor-only modules](./editor-modules.md) that `RuntimeNoCommandlet` and
 `EditorNoCommandlet` are real `Type` values specifically meant to exclude a module from commandlet
 execution. If a commandlet you write depends on a module typed that way, it won't load in the commandlet
@@ -193,7 +193,7 @@ context — check the `Type` of every dependency, not just your own commandlet's
 commandlet run fails to find a class or subsystem that works fine in the normal editor.
 :::
 
-:::caution Long-running commandlets still need to tick the engine loop themselves
+:::caution[Long-running commandlets still need to tick the engine loop themselves]
 A commandlet's `Main` runs to completion and then the process exits — there's no implicit per-frame tick
 the way there is in a running editor or game. If your commandlet does something that depends on deferred
 work (asynchronous asset loading, streaming), you're responsible for pumping whatever wait/poll loop is

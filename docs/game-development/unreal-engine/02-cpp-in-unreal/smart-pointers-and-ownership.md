@@ -95,19 +95,19 @@ under a different name.
 
 ## Gotchas
 
-:::danger Never wrap a UObject in a TSharedPtr, and never store a plain C++ object in a UPROPERTY
+:::danger[Never wrap a UObject in a TSharedPtr, and never store a plain C++ object in a UPROPERTY]
 A `UObject` already has an owner — the reflection/GC system. Giving it a second owner via `TSharedPtr`
 creates two lifetime authorities that don't know about each other. The reverse mistake — expecting
 `UPROPERTY` to manage a plain, non-reflected C++ type — simply doesn't compile, which is the safer
 failure mode; the `TSharedPtr<UObject>` mistake compiles and runs until it doesn't.
 :::
 
-:::warning A TSharedPtr cycle leaks exactly like a shared_ptr cycle
+:::warning[A TSharedPtr cycle leaks exactly like a shared_ptr cycle]
 Two objects holding `TSharedPtr`s to each other never reach a zero reference count. Break the cycle
 by making one direction a `TWeakPtr`, same as any other reference-counted smart pointer family.
 :::
 
-:::caution Pin() before use, every time
+:::caution[Pin() before use, every time]
 `TWeakPtr::Pin()` can return an empty `TSharedPtr` if the target was already destroyed. Treat every
 `Pin()` result as something that might be null, the same way you'd treat `TWeakObjectPtr::Get()` for a
 `UObject`.

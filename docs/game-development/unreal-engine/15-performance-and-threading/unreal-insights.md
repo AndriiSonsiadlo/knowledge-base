@@ -156,14 +156,14 @@ Insights tells you which specific frame and which specific scope, at the moment 
 
 ## Gotchas
 
-:::warning Tracing has a cost — don't leave every channel on by default
+:::warning[Tracing has a cost — don't leave every channel on by default]
 Every enabled channel adds overhead to the run being profiled, and some (memory tracking in particular)
 are expensive enough to visibly change frame time while capturing. Enable only the channels relevant to
 the question you're asking, and prefer a short, targeted capture window over "trace everything for the
 whole session."
 :::
 
-:::caution A live network trace needs the host reachable
+:::caution[A live network trace needs the host reachable]
 `-tracehost=<ip>` only works if the capturing machine (running Insights) is actually reachable from the
 device under test — a firewall, a different subnet, or a console's network sandboxing can silently make
 a "live" trace never connect while showing no obvious error. If a live session won't connect, capture to

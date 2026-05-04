@@ -213,27 +213,27 @@ one more `FArchive` consumer, which is exactly why the same custom-version machi
 
 ## Gotchas
 
-:::warning Forgetting to bump the custom version is worse than not versioning at all
+:::warning[Forgetting to bump the custom version is worse than not versioning at all]
 A custom version that exists but never gets incremented when the format changes gives false confidence —
 your `Serialize` override branches on a version number that never reflects the actual change you made,
 so old and new saves both take the "current" code path and the old ones load garbage into the new field.
 Bump the enum in the same commit that changes the serialized layout, not later.
 :::
 
-:::warning TArray/TMap element changes need the same version discipline as top-level fields
+:::warning[TArray/TMap element changes need the same version discipline as top-level fields]
 Adding a member to a struct that's serialized inside a `TArray<FMyStruct>` SaveGame property is a format
 change like any other — the struct's own `Serialize` (if it has one) or its reflected properties need the
 same guarded-read treatment, or every array element in an old save silently gets whatever the new field's
 in-memory default happens to be.
 :::
 
-:::caution Never reuse a custom version GUID across unrelated projects or systems
+:::caution[Never reuse a custom version GUID across unrelated projects or systems]
 The GUID is how the archive looks up "which version number belongs to which concern" in its version
 container — copying a GUID from an example (including this one) into a real project risks colliding with
 another system's version tracking. Generate a fresh GUID per project/subsystem.
 :::
 
-:::warning Slot names and user index are platform-meaningful, not just a filename
+:::warning[Slot names and user index are platform-meaningful, not just a filename]
 `SaveGameToSlot`/`LoadGameFromSlot`'s `SlotName`/`UserIndex` pair maps to different physical storage per
 platform (a simple file on Windows, a platform save-system entry on console). Don't assume slot names are
 freely renameable after shipping — a rename is effectively "this save no longer exists" for existing

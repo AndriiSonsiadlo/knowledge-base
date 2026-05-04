@@ -168,7 +168,7 @@ Every RPC must specify one:
   high-frequency cosmetic calls where losing one occurrence doesn't matter (a per-shot muzzle flash that
   fires several times a second is fine to lose occasionally).
 
-:::warning Reliable RPCs are not free
+:::warning[Reliable RPCs are not free]
 Overusing `Reliable` for high-frequency calls (anything called every tick, or many times a second) can
 saturate the reliable channel, which then **stalls other reliable traffic on the same connection**
 behind it. Reserve `Reliable` for infrequent, must-happen events, and use `Unreliable` (or a replicated
@@ -196,24 +196,24 @@ component only works if the component's owning actor has an owning connection se
 
 ## Gotchas
 
-:::warning A Server RPC from a client that doesn't own the actor silently does nothing
+:::warning[A Server RPC from a client that doesn't own the actor silently does nothing]
 There's no error, no log by default — the call just never reaches the server. If a "server call isn't
 working," check `GetOwner()` / the actor's owning connection before suspecting the RPC plumbing itself.
 :::
 
-:::caution NetMulticast run on everyone, including whoever triggered it
+:::caution[NetMulticast run on everyone, including whoever triggered it]
 A `NetMulticast` RPC executes on the server too, and on the calling client if that client is also
 relevant to the actor — don't double-apply a cosmetic effect by also playing it locally before calling
 the multicast.
 :::
 
-:::warning _Validate failing disconnects the client
+:::warning[_Validate failing disconnects the client]
 Treat a `_Validate` failure as "this client is misbehaving," not "this input was invalid right now." Use
 plain conditionals inside `_Implementation` for ordinary rejected actions (on cooldown, out of range at
 the moment the server checks) so a legitimate but laggy client isn't kicked for a race condition.
 :::
 
-:::caution RPC parameters are serialized like replicated properties
+:::caution[RPC parameters are serialized like replicated properties]
 Large payloads (big arrays, full `FString` blobs) sent as RPC parameters cost bandwidth per call, same
 as a replicated property. Keep RPC parameter lists small — pass IDs/indices and look up the rest locally
 rather than shipping large structures over an RPC.

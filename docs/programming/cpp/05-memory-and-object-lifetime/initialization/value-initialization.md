@@ -197,7 +197,7 @@ Point p;                    // x, y indeterminate
 
 ## Summary
 
-:::info Value Initialization - Key Points
+:::info[Value Initialization - Key Points]
 **Guaranteed Safety:**
 - **Fundamentals**: Always zero (0, 0.0, false, nullptr)
 - **Classes with constructor**: Calls default constructor

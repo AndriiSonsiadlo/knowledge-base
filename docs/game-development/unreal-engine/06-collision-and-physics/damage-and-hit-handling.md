@@ -168,13 +168,13 @@ void AProjectile::HandleHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 }
 ```
 
-:::warning Binding OnComponentHit does nothing without Simulation Generates Hit Events
+:::warning[Binding OnComponentHit does nothing without Simulation Generates Hit Events]
 A non-simulating component with `Block` collision only fires `OnComponentHit` if
 `Simulation Generates Hit Events` is enabled on it (or its owning body). Binding the delegate and never
 seeing it fire almost always traces back to this flag, not the delegate binding.
 :::
 
-:::caution Client-side ApplyDamage is a silent no-op, not a visible failure
+:::caution[Client-side ApplyDamage is a silent no-op, not a visible failure]
 Because `ApplyDamage`/`ApplyPointDamage`/`ApplyRadialDamage` are `BlueprintAuthorityOnly`, calling them on
 a client without authority doesn't damage anything and doesn't warn you — the call simply doesn't apply.
 If damage "isn't working" only in networked play, check `HasAuthority()` at the call site before anything

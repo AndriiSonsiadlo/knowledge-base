@@ -20,7 +20,7 @@ graph LR
 ```
 
 
-:::info Core Principle
+:::info[Core Principle]
 **Tie resource lifetime to object lifetime**
 - Acquire resource in constructor
 - Release resource in destructor
@@ -51,7 +51,7 @@ void processFile() {
 }
 ```
 
-:::danger Problems with Manual Management
+:::danger[Problems with Manual Management]
 - Forgetting to release resources
 - Exception-unsafe code
 - Early returns skip cleanup
@@ -476,7 +476,7 @@ void usePooledResource() {
 - Throw exceptions from constructors if acquisition fails
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Mix RAII with manual resource management
 - Throw exceptions from destructors
 - Forget to handle move semantics
@@ -586,7 +586,7 @@ public:
 
 ## Common Pitfalls
 
-:::warning Pitfall #1: Destructor Exceptions
+:::warning[Pitfall #1: Destructor Exceptions]
 ```cpp showLineNumbers 
 class Bad {
     ~Bad() {
@@ -599,7 +599,7 @@ class Bad {
 ```
 :::
 
-:::warning Pitfall #2: Incomplete Cleanup
+:::warning[Pitfall #2: Incomplete Cleanup]
 ```cpp showLineNumbers 
 class Incomplete {
     FILE* file;
@@ -610,7 +610,7 @@ public:
 ```
 :::
 
-:::warning Pitfall #3: Double Free
+:::warning[Pitfall #3: Double Free]
 ```cpp showLineNumbers 
 class DoubleFree {
     int* data;

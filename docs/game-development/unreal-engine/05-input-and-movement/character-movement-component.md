@@ -130,7 +130,7 @@ system that keeps client and server in agreement.
 
 ## Traps
 
-:::warning Never move the actor directly to implement movement
+:::warning[Never move the actor directly to implement movement]
 `SetActorLocation()` or `AddActorWorldOffset()` called on a `Character` with an active movement
 component fights the component's own position each tick and breaks prediction — the server-authoritative
 value the component computed gets silently overwritten or immediately corrected back. If you need
@@ -138,7 +138,7 @@ movement outside the built-in modes, add a custom mode (see
 [Custom movement modes](./custom-movement-modes.md)) rather than moving the actor around the component.
 :::
 
-:::caution MaxAcceleration of 0 does not mean "can't move"
+:::caution[MaxAcceleration of 0 does not mean "can't move"]
 Setting `MaxAcceleration` to zero (to lock movement, for example) also removes the deceleration curve's
 reference value in some modes, producing instant-stop or no-stop behavior that looks like a bug rather
 than a deliberate lock. Prefer `DisableMovement()` / restoring a saved `MaxWalkSpeed` of `0` explicitly,

@@ -10,7 +10,7 @@ tags: [c++, functions, overloading, overload-resolution]
 
 Function overloading allows multiple functions with the same name but different parameters. The compiler selects the best match based on arguments.
 
-:::info Compile-Time Selection
+:::info[Compile-Time Selection]
 Overload resolution happens at compile-time based on argument types, not runtime values.
 :::
 
@@ -332,7 +332,7 @@ Complex c = a + b;  // Calls operator+
 - Keep overload sets intuitive
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Overload with same parameter types (differs only by names)
 - Create ambiguous overload sets
 - Differ only by return type

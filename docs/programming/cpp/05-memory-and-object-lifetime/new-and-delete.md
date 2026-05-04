@@ -10,7 +10,7 @@ tags: [c++, new, delete, dynamic-memory, heap, allocation]
 
 Manual dynamic memory management in C++. Allocates on heap, requires explicit deallocation. Modern C++ prefers smart pointers.
 
-:::warning Manual Memory = Manual Cleanup
+:::warning[Manual Memory = Manual Cleanup]
 Every `new` requires exactly one `delete`. Missing = leak. Double = crash. Modern code uses `unique_ptr`/`shared_ptr` instead.
 :::
 
@@ -155,7 +155,7 @@ void safe() {
 - Initialize with `()` or `{}`, not bare `new int`
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Mix `new/delete` with `new[]/delete[]`
 - Delete same pointer twice
 - Use after delete
@@ -164,7 +164,7 @@ void safe() {
 
 ## Summary
 
-:::info new and delete - Key Points
+:::info[new and delete - Key Points]
 **Basic Operations:**
 - **`new`**: Allocates heap memory + constructs object
 - **`delete`**: Destructs object + deallocates memory

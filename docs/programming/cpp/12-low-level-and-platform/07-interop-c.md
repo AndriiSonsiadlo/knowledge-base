@@ -10,7 +10,7 @@ tags: [cpp, c-interop, extern-c, abi, compatibility]
 
 C++ can call C functions and vice versa using `extern "C"` linkage. Essential for using C libraries, system APIs, and creating C-compatible interfaces.
 
-:::info Name Mangling
+:::info[Name Mangling]
 C++ mangles function names (see [Name Mangling](../01-toolchain-and-build/name-mangling.md)). C doesn't. `extern "C"` disables mangling for C compatibility.
 :::
 
@@ -339,7 +339,7 @@ extern "C" void func(int x);
 - Document C API clearly
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Throw exceptions across boundary
 - Expose C++ types (std::string, std::vector) to C
 - Use function overloading in extern "C"

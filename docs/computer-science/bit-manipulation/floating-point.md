@@ -91,14 +91,14 @@ bool nan_eq_itself = (nan_val == nan_val); // false — NaN is never equal to an
 
 ## Edge Cases & Pitfalls
 
-:::danger Never use floating point for money
+:::danger[Never use floating point for money]
 Currency needs *exact* decimal arithmetic (cents must never silently drift). Floating point
 rounding error compounds across many additions/multiplications. Use integer cents, a fixed-point
 type, or a decimal type (`std::decimal` proposals, language-specific `Decimal`/`BigDecimal` types,
 or database `DECIMAL`/`NUMERIC` columns) instead.
 :::
 
-:::warning NaN breaks normal comparison logic
+:::warning[NaN breaks normal comparison logic]
 `NaN != NaN` is true, so `std::sort` and set/map ordering can misbehave if NaNs sneak into
 comparisons — always check `std::isnan()` before comparing or sorting untrusted floating-point
 data.

@@ -10,7 +10,7 @@ tags: [c++, cross-compilation, toolchain, embedded, arm, build]
 
 Cross-compilation builds executables for a different platform (target) than the one running the compiler (host). Essential for embedded systems, mobile development, and deploying to different architectures.
 
-:::info Build Here, Run There
+:::info[Build Here, Run There]
 **Host** = where you compile (e.g., x86-64 Linux laptop)  
 **Target** = where executable runs (e.g., ARM Raspberry Pi)
 :::
@@ -225,7 +225,7 @@ docker run -v $(pwd):/build cross-compiler
 
 ## Common Pitfalls
 
-:::danger Watch Out
+:::danger[Watch Out]
 
 **Endianness mismatch:**
 - Most ARM is little-endian like x86

@@ -13,7 +13,7 @@ and shared locks. It is the direct ancestor of `std::thread` and `std::mutex` fr
 offers features the standard has not fully absorbed: **thread interruption**, `thread_group`, and
 `shared_mutex` that shipped in Boost years before C++17 adopted it.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Before C++11, the language had no threading model at all. Platform code meant `pthread_create` on POSIX
 and `CreateThread` on Windows, with completely different APIs. Boost.Thread gave C++ a single, portable
 threading abstraction — and its design became the blueprint for the standard.
@@ -68,7 +68,7 @@ void writer(const std::string& val) {
 }
 ```
 
-:::tip shared_mutex arrived in Boost first
+:::tip[shared_mutex arrived in Boost first]
 `boost::shared_mutex` has been available since Boost 1.35 (2008). The standard equivalent,
 `std::shared_mutex`, did not appear until C++17. On older toolchains, Boost is the only portable
 option.
@@ -102,7 +102,7 @@ int main() {
 }
 ```
 
-:::warning std::thread has no interruption
+:::warning[std::thread has no interruption]
 `std::thread` deliberately omits interruption — the committee considered it too error-prone for a
 standard facility. If you need cooperative cancellation with `std::thread`, you must roll your own
 with an atomic flag or `std::stop_token` (C++20). Boost.Thread gives it to you out of the box.
@@ -155,7 +155,7 @@ int main() {
 | Move-only | yes | yes |
 | Needs linking | `-lboost_thread` | platform-dependent |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++17 and later, prefer `std::thread` and `std::shared_mutex` for standard code. Reach for
 Boost.Thread when you need thread interruption, `thread_group`, or must support a pre-C++11 toolchain.
 See [Boost and the C++ Standard](../00-overview/boost-and-the-standard.md) for the broader lineage.

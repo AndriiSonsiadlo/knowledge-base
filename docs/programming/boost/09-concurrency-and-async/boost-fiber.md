@@ -13,7 +13,7 @@ has its own stack and can block on mutexes, condition variables, and channels â€
 cooperatively within a single OS thread, not preemptively by the kernel. This makes fibers extremely
 lightweight: creating thousands of fibers is practical where creating thousands of OS threads is not.
 
-:::info The problem it solves
+:::info[The problem it solves]
 OS threads are expensive â€” each one consumes kernel resources and a megabyte or more of stack. When you
 have thousands of concurrent tasks that spend most of their time waiting (I/O, timers, channel reads),
 fibers give you the concurrency model of goroutines or Erlang processes in plain C++.
@@ -70,7 +70,7 @@ int main() {
 }
 ```
 
-:::warning Do not mix fiber and thread primitives
+:::warning[Do not mix fiber and thread primitives]
 Using `std::mutex` or `boost::mutex` inside a fiber blocks the entire OS thread, stalling all fibers
 on that thread. Always use `boost::fibers::mutex` and `boost::fibers::condition_variable` inside
 fiber code.
@@ -131,7 +131,7 @@ flowchart TD
 | Sync primitives | std::mutex, etc. | fiber::mutex, channels | awaitable objects |
 | Scalability | thousands at most | millions possible | millions possible |
 
-:::note Integration with Asio
+:::note[Integration with Asio]
 Boost.Fiber ships with an Asio integration scheduler (`boost::fibers::asio::round_robin`) that lets
 fibers yield on Asio async operations. This combines the readable, synchronous-looking fiber code with
 Asio's efficient I/O multiplexing.

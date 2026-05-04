@@ -12,7 +12,7 @@ Operator overloading lets your types reuse built-in operator syntax — `a + b`,
 so user-defined types read like primitives. It is *syntactic sugar over function calls*: `a + b` is
 exactly `a.operator+(b)` or `operator+(a, b)`.
 
-:::info Guiding principle
+:::info[Guiding principle]
 Overload an operator only when its meaning is **obvious and conventional** for the type. `+` on a
 `Matrix` is clear; `+` on a `BankAccount` is a riddle. When in doubt, write a named method.
 :::
@@ -81,7 +81,7 @@ struct Adder { int operator()(int a, int b) const { return a + b; } };   // call
 - Cannot overload `::`, `.`, `.*`, `?:`, or `sizeof`.
 - At least one operand must be a user-defined type — you cannot redefine `int + int`.
 
-:::warning Overloading `&&`, `||`, `,`
+:::warning[Overloading `&&`, `||`, `,`]
 Legal, but these lose their special behaviour: overloaded `&&`/`||` **stop short-circuiting** and
 overloaded `,` loses its sequencing. Readers will assume the built-in semantics. Don't.
 :::

@@ -14,7 +14,7 @@ metaprogramming engine. It provides data structures (sequences, tuples, lists, a
 constructs (repetition, iteration, conditionals), and the two primitive operations every preprocessor
 trick is built on: token pasting and stringizing.
 
-:::info Why a preprocessor metaprogramming library?
+:::info[Why a preprocessor metaprogramming library?]
 Templates run at compile time but operate on **types and values**. The preprocessor runs *earlier*,
 operating on **raw tokens** before the compiler ever parses them. That makes it the only tool that can
 mechanically generate *source code itself* — repeated function overloads, enum-to-string tables,
@@ -84,7 +84,7 @@ int BOOST_PP_CAT(var, VERSION) = 0;            // declares: int var3 = 0;
 const char* tag = BOOST_PP_STRINGIZE(VERSION); // yields "3", not "VERSION"
 ```
 
-:::tip Prefer the Boost macros over raw `#`/`##`
+:::tip[Prefer the Boost macros over raw `#`/`##`]
 If you ever find that `name ## SUFFIX` produced literally `nameSUFFIX` instead of the value of
 `SUFFIX`, reach for `BOOST_PP_CAT`. The double-expansion behaviour is exactly what you almost always
 want.
@@ -146,7 +146,7 @@ BOOST_PP_REPEAT_FROM_TO(0, 4, MAKE_OVERLOAD, ~)   // generates arities 1..4
 #undef MAKE_OVERLOAD
 ```
 
-:::note This is what variadic templates replaced
+:::note[This is what variadic templates replaced]
 In C++11 and later you would write a single `template <class... Ts> auto make(Ts const&... args)`.
 The preprocessor approach above only exists because that language feature did not. If you target
 C++11+, prefer the variadic template — it is shorter, debuggable, and not capped at an arbitrary
@@ -203,14 +203,14 @@ you when something goes wrong. Reach for a modern language feature first:
 | Type lists / type manipulation | Templates, `std::tuple`, fold expressions |
 | A handful of similar values | Just write them out, or a normal `constexpr` array |
 
-:::warning Debuggability is the real cost
+:::warning[Debuggability is the real cost]
 Preprocessor errors are notoriously opaque: a single mistake expands into a wall of unrelated tokens,
 and stepping through generated code in a debugger shows you machine-expanded source you never wrote.
 Use `g++ -E` (or `clang++ -E`) to inspect the expansion when diagnosing problems, and keep BOOST_PP
 to the smallest surface that solves the problem.
 :::
 
-:::danger Recursion and reentrancy limits
+:::danger[Recursion and reentrancy limits]
 The preprocessor cannot truly recurse. Boost.Preprocessor fakes recursion with a fixed pool of
 expansion "states," so a macro that re-enters itself (for example, calling `BOOST_PP_REPEAT` inside
 another `BOOST_PP_REPEAT` without using the `z`/`d` dimension parameters) silently fails to expand.

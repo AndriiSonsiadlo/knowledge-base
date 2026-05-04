@@ -123,13 +123,13 @@ if (const UWorldPartitionHLODRuntimeSubsystem* HLODSubsystem =
 
 ## Gotchas
 
-:::warning Cell size is not free to change late
+:::warning[Cell size is not free to change late]
 Changing a runtime grid's cell size after a lot of content has been placed reshuffles which actors belong
 to which cell, which touches a large number of external actor packages at once. Decide grid size early,
 based on your loading range and typical actor density, rather than tuning it iteratively on a full map.
 :::
 
-:::caution "Always loaded" actors bypass the whole point of World Partition
+:::caution["Always loaded" actors bypass the whole point of World Partition]
 Marking something always-loaded is sometimes necessary (a manager actor, a skybox), but every
 always-loaded actor is memory you pay regardless of where the player is. Audit this list — it's an easy
 place for stray actors to silently opt out of streaming.

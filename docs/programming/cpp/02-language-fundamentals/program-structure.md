@@ -10,7 +10,7 @@ tags: [c++, program-structure, main, organization]
 
 C++ programs consist of one or more source files containing declarations, definitions, and the required `main()` function.
 
-:::info Entry Point
+:::info[Entry Point]
 Every C++ program must have exactly one `main()` function - this is where execution begins.
 :::
 
@@ -299,7 +299,7 @@ int main() {
 }
 ```
 
-:::warning Avoid in Headers
+:::warning[Avoid in Headers]
 Never use `using namespace` in header files - it pollutes the namespace for all files that include the header.
 :::
 

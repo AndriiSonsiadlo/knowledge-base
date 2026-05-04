@@ -120,19 +120,19 @@ per-instance triangle budget.
 
 ## Gotchas
 
-:::warning Component/section size decided once, painfully changed later
+:::warning[Component/section size decided once, painfully changed later]
 Reflowing an existing landscape's component or section size effectively means re-tiling the whole
 heightfield and re-painting layer weights. Pick sizes based on your target world scale and streaming
 strategy up front rather than adjusting mid-production.
 :::
 
-:::caution Foliage density is a runtime cost, not just an editor slider
+:::caution[Foliage density is a runtime cost, not just an editor slider]
 High-density foliage painted for a "looks good in this one screenshot" moment is easy to forget about;
 audit density and culling distance per foliage type against your actual frame budget, not just visually in
 the editor viewport.
 :::
 
-:::caution Shared Layer Info assets mean shared weight semantics
+:::caution[Shared Layer Info assets mean shared weight semantics]
 Because a `ULandscapeLayerInfoObject` is a shared asset, changing its properties (like whether it's a
 weight-blended layer) affects every landscape that paints with it — don't duplicate landscapes without
 checking whether they're meant to diverge on layer setup too.

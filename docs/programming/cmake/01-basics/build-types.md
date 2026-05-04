@@ -247,7 +247,7 @@ mark_as_advanced(
 # cmake -DCMAKE_BUILD_TYPE=Profiling ..
 ```
 
-:::warning Consistency
+:::warning[Consistency]
 Ensure all compiler/linker flags are set for your custom type!
 :::
 
@@ -442,7 +442,7 @@ endif()
 
 ## Common Issues
 
-:::warning Pitfalls
+:::warning[Pitfalls]
 
 **Issue**: Build type ignored
 

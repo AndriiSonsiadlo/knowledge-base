@@ -10,7 +10,7 @@ tags: [cpp, non-copyable, idioms, raii, move-only]
 
 The non-copyable idiom prevents objects from being copied, ensuring unique ownership of resources. Essential for RAII types managing exclusive resources like file handles, mutexes, or database connections.
 
-:::info Move-Only Types
+:::info[Move-Only Types]
 Non-copyable types can still be moved, allowing transfer of ownership without duplication. Common pattern for resource-owning types.
 :::
 
@@ -497,7 +497,7 @@ If any member is non-copyable, the containing class automatically becomes non-co
 - Document why a type is non-copyable
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Make types non-copyable "just because"
 - Forget to consider move semantics
 - Inherit non-copyability in value-like types

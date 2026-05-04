@@ -119,20 +119,20 @@ consulted for this document — verify the parameter list in your engine version
 
 ## Gotchas
 
-:::warning Editing a Level Instance edits every placement
+:::warning[Editing a Level Instance edits every placement]
 Because all instances share the source level asset, going into edit mode on one placed instance and
 moving a light or deleting an actor changes that content everywhere the asset is used. This is the point
 of the feature, but it surprises people who expect per-instance content edits the way per-instance
 transform, tint, or Data Layer assignment works.
 :::
 
-:::caution Data Layers don't replace sublevels for gameplay-critical toggles
+:::caution[Data Layers don't replace sublevels for gameplay-critical toggles]
 `Unloaded` genuinely removes actors from memory, so don't rely on an `Activated` → `Unloaded` transition
 happening within a single frame for anything time-critical; treat Data Layer transitions as asynchronous,
 the same way you'd treat any other streaming operation.
 :::
 
-:::caution Packed Level Actors are a one-way bake for static content
+:::caution[Packed Level Actors are a one-way bake for static content]
 Converting to a Packed Level Actor is meant for set dressing that doesn't need per-actor gameplay logic at
 runtime. If you later need one placement to behave differently from another (a door that opens, a light
 that's sometimes off), you're fighting the format — use a regular Level Instance or individual actors for

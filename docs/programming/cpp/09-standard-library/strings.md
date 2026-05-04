@@ -10,7 +10,7 @@ tags: [c++, strings, string-view, text]
 
 C++ provides `std::string` for dynamic text storage and manipulation, along with `std::string_view` (C++17) for non-owning string references. Rich API for searching, modifying, and converting text data.
 
-:::info String Types
+:::info[String Types]
 **std::string** = owned, mutable text (dynamic allocation)  
 **std::string_view** = non-owning view (no allocation, no copies)  
 **C strings** = const char* (legacy, manual memory)

@@ -10,7 +10,7 @@ tags: [c++, auto, type-deduction, cpp11, templates]
 
 `auto` lets the compiler deduce variable types from initializers, reducing verbosity and improving maintainability.
 
-:::info C++11 Feature
+:::info[C++11 Feature]
 `auto` transforms C++ by eliminating repetitive type names while maintaining full type safety.
 :::
 
@@ -298,7 +298,7 @@ auto p = &x, v = x;   // Error: int* vs int
 - Use `auto` with `make_unique`, `make_shared`
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Use `auto` when type affects understanding
 - Use `auto` with proxy types (be careful)
 - Use `auto` for numeric literals if precision matters

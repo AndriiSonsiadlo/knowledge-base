@@ -10,7 +10,7 @@ tags: [c++, stl, containers, vector, map, set, data-structures]
 
 Containers store collections of objects. The STL provides optimized, well-tested containers for different access patterns and performance needs. Choose the right container for your use case.
 
-:::info Container Categories
+:::info[Container Categories]
 **Sequence**: ordered by insertion (vector, deque, list)  
 **Associative**: sorted by key (set, map)  
 **Unordered**: hash-based (unordered_set, unordered_map)  
@@ -117,7 +117,7 @@ sum(v); sum(a); sum(raw);                  // all bind to the same span paramete
 sum(std::span{v}.subspan(1));              // a window over part of v, still no copy
 ```
 
-:::warning A span is a borrow — watch lifetime
+:::warning[A span is a borrow — watch lifetime]
 A `span` is only valid while the storage it points at is alive and not reallocated. Returning a span
 to a local, or holding one across a `vector` `push_back` (which may reallocate), dangles — the same
 hazard as a [raw pointer](../06-pointers-references-and-smart-pointers/raw-pointers.md) or

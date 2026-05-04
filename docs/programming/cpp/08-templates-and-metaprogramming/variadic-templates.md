@@ -10,7 +10,7 @@ tags: [c++, templates, variadic-templates, cpp11]
 
 Variadic templates accept any number of arguments of any types. They're the foundation for functions like `std::make_tuple`, `printf`, and perfect forwarding.
 
-:::info Variable Number of Arguments
+:::info[Variable Number of Arguments]
 `...` = template parameter pack (any number of types)  
 Functions can accept 0, 1, 2, or any number of arguments!
 :::

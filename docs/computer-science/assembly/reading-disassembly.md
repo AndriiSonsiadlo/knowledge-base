@@ -184,7 +184,7 @@ internalize about reading real-world (optimized) disassembly:
 
 ## Edge Cases & Pitfalls
 
-:::warning Disassemblers can desynchronize on hand-crafted or obfuscated code
+:::warning[Disassemblers can desynchronize on hand-crafted or obfuscated code]
 Because x86-64 instructions are variable-length, a disassembler that starts decoding one byte off from
 the true instruction boundary (common in obfuscated malware or hand-written shellcode with embedded
 data) will produce a stream of garbage instructions until it happens to resynchronize. Don't trust a
@@ -192,7 +192,7 @@ linear disassembly of untrusted binaries without also checking control-flow-base
 tools like Ghidra or IDA do) or cross-referencing with a debugger's live execution.
 :::
 
-:::danger Stripped/optimized binaries don't map 1:1 back to source
+:::danger[Stripped/optimized binaries don't map 1:1 back to source]
 Inlining, loop unrolling, and instruction reordering under `-O2`/`-O3` mean a single disassembled
 instruction sequence may correspond to several different source lines interleaved, or to no single
 line at all (e.g. a function inlined at three call sites). Don't assume the order of instructions in

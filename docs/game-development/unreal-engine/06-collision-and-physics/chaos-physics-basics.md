@@ -113,14 +113,14 @@ tearing, but you should know that `SetActorLocation` on a simulating root compon
 your write is likely to be overwritten by the next synchronized solver result unless you also update the
 body's kinematic target or drop it out of simulation first.
 
-:::warning Don't SetActorLocation on a simulating body
+:::warning[Don't SetActorLocation on a simulating body]
 Calling `SetActorLocation` / `SetActorTransform` on an actor whose root component is simulating physics
 sets the transform for one frame, then the next solver sync overwrites it with the simulated result. To
 move a physics body from code, either flip it kinematic first, or apply forces/impulses
 (`AddImpulse`, `AddForce`) and let the solver do the moving.
 :::
 
-:::caution Author simple collision before you flip SimulatePhysics
+:::caution[Author simple collision before you flip SimulatePhysics]
 A static mesh imported without simple collision (or with `Collision Complexity` left on a complex-only
 setting) either can't simulate at all or does so against expensive per-triangle geometry. Set up convex
 or primitive simple collision in the mesh editor for anything you intend to simulate, not just anything

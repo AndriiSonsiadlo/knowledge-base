@@ -121,7 +121,7 @@ is what shows up in the editor dropdown, and every project sharing a `.uproject`
 `Profiles` entry that redefines an existing name (like `Trigger`) overrides the engine default rather than
 creating a duplicate.
 
-:::warning The most common "my trace hits nothing" bug
+:::warning[The most common "my trace hits nothing" bug]
 A trace against a custom channel returns no hit for one of three reasons, in order of likelihood: the
 target's `CollisionEnabled` is `NoCollision` or `PhysicsOnly` (no query participation at all), the
 target's response to that specific channel is `Ignore` rather than `Block`/`Overlap`, or you traced with
@@ -130,7 +130,7 @@ about per-channel responses at all — they only look at the component's object 
 `CollisionEnabled` first; it silences everything downstream of it.
 :::
 
-:::caution Presets vs. per-component overrides drift silently
+:::caution[Presets vs. per-component overrides drift silently]
 Editing a component's response in the Details panel while a named preset is assigned switches that
 component to `Custom...` without warning — it stops tracking future edits to the shared preset. If you
 meant to change the preset for every actor using it, edit `DefaultEngine.ini` (or Project Settings), not

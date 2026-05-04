@@ -120,7 +120,7 @@ handshake, visible on the wire.
 
 ## Edge Cases & Pitfalls
 
-:::danger UDP gives you no delivery guarantee at all
+:::danger[UDP gives you no delivery guarantee at all]
 If you build a protocol on UDP, loss, reordering, and duplication are all things *your application*
 must handle if it cares about them — there is no free retransmission. This is by design: DNS
 retransmits at the application level with simple timeouts, while QUIC (HTTP/3's transport) builds a

@@ -102,17 +102,17 @@ player — widget labels, tooltips, subtitles, quest text.
 
 ## Gotchas
 
-:::warning FString for anything player-facing breaks localization silently
+:::warning[FString for anything player-facing breaks localization silently]
 Code compiles and works fine in English, then never gets translated because there's no `FText` to
 attach a translation to. This is usually caught late, by localization QA, not by the compiler.
 :::
 
-:::warning FName comparisons are case-insensitive
+:::warning[FName comparisons are case-insensitive]
 Two `FName`s that differ only in case are equal. That's usually what you want for identifiers, but it
 means `FName` is the wrong type for anything where case is meaningful data.
 :::
 
-:::caution Don't rebuild an FName from a literal every call
+:::caution[Don't rebuild an FName from a literal every call]
 `FName(TEXT("WeaponSocket"))` inside a function that runs every frame pays a string-table lookup every
 frame. Hoist it to a `static const FName` (file scope or function-local `static`) instead.
 :::

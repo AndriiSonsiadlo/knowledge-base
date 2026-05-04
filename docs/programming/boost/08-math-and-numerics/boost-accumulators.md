@@ -13,7 +13,7 @@ points into an accumulator one at a time, and it maintains running statistics �
 min, max, count, moments, quantiles — in a single pass, without storing the entire dataset. It
 uses a dependency-resolution system to share intermediate results between features automatically.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Computing statistics the naive way — store all values, then iterate — requires O(n) memory and
 multiple passes. Streaming data (sensor readings, log events, network telemetry) may be unbounded.
 Boost.Accumulators computes statistics incrementally in O(1) memory per feature, updating on each
@@ -71,7 +71,7 @@ flowchart TD
     VAR --> COUNT
 ```
 
-:::tip Only declare what you need
+:::tip[Only declare what you need]
 You only list the *leaf* features you want to extract. Dependencies are resolved automatically.
 Asking for `variance` gives you `mean` and `count` for free — no need to list them explicitly,
 though doing so is harmless.
@@ -145,7 +145,7 @@ int main() {
 | Rolling mean | `tag::rolling_mean` | Windowed mean |
 | Weighted mean | `tag::weighted_mean` | Weight-adjusted mean |
 
-:::note P-square quantile estimation
+:::note[P-square quantile estimation]
 The `median` and `extended_p_square_quantile` features use the P-square algorithm — an
 incremental quantile estimator that does not store all data points. The estimate is approximate;
 for exact quantiles you must store and sort.
@@ -184,7 +184,7 @@ int main() {
 }
 ```
 
-:::warning Header-heavy compile times
+:::warning[Header-heavy compile times]
 Boost.Accumulators is heavily templated. Including many features in one translation unit can
 noticeably increase compile times. Limit includes to the specific feature headers you need
 rather than pulling in a catch-all header.

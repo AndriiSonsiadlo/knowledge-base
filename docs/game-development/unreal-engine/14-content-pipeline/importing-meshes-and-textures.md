@@ -171,21 +171,21 @@ asset instead of re-clicking the same dialog per file.
 
 ## Gotchas
 
-:::warning sRGB is per-texture, and its default follows file type, not content
+:::warning[sRGB is per-texture, and its default follows file type, not content]
 An import dialog defaults sRGB **on** for most 8-bit color formats regardless of whether the content is
 actually color data. A roughness mask saved as a `.png` will default to sRGB on — you must manually
 turn it off. This is the single most common "why does my material look wrong only on this platform"
 bug reported by artists who imported a mask without checking the sRGB checkbox.
 :::
 
-:::caution Re-importing overwrites hand-tuned settings unless you're careful
+:::caution[Re-importing overwrites hand-tuned settings unless you're careful]
 "Reimport" (right-click → Reimport) by default keeps existing asset settings and only refreshes
 geometry/pixel data from the source file — but "Import Materials"/"Import Textures" style options on a
 mesh reimport can spawn new auto-generated material instances that shadow your hand-authored ones if
 left enabled. Disable auto material import once you have a real material workflow in place.
 :::
 
-:::warning LOD Group changes don't retroactively fix already-imported assets
+:::warning[LOD Group changes don't retroactively fix already-imported assets]
 Changing a mesh's `LODGroup` after import updates the *default* generation settings for the *next*
 LOD build, not existing baked LOD data. If a whole prop category was imported under the wrong LOD
 group, you need to force a rebuild (Static Mesh Editor → LOD settings → regenerate), not just flip the

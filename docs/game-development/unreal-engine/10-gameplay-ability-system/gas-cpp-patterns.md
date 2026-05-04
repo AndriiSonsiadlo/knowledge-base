@@ -163,13 +163,13 @@ things keep this in check without blocking designers from working independently:
 
 ## Gotchas
 
-:::warning A missing project base class is a decision, not a shortcut
+:::warning[A missing project base class is a decision, not a shortcut]
 Skipping the base-class step because "we only have five abilities right now" means the sixth through
 fortieth ability each individually decide instancing policy, net execution policy, and logging
 convention — decide once, in one file, before the second ability ships.
 :::
 
-:::caution Don't let native tag declarations and config-registered tags drift into two sources of truth
+:::caution[Don't let native tag declarations and config-registered tags drift into two sources of truth]
 If some tags live in `MyGameplayTags.h` and others only in `DefaultGameplayTags.ini` with no documented
 rule for which goes where, newcomers guess wrong in both directions. State the rule explicitly: gameplay
 code branches on it → native; purely data/designer-facing → config or in-editor tag creation.

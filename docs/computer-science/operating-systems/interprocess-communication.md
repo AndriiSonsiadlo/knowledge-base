@@ -103,14 +103,14 @@ see [Computer Networks](../computer-networks/intro.md) for the network side of t
 
 ## Edge Cases & Pitfalls
 
-:::warning Shared memory needs its own synchronization
+:::warning[Shared memory needs its own synchronization]
 Mapping a region into two processes doesn't make access to it safe — it's the multi-process analogue
 of two threads sharing memory. Without an explicit lock (commonly a named semaphore or a mutex placed
 inside the shared region itself, allocated with `pthread_mutexattr_setpshared`), concurrent writers
 will race exactly as they would across threads.
 :::
 
-:::danger Pipes have a bounded capacity — writers can block
+:::danger[Pipes have a bounded capacity — writers can block]
 A pipe has a finite kernel buffer (commonly 64 KiB on Linux). If a writer produces data faster than
 the reader consumes it, `write()` blocks once the buffer fills — a slow or stalled reader can stall
 the writer indefinitely, and if both ends are on processes that are also waiting on each other

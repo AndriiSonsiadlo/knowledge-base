@@ -14,7 +14,7 @@ platform-specific API yourself. It is one of the most successful Boost libraries
 almost wholesale into C++17 as `std::filesystem`, and its design shaped how every major C++ project
 handles paths today.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Before Boost.Filesystem, portable file handling meant `#ifdef _WIN32` blocks everywhere, hand-rolled
 path concatenation with `/` vs `\`, and calling `stat()` or `GetFileAttributesW()` depending on
 platform. Boost.Filesystem replaces all of that with a single, cross-platform API built around the
@@ -74,7 +74,7 @@ void report(const fs::path& p) {
 }
 ```
 
-:::tip Error-code overloads
+:::tip[Error-code overloads]
 Every function that touches the filesystem has two overloads: one that throws
 `boost::filesystem::filesystem_error` on failure, and one that writes to an `error_code` reference.
 Prefer the `error_code` overload in performance-sensitive or expected-failure paths.
@@ -128,7 +128,7 @@ void demo() {
 }
 ```
 
-:::danger remove_all is irreversible
+:::danger[remove_all is irreversible]
 `remove_all` recursively deletes an entire directory tree without confirmation. Double-check the
 path — especially when it comes from user input — before calling it.
 :::
@@ -153,7 +153,7 @@ flowchart LR
 | Compiled library | yes, link `-lboost_filesystem` | usually header-only or auto-linked |
 | Requires | Boost | C++17 compiler |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++17 and later, prefer `std::filesystem` — it needs no external dependency and is ABI-stable
 across standard-library updates. Reach for Boost.Filesystem when you need `unique_path()`, must
 support a pre-C++17 toolchain, or need portable behaviour that your vendor's `std::filesystem`

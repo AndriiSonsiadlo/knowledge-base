@@ -10,7 +10,7 @@ tags: [c++, smart-pointers, shared-ptr, reference-counting, cpp11]
 
 Smart pointer with shared ownership via reference counting. Multiple `shared_ptr`s can own the same object, deleted when last owner destroyed.
 
-:::info Reference Counting
+:::info[Reference Counting]
 Each copy increments count, each destruction decrements it.
 **Count reaches zero → automatic deletion**
 ```cpp
@@ -127,7 +127,7 @@ void thread2() {
 
 Copying `shared_ptr`s between threads is safe - the reference count operations are atomic. However, if multiple threads access the pointed-to object, you need additional synchronization (mutex, atomic operations) to protect the data.
 
-:::warning Thread Safety
+:::warning[Thread Safety]
 - Control block operations (ref counting) are atomic
 - Object itself is NOT automatically protected
 - Need mutex/atomics to protect shared data
@@ -241,7 +241,7 @@ observe_shared(widget);    // Observing (no count change)
 
 Pass by `raw pointer` or `reference` when the function doesn't need ownership. Pass by `shared_ptr` value when the function should extend the object's lifetime (store it, pass to async operations). Pass by const reference to `shared_ptr` when you need to check/copy the `shared_ptr` itself without affecting ownership.
 
-:::info Parameter Guidelines
+:::info[Parameter Guidelines]
 | Intent | Type | Overhead |
 |--------|------|----------|
 | Observe | `const T*` or `const T&` | None |
@@ -275,7 +275,7 @@ node2->prev = node1;  // node2 → node1 (cycle!)
 
 Each node keeps the other alive through its `shared_ptr`. When the original `shared_ptr`s go out of scope, the reference counts only drop to 1 (the circular reference), never reaching zero. The objects are never deleted - a memory leak despite using smart pointers.
 
-:::danger Circular Reference Leak
+:::danger[Circular Reference Leak]
 ```
 node1 (count=2) ──next──> node2 (count=2)
          ^                   |
@@ -427,7 +427,7 @@ The control block contains the reference count and weak count, requiring extra m
 - Dereference: same as raw pointer
 - Creation: allocation + atomic init
 
-:::warning When to Avoid
+:::warning[When to Avoid]
 Use `unique_ptr` unless you need shared ownership:
 - Faster (no atomic operations)
 - Smaller (8 vs 16 bytes)
@@ -458,7 +458,7 @@ auto shared = w->getShared();
 std::shared_ptr<Widget> bad(this);  // DISASTER!
 ```
 
-:::danger Never Create from this
+:::danger[Never Create from this]
 ```cpp
 class Bad {
     std::shared_ptr<Bad> getPtr() {

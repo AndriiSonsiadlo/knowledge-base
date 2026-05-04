@@ -134,14 +134,14 @@ void AMyCharacter::HandleMoveInput(const FInputActionValue& Value)
 
 ## Gotchas
 
-:::warning Don't swap out ACharacter's root component
+:::warning[Don't swap out ACharacter's root component]
 `UCharacterMovementComponent` assumes the actor's root is the capsule it was built against. Replacing
 `RootComponent` with something else after construction (or reparenting the capsule under a new root)
 breaks collision sweeps and movement in ways that are painful to debug — resize or reshape the existing
 capsule instead of replacing it.
 :::
 
-:::caution Not everything that moves should be a Character
+:::caution[Not everything that moves should be a Character]
 A vehicle, a turret, an RTS unit, or a spectator pawn doesn't want capsule collision or biped movement.
 Deriving from `ACharacter` for these just means overriding or disabling most of what it provides. Start
 from `APawn` and add only the movement component you actually need (or none, for something that doesn't

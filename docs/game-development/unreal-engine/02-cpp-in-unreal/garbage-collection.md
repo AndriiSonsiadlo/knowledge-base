@@ -122,18 +122,18 @@ to the collector's `FReferenceCollector` is the escape hatch — reach for `UPRO
 
 ## Gotchas
 
-:::danger A non-UPROPERTY UObject pointer is not safe against GC
+:::danger[A non-UPROPERTY UObject pointer is not safe against GC]
 This is the single most common source of "randomly crashes after a few minutes" bugs in new Unreal
 code. If a member holds a `UObject*` or `TObjectPtr<T>` and needs the object to stay alive, it must be
 `UPROPERTY`. There is no warning when you get this wrong — the pointer just eventually dangles.
 :::
 
-:::warning TWeakObjectPtr requires a validity check before use
+:::warning[TWeakObjectPtr requires a validity check before use]
 `Get()` returns `nullptr` once the target is collected; dereferencing without checking is the same
 class of bug as skipping a null check on a raw pointer.
 :::
 
-:::caution GC runs on a schedule, not on last-reference-drop
+:::caution[GC runs on a schedule, not on last-reference-drop]
 Don't assume an unreferenced object is destroyed immediately, and don't assume you can safely ignore
 rooting "just for one frame" — a collection pass can land inside that frame.
 :::

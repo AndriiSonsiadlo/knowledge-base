@@ -10,7 +10,7 @@ tags: [c++, headers, includes, organization, preprocessor]
 
 Headers (.h, .hpp) contain declarations that are shared across multiple source files. The `#include` directive copies header contents into source files during preprocessing.
 
-:::info Purpose of Headers
+:::info[Purpose of Headers]
 Headers declare interfaces (what exists), while source files define implementations (how it works). This separation enables code reuse and organization.
 :::
 

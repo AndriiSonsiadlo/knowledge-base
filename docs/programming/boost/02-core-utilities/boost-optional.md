@@ -13,7 +13,7 @@ not rely on a magic sentinel like `-1`, an empty string, or a null pointer. It i
 influential libraries: it directly inspired C++17's `std::optional`, and it remains useful even today
 because it can do something the standard version still cannot — hold optional *references*.
 
-:::info The problem it solves
+:::info[The problem it solves]
 How do you say "this function might not return a value"? The old answers were all flawed: sentinel
 values collide with real data, output parameters plus a `bool` are clumsy, and raw pointers conflate
 "optional" with "owning" and "nullable". `optional<T>` makes *absence* a first-class, type-safe state.
@@ -70,7 +70,7 @@ void demo(boost::optional<int> o) {
 }
 ```
 
-:::danger Dereferencing an empty optional is undefined behaviour
+:::danger[Dereferencing an empty optional is undefined behaviour]
 `*o` and `o->member` do **not** check engagement. Reading through an empty optional is UB, exactly like
 dereferencing a null pointer. Guard with `if (o)`, or use `value_or` / `value()` when you are not
 certain.
@@ -123,7 +123,7 @@ int main() {
 }
 ```
 
-:::tip When optional references shine
+:::tip[When optional references shine]
 They express "an optional handle to something I do not own" more clearly than `T*`. A pointer might be
 null, but it also *might* be owning, or part of an array — an `optional<T&>` says exactly one thing:
 "maybe a reference to an existing object."
@@ -166,7 +166,7 @@ flowchart LR
 | `constexpr` support | limited | extensive |
 | Monadic ops (`and_then`, `map`) | partial | yes (C++23) |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++17 and later, prefer `std::optional` for plain values — it is `constexpr`-friendly, integrates
 with the standard, and needs no dependency. Reach for `boost::optional` when you need an optional
 *reference*, or when you must support a pre-C++17 toolchain. See

@@ -10,7 +10,7 @@ tags: [c++, smart-pointers, unique-ptr, raii, cpp11]
 
 Smart pointer with exclusive ownership. Zero overhead, automatic cleanup, move-only semantics. The default choice for dynamic memory.
 
-:::info Exclusive Ownership
+:::info[Exclusive Ownership]
 **One owner at a time** - cannot be copied, only moved.
 - Automatic deletion when destroyed (RAII)
 - Zero runtime overhead vs raw pointers
@@ -210,7 +210,7 @@ consume(std::move(widget));   // Transferring ownership
 
 Pass by `raw pointer` or `reference` when the function doesn't take ownership. Pass by `unique_ptr` when transferring ownership. This makes ownership semantics explicit in the function signature and at call sites.
 
-:::info Parameter Guidelines
+:::info[Parameter Guidelines]
 | Intent | Parameter Type | Call Site |
 |--------|---------------|-----------|
 | Observe | `const T&` or `const T*` | `func(*ptr)` or `func(ptr.get())` |
@@ -316,7 +316,7 @@ ptr->identify();  // "Derived" (polymorphic call)
 // Proper cleanup: ~Derived, then ~Base
 ```
 
-:::info Virtual Destructor Required
+:::info[Virtual Destructor Required]
 ```cpp showLineNumbers
 class Base {
 public:
@@ -430,7 +430,7 @@ Widget::~Widget() = default;  // unique_ptr knows how to delete Impl
 
 ## Common Mistakes
 
-:::danger Pitfalls
+:::danger[Pitfalls]
 ```cpp
 // Forgetting std::move
 void consume(std::unique_ptr<int> p) { }
@@ -456,14 +456,14 @@ ptr.reset();
 
 ## Summary
 
-:::info Core features
+:::info[Core features]
 - Exclusive ownership (one owner at a time)
 - Move-only (cannot copy)
 - Zero overhead (same as raw pointer)
 - Automatic cleanup (RAII)
 :::
 
-:::info Key operations
+:::info[Key operations]
 - `make_unique<T>(args)` - create (preferred)
 - `ptr.get()` - observe (doesn't transfer ownership)
 - `ptr.release()` - transfer ownership out
@@ -471,7 +471,7 @@ ptr.reset();
 - `std::move(ptr)` - transfer ownership
 :::
 
-:::info Function parameters
+:::info[Function parameters]
 - Observe: `const T*` or `const T&`
 - Modify: `T*` or `T&`
 - Take ownership: `unique_ptr<T>` (by value)

@@ -10,7 +10,7 @@ tags: [cpp, concurrency, threads, threading, parallelism]
 
 **Threads** allow programs to perform multiple operations concurrently. C++11 introduced `std::thread` for portable threading.
 
-:::danger Join or detach — always
+:::danger[Join or detach — always]
 A `std::thread` must be **joined** (wait for it to finish) or **detached** (let it run independently)
 before it is destroyed. A still-joinable thread that goes out of scope calls `std::terminate` and
 kills the whole process. C++20's `std::jthread` fixes this with RAII — it **auto-joins** in its

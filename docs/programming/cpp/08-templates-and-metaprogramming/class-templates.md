@@ -10,7 +10,7 @@ tags: [c++, templates, class-templates, generic-programming]
 
 Class templates create generic classes that work with different types. Think `std::vector<T>` or `std::unique_ptr<T>` - same class, different types.
 
-:::info One Class Definition, Many Types
+:::info[One Class Definition, Many Types]
 Class template = blueprint for creating type-specific classes. `vector<int>` and `vector<string>` are different types from same template.
 :::
 

@@ -89,7 +89,7 @@ Every new C++ project ships with `Core`, `CoreUObject`, `Engine`, and `InputCore
 `PublicDependencyModuleNames` by default — these four cover `UObject`, actors, and basic input, which
 is why nearly every gameplay class compiles without extra setup.
 
-:::warning Default to Private; promote to Public only when required
+:::warning[Default to Private; promote to Public only when required]
 Putting a dependency in `PublicDependencyModuleNames` when `PrivateDependencyModuleNames` would do
 increases compile times for every module that depends on yours, since it pulls in that module's
 public include paths transitively. Start private; move a dependency to public only when you get a
@@ -119,7 +119,7 @@ just recompile. Adding a **new module** (a new folder with its own `Build.cs`, r
 `.uproject`) does require **Generate Visual Studio project files** again, since the `.sln` itself
 needs a new project entry.
 
-:::warning A missing dependency shows up as a linker error, not a header error
+:::warning[A missing dependency shows up as a linker error, not a header error]
 If you `#include` a header from a module you haven't added to either dependency list, you'll often
 get away with it at the `#include` stage — the compiler may still find the header via a transitively
 public include path — but linking fails with unresolved symbols. When you see an unresolved external

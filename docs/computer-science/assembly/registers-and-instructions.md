@@ -69,7 +69,7 @@ on the width — a frequent source of subtle bugs and disassembly confusion:
 | `rsp` | `esp` | `sp` | `spl` | The stack pointer — always points at the top of the stack |
 | `r8`-`r15` | `r8d`-`r15d` | `r8w`-`r15w` | `r8b`-`r15b` | 5th/6th arguments (`r8`, `r9`); rest general purpose |
 
-:::info Why no `r8h`?
+:::info[Why no `r8h`?]
 The `ah`/`bh`/`ch`/`dh` "high byte of the low 16 bits" names are a legacy quirk of the original four
 registers only. `r8`-`r15` (and the newer `sil`/`dil`/`bpl`/`spl` byte names) never got equivalent
 high-byte aliases, and mixing `ah`-style registers with any instruction using a REX prefix (needed to
@@ -130,13 +130,13 @@ exactly the "writing a 32-bit sub-register clears the upper half" rule above.
 
 ## Edge Cases & Pitfalls
 
-:::warning 8/16-bit sub-register writes don't clear the upper bits
+:::warning[8/16-bit sub-register writes don't clear the upper bits]
 Unlike 32-bit writes, `mov al, 0` only changes the lowest byte of `rax` — the other 56 bits keep
 whatever garbage was there before. Code that reads `eax` or `rax` right after only setting `al`
 without having first cleared or fully set the full register is a classic uninitialized-value bug.
 :::
 
-:::danger Don't confuse a sub-register with an independent variable
+:::danger[Don't confuse a sub-register with an independent variable]
 `eax` and `al` are the *same storage* as `rax`, just narrower views. Assembly beginners sometimes
 assume `rax` and `eax` can hold two different live values at once — they cannot; writing one always
 affects the other's bits.

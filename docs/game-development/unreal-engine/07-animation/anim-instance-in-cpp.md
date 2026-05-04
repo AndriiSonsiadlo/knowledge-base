@@ -153,7 +153,7 @@ detect the pawn being destroyed out from under you. `TWeakObjectPtr` gives you a
 [Smart pointers and ownership](../02-cpp-in-unreal/smart-pointers-and-ownership.md) for the broader
 pattern.
 
-:::warning Never dereference the owning pawn from a thread-safe update or the AnimGraph
+:::warning[Never dereference the owning pawn from a thread-safe update or the AnimGraph]
 `NativeThreadSafeUpdateAnimation`, `BlueprintThreadSafeUpdateAnimation`, and every AnimGraph node run
 under the assumption that they might be on a worker thread. Calling a `UFUNCTION` on the owning pawn, its
 movement component, or any other live gameplay object from one of these is a data race the moment
@@ -161,7 +161,7 @@ movement component, or any other live gameplay object from one of these is a dat
 ship and hard to bisect later.
 :::
 
-:::caution Always call the Super implementation
+:::caution[Always call the Super implementation]
 Skipping `Super::NativeUpdateAnimation()` / `Super::NativeInitializeAnimation()` /
 `Super::NativeThreadSafeUpdateAnimation()` in an override silently drops whatever the parent class (or,
 further up, `UAnimInstance` itself) does in that hook — including Blueprint-exposed logic in a derived

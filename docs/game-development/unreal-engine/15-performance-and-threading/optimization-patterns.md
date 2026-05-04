@@ -186,20 +186,20 @@ logic in every subsystem that wants to scale down.
 
 ## Gotchas
 
-:::warning TickInterval isn't free once you're below the frame rate
+:::warning[TickInterval isn't free once you're below the frame rate]
 Setting `TickInterval` shorter than the actual frame time has no effect — the actor still only ticks once
 per rendered frame. Use it to *reduce* tick frequency below full rate, not as a way to request finer
 granularity than the engine is running at.
 :::
 
-:::warning Object pools leak state if you don't reset it on both acquire and release
+:::warning[Object pools leak state if you don't reset it on both acquire and release]
 A pooled object that isn't fully reset (velocity, timers, attached components, gameplay tags) will carry
 stale state into its next use, producing bugs that only reproduce after the object has been recycled at
 least once — much harder to repro than a fresh-spawn bug. Reset everything the object's behavior depends
 on in both `AcquireProjectile` and `ReleaseProjectile`, not just the obviously visual bits.
 :::
 
-:::caution Culling and LOD settings tuned in the editor viewport don't validate a real budget
+:::caution[Culling and LOD settings tuned in the editor viewport don't validate a real budget]
 Cull distances and LOD transition distances that look fine in an empty test level can still blow the
 frame budget once real level density, real AI counts, and real camera distances are in play. Validate
 these settings against `stat unit`/`stat scenerendering` in a representative gameplay scenario, not an

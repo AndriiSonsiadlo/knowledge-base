@@ -82,7 +82,7 @@ Everything from "set this flag" to "count the 1 bits in this word" (see
 
 ## Edge Cases & Pitfalls
 
-:::warning Hex literals don't announce their width
+:::warning[Hex literals don't announce their width]
 `0xFF` is 8 bits' worth of `1`s, but in C/C++ its *type* defaults to `int` unless you add a suffix
 (`0xFFu`, `0xFFFFFFFFu` for a full 32-bit mask) — mixing widths silently sign-extends or truncates.
 :::

@@ -13,7 +13,7 @@ is the direct ancestor of `std::regex` — the standard committee adopted it ess
 into C++11. Boost.Regex remains relevant because several standard library implementations of
 `std::regex` are notoriously slow, while Boost.Regex has had years of performance tuning.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Before C++11, C++ had no built-in regular expression support at all. You either pulled in PCRE,
 wrote manual parsing loops, or shelled out to another language. Boost.Regex brought proper regex
 to C++ with a clean, iterator-friendly API that the standard later adopted.
@@ -38,7 +38,7 @@ int main() {
 }
 ```
 
-:::warning regex_match versus regex_search
+:::warning[regex_match versus regex_search]
 `regex_match` requires the **entire** string to match. `regex_search` finds a match **within**
 the string. Confusing the two is one of the most common regex bugs in C++.
 :::
@@ -136,13 +136,13 @@ boost::regex ci_pattern("hello", boost::regex::perl | boost::regex::icase);
 | Unicode | ICU integration available | limited |
 | Build requirement | compiled library (`-lboost_regex`) | standard library |
 
-:::note Which to choose
+:::note[Which to choose]
 If your `std::regex` implementation is fast enough (measure it), prefer the standard. Otherwise
 Boost.Regex is a drop-in improvement — the API is nearly identical. On GCC's libstdc++, where
 `std::regex` has historically been slow, Boost.Regex can be an order of magnitude faster.
 :::
 
-:::danger Boost.Regex is a compiled library
+:::danger[Boost.Regex is a compiled library]
 Unlike most Boost libraries, Boost.Regex is **not** header-only. You must link against
 `-lboost_regex`. See [header-only vs compiled](../00-overview/header-only-vs-compiled.md).
 :::

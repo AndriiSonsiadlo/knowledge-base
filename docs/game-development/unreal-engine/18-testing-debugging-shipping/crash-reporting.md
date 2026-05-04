@@ -150,14 +150,14 @@ client crash-reporting latency in practice.
 
 ## Gotchas
 
-:::warning No symbols means no stack, and a slightly-wrong .pdb is worse than none
+:::warning[No symbols means no stack, and a slightly-wrong .pdb is worse than none]
 A dump opened without matching symbols shows raw addresses and `<unknown>` frames — obviously useless. A
 dump opened with a *mismatched* `.pdb` (right module, wrong build) can resolve to plausible-looking but
 wrong function names and lines, which is worse because it looks trustworthy. Always confirm the module
 version/GUID matches before trusting a symbolicated stack from an unfamiliar build.
 :::
 
-:::warning Crash reporting has to be enabled and reachable before you need it
+:::warning[Crash reporting has to be enabled and reachable before you need it]
 There's no way to retroactively capture a crash that happened before the reporter was configured to run,
 or before your report-receiving endpoint existed. Verify the crash reporting pipeline end-to-end (a
 deliberate test crash, confirmed to arrive somewhere you can read it) before a build goes anywhere near
@@ -165,7 +165,7 @@ real players — this belongs on your [release checklist](./release-checklist.md
 launch.
 :::
 
-:::caution Full crash dumps are expensive — don't default every crash signature to one
+:::caution[Full crash dumps are expensive — don't default every crash signature to one]
 A full memory dump is dramatically larger than a minidump and costs real bandwidth/storage per
 occurrence. Reserve full-dump configuration for specific, hard-to-diagnose crash signatures rather than
 enabling it broadly, or a spike in one crash type can flood your intake pipeline.

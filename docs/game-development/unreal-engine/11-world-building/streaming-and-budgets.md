@@ -105,19 +105,19 @@ void AWorldBudgetMonitor::CheckHLODHealth()
 
 ## Gotchas
 
-:::warning Blocking streaming sources hide budget problems until they don't
+:::warning[Blocking streaming sources hide budget problems until they don't]
 A blocking source (`bBlockOnSlowStreaming`-style behavior) makes streaming look fine in normal play because
 it stalls rather than pops content in late. That stall is still a hitch — it just happens as a frame-time
 spike instead of visible pop-in. Don't mistake "no visible pop-in" for "no streaming cost."
 :::
 
-:::caution Outdated HLODs mean you're paying full detail cost at distance
+:::caution[Outdated HLODs mean you're paying full detail cost at distance]
 If HLODs aren't rebuilt after content changes, the runtime subsystem may fall back to full-detail content
 further than intended, quietly blowing the budget the HLOD layer was supposed to protect. Rebuilding HLODs
 is part of the content pipeline, not a one-time setup step.
 :::
 
-:::caution Data Layer toggling in bulk is a streaming event, not a flag flip
+:::caution[Data Layer toggling in bulk is a streaming event, not a flag flip]
 Activating a Data Layer that tags thousands of actors is functionally a large streaming request. Batch and
 stagger large Data Layer transitions the same way you would think about loading a new sublevel, rather
 than treating `SetDataLayerRuntimeState` as an instantaneous call.

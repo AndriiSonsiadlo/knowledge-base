@@ -13,7 +13,7 @@ pasting header text into every translation unit, a module is **compiled once** i
 interface (BMI) that consumers `import`. This fixes the header model's three chronic problems: slow
 builds, macro leakage, and fragile include order.
 
-:::info Prerequisite contrast
+:::info[Prerequisite contrast]
 This page assumes the header model it replaces — see [Headers and Includes](./headers-and-includes.md)
 and [Include Guards / pragma once](./include-guards-and-pragma-once.md). Modules make include guards
 obsolete and macros no longer leak across the boundary.
@@ -98,13 +98,13 @@ int main() {
 
 ## Why it's better — and the catch
 
-:::tip Benefits
+:::tip[Benefits]
 - **Faster builds** — an interface is compiled once, not re-parsed per includer.
 - **Isolation** — macros and private declarations do not leak across `import`.
 - **No include guards / ordering** — import order is irrelevant; no ODR landmines from header soup.
 :::
 
-:::warning Toolchain maturity
+:::warning[Toolchain maturity]
 Modules need coordinated compiler **and** build-system support, because a module must be built before
 anything that imports it (a dependency the build tool has to discover). Support in GCC, Clang, MSVC,
 CMake, and Ninja is solid but still maturing. BMIs are **not portable** — compiler/version specific —

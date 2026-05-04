@@ -129,14 +129,14 @@ elements to read state from a widget or vice versa.
 
 ## Gotchas
 
-:::warning DrawHUD() coordinates are pixels, not Slate/DPI-scaled units
+:::warning[DrawHUD() coordinates are pixels, not Slate/DPI-scaled units]
 `AHUD`'s screen-space draw calls are raw pixel coordinates. If your project supports DPI scaling or
 multiple resolutions and you hardcode pixel offsets, positioning drifts across resolutions in a way UMG's
 anchor/percentage-based layout doesn't suffer from. This is one more reason most projects keep `AHUD` to
 debug drawing and put real UI in UMG.
 :::
 
-:::caution AHUD's canvas and the debug canvas are not the same surface
+:::caution[AHUD's canvas and the debug canvas are not the same surface]
 `AHUD` maintains a separate debug canvas alongside its main canvas; console debug tools (`showdebug`,
 some `stat` displays) draw to the debug canvas, not the one your `DrawHUD()` override draws to. Don't
 assume a `DrawHUD()` override is the only thing responsible for what appears on screen when debug tools

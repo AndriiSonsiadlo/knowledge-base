@@ -96,14 +96,14 @@ should be per-session must live on an object scoped to one of those worlds (an a
 
 ## Gotchas
 
-:::warning GetWorld() can return null outside of live gameplay
+:::warning[GetWorld() can return null outside of live gameplay]
 Calling `GetWorld()` on a `UObject` that isn't part of a spawned actor hierarchy, or during CDO
 construction, can return `nullptr`. Guard world-dependent code with a null check instead of assuming a
 world is always available, especially in code paths that might run from editor tooling or asset
 processing.
 :::
 
-:::caution A static or global doesn't know which world it belongs to
+:::caution[A static or global doesn't know which world it belongs to]
 A `static UMyManager*` or file-scope global is shared across every `UWorld` in the process. In a
 single-PIE-client test this is invisible; with two PIE clients (or a dedicated server plus a client in
 the same process) it becomes cross-talk between sessions that shouldn't be able to see each other. Use a

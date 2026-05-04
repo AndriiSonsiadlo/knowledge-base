@@ -12,7 +12,7 @@ This page explains how the **class features you write** — members, virtual fun
 translate into a memory layout. It's the OOP-level intuition; the byte-exact ABI details and tooling
 live in [Object Layout](../12-low-level-and-platform/02-object-layout.md).
 
-:::info Three things shape a class's layout
+:::info[Three things shape a class's layout]
 1. **Members** sit in declaration order, with padding for alignment (see [Memory Alignment](../05-memory-and-object-lifetime/alignment.md)).
 2. **Virtual functions** add a hidden vtable pointer.
 3. **Base classes** are embedded as subobjects.

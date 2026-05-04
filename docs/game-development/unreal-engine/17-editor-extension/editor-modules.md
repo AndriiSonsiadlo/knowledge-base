@@ -231,7 +231,7 @@ applies to each entry in `Modules`.
 
 ## Gotchas
 
-:::warning An Editor module is simply absent from Shipping, not stubbed out
+:::warning[An Editor module is simply absent from Shipping, not stubbed out]
 Don't write defensive `WITH_EDITOR` checks inside an `Editor`-typed module expecting them to matter in
 Shipping — they don't get the chance to run, because Unreal Build Tool never compiles that module into
 a Shipping target at all. The `Type` field is doing the exclusion at the module level; `WITH_EDITOR`
@@ -239,7 +239,7 @@ inside that same module is redundant. Reserve `WITH_EDITOR` for runtime modules 
 conditionally within a single compiled unit.
 :::
 
-:::warning Don't let a Runtime module's header include an Editor-only header
+:::warning[Don't let a Runtime module's header include an Editor-only header]
 If `MyToolRuntime`'s public header `#include`s something from `UnrealEd` or `PropertyEditor` — even
 inside a `WITH_EDITOR` block, if the include itself isn't guarded — you've created a dependency that
 breaks the moment someone builds a Shipping target, because those editor libraries genuinely are not
@@ -247,7 +247,7 @@ present to link against outside editor-hosting targets. Guard the `#include` its
 WITH_EDITOR`, not just the code that uses it.
 :::
 
-:::caution Plugin-level "editor only" is not the same as module Type
+:::caution[Plugin-level "editor only" is not the same as module Type]
 Marking an entire plugin `"EditorOnly": true` in the `.uplugin` descriptor controls whether the plugin
 is even considered for non-editor targets, but it's a coarser lever than per-module `Type`. A plugin
 that bundles both a `Runtime` and an `Editor` module still needs the `Runtime` module correctly typed if

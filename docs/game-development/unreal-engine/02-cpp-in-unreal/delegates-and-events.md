@@ -119,18 +119,18 @@ passing context the broadcaster doesn't know about.
 
 ## Gotchas
 
-:::danger AddRaw has no destruction safety
+:::danger[AddRaw has no destruction safety]
 `AddRaw` stores a plain pointer. If the bound object is destroyed and the delegate isn't explicitly
 unbound first, the next broadcast calls into freed memory. Prefer `AddUObject`/`AddDynamic` for
 `UObject` targets, or make certain the unbind happens in the target's teardown path.
 :::
 
-:::warning Dynamic delegates only bind UFUNCTIONs
+:::warning[Dynamic delegates only bind UFUNCTIONs]
 Trying to `AddDynamic` a plain method is a compile error, not a runtime surprise — but it's a common
 one the first time you reach for a dynamic delegate coming from single-cast/multicast usage.
 :::
 
-:::caution A forgotten RemoveAll is a leak, not just a dangling call risk
+:::caution[A forgotten RemoveAll is a leak, not just a dangling call risk]
 Even a weak/UObject-safe binding keeps the delegate's internal bookkeeping around until the object is
 actually destroyed. For long-lived broadcasters and short-lived listeners, unbind explicitly rather
 than relying on eventual GC.

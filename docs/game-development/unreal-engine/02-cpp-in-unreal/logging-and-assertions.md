@@ -117,20 +117,20 @@ if this distinction matters for correctness rather than just diagnostics.
 
 ## Gotchas
 
-:::danger check() must never gate a required side effect
+:::danger[check() must never gate a required side effect]
 `check(DoSomethingImportant())` is a trap: if checks are compiled out in a given configuration, the
 call inside might not happen at all. Use `verify()` when the expression itself needs to run
 regardless of assertion behaviour.
 :::
 
-:::warning No exceptions means no throw/catch as your error-handling idiom
+:::warning[No exceptions means no throw/catch as your error-handling idiom]
 Unreal disables C++ exception handling; error paths are expressed through return values, `Optional`
 types, `ensure`/`check`, or explicit error enums — not `try`/`catch`. Code ported from a
 non-Unreal C++ codebase that leans on exceptions needs its error handling redesigned, not just
 recompiled.
 :::
 
-:::caution ensure() fires once per callsite per session by default, not once per call
+:::caution[ensure() fires once per callsite per session by default, not once per call]
 Don't rely on `ensure` output volume to gauge how often a condition is failing; it's designed to avoid
 spamming the log/crash reporter on a hot path, which means a very frequent failure and a rare one can
 look identical in the log.

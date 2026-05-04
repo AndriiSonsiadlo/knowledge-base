@@ -10,7 +10,7 @@ tags: [c++, compiler, optimization, assembly]
 
 The compilation phase translates preprocessed C++ code into assembly language. This is where syntax checking, semantic analysis, optimization, and code generation happen.
 
-:::info Brain of the Build
+:::info[Brain of the Build]
 Compilation is the "smart" phase - it understands C++, checks types, instantiates templates, and performs optimizations.
 :::
 

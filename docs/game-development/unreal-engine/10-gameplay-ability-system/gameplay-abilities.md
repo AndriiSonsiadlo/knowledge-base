@@ -150,12 +150,12 @@ abilities have no per-activation state to protect.
 
 ## Gotchas
 
-:::warning CanActivateAbility must be pure — no side effects
+:::warning[CanActivateAbility must be pure — no side effects]
 It's called speculatively, sometimes multiple times, including for UI queries that never actually
 activate the ability. Any state mutation belongs in `ActivateAbility` after `CommitAbility` succeeds.
 :::
 
-:::caution Forgetting to call EndAbility leaks the activation
+:::caution[Forgetting to call EndAbility leaks the activation]
 An ability that never calls `EndAbility` stays "active" forever from the ASC's point of view, keeps
 blocking any tags it set as blocking, and — for `InstancedPerActor` abilities — permanently occupies that
 instance's activation state. Every code path through `ActivateAbility`, including early-exit failure

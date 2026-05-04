@@ -13,7 +13,7 @@ long command line like `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_T
 collapses to `cmake --preset release`. Presets (CMake **3.19+**) are the modern replacement for the
 brittle wrapper shell scripts teams used to share build configurations.
 
-:::tip Why presets matter
+:::tip[Why presets matter]
 One file means **you, your CI, and everyone's IDE configure the build identically**. Visual Studio,
 VS Code, and CLion all read `CMakePresets.json` natively, so "works on my machine" stops being a
 configuration problem.
@@ -84,7 +84,7 @@ flowchart LR
     T --> P["packagePresets<br/>(CPack, optional)"]
 ```
 
-:::warning Version field is required
+:::warning[Version field is required]
 The top-level `"version"` selects the JSON schema (v6 ships with CMake 3.25). If your CMake is older
 than a preset feature you use, configuration fails with a schema error — bump
 `cmake_minimum_required` or lower the version to match.

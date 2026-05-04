@@ -104,14 +104,14 @@ subsystem. See [Subsystems](../02-cpp-in-unreal/subsystems.md) for the full patt
 
 ## Gotchas
 
-:::warning GameInstance is not GameMode
+:::warning[GameInstance is not GameMode]
 It's tempting to treat `GameInstance` as "the bigger GameMode," but they answer different questions:
 `GameMode` is server-only, scoped to one `UWorld`, and re-created on every level load; `GameInstance`
 exists on every machine (server and clients alike) and persists across level loads for the entire
 session. Match-rule logic belongs on `GameMode`; cross-level session data belongs on `GameInstance`.
 :::
 
-:::caution PIE gives every client its own GameInstance
+:::caution[PIE gives every client its own GameInstance]
 Data on `GameInstance` is not shared across multiple PIE clients in the same editor process — each PIE
 client gets a fully separate `UGameInstance`. Code that assumes one `GameInstance` speaks for "the whole
 test session" will behave differently in a two-client PIE test than in a real packaged multiplayer build

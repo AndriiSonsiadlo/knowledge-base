@@ -101,14 +101,14 @@ over-adopted GAS integration is to rip out.
 
 ## Gotchas
 
-:::warning GAS is an all-or-nothing commitment per actor
+:::warning[GAS is an all-or-nothing commitment per actor]
 Once an actor's gameplay is driven through its `UAbilitySystemComponent`, bypassing it for "just this one
 simple case" (e.g., setting health directly instead of through an attribute set) breaks replication,
 prediction, and any Gameplay Cue or tag logic tied to that value. Decide up front which actors are
 GAS-driven and route every relevant state change through the ASC for those actors.
 :::
 
-:::caution "We'll add GAS later" is more expensive than it sounds
+:::caution["We'll add GAS later" is more expensive than it sounds]
 `UAbilitySystemComponent` placement (Character vs PlayerState), attribute set structure, and tag naming
 conventions are foundational decisions — see
 [GAS project setup](./gas-project-setup.md). Retrofitting GAS onto a shipped or deeply-built combat

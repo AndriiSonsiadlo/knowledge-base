@@ -135,7 +135,7 @@ consequence of the MESI mechanics described on this page.
 
 ## Edge Cases & Pitfalls
 
-:::danger Coherence traffic can dominate multicore performance
+:::danger[Coherence traffic can dominate multicore performance]
 Even when cores touch *different* variables, if those variables share a cache line, MESI's
 invalidation traffic forces the line to bounce between cores' caches on every write — see
 [Multicore & Parallelism](../cpu-architecture/multicore-and-parallelism.md) for the false-sharing

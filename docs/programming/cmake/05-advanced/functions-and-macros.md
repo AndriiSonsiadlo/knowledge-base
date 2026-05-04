@@ -552,7 +552,7 @@ endfunction()
 
 ## Common Pitfalls
 
-:::warning Avoid These Mistakes
+:::warning[Avoid These Mistakes]
 
 **Forgetting PARENT_SCOPE in functions:**
 

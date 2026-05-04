@@ -10,28 +10,28 @@ tags: [c++, value-categories, glvalue, prvalue, xvalue, cpp11]
 
 C++11 refined value categories into five types: `lvalue`, `prvalue`, `xvalue`, `glvalue`, and `rvalue`. Understanding these enables perfect forwarding and move semantics.
 
-:::info Category Tree
+:::info[Category Tree]
 ![value-categories](valuecategories.png)
 :::
 
 ## The Five Categories
 
 ### Primary Categories
-:::info lvalue
+:::info[lvalue]
 Has identity, can't be moved from
 - Variables: `int x`
 - Dereferenced pointers: `*ptr`
 - Functions returning lvalue references: `getRef()`
 :::
 
-:::info prvalue
+:::info[prvalue]
 No identity, can be moved from (pure rvalue)
 - Literals: `42`, `3.14`
 - Temporaries: `x + y`, `Point{1,2}`
 - Functions returning by value: `getValue()`
 :::
 
-:::info xvalue
+:::info[xvalue]
 Has identity, can be moved from (expiring value)
 - `std::move(x)`
 - Cast to rvalue reference: `static_cast<T&&>(x)`

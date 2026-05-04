@@ -87,19 +87,19 @@ it's visually load-bearing — a mirror, a highly reflective floor, a cutscene c
 
 ## Gotchas
 
-:::warning A Stationary Directional Light silently degrades Lumen
+:::warning[A Stationary Directional Light silently degrades Lumen]
 If your key light isn't Movable, Lumen doesn't error — it just doesn't get the dynamic GI behavior you're
 expecting from it. This is one of the most common "why does my scene look flat/wrong compared to the
 Lumen demo" issues and it's a light property, not a Lumen setting.
 :::
 
-:::caution Hardware ray tracing cost scales with instance count, not just triangle count
+:::caution[Hardware ray tracing cost scales with instance count, not just triangle count]
 Above roughly 100,000 instances, hardware ray tracing's scene update cost becomes significant regardless
 of how simple each instance is. Dense instanced foliage or PCG-scattered content is exactly the case where
 this bites — profile HWRT scene update cost on your actual dense scenes, not a test level.
 :::
 
-:::caution Screen Traces trade correctness for cost
+:::caution[Screen Traces trade correctness for cost]
 Because screen traces bypass the Lumen Scene, effects that only exist there (certain emissive
 contributions to reflections/GI) can be missing from a screen-traced result even though the setting is
 purely a quality knob on paper. If something is invisible in reflections specifically, check whether

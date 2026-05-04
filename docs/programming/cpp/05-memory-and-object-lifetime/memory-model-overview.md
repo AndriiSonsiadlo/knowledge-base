@@ -10,7 +10,7 @@ tags: [c++, memory-model, stack, heap, memory-allocation]
 
 Understanding how C++ programs use memory is fundamental to writing efficient, safe code. Memory is divided into distinct regions with different characteristics and management strategies.
 
-:::info Foundation
+:::info[Foundation]
 The memory model defines how programs interact with memory - regions, lifetimes, and allocation strategies. Master this to understand pointers, object lifetime, and performance.
 :::
 
@@ -403,7 +403,7 @@ thread_local int tlsVar = 0;  // Per-thread lifetime
 - **Profile before optimizing** memory usage
 :::
 
-:::danger DON'T
+:::danger[DON'T]
 - **Don't put large arrays on stack** (causes overflow)
 - **Don't forget to delete** heap allocations
 - **Don't use new/delete** when stack works

@@ -91,20 +91,20 @@ differently to fit the rest of the codebase's naming.
 
 ## Gotchas
 
-:::danger Exception-based error handling from ported code silently changes behavior, or doesn't compile at all
+:::danger[Exception-based error handling from ported code silently changes behavior, or doesn't compile at all]
 Code assuming a `throw` will be caught somewhere up the call stack either fails to build under
 Unreal's exception-disabled configuration, or — worse, if exceptions happen to be enabled for a
 specific build configuration you're not targeting — behaves differently in Shipping than in the
 configuration you tested. Redesign around `check`/`ensure`/return values instead of assuming parity.
 :::
 
-:::warning A UPROPERTY member cannot be a std:: container
+:::warning[A UPROPERTY member cannot be a std:: container]
 `UPROPERTY() std::vector<int32> Values;` compiles as ordinary C++ but is invisible to the reflection
 system — no editor exposure, no serialization, no GC tracking of any `UObject*` inside it. Use
 `TArray` for anything that needs to be `UPROPERTY`.
 :::
 
-:::caution Don't mix TArray and std::vector idioms across one function's boundary
+:::caution[Don't mix TArray and std::vector idioms across one function's boundary]
 Converting back and forth between `TArray` and `std::vector` at every call into or out of a function is
 a sign the function is on the wrong side of an idiom boundary — pick the container type the rest of
 that subsystem uses and stay consistent through it.

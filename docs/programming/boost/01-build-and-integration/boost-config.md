@@ -15,7 +15,7 @@ language features they support — or implement the same feature with subtly dif
 Boost.Config papers over the difference so the rest of Boost can be written once and compiled
 everywhere.
 
-:::info Why this library exists
+:::info[Why this library exists]
 Boost has always supported a wide range of compilers, including old and non-conforming ones. Rather
 than scatter `#ifdef _MSC_VER` and `#ifdef __GNUC__` checks through every library, Boost centralises
 all of that detection in one place. A library author asks a clean question — "does this compiler have
@@ -59,7 +59,7 @@ int main() {
 | `BOOST_COMPILER` | Human-readable compiler name and version |
 | `BOOST_STDLIB` | Human-readable standard-library implementation name |
 
-:::note Decoding BOOST_VERSION
+:::note[Decoding BOOST_VERSION]
 The integer form is deliberately easy to compare. To recover the parts: major is
 `BOOST_VERSION / 100000`, minor is `BOOST_VERSION / 100 % 1000`, and patch is `BOOST_VERSION % 100`.
 For versioning context across releases see [Versioning and Releases](../00-overview/versioning-and-releases.md).
@@ -157,7 +157,7 @@ BOOST_FORCEINLINE int square(int x) { return x * x; }
 - **`BOOST_CONSTEXPR` / `BOOST_NOEXCEPT`** — expand to the keyword where supported, to nothing where
   not, so a single source line works on toolchains old and new.
 
-:::tip Prefer standard attributes in new code
+:::tip[Prefer standard attributes in new code]
 On a modern C++17/20 toolchain, write `[[fallthrough]]`, `[[likely]]`, and `noexcept` directly. The
 `BOOST_*` spellings earn their keep when your code must also compile on older or non-conforming
 compilers — exactly the situation Boost libraries themselves are in.
@@ -183,7 +183,7 @@ compiler has it. This is the recurring Boost story: a facility prototyped as a p
 absorbed into the language, after which the Boost macro becomes a compatibility shim. The same arc is
 described for whole libraries in [Boost and the C++ Standard](../00-overview/boost-and-the-standard.md).
 
-:::warning Do not redefine these macros
+:::warning[Do not redefine these macros]
 Boost.Config macros encode delicate, compiler-specific knowledge. Never `#define` or `#undef` a
 `BOOST_*` macro yourself to "fix" a build — you will silently break the assumptions every other Boost
 library makes about the environment. If detection is wrong, report it upstream rather than overriding

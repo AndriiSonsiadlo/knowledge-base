@@ -62,7 +62,7 @@ component you didn't write, you can step into the actual engine implementation i
 from documentation. It also means "the engine" is something you can grep, patch, and rebuild locally
 — most large studios carry a handful of engine-level patches specific to their project.
 
-:::warning Source-available is not open source
+:::warning[Source-available is not open source]
 You can read and modify the engine source, and redistribute your modified engine internally, but
 Unreal Engine ships under Epic's own EULA, not an OSI license. Shipping a commercial product still
 means agreeing to Epic's royalty terms above a revenue threshold. "I can see the source" and "I can
@@ -108,13 +108,13 @@ relationship visible in one place. See
 
 ## Gotchas
 
-:::warning "It works in the editor" is not proof
+:::warning["It works in the editor" is not proof]
 Editor-only modules, editor-only Blueprint nodes, and PIE (Play In Editor) conveniences do not exist
 in a packaged build. A reference to an editor utility class compiled into gameplay code will fail to
 package, sometimes only on the platform you didn't test.
 :::
 
-:::caution The launcher build and a source build are different products
+:::caution[The launcher build and a source build are different products]
 A launcher-installed Editor cannot be rebuilt from source, cannot easily be patched at the engine
 level, and won't support platforms that require a source build. Decide early which one your project
 needs — switching later means re-provisioning the whole toolchain. See

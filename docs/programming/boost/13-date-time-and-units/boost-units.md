@@ -13,7 +13,7 @@ Boost.Units brings **compile-time dimensional analysis** to C++. It wraps numeri
 to seconds is a compile error, multiplying metres by metres gives square metres, and converting
 between compatible unit systems (SI to CGS) is automatic and exact.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The Mars Climate Orbiter was lost because one team used pound-seconds and another used newton-seconds
 and no one caught the mismatch until the spacecraft burned up. Boost.Units makes that class of bug
 impossible — the compiler rejects unit-incompatible arithmetic.
@@ -59,7 +59,7 @@ int main() {
 }
 ```
 
-:::danger The compiler catches the bug
+:::danger[The compiler catches the bug]
 If you try to add a length to a time, or assign a velocity to an acceleration variable, the code
 will not compile. The error messages can be verbose, but the safety is absolute — no unit mismatch
 escapes to runtime.
@@ -154,13 +154,13 @@ int main() {
 
 ## Practical tips
 
-:::tip Keep quantity types in interfaces
+:::tip[Keep quantity types in interfaces]
 Declare function parameters and return types as `quantity<si::length>` rather than plain `double`.
 This pushes unit checking to the API boundary — callers cannot accidentally pass a time where a
 length is expected.
 :::
 
-:::warning Compile times
+:::warning[Compile times]
 Boost.Units is heavily template-based. Large translation units with many unit computations can
 compile slowly. Consider isolating physics-heavy code behind a compiled interface (pimpl or
 separate translation units).

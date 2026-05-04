@@ -170,14 +170,14 @@ just changing one class declaration.
 
 ## Gotchas
 
-:::warning Decide before you write the first ability
+:::warning[Decide before you write the first ability]
 The Character-vs-PlayerState choice has no clean default — Epic's own Lyra sample uses PlayerState for
 player-controlled pawns and Character-hosted ASCs for simple AI. Decide based on whether your game needs
 attributes/abilities to survive a respawn, and write it down; don't let it fall out accidentally from
 "where I happened to add `CreateDefaultSubobject` first."
 :::
 
-:::caution InitAbilityActorInfo timing bugs are the most common GAS setup mistake
+:::caution[InitAbilityActorInfo timing bugs are the most common GAS setup mistake]
 Abilities activated before `InitAbilityActorInfo` runs will have a null or stale `AvatarActor`. If you
 see abilities silently failing to activate only on respawn, check that you're re-calling
 `InitAbilityActorInfo` on the *new* pawn, not just once at `BeginPlay`.

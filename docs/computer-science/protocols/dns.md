@@ -101,7 +101,7 @@ Reading this:
 
 ## Edge Cases & Pitfalls
 
-:::warning DNS caching means changes are never instant
+:::warning[DNS caching means changes are never instant]
 Because resolvers cache answers for up to a record's TTL, updating a DNS record (e.g., pointing a
 domain at a new server) can take anywhere from seconds to the full TTL to propagate everywhere,
 depending on who has already cached the old value. Lowering a TTL *before* a planned change (and

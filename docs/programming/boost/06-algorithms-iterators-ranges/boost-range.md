@@ -12,7 +12,7 @@ tags: [c++, boost, range, adaptors, pipeline]
 composable, lazy transformations you pipe together with `|`. It is the direct ancestor of C++20
 `std::ranges` and `std::views`, and it remains the only option on pre-C++20 toolchains.
 
-:::info The problem it solves
+:::info[The problem it solves]
 STL algorithms take pairs of iterators, which is verbose and error-prone (mismatched begin/end from
 different containers compiles but crashes). Boost.Range lets you pass a single range object instead,
 and the adaptor pipeline replaces nested algorithm calls with a readable left-to-right flow.
@@ -68,7 +68,7 @@ int main() {
 }
 ```
 
-:::tip Reading adaptor pipelines
+:::tip[Reading adaptor pipelines]
 Read the pipe left to right: "start with `v`, keep evens, square each, take the first three." Each
 adaptor returns a view — no intermediate containers are allocated, and elements are computed on
 demand during iteration.
@@ -150,7 +150,7 @@ flowchart LR
 | Projection support | no (use `transformed`) | yes (built into algorithms) |
 | Minimum standard | C++03 | C++20 |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++20 and later, prefer `std::ranges` and `std::views` — they have concept-based error messages,
 projection support, and deeper compiler integration. Use Boost.Range when you need the adaptor
 pipeline on a C++11/14/17 codebase.

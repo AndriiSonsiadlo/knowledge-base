@@ -195,13 +195,13 @@ void UMyDialogWidget::NativeConstruct()
 
 ## Gotchas
 
-:::warning AddToViewport does not mean "created" — CreateWidget does not mean "visible"
+:::warning[AddToViewport does not mean "created" — CreateWidget does not mean "visible"]
 Forgetting `AddToViewport` gives you a widget that exists and does nothing observable; forgetting to
 eventually call `RemoveFromParent()` gives you a widget that keeps ticking and drawing on top of whatever
 comes after it. Track both ends of that lifetime, not just the creation call.
 :::
 
-:::caution BindWidget names must match exactly, and only the Designer side can break the contract silently
+:::caution[BindWidget names must match exactly, and only the Designer side can break the contract silently]
 Renaming a widget in the Designer without updating the C++ property name (or vice versa) turns a
 `BindWidget` into a compile-time Blueprint error, but a `BindWidgetOptional` just silently goes null — the
 widget still compiles, and the null-pointer bug shows up at runtime instead.

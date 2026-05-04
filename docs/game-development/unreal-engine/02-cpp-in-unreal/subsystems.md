@@ -103,13 +103,13 @@ way they would through a `static`.
 
 ## Gotchas
 
-:::warning Don't cache a subsystem pointer across a scope you don't own
+:::warning[Don't cache a subsystem pointer across a scope you don't own]
 Caching a `UWorldSubsystem*` in something that outlives the world (like a `UGameInstanceSubsystem`) is
 exactly the stale-pointer problem subsystems are meant to avoid. Fetch it fresh, or cache it only in
 something scoped at or below the subsystem's own level.
 :::
 
-:::caution Initialize/Deinitialize order across subsystems is not something to depend on
+:::caution[Initialize/Deinitialize order across subsystems is not something to depend on]
 Don't assume another subsystem in the same collection is already initialized inside your own
 `Initialize`. Defer cross-subsystem lookups to a point after initialization — `OnWorldBeginPlay` for
 world subsystems — rather than doing them in `Initialize` itself.

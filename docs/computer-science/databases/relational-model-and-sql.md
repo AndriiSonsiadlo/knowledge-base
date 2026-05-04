@@ -86,7 +86,7 @@ Normalizing splits this into separate tables, each storing one fact exactly once
 the `CUSTOMERS`, `ORDERS`, `ORDER_ITEMS`, `PRODUCTS` structure in the diagram above. Now Alice's email
 lives in exactly one row, updated in exactly one place.
 
-:::info Normal forms, briefly
+:::info[Normal forms, briefly]
 1NF requires atomic (non-repeating) column values. 2NF removes columns that depend on only part of a
 composite key. 3NF removes columns that depend on other non-key columns rather than the key itself.
 Most practical schema design stops at 3NF; further normalization is rarely worth the extra joins.
@@ -118,7 +118,7 @@ WHERE o.order_date >= '2024-01-01';
 
 ## Edge Cases & Pitfalls
 
-:::warning Over-normalization
+:::warning[Over-normalization]
 Splitting data into too many tables can turn simple reads into deep join chains, hurting read
 performance. Read-heavy analytical systems often deliberately **denormalize** (duplicate some data)
 to avoid joins — the opposite trade-off, made intentionally rather than by accident.

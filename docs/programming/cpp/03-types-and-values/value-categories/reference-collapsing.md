@@ -10,7 +10,7 @@ tags: [c++, reference-collapsing, forwarding, templates]
 
 When template type deduction creates "reference to reference", C++ applies collapsing rules. This enables perfect forwarding.
 
-:::info The Rule
+:::info[The Rule]
 `& &` → `&`  
 `& &&` → `&`  
 `&& &` → `&`  
@@ -57,7 +57,7 @@ LRef &&   // int& && → int&
 RRef &    // int&& & → int&
 RRef &&   // int&& && → int&&
 ```
-:::warning Collapsing Rule
+:::warning[Collapsing Rule]
 **Only double `rvalue` reference stays `rvalue` reference!**
 :::
 

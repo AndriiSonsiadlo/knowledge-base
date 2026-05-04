@@ -10,7 +10,7 @@ tags: [c++, decltype, type-deduction, cpp11]
 
 `decltype` deduces the type of an expression, preserving references and const qualifiers exactly.
 
-:::info Difference from auto
+:::info[Difference from auto]
 `auto` uses template deduction (drops ref/const), `decltype` preserves exact type including references.
 :::
 
@@ -176,7 +176,7 @@ decltype((x)) // int& (expression - lvalue)
 // decltype of lvalue expression → reference
 ```
 
-:::warning Critical Difference
+:::warning[Critical Difference]
 `decltype(name)` ≠ `decltype((name))`  
 Parentheses change name to expression!
 :::

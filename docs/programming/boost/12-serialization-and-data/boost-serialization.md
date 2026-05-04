@@ -13,7 +13,7 @@ Boost.Serialization converts C++ objects to and from a sequence of bytes — **s
 It handles arbitrarily complex object graphs, including pointers, shared ownership, polymorphism,
 and versioning, all without requiring you to write parsing code by hand.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Hand-written save/load code is tedious and error-prone: you must track pointer aliasing (two
 pointers to the same object), handle class hierarchies, manage version skew when formats evolve,
 and repeat it all for every archive format. Boost.Serialization automates all of this with a single
@@ -93,7 +93,7 @@ Boost.Serialization ships several archive types. Swap one line and your data is 
 | `binary_oarchive` / `binary_iarchive` | `boost/archive/binary_*archive.hpp` | Compact, fast, not portable across platforms |
 | `xml_oarchive` / `xml_iarchive` | `boost/archive/xml_*archive.hpp` | Interop, human-readable with structure |
 
-:::warning Binary archives are not portable
+:::warning[Binary archives are not portable]
 A binary archive written on a little-endian 64-bit Linux machine may not load on a big-endian or
 32-bit system. Use text or XML archives when portability matters.
 :::
@@ -146,7 +146,7 @@ struct Node {
 };
 ```
 
-:::tip STL container support
+:::tip[STL container support]
 Include the matching header to serialize standard containers:
 `boost/serialization/vector.hpp`, `boost/serialization/map.hpp`,
 `boost/serialization/string.hpp`, etc.

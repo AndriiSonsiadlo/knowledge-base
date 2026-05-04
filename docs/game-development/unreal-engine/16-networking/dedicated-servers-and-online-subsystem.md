@@ -189,7 +189,7 @@ the two.
 
 ## Gotchas
 
-:::warning A Server target isn't a Game target with rendering "turned off" at runtime
+:::warning[A Server target isn't a Game target with rendering "turned off" at runtime]
 Rendering, audio, and most input code are compiled out of a `Server` target, not disabled by a runtime
 switch — code that unconditionally touches rendering/audio APIs without a platform check can fail to
 compile or link against a `Server` target, not just misbehave at runtime. Guard such code appropriately
@@ -197,13 +197,13 @@ compile or link against a `Server` target, not just misbehave at runtime. Guard 
 than assuming it'll just no-op.
 :::
 
-:::caution OnlineSubsystemNull is a real fallback, not a stub to delete before shipping
+:::caution[OnlineSubsystemNull is a real fallback, not a stub to delete before shipping]
 `OnlineSubsystemNull` is genuinely useful for LAN, automated testing, and offline/single-player builds
 that still exercise session-shaped code paths. Don't assume "Null" means "broken" — it means "no real
 platform backend," which is a legitimate deployment target for some builds.
 :::
 
-:::warning GameMode being server-only breaks naive replicated-property assumptions
+:::warning[GameMode being server-only breaks naive replicated-property assumptions]
 Code that expects to read gameplay-rule state directly off `AGameModeBase` from client-side code will
 find it simply doesn't exist there — `AGameModeBase` has no client-side representation at all. Put
 anything a client needs to read into `AGameStateBase` (which does replicate) instead.

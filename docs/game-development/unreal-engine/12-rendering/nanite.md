@@ -103,19 +103,19 @@ your specific 5.7 build rather than assuming parity with older documentation.
 
 ## Gotchas
 
-:::warning A masked material on foliage is not a free win
+:::warning[A masked material on foliage is not a free win]
 Masked Nanite materials are supported, but per-pixel Vertex Interpolator/Custom UV evaluation cost
 (up to 3x) plus alpha-test overhead adds up fast on dense foliage. Don't assume "Nanite supports
 Masked" means masked foliage costs the same as an opaque Nanite mesh — profile it.
 :::
 
-:::caution An unsupported blend mode fails quietly
+:::caution[An unsupported blend mode fails quietly]
 Assigning a Translucent or Additive material to a Nanite mesh doesn't error at compile or cook time —
 it falls back to a default material and logs a warning. Put a log-warning check for Nanite fallback
 materials into your CI or asset validation pass rather than relying on someone noticing visually.
 :::
 
-:::warning Don't expect Wireframe or Mesh Decals to work
+:::warning[Don't expect Wireframe or Mesh Decals to work]
 Wireframe display and Mesh Decals are both explicitly unsupported on Nanite geometry. If your
 debug tooling or a gameplay system depends on either, it needs a non-Nanite path.
 :::

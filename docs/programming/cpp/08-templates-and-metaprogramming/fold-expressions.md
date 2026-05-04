@@ -10,7 +10,7 @@ tags: [c++, templates, fold-expressions, cpp17]
 
 Fold expressions provide a concise way to apply operators to variadic template parameter packs. They eliminate the need for recursive template patterns.
 
-:::info Simplifying Variadic Templates
+:::info[Simplifying Variadic Templates]
 Before C++17: Complex recursion  
 C++17: `(args + ...)` - simple and readable!
 :::

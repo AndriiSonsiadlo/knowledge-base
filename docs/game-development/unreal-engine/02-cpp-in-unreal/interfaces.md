@@ -129,20 +129,20 @@ TScriptInterface<IDamageableInterface> CurrentTarget;
 
 ## Gotchas
 
-:::warning Inherit from the I-class, not the U-class
+:::warning[Inherit from the I-class, not the U-class]
 `class AEnemy : public AActor, public UDamageableInterface` is the classic mistake — it doesn't
 compile the way you'd expect, and even where it did, `UDamageableInterface` isn't the class with the
 virtual functions on it.
 :::
 
-:::warning Cast only sees native implementations
+:::warning[Cast only sees native implementations]
 `Cast<IDamageableInterface>(SomeObject)` returns `nullptr` for a Blueprint-only implementer even
 though `ImplementsInterface` would say true. Use the `Execute_` wrapper when the object might be
 Blueprint-implemented — which, for anything that could plausibly be subclassed in Blueprint, is most
 of the time.
 :::
 
-:::caution BlueprintNativeEvent needs the _Implementation override, not the declared name
+:::caution[BlueprintNativeEvent needs the _Implementation override, not the declared name]
 Overriding `ApplyDamage` instead of `ApplyDamage_Implementation` either fails to compile or silently
 creates an unrelated function, depending on the exact signature mismatch — always override the
 `_Implementation` name for `BlueprintNativeEvent` functions.

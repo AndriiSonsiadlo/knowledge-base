@@ -10,7 +10,7 @@ tags: [c++, special-members, rule-of-five, raii, best-practices]
 
 These rules tell you which special member functions to define based on your class's resource management needs.
 
-:::info The Three Rules
+:::info[The Three Rules]
 **Rule of Zero** - Use RAII wrappers, define nothing  
 **Rule of Three** - If you need one, you need all three (C++98)  
 **Rule of Five** - If you need one, you need all five (C++11+)
@@ -124,7 +124,7 @@ public:
 };
 ```
 
-:::warning Why All Three?
+:::warning[Why All Three?]
 If you need a destructor to clean up, compiler-generated copy will just copy the pointer, causing **double-delete** bugs!
 :::
 
@@ -302,7 +302,7 @@ public:
 };
 ```
 
-:::info Generation Rules Summary
+:::info[Generation Rules Summary]
 - User-declared destructor → no move operations generated
 - User-declared copy → no move operations generated
 - User-declared move → copy operations deleted
@@ -350,7 +350,7 @@ public:
 
 ## Common Mistakes
 
-:::danger Watch Out
+:::danger[Watch Out]
 **Self-Assignment:** Always check `if (this != &other)` in copy assignment
 
 **Resource Leaks:** Delete old resource before acquiring new one in assignment
@@ -366,25 +366,25 @@ public:
 
 ## Summary
 
-:::info Rule of Zero (preferred):
+:::info[Rule of Zero (preferred):]
 - Use RAII wrappers (smart pointers, containers)
 - Don't define any special members
 - Safest and simplest approach
 :::
 
-:::info Rule of Three (C++98):
+:::info[Rule of Three (C++98):]
 - Destructor, copy constructor, copy assignment
 - All related when managing resources
 - If you need one, you need all three
 :::
 
-:::info Rule of Five (C++11+):
+:::info[Rule of Five (C++11+):]
 - Add move constructor and move assignment
 - Enables efficient resource transfer
 - If you manage resources, define or delete all five
 :::
 
-:::info Best practices:
+:::info[Best practices:]
 - Prefer Rule of Zero whenever possible
 - Mark move operations `noexcept`
 - Check self-assignment: `if (this != &other)`
@@ -393,7 +393,7 @@ public:
 - Copy-and-swap provides exception safety
 :::
 
-:::info Generation rules:
+:::info[Generation rules:]
 - Declaring destructor prevents move generation
 - Declaring copy prevents move generation
 - Declaring move deletes copy operations

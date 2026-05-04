@@ -14,7 +14,7 @@ CMake is a **cross-platform build system generator**. It doesn't build your code
 it generates native build files (Makefiles, Visual Studio projects, Ninja files, etc.) for your
 platform.
 
-:::info Key Concept
+:::info[Key Concept]
 CMake is a **meta-build system**. You write platform-independent configuration files, and CMake
 translates them into platform-specific build instructions.
 :::
@@ -100,7 +100,7 @@ cmake --build .
 | IDE integration | Excellent | Limited   | Limited  |
 | Modern C++      | Yes       | Manual    | Manual   |
 
-:::warning Remember
+:::warning[Remember]
 CMake files are named `CMakeLists.txt` (case-sensitive!) and must be in your project root and
 subdirectories.
 :::

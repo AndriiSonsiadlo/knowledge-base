@@ -10,12 +10,12 @@ tags: [c++, templates, sfinae, enable-if, metaprogramming]
 
 SFINAE (Substitution Failure Is Not An Error) is a fundamental C++ template mechanism that enables conditional template compilation. `std::enable_if` is the primary tool for applying SFINAE in practice.
 
-:::info Conditional Template Compilation
+:::info[Conditional Template Compilation]
 **SFINAE:** When template substitution fails, remove template from consideration instead of erroring  
 **enable_if:** Enable/disable templates based on compile-time conditions
 :::
 
-:::tip In C++20, prefer concepts
+:::tip[In C++20, prefer concepts]
 SFINAE works but is hard to read and produces brutal error messages.
 [Concepts and `requires`](./concepts-and-requires.md) express the same constraints with readable
 syntax and far better diagnostics. Reach for SFINAE only to support pre-C++20 compilers, or for

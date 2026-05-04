@@ -14,7 +14,7 @@ which snapshot of every library you have, which is what makes "I'm on Boost 1.85
 This page covers the versioning scheme, the release cadence, how to read the version from code, and how
 the project is structured behind the scenes.
 
-:::info The one number you quote
+:::info[The one number you quote]
 When you report a Boost version, you give the umbrella release number (for example `1.85.0`), not a
 per-library version. Every library in that release is whatever revision shipped in `1.85.0`.
 :::
@@ -49,7 +49,7 @@ flowchart LR
     REL --> NEXT[Next cycle begins]
 ```
 
-:::tip Pin your version
+:::tip[Pin your version]
 Because three releases a year means the landscape shifts steadily, pin a specific Boost version in your
 build (via your [package manager](../01-build-and-integration/package-managers.md) or a fixed download)
 rather than tracking "latest." Upgrade deliberately and re-run your tests.
@@ -92,7 +92,7 @@ feature or fix landed in a known release:
 #endif
 ```
 
-:::note Why the packed integer
+:::note[Why the packed integer]
 The single-integer form makes version comparisons trivial in the preprocessor — `BOOST_VERSION >= 108300`
 is one clean comparison, whereas comparing separate major/minor/patch macros would need nested checks.
 :::
@@ -108,7 +108,7 @@ That said, deprecation timelines are decided **per library**, not centrally — 
 project-wide guarantee of how many releases an old API survives. Always read a library's own changelog
 before assuming an upgrade is transparent.
 
-:::warning Read the release notes before upgrading
+:::warning[Read the release notes before upgrading]
 Each release ships notes describing per-library changes, deprecations, and removals. Skipping several
 versions at once compounds the risk: a quietly deprecated API in `1.81` may be *gone* by `1.85`. Upgrade
 in steps when you can, and rebuild against your test suite.

@@ -10,7 +10,7 @@ tags: [c++, object-files, symbols, elf, linking]
 
 Object files (.o, .obj) are compiled but not yet linked binary files containing machine code, data, and metadata for the linker.
 
-:::info Intermediate Format
+:::info[Intermediate Format]
 Object files are the bridge between compilation and linking - they contain everything needed to build an executable except resolved external references.
 :::
 

@@ -10,7 +10,7 @@ tags: [c++, smart-pointers, deleters, resource-management, raii]
 
 Extend smart pointers to manage any resource requiring special cleanup beyond `delete`. Enable RAII for files, handles, connections, locks - anything needing cleanup.
 
-:::info Beyond delete
+:::info[Beyond delete]
 **Default:** `delete` or `delete[]`  
 **Custom:** Close files, unlock mutexes, release handles, any cleanup
 
@@ -65,7 +65,7 @@ std::unique_ptr<int, decltype(&customDelete)> ptr2(
 // decltype(ptr) != decltype(ptr2)
 ```
 
-:::warning Type Signature
+:::warning[Type Signature]
 ```cpp showLineNumbers
 std::unique_ptr<int, Deleter1> p1;
 std::unique_ptr<int, Deleter2> p2;
@@ -369,7 +369,7 @@ You rarely need to use `default_delete` explicitly, but it's useful for template
 - **Prefer standard RAII** (fstream, lock_guard) when available
 :::
 
-:::danger DON'T
+:::danger[DON'T]
 - **Delete non-owned memory** - use no-op deleter
 - **Throw from deleters** - can terminate program
 - **Forget null checks** - validate pointer before operations
@@ -396,27 +396,27 @@ sizeof(std::shared_ptr<int>);  // 16 bytes
 
 ## Summary
 
-:::info Core concept:
+:::info[Core concept:]
 - Extend smart pointers to any resource
 - Not just heap memory (files, handles, locks)
 - RAII for everything
 :::
 
-:::info `unique_ptr` deleters:
+:::info[`unique_ptr` deleters:]
 - Type part of signature
 - Zero overhead if stateless
 - Requires `decltype` for lambdas
 - Different deleters = different types
 :::
 
-:::info `shared_ptr` deleters:
+:::info[`shared_ptr` deleters:]
 - Type-erased (stored in control block)
 - All `shared_ptr<T>` same type
 - Small overhead (always stored)
 - More flexible for heterogeneous collections
 :::
 
-:::info Common patterns:
+:::info[Common patterns:]
 - File handles (fclose)
 - System resources (close fd)
 - Database connections
@@ -424,7 +424,7 @@ sizeof(std::shared_ptr<int>);  // 16 bytes
 - Stateful deleters (logging, metrics)
 :::
 
-:::info Guidelines:
+:::info[Guidelines:]
 - Always check null in deleter
 - Make deleters noexcept
 - Prefer standard RAII when available

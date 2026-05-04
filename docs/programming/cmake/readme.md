@@ -12,7 +12,7 @@ emits the native build files (Makefiles, Ninja, Visual Studio, Xcode) for whatev
 on. These docs cover **modern, target-based CMake (3.15+)** — the `target_*` style that replaced the
 old global-variable approach — from first project to dependencies, testing, and the advanced bits.
 
-:::info How this is organised
+:::info[How this is organised]
 Roughly in learning order: **Intro → Basics → Targets** is the core you use every day; **Dependencies**,
 **Organization**, **Advanced**, and **Testing** are the layers you add as projects grow. Each folder
 is self-contained — follow the cross-links.
@@ -69,7 +69,7 @@ ctest --test-dir build                           # test
 cmake --install build --prefix /usr/local        # install
 ```
 
-:::tip Conventions used across these docs
+:::tip[Conventions used across these docs]
 - Examples target **CMake 3.15+** and the modern **target-based** style (`target_*` over global `set()`).
 - The golden rule throughout: **set properties on targets with `PRIVATE`/`PUBLIC`/`INTERFACE` scope**, not globally.
 - Admonitions flag the important bits: `info` context, `tip` guidance, `warning`/`danger` foot-guns.

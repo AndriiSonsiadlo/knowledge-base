@@ -10,7 +10,7 @@ tags: [valgrind, memory-leaks, profiling, debugging]
 
 Dynamic analysis tool suite for memory debugging, leak detection, and profiling. More thorough than sanitizers but much slower (10-50x).
 
-:::info When to Use Valgrind
+:::info[When to Use Valgrind]
 **Sanitizers can't find it?** Try Valgrind. Better leak detection, more thorough checks. Trade-off: 10-50x slower.
 :::
 

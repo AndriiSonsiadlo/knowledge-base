@@ -152,21 +152,21 @@ state lives) that cost nothing today — not about implementing replication mach
 
 ## Gotchas
 
-:::warning "It works in PIE" tells you almost nothing about multiplayer-readiness
+:::warning["It works in PIE" tells you almost nothing about multiplayer-readiness]
 A standalone or single-client PIE session makes `HasAuthority()` always true and every RPC a same-machine
 call — code with no authority discipline at all will pass every test you're currently running. This is
 precisely why the discipline has to be a habit, not something you verify by testing, until you actually
 stand up a second client.
 :::
 
-:::caution Retrofitting authority checks later means re-deriving your own control flow
+:::caution[Retrofitting authority checks later means re-deriving your own control flow]
 The expensive column above isn't expensive because the code is hard to write — it's expensive because
 you have to re-establish, for every system, what "who's allowed to change this" should have meant all
 along, often without the original context of why the code was written that way. Keeping the check in
 from the start means that reasoning happens once, while you still remember it.
 :::
 
-:::warning A late "add multiplayer" pass tends to also uncover a UI/assumption backlog
+:::warning[A late "add multiplayer" pass tends to also uncover a UI/assumption backlog]
 Beyond the C++ gameplay logic, retrofitting multiplayer onto a single-player-first project usually also
 surfaces UI code that assumed one local player, save systems that assumed one save slot maps to one
 player, and input code that assumed one local controller. None of that is covered by this networking

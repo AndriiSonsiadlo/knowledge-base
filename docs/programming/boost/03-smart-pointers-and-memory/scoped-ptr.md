@@ -13,7 +13,7 @@ the `scoped_ptr` goes out of scope. It is **non-copyable and non-movable** — o
 the pointer's entire lifetime. That deliberate restriction makes intent crystal clear: "this object
 lives exactly as long as this scope, and nobody else can take it."
 
-:::info Zero overhead
+:::info[Zero overhead]
 `scoped_ptr` stores nothing but the raw pointer. There is no reference count and no control block, so
 it is exactly as cheap as a hand-written `new`/`delete` pair — just exception-safe.
 :::
@@ -63,7 +63,7 @@ deleters, while remaining just as cheap.
 | Array form | `scoped_array` | `unique_ptr<T[]>` |
 | Overhead | None | None |
 
-:::tip Prefer std::unique_ptr in new code
+:::tip[Prefer std::unique_ptr in new code]
 `unique_ptr` is a strict superset of what `scoped_ptr` offers and is the modern default. Keep
 `scoped_ptr` in mind only for pre-C++11 code or where you specifically want to *forbid* moving as
 documentation of intent. See [Boost and the standard](../00-overview/boost-and-the-standard.md).

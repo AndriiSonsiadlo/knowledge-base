@@ -200,7 +200,7 @@ Widget w{};  // Calls Widget(), not Widget(initializer_list)
 
 ## Summary
 
-:::info Uniform Initialization - Key Points
+:::info[Uniform Initialization - Key Points]
 **One Syntax for All Types:**
 - Fundamentals: `int x{42};`
 - Arrays: `int arr[]{1, 2, 3};`

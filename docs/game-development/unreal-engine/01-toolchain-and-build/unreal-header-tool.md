@@ -101,14 +101,14 @@ whether it's a `UCLASS`), the missing include surfaces as a UHT parse failure th
 symptom (an unresolved type in the generated code) rather than the cause (the missing `#include`).
 The fix is almost always: find the type's owning header, add the include, rebuild.
 
-:::warning UHT errors point at generated code, not your mistake
+:::warning[UHT errors point at generated code, not your mistake]
 When a build fails with an error inside a `.generated.h` file, or a "circular includes" complaint
 between generated headers, the first thing to check is whether every `UPROPERTY`/`UFUNCTION`
 parameter and return type used in that header actually has its own header included above the
 `.generated.h` line — not just forward-declared.
 :::
 
-:::warning Regenerate project files after adding a new UCLASS file
+:::warning[Regenerate project files after adding a new UCLASS file]
 Adding a brand-new header with a `UCLASS` in it (a new file, not a new class in an existing file)
 sometimes requires **Generate Visual Studio project files** before IntelliSense picks it up, even
 though UBT/UHT itself will find and process the file correctly on the next build.

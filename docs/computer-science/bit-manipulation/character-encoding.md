@@ -79,14 +79,14 @@ std::cout << s.size() << "\n";       // 5 — 'é' takes 2 bytes in UTF-8, not 1
 
 ## Edge Cases & Pitfalls
 
-:::danger `.size()`/`.length()` counts bytes (or UTF-16 code units), not "characters"
+:::danger[`.size()`/`.length()` counts bytes (or UTF-16 code units), not "characters"]
 `std::string::size()` in C++ (UTF-8 assumed) counts bytes; `.length` on a JavaScript string counts
 UTF-16 code units. Both can disagree with the number of visible characters — especially for emoji,
 which are often outside the Basic Multilingual Plane and need **2 UTF-16 code units** (a
 "surrogate pair") or **4 UTF-8 bytes**.
 :::
 
-:::warning Mojibake: decoding with the wrong encoding
+:::warning[Mojibake: decoding with the wrong encoding]
 Opening a UTF-8 file as if it were Latin-1 (ISO-8859-1) turns each multi-byte UTF-8 sequence into
 several garbled Latin-1 characters (the classic `café` → `cafÃ©` bug). The fix is always to know
 and declare the encoding explicitly — HTTP `Content-Type: charset=utf-8`, an XML/HTML `<meta

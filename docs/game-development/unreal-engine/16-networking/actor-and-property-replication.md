@@ -205,26 +205,26 @@ void AMyPlayerController::OnPossess(APawn* InPawn)
 
 ## Gotchas
 
-:::warning Forgetting GetLifetimeReplicatedProps silently drops the property
+:::warning[Forgetting GetLifetimeReplicatedProps silently drops the property]
 Marking a property `UPROPERTY(Replicated)` without registering it in `GetLifetimeReplicatedProps` fails
 silently — no compile error, no runtime warning, the property just never leaves the server. If a
 replicated field "does nothing," check this file first.
 :::
 
-:::caution Components need their own opt-in
+:::caution[Components need their own opt-in]
 `bReplicates` on the owning actor is not enough for a component's properties to replicate — the
 component itself must call `SetIsReplicatedByDefault(true)` (or `SetIsReplicated(true)` at runtime) and
 implement its own `GetLifetimeReplicatedProps`. An actor that replicates fine but whose component's
 properties never update almost always means this step was skipped.
 :::
 
-:::warning RepNotify functions don't run on the server
+:::warning[RepNotify functions don't run on the server]
 Don't put logic in `OnRep_X` that the server also needs to run — the server sets the value directly and
 its own `OnRep_` never fires from that local write. Call a shared helper from both the server-side
 setter and the `OnRep_` function if both sides need the same reaction.
 :::
 
-:::caution Relevancy can make replication look broken when it's really invisibility
+:::caution[Relevancy can make replication look broken when it's really invisibility]
 If a property "isn't replicating" only for some clients, check whether the actor is even relevant to
 those connections before debugging the property itself — no channel means no replication at all,
 regardless of how correctly the property is registered.

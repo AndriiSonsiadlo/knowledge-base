@@ -87,14 +87,14 @@ toolchain working in the first place, which is covered in
 
 ## Gotchas
 
-:::warning Version drift is real
+:::warning[Version drift is real]
 Unreal Engine's API and recommended patterns change meaningfully between major versions (4.x to 5.x,
 and across 5.x minor releases). A book or course written for an earlier version can teach patterns
 that still compile but are no longer idiomatic, or reference APIs that have since been deprecated.
 Check the target engine version on any resource before trusting it as current guidance for UE 5.7.
 :::
 
-:::caution Prefer primary sources for anything you're about to ship
+:::caution[Prefer primary sources for anything you're about to ship]
 Tutorials and books are for building a mental model. For anything that ends up in shipping code —
 exact specifier behavior, a deprecated function's replacement, a platform-specific constraint — verify
 against the official Unreal Engine documentation or engine source directly, not against a

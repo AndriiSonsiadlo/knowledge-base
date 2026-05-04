@@ -10,7 +10,7 @@ tags: [profiling, performance, perf, gprof, optimization]
 
 Tools for finding performance bottlenecks: CPU time, cache misses, branch mispredictions. Measure first, then optimize.
 
-:::info Measure Before Optimizing
+:::info[Measure Before Optimizing]
 **Premature optimization is the root of all evil.** Profile to find actual bottlenecks, not perceived ones.
 :::
 
@@ -318,7 +318,7 @@ perf stat -r 10 ./program_new
 - Run multiple iterations
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Optimize without measuring
 - Profile debug builds
 - Trust micro-benchmarks only

@@ -13,7 +13,7 @@ tags: [c++, boost, numeric, conversion, cast]
 It replaces `static_cast<int>(some_double)` — which silently truncates, wraps, or loses precision —
 with a conversion that either succeeds exactly or fails loudly.
 
-:::info The problem it solves
+:::info[The problem it solves]
 C++ implicit and `static_cast` numeric conversions are silent: assigning a `long long` to an `int`
 wraps on overflow, converting a negative value to `unsigned` wraps modulo 2^N, and casting a large
 `double` to `int` is undefined behaviour. These bugs are hard to find because the code compiles
@@ -71,7 +71,7 @@ int main() {
 }
 ```
 
-:::danger static_cast is not a safe alternative
+:::danger[static_cast is not a safe alternative]
 `static_cast<int>(3'000'000'000LL)` compiles and runs — it produces a garbage value. There is
 no warning, no exception, no signal. This class of bug is responsible for real-world failures
 (Ariane 5, integer overflow CVEs). `numeric_cast` exists to make this impossible.
@@ -127,7 +127,7 @@ int main() {
 }
 ```
 
-:::tip Use numeric_cast for boundaries
+:::tip[Use numeric_cast for boundaries]
 `numeric_cast` is most valuable at **system boundaries**: user input, network protocol fields,
 file format values, and API return values. Interior arithmetic in a tight loop rarely needs it —
 the cost of the range check matters there, and the values should already be validated.
@@ -162,7 +162,7 @@ int main() {
 | `gsl::narrow_cast` | no | no | no | documentation-only cast |
 | `gsl::narrow` | yes | yes | no | similar to numeric_cast |
 
-:::note No standard equivalent
+:::note[No standard equivalent]
 There is no `std::numeric_cast` in the C++ standard. C++20 added `std::in_range` for querying
 whether a value fits in an integer type, but it does not perform the conversion itself. For a
 throwing checked cast, `boost::numeric_cast` remains the standard approach.

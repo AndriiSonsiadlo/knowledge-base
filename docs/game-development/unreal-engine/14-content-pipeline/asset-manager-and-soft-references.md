@@ -266,7 +266,7 @@ dynamic asset's bundle dependencies, registers it, and kicks off loading — the
 
 ## Gotchas
 
-:::warning Bundles only gate *soft* references
+:::warning[Bundles only gate *soft* references]
 Tagging a `TObjectPtr` hard reference with `meta = (AssetBundles = "Game")` does nothing — hard
 references are not bundle-gated, they load unconditionally the instant the owning object loads. Bundles
 only defer properties that are already `TSoftObjectPtr`/`TSoftClassPtr`. If a "Game"-bundled property
@@ -274,14 +274,14 @@ still shows up loaded when only the "UI" bundle was requested, check whether it'
 a soft pointer in the header.
 :::
 
-:::caution `GetPrimaryAssetObject` returns null until the relevant bundle is loaded
+:::caution[`GetPrimaryAssetObject` returns null until the relevant bundle is loaded]
 Calling `GetPrimaryAssetObject(WeaponId)` before any `LoadPrimaryAsset` call for that ID returns the
 Primary Asset itself only if something else already caused it to load — its bundled soft references
 are not resolved just because the data asset object exists. Always request the bundle you need and load
 off the completion delegate rather than assuming the object graph is fully populated on first access.
 :::
 
-:::warning Forgetting to unload leaks exactly like forgetting to `delete`
+:::warning[Forgetting to unload leaks exactly like forgetting to `delete`]
 `LoadPrimaryAsset`/`ChangeBundleStateForPrimaryAssets` increment a reference the AssetManager holds
 against the loaded content. There's no automatic timeout or scope-based release — if your code path
 that loads a bundle doesn't have a matching unload on the corresponding transition (level exit, weapon
@@ -289,7 +289,7 @@ unequip, screen close), that memory stays resident for the rest of the session, 
 missed `TSharedPtr` release.
 :::
 
-:::caution `RequestAsyncLoad` callbacks can fire on a differently-ordered path than you assume
+:::caution[`RequestAsyncLoad` callbacks can fire on a differently-ordered path than you assume]
 Multiple in-flight `RequestAsyncLoad` calls for overlapping soft paths do not guarantee callback
 ordering matches request ordering, and a released/canceled handle's delegate may never fire. Don't
 build gameplay logic that depends on load-completion order across separate handles; if ordering

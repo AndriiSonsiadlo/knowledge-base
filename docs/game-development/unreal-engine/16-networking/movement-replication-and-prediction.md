@@ -140,7 +140,7 @@ ordinary input-driven movement.
 
 ## Gotchas
 
-:::warning Don't set Actor location directly on a networked Character
+:::warning[Don't set Actor location directly on a networked Character]
 Calling `SetActorLocation` (or teleporting via `SetActorTransform`) on a `Character` bypasses the
 movement component's prediction bookkeeping — the server and owning client's prediction states
 desynchronize, producing a visible snap-back on the next correction. Use
@@ -148,7 +148,7 @@ desynchronize, producing a visible snap-back on the next correction. Use
 state, instead of writing the transform directly.
 :::
 
-:::caution A "smooth" correction can still look like a snap under bad conditions
+:::caution[A "smooth" correction can still look like a snap under bad conditions]
 Network smoothing and prediction reconciliation reduce visible corrections under normal latency and
 packet loss — they don't eliminate visible corrections entirely. High latency, high jitter, or a client
 that mispredicts often (server and client movement logic diverging, e.g., from a custom movement mode
@@ -157,7 +157,7 @@ as evidence the whole system is broken; treat *frequent* ones as evidence client
 logic have drifted apart.
 :::
 
-:::warning Custom movement modes must run identically on client and server
+:::warning[Custom movement modes must run identically on client and server]
 See [Custom movement modes](../05-input-and-movement/custom-movement-modes.md) — if your custom mode's
 logic isn't deterministic given the same input and starting state on both client and server (for
 example, it reads a value that isn't replicated, or depends on frame-rate-sensitive floating point in a
@@ -165,7 +165,7 @@ way the server's tick rate doesn't match), prediction will disagree constantly, 
 visible corrections even under good network conditions.
 :::
 
-:::caution Simulated proxies never run gameplay logic tied to movement
+:::caution[Simulated proxies never run gameplay logic tied to movement]
 Code that assumes `Tick`-time movement-component callbacks (like landing/falling events) fire
 identically on a simulated proxy as they do on the owning client or server is a common source of "this
 works for me, not for other players" — a simulated proxy is only replaying interpolated transforms, not

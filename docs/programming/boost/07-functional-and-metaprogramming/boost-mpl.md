@@ -14,7 +14,7 @@ in C++. It provides type-level equivalents of the STL — sequences of types (`m
 evaluated entirely by the compiler. MPL made template metaprogramming accessible and structured
 when C++03 was the only game in town.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Template metaprogramming before MPL was ad hoc: recursive template specialisations, `enum` hacks,
 and undiscoverable patterns. MPL brought the STL mental model — containers, iterators, algorithms —
 to the type level, giving metaprogramming a vocabulary and a set of composable building blocks.
@@ -138,7 +138,7 @@ static_assert(std::is_same<safe_ptr<int>::type, int*>::value);
 static_assert(std::is_same<safe_ptr<int*>::type, int*>::value);
 ```
 
-:::warning Compile-time cost
+:::warning[Compile-time cost]
 MPL algorithms instantiate many templates. Large type sequences or deeply nested metafunctions can
 significantly increase compile times. Profile with `-ftime-report` or similar before scaling up.
 :::
@@ -160,7 +160,7 @@ flowchart TD
 | Compile speed | slow on large sequences | fast |
 | Required standard | C++03 | C++14 |
 
-:::note Migration advice
+:::note[Migration advice]
 For new code on C++14+, prefer [Boost.Hana](./boost-hana.md). MPL is stable and maintained but
 receives no new features. Existing MPL code does not need rewriting unless compile times or
 readability demand it.

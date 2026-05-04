@@ -10,7 +10,7 @@ tags: [cpp, type-erasure, templates, polymorphism, design-patterns]
 
 Type erasure hides the concrete type behind a common interface, allowing different types to be treated uniformly without inheritance. Combines the flexibility of runtime polymorphism with the performance benefits of templates.
 
-:::info Polymorphism Without Inheritance
+:::info[Polymorphism Without Inheritance]
 Type erasure lets unrelated types work through a common interface without requiring them to inherit from a base class. The canonical example is `std::function` which can store any callable.
 :::
 
@@ -532,7 +532,7 @@ struct WithTemplate {
 - Leverage for callback storage
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Use when templates suffice
 - Ignore performance implications
 - Forget to handle copy/move properly

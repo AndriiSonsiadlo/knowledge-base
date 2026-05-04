@@ -14,7 +14,7 @@ rename — but the implementations add features the standard either cannot guara
 at all: incomplete-type support, `stable_vector`, `flat_map`/`flat_set`, `small_vector`,
 `static_vector`, and a scoped-allocator model that propagates allocators to nested containers.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Standard containers are deliberately minimal — the committee specifies *interfaces*, not
 implementation strategies. If you need a vector that never invalidates pointers on growth, a sorted
 flat container backed by a contiguous array, or a small-buffer-optimised vector that avoids the heap
@@ -42,7 +42,7 @@ int main() {
 }
 ```
 
-:::warning std::vector and incomplete types
+:::warning[std::vector and incomplete types]
 Some standard library implementations happen to accept incomplete types, but the standard does **not**
 guarantee it. Relying on that is undefined behaviour. `boost::container::vector` guarantees it.
 :::
@@ -88,7 +88,7 @@ int main() {
 }
 ```
 
-:::tip When to prefer flat containers
+:::tip[When to prefer flat containers]
 Use `flat_map`/`flat_set` when the container is **built once and queried many times** (lookup
 tables, configuration maps, static dictionaries). The contiguous memory layout gives much better
 cache performance than `std::map`'s node-based tree. C++23 adopted `std::flat_map` — the Boost
@@ -134,7 +134,7 @@ int main() {
 }
 ```
 
-:::danger Do not exceed the capacity of static_vector
+:::danger[Do not exceed the capacity of static_vector]
 Unlike `std::vector`, `static_vector` will **not** grow. Pushing beyond capacity is undefined
 behaviour (or an assertion failure in debug builds). Always check `size() < capacity()` or design
 your logic so overflow is impossible.

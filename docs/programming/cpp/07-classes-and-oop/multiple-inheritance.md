@@ -10,7 +10,7 @@ tags: [c++, classes, multiple-inheritance, diamond-problem, virtual-inheritance]
 
 Multiple inheritance allows a class to inherit from multiple base classes. This enables combining functionality but introduces complexity, especially the diamond problem.
 
-:::info Multiple Inheritance
+:::info[Multiple Inheritance]
 **Power** = Combine multiple base classes  
 **Danger** = Diamond problem (ambiguity and duplication)  
 **Solution** = Virtual inheritance
@@ -271,7 +271,7 @@ public:
 Bat bat(5);  // Bat's constructor initializes Animal
 ```
 
-:::warning Virtual Base Initialization
+:::warning[Virtual Base Initialization]
 With virtual inheritance, the **most derived class** is responsible for initializing the virtual base, even if intermediate classes have constructors that would normally initialize it.
 :::
 
@@ -361,39 +361,39 @@ public:
 
 ## Summary
 
-:::info Multiple inheritance basics
+:::info[Multiple inheritance basics]
 - Class inherits from multiple base classes
 - Gets all members from all bases
 - Each base is a subobject in derived class
 :::
 
-:::info Diamond problem
+:::info[Diamond problem]
 - Occurs when two bases share a common base
 - Creates duplicate base subobjects
 - Causes ambiguity and waste
 :::
 
-:::info Virtual inheritance
+:::info[Virtual inheritance]
 - Ensures only one copy of common base
 - Use `public virtual BaseClass`
 - Most derived class initializes virtual base
 - Performance overhead (size and speed)
 :::
 
-:::info Best practices
+:::info[Best practices]
 - Use for pure interfaces (abstract classes)
 - Good for mixins and independent capabilities
 - Consider composition as alternative
 - Virtual inheritance only when needed for diamond
 :::
 
-:::info Ambiguity resolution
+:::info[Ambiguity resolution]
 - Disambiguate with `BaseClass::member`
 - Override in derived class
 - Virtual inheritance eliminates need
 :::
 
-:::info Costs
+:::info[Costs]
 - Normal inheritance: no overhead
 - Virtual inheritance: extra vptr per path, indirect access
 - Diamond without virtual: duplicate data

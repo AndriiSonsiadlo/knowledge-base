@@ -10,7 +10,7 @@ tags: [c++, make, build, automation]
 
 Makefiles define rules for building projects using the Make build system. They specify dependencies and commands to compile source code incrementally.
 
-:::info Unix Build Standard
+:::info[Unix Build Standard]
 Make has been the standard Unix build tool since 1976. Simple for small projects, but CMake is preferred for cross-platform development.
 :::
 

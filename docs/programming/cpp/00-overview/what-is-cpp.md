@@ -12,7 +12,7 @@ C++ is a general-purpose, compiled programming language that extends C with obje
 generic, and functional programming features. It provides low-level memory control while offering
 high-level abstractions.
 
-:::info Key Characteristics
+:::info[Key Characteristics]
 **Multi-paradigm**: Supports procedural, OOP, generic, and functional programming  
 **Performance**: Zero-overhead abstractions and direct hardware access  
 **Compiled**: Translates to native machine code for maximum efficiency
@@ -349,17 +349,17 @@ lambdas), all without sacrificing performance.
 
 ## Common Misconceptions
 
-:::danger Myth #1: "C++ is just C with classes"
+:::danger[Myth #1: "C++ is just C with classes"]
 **Reality**: C++ has diverged significantly from C. Modern features like RAII, move semantics,
 templates, and constexpr make it a fundamentally different language.
 :::
 
-:::danger Myth #2: "C++ is too complex"
+:::danger[Myth #2: "C++ is too complex"]
 **Reality**: Modern C++ (C++11+) is simpler than legacy C++. Smart pointers replace manual memory
 management, auto reduces boilerplate, and range-based for loops simplify iteration.
 :::
 
-:::danger Myth #3: "C++ is obsolete"
+:::danger[Myth #3: "C++ is obsolete"]
 **Reality**: C++ powers Chrome, Firefox, Microsoft Office, Adobe Photoshop, game engines, and most
 high-performance systems. It's consistently among the top 5 most-used languages.
 :::

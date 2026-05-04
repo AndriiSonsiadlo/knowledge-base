@@ -12,7 +12,7 @@ tags: [c++, operators, logical, boolean]
 evaluation**: the right operand of `&&`/`||` is evaluated only when it can change the result. That
 behaviour is not a micro-optimisation — code routinely *depends* on it for correctness.
 
-:::info Don't confuse with bitwise
+:::info[Don't confuse with bitwise]
 `&&`/`||` are logical (operate on truth values, short-circuit). `&`/`|` are
 [bitwise](./bitwise.md) (operate per bit, always evaluate both sides). `if (flags & MASK)` and
 `if (a && b)` mean very different things.
@@ -39,7 +39,7 @@ if (ptr != nullptr && ptr->ready()) { /* ... */ }
 if (cache_hit(key) || expensive_lookup(key)) { /* ... */ }
 ```
 
-:::danger Side effects hide here
+:::danger[Side effects hide here]
 Because the right operand may not run, never bury required side effects in it.
 
 ```cpp

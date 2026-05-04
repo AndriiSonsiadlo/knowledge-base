@@ -16,7 +16,7 @@ The syntax uses `$<...>` and looks unusual, but it's powerful for expressing com
 
 **Why they exist:** Some information isn't known during configuration. For example, with multi-config generators (Visual Studio, Xcode), the build type isn't determined until you actually build. Generator expressions let you handle this elegantly.
 
-:::tip Three phases, not two
+:::tip[Three phases, not two]
 CMake runs in **configure** (reads `CMakeLists.txt`, fills the cache) → **generate** (writes the
 native build files) → the native tool **builds**. Ordinary `if()` and variables resolve at *configure*
 time; generator expressions resolve later, at *generate* time — the only point where per-config and
@@ -408,7 +408,7 @@ add_custom_target(show_genex ALL
 
 ## Common Mistakes
 
-:::warning Pitfalls
+:::warning[Pitfalls]
 
 **Using in set() commands**
 

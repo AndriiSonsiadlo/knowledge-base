@@ -518,7 +518,7 @@ endif()
 8. **Keep subdirectory CMakeLists.txt focused** - just that component
    :::
 
-:::warning Common Pitfalls
+:::warning[Common Pitfalls]
 
 **Wrong order** causing "target not found" errors  
 **Assuming variables propagate** back to parent  

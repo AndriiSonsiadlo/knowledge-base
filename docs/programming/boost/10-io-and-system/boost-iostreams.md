@@ -13,7 +13,7 @@ filters that process data as it flows through standard `iostream` interfaces. In
 zlib calls or hand-rolling buffered I/O, you compose a pipeline: read from a file, decompress with
 gzip, count lines, and deliver UTF-8 text — all through a single `std::istream` interface.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The standard `<iostream>` hierarchy gives you sources and sinks (`filebuf`, `stringbuf`), but no way
 to *chain* processing steps. Boost.Iostreams introduces the **filter** concept: a reusable
 transformation that sits between a source/sink and the user-facing stream, letting you stack
@@ -82,7 +82,7 @@ int main() {
 }
 ```
 
-:::warning Always close or flush compressed output streams
+:::warning[Always close or flush compressed output streams]
 Gzip and bzip2 compressors buffer internally and write a footer on close. If you let the stream
 destruct without flushing, the output file may be truncated or invalid.
 :::
@@ -137,7 +137,7 @@ int main() {
 }
 ```
 
-:::tip When to use memory-mapped I/O
+:::tip[When to use memory-mapped I/O]
 Memory-mapped files are fastest for random-access reads over large files — the OS handles paging
 automatically. For sequential, filtered reads (compression, line-by-line), the filter-chain approach
 is usually cleaner and more composable.

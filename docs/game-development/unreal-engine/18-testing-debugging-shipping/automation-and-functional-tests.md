@@ -211,20 +211,20 @@ bool FDamageCalculation_ClampsAtZero::RunTest(const FString& Parameters)
 
 ## Gotchas
 
-:::warning A test that doesn't clean up its world leaks into the next test
+:::warning[A test that doesn't clean up its world leaks into the next test]
 Functional tests that spawn actors, timers, or subsystems and don't tear them down on `FinishTest` can
 leave state that contaminates the next test run in the same process — especially in a batch headless run
 that doesn't restart the engine between tests. Always pair `StartTest` setup with cleanup on completion.
 :::
 
-:::warning Editor-context tests silently don't run in a packaged game
+:::warning[Editor-context tests silently don't run in a packaged game]
 A test flagged only with an editor application-context bit is invisible (not failing — invisible) when
 queried from a non-editor process. If a CI job reports "0 tests found" for a suite you know exists,
 check that the process you're running from (editor-cmd vs. a packaged `-game` build) matches the
 application-context flags the tests were registered with.
 :::
 
-:::caution Don't conflate "runs in the editor" with "safe in Shipping"
+:::caution[Don't conflate "runs in the editor" with "safe in Shipping"]
 Automation tests are development/testing infrastructure and are not expected to compile into `Shipping`
 builds the same way editor-only code is stripped — see
 [Build configurations and targets](../01-toolchain-and-build/build-configurations-and-targets.md) for what

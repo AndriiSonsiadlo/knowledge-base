@@ -67,7 +67,7 @@ flowchart LR
     O1 --- T1
 ```
 
-:::info Why TCP/IP "won" despite OSI being taught more
+:::info[Why TCP/IP "won" despite OSI being taught more]
 OSI's protocols (X.25, CLNP, etc.) were designed top-down by committee before much real-world
 deployment experience existed, and the full stack was heavyweight to implement. TCP/IP grew
 bottom-up from working code on ARPANET/the early Internet — "rough consensus and running code."
@@ -112,7 +112,7 @@ Reading this against the model:
 
 ## Edge Cases & Pitfalls
 
-:::warning "Which layer is this?" doesn't always have a clean answer
+:::warning["Which layer is this?" doesn't always have a clean answer]
 Real protocols don't always respect the model cleanly. TLS is often drawn "between" transport and
 application, but functions more like a session/presentation-layer concern (OSI layers 5-6) wrapped
 around application data. QUIC (used by HTTP/3) implements transport-layer reliability *and*

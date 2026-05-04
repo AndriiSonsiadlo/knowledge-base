@@ -635,7 +635,7 @@ set_target_properties(audio_mp3 PROPERTIES
 8. **Document dependencies** - comments explaining why
    :::
 
-:::warning Common Mistakes
+:::warning[Common Mistakes]
 
 **Circular dependencies** between directories  
 **Global commands** affecting all subdirectories  

@@ -10,7 +10,7 @@ tags: [c++, standards, cpp11, cpp14, cpp17, cpp20, cpp23, history]
 
 C++ evolves through standardized versions released approximately every three years. Each standard adds features, fixes issues, and modernizes the language while maintaining backward compatibility.
 
-:::info Standard Naming
+:::info[Standard Naming]
 C++ standards are named by their publication year: C++98, C++11, C++14, C++17, C++20, C++23. Before publication, they're called by the expected year (C++0x was expected in 200x, released in 2011).
 :::
 
@@ -77,7 +77,7 @@ delete ptr;  // Easy to forget!
 void* ptr = NULL;  // NULL is actually integer 0
 ```
 
-:::warning Legacy Code
+:::warning[Legacy Code]
 Much existing C++ code is still C++98/03. Understanding it is necessary for maintaining legacy systems.
 :::
 

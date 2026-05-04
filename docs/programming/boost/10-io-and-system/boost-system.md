@@ -14,7 +14,7 @@ nearly verbatim as `std::error_code` and `std::error_category`. Today, Boost.Sys
 with `boost::system::result<T>` (Boost 1.81+), which bundles a value *or* an error in a single
 return type.
 
-:::info The problem it solves
+:::info[The problem it solves]
 C has `errno`, Windows has `GetLastError()`, and every library invents its own error integers. These
 are all incompatible: a Winsock error code means something completely different from a POSIX errno.
 Boost.System introduces `error_code` (a code + a *category*) so that error values from different
@@ -97,7 +97,7 @@ sys::error_code make_error_code(app_error e) {
 }
 ```
 
-:::tip error_code vs error_condition
+:::tip[error_code vs error_condition]
 `error_code` represents a *specific* error from a *specific* source (e.g., POSIX errno 2).
 `error_condition` represents a *portable* error class (e.g., "file not found") that you can compare
 against codes from any category. Use `error_condition` for cross-platform error handling in generic
@@ -152,7 +152,7 @@ int main() {
 }
 ```
 
-:::note result vs std::expected
+:::note[result vs std::expected]
 C++23 introduced `std::expected<T, E>`, which serves a similar purpose. `boost::system::result<T>`
 is fixed to `error_code` as its error type, making it lighter-weight and directly compatible with
 the Boost error framework. If you need a custom error type, `std::expected` is more flexible.

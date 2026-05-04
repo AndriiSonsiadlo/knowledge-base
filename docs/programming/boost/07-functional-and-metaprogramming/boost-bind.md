@@ -13,7 +13,7 @@ callable — fixing some parameters while leaving others as placeholders (`_1`, 
 direct predecessor of `std::bind` (C++11) and, for over a decade, the standard way to adapt
 callbacks and connect member functions to generic algorithms.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Generic algorithms and callback APIs expect a callable with a specific arity. If you have a function
 that takes three arguments but the algorithm needs one, you need to *bind* the extra arguments.
 Before C++11 lambdas, `boost::bind` was the only ergonomic way to do this without writing a
@@ -105,7 +105,7 @@ int main() {
 }
 ```
 
-:::warning Dangling references
+:::warning[Dangling references]
 `boost::ref` does not extend lifetime. If the referenced object is destroyed before the bound
 function object is called, the behaviour is undefined.
 :::
@@ -130,7 +130,7 @@ int main() {
 }
 ```
 
-:::note Readability
+:::note[Readability]
 Nested binds quickly become hard to read. In modern C++ a lambda is almost always clearer:
 `auto f = [](int x) { return x * 2 + 10; };`
 :::
@@ -153,7 +153,7 @@ flowchart LR
 | Debuggability | poor | poor | good |
 | Nesting | supported but hard to read | supported but hard to read | natural |
 
-:::tip Modern advice
+:::tip[Modern advice]
 Prefer lambdas in any codebase targeting C++11 or later. They are more readable, debuggable, and
 flexible (move captures, `auto` parameters). Use `boost::bind` only in legacy code or pre-C++11
 projects. See [Boost and the C++ Standard](../00-overview/boost-and-the-standard.md) for the

@@ -12,7 +12,7 @@ tags: [c++, operators, precedence]
 **associativity** decides the order among operators of *equal* precedence. Together they determine
 how `a - b - c` or `*p++` parses — before any value is computed.
 
-:::info Don't memorise the whole table
+:::info[Don't memorise the whole table]
 Nobody recalls all 17 levels correctly. The professional habit is: **parenthesise anything
 non-obvious.** This page exists so you can resolve a specific ambiguity, not so you can rely on
 remembering it.

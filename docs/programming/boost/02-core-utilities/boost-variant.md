@@ -13,7 +13,7 @@ value of exactly one of a fixed list of types, and always knows which one it cur
 type-safe replacement for raw `union` and for the "tagged struct" idiom, and it directly inspired
 C++17's `std::variant`.
 
-:::info Variant versus union
+:::info[Variant versus union]
 A C `union` overlaps several types in one storage slot but tracks *nothing* — read the wrong member and
 you get undefined behaviour. A `variant` adds the missing discriminator and enforces correct access,
 running constructors and destructors properly for non-trivial types like `std::string`.
@@ -63,7 +63,7 @@ int main() {
 }
 ```
 
-:::tip Visitors are compile-time exhaustive
+:::tip[Visitors are compile-time exhaustive]
 If you add a new alternative to the variant and forget to handle it in the visitor, the code fails to
 compile. That is a feature: the compiler reminds you of every place that must be updated. Prefer
 visitation over chains of `get<T>` checks for exactly this reason.
@@ -114,7 +114,7 @@ int main() {
 }
 ```
 
-:::note Why this is hard without help
+:::note[Why this is hard without help]
 `boost::variant<X, std::vector<...self...>>` would need to know its own size to lay out the vector
 element type, which is circular. The recursive machinery introduces an indirection so the type can
 refer to itself safely.
@@ -127,7 +127,7 @@ alternatives. Maintaining that during assignment is genuinely hard — if constr
 throws *after* the old one was destroyed, what is left? Boost upholds the guarantee with a hidden
 heap-backed "temporary backup" trick, which costs an occasional allocation.
 
-:::warning The hidden cost of never-empty
+:::warning[The hidden cost of never-empty]
 To keep the guarantee, `boost::variant` may allocate on the heap during a throwing assignment, and its
 double-buffering can make it larger and slower than you expect. This is the main motivation for its
 successor, described below.
@@ -149,7 +149,7 @@ successor.
 | Access | `get<T>`, `get_if` | `std::get`, `get_if` | `get<T>`, `get_if` |
 | Performance | heaviest | light | light |
 
-:::tip Which variant to use
+:::tip[Which variant to use]
 For new code on C++17+, `std::variant` is the default — standard, light, no dependency. If you
 specifically need the never-empty guarantee without the standard's allocation-free-but-emptyable
 trade-off, prefer **Boost.Variant2**. Reach for the original `boost::variant` mainly for legacy code or

@@ -12,7 +12,7 @@ tags: [cpp, noexcept, exception-safety, strong-guarantee]
 through it. The four levels form a ladder; most code should aim for the **strong guarantee** —
 all-or-nothing — and `noexcept` (the no-throw rung) is the tool that makes the commit step possible.
 
-:::info Scope split
+:::info[Scope split]
 This page is about the *safety guarantees*. For the `noexcept` **specifier** itself — syntax, the
 `noexcept` operator, conditional `noexcept`, which functions to mark, performance — see the canonical
 [noexcept Specifier](../04-functions-and-call-mechanics/noexcept.md) page.
@@ -60,7 +60,7 @@ This "prepare on a copy, commit with a non-throwing move/swap" shape is the core
 [copy-and-swap idiom](../13-idioms-and-design/05-copy-and-swap.md) packages it for assignment
 operators; [PIMPL](../13-idioms-and-design/02-pimpl.md) does it by swapping a single pointer.
 
-:::warning The commit step *must* be no-throw
+:::warning[The commit step *must* be no-throw]
 The whole scheme collapses if the commit can throw. That is why move assignment and `swap` need to be
 `noexcept` — and why the standard library only *moves* (instead of copying) elements during vector
 reallocation when the move constructor is `noexcept`. A throwing move would break the strong
@@ -94,7 +94,7 @@ You do not always want the strong guarantee — it has a cost (the copy). Pick d
   bulk updates, transactions).
 - **Basic** when a copy is too expensive and the caller can cope with a valid-but-changed object.
 
-:::tip Let the library do the work
+:::tip[Let the library do the work]
 Standard containers already provide strong/basic guarantees for their operations. The cheapest way
 to be exception-safe is to build from `std::vector`, `std::string`, and smart pointers, and let
 [RAII](../13-idioms-and-design/01-raii.md) handle every cleanup path — then you rarely write a

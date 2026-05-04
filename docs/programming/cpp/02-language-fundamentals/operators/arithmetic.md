@@ -12,7 +12,7 @@ Arithmetic operators compute numeric results from numeric operands. The surface 
 trivial — the subtleties are in *integer division*, *modulo sign rules*, *overflow*, and the
 *implicit conversions* applied before the operation runs.
 
-:::info Scope
+:::info[Scope]
 This page covers the semantics that bite in practice. For the bird's-eye list of every operator
 see [Expressions and Statements](../expressions-and-statements.md); for the conversions applied to
 mixed operands see [Conversions and Promotions](../../03-types-and-values/conversions-and-promotions.md).
@@ -43,7 +43,7 @@ double d = 7 / 2.0;     // 3.5 — same
 double e = static_cast<double>(7) / 2;  // 3.5 — force it explicitly
 ```
 
-:::warning Truncation, not rounding
+:::warning[Truncation, not rounding]
 Integer `/` truncates toward zero (`-7 / 2 == -3`, not `-4`). If you need rounding, do it
 deliberately, e.g. `(a + b/2) / b` for positive values, or `std::lround`.
 :::
@@ -80,7 +80,7 @@ int b = 5;
 int y = b++;   // b == 6, y == 5   (read, then increment)
 ```
 
-:::tip Prefer prefix
+:::tip[Prefer prefix]
 For built-in types they optimise identically. For iterators and other class types, `it++` must
 build and return a temporary copy, while `++it` does not — prefer `++it` in loops out of habit.
 :::

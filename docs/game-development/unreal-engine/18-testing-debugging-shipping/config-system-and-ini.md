@@ -171,20 +171,20 @@ committed to source control, and editing it directly is a dead end since it gets
 
 ## Gotchas
 
-:::warning A platform override you forgot about silently wins
+:::warning[A platform override you forgot about silently wins]
 `Config/<Platform>/<Platform><Category>.ini` merges *after* your project-wide `Default<Category>.ini`.
 A setting that "isn't taking effect" on one platform is very often a platform override file nobody
 remembers exists, quietly overwriting the value you just changed in the project-wide default.
 :::
 
-:::warning Missing a `+`/`-` prefix on an array duplicates or fails to remove entries
+:::warning[Missing a `+`/`-` prefix on an array duplicates or fails to remove entries]
 Editing an array-typed config property (`+GameplayTagList=(...)`, `+ActiveGameNameRedirects=(...)`)
 without the prefix, or copy-pasting a bare key from one layer into another, is the single most common
 cause of "why do I have two of these" or "why won't this entry go away" config bugs. Always use `+`, `-`,
 or `.` explicitly for array properties.
 :::
 
-:::caution `GlobalConfig` vs `Config` changes which section a Blueprint subclass reads
+:::caution[`GlobalConfig` vs `Config` changes which section a Blueprint subclass reads]
 A plain `Config` property on a class with Blueprint-subclassable behavior reads/writes a section keyed to
 the *most-derived* class by default, which means each Blueprint subclass can end up with its own,
 independent copy of a value that C++ code assumed was shared. Mark it `GlobalConfig` if you need one
@@ -197,7 +197,7 @@ Blueprint-generated subclasses under plain `Config` (versus `GlobalConfig`) — 
 version if a Blueprint subclass's config values aren't landing where you expect.
 :::
 
-:::warning `Saved/Config` is not source of truth and is not shipped
+:::warning[`Saved/Config` is not source of truth and is not shipped]
 It's tempting to hand-edit the generated file under `Saved/Config` to "fix" a value quickly — it gets
 regenerated from the real layers on the next run (and isn't part of a packaged build), so any edit there
 is invisible to every other machine and disappears on your own next launch.

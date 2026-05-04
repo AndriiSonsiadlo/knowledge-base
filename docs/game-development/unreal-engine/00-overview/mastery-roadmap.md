@@ -97,7 +97,7 @@ a milestone above actually needs them:
 Treat those folders as reference: come back when a specific milestone or bug forces the question,
 not on a fixed schedule.
 
-:::tip Multiplayer is deferred, not ignored
+:::tip[Multiplayer is deferred, not ignored]
 If you already know a project needs multiplayer, the *rule* is worth internalizing even before you
 reach the dedicated networking material later in this knowledge base: keep authority checks in place,
 never assume the local client owns state, and keep gameplay state in replicable containers. Designing
@@ -107,14 +107,14 @@ assumes single-player authority.
 
 ## Gotchas
 
-:::warning Reference-only does not mean unimportant
+:::warning[Reference-only does not mean unimportant]
 "Skip on a first pass" is about sequencing, not priority. Coding standards, containers, and smart
 pointer conventions in [02-cpp-in-unreal](../02-cpp-in-unreal/coding-standard-and-naming.md) matter
 from the first line of C++ you write — "skip" here means don't read the whole folder before you write
 that first line, not "ignore the conventions."
 :::
 
-:::caution Don't chase 100% engine coverage before shipping anything
+:::caution[Don't chase 100% engine coverage before shipping anything]
 Unreal's surface area is large enough that "I should understand X before I start" is nearly always an
 excuse. Every milestone above is reachable with a small, specific slice of the engine — resist the
 urge to detour into an unrelated subsystem because it looked interesting in the sidebar.

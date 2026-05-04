@@ -116,7 +116,7 @@ copy-then-customize tricks awkward, which is part of why POSIX compatibility lay
 
 ## Edge Cases & Pitfalls
 
-:::warning fork() only duplicates the calling thread
+:::warning[fork() only duplicates the calling thread]
 In a multithreaded process, `fork()` clones the *entire address space* but only the calling thread
 continues to exist in the child — other threads simply vanish without running their cleanup code.
 Mutexes held by now-nonexistent threads can be left permanently locked. POSIX explicitly documents
@@ -124,7 +124,7 @@ this; the safe pattern is to `fork()` before spawning additional threads, or to 
 in the child.
 :::
 
-:::danger Thread creation is not "free," and address-space sharing cuts both ways
+:::danger[Thread creation is not "free," and address-space sharing cuts both ways]
 Because threads share memory, a bug in one thread (a wild pointer write, a buffer overflow) can
 silently corrupt another thread's data with no kernel protection between them — unlike a crash in one
 *process*, which the kernel isolates from every other process automatically.

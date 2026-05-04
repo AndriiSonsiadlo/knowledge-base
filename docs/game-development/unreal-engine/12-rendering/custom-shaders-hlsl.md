@@ -122,20 +122,20 @@ sources consulted.
 
 ## Gotchas
 
-:::warning Custom node HLSL isn't reusable or debuggable the way a .usf file is
+:::warning[Custom node HLSL isn't reusable or debuggable the way a .usf file is]
 There's no `#include`, no shared header, and no source-level shader debugging for a Custom node's
 string body. Once the same HLSL snippet is copy-pasted into a second Custom node, move it to a real
 global shader or a shared `.ush` include instead.
 :::
 
-:::caution Virtual paths, not disk paths
+:::caution[Virtual paths, not disk paths]
 `IMPLEMENT_GLOBAL_SHADER` and `#include` inside shader files both take virtual paths
 (`/Engine/...`, `/Plugin/<Name>/...`, or your own registered root), never a real filesystem path. A
 typo in the virtual root is a shader compile failure that reads like a missing file, because it is one
 — just not at the path you're looking at on disk.
 :::
 
-:::warning Plugin shader folders map automatically; module folders don't
+:::warning[Plugin shader folders map automatically; module folders don't]
 Don't assume a game module's `Shaders/` folder is visible to shader compilation just because a
 plugin's would be — a plugin's `Shaders/` directory gets its virtual mapping for free, a bare module
 does not and needs an explicit `AddShaderSourceDirectoryMapping` call.

@@ -719,7 +719,7 @@ install(TARGETS myapp mylib
 
 ## Common Pitfalls
 
-:::warning Avoid These Mistakes
+:::warning[Avoid These Mistakes]
 
 1. **Setting global properties instead of target properties**
 

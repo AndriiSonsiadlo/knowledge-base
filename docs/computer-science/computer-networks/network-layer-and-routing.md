@@ -114,7 +114,7 @@ else goes to the `default` route via the gateway at `192.168.1.1`.
 
 ## Edge Cases & Pitfalls
 
-:::warning Subnet math errors are a top cause of "can't reach this host" bugs
+:::warning[Subnet math errors are a top cause of "can't reach this host" bugs]
 Getting the prefix length wrong (e.g., configuring `/24` when you meant `/25`) silently splits or
 merges subnets in ways that cause some hosts to be unreachable directly and require routing through
 a gateway they weren't expecting to need. Always double check host count math: a `/N` prefix leaves

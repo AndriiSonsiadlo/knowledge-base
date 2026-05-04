@@ -111,7 +111,7 @@ Both `.Target.cs` files reference the same `MyGame` module and its `Build.cs` �
 decides which `TargetType` (and therefore which set of modules by their `EHostType`) gets linked in,
 not a separate copy of your gameplay code.
 
-:::warning Shipping strips more than performance
+:::warning[Shipping strips more than performance]
 `Shipping` doesn't just optimize — it compiles out console commands, most logging, `ensure`/`check`
 diagnostics beyond fatal ones, and any code gated behind `#if !UE_BUILD_SHIPPING` or
 `WITH_EDITOR`/`WITH_EDITORONLY_DATA`. Code that works in `Development Editor` but silently no-ops or
@@ -120,7 +120,7 @@ call chain — test in a `Shipping` (or at least `Development Game`) build befor
 feature done.
 :::
 
-:::warning DebugGame Editor is not the same as Debug Editor
+:::warning[DebugGame Editor is not the same as Debug Editor]
 `Debug` configures the *engine* itself as unoptimized, which makes editor startup and general
 interaction painfully slow. Unless you're actively stepping through engine internals, use
 `DebugGame Editor` — it keeps the engine fast and only compiles your game module unoptimized.

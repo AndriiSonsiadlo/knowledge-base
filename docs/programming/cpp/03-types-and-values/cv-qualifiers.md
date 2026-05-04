@@ -10,7 +10,7 @@ tags: [c++, const, volatile, qualifiers, const-correctness]
 
 CV-qualifiers (`const` and `volatile`) modify type behavior. `const` prevents modification; `volatile` prevents compiler optimization.
 
-:::info const is About Contract
+:::info[const is About Contract]
 `const` is a compile-time contract stating "this value won't change" - enabling optimization and catching bugs early.
 :::
 
@@ -170,7 +170,7 @@ volatile bool flag = false;  // Can change in another thread
 volatile sig_atomic_t signal_received = 0;
 ```
 
-:::warning volatile is NOT for Threading
+:::warning[volatile is NOT for Threading]
 In modern C++, use `std::atomic` for thread-safe variables, not `volatile`.
 :::
 

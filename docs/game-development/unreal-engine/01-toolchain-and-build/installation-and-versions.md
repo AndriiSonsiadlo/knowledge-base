@@ -73,7 +73,7 @@ components, make sure these are checked:
 Without **Game development with C++** specifically, the installer's Unreal Engine integration step
 (the checkbox that registers `.uproject` file association and project templates) does not appear.
 
-:::warning Right-click "Generate Visual Studio project files" if VS doesn't open
+:::warning[Right-click "Generate Visual Studio project files" if VS doesn't open]
 If double-clicking a `.uproject` doesn't launch a working IDE session, right-click the file and
 choose **Generate Visual Studio project files** (or use **Tools > Refresh Visual Studio Project**
 from inside the editor once it's open). This regenerates the `.sln` and `.vcxproj` files from your
@@ -107,7 +107,7 @@ If you don't already know you need to modify engine internals, default to the La
 it's the path this folder's other pages assume unless a page calls out a source-build difference
 explicitly.
 
-:::warning Source builds need a GitHub-linked Epic account
+:::warning[Source builds need a GitHub-linked Epic account]
 Cloning the private `EpicGames/UnrealEngine` repository requires linking your GitHub account to your
 Epic Games account first; an unlinked account gets a 404, not a permissions error, which is a common
 point of confusion.

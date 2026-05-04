@@ -13,7 +13,7 @@ transformation** templates — `is_integral`, `is_pointer`, `remove_const`, `add
 dozens more. It was the direct ancestor of the `<type_traits>` header standardised in C++11, and
 remains relevant for the handful of traits the standard does not include.
 
-:::info The problem it solves
+:::info[The problem it solves]
 Generic code often needs to ask questions about types at compile time: "Is this an integer?" "Is
 this a pointer?" "What is this type without its `const`?" Before C++11, the language provided no
 built-in way to answer these questions. Boost.TypeTraits filled that gap and established the
@@ -101,7 +101,7 @@ int main() {
 }
 ```
 
-:::tip Modern alternative
+:::tip[Modern alternative]
 In C++17 and later, prefer `if constexpr` over SFINAE for most conditional compilation. It is
 dramatically easier to read and produces better error messages.
 :::
@@ -150,7 +150,7 @@ static_assert(boost::is_same<int, int>::value);
 | Extra traits | `has_plus`, `has_nothrow_assign`, ... | not provided |
 | Pre-C++11 | yes | no |
 
-:::note Which to choose
+:::note[Which to choose]
 On C++11 and later, prefer `std::` type traits — they have the `_v` and `_t` conveniences and need
 no dependency. Use `boost::` only for the extra traits not in the standard (`has_plus`,
 `has_trivial_copy`, etc.) or when targeting a pre-C++11 compiler. See

@@ -14,7 +14,7 @@ compile-time) and the STL (purely runtime): Fusion sequences carry real values b
 compile-time iteration, access by index, and adaptation of user-defined structs into iterable
 sequences.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `std::tuple` stores heterogeneous values but has no algorithm library. You cannot `for_each` over a
 tuple, filter it, or transform it without writing recursive template boilerplate. Fusion provides
 exactly that: STL-like algorithms for heterogeneous sequences, including the ability to treat a
@@ -106,7 +106,7 @@ int main() {
 }
 ```
 
-:::tip Serialization and reflection
+:::tip[Serialization and reflection]
 `BOOST_FUSION_ADAPT_STRUCT` is a lightweight form of compile-time reflection. It is commonly used
 to build generic serializers, loggers, and ORM-like mappings without hand-written per-field code.
 :::
@@ -163,7 +163,7 @@ flowchart LR
 | Required standard | C++11 | C++03 | C++14 |
 | Compile speed | fast | moderate | fast |
 
-:::note When to use Fusion
+:::note[When to use Fusion]
 If you need struct introspection on C++03/C++11, or your project already uses MPL/Spirit heavily,
 Fusion is the right choice. For new C++14+ projects, [Boost.Hana](./boost-hana.md) provides the
 same capabilities with cleaner syntax and faster compile times.

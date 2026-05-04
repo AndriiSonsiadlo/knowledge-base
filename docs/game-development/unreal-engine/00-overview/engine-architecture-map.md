@@ -94,14 +94,14 @@ configuration before relying on ordering assumptions.
 
 ## Gotchas
 
-:::warning Don't put gameplay logic in the wrong layer
+:::warning[Don't put gameplay logic in the wrong layer]
 Code that reaches "down" past the gameplay framework — an `AActor` subclass calling low-level physics
 or rendering APIs directly instead of going through its components — is a maintenance trap. It breaks
 the composability the component system exists for, and the next person to touch that Actor won't know
 where to look for the behavior.
 :::
 
-:::caution GameState is not GameMode with a different name
+:::caution[GameState is not GameMode with a different name]
 `AGameStateBase` exists specifically because `AGameModeBase` is server-only and never replicates. If
 you put state a client needs to read (score, match phase, player list) on `GameMode` instead of
 `GameState`, it will work in a single-player PIE session and silently fail to reach clients the moment

@@ -10,7 +10,7 @@ tags: [c++, templates, specialization, template-specialization]
 
 Full specialization provides a completely custom implementation for specific template arguments. It's like saying "for this exact type, use this completely different code."
 
-:::info Complete Override
+:::info[Complete Override]
 Full specialization = brand new implementation for specific types. `Template<int>` can be totally different from `Template<double>`.
 :::
 

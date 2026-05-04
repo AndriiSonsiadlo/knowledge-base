@@ -108,7 +108,7 @@ staying backward compatible:
 | PCIe 5.0 | 32 GT/s | 128b/130b | ~3.94 GB/s |
 | PCIe 6.0 | 64 GT/s | PAM4 signaling + FLIT encoding | ~7.5-7.9 GB/s |
 
-:::info GT/s vs. bytes/s
+:::info[GT/s vs. bytes/s]
 "Transfers per second" (GT/s) is the raw signaling rate. Actual usable bandwidth is lower because
 some bits are spent on line-code overhead (8b/10b wastes 20%; 128b/130b wastes under 2%) — this is
 why PCIe 3.0's per-lane bandwidth is more than double PCIe 2.0's despite the line rate only going from
@@ -128,7 +128,7 @@ can silently downgrade one slot's link width.
 
 ## Edge Cases & Pitfalls
 
-:::warning Lane bifurcation and shared lane budgets
+:::warning[Lane bifurcation and shared lane budgets]
 A CPU or chipset has a fixed total lane count. Plugging a GPU into a x16 slot and an NVMe drive into
 an M.2 slot on the same platform can force the platform to split ("bifurcate") a shared set of lanes,
 silently dropping the GPU to x8 or an SSD to a slower link. Check the motherboard manual's lane

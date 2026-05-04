@@ -10,7 +10,7 @@ tags: [c++, inheritance, polymorphism, oop]
 
 Inheritance lets you create new classes based on existing ones, reusing code and establishing "is-a" relationships. Derived classes inherit members from base classes and can add new functionality or override existing behavior.
 
-:::info Base and Derived
+:::info[Base and Derived]
 **Base class** (parent) provides common functionality  
 **Derived class** (child) inherits and extends or specializes
 :::

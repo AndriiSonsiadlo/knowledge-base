@@ -125,13 +125,13 @@ subclass), exactly like it spawns the `PlayerController` — see
 
 ## Gotchas
 
-:::warning Per-life data does not belong on PlayerState
+:::warning[Per-life data does not belong on PlayerState]
 Health, ammo, and anything that should reset when a `Pawn` respawns belongs on the `Pawn`/`Character`
 itself, not on `PlayerState` — `PlayerState` deliberately survives across respawns, so data placed there
 will carry over between lives unless you explicitly reset it, which is rarely what you want.
 :::
 
-:::caution A remote client's PlayerController is not a reliable data source
+:::caution[A remote client's PlayerController is not a reliable data source]
 Don't write gameplay logic that reads properties off another player's `APlayerController` — on a given
 client, only the local player's controller (and the server) has a meaningfully populated one. If data
 needs to be visible to everyone, it belongs on `PlayerState`, not `PlayerController`.

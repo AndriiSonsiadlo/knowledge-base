@@ -16,7 +16,7 @@ The key characteristic of ExternalProject is that it creates custom build target
 
 ExternalProject is particularly useful for large dependencies, projects that don't use CMake, or when you need complete control over the build process of dependencies.
 
-:::info Choosing a dependency mechanism
+:::info[Choosing a dependency mechanism]
 ExternalProject is the heaviest of the three options — reach for it for non-CMake dependencies or
 superbuilds. For most modern needs [FetchContent](./fetchcontent.md) is simpler; see the
 [decision guide](./find-package.md) to choose.
@@ -845,7 +845,7 @@ target_link_libraries(app library_name)
 add_dependencies(app name)
 ```
 
-:::info When to Choose ExternalProject
+:::info[When to Choose ExternalProject]
 
 **Perfect for:**
 

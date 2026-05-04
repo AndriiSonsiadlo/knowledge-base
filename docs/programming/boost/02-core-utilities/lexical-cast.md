@@ -13,7 +13,7 @@ syntax. It is the convenient middle ground between the verbose `std::stringstrea
 fast-but-fiddly low-level conversion functions: one expression turns a string into a number, a number
 into a string, or one streamable type into another.
 
-:::info The appeal
+:::info[The appeal]
 Before C++11 gave us `std::stoi` / `std::to_string`, and before C++17 added `std::from_chars`,
 converting `"42"` to an `int` meant building a `stringstream`, shifting the value in, checking failure
 bits, and shifting it out. `lexical_cast` collapses all of that into one readable call.
@@ -58,7 +58,7 @@ int main() {
 }
 ```
 
-:::warning Strictness can surprise you
+:::warning[Strictness can surprise you]
 `lexical_cast<int>("42 ")` (trailing space) and `lexical_cast<int>("3.14")` (fractional text into an
 `int`) both **throw** — the entire string must be a valid representation of the target. That strictness
 is usually a feature, but it means `lexical_cast` is not a tolerant parser. If you need to skip
@@ -93,7 +93,7 @@ bool parse_int(std::string_view sv, int& out) {
 
 ## Pitfalls: locale and precision
 
-:::danger Locale dependence
+:::danger[Locale dependence]
 `lexical_cast` historically honours stream formatting rules, so a locale that uses a comma as the
 decimal separator can change how `"3,14"` versus `"3.14"` is interpreted, and grouping separators can
 break round-trips. For data interchange (config files, network protocols, JSON), this locale sensitivity
@@ -119,7 +119,7 @@ double back = boost::lexical_cast<double>(text);
 
 ## When to prefer which
 
-:::tip Recommendation
+:::tip[Recommendation]
 - Reach for **`lexical_cast`** for quick, readable, low-volume conversions — CLI arguments, log
   formatting, glue code — especially when you value the throw-on-failure behaviour and the uniform
   syntax across types.

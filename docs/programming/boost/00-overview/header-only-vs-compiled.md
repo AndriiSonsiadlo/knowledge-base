@@ -15,7 +15,7 @@ linked**, and forgetting to link them produces some of the most confusing errors
 
 This page explains the split, lists the common offenders, and shows how to tell which kind a library is.
 
-:::info The short version
+:::info[The short version]
 Header-only: add an include path, write `#include <boost/...>`, compile. Done.
 Compiled: do all of the above **and** link the matching `libboost_<name>` library.
 :::
@@ -62,7 +62,7 @@ in your program, or when it depends on the operating system in ways a header can
 If you `#include` such a library but forget to link it, the compile succeeds and the **linker** fails
 with "undefined reference" / "unresolved external symbol" errors naming `boost::<something>`.
 
-:::warning The classic newcomer error
+:::warning[The classic newcomer error]
 `undefined reference to 'boost::filesystem::...'` does **not** mean Boost is missing or your include path
 is wrong. It means you included a *compiled* library but did not link it. Add the matching
 `-lboost_<name>` (or the `Boost::<component>` CMake target).
@@ -86,7 +86,7 @@ exhaustive, and a few entries have header-only modes (noted below).
 | Chrono | `boost_chrono` | Clocks and durations | `std::chrono` (C++11) |
 | Iostreams | `boost_iostreams` | Filtering streams, compression | — |
 
-:::note Header-only modes exist for a few
+:::note[Header-only modes exist for a few]
 Some of these can be used header-only with extra defines or by including a different header — Boost.Regex
 and Boost.System, for example, have header-only paths. When the standard version exists and your toolchain
 supports it, prefer it: `std::filesystem`, `std::regex`, and `std::chrono` remove the link dependency
@@ -134,7 +134,7 @@ does not match what you actually built (wrong toolset, wrong address model). Use
 #include <boost/filesystem.hpp>
 ```
 
-:::tip On non-Windows platforms you link explicitly
+:::tip[On non-Windows platforms you link explicitly]
 GCC and Clang have no auto-linking, so on Linux and macOS you always name the libraries yourself (via
 `-l` or CMake targets). If you move a project from MSVC to GCC and suddenly hit undefined-reference
 errors, this is usually why — the implicit links you never noticed are now your responsibility.
@@ -160,7 +160,7 @@ Header-only is convenient, but it is not free. Because the implementation lives 
 translation unit that includes a Boost header re-parses and re-compiles that code**, and heavy libraries
 pull in deep webs of internal headers. The result can be dramatically slower builds.
 
-:::warning Header-only inflates compile times
+:::warning[Header-only inflates compile times]
 A single `#include <boost/spirit.hpp>` or large metaprogramming headers can add seconds *per translation
 unit*. Mitigations: include only the narrow sub-header you need (`<boost/algorithm/string/trim.hpp>`
 rather than the umbrella header), confine heavy includes behind a compilation firewall, and precompile

@@ -39,7 +39,7 @@ message(STATUS "Greeting: ${GREETING}")
 # Output: -- Greeting: Hello
 ```
 
-:::info Dereferencing
+:::info[Dereferencing]
 Use `${VAR_NAME}` to access the value. Without `${}`, you get the literal string.
 :::
 
@@ -223,7 +223,7 @@ else()
 endif()
 ```
 
-:::warning Quoting Lists
+:::warning[Quoting Lists]
 When passing lists to commands, don't quote them:
 
 ```cmake showLineNumbers 
@@ -298,7 +298,7 @@ set(ENV{MY_VAR} "value")
 # Note: Does NOT persist outside CMake
 ```
 
-:::warning Temporary Only
+:::warning[Temporary Only]
 `set(ENV{...})` only affects the CMake process, not the system or build process.
 :::
 

@@ -71,7 +71,7 @@ because later sections assume you know what a register, a cache, and a page faul
 
 ## Edge Cases & Pitfalls
 
-:::warning Don't skip layers when debugging
+:::warning[Don't skip layers when debugging]
 A slow SQL query, a segfault, and a dropped network packet all *look* like application bugs but are
 frequently caused by the layer underneath (a missing index, a stack overflow, a misconfigured MTU).
 Knowing the stack lets you jump to the right layer instead of guessing at the top one.

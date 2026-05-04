@@ -10,7 +10,7 @@ tags: [c++, functions, inline, optimization, performance]
 
 `inline` suggests the compiler replace function calls with function body, eliminating call overhead. Modern compilers decide automatically.
 
-:::info Suggestion, Not Command
+:::info[Suggestion, Not Command]
 `inline` is a hint. Compilers inline automatically based on optimization settings, often ignoring the keyword.
 :::
 
@@ -143,7 +143,7 @@ inline void Widget::setValue(int v) {
 }
 ```
 
-:::warning One Definition Rule
+:::warning[One Definition Rule]
 Inline functions can be defined in multiple translation units (identical definitions required).
 :::
 
@@ -320,7 +320,7 @@ g++ -flto -O3 file1.cpp file2.cpp -o app
 - Use for getters/setters
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Inline large functions
 - Inline recursive functions
 - Inline virtual functions (ineffective)

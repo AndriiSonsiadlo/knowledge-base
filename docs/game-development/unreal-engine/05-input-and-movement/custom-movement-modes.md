@@ -157,7 +157,7 @@ void UMyCustomMovementComponent::PhysWallRun(float DeltaTime, int32 Iterations)
 
 ## Traps
 
-:::warning Custom modes are not automatically replicated correctly if you skip the network move data
+:::warning[Custom modes are not automatically replicated correctly if you skip the network move data]
 The client-authoritative prediction that makes ordinary walking network-transparent depends on the
 component serializing enough information about each move to replay it. A custom mode that reads extra
 state your `PhysCustom` needs (say, which wall you're attached to) but never puts that state into the
@@ -168,14 +168,14 @@ extra state is the supported path — skipping it is the most common way homemad
 under real network conditions.
 :::
 
-:::caution Don't set CustomMovementMode without also setting MovementMode
+:::caution[Don't set CustomMovementMode without also setting MovementMode]
 `CustomMovementMode` is only consulted while `MovementMode == MOVE_Custom`. Setting the sub-mode alone
 and forgetting `SetMovementMode(MOVE_Custom, ...)` leaves the character in whatever mode it was already
 in — `PhysCustom` is never called, and the bug looks like "wall-run doesn't start" with no error
 anywhere.
 :::
 
-:::caution Exiting custom mode has to hand off state cleanly
+:::caution[Exiting custom mode has to hand off state cleanly]
 Leaving wall-run and falling straight into `MOVE_Falling` mid-air needs `Velocity` left in a sane state
 for the fall simulation to continue from — a custom mode that zeroes velocity on exit or leaves stale
 values produces a visible pop. Treat mode transitions as a handoff of physical state, not just a mode

@@ -254,28 +254,28 @@ PrivateDependencyModuleNames.AddRange(new string[]
 
 ## Gotchas
 
-:::warning Register in StartupModule, unregister in ShutdownModule — always both
+:::warning[Register in StartupModule, unregister in ShutdownModule — always both]
 Skipping the `ShutdownModule` unregister is the single most common bug here: Live Coding or a plugin
 disable/enable cycle unloads and reloads your module, and a stale registration left pointing at a
 destroyed static function is a crash on the next Details panel refresh for that class, not an
 immediate one — which makes it look unrelated to the module you just touched.
 :::
 
-:::warning CustomizeDetails runs once per refresh, not once per object lifetime
+:::warning[CustomizeDetails runs once per refresh, not once per object lifetime]
 Don't treat `CustomizeDetails` as a constructor — it's called every time the Details view rebuilds
 (selection change, undo/redo, a property edit that triggers `PostEditChangeProperty` with a layout
 refresh). Expensive work inside it (asset scans, file I/O) runs on every keystroke-adjacent refresh if
 you're not careful; cache what you can outside the function.
 :::
 
-:::caution IPropertyTypeCustomization for a struct applies everywhere that struct is used
+:::caution[IPropertyTypeCustomization for a struct applies everywhere that struct is used]
 Registering a customization for `FMyRange` changes how it renders in *every* Details panel across the
 editor, not just the one class you had in mind — including inside arrays, maps, and other structs that
 embed it. Confirm the struct isn't reused somewhere the new layout would be wrong before registering
 globally.
 :::
 
-:::caution Empty CustomizeChildren does not mean "no children" by accident
+:::caution[Empty CustomizeChildren does not mean "no children" by accident]
 If you leave `CustomizeChildren` empty because `CustomizeHeader` already shows everything, that's a
 deliberate choice — but forgetting to implement it at all (rather than deliberately leaving it empty)
 for a struct with more fields than fit in the header row silently drops those fields from the UI with no

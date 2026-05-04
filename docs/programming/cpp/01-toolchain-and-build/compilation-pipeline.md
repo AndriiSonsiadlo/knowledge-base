@@ -10,7 +10,7 @@ tags: [c++, compilation, build, toolchain, compiler]
 
 The C++ compilation process transforms source code into executable binary through four main stages: **preprocessing**, **compilation**, **assembly**, and **linking**.
 
-:::info Single Command, Multiple Steps
+:::info[Single Command, Multiple Steps]
 `g++ main.cpp -o app` hides 4 distinct phases. Understanding each helps debug build errors and optimize compile times.
 :::
 

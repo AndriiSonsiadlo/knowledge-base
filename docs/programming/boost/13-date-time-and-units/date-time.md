@@ -13,7 +13,7 @@ time-of-day values (`posix_time::ptime`, `posix_time::time_duration`), time zone
 date arithmetic. It was the first serious date/time library for C++ and influenced both
 `std::chrono` (C++11, for durations and clocks) and the calendar additions in C++20.
 
-:::info The problem it solves
+:::info[The problem it solves]
 `<ctime>` gives you `time_t` and `struct tm` — a raw integer and a broken-down struct with no type
 safety, no date arithmetic, no time zones, and one-second resolution. Boost.Date_Time replaces this
 with value types where adding "3 months" to a date is a single function call and the compiler
@@ -53,7 +53,7 @@ int main() {
 | Add years | `d + years(1)` | `date` |
 | Day of week | `d.day_of_week()` | `greg_weekday` (0 = Sunday) |
 
-:::tip End-of-month clamping
+:::tip[End-of-month clamping]
 Adding one month to January 31 gives February 28 (or 29 in a leap year) — it clamps to the last
 valid day rather than overflowing.
 :::
@@ -139,7 +139,7 @@ int main() {
 | Parsing/formatting | Built-in | `from_stream` (C++20) | `from_stream` |
 | Resolution | Microseconds | Arbitrary | Arbitrary |
 
-:::note When to use which
+:::note[When to use which]
 `std::chrono` is the go-to for durations, clocks, and benchmarking. For calendar operations on
 C++17 or earlier, Boost.Date_Time fills the gap that `std::chrono` left until C++20. On C++20,
 prefer `std::chrono`'s calendar types unless you need Date_Time's time-zone database or are already

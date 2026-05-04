@@ -10,7 +10,7 @@ tags: [c++, translation-units, compilation, linking, one-definition-rule]
 
 A translation unit is a single source file plus all its included headers after preprocessing. It's the basic unit of compilation in C++.
 
-:::info One File In, One Object Out
+:::info[One File In, One Object Out]
 Each .cpp file becomes one translation unit, which compiles independently into one object file (.o).
 :::
 

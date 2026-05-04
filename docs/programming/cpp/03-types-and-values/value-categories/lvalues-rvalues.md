@@ -10,7 +10,7 @@ tags: [c++, lvalue, rvalue, value-categories, move-semantics]
 
 Every C++ expression has a type and a **value category**. Lvalues have persistent storage; rvalues are temporaries.
 
-:::info Simple Rule
+:::info[Simple Rule]
 **Can you take its address?** → Lvalue  
 **Is it temporary?** → Rvalue
 :::
@@ -207,7 +207,7 @@ std::vector<int> v2 = std::move(v1);
 std::cout << v1.size();  // Likely 0, but not guaranteed
 ```
 
-:::warning std::move Doesn't Move!
+:::warning[std::move Doesn't Move!]
 `std::move` only casts to rvalue. Actual moving happens in move constructor/assignment.
 :::
 

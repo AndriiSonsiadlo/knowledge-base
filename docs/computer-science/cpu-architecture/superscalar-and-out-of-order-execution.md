@@ -76,7 +76,7 @@ the ALU does — it changes how predictable the branch is, which changes how oft
 
 ## Edge Cases & Pitfalls
 
-:::danger Speculative execution and security
+:::danger[Speculative execution and security]
 Speculative execution can transiently access data (e.g., read past an array bound during a
 mispredicted branch) that never architecturally "happens" — the instruction is squashed on
 misprediction. But the speculative access can leave measurable side effects in the CPU cache. This is

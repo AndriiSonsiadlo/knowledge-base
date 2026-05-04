@@ -60,7 +60,7 @@ filesystem** (ext3/ext4, NTFS, XFS) writes a short description of the intended c
 first; on reboot after a crash, the filesystem replays or discards incomplete journal entries to get
 back to a consistent state without a full filesystem scan.
 
-:::info Copy-on-write: a different answer to the same problem
+:::info[Copy-on-write: a different answer to the same problem]
 **ZFS** and **Btrfs** take a different approach: instead of modifying data/metadata in place and
 logging the intent, they write changes to new blocks and only then atomically update a pointer (like a
 tree root) to make the new version visible. This means the filesystem is never caught "mid-update" in
@@ -82,7 +82,7 @@ and it enables cheap snapshots, since an old root pointer can be kept around to 
 
 ## Edge Cases & Pitfalls
 
-:::warning Journaling protects metadata, not always data
+:::warning[Journaling protects metadata, not always data]
 Many journaling filesystems default to journaling *metadata only* (not file contents) for
 performance reasons. That means after a crash, the filesystem structure will be consistent, but the
 *contents* of a file being written at crash time may still be incomplete or stale — applications that
@@ -90,7 +90,7 @@ need stronger guarantees must use explicit `fsync`/`fdatasync` and understand th
 journaling mode.
 :::
 
-:::danger Silent data corruption without checksumming
+:::danger[Silent data corruption without checksumming]
 Traditional filesystems (ext4, NTFS) don't checksum file data by default, so a "bit rot" event on the
 storage medium can go undetected until the corrupted data is read and causes a visible problem.
 Checksumming filesystems (ZFS, Btrfs) detect this at read time and, with redundancy configured, can

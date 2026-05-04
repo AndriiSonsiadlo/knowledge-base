@@ -29,7 +29,7 @@ faster, and why "more cores" doesn't automatically mean "faster program."
 | **Instruction Set Architecture (ISA)** | The vocabulary of operations the CPU understands, and how they're encoded as bits — the contract between hardware and software. |
 | **Microarchitecture** | *How* a specific chip implements an ISA internally (pipeline depth, cache sizes, branch predictor design). Two CPUs can share an ISA (e.g., x86-64) but have very different microarchitectures and performance. |
 
-:::info ISA vs. microarchitecture
+:::info[ISA vs. microarchitecture]
 This distinction matters: the ISA is the stable interface (your compiled binary works on any x86-64
 chip); the microarchitecture is the implementation detail that changes every chip generation and is
 where most performance engineering happens. See [Instruction Set Architecture](./instruction-set-architecture.md).

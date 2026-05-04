@@ -10,7 +10,7 @@ tags: [cpp, volatile, hardware, optimization, memory-mapped]
 
 `volatile` tells compiler that a variable can change unexpectedly (hardware, interrupts, other threads). Prevents certain optimizations. **Not for thread synchronization** - use atomics instead.
 
-:::danger Not for Threading
+:::danger[Not for Threading]
 `volatile` ≠ thread-safe. Use `std::atomic` for multi-threading. `volatile` is for hardware/interrupts only.
 :::
 
@@ -288,7 +288,7 @@ volatile int* hardware_register;
 
 ## Summary
 
-:::info Volatile
+:::info[Volatile]
 `volatile` prevents compiler from optimizing away memory accesses - forces actual reads/writes every time.
 - Memory aid: "Hardware Only, Not Threads"
 - Use for: Hardware registers, ISRs, signal handlers

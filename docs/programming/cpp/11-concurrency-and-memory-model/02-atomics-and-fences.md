@@ -10,7 +10,7 @@ tags: [cpp, concurrency, atomics, fences, memory-barriers, lock-free]
 
 Atomic operations execute as single, indivisible steps with no interference from other threads. Memory fences (barriers) establish ordering constraints between operations.
 
-:::info Lock-Free Synchronization
+:::info[Lock-Free Synchronization]
 **Atomics** = indivisible operations (read/write/modify)  
 **Fences** = ordering guarantees for surrounding operations  
 Together they enable lock-free programming and fine-grained synchronization
@@ -362,7 +362,7 @@ public:
 - Start with sequential consistency, optimize if needed
   :::
 
-:::danger DON'T
+:::danger[DON'T]
 - Use atomics for complex data structures (use mutexes)
 - Mix atomic and non-atomic access to same variable
 - Assume all atomic operations are lock-free

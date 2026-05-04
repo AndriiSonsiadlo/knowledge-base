@@ -13,7 +13,7 @@ trimming, finding, replacing, splitting, joining, and predicates — that work o
 characters, not just `std::string`. It fills the gap left by the standard library, which has
 surprisingly few ready-made string utilities.
 
-:::info The problem it solves
+:::info[The problem it solves]
 The C++ standard library gives you `std::string` but almost no algorithms that operate on it.
 Want to trim whitespace, split on a delimiter, or check if a string starts with a prefix? Before
 C++20 you had to write it yourself, reach for C functions, or add Boost.StringAlgo.
@@ -77,7 +77,7 @@ int main() {
 }
 ```
 
-:::tip C++20 added `starts_with` and `ends_with`
+:::tip[C++20 added `starts_with` and `ends_with`]
 `std::string::starts_with` and `ends_with` arrived in C++20. If your toolchain supports them,
 prefer the standard versions for those two. Boost.StringAlgo still wins for `contains`,
 `iequals`, `all`, and the rest.
@@ -166,7 +166,7 @@ int main() {
 | Replace all | `replace_all_copy` | `replace_all` |
 | Erase all | `erase_all_copy` | `erase_all` |
 
-:::note Naming convention
+:::note[Naming convention]
 Functions ending in `_copy` return a new string; the bare name modifies the argument in place.
 Functions prefixed with `i` (like `ifind_first`, `ireplace_all`) are case-insensitive.
 :::

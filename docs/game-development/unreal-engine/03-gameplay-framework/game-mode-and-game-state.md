@@ -139,13 +139,13 @@ notice you're calling server-only code from a place that might run on both.
 
 ## Gotchas
 
-:::warning GetAuthGameMode returns null on every pure client
+:::warning[GetAuthGameMode returns null on every pure client]
 Any code path that can run on a client must not assume `GetAuthGameMode()` succeeds. Gate
 server-authoritative logic behind `HasAuthority()` on the actor performing it, not behind a null check
 on the game mode alone — a listen server host has both, which can mask the bug in single-player testing.
 :::
 
-:::caution Don't put client-visible data on GameMode
+:::caution[Don't put client-visible data on GameMode]
 Score, match phase, and the player list all need to reach clients, so they belong on `GameStateBase`
 (or `PlayerState` if per-player). Storing them on `GameMode` compiles fine and works in a single-process
 PIE session, then does nothing on remote clients the first time you test networked — `GameMode` simply

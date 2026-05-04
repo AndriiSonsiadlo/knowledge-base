@@ -99,14 +99,14 @@ private:
 The AnimGraph in the derived Blueprint reads `Speed` and `bIsInAir` as ordinary variables — it never
 needs to know they were populated in C++ rather than an EventGraph node.
 
-:::warning Don't call gameplay-object functions from the AnimGraph
+:::warning[Don't call gameplay-object functions from the AnimGraph]
 The AnimGraph is designed to be evaluated off the game thread. A custom AnimGraph node (or a
 `BlueprintThreadSafeUpdateAnimation` call, see [AnimInstance in C++](./anim-instance-in-cpp.md)) that
 dereferences the owning actor, calls a `UFUNCTION` on a component, or touches anything not already cached
 on the anim instance is a race condition waiting for a bad frame — cache the value during Update instead.
 :::
 
-:::caution EventGraph work runs every tick, gate it
+:::caution[EventGraph work runs every tick, gate it]
 `Event Blueprint Update Animation` fires every tick the anim instance updates — the same frequency as
 `Tick` on an actor. Expensive lookups (trace calls, deep property chains) here scale with every animated
 character on screen; get the gameplay state pushed to the anim instance instead of pulled by it wherever

@@ -10,7 +10,7 @@ tags: [c++, pointers, memory, addresses, fundamentals]
 
 A pointer is a variable that stores a memory address, allowing indirect access to other variables.
 
-:::info Core Concept
+:::info[Core Concept]
 **Pointer = Address**, not the data itself
 - `&` gets address → `&x` gives address of x
 - `*` dereferences → `*ptr` accesses value at address
@@ -47,7 +47,7 @@ std::cout << &ptr;      // Address of pointer itself
 std::cout << value;     // 100 (changed!)
 ```
 
-:::warning Declaration Syntax
+:::warning[Declaration Syntax]
 ```cpp
 int* p1, p2;    // p1 is pointer, p2 is int!
 int *p3, *p4;   // Both are pointers
@@ -70,7 +70,7 @@ if (ptr) {
 *ptr = 42;      // Crash! Dereferencing null pointer
 ```
 
-:::warning Rules
+:::warning[Rules]
 - `nullptr` is type-safe null (C++11)
 - Dereferencing null = crash (segmentation fault)
 - Uninitialized pointers are worse (random corruption)
@@ -146,7 +146,7 @@ sizeof(ptr);  // 8 bytes (pointer size on 64-bit)
 ptr = arr;     // OK: pointer can be reassigned
 ```
 
-:::info Array-Pointer Relationship
+:::info[Array-Pointer Relationship]
 `ptr[i]` is identical to `*(ptr + i)`
 - Compiler scales by `sizeof(type)` automatically
 - `ptr + 1` moves by 4 bytes for `int*`, not 1 byte
@@ -176,7 +176,7 @@ delete ptr;      // Single object
 delete[] arr;    // Array (must match allocation!)
 ```
 
-:::danger Memory Management Rules
+:::danger[Memory Management Rules]
 - **Every `new` needs matching `delete`**
 - **Every `new[]` needs matching `delete[]`**
 - Missing `delete` = memory leak
@@ -253,7 +253,7 @@ void correct() {
 }
 ```
 
-:::tip Every danger above has one fix
+:::tip[Every danger above has one fix]
 Dangling pointers, use-after-free, double-delete, and leaks are exactly the bugs that
 [RAII](../13-idioms-and-design/01-raii.md) and [smart pointers](./unique-ptr.md) eliminate — the
 owner's destructor deletes exactly once, on every exit path. Use raw *owning* pointers only at the

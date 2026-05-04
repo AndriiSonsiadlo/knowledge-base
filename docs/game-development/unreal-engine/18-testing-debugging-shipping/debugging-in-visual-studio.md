@@ -121,7 +121,7 @@ you break inside PIE gameplay code. A separate standalone game process launched 
 (**Standalone Game** play mode, or a packaged build run alongside) is its own process and needs its own
 attach.
 
-:::caution Attaching after the crash is too late
+:::caution[Attaching after the crash is too late]
 If the process has already crashed, there's nothing left to attach to — Visual Studio can only attach to
 a live process. For a crash that already happened, you debug the crash dump instead (below), not the
 live process.
@@ -178,19 +178,19 @@ what else gets compiled out under `Shipping`.
 
 ## Gotchas
 
-:::warning Optimized builds lie about locals
+:::warning[Optimized builds lie about locals]
 In `Development` configurations, the optimizer can eliminate or reuse a local variable's storage, so a
 watch expression may show a stale or `<optimized out>` value even though the breakpoint hit the "right"
 line. If a value looks wrong, switch to `DebugGame Editor` before trusting it.
 :::
 
-:::warning A missing natvis file makes containers look broken, not just ugly
+:::warning[A missing natvis file makes containers look broken, not just ugly]
 If `TArray`/`FString`/`TSharedPtr` show raw pointers and counts instead of contents, that's a tooling gap,
 not a sign your data is corrupted — check that Unreal's natvis files are actually loaded before spending
 time chasing a "bug" that's really just an unformatted Watch window.
 :::
 
-:::warning Symbol mismatch produces a call stack that looks plausible but is wrong
+:::warning[Symbol mismatch produces a call stack that looks plausible but is wrong]
 Visual Studio will happily resolve addresses against a `.pdb` that's close-but-not-exact (a slightly
 different build), producing function names that are subtly incorrect rather than an obvious failure.
 Confirm the module's timestamp/GUID matches the `.pdb` before trusting a suspicious stack.

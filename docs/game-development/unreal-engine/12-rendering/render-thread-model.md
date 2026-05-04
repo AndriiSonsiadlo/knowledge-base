@@ -103,7 +103,7 @@ the render thread has processed everything up to that point.
 
 ## Gotchas
 
-:::warning Never cache a game-thread pointer inside a scene proxy
+:::warning[Never cache a game-thread pointer inside a scene proxy]
 A classic bug: a scene proxy constructor caches the owning `AActor*` or `UActorComponent*`, then a
 render-thread function later dereferences it to read some property. The game thread owns all
 `AActor`/`UObject` state and may write to it — or the garbage collector may reclaim it — at any point.
@@ -111,14 +111,14 @@ Mirror the specific values you need into the proxy at update time instead of rea
 cached pointer.
 :::
 
-:::caution The render thread is looking at last frame, not this frame
+:::caution[The render thread is looking at last frame, not this frame]
 Because the render thread trails the game thread, any render-thread work that reads back into game
 state (screenshot capture, GPU readbacks used for gameplay decisions, blocking on `FRenderCommandFence`
 every tick) either sees stale data or forces an expensive sync that erases the parallelism the split
 exists to provide. Design render-thread-facing features assuming the data they see is one frame old.
 :::
 
-:::warning Don't guess at RHI thread specifics
+:::warning[Don't guess at RHI thread specifics]
 Whether an RHI thread runs at all, and how much work it does versus the render thread, is platform-
 and RHI-dependent, and console-specific behavior isn't something this doc verifies. Treat "render
 thread" and "RHI thread" as distinct ownership domains, but don't assume identical behavior across
