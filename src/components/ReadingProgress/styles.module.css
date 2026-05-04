@@ -1,0 +1,28 @@
+.progressTrack {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	z-index: 1001;
+	background: transparent;
+	pointer-events: none;
+}
+
+.progressFill {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(
+		90deg,
+		var(--brand-primary),
+		var(--brand-accent),
+		var(--brand-primary-light)
+	);
+	transition: width 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.progressFill {
+		transition: none;
+	}
+}

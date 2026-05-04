@@ -1,5 +1,6 @@
 import { useDoc } from "@docusaurus/plugin-content-docs/client";
 import { useWindowSize } from "@docusaurus/theme-common";
+import ReadingProgress from "@components/ReadingProgress";
 import ContentVisibility from "@theme/ContentVisibility";
 import DocBreadcrumbs from "@theme/DocBreadcrumbs";
 import DocItemContent from "@theme/DocItem/Content";
@@ -10,6 +11,7 @@ import DocItemTOCMobile from "@theme/DocItem/TOC/Mobile";
 import DocVersionBadge from "@theme/DocVersionBadge";
 import DocVersionBanner from "@theme/DocVersionBanner";
 import clsx from "clsx";
+import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
 
 /**
@@ -31,19 +33,41 @@ function useDocTOC() {
     desktop,
   };
 }
+
+function useReadingTime(articleRef) {
+  const [minutes, setMinutes] = useState(null);
+
+  useEffect(() => {
+    const node = articleRef.current;
+    if (!node) {
+      return;
+    }
+    const words = node.innerText.trim().split(/\s+/).filter(Boolean).length;
+    setMinutes(Math.max(1, Math.round(words / 200)));
+  }, [articleRef]);
+
+  return minutes;
+}
+
 export default function DocItemLayout({ children }) {
   const docTOC = useDocTOC();
   const { metadata } = useDoc();
+  const articleRef = useRef(null);
+  const readingMinutes = useReadingTime(articleRef);
   return (
     <div className="row">
+      <ReadingProgress targetRef={articleRef} />
       <div
         className={clsx("col", "xl:px-10", !docTOC.hidden && styles.docItemCol)}
       >
         <ContentVisibility metadata={metadata} />
         <DocVersionBanner />
         <div className={styles.docItemContainer}>
-          <article>
+          <article ref={articleRef}>
             <DocBreadcrumbs />
+            {readingMinutes !== null && (
+              <p className={styles.readingTime}>{readingMinutes} min read</p>
+            )}
             <DocVersionBadge />
             {docTOC.mobile}
             <DocItemContent>{children}</DocItemContent>
