@@ -3,6 +3,7 @@ import GlassCard from "@components/GlassCard";
 import HomeIntro from "@components/HomeIntro";
 import RecentDocs from "@components/RecentDocs";
 import ScrollReveal from "@components/ScrollReveal";
+import StatsSection from "@components/StatsSection";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Heading from "@theme/Heading";
 import Layout from "@theme/Layout";
@@ -85,6 +86,9 @@ export default function Home(): ReactNode {
 
           <ScrollReveal>
             <HomeIntro />
+          </ScrollReveal>
+          <ScrollReveal>
+            <StatsSection />
           </ScrollReveal>
           <ScrollReveal>
             <RecentDocs />
