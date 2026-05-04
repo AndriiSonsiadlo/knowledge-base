@@ -8,6 +8,7 @@
 
 /* Base card styling */
 .categoryCard {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -22,22 +23,29 @@
 }
 
 .categoryCard:hover {
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
 	transform: translateY(-4px);
-	animation: glowPulse 1.8s ease-in-out infinite;
 }
 
-@keyframes glowPulse {
-	0%,
-	100% {
-		box-shadow:
-			0 20px 50px rgba(0, 0, 0, 0.2),
-			0 0 0 0 rgb(var(--glow-rgb, var(--brand-primary-rgb)) / 0.35);
-	}
-	50% {
-		box-shadow:
-			0 20px 50px rgba(0, 0, 0, 0.2),
-			0 0 26px 4px rgb(var(--glow-rgb, var(--brand-primary-rgb)) / 0.45);
-	}
+/* Glow lives on its own pseudo-element (opacity-toggled via transition, not
+   the `animation` shorthand) so hovering/unhovering never restarts the
+   `cardEnter` entrance animation on the card itself. A plain transition
+   (rather than a looping keyframe animation) keeps the fade-in consistent
+   every time, instead of depending on whatever phase a pulse loop happens
+   to be at. */
+.categoryCard::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	opacity: 0;
+	box-shadow: 0 0 26px 4px rgb(var(--glow-rgb, var(--brand-primary-rgb)) / 0.45);
+	transition: opacity 0.3s ease;
+}
+
+.categoryCard:hover::before {
+	opacity: 1;
 }
 
 @keyframes cardEnter {
@@ -66,11 +74,8 @@
 		animation: none;
 	}
 
-	.categoryCard:hover {
-		animation: none;
-		box-shadow:
-			0 20px 50px rgba(0, 0, 0, 0.2),
-			0 0 20px 3px rgb(var(--glow-rgb, var(--brand-primary-rgb)) / 0.4);
+	.categoryCard::before {
+		transition: none;
 	}
 
 	.categoryCard:hover .cardIcon {

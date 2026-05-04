@@ -61,13 +61,7 @@ html[data-theme="light"] .sectionTitle {
 }
 
 html[data-theme="light"] .sectionTitle::after {
-	background: linear-gradient(
-		90deg,
-		var(--brand-primary-dark),
-		var(--brand-accent),
-		var(--brand-primary)
-	);
-	box-shadow: 0 8px 18px rgb(var(--brand-primary-rgb) / 0.16);
+	display: none;
 }
 
 .sectionDescription {

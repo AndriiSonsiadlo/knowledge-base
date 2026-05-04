@@ -1,0 +1,8 @@
+.footer {
+	border-top: 1px solid var(--footer-border-color, rgb(0 0 0 / 0.08));
+	background: var(--brand-primary-lightest);
+}
+
+[data-theme="dark"] .footer {
+	background: var(--brand-bg-end);
+}

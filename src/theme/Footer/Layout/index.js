@@ -1,17 +1,18 @@
-import React from "react";
+import clsx from "clsx";
+import styles from "./styles.module.css";
 
 export default function FooterLayout({ style, links, logo, copyright }) {
-	return (
-		<footer className="border-t border-gray-200 bg-slate-50 dark:border-gray-800 dark:bg-slate-950/50">
-			<div className="mx-auto max-w-7xl px-4 py-6">
-				{links}
-				{(logo || copyright) && (
-					<div className="footer__bottom text--center">
-						{logo && <div className="margin-bottom--sm">{logo}</div>}
-						{copyright}
-					</div>
-				)}
-			</div>
-		</footer>
-	);
+  return (
+    <footer className={clsx(styles.footer)}>
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        {links}
+        {(logo || copyright) && (
+          <div className="footer__bottom text--center">
+            {logo && <div className="margin-bottom--sm">{logo}</div>}
+            {copyright}
+          </div>
+        )}
+      </div>
+    </footer>
+  );
 }
