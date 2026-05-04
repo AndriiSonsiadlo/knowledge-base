@@ -1167,6 +1167,50 @@ button {
 }
 
 
+/* ============ Docusaurus Admonitions ============ */
+.theme-admonition {
+  border-radius: 0.75rem;
+  border-width: 1px;
+  border-left-width: 4px;
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.06);
+}
+
+[data-theme='dark'] .theme-admonition {
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.25);
+}
+
+.theme-admonition-note,
+.theme-admonition-info {
+  border-left-color: var(--brand-primary);
+  background: rgb(var(--brand-primary-rgb) / 0.06);
+}
+
+.theme-admonition-tip {
+  border-left-color: var(--brand-accent);
+  background: rgb(var(--brand-accent-rgb) / 0.06);
+}
+
+[data-theme='dark'] .theme-admonition-note,
+[data-theme='dark'] .theme-admonition-info {
+  background: rgb(var(--brand-primary-rgb) / 0.1);
+}
+
+[data-theme='dark'] .theme-admonition-tip {
+  background: rgb(var(--brand-accent-rgb) / 0.1);
+}
+
+/* ============ Code blocks ============ */
+[class*='codeBlockContainer_'] {
+  border-top: 2px solid rgb(var(--brand-primary-rgb) / 0.35);
+  border-radius: var(--ifm-code-border-radius);
+  overflow: hidden;
+}
+
+[class*='codeBlockTitle_'] {
+  border-bottom: 1px solid rgb(var(--brand-primary-rgb) / 0.16);
+  font-weight: 600;
+}
+
 /* ============ Footer ============ */
 /* Docusaurus' default footer stacks every link on its own line
    (line-height: 2 per item), which makes a short link list very tall.
