@@ -1181,6 +1181,14 @@ button {
 }
 
 
+/* Docusaurus renders its own unstyled back-to-top button on doc pages
+   (@theme/DocRoot/Layout always mounts it). We provide a styled, brand-
+   consistent one site-wide via src/theme/Root + src/components/BackToTop,
+   so hide the native one instead of showing both. */
+.theme-back-to-top-button {
+  display: none !important;
+}
+
 /* ============ Docusaurus Admonitions ============ */
 .theme-admonition {
   border-radius: 0.75rem;
