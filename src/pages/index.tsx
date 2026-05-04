@@ -2,6 +2,7 @@ import CategoryGrid from "@components/CategoryGrid";
 import GlassCard from "@components/GlassCard";
 import HomeIntro from "@components/HomeIntro";
 import RecentDocs from "@components/RecentDocs";
+import ScrollReveal from "@components/ScrollReveal";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import Heading from "@theme/Heading";
 import Layout from "@theme/Layout";
@@ -82,15 +83,21 @@ export default function Home(): ReactNode {
             </GlassCard>
           </div>
 
-          <HomeIntro />
-          <RecentDocs />
+          <ScrollReveal>
+            <HomeIntro />
+          </ScrollReveal>
+          <ScrollReveal>
+            <RecentDocs />
+          </ScrollReveal>
 
           {/* Categories Section - Same Gradient */}
-          <div className="pb-16 md:pb-20">
-            <GlassCard>
-              <CategoryGrid />
-            </GlassCard>
-          </div>
+          <ScrollReveal>
+            <div className="pb-16 md:pb-20">
+              <GlassCard>
+                <CategoryGrid />
+              </GlassCard>
+            </div>
+          </ScrollReveal>
         </main>
       </div>
     </Layout>
