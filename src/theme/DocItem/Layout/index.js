@@ -1,6 +1,6 @@
+import ReadingProgress from "@components/ReadingProgress";
 import { useDoc } from "@docusaurus/plugin-content-docs/client";
 import { useWindowSize } from "@docusaurus/theme-common";
-import ReadingProgress from "@components/ReadingProgress";
 import ContentVisibility from "@theme/ContentVisibility";
 import DocBreadcrumbs from "@theme/DocBreadcrumbs";
 import DocItemContent from "@theme/DocItem/Content";

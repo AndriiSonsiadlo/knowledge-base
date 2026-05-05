@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import type { ReactNode, RefObject } from "react";
+import { useEffect, useState } from "react";
 import styles from "./styles.module.css";
 
 interface ReadingProgressProps {

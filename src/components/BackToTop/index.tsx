@@ -1,6 +1,6 @@
 import { cn } from "@lib/utils";
-import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import styles from "./styles.module.css";
 
 export default function BackToTop(): ReactNode {

@@ -1,7 +1,7 @@
 import { useAllDocsData } from "@docusaurus/plugin-content-docs/client";
 import { useThemeConfig } from "@docusaurus/theme-common";
-import { useCountUp } from "@/hooks/useCountUp";
 import type { ReactNode } from "react";
+import { useCountUp } from "@/hooks/useCountUp";
 import styles from "./styles.module.css";
 
 function StatCard({ value, label }: { value: number; label: string }) {
