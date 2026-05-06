@@ -1,0 +1,12 @@
+.navbarSearchContainer:empty {
+  display: none;
+}
+
+.navbarSearchContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: 100%;
+}
