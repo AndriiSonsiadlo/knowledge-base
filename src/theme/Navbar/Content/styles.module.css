@@ -1,0 +1,82 @@
+.navbarInner {
+  min-width: 0;
+}
+
+.brandRail {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.navRail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--navbar-nav-gap, 2rem);
+  min-width: 0;
+}
+
+.desktopNav :global(.navbar__item) {
+  display: flex;
+  align-items: center;
+}
+
+.desktopNav :global(.navbar__link) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.desktopNav :global(.navbar__link)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.4rem;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--brand-primary-rgb) / 0.95),
+    rgb(var(--brand-accent-rgb) / 0.9)
+  );
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 180ms ease;
+}
+
+.desktopNav :global(.navbar__link:hover)::after,
+.desktopNav :global(.navbar__link--active)::after {
+  transform: scaleX(1);
+}
+
+.actionRail {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--navbar-search-gap, 1rem);
+  min-width: 0;
+}
+
+.utilityGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--navbar-utility-gap, 0.75rem);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.colorModeToggle {
+  display: flex;
+  align-items: center;
+}
