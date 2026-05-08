@@ -1,67 +1,58 @@
 .inlineSearch {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
 }
 
 .compactSearch {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-width: 0;
   flex: 0 0 auto;
 }
 
 .compactTrigger,
 .closeButton {
   display: inline-flex;
+  width: var(--navbar-control-size, 2.25rem);
+  height: var(--navbar-control-size, 2.25rem);
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgb(var(--brand-primary-rgb) / 0.14);
+  border: 1px solid rgb(var(--brand-primary-rgb) / 0.08);
   border-radius: 999px;
-  background: rgb(var(--brand-primary-rgb) / 0.06);
+  background: rgb(255 255 255 / 0.24);
   color: var(--brand-primary-dark);
   transition:
     transform 180ms ease,
     background-color 180ms ease,
     border-color 180ms ease,
-    box-shadow 180ms ease,
     color 180ms ease;
-}
-
-.compactTrigger {
-  width: 2.65rem;
-  height: 2.65rem;
-}
-
-.closeButton {
-  width: 2.3rem;
-  height: 2.3rem;
 }
 
 .compactTrigger:hover,
 .closeButton:hover {
   transform: translateY(-1px);
-  border-color: rgb(var(--brand-primary-rgb) / 0.24);
-  background: rgb(var(--brand-primary-rgb) / 0.12);
+  border-color: rgb(var(--brand-primary-rgb) / 0.18);
+  background: rgb(var(--brand-primary-rgb) / 0.1);
   color: var(--brand-primary-darkest);
-  box-shadow: 0 12px 24px rgb(var(--brand-primary-rgb) / 0.12);
 }
 
 :global([data-theme='dark']) .compactTrigger,
 :global([data-theme='dark']) .closeButton {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.03);
   color: var(--brand-primary-lightest);
 }
 
 :global([data-theme='dark']) .compactTrigger:hover,
 :global([data-theme='dark']) .closeButton:hover {
-  border-color: rgb(var(--brand-primary-rgb) / 0.28);
-  background: rgb(var(--brand-primary-rgb) / 0.14);
-  box-shadow: 0 12px 24px rgb(0 0 0 / 0.22);
+  border-color: rgb(var(--brand-primary-rgb) / 0.2);
+  background: rgb(var(--brand-primary-rgb) / 0.12);
 }
 
 .modalBackdrop {
@@ -77,8 +68,17 @@
   -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
+.backdropDismiss {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
 .modalPanel {
   position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   width: min(42rem, calc(100vw - 2rem));
@@ -97,7 +97,7 @@
 
 .modalHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1rem 0.4rem;
@@ -111,6 +111,10 @@
   font-weight: 600;
   line-height: 1.3;
   color: var(--ifm-color-emphasis-800);
+}
+
+:global([data-theme='dark']) .modalTitle {
+  color: var(--brand-primary-lightest);
 }
 
 .modalBody {

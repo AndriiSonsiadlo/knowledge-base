@@ -1,11 +1,11 @@
+import clsx from "clsx";
+import { Search, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import clsx from "clsx";
-import { Search, X } from "lucide-react";
 import styles from "./styles.module.css";
 
-const COMPACT_SEARCH_MEDIA = "(max-width: 480px)";
+const COMPACT_SEARCH_MEDIA = "(max-width: 560px)";
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -75,7 +75,8 @@ export default function ResponsiveSearch({
       }
 
       const focusable = Array.from(
-        panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ?? [],
+        panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR) ??
+          [],
       );
 
       if (focusable.length === 0) {
@@ -115,21 +116,22 @@ export default function ResponsiveSearch({
   }, [closeModal, isOpen]);
 
   if (!isCompact) {
-    return <div className={clsx(styles.inlineSearch, className)}>{children}</div>;
+    return (
+      <div className={clsx(styles.inlineSearch, className)}>{children}</div>
+    );
   }
 
   const modal =
     isOpen && typeof document !== "undefined"
       ? createPortal(
-          <div
-            className={styles.modalBackdrop}
-            aria-hidden={false}
-            onClick={(event) => {
-              if (event.target === event.currentTarget) {
-                closeModal();
-              }
-            }}
-          >
+          <div className={styles.modalBackdrop} aria-hidden={false}>
+            <button
+              type="button"
+              tabIndex={-1}
+              className={clsx("clean-btn", styles.backdropDismiss)}
+              aria-label="Close search overlay"
+              onClick={closeModal}
+            />
             <div
               id={modalId}
               ref={panelRef}

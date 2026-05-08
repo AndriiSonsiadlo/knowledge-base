@@ -4,9 +4,10 @@
 
 .navbarSearchContainer {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   max-width: 100%;
 }
