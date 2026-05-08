@@ -39,7 +39,7 @@ const config = {
 
   // Enable Docusaurs Faster: https://github.com/facebook/docusaurus/issues/10556
   future: {
-    experimental_faster: true,
+    faster: true,
     v4: true,
   },
 
@@ -128,7 +128,7 @@ const config = {
           {
             href: "https://github.com/AndriiSonsiadlo/knowledge-base",
             position: "right",
-            className: "header-github-link text-secondary",
+            className: "header-github-link",
             "aria-label": "GitHub repository",
           },
         ],

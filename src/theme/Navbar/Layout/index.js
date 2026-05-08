@@ -57,7 +57,13 @@ export default function NavbarLayout({ children }) {
 				},
 			)}
 		>
-			{children}
+			{/* backdrop-filter lives on this inner wrapper, not on <nav> itself:
+			    backdrop-filter (like filter/transform) creates a new containing
+			    block for position:fixed descendants, which would break the
+			    full-viewport fixed positioning of NavbarBackdrop/NavbarMobileSidebar
+			    below (they'd size themselves against the navbar's own box instead
+			    of the viewport, collapsing the mobile sidebar to nothing). */}
+			<div className={styles.navbarChrome}>{children}</div>
 			<NavbarBackdrop onClick={mobileSidebar.toggle} />
 			<NavbarMobileSidebar />
 		</nav>

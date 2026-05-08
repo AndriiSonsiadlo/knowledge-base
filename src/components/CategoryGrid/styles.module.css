@@ -31,23 +31,6 @@ html[data-theme="light"] .categoryGrid {
 	background-clip: text;
 }
 
-.sectionTitle::after {
-	content: "";
-	position: absolute;
-	left: 0.2rem;
-	right: 0.2rem;
-	bottom: 0;
-	height: 0.22rem;
-	border-radius: 999px;
-	background: linear-gradient(
-		90deg,
-		var(--brand-primary-light),
-		var(--brand-accent-light),
-		var(--brand-primary)
-	);
-	box-shadow: 0 6px 18px rgb(var(--brand-primary-rgb) / 0.24);
-}
-
 html[data-theme="light"] .sectionTitle {
 	background: linear-gradient(
 		to right,
@@ -58,10 +41,6 @@ html[data-theme="light"] .sectionTitle {
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
-}
-
-html[data-theme="light"] .sectionTitle::after {
-	display: none;
 }
 
 .sectionDescription {
