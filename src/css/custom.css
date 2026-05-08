@@ -372,28 +372,99 @@ button {
   display: none;
 }
 
-.header-github-link {
-  width: 2.65rem;
-  height: 2.65rem;
+/* Navbar layout and utility alignment */
+.navbar {
+  --navbar-height: 68px;
+  --navbar-brand-rail-width: clamp(13.75rem, 15vw, 15rem);
+  --navbar-layout-gap: 3rem;
+  --navbar-nav-gap: 2rem;
+  --navbar-utility-gap: 0.75rem;
+  --navbar-search-gap: 1rem;
+  --navbar-control-size: 2.25rem;
+  --navbar-control-icon-size: 18px;
+  --navbar-search-width: clamp(10rem, 15vw, 15rem);
+}
+
+.navbar__inner {
+  display: grid;
+  grid-template-columns: var(--navbar-brand-rail-width) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--navbar-layout-gap);
+  width: 100%;
+  min-width: 0;
+  min-height: var(--navbar-height);
+}
+
+.navbar__items {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.navbar__items--right {
+  flex: 0 0 auto;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.navbar__items--right > * {
+  display: flex;
+  align-items: center;
+  min-height: var(--navbar-control-size);
+}
+
+.navbar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.navbar__brand-mark {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 0.875rem;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.42);
+}
+
+[data-theme='dark'] .navbar__brand-mark {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+.navbar__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.header-github-link,
+.navbar [class*='toggleButton'] {
+  width: var(--navbar-control-size);
+  height: var(--navbar-control-size);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   border-radius: 999px;
-  border: 1px solid rgb(var(--brand-primary-rgb) / 0.14);
-  background: rgb(var(--brand-primary-rgb) / 0.06);
+  border: 1px solid rgb(var(--brand-primary-rgb) / 0.08);
+  background: rgb(255 255 255 / 0.24);
   color: var(--brand-primary-dark);
   transition:
     transform 180ms ease,
     background-color 180ms ease,
     border-color 180ms ease,
-    box-shadow 180ms ease,
     color 180ms ease;
 }
 
 .header-github-link::before {
   content: '';
-  width: 18px;
-  height: 18px;
+  width: var(--navbar-control-icon-size);
+  height: var(--navbar-control-icon-size);
   display: block;
   background-color: currentColor;
   mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4'/%3E%3Cpath d='M9 18c-4.51 2-5-2-7-2'/%3E%3C/svg%3E");
@@ -402,67 +473,158 @@ button {
   mask-size: contain;
 }
 
-.header-github-link:hover {
+.header-github-link:hover,
+.navbar [class*='toggleButton']:hover {
   transform: translateY(-1px);
-  border-color: rgb(var(--brand-primary-rgb) / 0.24);
-  background: rgb(var(--brand-primary-rgb) / 0.12);
+  border-color: rgb(var(--brand-primary-rgb) / 0.18);
+  background: rgb(var(--brand-primary-rgb) / 0.1);
   color: var(--brand-primary-darkest);
-  box-shadow: 0 12px 24px rgb(var(--brand-primary-rgb) / 0.12);
 }
 
-[data-theme='dark'] .header-github-link {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(255 255 255 / 0.04);
-}
-
-[data-theme='dark'] .header-github-link:hover {
-  border-color: rgb(var(--brand-primary-rgb) / 0.28);
-  background: rgb(var(--brand-primary-rgb) / 0.14);
+[data-theme='dark'] .header-github-link,
+[data-theme='dark'] .navbar [class*='toggleButton'] {
+  border-color: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.03);
   color: var(--brand-primary-lightest);
 }
 
-/*  Keyboard search keys */
-kbd {
-  &[class^='searchHint_'] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--docsearch-key-gradient);
-    border: 0;
-    border-radius: 3px;
-    box-shadow: var(--docsearch-key-shadow);
-    color: var(--docsearch-muted-color);
-    height: 20px;
-    margin-right: 0.4em;
-    padding: 0 7px 2px;
-  }
+[data-theme='dark'] .header-github-link:hover,
+[data-theme='dark'] .navbar [class*='toggleButton']:hover {
+  border-color: rgb(var(--brand-primary-rgb) / 0.2);
+  background: rgb(var(--brand-primary-rgb) / 0.12);
+}
 
-  &.searchHint_btn {
-    display: inline-block;
-    align-items: unset;
-    justify-content: unset;
-    height: unset;
-    margin-left: 0.4rem;
-    padding: 4px 10px;
-  }
+.navbar [class*='toggleButton'] svg {
+  width: var(--navbar-control-icon-size);
+  height: var(--navbar-control-icon-size);
+}
+
+.navbar__toggle {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+[class^='navbarSearchContainer_'] {
+  display: flex;
+  width: var(--navbar-search-width);
+  min-width: 10rem;
+  max-width: 15rem;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.navbar__search,
+[class^='searchBarContainer_'] {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+[class^='searchBarContainer_'] {
+  margin-left: 0;
+}
+
+[class^='searchHintContainer_'] {
+  display: none;
 }
 
 /* Search navbar (local search) */
 .navbar__search-input {
-  padding: 0 2rem 0 2.25rem;
-  width: 13.5rem;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: var(--navbar-control-size);
+  box-sizing: border-box;
+  padding: 0 0.85rem 0 2.3rem;
+  border: 1px solid rgb(var(--brand-primary-rgb) / 0.08);
+  border-radius: 999px;
+  background-color: rgb(255 255 255 / 0.44);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.34);
+  line-height: 1.2;
+  background-position: left 0.82rem center;
+  background-size: 15px 15px;
+  /* Infima's search icon SVG hardcodes fill="currentColor", but that never
+     resolves against the page's color when used as a background-image data
+     URI, so it renders black regardless of theme. Override with a version
+     baked with the same brand purple used by the GitHub/theme-toggle icons. */
+  --ifm-navbar-search-input-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' height='16px' width='16px'%3E%3Cpath fill='%236a46f0' d='M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z'/%3E%3C/svg%3E");
+}
+
+.navbar__search-input::placeholder {
+  color: rgb(63 53 80 / 0.68);
+}
+
+.navbar__search-input:focus {
+  border-color: rgb(var(--brand-primary-rgb) / 0.16);
+  background-color: rgb(255 255 255 / 0.56);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.38);
+}
+
+[data-theme='dark'] .navbar__search-input {
+  background-color: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+  --ifm-navbar-search-input-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' height='16px' width='16px'%3E%3Cpath fill='%23eee9ff' d='M6.02945,10.20327a4.17382,4.17382,0,1,1,4.17382-4.17382A4.15609,4.15609,0,0,1,6.02945,10.20327Zm9.69195,4.2199L10.8989,9.59979A5.88021,5.88021,0,0,0,12.058,6.02856,6.00467,6.00467,0,1,0,9.59979,10.8989l4.82338,4.82338a.89729.89729,0,0,0,1.29912,0,.89749.89749,0,0,0-.00087-1.29909Z'/%3E%3C/svg%3E");
+}
+
+[data-theme='dark'] .navbar__search-input::placeholder {
+  color: rgb(238 233 255 / 0.68);
+}
+
+[data-theme='dark'] .navbar__search-input:focus {
+  border-color: rgb(var(--brand-primary-rgb) / 0.18);
+  background-color: rgb(var(--brand-primary-rgb) / 0.08);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
 }
 
 /* With 5 category links plus the GitHub icon, the navbar still runs out of
    room above Infima's default 996px mobile breakpoint.
    Switch to the hamburger sidebar earlier so items never have to compete
    for space with the search box and right-hand icons. */
-@media (max-width: 1400px) {
+@media (max-width: 1280px) {
+  [class*='navRail'] {
+    display: none;
+  }
+
   .navbar__toggle {
     display: inherit;
   }
 
-  .navbar__item {
+  .navbar__inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  [class^='navbarSearchContainer_'] {
+    width: clamp(10rem, 24vw, 12.5rem);
+    max-width: 12.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar__title {
+    display: none;
+  }
+
+  [class^='navbarSearchContainer_'] {
+    width: clamp(9rem, 30vw, 11rem);
+    min-width: 9rem;
+    max-width: 11rem;
+  }
+
+  .navbar__search-input {
+    padding: 0 0.75rem 0 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-github-link,
+  .navbar [class*='toggleButton'] {
     display: none;
   }
 }
@@ -519,7 +681,6 @@ div[class^='docItemContainer_'] article img {
 @media screen and (max-width: 991px) {
   /* Search navbar local */
   .navbar__search-input {
-    width: 14rem;
     padding: 0 0.5rem 0 2.25rem;
   }
 }
@@ -572,106 +733,14 @@ div[class^='docItemContainer_'] article img {
 }
 
 .navbar {
-  background: var(--ifm-navbar-background-color);
+  background: transparent;
   border-bottom: 1px solid var(--navbar-border-color);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 0 10px 30px rgb(15 23 42 / 0.08);
+  box-shadow: 0 8px 22px rgb(15 23 42 / 0.05);
   isolation: isolate;
 }
 
 [data-theme='light'] .navbar {
-  background: rgb(236 229 243 / 0.76);
-}
-
-.navbar__items--left .navbar__link {
-  position: relative;
-  margin-inline: 0.08rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  padding: 0.52rem 0.82rem 0.68rem;
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    color 180ms ease;
-}
-
-.navbar__items--left .navbar__link::after {
-  content: '';
-  position: absolute;
-  left: 0.85rem;
-  right: 0.85rem;
-  bottom: 0.38rem;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--brand-primary),
-    var(--brand-accent),
-    var(--brand-primary-light)
-  );
-  transform: scaleX(0);
-  transform-origin: center;
-  transition: transform 180ms ease;
-  opacity: 0.92;
-}
-
-.navbar__items--left .navbar__link:hover,
-.navbar__items--left .navbar__link--active {
-  transform: translateY(-1px);
-  border-color: rgb(var(--brand-primary-rgb) / 0.14);
-  background: rgb(var(--brand-primary-rgb) / 0.07);
-  box-shadow: 0 10px 22px rgb(var(--brand-primary-rgb) / 0.1);
-}
-
-.navbar__items--left .navbar__link:hover::after,
-.navbar__items--left .navbar__link--active::after {
-  transform: scaleX(1);
-}
-
-.navbar [class*='toggleButton'] {
-  width: 2.65rem;
-  height: 2.65rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgb(var(--brand-primary-rgb) / 0.14);
-  border-radius: 999px;
-  background: rgb(var(--brand-primary-rgb) / 0.06);
-  color: var(--brand-primary-dark);
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 180ms ease,
-    color 180ms ease;
-}
-
-.navbar [class*='toggleButton']:hover {
-  transform: translateY(-1px) rotate(4deg);
-  border-color: rgb(var(--brand-primary-rgb) / 0.24);
-  background: rgb(var(--brand-primary-rgb) / 0.12);
-  color: var(--brand-primary-darkest);
-  box-shadow: 0 12px 24px rgb(var(--brand-primary-rgb) / 0.12);
-}
-
-.navbar [class*='toggleButton'] svg {
-  width: 18px;
-  height: 18px;
-}
-
-[data-theme='dark'] .navbar [class*='toggleButton'] {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(255 255 255 / 0.04);
-  color: var(--brand-primary-lightest);
-}
-
-[data-theme='dark'] .navbar [class*='toggleButton']:hover {
-  border-color: rgb(var(--brand-primary-rgb) / 0.28);
-  background: rgb(var(--brand-primary-rgb) / 0.14);
-  box-shadow: 0 12px 24px rgb(0 0 0 / 0.22);
+  background: transparent;
 }
 
 .footer,
