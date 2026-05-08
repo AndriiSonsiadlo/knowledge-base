@@ -5,8 +5,9 @@ import IconClose from "@theme/Icon/Close";
 import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle";
 import NavbarLogo from "@theme/Navbar/Logo";
 import clsx from "clsx";
+import styles from "./styles.module.css";
 
-function CloseButton() {
+function CloseButton({ className }) {
   const mobileSidebar = useNavbarMobileSidebar();
   return (
     <button
@@ -16,7 +17,12 @@ function CloseButton() {
         message: "Close navigation bar",
         description: "The ARIA label for close button of mobile sidebar",
       })}
-      className="clean-btn navbar-sidebar__close"
+      className={clsx(
+        "clean-btn",
+        "navbar-sidebar__close",
+        styles.closeButton,
+        className,
+      )}
       onClick={() => mobileSidebar.toggle()}
     >
       <IconClose color="var(--ifm-color-emphasis-600)" />
@@ -27,7 +33,7 @@ function CloseButton() {
 // The GitHub link is rendered here (sidebar header) instead of in the
 // primary menu list, so it stays part of the sidebar's navigation chrome
 // rather than showing up as one more row below every category link.
-function GitHubLink() {
+function GitHubLink({ className }) {
   const { navbar } = useThemeConfig();
   const githubItem = navbar.items.find(
     (item) => item.className === "header-github-link",
@@ -44,7 +50,7 @@ function GitHubLink() {
       href={githubItem.href}
       target="_blank"
       rel="noopener noreferrer"
-      className={clsx("header-github-link", "margin-right--sm")}
+      className={clsx("header-github-link", styles.githubLink, className)}
       aria-label={label}
     >
       <span className="sr-only">{label}</span>
@@ -54,11 +60,17 @@ function GitHubLink() {
 
 export default function NavbarMobileSidebarHeader() {
   return (
-    <div className="navbar-sidebar__brand">
-      <NavbarLogo />
-      <GitHubLink />
-      <NavbarColorModeToggle className="margin-right--md" />
-      <CloseButton />
+    <div className={clsx("navbar-sidebar__brand", styles.sidebarBrand)}>
+      <div className={styles.brandSlot}>
+        <NavbarLogo />
+      </div>
+      <div className={styles.actionRail}>
+        <div className={styles.utilityRail}>
+          <GitHubLink />
+          <NavbarColorModeToggle className={styles.colorModeToggle} />
+        </div>
+        <CloseButton />
+      </div>
     </div>
   );
 }

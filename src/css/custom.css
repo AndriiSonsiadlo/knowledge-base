@@ -579,12 +579,13 @@ button {
 }
 
 @media (max-width: 996px) {
-  .navbar__inner {
-    gap: 0.6rem;
+  .navbar {
+    --navbar-action-gap: 0.62rem;
+    --navbar-brand-gap: 0.6rem;
   }
 
-  .navbar__items--right {
-    gap: 0.45rem;
+  .navbar__inner {
+    gap: 0.6rem;
   }
 }
 
@@ -595,15 +596,13 @@ button {
 }
 
 @media (max-width: 480px) {
-  .navbar__items--right {
-    gap: 0.4rem;
+  .navbar {
+    --navbar-action-gap: 0.58rem;
+    --navbar-brand-gap: 0.45rem;
   }
 
-  /* The GitHub link is still reachable from the mobile sidebar header at
-     this width, so it's safe to drop from the topbar to save space. The
-     theme toggle has no such fallback and must never be hidden here. */
-  .header-github-link {
-    display: none;
+  .navbar__items--right {
+    gap: var(--navbar-action-gap);
   }
 }
 
