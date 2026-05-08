@@ -484,13 +484,14 @@ button {
   align-self: center;
 }
 
+/* The search control is always the icon-button + modal pattern (see
+   ResponsiveSearch), so its navbar slot is a fixed size at every
+   breakpoint instead of the variable-width slot an inline input needs. */
 [class^='navbarSearchContainer_'] {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  flex: 1 1 clamp(8.75rem, 16vw, 10.5rem);
-  min-width: 0;
-  max-width: clamp(8.75rem, 16vw, 10.5rem);
+  flex: 0 0 auto;
 }
 
 .navbar__search,
@@ -581,11 +582,6 @@ button {
   .navbar__items--right {
     gap: 0.45rem;
   }
-
-  [class^='navbarSearchContainer_'] {
-    flex-basis: clamp(8.5rem, 28vw, 9.75rem);
-    max-width: clamp(8.5rem, 28vw, 9.75rem);
-  }
 }
 
 @media (max-width: 768px) {
@@ -594,24 +590,15 @@ button {
   }
 }
 
-@media (max-width: 640px) {
-  [class^='navbarSearchContainer_'] {
-    flex-basis: clamp(7.75rem, 34vw, 8.75rem);
-    max-width: clamp(7.75rem, 34vw, 8.75rem);
-  }
-
-  .navbar__search-input {
-    padding: 0 0.75rem 0 2.2rem;
-  }
-}
-
 @media (max-width: 480px) {
   .navbar__items--right {
     gap: 0.4rem;
   }
 
-  .header-github-link,
-  .navbar [class*='toggleButton'] {
+  /* The GitHub link is still reachable from the mobile sidebar header at
+     this width, so it's safe to drop from the topbar to save space. The
+     theme toggle has no such fallback and must never be hidden here. */
+  .header-github-link {
     display: none;
   }
 }
@@ -728,6 +715,20 @@ div[class^='docItemContainer_'] article img {
 
 [data-theme='light'] .navbar {
   background: transparent;
+}
+
+/* The mobile sidebar panel is a full overlay above page content, not a
+   translucent bar like the navbar itself, so it needs an opaque background
+   (same brand hue as .navbarChrome, just without the transparency) to stay
+   legible regardless of what's scrolled behind it. */
+.navbar-sidebar {
+  background: rgb(240 234 247);
+  box-shadow: 4px 0 32px rgb(15 23 42 / 0.18);
+}
+
+[data-theme='dark'] .navbar-sidebar {
+  background: rgb(18 12 30);
+  box-shadow: 4px 0 32px rgb(0 0 0 / 0.5);
 }
 
 .navbar__items--left .navbar__link {

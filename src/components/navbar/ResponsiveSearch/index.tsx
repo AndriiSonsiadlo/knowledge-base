@@ -5,7 +5,6 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./styles.module.css";
 
-const COMPACT_SEARCH_MEDIA = "(max-width: 480px)";
 const FOCUSABLE_SELECTOR =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -14,11 +13,14 @@ type ResponsiveSearchProps = {
   className?: string;
 };
 
+// The search control is always an icon button that opens a modal containing
+// the real search input. Using one interaction pattern at every breakpoint
+// (instead of switching to an inline input on wider screens) keeps sizing,
+// spacing, and behavior identical on desktop, tablet, and mobile.
 export default function ResponsiveSearch({
   children,
   className,
 }: ResponsiveSearchProps) {
-  const [isCompact, setIsCompact] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const modalId = useId();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -33,28 +35,6 @@ export default function ResponsiveSearch({
       });
     }
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const media = window.matchMedia(COMPACT_SEARCH_MEDIA);
-    const sync = (event?: MediaQueryListEvent) => {
-      setIsCompact(event?.matches ?? media.matches);
-    };
-
-    sync();
-    media.addEventListener("change", sync);
-
-    return () => media.removeEventListener("change", sync);
-  }, []);
-
-  useEffect(() => {
-    if (!isCompact) {
-      setIsOpen(false);
-    }
-  }, [isCompact]);
 
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") {
@@ -114,12 +94,6 @@ export default function ResponsiveSearch({
       window.cancelAnimationFrame(frame);
     };
   }, [closeModal, isOpen]);
-
-  if (!isCompact) {
-    return (
-      <div className={clsx(styles.inlineSearch, className)}>{children}</div>
-    );
-  }
 
   const modal =
     isOpen && typeof document !== "undefined"
