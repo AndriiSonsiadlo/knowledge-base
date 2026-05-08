@@ -13,6 +13,10 @@ type ResponsiveSearchProps = {
   className?: string;
 };
 
+type CloseModalOptions = {
+  restoreFocus?: boolean;
+};
+
 // The search control is always an icon button that opens a modal containing
 // the real search input. Using one interaction pattern at every breakpoint
 // (instead of switching to an inline input on wider screens) keeps sizing,
@@ -26,15 +30,32 @@ export default function ResponsiveSearch({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  const closeModal = useCallback(() => {
-    setIsOpen(false);
+  const closeModal = useCallback(
+    ({ restoreFocus = true }: CloseModalOptions = {}) => {
+      setIsOpen(false);
 
-    if (typeof window !== "undefined") {
+      if (!restoreFocus || typeof window === "undefined") {
+        return;
+      }
+
       window.requestAnimationFrame(() => {
         triggerRef.current?.focus();
       });
-    }
-  }, []);
+    },
+    [],
+  );
+
+  const handleResultActivation = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      const target = event.target as HTMLElement | null;
+      if (!target?.closest("a[href]")) {
+        return;
+      }
+
+      closeModal({ restoreFocus: false });
+    },
+    [closeModal],
+  );
 
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") {
@@ -104,7 +125,7 @@ export default function ResponsiveSearch({
               tabIndex={-1}
               className={clsx("clean-btn", styles.backdropDismiss)}
               aria-label="Close search overlay"
-              onClick={closeModal}
+              onClick={() => closeModal()}
             />
             <div
               id={modalId}
@@ -122,12 +143,17 @@ export default function ResponsiveSearch({
                   type="button"
                   className={clsx("clean-btn", styles.closeButton)}
                   aria-label="Close search"
-                  onClick={closeModal}
+                  onClick={() => closeModal()}
                 >
                   <X size={18} />
                 </button>
               </div>
-              <div className={styles.modalBody}>{children}</div>
+              <div
+                className={styles.modalBody}
+                onClickCapture={handleResultActivation}
+              >
+                <div className={styles.searchSurface}>{children}</div>
+              </div>
             </div>
           </div>,
           document.body,

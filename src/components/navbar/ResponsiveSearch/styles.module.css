@@ -100,7 +100,7 @@
 
 .modalHeader {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1rem 1rem 0.4rem;
@@ -125,45 +125,54 @@
   padding: 0 1rem 1rem;
 }
 
+.searchSurface {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 36rem);
+  min-width: 0;
+  margin: 0 auto;
+}
+
 .modalPanel,
 .modalHeader,
 .modalBody,
-.modalBody :global(.navbar__search),
-.modalBody :global(.navbar__search > span),
-.modalBody :global(.navbar__search-input),
-.modalBody :global([class^='dropdownMenu_']) {
+.searchSurface,
+.searchSurface :global(.navbar__search),
+.searchSurface :global(.navbar__search > span),
+.searchSurface :global(.navbar__search-input),
+.searchSurface :global([class^='dropdownMenu_']) {
   box-sizing: border-box;
 }
 
-.modalBody :global(.navbar__search),
-.modalBody :global([class^='searchBarContainer_']) {
+.searchSurface :global(.navbar__search),
+.searchSurface :global([class^='searchBarContainer_']) {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: none;
 }
 
-.modalBody :global([class^='searchBarContainer_']) {
-  margin-left: 0;
+.searchSurface :global([class^='searchBarContainer_']) {
+  margin: 0;
 }
 
-.modalBody :global(.navbar__search) {
+.searchSurface :global(.navbar__search) {
   position: relative;
 }
 
-.modalBody :global(.navbar__search > span) {
+.searchSurface :global(.navbar__search > span) {
   display: block !important;
   width: 100%;
   min-width: 0;
 }
 
-.modalBody :global(.navbar__search-input) {
+.searchSurface :global(.navbar__search-input) {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: none;
   height: 3rem;
-  padding: 0 2.6rem 0 2.6rem;
+  padding: 0 3rem 0 2.75rem;
   border: 1px solid rgb(var(--brand-primary-rgb) / 0.14);
   border-radius: 0.95rem;
   background-color: rgb(255 255 255 / 0.8);
@@ -172,27 +181,27 @@
   line-height: 1.2;
 }
 
-:global([data-theme='dark']) .modalBody :global(.navbar__search-input) {
+:global([data-theme='dark']) .searchSurface :global(.navbar__search-input) {
   border-color: rgb(255 255 255 / 0.12);
   background-color: rgb(255 255 255 / 0.05);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
 }
 
-.modalBody :global([class^='searchBarLoadingRing_']) {
+.searchSurface :global([class^='searchBarLoadingRing_']) {
   left: 0.9rem;
   top: 50%;
   transform: translateY(-50%);
 }
 
-.modalBody :global([class^='searchHintContainer_']) {
+.searchSurface :global([class^='searchHintContainer_']) {
   display: none;
 }
 
-.modalBody :global([class^='searchClearButton_']) {
+.searchSurface :global([class^='searchClearButton_']) {
   right: 0.95rem;
 }
 
-.modalBody :global([class^='dropdownMenu_']) {
+.searchSurface :global([class^='dropdownMenu_']) {
   position: static !important;
   inset: auto !important;
   width: 100% !important;
@@ -206,17 +215,17 @@
   padding: 0.55rem;
 }
 
-:global([data-theme='dark']) .modalBody :global([class^='dropdownMenu_']) {
+:global([data-theme='dark']) .searchSurface :global([class^='dropdownMenu_']) {
   border-color: rgb(255 255 255 / 0.1);
   background: rgb(20 16 31 / 0.94);
   box-shadow: 0 18px 40px rgb(0 0 0 / 0.34);
 }
 
-.modalBody :global([class^='dataset_']) {
+.searchSurface :global([class^='dataset_']) {
   max-height: inherit;
 }
 
-.modalBody :global([class^='suggestion_']) {
+.searchSurface :global([class^='suggestion_']) {
   min-height: 0;
   align-items: flex-start;
   gap: 0.75rem;
@@ -224,48 +233,48 @@
   padding: 0.85rem 0.95rem;
 }
 
-.modalBody :global([class^='suggestion_']:not(:last-child)) {
+.searchSurface :global([class^='suggestion_']:not(:last-child)) {
   margin-bottom: 0.5rem;
 }
 
-.modalBody :global([class^='hitTree_']) {
+.searchSurface :global([class^='hitTree_']) {
   align-self: stretch;
 }
 
-.modalBody :global([class^='hitTree_'] > svg) {
+.searchSurface :global([class^='hitTree_'] > svg) {
   height: 100%;
   min-height: 1.5rem;
 }
 
-.modalBody :global([class^='hitWrapper_']) {
+.searchSurface :global([class^='hitWrapper_']) {
   width: auto;
   min-width: 0;
   margin: 0;
   gap: 0.2rem;
 }
 
-.modalBody :global([class^='hitTitle_']) {
+.searchSurface :global([class^='hitTitle_']) {
   font-size: 0.95rem;
   line-height: 1.35;
 }
 
-.modalBody :global([class^='hitPath_']) {
+.searchSurface :global([class^='hitPath_']) {
   font-size: 0.78rem;
   line-height: 1.35;
 }
 
-.modalBody :global([class^='noResults_']) {
+.searchSurface :global([class^='noResults_']) {
   gap: 0.65rem;
   padding: 1rem 0.75rem;
   text-align: center;
   overflow-wrap: anywhere;
 }
 
-.modalBody :global([class^='noResultsIcon_']) {
+.searchSurface :global([class^='noResultsIcon_']) {
   margin-bottom: 0;
 }
 
-.modalBody :global([class^='hitFooter_']) {
+.searchSurface :global([class^='hitFooter_']) {
   margin-top: 0.8rem;
   padding: 0.25rem 0.5rem 0.1rem;
   overflow-wrap: anywhere;
