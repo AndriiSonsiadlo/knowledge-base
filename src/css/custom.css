@@ -376,11 +376,15 @@ button {
 .navbar {
   --navbar-control-size: 2.625rem;
   --navbar-control-icon-size: 18px;
+  --navbar-action-gap: 0.68rem;
+  --navbar-brand-gap: 0.7rem;
+  padding: 0;
 }
 
 .navbar__inner {
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 0.7rem;
   min-width: 0;
 }
@@ -401,7 +405,7 @@ button {
   min-width: 0;
   margin-left: auto;
   justify-content: flex-end;
-  gap: 0.45rem;
+  gap: var(--navbar-action-gap);
 }
 
 .navbar__items--right > * {
@@ -415,7 +419,7 @@ button {
   align-items: center;
   gap: 0.55rem;
   min-width: 0;
-  margin-right: 0.2rem;
+  margin-right: var(--navbar-brand-gap);
 }
 
 .navbar__title {

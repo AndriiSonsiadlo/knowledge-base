@@ -63,7 +63,9 @@ export default function NavbarLayout({ children }) {
 			    full-viewport fixed positioning of NavbarBackdrop/NavbarMobileSidebar
 			    below (they'd size themselves against the navbar's own box instead
 			    of the viewport, collapsing the mobile sidebar to nothing). */}
-			<div className={styles.navbarChrome}>{children}</div>
+			<div className={styles.navbarChrome}>
+				<div className={styles.navbarContent}>{children}</div>
+			</div>
 			<NavbarBackdrop onClick={mobileSidebar.toggle} />
 			<NavbarMobileSidebar />
 		</nav>
