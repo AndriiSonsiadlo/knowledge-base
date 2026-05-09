@@ -1,0 +1,26 @@
+.navbarInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.brandRail {
+  min-width: 0;
+}
+
+.centerRail {
+  min-width: 0;
+}
+
+.utilityRail {
+  min-width: 0;
+}
+
+@media (max-width: 1400px) {
+  .centerRail {
+    display: none;
+  }
+}
