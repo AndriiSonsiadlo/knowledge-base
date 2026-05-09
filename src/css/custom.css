@@ -381,29 +381,25 @@ button {
   padding: 0;
 }
 
-.navbar__inner {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 0.7rem;
-  min-width: 0;
-}
-
 .navbar__items {
   display: flex;
   align-items: center;
   min-width: 0;
 }
 
-.navbar__items--left {
-  flex: 1 1 auto;
+.navbar__items--brand {
+  flex: 0 0 auto;
+}
+
+.navbar__items--center {
+  flex: 0 1 auto;
+  justify-content: center;
   gap: 0.32rem;
 }
 
 .navbar__items--right {
   flex: 0 1 auto;
   min-width: 0;
-  margin-left: auto;
   justify-content: flex-end;
   gap: var(--navbar-action-gap);
 }
@@ -496,6 +492,7 @@ button {
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
+  margin-left: 0.9rem;
 }
 
 .navbar__search,
@@ -573,7 +570,7 @@ button {
     display: inherit;
   }
 
-  .navbar__item {
+  .navbar__items--center {
     display: none;
   }
 }
@@ -734,7 +731,7 @@ div[class^='docItemContainer_'] article img {
   box-shadow: 4px 0 32px rgb(0 0 0 / 0.5);
 }
 
-.navbar__items--left .navbar__link {
+.navbar__items--center .navbar__link {
   position: relative;
   display: flex;
   align-items: center;
@@ -751,11 +748,11 @@ div[class^='docItemContainer_'] article img {
     color 180ms ease;
 }
 
-[data-theme='dark'] .navbar__items--left .navbar__link {
+[data-theme='dark'] .navbar__items--center .navbar__link {
   color: rgb(238 233 255 / 0.86);
 }
 
-.navbar__items--left .navbar__link::after {
+.navbar__items--center .navbar__link::after {
   content: '';
   position: absolute;
   left: 0.85rem;
@@ -775,23 +772,23 @@ div[class^='docItemContainer_'] article img {
   opacity: 0.92;
 }
 
-.navbar__items--left .navbar__link:hover,
-.navbar__items--left .navbar__link--active {
+.navbar__items--center .navbar__link:hover,
+.navbar__items--center .navbar__link--active {
   transform: translateY(-1px);
   border-color: rgb(var(--brand-primary-rgb) / 0.08);
   background: rgb(var(--brand-primary-rgb) / 0.05);
   color: var(--brand-primary-darkest);
 }
 
-[data-theme='dark'] .navbar__items--left .navbar__link:hover,
-[data-theme='dark'] .navbar__items--left .navbar__link--active {
+[data-theme='dark'] .navbar__items--center .navbar__link:hover,
+[data-theme='dark'] .navbar__items--center .navbar__link--active {
   border-color: rgb(255 255 255 / 0.08);
   background: rgb(255 255 255 / 0.04);
   color: var(--brand-primary-lightest);
 }
 
-.navbar__items--left .navbar__link:hover::after,
-.navbar__items--left .navbar__link--active::after {
+.navbar__items--center .navbar__link:hover::after,
+.navbar__items--center .navbar__link--active::after {
   transform: scaleX(1);
 }
 
