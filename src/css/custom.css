@@ -874,6 +874,8 @@ body {
 
 .markdown p {
   @apply text-base leading-relaxed mb-4;
+  text-align: justify;
+  text-align-last: left;
 }
 
 .markdown ul,
@@ -930,6 +932,7 @@ body {
 
 .markdown code {
   @apply rounded px-2 py-1 text-sm font-mono;
+  white-space: nowrap;
 }
 
 [data-theme="light"] .markdown code {
