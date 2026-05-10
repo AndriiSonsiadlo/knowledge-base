@@ -1,6 +1,5 @@
 .navbarInner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
   width: 100%;
   gap: 0.7rem;
@@ -8,17 +7,14 @@
 }
 
 .brandRail {
-  grid-column: 1;
   min-width: 0;
 }
 
 .centerRail {
-  grid-column: 2;
   min-width: 0;
 }
 
 .utilityRail {
-  grid-column: 3;
   min-width: 0;
 }
 

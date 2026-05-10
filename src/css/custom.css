@@ -376,7 +376,7 @@ button {
 .navbar {
   --navbar-control-size: 2.625rem;
   --navbar-control-icon-size: 18px;
-  --navbar-action-gap: 0.68rem;
+  --navbar-action-gap: 0.9rem;
   --navbar-brand-gap: 0.7rem;
   padding: 0;
 }
@@ -392,7 +392,7 @@ button {
 }
 
 .navbar__items--center {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   justify-content: center;
   gap: 0.32rem;
 }
@@ -400,6 +400,7 @@ button {
 .navbar__items--right {
   flex: 0 1 auto;
   min-width: 0;
+  margin-left: auto;
   justify-content: flex-end;
   gap: var(--navbar-action-gap);
 }
@@ -492,7 +493,6 @@ button {
   align-items: center;
   justify-content: flex-end;
   flex: 0 0 auto;
-  margin-left: 0.9rem;
 }
 
 .navbar__search,
@@ -1317,21 +1317,27 @@ button {
 
 .theme-admonition-note,
 .theme-admonition-info {
+  border-color: rgb(var(--brand-primary-rgb) / 0.3);
   border-left-color: var(--brand-primary);
   background: rgb(var(--brand-primary-rgb) / 0.06);
 }
 
 .theme-admonition-tip {
+  border-color: rgb(var(--brand-accent-rgb) / 0.3);
   border-left-color: var(--brand-accent);
   background: rgb(var(--brand-accent-rgb) / 0.06);
 }
 
 [data-theme='dark'] .theme-admonition-note,
 [data-theme='dark'] .theme-admonition-info {
+  border-color: rgb(var(--brand-primary-rgb) / 0.28);
+  border-left-color: var(--brand-primary);
   background: rgb(var(--brand-primary-rgb) / 0.1);
 }
 
 [data-theme='dark'] .theme-admonition-tip {
+  border-color: rgb(var(--brand-accent-rgb) / 0.28);
+  border-left-color: var(--brand-accent);
   background: rgb(var(--brand-accent-rgb) / 0.1);
 }
 
