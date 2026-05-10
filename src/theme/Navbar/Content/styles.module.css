@@ -8,19 +8,28 @@
 }
 
 .brandRail {
+  grid-column: 1;
   min-width: 0;
 }
 
 .centerRail {
+  grid-column: 2;
   min-width: 0;
 }
 
 .utilityRail {
+  grid-column: 3;
   min-width: 0;
 }
 
 @media (max-width: 1400px) {
   .centerRail {
     display: none;
+  }
+}
+
+@media (max-width: 996px) {
+  .navbarInner {
+    gap: 0.6rem;
   }
 }

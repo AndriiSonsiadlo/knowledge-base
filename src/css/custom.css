@@ -580,10 +580,6 @@ button {
     --navbar-action-gap: 0.62rem;
     --navbar-brand-gap: 0.6rem;
   }
-
-  .navbar__inner {
-    gap: 0.6rem;
-  }
 }
 
 @media (max-width: 768px) {
