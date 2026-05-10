@@ -18,6 +18,16 @@
   min-width: 0;
 }
 
+/* Docusaurus's default ColorModeToggle wraps the button in a div hardcoded
+   to 2rem x 2rem. custom.css resizes the inner button to
+   --navbar-control-size (2.625rem) to match the GitHub/search buttons, but
+   left this wrapper unsized, so the button overflowed its box and the
+   flex gap (measured box-edge to box-edge) looked uneven next to it. */
+.colorModeToggle {
+  width: var(--navbar-control-size, 2.625rem);
+  height: var(--navbar-control-size, 2.625rem);
+}
+
 @media (max-width: 1400px) {
   .centerRail {
     display: none;

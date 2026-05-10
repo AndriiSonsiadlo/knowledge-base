@@ -1,8 +1,9 @@
+import { useHistory } from "@docusaurus/router";
 import clsx from "clsx";
 import { Search, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import styles from "./styles.module.css";
 
 const FOCUSABLE_SELECTOR =
@@ -47,15 +48,45 @@ export default function ResponsiveSearch({
 
   const handleResultActivation = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
+      // Only the footer "See all results" link is a real <a> we can catch
+      // on click. Individual search hits are plain divs driven by
+      // autocomplete.js's own delegated click listener (bound on the
+      // dropdown menu element) - closing on those is handled by the
+      // history-change listener below instead, since closing here would
+      // race (and sometimes win against) that listener's own navigation.
       const target = event.target as HTMLElement | null;
       if (!target?.closest("a[href]")) {
         return;
       }
 
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       closeModal({ restoreFocus: false });
     },
     [closeModal],
   );
+
+  const isOpenRef = useRef(isOpen);
+  isOpenRef.current = isOpen;
+  const history = useHistory();
+
+  useEffect(() => {
+    // autocomplete.js navigates via history.push(url) itself when a search
+    // hit is picked, with no <a> element and no React event we can hook for
+    // that case. Listening for the route change itself, instead of trying
+    // to catch the click, is what actually fires reliably: close the modal
+    // and lift the scroll lock synchronously (flushSync) so Docusaurus's
+    // own scroll-to-hash effect - which runs synchronously right after this
+    // navigation - sees a page that's actually scrollable.
+    return history.listen(() => {
+      if (!isOpenRef.current) {
+        return;
+      }
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      flushSync(() => closeModal({ restoreFocus: false }));
+    });
+  }, [history, closeModal]);
 
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") {
