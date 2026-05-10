@@ -50,7 +50,13 @@ export default function NavbarContent() {
 
   return (
     <div className={styles.navbarInner}>
-      <div className={clsx("navbar__items", "navbar__items--brand", styles.brandRail)}>
+      <div
+        className={clsx(
+          "navbar__items",
+          "navbar__items--brand",
+          styles.brandRail,
+        )}
+      >
         {!mobileSidebar.disabled && <NavbarMobileSidebarToggle />}
         <NavbarLogo />
       </div>
