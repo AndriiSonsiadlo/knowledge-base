@@ -25,7 +25,7 @@ function NavbarItems({ items }) {
     <>
       {items.map((item, i) => (
         <ErrorCauseBoundary
-          key={i}
+          key={item.label ?? item.href ?? item.to ?? i}
           onError={(error) =>
             new Error(
               `A theme navbar item failed to render.
