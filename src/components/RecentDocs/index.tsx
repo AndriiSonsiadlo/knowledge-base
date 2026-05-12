@@ -3,6 +3,7 @@ import Link from "@docusaurus/Link";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Heading from "@theme/Heading";
 import type { ReactNode } from "react";
+import categoryStyles from "../CategoryGrid/styles.module.css";
 
 interface RecentDocSummary {
   title: string;
@@ -62,11 +63,14 @@ export default function RecentDocs(): ReactNode | null {
 
   return (
     <section className="mx-auto w-full max-w-6xl pb-12 md:pb-16">
-      <div className="mb-8 text-center">
-        <Heading as="h2" className="font-display text-3xl md:text-4xl">
+      <div className="text-center mb-16">
+        <Heading
+          as="h2"
+          className={`${categoryStyles.sectionTitle} font-display text-4xl md:text-5xl font-bold mb-4 leading-tight md:leading-snug`}
+        >
           Recently updated
         </Heading>
-        <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-700 dark:text-slate-300">
+        <p className={`${categoryStyles.sectionDescription} text-lg mx-auto`}>
           The latest notes I’ve touched in this knowledge base.
         </p>
       </div>
