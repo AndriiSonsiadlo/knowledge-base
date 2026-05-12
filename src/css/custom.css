@@ -734,15 +734,9 @@ div[class^='docItemContainer_'] article img {
   align-items: center;
   line-height: 1.1;
   margin-inline: 0.06rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
   padding: 0.54rem 0.72rem;
   color: rgb(63 53 80 / 0.86);
-  transition:
-    transform 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease;
+  transition: color 180ms ease;
 }
 
 [data-theme='dark'] .navbar__items--center .navbar__link {
@@ -771,16 +765,11 @@ div[class^='docItemContainer_'] article img {
 
 .navbar__items--center .navbar__link:hover,
 .navbar__items--center .navbar__link--active {
-  transform: translateY(-1px);
-  border-color: rgb(var(--brand-primary-rgb) / 0.08);
-  background: rgb(var(--brand-primary-rgb) / 0.05);
   color: var(--brand-primary-darkest);
 }
 
 [data-theme='dark'] .navbar__items--center .navbar__link:hover,
 [data-theme='dark'] .navbar__items--center .navbar__link--active {
-  border-color: rgb(255 255 255 / 0.08);
-  background: rgb(255 255 255 / 0.04);
   color: var(--brand-primary-lightest);
 }
 
