@@ -162,6 +162,7 @@
   --brand-primary-light: #a992ff;
   --brand-primary-lighter: #cbc0ff;
   --brand-primary-lightest: #eee9ff;
+  --footer-bg-light: #fff4f4;
   --brand-accent: #ff6b6b;
   --brand-accent-light: #ff8f8f;
   --brand-bg-start: #f8f6fb;
@@ -787,7 +788,7 @@ div[class^='docItemContainer_'] article img {
   --ifm-footer-color: #3f3550;
   --ifm-footer-title-color: #22192f;
   --ifm-footer-link-color: #22192f;
-  background: var(--brand-primary-lightest) !important;
+  background: var(--footer-bg-light) !important;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.45);
 }
 
