@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git commits
+
+Commit as you go — after each self-contained change, not batched at the end of a session.
+
+- Message style: short and concise. `<type>: <what>` on one line (`fix:`, `feat:`, `docs:`, `chore:`, `refactor:`).
+- No body unless the change genuinely needs it. No bullet list of every file touched.
+- **Never** add a `Co-Authored-By` trailer or a "Generated with Claude Code" line.
+
 ## What this is
 
 A personal knowledge-base documentation site built with **Docusaurus 3.9** (React 19, Node ≥20). Content is Markdown under `docs/`; the rest is a customized Docusaurus theme. Deployed to GitHub Pages at `https://andriisonsiadlo.github.io/knowledge-base/`.

@@ -86,3 +86,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .docusaurus
+# superpowers workflow artifacts (local only)
+/specs/
+/plans/
