@@ -180,7 +180,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
-        additionalLanguages: ["bash", "cmake", "csharp", "ini"],
+        additionalLanguages: ["bash", "cmake", "csharp", "ini", "python"],
         additionalPlugins: ["line-numbers", "show-language"],
       },
     }),
