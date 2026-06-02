@@ -61,4 +61,4 @@ flowchart TB
 ## See also
 
 - [Your First Chain](../01-setup/first-chain.md) — the quickstart this page explains in depth.
-- Composition — how `|` coerces dicts and plain functions into Runnables (Composition section, later in this reference).
+- [Pipe Chaining](../03-composition/pipe-chaining.md) — how `|` coerces dicts and plain functions into Runnables.

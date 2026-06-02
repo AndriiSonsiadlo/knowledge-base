@@ -33,7 +33,7 @@ messages = [
 response = model.invoke(messages)  # model now answers using the tool result
 ```
 
-An `AIMessage` carrying `tool_calls` is the shape the tool-calling loop depends on — see Tool Calling (Tools & Agents section, later in this reference).
+An `AIMessage` carrying `tool_calls` is the shape the tool-calling loop depends on — see [Tool Calling](../06-tools-and-agents/tool-calling.md).
 
 ```mermaid
 sequenceDiagram
@@ -49,4 +49,4 @@ sequenceDiagram
 ## See also
 
 - [Prompt Templates](./prompt-templates.md) — how templates assemble message lists.
-- Tool Calling — the round trip that produces `AIMessage.tool_calls` (Tools & Agents section, later in this reference).
+- [Tool Calling](../06-tools-and-agents/tool-calling.md) — the round trip that produces `AIMessage.tool_calls`.

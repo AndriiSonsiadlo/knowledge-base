@@ -33,10 +33,10 @@ flowchart LR
 Every agent needs a step cap and a cost cap. A router that never decides to stop runs until the framework's recursion limit or your provider bill stops it — an unbounded loop is a billing incident, not a bug you notice gracefully.
 :::
 
-`create_agent` builds the common case: bind tools, loop the model against them, stop when the model answers without requesting another call. It is built on LangGraph under the hood (see the LangGraph section later in this reference), which is why step limits, checkpointing, and human-in-the-loop approval all become available once you need them.
+`create_agent` builds the common case: bind tools, loop the model against them, stop when the model answers without requesting another call. It is built on LangGraph under the hood (see [Why LangGraph](../07-langgraph/why-langgraph.md)), which is why step limits, checkpointing, and human-in-the-loop approval all become available once you need them.
 
 ## See also
 
 - [Tool Calling](./tool-calling.md) — the manual loop `create_agent` automates.
 - [React Agent](./react-agent.md) — a runnable example.
-- Why LangGraph — the orchestration layer agents run on (LangGraph section, later in this reference).
+- [Why LangGraph](../07-langgraph/why-langgraph.md) — the orchestration layer agents run on.

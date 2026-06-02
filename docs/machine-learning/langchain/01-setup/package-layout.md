@@ -22,12 +22,6 @@ flowchart BT
     openai --> core
     anthropic --> core
     community --> core
-
-    style core fill:#4C6EF5,color:#fff
-    style lc fill:#37B24D,color:#fff
-    style openai fill:#868E96,color:#fff
-    style anthropic fill:#868E96,color:#fff
-    style community fill:#F59F00,color:#fff
 ```
 
 Every arrow points at `langchain-core`. That is the stability contract:
@@ -45,7 +39,7 @@ When you're writing type hints or building an abstraction that should work acros
 
 ## See also
 
-- installation.md — installing the packages described here.
-- keys-and-config.md — configuring the provider packages once installed.
-- ../02-core-primitives/runnables-and-lcel.md — the `Runnable` abstraction that `langchain-core` defines.
+- [Installation](./installation.md) — installing the packages described here.
+- [Keys and config](./keys-and-config.md) — configuring the provider packages once installed.
+- [Runnables and LCEL](../02-core-primitives/runnables-and-lcel.md) — the `Runnable` abstraction that `langchain-core` defines.
 

@@ -17,7 +17,7 @@ Tool selection quality degrades as the tool list grows — with a handful of wel
 - **Pre-filtering per request** — don't bind every tool the application knows about to every call. Select a relevant subset (by category, by user permission, by retrieval over tool descriptions) before invoking the model. Fewer, more relevant options beat exposing everything every time.
 
 :::danger
-Tool results are untrusted input, not application output. A retrieved document, a scraped page, or an API response can carry text engineered to look like an instruction. Never let a tool's return value directly trigger a privileged action (another tool call, a write, a shell command) without your own code validating it first — the model reading it is not a security boundary. See Security (Deployment section, later in this reference) for the full trust-boundary picture.
+Tool results are untrusted input, not application output. A retrieved document, a scraped page, or an API response can carry text engineered to look like an instruction. Never let a tool's return value directly trigger a privileged action (another tool call, a write, a shell command) without your own code validating it first — the model reading it is not a security boundary. See [Security](../10-deployment/security.md) for the full trust-boundary picture.
 :::
 
 ## See also

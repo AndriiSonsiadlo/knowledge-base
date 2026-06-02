@@ -57,4 +57,4 @@ sequenceDiagram
 
 - [Agent Concepts](./agent-concepts.md) — chain vs agent, when to reach for this.
 - [Custom Tools](./custom-tools.md) — writing `search_docs`-style functions.
-- Why LangGraph — the orchestration layer this constructor is built on (LangGraph section, later in this reference).
+- [Why LangGraph](../07-langgraph/why-langgraph.md) — the orchestration layer this constructor is built on.

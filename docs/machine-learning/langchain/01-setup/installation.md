@@ -40,6 +40,6 @@ Swap `langchain-openai` for whichever provider package you need — `langchain-a
 
 ## See also
 
-- ../00-overview/versions-and-migration.md — the version this section documents and what changed getting here.
-- package-layout.md — why the packages are split this way.
-- keys-and-config.md — configuring credentials for the provider package you just installed.
+- [Versions and migration](../00-overview/versions-and-migration.md) — the version this section documents and what changed getting here.
+- [Package layout](./package-layout.md) — why the packages are split this way.
+- [Keys and config](./keys-and-config.md) — configuring credentials for the provider package you just installed.

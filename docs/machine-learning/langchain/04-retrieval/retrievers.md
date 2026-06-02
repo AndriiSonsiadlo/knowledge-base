@@ -44,4 +44,4 @@ MMR is the one worth reaching for by default once you notice retrieved chunks re
 
 - [Embeddings](./embeddings.md) — what a retriever is searching over.
 - [RAG Pipeline](./rag-pipeline.md) — wiring a retriever into a full chain.
-- Vector Stores — per-store `as_retriever` differences (Vector Stores section, later in this reference).
+- [Vector Stores Overview](../05-vector-stores/overview.md) — per-store `as_retriever` differences.

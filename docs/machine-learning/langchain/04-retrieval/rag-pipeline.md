@@ -87,4 +87,4 @@ When a RAG answer is wrong, the retriever is the more likely culprit, not the mo
 
 - [Retrievers](./retrievers.md) — the `retriever | format_docs` step in detail.
 - [Parallel Execution and Branching](../03-composition/parallel-and-branching.md) — the `RunnableParallel` pattern this pipeline relies on.
-- Recipes — a citation-aware version of this pipeline over PDFs (Recipes section, later in this reference).
+- [RAG over PDFs](../11-recipes/rag-over-pdfs.md) — a citation-aware version of this pipeline over PDFs.

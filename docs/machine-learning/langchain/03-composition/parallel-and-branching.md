@@ -70,4 +70,4 @@ flowchart TB
 ## See also
 
 - [Pipe Chaining with LCEL](./pipe-chaining.md) — the linear case this builds on.
-- Retrieval — `RunnableParallel` is the standard shape for wiring a retriever into a RAG chain (Retrieval & RAG section, later in this reference).
+- [RAG Pipeline](../04-retrieval/rag-pipeline.md) — `RunnableParallel` is the standard shape for wiring a retriever into a RAG chain.

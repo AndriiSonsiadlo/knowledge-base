@@ -47,4 +47,4 @@ Provider portability is real for the basics (`invoke`, `stream`, `temperature`) 
 ## See also
 
 - [Structured Output](./structured-output.md) — constraining a chat model's response to a schema.
-- Config & Fallbacks — retrying and failing over between models (Composition section, later in this reference).
+- [Config and Fallbacks](../03-composition/config-and-fallbacks.md) — retrying and failing over between models.

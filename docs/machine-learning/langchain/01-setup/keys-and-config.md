@@ -57,6 +57,6 @@ print(response.content)
 
 ## See also
 
-- installation.md — installing the packages these env vars configure.
-- ../02-core-primitives/chat-models.md — the full `init_chat_model` parameter surface.
-- Deployment → Security (later in this section) — secret handling in production deployments.
+- [Installation](./installation.md) — installing the packages these env vars configure.
+- [Chat models](../02-core-primitives/chat-models.md) — the full `init_chat_model` parameter surface.
+- [Security](../10-deployment/security.md) — secret handling in production deployments.

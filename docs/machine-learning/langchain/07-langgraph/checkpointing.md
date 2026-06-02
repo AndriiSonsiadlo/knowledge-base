@@ -51,4 +51,4 @@ sequenceDiagram
 ## See also
 
 - [Human in the Loop](./human-in-the-loop.md) — interrupts depend on a checkpointer.
-- Thread Persistence — durable conversations built on this (Memory & State section, later in this reference).
+- [Thread Persistence](../08-memory/thread-persistence.md) — durable conversations built on this.
