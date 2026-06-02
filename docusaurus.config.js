@@ -43,6 +43,14 @@ const config = {
     v4: true,
   },
 
+  stylesheets: [
+    {
+      href: "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
+      type: "text/css",
+      crossorigin: "anonymous",
+    },
+  ],
+
   presets: [
     [
       "classic",
@@ -53,6 +61,8 @@ const config = {
           showLastUpdateTime: true,
           editUrl:
             "https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/",
+          remarkPlugins: [require("remark-math")],
+          rehypePlugins: [require("rehype-katex")],
         },
         blog: false,
         theme: {
