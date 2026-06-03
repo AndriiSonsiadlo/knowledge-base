@@ -39,7 +39,9 @@ const config = {
 
   // Enable Docusaurs Faster: https://github.com/facebook/docusaurus/issues/10556
   future: {
-    faster: false,
+    // Only the CSS minimizer: cssnano/clean-css can't parse the `@layer` rules
+    // emitted by `v4.useCssCascadeLayers` and silently drops infima's :root.
+    faster: { lightningCssMinimizer: true },
     v4: true,
   },
 
