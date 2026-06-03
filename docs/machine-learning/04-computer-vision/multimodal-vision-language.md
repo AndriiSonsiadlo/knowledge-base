@@ -32,7 +32,7 @@ For a batch of $N$ (image, text) pairs, each image should match its own caption 
 
 ## Zero-shot classification via text prompts
 
-CLIP's most striking capability: to classify an image among a set of candidate classes, embed the image once, embed each class name as a short text prompt (e.g. "a photo of a {class}"), and pick whichever class's text embedding is closest to the image embedding — no classification head was ever trained, and the class set can be entirely new at inference time, unconstrained by whatever classes appeared during CLIP's own training.
+CLIP's most striking capability: to classify an image among a set of candidate classes, embed the image once, embed each class name as a short text prompt (e.g. "a photo of a `{class}`"), and pick whichever class's text embedding is closest to the image embedding — no classification head was ever trained, and the class set can be entirely new at inference time, unconstrained by whatever classes appeared during CLIP's own training.
 
 | Symbol | Meaning |
 |---|---|
@@ -41,7 +41,7 @@ CLIP's most striking capability: to classify an image among a set of candidate c
 
 ## Prompt-template sensitivity
 
-Zero-shot accuracy can vary noticeably depending on the exact wording of the text prompt used — "a photo of a {class}" versus just "{class}" versus "a picture of a {class}" can produce meaningfully different classification accuracy on the same task, an odd but well-documented sensitivity that makes prompt engineering relevant even for this non-generative use case.
+Zero-shot accuracy can vary noticeably depending on the exact wording of the text prompt used — "a photo of a `{class}`" versus just "`{class}`" versus "a picture of a `{class}`" can produce meaningfully different classification accuracy on the same task, an odd but well-documented sensitivity that makes prompt engineering relevant even for this non-generative use case.
 
 ## Image and text retrieval
 

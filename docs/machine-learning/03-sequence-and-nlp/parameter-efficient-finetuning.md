@@ -66,8 +66,8 @@ Combines LoRA with aggressive quantisation of the frozen base model: weights are
 | Method | Trainable parameters | Memory | Quality gap vs. full fine-tune | Inference cost |
 |---|---|---|---|---|
 | Full fine-tuning | 100% | highest | none (baseline) | baseline |
-| LoRA | typically <1% | low | small to negligible | zero, once merged |
-| QLoRA | typically <1% | lowest | small to negligible | zero, once merged and dequantised |
+| LoRA | typically under 1% | low | small to negligible | zero, once merged |
+| QLoRA | typically under 1% | lowest | small to negligible | zero, once merged and dequantised |
 | Prompt/prefix tuning | very small | low | often larger, task-dependent | small ongoing overhead |
 
 ## When full fine-tuning is still the right answer

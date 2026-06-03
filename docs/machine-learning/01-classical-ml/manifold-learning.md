@@ -34,7 +34,7 @@ The heavy Student-t tail in the low-dimensional space is deliberate: it lets mod
 
 | Symbol | Meaning |
 |---|---|
-| $p_{j|i}$ | high-dimensional conditional similarity of point $j$ to point $i$ |
+| $p_{j \mid i}$ | high-dimensional conditional similarity of point $j$ to point $i$ |
 | $q_{ij}$ | low-dimensional similarity in the embedding |
 | perplexity | roughly, the effective number of neighbours considered per point |
 
