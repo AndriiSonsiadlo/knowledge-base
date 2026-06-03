@@ -97,7 +97,7 @@ export default function RecentDocs(): ReactNode | null {
                 {doc.title}
               </Heading>
               {doc.description ? (
-                <p className="m-0 text-sm text-slate-700 dark:text-slate-300">
+                <p className="m-0 line-clamp-2 text-sm text-slate-700 dark:text-slate-300">
                   {doc.description}
                 </p>
               ) : null}
