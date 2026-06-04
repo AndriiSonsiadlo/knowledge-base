@@ -4,7 +4,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "My Knowledge Base",
+  title: "Knowledge Base by Andrii Sonsiadlo",
   tagline: "Organized notes and structured information",
   favicon: "img/favicon.ico",
 
