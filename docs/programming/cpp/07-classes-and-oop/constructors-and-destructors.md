@@ -61,7 +61,7 @@ public:
 };
 ```
 
-:::success Use Initializer Lists
+:::success[Use Initializer Lists]
 **Required for:**
 - const members
 - Reference members
@@ -199,7 +199,7 @@ public:
 process(String(100));  // OK: explicit conversion
 ```
 
-:::success Use explicit
+:::success[Use explicit]
 **Always use `explicit`** for single-argument constructors (except copy/move constructors) to prevent accidental conversions.
 :::
 

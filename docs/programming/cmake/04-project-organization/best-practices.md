@@ -528,7 +528,7 @@ cmake --build build --parallel 8
 
 ## Quick Reference Checklist
 
-:::success Essential Best Practices
+:::success[Essential Best Practices]
 
 **Use target commands** (`target_*` not global commands)  
 **Always specify visibility** (PRIVATE/PUBLIC/INTERFACE)  

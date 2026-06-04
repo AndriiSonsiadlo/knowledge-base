@@ -506,7 +506,7 @@ endif()
 
 ## Best Practices
 
-:::success Subdirectory Guidelines
+:::success[Subdirectory Guidelines]
 
 1. **One component per subdirectory** - clear boundaries
 2. **Use ALIAS targets** - namespace your targets

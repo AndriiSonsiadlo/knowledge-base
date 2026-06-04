@@ -477,14 +477,14 @@ ptr.reset();
 - Take ownership: `unique_ptr<T>` (by value)
 :::
 
-:::success When to use
+:::success[When to use]
 - Default choice for dynamic memory
 - Factory functions (clear ownership transfer)
 - RAII guards and resources
 - Exclusive ownership scenarios
 :::
 
-:::success Performance
+:::success[Performance]
 - Same size as raw pointer
 - No runtime overhead
 - Compile-time only abstraction

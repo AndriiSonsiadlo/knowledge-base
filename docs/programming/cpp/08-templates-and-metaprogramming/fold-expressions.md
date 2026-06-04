@@ -246,7 +246,7 @@ Fold expressions work with these operators:
 - Comma: `,`
 - Member access: `.*`, `->*`
 
-:::success Fold Expression Patterns
+:::success[Fold Expression Patterns]
 
 **Sum** = `(args + ...)`  
 **Product** = `(args * ...)`  

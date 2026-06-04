@@ -650,7 +650,7 @@ catch_discover_tests(integration_tests
 
 ## Best Practices
 
-:::success Test Integration Guidelines
+:::success[Test Integration Guidelines]
 
 1. **Separate test types** - unit, integration, system in different directories
 2. **Label everything** - easy to filter and run specific test types

@@ -524,7 +524,7 @@ struct WithTemplate {
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use for unknown types at compile-time
 - Implement clone for copy support
 - Consider small buffer optimization

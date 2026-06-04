@@ -420,7 +420,8 @@ result = (df['value'] * 2).sum()
 total = df['value'].sum()
 ```
 
-:::success
+:::success[Use Built-in Aggregation Methods]
+
 Always use built-in aggregation methods (sum, mean, etc.) instead of apply() or loops. They're optimized and much faster.
 :::
 

@@ -410,7 +410,7 @@ constexpr const int* ptr2 = &x;  // Still problematic
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `constexpr` for compile-time computations
 - Mark constructors `constexpr` when possible
 - Use `constexpr if` for type-dependent code

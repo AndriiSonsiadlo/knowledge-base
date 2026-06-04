@@ -624,7 +624,7 @@ void use_policy(PolicyBased<T>& obj) {
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use policies for orthogonal concerns
 - Name policies clearly (e.g., `LockingPolicy`, `StoragePolicy`)
 - Use private inheritance with EBO for empty policies

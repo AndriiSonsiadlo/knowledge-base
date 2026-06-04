@@ -103,7 +103,7 @@ public:
 | **Readability** | 3 lines | 1 line |
 | **Maintenance** | Manual naming | Automatic |
 
-:::success Recommendation
+:::success[Recommendation]
 Use `#pragma once` for new code - it's simpler, faster, and universally supported. Use traditional guards only if you need standards compliance or encounter symlink issues.
 :::
 
@@ -344,7 +344,7 @@ find . -name "*.h" -exec sh -c \
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `#pragma once` for simplicity (modern projects)
 - Use traditional guards if standards compliance required
 - Make guard names unique (include full path)

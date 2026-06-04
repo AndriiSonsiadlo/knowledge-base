@@ -503,7 +503,7 @@ if (it != vec.end()) {
 }
 ```
 
-:::success Iterator Essentials
+:::success[Iterator Essentials]
 
 **Categories** = Input, Output, Forward, Bidirectional, Random Access  
 **begin/end** = half-open range [begin, end)  

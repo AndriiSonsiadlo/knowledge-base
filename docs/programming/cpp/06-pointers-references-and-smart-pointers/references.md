@@ -79,7 +79,7 @@ increment_ref(value);   // value now 11
 
 Const references allow reading but prevent modification, making them ideal for passing large objects efficiently without allowing changes.
 
-:::success Best Practice for Large Objects
+:::success[Best Practice for Large Objects]
 ```cpp
 // Expensive copy
 void print(std::string s) {

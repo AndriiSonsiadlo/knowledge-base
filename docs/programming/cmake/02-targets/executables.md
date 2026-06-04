@@ -126,7 +126,7 @@ set_target_properties(myapp PROPERTIES
 )
 ```
 
-:::success Recommended Approach
+:::success[Recommended Approach]
 Use `target_compile_features()` - it's more portable and explicit.
 :::
 
@@ -494,7 +494,7 @@ target_include_directories(myapp PRIVATE
 
 ## Best Practices
 
-:::success Recommendations
+:::success[Recommendations]
 
 1. **Use target-based commands**
 

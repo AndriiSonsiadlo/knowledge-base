@@ -342,7 +342,7 @@ target_link_libraries(app PRIVATE A)
 # - NOT B (A's PRIVATE dependency)
 ```
 
-:::success Rule of Thumb
+:::success[Rule of Thumb]
 
 - **PRIVATE**: Implementation detail
 - **PUBLIC**: Part of your API
@@ -534,7 +534,7 @@ target_link_libraries(mygame PRIVATE game)
 
 ## Best Practices
 
-:::success Recommendations
+:::success[Recommendations]
 
 1. **Modern library interface**
 

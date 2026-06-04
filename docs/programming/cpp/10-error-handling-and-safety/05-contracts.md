@@ -623,8 +623,7 @@ void handleContractViolation(ContractViolation type,
 
 ## Benefits of Contract Programming
 
-:::success
-**Advantages:**
+:::success[**Advantages:**]
 - **Documentation** - Contracts formalize API requirements
 - **Bug Detection** - Catch errors early, close to their source
 - **Defensive Programming** - Explicit about assumptions
@@ -661,8 +660,7 @@ void processIndexSafe(const std::vector<int>& vec, size_t index) {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Document all preconditions, postconditions, and invariants
 - Check invariants at the end of every public method
 - Use assertions for development builds

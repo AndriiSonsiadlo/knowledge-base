@@ -97,7 +97,7 @@ std::vector<std::shared_ptr<int>> vec = {ptr1, ptr2};
 
 The deleter is stored in the control block, not the `shared_ptr` itself. This means all `shared_ptr`s to the same type are interchangeable regardless of deleter. This is more convenient but has a small memory cost (deleter stored in control block).
 
-:::success Type Erasure Advantage
+:::success[Type Erasure Advantage]
 
 `shared_ptr` uses type erasure for deleters, enabling mixing different deleters of the same type.
 
@@ -361,7 +361,7 @@ You rarely need to use `default_delete` explicitly, but it's useful for template
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - **Check null** before cleanup operations
 - **Make deleters noexcept** - no exceptions during cleanup
 - **Capture by value** for lambda deleters (avoid dangling refs)

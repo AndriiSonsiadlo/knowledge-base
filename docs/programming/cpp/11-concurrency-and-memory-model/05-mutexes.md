@@ -340,8 +340,7 @@ void efficient() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Always use RAII locks (lock_guard, unique_lock)
 - Keep critical sections small
 - Use scoped_lock for multiple mutexes

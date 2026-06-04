@@ -326,7 +326,7 @@ make test
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use ASan+UBSan in development (always)
 - Run tests with sanitizers in CI
 - Fix sanitizer warnings immediately

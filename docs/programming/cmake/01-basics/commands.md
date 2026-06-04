@@ -151,7 +151,7 @@ target_link_libraries(ui PUBLIC engine)
 target_link_libraries(game PRIVATE ui)
 ```
 
-:::success Transitive Dependencies
+:::success[Transitive Dependencies]
 `PUBLIC` and `INTERFACE` propagate requirements to dependents automatically!
 :::
 

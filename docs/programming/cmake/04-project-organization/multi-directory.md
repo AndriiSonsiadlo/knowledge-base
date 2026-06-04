@@ -623,7 +623,7 @@ set_target_properties(audio_mp3 PROPERTIES
 
 ## Best Practices
 
-:::success Multi-Directory Guidelines
+:::success[Multi-Directory Guidelines]
 
 1. **One target per directory** - clarity and modularity
 2. **Use ALIAS targets** - consistency when used internally or externally

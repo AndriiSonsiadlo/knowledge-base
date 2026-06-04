@@ -352,7 +352,7 @@ public:
 };
 ```
 
-:::success Composition benefits
+:::success[Composition benefits]
 - No diamond problem
 - Clear ownership
 - Easier to understand

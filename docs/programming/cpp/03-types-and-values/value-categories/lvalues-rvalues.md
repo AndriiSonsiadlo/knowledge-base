@@ -100,7 +100,7 @@ const int& cref1 = x;   // OK: lvalue
 const int& cref2 = 42;  // OK: rvalue (lifetime extended!)
 ```
 
-:::success const& Magic
+:::success[const& Magic]
 `const T&` can bind to both lvalues and rvalues, making it perfect for function parameters.
 :::
 

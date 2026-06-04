@@ -248,7 +248,7 @@ int* data2 = b.getData();  // Calls non-const version
 - const → non-const: requires `const_cast` (dangerous)
 :::
 
-:::success Best practices
+:::success[Best practices]
 - Use `const` everywhere possible
 - Function parameters: prefer `const T*` for read-only
 - Document intent through const-correctness

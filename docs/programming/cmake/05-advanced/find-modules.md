@@ -465,7 +465,7 @@ endif()
 
 ## Best Practices
 
-:::success Find Module Guidelines
+:::success[Find Module Guidelines]
 
 1. **Always create imported targets** - modern CMake expects them
 2. **Use find_package_handle_standard_args()** - handles REQUIRED, QUIET, version checking

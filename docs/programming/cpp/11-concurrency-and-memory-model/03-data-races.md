@@ -336,8 +336,7 @@ public:
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use ThreadSanitizer during development
 - Protect shared data with mutexes or atomics
 - Prefer immutable data when possible

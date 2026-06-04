@@ -351,7 +351,8 @@ void expectedUsage() {
 }
 ```
 
-:::success
+:::success[`std::expected`]
+
 `std::expected` combines the best of both worlds: type-safe error handling without exceptions, with ergonomic API similar to `std::optional`.
 :::
 
@@ -679,8 +680,7 @@ void usage() {
 
 ## When to Use Error Codes
 
-:::success
-**Use Error Codes When:**
+:::success[**Use Error Codes When:**]
 - Performance is critical (hot paths)
 - Errors are expected/common
 - Working in noexcept contexts
@@ -700,8 +700,7 @@ void usage() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Check error codes immediately after calls
 - Use `std::error_code` over raw integers
 - Create custom error categories for domain-specific errors

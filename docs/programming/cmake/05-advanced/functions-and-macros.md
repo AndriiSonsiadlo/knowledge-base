@@ -513,7 +513,7 @@ target_add_feature(myapp graphics)
 
 ## Best Practices
 
-:::success Function/Macro Guidelines
+:::success[Function/Macro Guidelines]
 
 **Prefer functions over macros:**
 

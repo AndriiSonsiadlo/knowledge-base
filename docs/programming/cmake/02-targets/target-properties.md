@@ -688,7 +688,7 @@ install(TARGETS myapp mylib
 
 ## Best Practices
 
-:::success Property Management
+:::success[Property Management]
 
 1. **Use target-specific commands when available**
     - `target_compile_features()` over setting `CXX_STANDARD`

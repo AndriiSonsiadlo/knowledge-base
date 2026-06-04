@@ -248,7 +248,7 @@ b.print();  // "Base" (not "Derived"!)
 
 **Solution:** Use pointers or references to maintain polymorphism.
 
-:::success Inheritance Checklist
+:::success[Inheritance Checklist]
 
 **public inheritance** = is-a relationship  
 **virtual functions** = runtime polymorphism  

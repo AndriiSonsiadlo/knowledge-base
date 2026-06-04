@@ -428,7 +428,7 @@ C++ is a powerful, efficient language that combines:
 - **Versatility** - Systems programming, games, scientific computing, embedded
 - **Industry standard** - Used in critical infrastructure worldwide
 
-:::success When to Choose C++
+:::success[When to Choose C++]
 
 - Performance is critical
 - Need direct hardware access

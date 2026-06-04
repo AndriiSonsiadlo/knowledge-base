@@ -203,7 +203,8 @@ void steadyClockExample() {
 }
 ```
 
-:::success
+:::success[`steady_clock` for Timing]
+
 Always use `steady_clock` for **measuring durations** and **benchmarking**!
 :::
 
@@ -274,7 +275,8 @@ void literalsExample() {
 }
 ```
 
-:::success
+:::success[Chrono Literals]
+
 Always use chrono literals (e.g., `100ms`) instead of raw numbers for readability and type safety!
 :::
 
@@ -559,8 +561,7 @@ void usage() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use `steady_clock` for measuring durations
 - Use `system_clock` for wall-clock time
 - Use chrono literals (`100ms`, `5s`) for readability

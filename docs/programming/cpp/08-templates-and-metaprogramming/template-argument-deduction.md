@@ -288,7 +288,7 @@ wrapper(42);         // T = int, forwards rvalue
 wrapper(std::move(x));  // T = int, forwards rvalue
 ```
 
-:::success Deduction Rules Summary
+:::success[Deduction Rules Summary]
 
 **By value** = strips const and references  
 **By reference** = preserves const, deduces reference  

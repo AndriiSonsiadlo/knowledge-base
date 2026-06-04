@@ -561,7 +561,7 @@ install(TARGETS myapp core network utilities
 
 ## Best Practices
 
-:::success Link Visibility Guidelines
+:::success[Link Visibility Guidelines]
 
 **Use PRIVATE when:**
 
@@ -582,7 +582,7 @@ install(TARGETS myapp core network utilities
 - Propagating requirements without using them
   :::
 
-:::success General Best Practices
+:::success[General Best Practices]
 
 1. **Always use visibility keywords** - never omit PRIVATE/PUBLIC/INTERFACE
 2. **Prefer imported targets** over variable-based linking

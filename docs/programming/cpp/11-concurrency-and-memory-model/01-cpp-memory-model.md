@@ -121,7 +121,8 @@ void consumer() {
 }
 ```
 
-:::success
+:::success[Acquire-Release Ordering]
+
 **Acquire-Release** is faster than seq_cst and sufficient for most synchronization.
 :::
 
@@ -233,8 +234,7 @@ public:
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use `seq_cst` (default) unless profiling shows bottleneck
 - Use acquire-release for locks and flags
 - Use relaxed for independent counters

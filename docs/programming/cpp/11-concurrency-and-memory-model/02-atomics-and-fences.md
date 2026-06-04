@@ -354,7 +354,7 @@ public:
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use atomics for simple shared counters/flags
 - Use relaxed ordering for independent operations
 - Check `is_lock_free()` for critical paths

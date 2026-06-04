@@ -255,7 +255,7 @@ uint32_t read_cr0() {
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `volatile` for side effects
 - Specify clobber list accurately
 - Prefer compiler intrinsics when available

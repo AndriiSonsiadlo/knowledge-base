@@ -259,7 +259,8 @@ df.nsmallest(2, 'score')
 df.nlargest(2, ['score', 'name'])
 ```
 
-:::success
+:::success[Use `nlargest()`/`nsmallest()`]
+
 `nlargest()` and `nsmallest()` are faster than sorting when you only need top/bottom N rows.
 :::
 

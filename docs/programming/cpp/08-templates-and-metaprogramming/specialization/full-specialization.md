@@ -414,7 +414,7 @@ void func(int value) { std::cout << "Overload\n"; }
 
 Overloading participates in normal overload resolution. Specialization doesn't!
 
-:::success Full Specialization Key Points
+:::success[Full Specialization Key Points]
 
 **Complete override** = entirely new implementation  
 **`template<>`** = syntax for full specialization  

@@ -235,7 +235,7 @@ auto x = add(5, 10);  // NOW template is compiled for int
 
 **Important:** Template definitions must be in headers (or same translation unit where used).
 
-:::success Function Template Essentials
+:::success[Function Template Essentials]
 
 **Generic code** = write once, works for many types  
 **Compiler generates** = separate function for each type used  

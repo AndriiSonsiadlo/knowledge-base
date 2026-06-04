@@ -218,7 +218,8 @@ void iterateDirectory() {
 }
 ```
 
-:::success
+:::success[`recursive_directory_iterator`]
+
 Use `recursive_directory_iterator` to walk entire directory trees easily!
 :::
 
@@ -346,7 +347,8 @@ void errorHandling() {
 }
 ```
 
-:::success
+:::success[Error Code Versions]
+
 Prefer **error code versions** in performance-critical code to avoid exception overhead.
 :::
 
@@ -511,8 +513,7 @@ void permissions() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use `fs::path` for all path manipulation
 - Prefer error code versions in performance-critical code
 - Check `exists()` before file operations

@@ -146,7 +146,8 @@ result = df.groupby('category').agg(
 # B                450      225.0         45
 ```
 
-:::success
+:::success[Use Named Aggregations]
+
 Use named aggregations (pandas 0.25+) for cleaner column names: `agg(name=('column', 'function'))`
 :::
 
@@ -519,7 +520,8 @@ result = df.groupby('category', as_index=False)['value'].sum()
 result = df.groupby('category')['value'].agg('sum', engine='numba')
 ```
 
-:::success
+:::success[Combine Aggregations in One Call]
+
 Avoid multiple groupby calls. Combine all aggregations in a single `agg()` call for better performance.
 :::
 

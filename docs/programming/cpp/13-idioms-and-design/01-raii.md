@@ -107,7 +107,8 @@ void processFile() {
 }
 ```
 
-:::success
+:::success[RAII]
+
 RAII ensures resources are **always** released, even when exceptions are thrown, providing both safety and convenience.
 :::
 
@@ -467,7 +468,7 @@ void usePooledResource() {
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use RAII for ALL resource management
 - - Prefer standard library RAII types (`unique_ptr`, `lock_guard`)
 - Make destructors `noexcept`

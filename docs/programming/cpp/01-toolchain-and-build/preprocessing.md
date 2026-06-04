@@ -373,7 +373,7 @@ This shows exactly what the compiler sees after preprocessing. Useful for debugg
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `#pragma once` for include guards (simpler)
 - Use `const`/`constexpr` instead of `#define` for constants
 - Use `inline` functions instead of function macros

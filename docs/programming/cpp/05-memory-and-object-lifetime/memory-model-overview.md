@@ -395,7 +395,7 @@ thread_local int tlsVar = 0;  // Per-thread lifetime
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - **Default to stack** for local variables
 - **Use smart pointers** for heap (unique_ptr, shared_ptr)
 - **Prefer std::vector** over new[] for dynamic arrays

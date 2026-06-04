@@ -760,7 +760,7 @@ if(NOT name_FOUND)
 endif()
 ```
 
-:::success When to Use FetchContent
+:::success[When to Use FetchContent]
 
 **Perfect for:**
 

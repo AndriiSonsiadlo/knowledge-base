@@ -433,7 +433,7 @@ class X<T*, T> { /* ... */ };
 
 Make sure specializations don't overlap ambiguously.
 
-:::success Partial Specialization Essentials
+:::success[Partial Specialization Essentials]
 
 **Pattern matching** = specialize for type categories  
 **Class templates only** = functions can't be partially specialized  

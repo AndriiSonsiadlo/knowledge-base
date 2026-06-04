@@ -69,7 +69,7 @@ MyStruct s;
 s.x = 10;     // OK: public
 ```
 
-:::success class vs struct
+:::success[class vs struct]
 - `class` - private by default (use for objects with behavior)
 - `struct` - public by default (use for plain data)
   
@@ -113,7 +113,7 @@ public:
 // Cannot corrupt account - balance always valid
 ```
 
-:::success Benefits
+:::success[Benefits]
 - Invariants protected (balance ≥ 0)
 - Implementation can change without breaking code
 - Clear interface (public methods)

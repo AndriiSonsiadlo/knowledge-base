@@ -577,9 +577,9 @@ result = pd.merge(left, right, on='key')
 df['key'] = df['key'].astype('category')
 ```
 
-:::success
-For repeated merges on the same column, convert it to categorical dtype or set it as the index for
-better performance.
+:::success[Optimize Repeated Merges]
+
+For repeated merges on the same column, convert it to categorical dtype or set it as the index for better performance.
 :::
 
 ## Common Mistakes

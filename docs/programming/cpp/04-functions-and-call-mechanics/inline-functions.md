@@ -313,7 +313,7 @@ g++ -flto -O3 file1.cpp file2.cpp -o app
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Let compiler decide (use -O2/-O3)
 - Mark small, frequently-called functions inline
 - Define inline functions in headers

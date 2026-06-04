@@ -137,7 +137,8 @@ df['income_quartile'] = pd.qcut(
 )
 ```
 
-:::success
+:::success[Choose the Right Binning Method]
+
 Use `qcut()` when you want balanced groups. Use `cut()` when bin boundaries are meaningful (e.g., age groups).
 :::
 
@@ -307,8 +308,7 @@ df['status'].memory_usage(deep=True)
 # ~2000 bytes (98% reduction!)
 ```
 
-:::success
-Convert to categorical when:
+:::success[Convert to categorical when:]
 
 - Column has \<50% unique values
 - Values repeat frequently

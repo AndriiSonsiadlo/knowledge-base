@@ -205,7 +205,7 @@ for (auto& animal : zoo) {
 }
 ```
 
-:::success Avoiding Slicing
+:::success[Avoiding Slicing]
 
 **Problem** = copying derived to base loses derived parts  
 **Pass by value** = causes slicing  

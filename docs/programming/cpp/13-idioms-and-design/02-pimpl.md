@@ -464,8 +464,7 @@ for (auto& w : widgets) {
 
 Pimpl is most beneficial in specific scenarios, not everywhere.
 
-:::success
-**Use Pimpl When:**
+:::success[**Use Pimpl When:**]
 - Class has complex private implementation
 - Reducing compilation dependencies is important
 - Providing stable ABI for library interface
@@ -486,8 +485,7 @@ Pimpl is most beneficial in specific scenarios, not everywhere.
 
 Follow these guidelines for effective Pimpl usage.
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Define destructor in `.cpp` file
 - Use `unique_ptr` for exclusive ownership
 - Forward declare Impl in header

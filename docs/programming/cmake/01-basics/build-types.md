@@ -98,7 +98,7 @@ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 - Debugging performance issues
 - Need stack traces in production
 
-:::success Recommended for Profiling
+:::success[Recommended for Profiling]
 This is the ideal configuration for performance profiling tools!
 :::
 
@@ -381,7 +381,7 @@ int main() {
 
 ## Build Type Best Practices
 
-:::success Recommendations
+:::success[Recommendations]
 
 1. **Development**: Use `Debug`
     - Full debugging capability

@@ -521,7 +521,7 @@ std::transform(std::execution::par, vec.begin(), vec.end(), vec.begin(),
     [](int x) { return x * x; });
 ```
 
-:::success Algorithm Quick Reference
+:::success[Algorithm Quick Reference]
 
 **Finding**: find, find_if, count, count_if  
 **Copying**: copy, copy_if, move  

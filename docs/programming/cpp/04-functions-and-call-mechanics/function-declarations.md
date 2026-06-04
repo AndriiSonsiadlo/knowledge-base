@@ -276,8 +276,7 @@ private:
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Declare functions in headers, define in source files
 - Use meaningful parameter names in declarations
 - Mark const member functions with `const`

@@ -27,8 +27,7 @@ std::sort(nums.begin(), nums.end());
 std::ranges::sort(nums);
 ```
 
-:::success
-**Benefits:**
+:::success[**Benefits:**]
 - More concise syntax
 - Composable operations (pipelines)
 - Lazy evaluation (no intermediate containers)
@@ -247,7 +246,8 @@ void projectionExample() {
 }
 ```
 
-:::success
+:::success[Projections]
+
 **Projections** eliminate the need for custom comparators in many cases!
 :::
 
@@ -350,8 +350,7 @@ graph LR
     
 ```
 
-:::success
-**Performance Benefits:**
+:::success[**Performance Benefits:**]
 - No intermediate allocations
 - Lazy evaluation - only compute what's needed
 - Better optimization opportunities for compilers
@@ -411,8 +410,7 @@ auto fibonacci = std::views::iota(0)
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use views for lazy, composable operations
 - Prefer range algorithms over iterator-based ones
 - Use projections instead of custom comparators

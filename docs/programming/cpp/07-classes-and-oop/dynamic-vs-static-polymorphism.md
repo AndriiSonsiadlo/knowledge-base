@@ -240,7 +240,7 @@ void sort(Iterator begin, Iterator end) {
 
 GUI frameworks typically use dynamic polymorphism (runtime type selection). Generic algorithms use static polymorphism (compile-time optimization).
 
-:::success Choosing Polymorphism Type
+:::success[Choosing Polymorphism Type]
 
 **Dynamic Polymorphism:**
 - Runtime flexibility

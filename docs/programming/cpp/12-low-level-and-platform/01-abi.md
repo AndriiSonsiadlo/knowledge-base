@@ -238,7 +238,7 @@ try {
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 
 - Maintain ABI stability in public libraries
 - Use PIMPL for implementation flexibility

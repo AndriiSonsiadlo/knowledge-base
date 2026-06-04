@@ -212,7 +212,8 @@ df_irregular = df.sample(frac=0.8)  # 80% of data
 df_irregular['ma'] = df_irregular['value'].rolling(window='24H').mean()
 ```
 
-:::success
+:::success[Use Time-Based Windows]
+
 Use time-based windows (`window='7D'`) instead of count-based (`window=7`) for irregular time series or when frequency varies.
 :::
 

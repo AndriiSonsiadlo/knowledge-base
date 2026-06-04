@@ -250,7 +250,8 @@ df['plus_5_bdays'] = df['date'] + pd.offsets.BDay(5)
 df['month_end'] = df['date'] + pd.offsets.MonthEnd(0)  # 0 = this month
 ```
 
-:::success
+:::success[DateOffset vs Timedelta]
+
 Use `pd.DateOffset` for month/year arithmetic as it handles varying month lengths correctly. Use `pd.Timedelta` for fixed durations (days, hours).
 :::
 

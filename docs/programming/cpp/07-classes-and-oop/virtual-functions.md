@@ -193,7 +193,7 @@ public:
 };
 ```
 
-:::success Always Use override
+:::success[Always Use override]
 Catches typos, parameter mismatches, and signature differences. Makes intent clear.
 :::
 

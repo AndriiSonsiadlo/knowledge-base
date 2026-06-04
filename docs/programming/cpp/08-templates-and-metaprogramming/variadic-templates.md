@@ -250,7 +250,7 @@ sum(1, 2, 3);      // OK: all ints
 // sum(1, 2.5, 3);   // Error: 2.5 is not integral
 ```
 
-:::success Variadic Template Essentials
+:::success[Variadic Template Essentials]
 
 **Parameter pack** = `typename... Args` (0+ types)  
 **Pack expansion** = `args...` expands to multiple arguments  

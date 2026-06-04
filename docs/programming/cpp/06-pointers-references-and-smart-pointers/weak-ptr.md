@@ -271,7 +271,7 @@ public:
 
 The parent owns the children (strong references), and children observe the parent (weak reference). This prevents cycles: when the parent is destroyed, it releases its children, and the children can detect that their parent is gone.
 
-:::success Ownership Rule
+:::success[Ownership Rule]
 ```
 Parent ──owns──> Child  (shared_ptr)
 Child ·observes· Parent (weak_ptr)
@@ -313,7 +313,7 @@ public:
 
 Observers can be destroyed without notifying the subject. The subject doesn't keep observers alive - they're held weakly. When notifying, expired observers are skipped or removed automatically.
 
-:::success Benefits
+:::success[Benefits]
 - Observers can be destroyed without notifying subject
 - Subject doesn't keep observers alive
 - Automatic cleanup of dead observers
@@ -349,7 +349,7 @@ public:
 
 The cache stores `weak_ptr`s, so it doesn't prevent resources from being deleted when no longer needed. If a resource is still in use elsewhere (has active `shared_ptr`s), the cache can return it. Otherwise, the cache entry is expired and a new resource is created.
 
-:::success Benefits
+:::success[Benefits]
 - Cache doesn't prevent deletion
 - Resources deleted when no longer used
 - Cache automatically cleans up

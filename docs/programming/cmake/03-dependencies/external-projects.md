@@ -750,7 +750,7 @@ add_dependencies(myapp boost)
 
 ## Best Practices
 
-:::success Recommendations
+:::success[Recommendations]
 
 1. **Use specific versions**
     - Tags or commit hashes, not branch names

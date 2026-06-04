@@ -558,7 +558,7 @@ ctest -D Experimental  # Run and submit to dashboard
 
 ## Best Practices
 
-:::success Testing Guidelines
+:::success[Testing Guidelines]
 
 1. **Enable testing conditionally** - users may not want tests
 

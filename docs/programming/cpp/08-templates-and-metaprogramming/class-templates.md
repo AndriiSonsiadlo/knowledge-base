@@ -329,7 +329,7 @@ UniquePtr<int> p(new int(42));
 std::cout << *p;  // 42
 ```
 
-:::success Class Template Key Points
+:::success[Class Template Key Points]
 
 **Generic classes** = one template, many type-specific classes  
 **Multiple parameters** = types and non-type values  

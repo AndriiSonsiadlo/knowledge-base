@@ -94,7 +94,7 @@ This section defines your project and automatically sets up useful variables lik
 * `PROJECT_SOURCE_DIR` → Absolute path to the source directory
 * `PROJECT_BINARY_DIR` → Absolute path to the build directory
 
-:::success Variables Created
+:::success[Variables Created]
 After `project()`, you can reference `${PROJECT_NAME}`, `${PROJECT_VERSION}`,
 `${PROJECT_SOURCE_DIR}`, etc., in other parts of your CMake scripts.
 :::
@@ -314,7 +314,7 @@ target_compile_options(myapp PRIVATE -Wall -Wextra)
 
 :::
 
-:::success Benefits of using targets properly
+:::success[Benefits of using targets properly]
 
 1. **Encapsulation**: Each target defines its own behavior and dependencies.
 2. **Portability**: Imported targets and modern CMake practices work seamlessly across platforms.
@@ -423,7 +423,7 @@ ctest --test-dir build -R MyLibTests
   * `ctest -V` → verbose output
   * `ctest -j N` → run tests in parallel
 
-:::success Benefits of using CTest
+:::success[Benefits of using CTest]
 
 * Automatically handles multiple test executables and their dependencies.
 * Integrates with CI/CD pipelines (GitHub Actions, GitLab CI, Jenkins, etc.).
@@ -550,7 +550,7 @@ add_test(NAME MyLibTests COMMAND test_suite)
 
 ## Best Practices
 
-:::success Do's
+:::success[Do's]
 Use `target_*` commands (not global `include_directories()`)  
 Put `cmake_minimum_required()` first  
 Version your project  

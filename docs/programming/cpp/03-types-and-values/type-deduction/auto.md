@@ -291,7 +291,7 @@ auto p = &x, v = x;   // Error: int* vs int
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `auto` for iterators and complex template types
 - Use `auto&` or `const auto&` in range-for loops
 - Use `auto` to avoid repeating type names

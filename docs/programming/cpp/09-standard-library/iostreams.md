@@ -228,8 +228,7 @@ int main() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use RAII (file streams close automatically)
 - Check stream state after operations
 - Use `std::getline()` for line-based input

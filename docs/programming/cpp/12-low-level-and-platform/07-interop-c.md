@@ -331,7 +331,7 @@ extern "C" void func(int x);
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `extern "C"` for C compatibility
 - Wrap with `#ifdef __cplusplus`
 - Use opaque pointers for C++ classes

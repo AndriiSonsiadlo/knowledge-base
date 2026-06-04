@@ -10,7 +10,7 @@ tags: [c++, initialization, value-init, zero-initialization]
 
 Explicitly request **zero-initialization** for fundamentals, **default construction** for classes. Safer than default initialization.
 
-:::success Guaranteed Zero
+:::success[Guaranteed Zero]
 Value initialization ensures fundamentals are zeroed, not indeterminate. Always safe to read.
 :::
 

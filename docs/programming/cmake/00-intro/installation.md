@@ -79,7 +79,7 @@ Expected output:
 cmake version 3.28.1
 ```
 
-:::success Minimum Version
+:::success[Minimum Version]
 For modern C++ projects, use **CMake 3.15+**. Many features require this baseline.
 :::
 

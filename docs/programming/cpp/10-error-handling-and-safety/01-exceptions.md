@@ -184,7 +184,8 @@ void databaseOperation() {
 }
 ```
 
-:::success
+:::success[Custom Exception Hierarchy]
+
 Derive custom exceptions from standard exception classes to maintain compatibility with generic handlers.
 :::
 
@@ -290,7 +291,8 @@ void safeFunction() {
 }
 ```
 
-:::success
+:::success[RAII Wrappers]
+
 Always use **RAII** wrappers (smart pointers, file streams, lock guards) for exception-safe resource management.
 :::
 
@@ -586,8 +588,7 @@ void useGuard() {
 
 ## When to Use Exceptions
 
-:::success
-**Use Exceptions When:**
+:::success[**Use Exceptions When:**]
 - Errors are exceptional (not expected in normal flow)
 - Error handling code would clutter normal logic
 - Errors need to propagate through multiple layers
@@ -606,8 +607,7 @@ void useGuard() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Throw by value, catch by const reference
 - Use standard exception types when possible
 - Provide meaningful error messages

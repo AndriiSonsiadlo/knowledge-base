@@ -310,7 +310,7 @@ perf stat -r 10 ./program_new
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Profile before optimizing
 - Focus on hot paths (90/10 rule)
 - Measure real-world workloads

@@ -362,7 +362,7 @@ static_assert(noexcept(vec[0]));         // true (no bounds checking)
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Mark move constructors/assignments `noexcept`
 - Mark destructors `noexcept` (implicit, but can be explicit)
 - Mark swap functions `noexcept`

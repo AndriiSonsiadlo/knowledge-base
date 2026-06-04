@@ -202,8 +202,7 @@ public:
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use defaults for frequently-used values
 - Place defaults in header files (declarations)
 - Keep defaults simple (literals or simple expressions)

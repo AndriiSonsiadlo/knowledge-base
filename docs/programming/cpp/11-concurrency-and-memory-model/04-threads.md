@@ -373,8 +373,7 @@ int main() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Always join or detach threads before destruction
 - Use RAII wrappers for automatic joining
 - Consider hardware_concurrency() for thread count

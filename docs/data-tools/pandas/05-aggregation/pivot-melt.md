@@ -524,7 +524,8 @@ result = pd.pivot_table(df, index='category', columns='region', values='sales')
 # (Faster with categorical data)
 ```
 
-:::success
+:::success[Categorical Before Pivoting]
+
 Convert columns to categorical before pivoting if they have many repeated values. This significantly improves performance and reduces memory usage.
 :::
 

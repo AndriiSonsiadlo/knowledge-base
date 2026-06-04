@@ -118,7 +118,7 @@ message(STATUS "Binary: ${PROJECT_BINARY_DIR}")   # /path/to/build
 | `CMAKE_CURRENT_BINARY_DIR` | Current build subdirectory | `/home/user/project/build/src` |
 | `CMAKE_CURRENT_LIST_DIR` | Directory of current list file | `/home/user/project/cmake` |
 
-:::success Use Current Variables
+:::success[Use Current Variables]
 In subdirectories, prefer `CMAKE_CURRENT_SOURCE_DIR` over `CMAKE_SOURCE_DIR`
 :::
 
@@ -376,7 +376,7 @@ target_compile_options(myapp PRIVATE ${WARNINGS})
 
 ## Variable Naming Conventions
 
-:::success Best Practices
+:::success[Best Practices]
 
 - `UPPERCASE_WITH_UNDERSCORES` - Cache variables, important settings
 - `MixedCase` or `lowercase_with_underscores` - Local variables

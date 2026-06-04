@@ -541,7 +541,7 @@ The derived class is incomplete during base class definition. Only pointer/refer
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use CRTP for zero-overhead static polymorphism
 - Provide clear interface expectations in base
 - Use `friend` for cleaner derived class API

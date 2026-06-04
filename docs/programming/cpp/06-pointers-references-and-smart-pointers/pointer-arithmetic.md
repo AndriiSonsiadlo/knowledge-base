@@ -136,7 +136,7 @@ for (int* ptr = end - 1; ptr >= arr; --ptr) {
 }
 ```
 
-:::success Modern Alternative
+:::success[Modern Alternative]
 ```cpp
 // Prefer range-based for
 for (int value : arr) {
@@ -235,7 +235,7 @@ int x = *(int*)(cptr + 1);  // Undefined behavior
 - Type assumptions (arithmetic assumes correct type)
 :::
 
-:::success Modern practice
+:::success[Modern practice]
 - Prefer iterators and range-based for
 - Use `std::vector`/`std::array` (bounds checking)
 - Pointer arithmetic for C API interop only

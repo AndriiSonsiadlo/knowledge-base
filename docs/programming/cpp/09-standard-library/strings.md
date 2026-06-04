@@ -621,7 +621,7 @@ std::string long_str(1000, 'x');  // Definitely allocated
 
 **Benefit:** Short strings are fast with no dynamic allocation overhead.
 
-:::success String Essentials
+:::success[String Essentials]
 
 **std::string** = owned, mutable, dynamic  
 **std::string_view** = non-owning, efficient passing  

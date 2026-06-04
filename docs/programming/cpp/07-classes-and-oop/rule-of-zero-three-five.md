@@ -224,7 +224,7 @@ vec.push_back(Widget());  // Can use move if noexcept
 // Otherwise uses copy for exception safety
 ```
 
-:::success Always noexcept
+:::success[Always noexcept]
 Move constructors and move assignments should almost always be `noexcept`. This enables optimizations in standard containers.
 :::
 

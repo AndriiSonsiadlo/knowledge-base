@@ -119,8 +119,7 @@ void pmrExample() {
 }
 ```
 
-:::success
-**PMR Benefits:**
+:::success[**PMR Benefits:**]
 - Runtime polymorphism (no template bloat)
 - Easy to swap memory strategies
 - Built-in memory resources for common patterns
@@ -437,8 +436,7 @@ void threadFunction() {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use `std::allocator_traits` for generic code
 - Prefer PMR for runtime flexibility
 - Use monotonic buffers for temporary allocations

@@ -429,7 +429,7 @@ This helps CMake understand the full build graph, important for Ninja generator.
 
 ## Best Practices
 
-:::success Custom Command Guidelines
+:::success[Custom Command Guidelines]
 
 1. **Depend on actual inputs** - list all files that trigger rebuild
 2. **Use absolute paths** for `OUTPUT` - ensures correct location

@@ -240,7 +240,7 @@ void no_leak() {
 
 ## Quick Debugging Checklist
 
-:::success Before Using Debugger
+:::success[Before Using Debugger]
 1. **Read error message** completely
 2. **Check recent changes** (version control)
 3. **Add print statements** at key points

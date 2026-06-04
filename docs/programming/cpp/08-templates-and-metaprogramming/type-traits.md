@@ -307,7 +307,7 @@ auto b = getValue(ptr);  // Returns 42 (dereferenced)
 - `add_const`, `add_pointer`, `add_lvalue_reference`
 - `decay`, `conditional`, `common_type`
 
-:::success Type Traits Summary
+:::success[Type Traits Summary]
 
 **Query types** = is_integral, is_pointer, is_const, etc.  
 **Transform types** = remove_const, add_pointer, decay, etc.  

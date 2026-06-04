@@ -199,7 +199,7 @@ wrapper(std::move(w));   // Forwards as rvalue (move)
 mechanism that lets `std::forward` recover the original value category is
 [Reference Collapsing](../03-types-and-values/value-categories/reference-collapsing.md).
 
-:::success Quick Reference
+:::success[Quick Reference]
 
 **Copy = Duplicate**, Move = Transfer  
 **lvalue = named**, rvalue = temporary  

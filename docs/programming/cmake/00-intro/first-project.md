@@ -102,7 +102,7 @@ cmake --build .
 ./myapp
 ```
 
-:::success Output
+:::success[Output]
 
 ```
 Hello from my first CMake project!

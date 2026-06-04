@@ -10,7 +10,7 @@ tags: [c++, initialization, uniform-init, cpp11, braces]
 
 C++11 brace initialization `{}` - one syntax for all types. Consistent, safe (prevents narrowing), solves gotchas.
 
-:::success One Syntax, Everywhere
+:::success[One Syntax, Everywhere]
 Braces `{}` work for any type: fundamentals, aggregates, classes, arrays, containers. Prevents narrowing conversions.
 :::
 

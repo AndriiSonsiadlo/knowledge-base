@@ -136,7 +136,7 @@ int main() {
 
 Memory is automatically managed through destructors. The string cleans itself up when it goes out of scope, eliminating manual memory management and the risk of leaks.
 
-:::success Why This Matters
+:::success[Why This Matters]
 C forces you to think about memory management constantly. C++ lets you focus on solving problems, with the compiler ensuring resources are cleaned up.
 :::
 
@@ -542,7 +542,7 @@ ASan detects:
 - Memory leaks
 - Double-free bugs
 
-:::success Production Workflow
+:::success[Production Workflow]
 1. **Develop** with warnings enabled (`-Wall -Wextra`)
 2. **Analyze** with clang-tidy during development
 3. **Test** with AddressSanitizer before commit

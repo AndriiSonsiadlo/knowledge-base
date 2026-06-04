@@ -148,7 +148,7 @@ void safe() {
 
 ## Key Rules
 
-:::success DO
+:::success[DO]
 - Use smart pointers (`unique_ptr`, `shared_ptr`)
 - Match `new` with `delete`, `new[]` with `delete[]`
 - Set deleted pointers to `nullptr`

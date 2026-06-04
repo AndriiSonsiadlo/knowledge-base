@@ -368,7 +368,7 @@ demangle(typeid(std::vector<int>).name());  // Human-readable
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `extern "C"` for C compatibility
 - Use `nm -C` to debug link errors
 - Maintain ABI compatibility in library updates

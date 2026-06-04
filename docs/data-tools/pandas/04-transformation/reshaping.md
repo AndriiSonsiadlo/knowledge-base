@@ -601,7 +601,8 @@ df_long = df.melt(id_vars=['id'], value_vars=columns)
 df_long['variable'] = df_long['variable'].astype('category')
 ```
 
-:::success
+:::success[Convert Melted 'variable' to Categorical]
+
 After melting, convert the 'variable' column to categorical to save memory if you have many rows.
 :::
 

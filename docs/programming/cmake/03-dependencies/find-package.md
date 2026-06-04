@@ -238,7 +238,7 @@ target_include_directories(myapp PRIVATE ${ZLIB_INCLUDE_DIRS})
 target_link_libraries(myapp PRIVATE ${ZLIB_LIBRARIES})
 ```
 
-:::success Use Imported Targets
+:::success[Use Imported Targets]
 Modern packages provide `Package::Component` targets. These are self-contained and handle includes/links automatically.
 :::
 
@@ -455,7 +455,7 @@ endif()
 
 ## Best Practices
 
-:::success Recommendations
+:::success[Recommendations]
 
 1. **Use REQUIRED for mandatory packages**
 

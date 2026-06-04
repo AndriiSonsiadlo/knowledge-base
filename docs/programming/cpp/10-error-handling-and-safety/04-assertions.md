@@ -227,7 +227,8 @@ void compileTimeChecks() {
 }
 ```
 
-:::success
+:::success[`static_assert`]
+
 `static_assert` provides **compile-time** guarantees with zero runtime cost. Use it for type checks, constants, and platform assumptions.
 :::
 
@@ -633,8 +634,7 @@ void buildModes() {
 
 ## Assertion Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use assertions to document assumptions
 - Check preconditions, postconditions, and invariants
 - Assert impossible conditions to catch bugs

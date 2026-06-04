@@ -489,7 +489,7 @@ If any member is non-copyable, the containing class automatically becomes non-co
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Delete copy operations explicitly for clarity
 - Implement move operations for transferable resources
 - Use `= default` for move when applicable

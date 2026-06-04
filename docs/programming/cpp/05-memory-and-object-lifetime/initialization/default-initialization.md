@@ -180,7 +180,7 @@ graph TD
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Always initialize fundamental types explicitly
 - Use in-class initializers (C++11)
 - Initialize in constructor initializer list

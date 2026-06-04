@@ -404,8 +404,7 @@ cv.wait(lock, []{ return ready; });
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Always use a predicate with `wait()`
 - Release locks before calling `notify()`
 - Use `unique_lock` (not `lock_guard`) with condition variables

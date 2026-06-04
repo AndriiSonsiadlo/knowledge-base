@@ -387,8 +387,7 @@ private:
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Size pool based on `hardware_concurrency()`
 - Use futures for results
 - Handle task exceptions gracefully

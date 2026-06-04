@@ -356,8 +356,7 @@ if (status == std::future_status::ready) {
 
 ## Best Practices
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Use `std::async` for simple async operations
 - Handle exceptions from futures
 - Check `valid()` before calling `get()`

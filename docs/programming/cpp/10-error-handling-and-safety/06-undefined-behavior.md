@@ -517,8 +517,7 @@ const std::string& safeStaticReturn() {
 
 ## Practical Guidelines
 
-:::success
-**DO:**
+:::success[**DO:**]
 - Enable all compiler warnings (`-Wall -Wextra`)
 - Use sanitizers during development
 - Initialize all variables before use

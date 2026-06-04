@@ -509,7 +509,7 @@ public:
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use copy-and-swap for strong exception safety
 - Implement non-throwing `swap`
 - Pass assignment parameter by value

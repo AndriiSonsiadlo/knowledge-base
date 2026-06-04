@@ -325,7 +325,7 @@ Complex c = a + b;  // Calls operator+
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Overload for different types/counts
 - Use const overloading for getter/setter pairs
 - Use reference qualifiers (lvalue/rvalue) for optimization

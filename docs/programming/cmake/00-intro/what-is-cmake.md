@@ -54,7 +54,7 @@ flowchart TD
     D --> E[Executable/Library]
 ```
 
-:::success The CMake Workflow
+:::success[The CMake Workflow]
 
 1. **Configure**: `cmake -S . -B build` - Generate build files
 2. **Build**: `cmake --build build` - Compile your project

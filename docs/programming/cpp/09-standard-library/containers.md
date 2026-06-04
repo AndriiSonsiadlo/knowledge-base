@@ -530,7 +530,7 @@ c.find(key);
 c.count(key);
 ```
 
-:::success Container Quick Reference
+:::success[Container Quick Reference]
 
 **vector** = dynamic array, default choice  
 **array** = fixed size, stack allocated  

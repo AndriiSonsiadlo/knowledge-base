@@ -335,7 +335,7 @@ The utilities library brings together many small but powerful building blocks th
 * efficient value handling (`std::move`, `std::forward`, `std::exchange`)
 * expressive generic programming (type traits and comparison utilities)
 
-:::success In practice:
+:::success[In practice:]
 * Prefer **`std::optional`** over sentinel values.
 * Prefer **`std::variant`** over unions or manual type tagging.
 * Use **`std::any`** only when true type erasure is required.

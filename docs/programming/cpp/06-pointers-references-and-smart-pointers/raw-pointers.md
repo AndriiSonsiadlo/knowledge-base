@@ -323,7 +323,7 @@ std::function<int(int, int)> op = add;
 
 Function pointer syntax is notoriously difficult to read: `int (*ptr)(int, int)` declares a pointer to a function taking two ints and returning int. Modern C++ prefers `std::function` which provides a cleaner syntax and can store lambdas, not just function pointers.
 
-:::success Key Insights
+:::success[Key Insights]
 
 **Memory Address**: Pointers store addresses, not values. The value lives elsewhere.
 

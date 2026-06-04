@@ -743,7 +743,7 @@ graph TD
 - Huge improvement over C++98
 - Available on all modern compilers
 
-:::success Minimum Modern Standard
+:::success[Minimum Modern Standard]
 Never use anything older than C++11. It's the baseline for "Modern C++" and is supported by all compilers since ~2015.
 :::
 

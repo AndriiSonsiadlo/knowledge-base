@@ -328,7 +328,7 @@ process([](int x) { std::cout << x; });  // No overhead
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Use `auto` for lambda variables
 - Prefer capture by value for small types
 - Use init capture for move-only types

@@ -241,7 +241,7 @@ gdb -batch -ex "bt" -ex "info locals" -ex "quit" $BINARY $CORE
 
 ## Best Practices
 
-:::success DO
+:::success[DO]
 - Enable cores in development (`ulimit -c unlimited`)
 - Keep matching binaries for production cores
 - Strip binaries, but keep debug symbols separately
