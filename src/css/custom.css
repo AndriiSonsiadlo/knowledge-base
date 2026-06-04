@@ -987,11 +987,19 @@ body {
 
 /* ============ Tables ============ */
 .markdown table {
-  @apply my-4 w-full overflow-hidden rounded-lg border;
-  /* border-separate (not collapse) so overflow-hidden clips the header's
-     colored corners to the radius — collapse leaves square corners. */
+  @apply my-4 mx-auto block max-w-full overflow-hidden rounded-lg border;
+  /* No width set: the table sizes to its content (up to max-w-full) instead
+     of always stretching edge-to-edge, so the border hugs the actual
+     content instead of leaving empty space inside full-width borders.
+     mx-auto centers it when it's narrower than the container. */
+  /* border-separate (not collapse), with explicit radii on the corner
+     cells below — relying solely on overflow-hidden to clip the header's
+     square corners is unreliable once the table is sized to fit-content,
+     which can leave a hairline gap where the flat cell background shows
+     through the curve. */
   border-collapse: separate;
   border-spacing: 0;
+  width: fit-content;
 }
 
 [data-theme="light"] .markdown table {
@@ -1026,6 +1034,24 @@ body {
 
 [data-theme="dark"] .markdown td {
   border-bottom-color: rgb(var(--brand-primary-rgb) / 0.16);
+}
+
+/* Explicit corner radii matching the table's rounded-lg, since the header
+   and last row's flat backgrounds otherwise square off the curve. */
+.markdown thead th:first-child {
+  @apply rounded-tl-lg;
+}
+
+.markdown thead th:last-child {
+  @apply rounded-tr-lg;
+}
+
+.markdown tbody tr:last-child td:first-child {
+  @apply rounded-bl-lg;
+}
+
+.markdown tbody tr:last-child td:last-child {
+  @apply rounded-br-lg;
 }
 
 /* ============ Images ============ */
