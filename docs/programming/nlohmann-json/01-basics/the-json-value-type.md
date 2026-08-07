@@ -39,13 +39,13 @@ after that, most operations are only legal if they match the current type.
 
 ```mermaid
 flowchart LR
-    N[null] -->|"j[\"k\"] = ..."| O[object]
-    N -->|push_back / j[0] = ...| A[array]
-    N -->|j = 42| I[number]
-    N -->|j = \"s\"| S[string]
-    O -.->|push_back on an object| E1[type_error]
-    A -.->|j[\"k\"] on an array| E2[type_error]
-    I -.->|j.push_back on a number| E3[type_error]
+    N[null] -->|"j['k'] = ..."| O[object]
+    N -->|"push_back / j[0] = ..."| A[array]
+    N -->|"j = 42"| I[number]
+    N -->|"j = 's'"| S[string]
+    O -.->|"push_back on an object"| E1[type_error]
+    A -.->|"j['k'] on an array"| E2[type_error]
+    I -.->|"j.push_back on a number"| E3[type_error]
 ```
 
 A `null` value is permissive — assigning a key into it turns it into an object, calling
