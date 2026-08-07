@@ -192,7 +192,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
-        additionalLanguages: ["bash", "cmake", "csharp", "ini", "python"],
+        additionalLanguages: ["bash", "cmake", "csharp", "ini", "json", "python"],
         additionalPlugins: ["line-numbers", "show-language"],
       },
     }),
