@@ -1,5 +1,6 @@
 .navbarInner {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   width: 100%;
   gap: 0.7rem;
@@ -8,14 +9,17 @@
 
 .brandRail {
   min-width: 0;
+  justify-self: start;
 }
 
 .centerRail {
   min-width: 0;
+  justify-self: center;
 }
 
 .utilityRail {
   min-width: 0;
+  justify-self: end;
 }
 
 /* Docusaurus's default ColorModeToggle wraps the button in a div hardcoded
