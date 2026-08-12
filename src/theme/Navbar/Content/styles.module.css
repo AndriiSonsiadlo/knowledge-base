@@ -36,6 +36,15 @@
   .centerRail {
     display: none;
   }
+
+  /* Below 1400px the center rail (categories) is gone. Relying on its grid
+     track collapsing to 0 is fragile, so switch to a plain 2-item flex
+     layout instead — guarantees brandRail stays flush left and utilityRail
+     stays flush right regardless of track-sizing edge cases. */
+  .navbarInner {
+    display: flex;
+    justify-content: space-between;
+  }
 }
 
 @media (max-width: 996px) {
