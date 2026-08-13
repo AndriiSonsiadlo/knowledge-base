@@ -31,7 +31,7 @@ flowchart TB
   SUB0 --> LANES["FP32 / INT32 / tensor lanes"]
 ```
 
-![A grid of blocks scheduled across a varying number of SMs](pathname:///knowledge-base/img/gpu/02-gpu-hardware-architecture/automatic-scalability.png)
+![A grid of blocks scheduled across a varying number of SMs](/img/gpu/02-gpu-hardware-architecture/automatic-scalability.png)
 *Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
 
 :::warning["CUDA cores" counts lanes, not processors]

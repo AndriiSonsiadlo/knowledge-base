@@ -61,7 +61,7 @@ On every architecture since Volta, L1 cache and shared memory occupy the same ph
 
 Unlike the register file, this pool is not split evenly and statically across the four sub-partitions the way registers are — the combined L1/shared-memory block sits below all four sub-partitions and is reachable by any warp on the SM, which is exactly why shared memory can be used to communicate between warps in the same block, while registers cannot.
 
-![CUDA memory hierarchy: per-thread, per-block, and global memory](pathname:///knowledge-base/img/gpu/02-gpu-hardware-architecture/memory-hierarchy.png)
+![CUDA memory hierarchy: per-thread, per-block, and global memory](/img/gpu/02-gpu-hardware-architecture/memory-hierarchy.png)
 *Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
 
 :::note[These numbers change every generation]
