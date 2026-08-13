@@ -131,6 +131,15 @@ const config = {
               "Master fundamentals, neural networks, NLP, and modern ML architectures.",
             icon: "🤖",
           },
+          {
+            type: "docSidebar",
+            sidebarId: "gpuComputingSidebar",
+            position: "left",
+            label: "GPU & Accelerators",
+            description:
+              "CUDA, GPU architecture, kernel optimization, and NPU/inference accelerators.",
+            icon: "🚀",
+          },
           // {
           //   to: "/blog",
           //   label: "Blog",
@@ -175,6 +184,10 @@ const config = {
                 label: "Machine Learning",
                 to: "/docs/machine-learning/intro",
               },
+              {
+                label: "GPU & Accelerators",
+                to: "/docs/gpu-computing/",
+              },
             ],
           },
           {
@@ -196,7 +209,17 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
-        additionalLanguages: ["bash", "cmake", "csharp", "ini", "json", "python"],
+        additionalLanguages: [
+          "bash",
+          "cmake",
+          "csharp",
+          "glsl",
+          "hlsl",
+          "ini",
+          "json",
+          "python",
+          "wgsl",
+        ],
         additionalPlugins: ["line-numbers", "show-language"],
       },
     }),
