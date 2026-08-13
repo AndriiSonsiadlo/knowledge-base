@@ -76,7 +76,7 @@ The index lists the three sequences; what follows is when each is the right one 
 
 The index states the section-wide conventions; the details worth knowing before you start reading are these.
 
-Code fences are `cpp` for CUDA C++ — there is no CUDA grammar available to the syntax highlighter, and `cpp` is the closest correct choice, so device-specific tokens like `__global__` and `` `<<<grid, block>>>` `` will not be highlighted specially. PTX and SASS listings use `text` for the same reason. Python appears only in [Libraries and Ecosystem](../08-libraries-and-ecosystem/cuda-python-and-cupy.md) and on the toolkit-installation page; everywhere else, examples are CUDA C++ even where a Python equivalent would be shorter.
+Code fences are `cpp` for CUDA C++ — there is no CUDA grammar available to the syntax highlighter, and `cpp` is the closest correct choice, so device-specific tokens like `__global__` and `<<<grid, block>>>` will not be highlighted specially. PTX and SASS listings use `text` for the same reason. Python appears only in [Libraries and Ecosystem](../08-libraries-and-ecosystem/cuda-python-and-cupy.md) and on the toolkit-installation page; everywhere else, examples are CUDA C++ even where a Python equivalent would be shorter.
 
 Admonitions carry consistent meanings. `:::info` frames the problem a feature exists to solve, and usually opens a page's substantive content. `:::note` carries version and compute-capability caveats — every feature with a hardware floor gets one, so if you are targeting older hardware, scanning the notes is the fastest way to find what you cannot use. `:::tip` is practical guidance, and `:::warning` marks correctness traps and performance cliffs, which on a GPU are frequently the same thing.
 

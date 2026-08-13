@@ -42,7 +42,7 @@ What happens when threads within the same warp take different paths through a co
 
 ### Grid / block / thread
 
-The three-level hierarchy a CUDA kernel launch is organised into: a grid is the whole launch, made of blocks; a block is a group of threads that can share memory and synchronize together via `__syncthreads()`, scheduled as a unit onto one SM; a thread is a single logical instance of the kernel, distinguished from its siblings by its index within the block and grid. The launch configuration `` `<<<grid, block>>>` `` sets the grid and block dimensions at the point a kernel is called. See [Threads, Blocks, and Grids](../03-cuda-programming-model/threads-blocks-and-grids.md).
+The three-level hierarchy a CUDA kernel launch is organised into: a grid is the whole launch, made of blocks; a block is a group of threads that can share memory and synchronize together via `__syncthreads()`, scheduled as a unit onto one SM; a thread is a single logical instance of the kernel, distinguished from its siblings by its index within the block and grid. The launch configuration `<<<grid, block>>>` sets the grid and block dimensions at the point a kernel is called. See [Threads, Blocks, and Grids](../03-cuda-programming-model/threads-blocks-and-grids.md).
 
 ### HBM
 
@@ -54,7 +54,7 @@ The standard CUDA terms for, respectively, the CPU and its system memory (the ho
 
 ### Kernel
 
-A function written to run on the GPU, launched from host code with the `` `<<<grid, block>>>` `` syntax and executed once per thread across the launch's entire thread hierarchy, marked with the `` `__global__` `` qualifier. A kernel launch is asynchronous with respect to the host by default — the host call returns immediately, and the work runs on the device's queue. See [Your First Kernel](../03-cuda-programming-model/your-first-kernel.md).
+A function written to run on the GPU, launched from host code with the `<<<grid, block>>>` syntax and executed once per thread across the launch's entire thread hierarchy, marked with the `__global__` qualifier. A kernel launch is asynchronous with respect to the host by default — the host call returns immediately, and the work runs on the device's queue. See [Your First Kernel](../03-cuda-programming-model/your-first-kernel.md).
 
 ### Occupancy
 
@@ -102,7 +102,7 @@ A grouping of thread blocks, introduced at compute capability 9.0 (Hopper), that
 
 ### Warp
 
-The GPU's actual unit of execution: a fixed group of 32 threads that the hardware issues one instruction to at a time, in lockstep, from a single program counter (subject to independent thread scheduling on compute capability 7.0+, which lets diverged threads within a warp track separate program counters without changing the underlying cost model). Every SIMT behavior in CUDA — coalescing, divergence, warp-level primitives like `` `__shfl_sync` `` — is a consequence of this 32-wide granularity. See [Warps and Schedulers](../02-gpu-hardware-architecture/warps-and-schedulers.md).
+The GPU's actual unit of execution: a fixed group of 32 threads that the hardware issues one instruction to at a time, in lockstep, from a single program counter (subject to independent thread scheduling on compute capability 7.0+, which lets diverged threads within a warp track separate program counters without changing the underlying cost model). Every SIMT behavior in CUDA — coalescing, divergence, warp-level primitives like `__shfl_sync` — is a consequence of this 32-wide granularity. See [Warps and Schedulers](../02-gpu-hardware-architecture/warps-and-schedulers.md).
 
 ## See also
 
