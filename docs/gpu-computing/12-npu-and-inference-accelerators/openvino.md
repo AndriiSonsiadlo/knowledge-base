@@ -8,4 +8,4 @@ tags: [gpu, npu, openvino, intel]
 
 # OpenVINO
 
-Stub — filled in by a later task.
+This page has not been written yet.

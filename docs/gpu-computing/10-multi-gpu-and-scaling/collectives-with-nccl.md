@@ -8,4 +8,4 @@ tags: [gpu, cuda, multi-gpu, nccl]
 
 # Collectives with NCCL
 
-Stub — filled in by a later task.
+This page has not been written yet.

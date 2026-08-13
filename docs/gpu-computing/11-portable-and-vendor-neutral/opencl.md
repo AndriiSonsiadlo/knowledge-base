@@ -8,4 +8,4 @@ tags: [gpu, opencl, portability]
 
 # OpenCL
 
-Stub — filled in by a later task.
+This page has not been written yet.

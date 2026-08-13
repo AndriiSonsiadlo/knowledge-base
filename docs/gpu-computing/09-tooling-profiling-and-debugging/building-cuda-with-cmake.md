@@ -8,4 +8,4 @@ tags: [gpu, cuda, tooling, cmake]
 
 # Building CUDA with CMake
 
-Stub — filled in by a later task.
+This page has not been written yet.

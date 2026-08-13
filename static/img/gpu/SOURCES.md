@@ -4,6 +4,10 @@ Third-party figures republished under `docs/gpu-computing/`. Every image referen
 in that section has a row here, so any figure can be located, re-sourced, or removed without
 searching 128 Markdown files.
 
+Convention: reference images in Markdown as `/img/gpu/<folder-slug>/<name>.png` — no `/knowledge-base`
+prefix; Docusaurus prepends `baseUrl` itself. Every image gets a row in the table below and an
+italic source caption immediately after it on the page.
+
 | file | source_url | publisher | retrieved | notes |
 |---|---|---|---|---|
 | `02-gpu-hardware-architecture/automatic-scalability.png` | https://docs.nvidia.com/cuda/cuda-c-programming-guide/ | NVIDIA | 2026-08-14 | Figure from the CUDA C++ Programming Guide; NVIDIA documentation terms. |

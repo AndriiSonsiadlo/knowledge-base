@@ -8,4 +8,4 @@ tags: [gpu, cuda, memory, coalescing]
 
 # Global Memory and Coalescing
 
-Stub — filled in by a later task.
+This page has not been written yet.

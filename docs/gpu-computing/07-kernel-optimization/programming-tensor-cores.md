@@ -8,4 +8,4 @@ tags: [gpu, cuda, optimization, tensor-cores]
 
 # Programming Tensor Cores
 
-Stub — filled in by a later task.
+This page has not been written yet.

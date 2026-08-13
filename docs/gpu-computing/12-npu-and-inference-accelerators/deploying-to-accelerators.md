@@ -8,4 +8,4 @@ tags: [gpu, npu, deployment, inference]
 
 # Deploying to Accelerators
 
-Stub — filled in by a later task.
+This page has not been written yet.

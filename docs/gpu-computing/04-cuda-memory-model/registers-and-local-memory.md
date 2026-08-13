@@ -8,4 +8,4 @@ tags: [gpu, cuda, memory, registers]
 
 # Registers and Local Memory
 
-Stub — filled in by a later task.
+This page has not been written yet.

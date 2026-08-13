@@ -12,7 +12,7 @@ Occupancy is defined in the [glossary](../00-overview/glossary.md) as the ratio 
 
 ## The register file is the scarce resource
 
-Every thread's local variables live in registers for as long as the thread is resident, and the hardware never spills a live thread's registers to make room for another thread — a launch that requests more registers per thread simply leaves less of the register file, and therefore fewer resident threads, available. Because registers are the fastest storage on the chip and every thread needs some, they're also the resource a kernel runs out of first far more often than shared memory or thread slots. [The Streaming Multiprocessor](./streaming-multiprocessor.md) covers the register file's physical layout — one slice per sub-partition, 65,536 32-bit registers total per SM on Hopper (compute capability 9.0), the number this page's worked example uses.
+Every thread's local variables live in registers for as long as the thread is resident, and the hardware never spills a live thread's registers to make room for another thread — a launch that requests more registers per thread simply leaves less of the register file, and therefore fewer resident threads, available. Because registers are the fastest storage on the chip and every thread needs some, they're also the resource a kernel runs out of first far more often than shared memory or thread slots. [The Streaming Multiprocessor](./streaming-multiprocessor.md) covers the register file's physical layout — one slice per sub-partition, 65,536 32-bit registers total per SM on an Ampere-class SM (compute capability 8.0) — the number this page's worked example uses, and a figure that also holds on Hopper.
 
 ## Occupancy is a hardware-limit calculation
 
@@ -22,7 +22,7 @@ The number of blocks the hardware can keep resident on an SM simultaneously is c
 
 - **Registers.** Divide the SM's total register count by the registers a single block consumes (registers per thread × threads per block, subject to allocation granularity — see below) to get the register-limited blocks/SM.
 - **Shared memory.** Divide the SM's usable shared-memory capacity by the shared memory a single block requests to get the shared-memory-limited blocks/SM.
-- **Block and thread slots.** Every SM has a fixed maximum number of resident threads (2048 on an H100 SM, compute capability 9.0) and a fixed maximum number of resident blocks (32 on Hopper), regardless of how frugal a kernel is with registers and shared memory. Dividing max resident threads by threads/block gives the thread-slot-limited blocks/SM; the hardware block-count cap applies on top of that.
+- **Block and thread slots.** Every SM has a fixed maximum number of resident threads (2048 on an Ampere-class SM, compute capability 8.0 — also 2048 on Hopper) and a fixed maximum number of resident blocks (32 on Ampere, also 32 on Hopper), regardless of how frugal a kernel is with registers and shared memory. Dividing max resident threads by threads/block gives the thread-slot-limited blocks/SM; the hardware block-count cap applies on top of that.
 
 ## Worked example
 

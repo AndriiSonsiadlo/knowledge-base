@@ -8,4 +8,4 @@ tags: [gpu, webgpu, wgsl, browser]
 
 # WebGPU
 
-Stub — filled in by a later task.
+This page has not been written yet.

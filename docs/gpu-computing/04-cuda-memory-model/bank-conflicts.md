@@ -8,4 +8,4 @@ tags: [gpu, cuda, memory, bank-conflicts]
 
 # Shared Memory Bank Conflicts
 
-Stub — filled in by a later task.
+This page has not been written yet.

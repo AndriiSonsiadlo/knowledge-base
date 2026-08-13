@@ -8,4 +8,4 @@ tags: [gpu, npu, accelerators, architecture]
 
 # What Is an NPU?
 
-Stub — filled in by a later task.
+This page has not been written yet.

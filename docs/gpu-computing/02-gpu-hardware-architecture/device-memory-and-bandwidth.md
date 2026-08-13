@@ -64,6 +64,7 @@ This is the mechanical reason the roofline model in [Arithmetic Intensity and th
 ## See also
 
 - [Cache Hierarchy](./cache-hierarchy.md) — what happens to a request before it ever reaches DRAM, and why coalescing determines how much of "peak" a kernel can actually reach.
+- [Interconnects: PCIe and NVLink](./interconnects-pcie-and-nvlink.md) — the bandwidth story once data leaves this GPU's own memory for the host or another GPU.
 - [Arithmetic Intensity and the Roofline Model](../01-parallel-computing-foundations/arithmetic-intensity-and-roofline.md) — the ridge-point comparison this page's bandwidth ceiling feeds into.
 - [Vector Add and SAXPY](../13-applied-kernels-and-patterns/vector-add-and-saxpy.md) — the worked kernel this page's SAXPY example is drawn from, implemented end to end.
 - [GPU & Accelerators](../readme.md) — the section index and its three learning paths.

@@ -8,4 +8,4 @@ tags: [gpu, npu, quantization, int8]
 
 # Quantization for Accelerators
 
-Stub — filled in by a later task.
+This page has not been written yet.

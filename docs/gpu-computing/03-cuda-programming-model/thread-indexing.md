@@ -8,4 +8,4 @@ tags: [gpu, cuda, indexing, grid-stride]
 
 # Thread Indexing
 
-Stub — filled in by a later task.
+This page has not been written yet.

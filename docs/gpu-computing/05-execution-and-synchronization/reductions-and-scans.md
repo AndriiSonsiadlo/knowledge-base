@@ -8,4 +8,4 @@ tags: [gpu, cuda, reduction, scan]
 
 # Reductions and Scans
 
-Stub — filled in by a later task.
+This page has not been written yet.

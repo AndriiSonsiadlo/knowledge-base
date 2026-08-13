@@ -8,4 +8,4 @@ tags: [gpu, cuda, optimization, ptx]
 
 # PTX and Inline Assembly
 
-Stub — filled in by a later task.
+This page has not been written yet.

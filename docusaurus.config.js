@@ -63,7 +63,16 @@ const config = {
           // Internal working artifacts (design specs, implementation plans).
           // Not knowledge-base content, not in any sidebar, and their relative
           // links point at other sections — which breaks `onBrokenLinks: throw`.
-          exclude: ["superpowers/**"],
+          // `exclude` replaces rather than merges with the plugin defaults, so
+          // the defaults are repeated here alongside the new entry to keep the
+          // standard underscore-prefixed-partial convention working.
+          exclude: [
+            "**/_*.{js,jsx,ts,tsx,md,mdx}",
+            "**/_*/**",
+            "**/*.test.{js,jsx,ts,tsx}",
+            "**/__tests__/**",
+            "superpowers/**",
+          ],
           showLastUpdateTime: true,
           editUrl:
             "https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/",

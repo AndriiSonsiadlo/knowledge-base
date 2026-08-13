@@ -8,4 +8,4 @@ tags: [gpu, portability, vendor-neutral]
 
 # The Portability Problem
 
-Stub — filled in by a later task.
+This page has not been written yet.

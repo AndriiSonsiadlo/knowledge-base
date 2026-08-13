@@ -8,4 +8,4 @@ tags: [gpu, cuda, kernels, gemm]
 
 # Matrix Multiply: Naive to Tiled
 
-Stub — filled in by a later task.
+This page has not been written yet.

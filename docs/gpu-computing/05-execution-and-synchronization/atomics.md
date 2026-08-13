@@ -8,4 +8,4 @@ tags: [gpu, cuda, atomics, contention]
 
 # Atomic Operations
 
-Stub — filled in by a later task.
+This page has not been written yet.

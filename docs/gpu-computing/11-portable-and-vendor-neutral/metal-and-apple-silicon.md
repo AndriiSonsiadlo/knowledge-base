@@ -8,4 +8,4 @@ tags: [gpu, metal, apple, unified-memory]
 
 # Metal and Apple Silicon
 
-Stub — filled in by a later task.
+This page has not been written yet.

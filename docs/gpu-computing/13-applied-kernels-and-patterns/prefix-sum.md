@@ -8,4 +8,4 @@ tags: [gpu, cuda, kernels, scan]
 
 # Prefix Sum (Scan)
 
-Stub — filled in by a later task.
+This page has not been written yet.

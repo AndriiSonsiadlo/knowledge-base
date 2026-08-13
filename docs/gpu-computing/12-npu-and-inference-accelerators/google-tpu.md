@@ -8,4 +8,4 @@ tags: [gpu, npu, tpu, xla]
 
 # Google TPU
 
-Stub — filled in by a later task.
+This page has not been written yet.

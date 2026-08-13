@@ -8,4 +8,4 @@ tags: [gpu, cuda, warps, shuffle]
 
 # Warp-Level Primitives
 
-Stub — filled in by a later task.
+This page has not been written yet.

@@ -8,4 +8,4 @@ tags: [gpu, cuda, tooling, roofline]
 
 # Roofline Analysis in Practice
 
-Stub — filled in by a later task.
+This page has not been written yet.

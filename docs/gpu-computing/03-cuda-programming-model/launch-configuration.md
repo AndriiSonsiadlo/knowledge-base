@@ -8,4 +8,4 @@ tags: [gpu, cuda, occupancy, launch]
 
 # Choosing a Launch Configuration
 
-Stub — filled in by a later task.
+This page has not been written yet.

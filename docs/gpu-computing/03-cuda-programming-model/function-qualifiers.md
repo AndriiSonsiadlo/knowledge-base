@@ -8,4 +8,4 @@ tags: [gpu, cuda, qualifiers, language]
 
 # Function and Variable Qualifiers
 
-Stub — filled in by a later task.
+This page has not been written yet.

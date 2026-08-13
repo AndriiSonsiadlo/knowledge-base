@@ -8,4 +8,4 @@ tags: [gpu, cuda, multi-gpu, slurm]
 
 # GPU Clusters and Schedulers
 
-Stub — filled in by a later task.
+This page has not been written yet.

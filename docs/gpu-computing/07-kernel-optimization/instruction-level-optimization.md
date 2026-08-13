@@ -8,4 +8,4 @@ tags: [gpu, cuda, optimization, ilp]
 
 # Instruction-Level Optimization
 
-Stub — filled in by a later task.
+This page has not been written yet.

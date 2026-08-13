@@ -8,4 +8,4 @@ tags: [gpu, sycl, oneapi, intel]
 
 # SYCL and oneAPI
 
-Stub — filled in by a later task.
+This page has not been written yet.

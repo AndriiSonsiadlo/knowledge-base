@@ -8,4 +8,4 @@ tags: [gpu, npu, edge, mobile]
 
 # Edge NPUs
 
-Stub — filled in by a later task.
+This page has not been written yet.

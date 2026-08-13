@@ -8,4 +8,4 @@ tags: [gpu, vulkan, directx, compute-shaders]
 
 # Vulkan and DirectX Compute
 
-Stub — filled in by a later task.
+This page has not been written yet.

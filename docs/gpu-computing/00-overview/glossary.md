@@ -14,7 +14,7 @@ This page collects the vocabulary the rest of the section assumes, in one alphab
 
 ### Arithmetic intensity
 
-The ratio of floating-point operations performed to bytes moved from DRAM, expressed in FLOPs/byte. It is the single number that predicts whether a kernel's ceiling is set by the arithmetic units or by the memory system: below the machine's balance point (peak TFLOPS divided by peak bandwidth) a kernel is memory-bound and faster ALUs change nothing, above it a kernel is compute-bound and faster memory changes nothing. See [Arithmetic Intensity and Roofline](../01-parallel-computing-foundations/arithmetic-intensity-and-roofline.md).
+The ratio of floating-point operations performed to bytes moved from DRAM, expressed in FLOPs/byte. It is the single number that predicts whether a kernel's ceiling is set by the arithmetic units or by the memory system: below the machine's ridge point (peak TFLOPS divided by peak bandwidth) a kernel is memory-bound and faster ALUs change nothing, above it a kernel is compute-bound and faster memory changes nothing. See [Arithmetic Intensity and Roofline](../01-parallel-computing-foundations/arithmetic-intensity-and-roofline.md).
 
 ### Bank conflict
 
@@ -22,7 +22,7 @@ A stall that occurs when multiple threads in the same warp access shared memory 
 
 ### Coalescing
 
-The property that the 32 threads of a warp issue a global-memory access whose addresses fall into the minimum number of memory transactions the hardware can serve at once, typically because consecutive threads touch consecutive addresses. A coalesced access uses the full width of a fetched cache line; an uncoalesced one — scattered, strided, or transposed — wastes most of the bytes each transaction brings back, and is the most common reason a ported kernel runs far below the advertised bandwidth. See [Global Memory and Coalescing](../04-cuda-memory-model/global-memory-and-coalescing.md).
+The property that the 32 threads of a warp issue a global-memory access whose addresses fall into the minimum number of memory transactions the hardware can serve at once, typically because consecutive threads touch consecutive addresses. The hardware fetches in 32-byte sectors rather than whole 128-byte lines, so a coalesced access is one whose addresses concentrate into the fewest possible sectors; an uncoalesced one — scattered, strided, or transposed — touches only a few bytes per sector while still paying for the whole sector, wasting most of the bytes each transaction brings back, and is the most common reason a ported kernel runs far below the advertised bandwidth. See [Global Memory and Coalescing](../04-cuda-memory-model/global-memory-and-coalescing.md).
 
 ### Compute capability
 
@@ -70,7 +70,7 @@ Reducing the numeric precision used to represent weights and activations — typ
 
 ### Roofline
 
-A performance model that plots achievable performance (in FLOP/s) against arithmetic intensity (in FLOP/byte), with a diagonal "memory roof" rising until it meets a flat "compute roof" at the machine's balance point. Placing a kernel's measured intensity and throughput on the plot tells you immediately which roof is limiting it and how much headroom is theoretically available before you touch a single line of code. See [Roofline in Practice](../09-tooling-profiling-and-debugging/roofline-in-practice.md).
+A performance model that plots achievable performance (in FLOP/s) against arithmetic intensity (in FLOP/byte), with a diagonal "memory roof" rising until it meets a flat "compute roof" at the machine's ridge point. Placing a kernel's measured intensity and throughput on the plot tells you immediately which roof is limiting it and how much headroom is theoretically available before you touch a single line of code. See [Arithmetic Intensity and Roofline](../01-parallel-computing-foundations/arithmetic-intensity-and-roofline.md), or [Roofline in Practice](../09-tooling-profiling-and-debugging/roofline-in-practice.md) for how the model is measured with real profiler output.
 
 ### SASS
 

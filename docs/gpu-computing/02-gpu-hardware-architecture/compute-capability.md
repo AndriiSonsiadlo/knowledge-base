@@ -23,6 +23,12 @@ Every feature enumerated in the closing table of [NVIDIA Architecture Generation
 
 PTX compiled for a given `compute_XX` can be JIT-compiled by the driver into SASS for any `sm_XX` that is the same or newer, because PTX deliberately stays forward-compatible; SASS compiled for a specific `sm_XX` runs only on that generation (and, for most generations, is not guaranteed to run on a different one at all, forward or backward).
 
+:::note[Two exceptions to the simple "same or newer" rule]
+Some instructions require an **architecture-accelerated target**, not just a plain `sm_XX`/`compute_XX` of sufficient number. `wgmma`, for example, needs `sm_90a`/`compute_90a` specifically — a binary built with `-gencode arch=compute_90,code=sm_90` alone still fails to assemble it, because the plain `sm_90` target deliberately excludes the accelerated, non-portable instructions the `a` suffix opts into.
+
+Compute capability numbering is also not a single total order once Blackwell is in the picture: 10.x (datacenter, SM_100/101) and 12.x (consumer, SM_120) are two separate, non-interchangeable families rather than one line where 12.0 is simply "newer than" 10.0. A feature gated at CC 10.0 is not automatically available at CC 12.0 — see [NVIDIA Architecture Generations](./nvidia-architecture-generations.md) for which family a given feature actually belongs to.
+:::
+
 ## `-arch`, `-code`, and `-gencode`
 
 A single `nvcc` invocation can embed multiple SASS images for different real architectures, plus one PTX image, all in the same binary — the driver picks whichever embedded SASS matches the GPU it's running on, and falls back to JIT-compiling the embedded PTX if no matching SASS is present. `-gencode arch=compute_XX,code=sm_YY` (with `XX` and `YY` typically equal) produces one such SASS image; a `-gencode` entry with `code=compute_XX` instead of `code=sm_XX` embeds PTX rather than SASS.

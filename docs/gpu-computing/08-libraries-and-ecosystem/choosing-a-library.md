@@ -8,4 +8,4 @@ tags: [gpu, cuda, libraries, decision-guide]
 
 # Choosing a Library Over a Kernel
 
-Stub — filled in by a later task.
+This page has not been written yet.
