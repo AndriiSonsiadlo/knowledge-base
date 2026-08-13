@@ -89,3 +89,6 @@ dist
 # superpowers workflow artifacts (local only)
 /specs/
 /plans/
+
+# superpowers SDD scratch
+.superpowers/
