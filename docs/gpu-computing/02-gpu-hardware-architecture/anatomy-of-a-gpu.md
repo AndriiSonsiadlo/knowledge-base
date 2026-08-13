@@ -31,6 +31,9 @@ flowchart TB
   SUB0 --> LANES["FP32 / INT32 / tensor lanes"]
 ```
 
+![A grid of blocks scheduled across a varying number of SMs](pathname:///knowledge-base/img/gpu/02-gpu-hardware-architecture/automatic-scalability.png)
+*Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
+
 :::warning["CUDA cores" counts lanes, not processors]
 Marketing material advertises a GPU by its total "CUDA core" count — an H100 SXM (Hopper, compute capability 9.0) is sold as having 16,896 FP32 CUDA cores. That number is 132 SMs times 128 FP32 lanes per SM; it is **not** 16,896 independent processors. A CUDA core has no program counter, no scheduler, and no ability to execute an instruction stream on its own — it's an ALU lane that does whatever the warp scheduler above it issues. The unit that actually behaves like a CPU core, with its own instruction issue and scheduling, is the SM: 132 of them on that same H100 SXM. When comparing GPU generations or vendors, SM count and per-SM lane count are the meaningful figures; the headline "core count" is their product and hides both.
 :::
