@@ -60,6 +60,10 @@ const config = {
       ({
         docs: {
           sidebarPath: "./sidebars.js",
+          // Internal working artifacts (design specs, implementation plans).
+          // Not knowledge-base content, not in any sidebar, and their relative
+          // links point at other sections — which breaks `onBrokenLinks: throw`.
+          exclude: ["superpowers/**"],
           showLastUpdateTime: true,
           editUrl:
             "https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/",
