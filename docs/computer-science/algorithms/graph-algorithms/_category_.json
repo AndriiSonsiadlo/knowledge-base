@@ -1,6 +1,6 @@
 {
-  "label": "Sorting Algorithms",
-  "position": 3,
+  "label": "Graph Algorithms",
+  "position": 5,
   "link": {
     "type": "generated-index"
   }
