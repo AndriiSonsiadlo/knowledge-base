@@ -46,6 +46,9 @@ Every thread computing an output element re-reads an entire row of `A` and an en
 
 ## The tiled kernel
 
+![Each block loads a tile of A and a tile of B into shared memory and reuses them across the tile's inner product](/img/gpu/07-kernel-optimization/matrix-multiplication-with-shared-memory.png)
+*Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
+
 Loading a `TILE x TILE` block of `A` and `B` into shared memory once per tile, then having every thread in the block reuse those tiles for `TILE` multiply-adds, is the fix:
 
 ```cpp showLineNumbers title="sgemm_tiled.cu"
