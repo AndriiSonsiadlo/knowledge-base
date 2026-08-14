@@ -27,6 +27,9 @@ flowchart TD
 Thread block clusters are a Hopper-and-later feature. See [Compute Capability](../02-gpu-hardware-architecture/compute-capability.md) for how to check a target GPU supports them, and [Thread Block Clusters](./thread-block-clusters.md) for how to launch one.
 :::
 
+![A 2-D grid of 2-D thread blocks](/img/gpu/03-cuda-programming-model/grid-of-thread-blocks.png)
+*Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
+
 ## `dim3` and multi-dimensional launches
 
 Grid and block dimensions are each a `dim3` — three integers (x, y, z), any of which can be left at 1. `saxpy<<<blocks, threads>>>` is shorthand for a 1-D launch where `blocks` and `threads` are implicitly `dim3(blocks, 1, 1)` and `dim3(threads, 1, 1)`; declaring the `dim3` explicitly is what enables 2-D or 3-D launches, which are convenient whenever the data itself is naturally 2-D or 3-D, such as an image.

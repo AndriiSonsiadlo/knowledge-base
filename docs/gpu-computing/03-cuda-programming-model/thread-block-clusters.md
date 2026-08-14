@@ -14,6 +14,9 @@ Blocks are independent by design: no portable synchronization between them, no s
 
 A cluster sits between the grid and the block in the hierarchy shown in [Threads, Blocks, and Grids](./threads-blocks-and-grids.md): the grid still contains many blocks, but those blocks are now grouped into clusters, and every block in a cluster is guaranteed to launch on the same GPC, co-resident with the rest of its cluster. That guarantee is the whole point — it is what makes distributed shared memory and cluster-wide barriers possible, neither of which the plain grid-of-blocks model can offer.
 
+![A grid of clusters, each cluster containing several thread blocks](/img/gpu/03-cuda-programming-model/grid-of-clusters.png)
+*Source: [NVIDIA CUDA C++ Programming Guide](https://docs.nvidia.com/cuda/cuda-c-programming-guide/)*
+
 :::note[Requires CC 9.0+]
 Thread block clusters are a Hopper-and-later feature. Check [Compute Capability](../02-gpu-hardware-architecture/compute-capability.md) before relying on them.
 :::
