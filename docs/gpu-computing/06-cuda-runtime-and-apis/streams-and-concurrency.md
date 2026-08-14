@@ -36,24 +36,28 @@ Whether two kernels from different streams can actually run on the GPU at the sa
 The four-stream loop from [Pinned Memory and Host Transfers](../04-cuda-memory-model/pinned-memory-and-transfers.md) — one stream per chunk, each issuing its H2D copy, kernel, and D2H copy in sequence — is the pattern that makes the timeline below possible: the driver can run chunk 1's kernel at the same time as chunk 2's H2D copy and chunk 0's D2H copy, because those operations sit in different streams with no ordering between them.
 
 ```mermaid
-graph LR
-    subgraph "Stream 0"
-        S0H["H2D copy"] -->|"then"| S0K["Kernel"] -->|"then"| S0D["D2H copy"]
-    end
-    subgraph "Stream 1"
-        S1H["H2D copy"] -->|"then"| S1K["Kernel"] -->|"then"| S1D["D2H copy"]
-    end
-    subgraph "Stream 2"
-        S2H["H2D copy"] -->|"then"| S2K["Kernel"] -->|"then"| S2D["D2H copy"]
-    end
-    S0H -.->|"overlaps"| S1H
-    S0K -.->|"overlaps"| S1H
-    S0K -.->|"overlaps"| S1K
-    S0D -.->|"overlaps"| S1K
-    S0D -.->|"overlaps"| S2H
+gantt
+    dateFormat X
+    axisFormat %ss
+    section Stream 0
+    H2D copy : s0h, 0, 2
+    Kernel : s0k, 2, 3
+    D2H copy : s0d, 5, 2
+    section Stream 1
+    H2D copy : s1h, 2, 2
+    Kernel : s1k, 4, 3
+    D2H copy : s1d, 7, 2
+    section Stream 2
+    H2D copy : s2h, 4, 2
+    Kernel : s2k, 6, 3
+    D2H copy : s2d, 9, 2
 ```
 
-Stream 1's H2D copy runs while stream 0's kernel is still executing, and stream 0's D2H copy overlaps stream 1's kernel and stream 2's H2D copy — none of that overlap exists inside a single stream, only across the three.
+Each stream's own three bars run in issue order — H2D, then kernel, then D2H — but the stagger between streams is what creates the overlap: stream 1's H2D copy sits directly under stream 0's kernel bar, and stream 2's H2D copy sits under both stream 1's kernel and stream 0's D2H copy. No single stream ever overlaps itself; the concurrency is entirely across streams.
+
+## Priorities
+
+`cudaStreamCreateWithPriority` creates a stream with a priority level, and `cudaDeviceGetStreamPriorityRange` reports the device's valid range (lower numeric value means higher priority). Priority affects the order in which the scheduler dispatches **new** blocks to an SM when more than one stream has eligible work waiting — it is not preemption: a block that's already running on an SM keeps running to completion regardless of what higher-priority work becomes ready afterward.
 
 ## Making concurrency actually happen
 
@@ -67,10 +71,6 @@ Code that looks correctly streamed still frequently shows no overlap in the prof
 :::tip[Verify overlap in the profiler, not by reading the code]
 Whether a given program actually achieves overlap is a claim about the scheduler's runtime behavior, not something reliably determined by reasoning about the source. Check the Nsight Systems timeline directly rather than assuming the streaming pattern worked. See [Nsight Systems](../09-tooling-profiling-and-debugging/nsight-systems.md).
 :::
-
-## Priorities
-
-`cudaStreamCreateWithPriority` creates a stream with a priority level, and `cudaDeviceGetStreamPriorityRange` reports the device's valid range (lower numeric value means higher priority). Priority affects the order in which the scheduler dispatches **new** blocks to an SM when more than one stream has eligible work waiting — it is not preemption: a block that's already running on an SM keeps running to completion regardless of what higher-priority work becomes ready afterward.
 
 ## See also
 

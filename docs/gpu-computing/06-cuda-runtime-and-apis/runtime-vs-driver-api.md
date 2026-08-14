@@ -45,6 +45,8 @@ CUDA_CHECK(cuLaunchKernel(saxpyFn,
     0, stream, args, nullptr));
 ```
 
+See [Error Handling and Checking](./error-handling.md) for what `CUDA_CHECK` does with the status these calls return.
+
 The `<<<>>>` syntax is exactly this call with the function handle, argument packing, and error type resolved at compile time instead of at run time.
 
 ## The primary context

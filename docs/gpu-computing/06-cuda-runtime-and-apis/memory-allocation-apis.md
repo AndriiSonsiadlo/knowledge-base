@@ -26,6 +26,8 @@ CUDA_CHECK(cudaMemcpy2D(d_a, pitch, h_a, width * sizeof(float),
                          width * sizeof(float), height, cudaMemcpyHostToDevice));
 ```
 
+See [Error Handling and Checking](./error-handling.md) for what `CUDA_CHECK` does with the status these calls return.
+
 Indexing into a pitched allocation from a kernel uses the returned pitch, not `width`, to compute a row's start:
 
 ```cpp
