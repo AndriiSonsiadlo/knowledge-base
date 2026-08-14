@@ -36,24 +36,22 @@ Whether two kernels from different streams can actually run on the GPU at the sa
 The four-stream loop from [Pinned Memory and Host Transfers](../04-cuda-memory-model/pinned-memory-and-transfers.md) — one stream per chunk, each issuing its H2D copy, kernel, and D2H copy in sequence — is the pattern that makes the timeline below possible: the driver can run chunk 1's kernel at the same time as chunk 2's H2D copy and chunk 0's D2H copy, because those operations sit in different streams with no ordering between them.
 
 ```mermaid
-gantt
-    dateFormat X
-    axisFormat %ss
-    section Stream 0
-    H2D copy : s0h, 0, 2
-    Kernel : s0k, 2, 3
-    D2H copy : s0d, 5, 2
-    section Stream 1
-    H2D copy : s1h, 2, 2
-    Kernel : s1k, 4, 3
-    D2H copy : s1d, 7, 2
-    section Stream 2
-    H2D copy : s2h, 4, 2
-    Kernel : s2k, 6, 3
-    D2H copy : s2d, 9, 2
+graph LR
+    subgraph S0["Stream 0"]
+        S0H["H2D copy"] --> S0K["Kernel"] --> S0D["D2H copy"]
+    end
+    subgraph S1["Stream 1"]
+        S1H["H2D copy"] --> S1K["Kernel"] --> S1D["D2H copy"]
+    end
+    subgraph S2["Stream 2"]
+        S2H["H2D copy"] --> S2K["Kernel"] --> S2D["D2H copy"]
+    end
+    S0 -.->|"overlaps"| S1
+    S0 -.->|"overlaps"| S2
+    S1 -.->|"overlaps"| S2
 ```
 
-Each stream's own three bars run in issue order — H2D, then kernel, then D2H — but the stagger between streams is what creates the overlap: stream 1's H2D copy sits directly under stream 0's kernel bar, and stream 2's H2D copy sits under both stream 1's kernel and stream 0's D2H copy. No single stream ever overlaps itself; the concurrency is entirely across streams.
+Within each stream the three operations are strictly ordered top to bottom; the dashed cross-stream edges are the absence of any such ordering between streams, which is exactly what lets the driver run any two of them at once.
 
 ## Priorities
 
