@@ -34,6 +34,14 @@ writes are handled, and how multiple cores keep their caches coherent.
 
 ### Private vs. shared, and the levels
 
+<Figure src="/img/cs/memory-hierarchy/cache-hierarchy.png"
+        alt="Nested rectangles widening downward: registers and a banked L1 cache inside a CPU core, then a unified L2, a wider unified L3, and main memory at the base"
+        caption="Widths are roughly to scale for capacity: each level is far larger, and far slower, than the one nested above it."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Cache_Hierarchy_Updated.png"
+        license="CC BY-SA 4.0" />
+
+That is one core's view. On a multi-core chip the lower levels are shared:
+
 ```mermaid
 flowchart TB
     subgraph Core0["Core 0"]

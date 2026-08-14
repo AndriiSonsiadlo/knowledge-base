@@ -31,32 +31,17 @@ instruction chains) are slower than others.
 A classic 5-stage pipeline (Fetch, Decode, Execute, Memory, Write-back — the MIPS/RISC textbook
 model):
 
-```mermaid
-gantt
-    dateFormat X
-    axisFormat %s
-    section Instr 1
-    F :a1, 0, 1
-    D :a2, 1, 1
-    E :a3, 2, 1
-    M :a4, 3, 1
-    W :a5, 4, 1
-    section Instr 2
-    F :b1, 1, 1
-    D :b2, 2, 1
-    E :b3, 3, 1
-    M :b4, 4, 1
-    W :b5, 5, 1
-    section Instr 3
-    F :c1, 2, 1
-    D :c2, 3, 1
-    E :c3, 4, 1
-    M :c4, 5, 1
-    W :c5, 6, 1
-```
+<Figure src="/img/cs/cpu-architecture/five-stage-pipeline.png"
+        alt="Five instructions staggered across a five-stage pipeline, each shifted one cycle later than the one above it"
+        caption="Time runs left to right (t), instructions top to bottom (i). The highlighted diagonal is a single clock cycle: five different instructions, each in a different stage."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Fivestagespipeline.png"
+        license="CC BY-SA 3.0" />
 
-By cycle 4, three different instructions are in flight simultaneously, each in a different stage —
-this overlap is what raises throughput to nearly one instruction per cycle.
+Read any vertical slice of that figure and you see the whole point of pipelining: in the fifth
+cycle, instruction 1 is writing back while instruction 5 is being fetched, and three more are in
+between. Five instructions are in flight at once on hardware that can only *start* one per cycle.
+The pipeline still takes five cycles to push any single instruction through — but it retires one
+per cycle once full.
 
 ### Hazards
 

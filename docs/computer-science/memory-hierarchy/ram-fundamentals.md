@@ -32,19 +32,12 @@ dense enough to serve as multi-gigabyte main memory.
 
 ### Why SRAM vs. DRAM at different tiers
 
-```mermaid
-flowchart LR
-    subgraph SRAM["SRAM — registers, L1/L2/L3 cache"]
-        S1["~6 transistors/bit"]
-        S2["No refresh needed"]
-        S3["Fast, low density, expensive per bit"]
-    end
-    subgraph DRAM["DRAM — main memory"]
-        D1["1 transistor + 1 capacitor per bit"]
-        D2["Needs periodic refresh"]
-        D3["Slower, high density, cheap per bit"]
-    end
-```
+| | SRAM — registers, L1/L2/L3 | DRAM — main memory |
+|---|---|---|
+| Cell | ~6 transistors/bit | 1 transistor + 1 capacitor per bit |
+| Refresh | Not needed | Required periodically |
+| Density & cost | Low density, expensive per bit | High density, cheap per bit |
+| Speed | Fast | Slower |
 
 A DRAM cell stores a bit as the presence or absence of charge on a capacitor; a single access
 transistor connects that capacitor to a bit line when its row is activated. Reading a DRAM cell is
@@ -57,6 +50,17 @@ at the cost of roughly 4-6x the transistors (and therefore silicon area and doll
 to DRAM's one transistor and one capacitor. That density/cost difference is exactly why SRAM is used
 only where a small amount of memory must be extremely fast (registers, L1/L2/L3 caches) and DRAM is
 used for everything that needs to be large (main memory).
+
+<Figure src="/img/cs/memory-hierarchy/dram-array.png"
+        alt="A DRAM array: a grid of one-transistor one-capacitor cells, with a row address demultiplexer selecting a row, sense amplifiers below the bit lines, and a column multiplexer selecting the output bit"
+        caption="A DRAM array. The row decoder (RAS) activates one entire row onto the bit lines, sense amplifiers recover and rewrite the values, then the column select (CAS) picks the bits actually wanted."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Square_array_of_mosfet_cells_read.png"
+        license="CC BY-SA 3.0" />
+
+This layout explains the timings on the next section's spec sheets. A read activates a **whole row**
+at once, so the first access to a row pays the full row-activation cost while subsequent accesses to
+the *same* row (a "row hit") only pay the column select — which is precisely why sequential access
+patterns are so much faster than random ones, at the DRAM level as much as at the cache level.
 
 ### DDR generations
 

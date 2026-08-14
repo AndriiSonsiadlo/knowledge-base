@@ -29,6 +29,18 @@ x86-64 or ARM64 core can retire 4-8 instructions per cycle despite running at "o
 
 ## Architecture / Mechanism
 
+A scalar pipeline starts one instruction per cycle. A **superscalar** pipeline widens every stage so
+it can start several:
+
+<Figure src="/img/cs/cpu-architecture/superscalar-pipeline.png"
+        alt="A superscalar pipeline processing two instructions in each stage per cycle, so two instructions are issued and retired every clock"
+        caption="Two instructions enter each stage per cycle instead of one. Compare the single-file diagonal on the pipelining page — this machine retires two instructions per clock, so its IPC ceiling is 2."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Superscalarpipeline.svg"
+        license="CC BY-SA 3.0" />
+
+Widening the pipeline is the easy half. The hard half is finding enough independent instructions to
+fill those slots every cycle, which is what the machinery below exists to do:
+
 ```mermaid
 flowchart TD
     F["Fetch (multiple instructions/cycle)"] --> D["Decode into micro-ops"]

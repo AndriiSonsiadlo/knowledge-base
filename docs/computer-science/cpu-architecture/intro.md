@@ -37,19 +37,16 @@ where most performance engineering happens. See [Instruction Set Architecture](.
 
 ## Architecture / Mechanism
 
-```mermaid
-flowchart LR
-    subgraph CPU
-        PC[Program Counter] --> FETCH[Fetch Unit]
-        FETCH --> DECODE[Control Unit: Decode]
-        DECODE --> REGS[Register File]
-        REGS --> ALU[ALU]
-        ALU --> REGS
-        DECODE -.control signals.-> ALU
-    end
-    MEM[(Main Memory / Cache)] -- instructions & data --> FETCH
-    ALU -- store results --> MEM
-```
+<Figure src="/img/cs/cpu-architecture/von-neumann.png"
+        alt="Von Neumann architecture: a control unit and arithmetic logic unit inside the CPU, connected to a single memory unit and to input and output devices"
+        caption="The von Neumann model every mainstream CPU still follows: one memory holding both instructions and data, a control unit that sequences, and an ALU that computes."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Von_Neumann_Architecture.svg"
+        license="CC BY-SA 3.0" />
+
+The single detail that matters most here is that **instructions and data share one memory**. That is
+what makes programs storable, compilers possible, and self-modifying code (and buffer-overflow
+exploits) conceivable — and it is also the origin of the *von Neumann bottleneck*, the single path
+to memory that the entire [memory hierarchy](../memory-hierarchy/intro.md) exists to widen.
 
 At the highest level, a CPU is a loop: **fetch** the instruction the PC points to, **decode** it to
 figure out which operation and which registers/memory it touches, **execute** it (usually in the

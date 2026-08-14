@@ -19,14 +19,16 @@ memory traffic.
 
 ## Core Concepts
 
-```mermaid
-flowchart TB
-    REG["Registers (~1 KB, ~0 cycles)"] --> L1["L1 Cache (~32-64 KB, ~4 cycles)"]
-    L1 --> L2["L2 Cache (~256KB-1MB, ~12 cycles)"]
-    L2 --> L3["L3 Cache (~8-32 MB, shared, ~40 cycles)"]
-    L3 --> RAM["Main Memory / DRAM (GBs, ~100-300 cycles)"]
-    RAM --> DISK["Storage / SSD-HDD (TBs, ~10,000-10,000,000 cycles)"]
-```
+<Figure src="/img/cs/memory-hierarchy/memory-hierarchy.png"
+        alt="A pyramid of memory tiers: processor registers at the narrow top, then cache, RAM, flash, hard drives, and tape backup at the wide base"
+        caption="The shape is the argument: capacity grows downward, speed and cost-per-bit grow upward. Nobody chose this — it is what you get when fast storage is expensive."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:ComputerMemoryHierarchy.svg"
+        license="Public domain" />
+
+The pyramid also splits along a second line the drawing marks as *power on* versus *power off*:
+everything from RAM upward loses its contents when the machine loses power, and everything below it
+survives. That boundary is why [filesystems](../storage/filesystems-basics.md) and database
+[durability](../databases/transactions-and-acid.md) are hard problems rather than bookkeeping.
 
 | Tier | Approx. size | Approx. latency | Volatile? |
 |---|---|---|---|

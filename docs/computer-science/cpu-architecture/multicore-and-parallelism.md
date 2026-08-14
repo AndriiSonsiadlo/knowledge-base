@@ -51,6 +51,21 @@ Each core has its own private L1/L2 cache but typically shares a larger L3 cache
 with every other core on the chip. This sharing is why memory-bandwidth-heavy workloads don't scale
 linearly with core count — every core is competing for the same path to RAM.
 
+Real hardware is messier than the sketch. `lstopo` (from `hwloc`) prints the actual topology of the
+machine you are sitting at:
+
+<Figure src="/img/cs/cpu-architecture/topology-hwloc.png"
+        alt="An lstopo topology map of a 32-core machine: two sockets, each holding two NUMA nodes, each node with its own L3 cache shared by eight cores"
+        caption="An lstopo map of a 32-core, two-socket machine. Each socket holds two NUMA nodes with their own memory and L3, cores share L2 in pairs, and a core reaching another node's memory pays noticeably more latency."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Hwloc.png"
+        license="BSD" />
+
+:::tip[Run it on your own machine]
+`lstopo-no-graphics` (Linux/macOS, from the `hwloc` package) prints this as text in a terminal. It is
+the fastest way to find out how many *physical* cores you have, which ones share an L3, and whether
+the box has more than one NUMA node — all things that change how you should pin threads.
+:::
+
 ### Amdahl's Law
 
 If a fraction **p** of a program's execution time can be parallelized across **N** processors, and
@@ -65,6 +80,12 @@ Speedup(N) = 1 / ((1 − p) + p / N)
 | 50% | 1.6x | 1.9x | 2x |
 | 90% | 3.1x | 7.8x | 10x |
 | 99% | 3.9x | 39.3x | 100x |
+
+<Figure src="/img/cs/cpu-architecture/amdahls-law.png"
+        alt="Speedup curves against processor count for parallel portions of 50, 75, 90 and 95 percent, each flattening to a horizontal ceiling"
+        caption="Every curve flattens. The ceiling is set by the serial fraction alone — at 95% parallel, the best you can ever buy is 20x, no matter how many cores you add."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:AmdahlsLaw.svg"
+        license="CC BY-SA 3.0" />
 
 :::info[The takeaway]
 Even a small serial fraction caps your maximum speedup, no matter how many cores you add. Finding and

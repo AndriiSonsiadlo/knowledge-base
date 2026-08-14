@@ -39,6 +39,16 @@ the data isn't resident) on every access.
   scattered, even non-resident, physical pages — programs don't need to know or care where their data
   physically lives.
 
+<Figure src="/img/cs/memory-hierarchy/virtual-memory.png"
+        alt="A process's contiguous virtual address space with dashed arrows mapping its pages to scattered frames in RAM and to a disk, with another process's memory occupying RAM in between"
+        caption="One process's flat, contiguous address space (left) scattered across whatever physical frames were free (right) — with another process's memory sitting in between, and some pages not in RAM at all."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Virtual_memory.svg"
+        license="CC BY-SA 3.0" />
+
+Two things in that picture do all the work. The arrows cross over each other, so *contiguous in
+virtual space* implies nothing about physical adjacency. And one arrow lands on the disk rather than
+in RAM — the process cannot tell the difference, which is the whole trick.
+
 ### Address translation path
 
 ```mermaid
@@ -61,6 +71,22 @@ find the mapping, which is then cached in the TLB for next time. If the page tab
 currently in physical memory at all — or the access violates permissions — the MMU raises a **page
 fault**, trapping into the OS to decide what to do (bring the page in from disk, extend the heap, or
 terminate the process for an invalid access).
+
+What "walks the page table" means concretely is that the address itself is cut into index fields:
+
+<Figure src="/img/cs/memory-hierarchy/x86-paging-4k.png"
+        alt="A 32-bit linear address split into a 10-bit page directory index, a 10-bit page table index, and a 12-bit offset, with CR3 pointing at the page directory"
+        caption="Classic 32-bit x86 paging. CR3 points at the page directory; bits 31–22 index it, bits 21–12 index the page table it names, and bits 11–0 are the byte offset that never gets translated at all."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:X86_Paging_4K.svg"
+        license="CC BY-SA 3.0" />
+
+:::note[This diagram is the 32-bit version, for legibility]
+64-bit x86 uses the same idea with **four** levels (PML4 → PDPT → PD → PT), each consuming 9 bits,
+plus a 12-bit offset — 48 address bits in total, extended to five levels and 57 bits on recent
+server parts. The structure is identical; there are simply more levels to walk, which is exactly why
+a TLB miss is expensive and why huge pages (2 MB, 1 GB), which stop the walk a level or two early,
+are a real optimization.
+:::
 
 ## Practical Usage
 
