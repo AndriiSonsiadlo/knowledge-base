@@ -97,13 +97,13 @@ __global__ void update_x_soa(ParticlesSoA p, int n) {
 }
 ```
 
-In `update_x_aos`, consecutive threads' `x` fields are 16 bytes apart (the size of `ParticleAoS`), so a warp's 32 accesses to `x` alone span 512 bytes and touch far more sectors than the 128 bytes of `x` data actually needed. `update_x_soa` puts every thread's `x` value contiguously, so the same warp coalesces into the minimum sector count. AoS still wins when a kernel touches *all* fields of an element together per thread; SoA wins whenever different threads or different kernels touch different fields independently.
+In `update_x_aos`, consecutive threads' `x` fields are 16 bytes apart (the size of `ParticleAoS`), so a warp's 32 accesses to `x` alone span 512 bytes. With a 16-byte stride, two consecutive elements' `x` fields still share the same 32-byte sector, so the warp touches 16 sectors — 512 bytes fetched for the 128 bytes of `x` data actually needed, half the waste of the fully-scattered strided case above but still four times more traffic than necessary. `update_x_soa` puts every thread's `x` value contiguously, so the same warp coalesces into the minimum sector count. AoS still wins when a kernel touches *all* fields of an element together per thread; SoA wins whenever different threads or different kernels touch different fields independently.
 
 | Pattern | Sectors per warp | Useful bytes | Efficiency |
 |---|---|---|---|
 | Coalesced (`stride == 1`) | 4 | 128 | 100% |
 | Strided (`stride == 32`) | 32 | 128 | 12.5% |
-| AoS, single-field update | up to 32 | 128 | as low as 12.5% |
+| AoS, single-field update (16-byte stride) | 16 | 128 | 25% |
 | SoA, single-field update | 4 | 128 | 100% |
 
 ## Vectorized loads
@@ -119,7 +119,7 @@ __global__ void vectorized_copy(const float4* in, float4* out, int n4) {
 }
 ```
 
-`` `float4` `` loads require the pointer to be 16-byte aligned. `cudaMalloc` guarantees 256-byte alignment for the base pointer it returns, but an *offset* into that allocation — for example casting `base + 3` to `` `float4*` `` — does not necessarily preserve 16-byte alignment, and a misaligned vector load is either slower or outright illegal depending on the architecture. Check alignment at the point of the cast, not just at the allocation.
+`float4` loads require the pointer to be 16-byte aligned. `cudaMalloc` guarantees 256-byte alignment for the base pointer it returns, but an *offset* into that allocation — for example casting `base + 3` to `float4*` — does not necessarily preserve 16-byte alignment, and a misaligned vector load is either slower or outright illegal depending on the architecture. Check alignment at the point of the cast, not just at the allocation.
 
 :::tip[Check the sector-fetch metric directly]
 Nsight Compute's `l1tex__t_sectors_pipe_lsu_mem_global_op_ld.sum` metric reports sectors fetched per global load request — comparing it against the theoretical minimum (four sectors per fully-coalesced warp of 4-byte accesses) tells you directly how much of your bandwidth a given kernel is wasting. See [Metrics That Matter](../09-tooling-profiling-and-debugging/metrics-that-matter.md).

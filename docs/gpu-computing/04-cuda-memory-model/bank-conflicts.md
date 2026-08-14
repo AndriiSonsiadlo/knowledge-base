@@ -30,7 +30,7 @@ The canonical conflict shows up in a shared-memory tile accessed column-wise. Ta
 __shared__ float tile[32][32];
 ```
 
-`tile` is laid out row-major, so `tile[row][col]` is at offset `row * 32 + col` (in words). Reading `tile[threadIdx.x][k]` for a fixed `k` across a warp — a column read, with `threadIdx.x` selecting the row — means thread `t`'s address is `t * 32 + k`. Bank is `(t * 32 + k) / 4 % 32`; since `32` is a multiple of `32`, every thread's `t * 32` term contributes a multiple of 32 to the address, and dividing by 4 and reducing mod 32 collapses that whole term to the same bank for every `t`. All 32 threads land in bank `(k / 4) % 32` — a full 32-way conflict, serializing what should be one cycle into 32.
+`tile` is laid out row-major, so `tile[row][col]` is at word offset `row * 32 + col` (the bank formula above takes a byte address; for a word offset like this one, dividing by the 4-byte word size is already done, so bank = `word_offset % 32`). Reading `tile[threadIdx.x][k]` for a fixed `k` across a warp — a column read, with `threadIdx.x` selecting the row — means thread `t`'s word offset is `t * 32 + k`. Bank is `(t * 32 + k) % 32`; since `32` is a multiple of `32`, every thread's `t * 32` term is itself a multiple of 32 and vanishes under `% 32`, leaving `k % 32` regardless of `t`. All 32 threads land in bank `k % 32` — a full 32-way conflict, serializing what should be one cycle into 32.
 
 Padding the row by one extra word breaks the arithmetic:
 
@@ -49,7 +49,7 @@ Padding wastes shared memory — one word per row, which adds up when shared mem
 int col = threadIdx.x ^ threadIdx.y;
 ```
 
-Indexing `tile[threadIdx.y][col]` into an *unpadded* `` `tile[32][32]` `` with this swizzled column spreads a warp's accesses across distinct banks the same way padding does, but keeps every row exactly 32 words wide. The tradeoff is complexity: the swizzle function has to be inverted consistently everywhere the tile is written and read, whereas padding only changes a declaration. Reach for swizzling specifically when shared memory is the occupancy limiter and the wasted padding column would drop a block below the next occupancy tier; otherwise padding is simpler and just as fast.
+Indexing `tile[threadIdx.y][col]` into an *unpadded* `tile[32][32]` with this swizzled column spreads a warp's accesses across distinct banks the same way padding does, but keeps every row exactly 32 words wide. The tradeoff is complexity: the swizzle function has to be inverted consistently everywhere the tile is written and read, whereas padding only changes a declaration. Reach for swizzling specifically when shared memory is the occupancy limiter and the wasted padding column would drop a block below the next occupancy tier; otherwise padding is simpler and just as fast.
 
 ## Measuring conflicts
 

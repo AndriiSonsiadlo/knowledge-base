@@ -47,13 +47,13 @@ The `-Xptxas -v` flag reports register usage per kernel at compile time; a nonze
 
 ## Controlling register usage
 
-Two levers force a lower register count per thread, and they're not equivalent. `-maxrregcount` is a translation-unit-wide `nvcc` flag — it caps every kernel compiled in that file, whether or not that's what you want for each of them. `` `__launch_bounds__` `` is a per-kernel annotation that travels with the kernel's own source, so it stays correct if the kernel is moved to a different file or compiled alongside kernels with different register needs:
+Two levers force a lower register count per thread, and they're not equivalent. `-maxrregcount` is a translation-unit-wide `nvcc` flag — it caps every kernel compiled in that file, whether or not that's what you want for each of them. `__launch_bounds__` is a per-kernel annotation that travels with the kernel's own source, so it stays correct if the kernel is moved to a different file or compiled alongside kernels with different register needs:
 
 ```cpp
 __global__ void __launch_bounds__(256, 4) myKernel(/* ... */) { /* ... */ }
 ```
 
-This tells the compiler the kernel will be launched with at most 256 threads/block and that it should target enough register frugality to keep at least 4 blocks resident per SM, and the compiler is free to spill to meet that target if it can't fit otherwise. Prefer `` `__launch_bounds__` `` over `-maxrregcount` for exactly that reason: it expresses the constraint at the kernel that actually has it, instead of blanket-capping every kernel in the compilation unit.
+This tells the compiler the kernel will be launched with at most 256 threads/block and that it should target enough register frugality to keep at least 4 blocks resident per SM, and the compiler is free to spill to meet that target if it can't fit otherwise. Prefer `__launch_bounds__` over `-maxrregcount` for exactly that reason: it expresses the constraint at the kernel that actually has it, instead of blanket-capping every kernel in the compilation unit.
 
 :::warning[Cutting registers to raise occupancy can cost more than it gains]
 Capping registers to raise occupancy trades a fast register access for an L1-or-worse local-memory access whenever the cap forces a spill the kernel wouldn't otherwise have. [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) covers this same tradeoff from the occupancy side — read that warning before reaching for either lever here, and measure both the occupancy change and the actual runtime, not just one.

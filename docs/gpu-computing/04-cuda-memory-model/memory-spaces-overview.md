@@ -26,9 +26,9 @@ graph TD
 |---|---|---|---|---|---|---|
 | Register | plain local variable | thread | thread | N/A (on-chip) | ~1 cycle | 65,536 32-bit registers/SM |
 | Local | spilled variable, non-constant-indexed local array | thread | thread | L1/L2 | few hundred cycles | limited only by device memory |
-| Shared | `` `__shared__` `` | block | block | N/A (on-chip, explicit) | ~20-30 cycles | up to 228 KB/SM (opt-in) |
-| Global | `cudaMalloc`, `` `__device__` `` | grid / host | application (until freed) | L1/L2 | few hundred cycles | device memory, GBs |
-| Constant | `` `__constant__` `` | grid / host | application | dedicated constant cache | ~few cycles when broadcast | 64 KB |
+| Shared | `__shared__` | block | block | N/A (on-chip, explicit) | ~20-30 cycles | up to 164 KB/SM (opt-in; up to 227 KB/SM on Hopper, CC 9.0) |
+| Global | `cudaMalloc`, `__device__` | grid / host | application (until freed) | L1/L2 | few hundred cycles | device memory, GBs |
+| Constant | `__constant__` | grid / host | application | dedicated constant cache | ~few cycles when broadcast | 64 KB |
 | Texture / read-only | `cudaTextureObject_t`, `const __restrict__` | grid / host | application (or bound object's lifetime) | dedicated read-only cache | ~few cycles when cached | device memory-backed |
 
 These are Ampere-class (compute capability 8.0) figures — [Compute Capability](../02-gpu-hardware-architecture/compute-capability.md) covers how they shift across generations, and [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) works the register and shared-memory numbers into a full occupancy calculation.

@@ -16,7 +16,7 @@ Shared memory does two distinct jobs, and most uses are one or the other. As a *
 
 ## Static allocation
 
-The simplest form declares a fixed-size array with the `` `__shared__` `` qualifier, sized at compile time:
+The simplest form declares a fixed-size array with the `__shared__` qualifier, sized at compile time:
 
 ```cpp
 __shared__ float tile[32][33];
@@ -52,7 +52,7 @@ CUDA_CHECK(cudaFuncSetAttribute(
 myKernel<<<blocks, threads, 65536>>>(/* ... */);
 ```
 
-The `cudaFuncSetAttribute` call raises the *permitted* maximum for this kernel; the launch's third `<<<...>>>` argument still has to actually request that much, and both numbers have to match what the kernel's own indexing expects. See [Error Handling and Checking](../06-cuda-runtime-and-apis/error-handling.md) for what `` `CUDA_CHECK` `` does with the status this call returns.
+The `cudaFuncSetAttribute` call raises the *permitted* maximum for this kernel; the launch's third `<<<...>>>` argument still has to actually request that much, and both numbers have to match what the kernel's own indexing expects. See [Error Handling and Checking](../06-cuda-runtime-and-apis/error-handling.md) for what `CUDA_CHECK` does with the status this call returns.
 
 :::note[Opt-in ceiling is compute-capability-dependent]
 The maximum dynamic shared memory a kernel can request past the 48 KB default varies by compute capability — see [Compute Capability](../02-gpu-hardware-architecture/compute-capability.md) before assuming a number here transfers to a different generation.
@@ -64,7 +64,7 @@ Shared memory is not zero-initialized — reading a location a block hasn't writ
 
 ## The lifetime rule
 
-Within a block, one thread's write to shared memory is only guaranteed visible to another thread after both have passed a `` `__syncthreads()` `` barrier — the hardware does not guarantee any ordering between threads' shared-memory writes and other threads' reads of the same location without one. A kernel that writes into shared memory and reads a location another thread wrote, without a synchronization point between the two, has a race whether or not it happens to produce the right answer on a given run. [Block Synchronization](../05-execution-and-synchronization/block-synchronization.md) covers `` `__syncthreads()` `` and its Cooperative Groups equivalents in full.
+Within a block, one thread's write to shared memory is only guaranteed visible to another thread after both have passed a `__syncthreads()` barrier — the hardware does not guarantee any ordering between threads' shared-memory writes and other threads' reads of the same location without one. A kernel that writes into shared memory and reads a location another thread wrote, without a synchronization point between the two, has a race whether or not it happens to produce the right answer on a given run. [Block Synchronization](../05-execution-and-synchronization/block-synchronization.md) covers `__syncthreads()` and its Cooperative Groups equivalents in full.
 
 ## See also
 
