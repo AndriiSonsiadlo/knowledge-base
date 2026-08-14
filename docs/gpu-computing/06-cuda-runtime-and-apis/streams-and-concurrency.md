@@ -51,7 +51,7 @@ graph LR
     S1 -.->|"overlaps"| S2
 ```
 
-Within each stream the three operations are strictly ordered top to bottom; the dashed cross-stream edges are the absence of any such ordering between streams, which is exactly what lets the driver run any two of them at once.
+Within each stream the three operations are strictly ordered left to right; the dashed cross-stream edges are the absence of any such ordering between streams, which is exactly what lets the driver run any two of them at once.
 
 ## Priorities
 

@@ -59,6 +59,7 @@ Establish a hardware roof first — effective bandwidth for a streaming kernel, 
 ## See also
 
 - [Occupancy Tuning](./occupancy-tuning.md) — the fix for the latency-bound branch of the classification above.
+- [Common Antipatterns](./common-antipatterns.md) — the checklist of specific ways this loop goes wrong.
 - [Memory-Bound vs Compute-Bound](../01-parallel-computing-foundations/memory-bound-vs-compute-bound.md) — the diagnostic this page's classify step is built on.
 - [Nsight Compute](../09-tooling-profiling-and-debugging/nsight-compute.md) — the profiler that produces the measure step's numbers.
 - [Metrics That Matter](../09-tooling-profiling-and-debugging/metrics-that-matter.md) — the full reference for the metrics named in this loop.

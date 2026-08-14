@@ -19,20 +19,20 @@ Occupancy is the supply of independent warps available to hide latency, nothing 
 The three limiters from [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) — registers/thread, shared memory/block, and thread/block slots — come from the compiler and the launch configuration, not from guessing. `nvcc -Xptxas -v` reports the register and shared-memory usage the compiler actually settled on for a given kernel. The block below is representative sample output, not a real captured compile — it illustrates the fields to read and the shared-memory figure (8448 bytes) matches the padded `sgemmTiled` tile arrays worked out in [Shared Memory Tiling](./shared-memory-tiling.md), but the register count is illustrative; compile the kernel yourself to get the number that applies to your toolchain and target architecture:
 
 ```text
-ptxas info    : Compiling entry function '_Z6sgemmTiled...' for 'sm_80'
-ptxas info    : Function properties for _Z6sgemmTiled...
+ptxas info    : Compiling entry function '_Z10sgemmTiled...' for 'sm_80'
+ptxas info    : Function properties for _Z10sgemmTiled...
     0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
-ptxas info    : Used 40 registers, 8448 bytes smem, 400 bytes cmem[0]
+ptxas info    : Used 64 registers, 8448 bytes smem, 400 bytes cmem[0]
 ```
 
-Feed `40` registers/thread and `8448` bytes shared memory/block, along with the launch's threads/block, into the same register / shared-memory / thread-slot minimum from [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) — or let `cudaOccupancyMaxActiveBlocksPerMultiprocessor` do it — to get blocks/SM and, from that, achieved theoretical occupancy.
+Feed `64` registers/thread and `8448` bytes shared memory/block, along with the launch's threads/block, into the same register / shared-memory / thread-slot minimum from [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) — or let `cudaOccupancyMaxActiveBlocksPerMultiprocessor` do it — to get blocks/SM and, from that, achieved theoretical occupancy.
 
 ## `__launch_bounds__`
 
 `__launch_bounds__(maxThreadsPerBlock, minBlocksPerMultiprocessor)` is a contract with `ptxas`, not a runtime setting: it tells the compiler the largest block size the kernel will ever be launched with and the minimum number of blocks per SM the caller wants resident, and `ptxas` caps the registers it allocates per thread so that many blocks actually fit. Without the annotation, the compiler is free to use as many registers as it finds useful for scheduling instructions; with it, register count becomes a budget the compiler must live inside.
 
 ```cpp showLineNumbers
-__global__ void __launch_bounds__(256, 4) sgemmTiled(int N, const float* __restrict__ A,
+__global__ void __launch_bounds__(1024, 2) sgemmTiled(int N, const float* __restrict__ A,
                                                        const float* __restrict__ B, float* __restrict__ C) {
     // kernel body unchanged
 }
@@ -44,7 +44,7 @@ The same kind of `-Xptxas -v` output shows the effect directly — the pair belo
 // without __launch_bounds__
 ptxas info    : Used 64 registers, 8448 bytes smem, 400 bytes cmem[0]
 
-// with __launch_bounds__(256, 4)
+// with __launch_bounds__(1024, 2)
 ptxas info    : Used 32 registers, 8448 bytes smem, 400 bytes cmem[0]
 ```
 

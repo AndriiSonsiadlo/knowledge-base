@@ -37,15 +37,15 @@ saxpy<<<grid, block>>>(n, a, d_x, d_y);
 
 // Driver API — same launch, made explicit
 CUfunction saxpyFn;
-CUDA_CHECK(cuModuleGetFunction(&saxpyFn, module, "saxpy"));
+cuModuleGetFunction(&saxpyFn, module, "saxpy");
 void* args[] = { &n, &a, &d_x, &d_y };
-CUDA_CHECK(cuLaunchKernel(saxpyFn,
+cuLaunchKernel(saxpyFn,
     grid.x, grid.y, grid.z,
     block.x, block.y, block.z,
-    0, stream, args, nullptr));
+    0, stream, args, nullptr);
 ```
 
-See [Error Handling and Checking](./error-handling.md) for what `CUDA_CHECK` does with the status these calls return.
+`cuModuleGetFunction` and `cuLaunchKernel` return `CUresult`, not `cudaError_t`, so checking them takes a macro built from `cuGetErrorName`/`cuGetErrorString`, not the runtime API's `CUDA_CHECK`. See [Error Handling and Checking](./error-handling.md) for what `CUDA_CHECK` does with the `cudaError_t` that runtime-API calls such as `cudaMalloc` and `cudaMemcpy` return.
 
 The `<<<>>>` syntax is exactly this call with the function handle, argument packing, and error type resolved at compile time instead of at run time.
 
