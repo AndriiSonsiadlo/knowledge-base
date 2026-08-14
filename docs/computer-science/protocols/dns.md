@@ -54,6 +54,30 @@ The recursive resolver caches results at every level (root/TLD referrals are eff
 cached for a long time; the final answer is cached according to its own TTL), so most real-world
 lookups skip several of these steps entirely and answer straight from cache.
 
+In deployment there are usually more caches in that chain than the sequence diagram suggests:
+
+<Figure src="/img/cs/protocols/dns-resolution.png"
+        alt="Applications on a computer query a local resolver with its own cache, which queries a caching forwarding resolver, then a recursive resolver, which finally queries authoritative root, TLD and second-level servers"
+        caption="Each box in the middle holds a cache, so most queries are answered long before reaching an authoritative server. The greyed boxes are redundant resolvers — this path is normally built for failover."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:DNS_Architecture.svg"
+        license="CC BY-SA 4.0" />
+
+### Zones and delegation
+
+The name space is one tree, but no single organisation runs it. It is carved into **zones**, each
+managed by its own name server, and a zone hands control of a subtree to another server by
+**delegating** it:
+
+<Figure src="/img/cs/protocols/dns-name-space.png"
+        alt="A tree of domain names enclosed by dashed outlines marking zones of authority, with an NS resource record delegating one subtree to a separately managed zone"
+        caption="Dashed outlines are zones of authority. A zone delegates a subtree by publishing an NS record naming the server authoritative for it — the mechanism the whole distributed system rests on."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Domain_name_space.svg"
+        license="Public domain" />
+
+This is why the resolution chain above walks down level by level. Each step does not answer the
+question; it answers *who to ask next*, following delegations from the root until it reaches a server
+that is authoritative for the name in question.
+
 ### Common Record Types
 
 | Type | Purpose |

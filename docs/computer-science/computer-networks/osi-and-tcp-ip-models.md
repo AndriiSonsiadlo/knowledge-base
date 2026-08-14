@@ -67,6 +67,31 @@ flowchart LR
     O1 --- T1
 ```
 
+### What layering means on the wire
+
+Layers are not a filing system for concepts — they are literally nested headers. Each layer wraps the
+layer above it, so what leaves the network card is an onion:
+
+<Figure src="/img/cs/computer-networks/udp-encapsulation.png"
+        alt="Application data wrapped in a UDP header, that whole thing wrapped in an IP header, and that wrapped in a link-layer frame header and footer, drawn as progressively wider stacked bars"
+        caption="Encapsulation. Application data is prefixed with a UDP header, the result becomes IP's payload, and that becomes the link frame's payload — each layer treating the one above as opaque bytes."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:UDP_encapsulation.svg"
+        license="CC BY-SA 3.0" />
+
+Reading that figure bottom-up is what a packet capture does, and reading it top-down explains why
+every layer costs you payload space — the widening bars are header overhead. It also shows why a
+layer can be swapped out without the others noticing: replace the link row with Wi-Fi instead of
+Ethernet, and nothing above it changes.
+
+Peers talk to peers. Layer 4 on this host is in conversation with layer 4 on the other host, even
+though every byte physically travels down to the wire and back up:
+
+<Figure src="/img/cs/computer-networks/osi-model-communication.png"
+        alt="Two vertical protocol stacks side by side, with each layer's instance connected horizontally to its counterpart on the other host by a labelled protocol line"
+        caption="The horizontal lines are the illusion each layer provides: layer 4 behaves as if it were speaking straight to the remote layer 4, while the traffic actually goes down one stack and up the other."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:OSI-model-Communication.svg"
+        license="Public domain" />
+
 :::info[Why TCP/IP "won" despite OSI being taught more]
 OSI's protocols (X.25, CLNP, etc.) were designed top-down by committee before much real-world
 deployment experience existed, and the full stack was heavyweight to implement. TCP/IP grew

@@ -44,6 +44,42 @@ flowchart LR
 TLS doesn't change *what* HTTP says — it wraps the entire exchange (including headers, method, path,
 and cookies) in an encrypted, tamper-evident channel between exactly the two parties who negotiated it.
 
+#### Two key operations underneath
+
+Public-key encryption solves the problem of sending a secret to someone you have never met, using two
+keys where what one locks only the other opens:
+
+<Figure src="/img/cs/protocols/public-key-encryption.png"
+        alt="Bob encrypts the message Hello Alice with Alice's public key, producing ciphertext that travels to Alice, who decrypts it back to plaintext with her private key"
+        caption="Encryption for confidentiality: anyone may hold Alice's public key and send her a secret, but only her private key can recover it."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Public_key_encryption.svg"
+        license="Public domain" />
+
+Run the same key pair the other way and you get a **signature** instead — proof of who sent something,
+rather than secrecy about what it says:
+
+<Figure src="/img/cs/protocols/digital-signature.png"
+        alt="Signing: data is hashed, the hash is encrypted with the signer's private key to form a signature, and both are attached. Verification: the receiver hashes the data, decrypts the signature with the signer's public key, and compares the two hashes"
+        caption="Signing hashes the data and encrypts the hash with the *private* key; verification decrypts with the *public* key and compares. Equal hashes prove both authorship and that nothing was altered."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Digital_Signature_diagram.svg"
+        license="CC BY-SA 3.0" />
+
+Symmetric encryption — the older idea — uses **one** shared key for both directions:
+
+<Figure src="/img/cs/protocols/symmetric-key-encryption.png"
+        alt="Bob encrypts a message with a shared secret key and Alice decrypts the ciphertext with the identical shared secret key"
+        caption="Symmetric encryption: fast and simple, but both parties must already share the same secret key — which is the exact problem public-key cryptography exists to solve."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Symmetric_key_encryption.svg"
+        license="CC0" />
+
+:::info[Why TLS uses both asymmetric and symmetric cryptography]
+Public-key operations are orders of magnitude slower than symmetric ones, so TLS uses them only
+during the handshake — to authenticate the server and agree on a shared secret. Every byte of actual
+traffic afterwards is protected with a fast symmetric cipher (AES-GCM, ChaCha20-Poly1305) keyed from
+that secret. The expensive maths happens once per connection, not once per byte, which is the other
+reason connection reuse matters so much.
+:::
+
 ### The TLS 1.3 Handshake (High Level)
 
 TLS 1.3 significantly simplified the handshake compared to TLS 1.2, cutting it from two round trips

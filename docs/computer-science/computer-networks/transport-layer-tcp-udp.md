@@ -48,6 +48,19 @@ Each side proposes an **initial sequence number** (ISN); the SYN-ACK both acknow
 ISN and proposes the server's own. After the final ACK, both sides have confirmed they can send *and*
 receive, and the connection moves to the `ESTABLISHED` state.
 
+That correctness has a price, and the price is measured in round trips:
+
+<Figure src="/img/cs/computer-networks/tcp-three-way-handshake.png"
+        alt="Timeline between a client and server: a connection request arrow at 0 ms, an acknowledgement arriving back at 34 ms, and the first application data sent at 68 ms"
+        caption="One full round trip is spent before a single byte of application data moves. On a 34 ms path that is 68 ms of latency the user pays for nothing they asked for."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:TCP_Three-Way_Handshake.svg"
+        license="Public domain" />
+
+This is the single most important number in web performance work. A fresh HTTPS connection costs
+that round trip *plus* the TLS handshake's own, which is why connection reuse
+([keep-alive](../protocols/http-and-https.md)), TLS session resumption, and QUIC's 0-RTT and
+1-RTT handshakes all exist — every one of them is an attempt to delete round trips from this picture.
+
 ### Reliability Mechanisms
 
 TCP guarantees ordered, complete delivery (or an error if that's impossible) using:

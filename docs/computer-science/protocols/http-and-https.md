@@ -75,6 +75,19 @@ flowchart TB
     end
 ```
 
+Even before multiplexing, HTTP/1.1's most valuable change was simply *not* tearing the connection
+down after every response:
+
+<Figure src="/img/cs/protocols/http-persistent-connection.png"
+        alt="Two timelines side by side: on the left each request opens and closes its own connection, on the right one connection is opened, carries three request-response pairs, and is closed once"
+        caption="Left: a connection opened and closed per request, paying setup latency every time. Right: one connection reused for three exchanges — the same work with a third of the setup cost."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:HTTP_persistent_connection.svg"
+        license="Public domain" />
+
+Each `open` on the left is the full [TCP handshake](../computer-networks/transport-layer-tcp-udp.md)
+— and over HTTPS, a TLS handshake on top of it. Persistent connections (`Connection: keep-alive`,
+the default since HTTP/1.1) are why that cost is paid once per page rather than once per image.
+
 - **HTTP/1.1**: text-based, one request waits for one response per connection at a time; browsers
   work around this by opening several parallel TCP connections to the same host.
 - **HTTP/2**: binary framing, true multiplexing of many concurrent requests/responses over a *single*

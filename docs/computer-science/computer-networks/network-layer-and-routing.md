@@ -35,6 +35,22 @@ An IPv4 address is 32 bits, written as four dotted decimal octets: `192.168.1.10
 billion possible addresses and far more than that many devices on the Internet, IPv4 address
 exhaustion is the reason both **NAT** and **IPv6** exist.
 
+Those addresses are two fields of a twenty-byte header prepended to every packet:
+
+<Figure src="/img/cs/computer-networks/ipv4-packet.png"
+        alt="The IPv4 header laid out as 32-bit rows: version, IHL, TOS and total length; identification, flags and fragment offset; TTL, protocol and header checksum; then source and destination addresses, optional options, and the data"
+        caption="The IPv4 header — 20 bytes without options. Source and destination take 8 of those bytes; the rest is the bookkeeping that makes forwarding, fragmentation and loop-prevention work."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:IPv4_Packet-en.svg"
+        license="CC BY-SA 4.0" />
+
+Three of those fields explain behaviour you will actually observe:
+
+| Field | Why you notice it |
+|---|---|
+| **TTL** | Decremented by every router; a packet hitting zero is dropped and an ICMP error returned. This is both the loop-killer and the mechanism `traceroute` exploits to discover each hop in turn. |
+| **Protocol** | Names what the payload is (6 = TCP, 17 = UDP, 1 = ICMP) so the receiving host knows which handler to pass it to — the "up" step of decapsulation. |
+| **Flags / Fragment offset** | Support splitting an oversized packet across several frames. The *Don't Fragment* flag plus a too-small MTU somewhere on the path is the classic cause of connections that complete a handshake and then hang on the first large transfer. |
+
 ### IPv6 (Briefly)
 
 **IPv6** uses 128-bit addresses, written as eight groups of hex digits (e.g.,

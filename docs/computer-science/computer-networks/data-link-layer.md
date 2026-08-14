@@ -40,6 +40,20 @@ A MAC address is 48 bits, conventionally written as six colon-separated hex byte
    the IEEE            specific interface
 ```
 
+### The frame those addresses live in
+
+<Figure src="/img/cs/computer-networks/ethernet-frame.png"
+        alt="An Ethernet Type II frame: a 14-byte MAC header of destination address, source address and EtherType, then a 46 to 1500 byte payload, then a 4-byte CRC checksum"
+        caption="An Ethernet Type II frame. Fourteen bytes of header, up to 1500 bytes of payload, four bytes of CRC — and the EtherType field that tells the receiver whether the payload is IP, ARP or something else."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Ethernet_Type_II_Frame_format.svg"
+        license="Public domain" />
+
+Two numbers there have outsized consequences. The 1500-byte payload ceiling is the standard **MTU**,
+and it is why IP has to fragment, why TCP negotiates an MSS of 1460, and why tunnelling protocols
+that add their own headers can mysteriously break large transfers. The 46-byte *minimum* is why tiny
+frames get padded — a legacy of collision detection on shared coaxial Ethernet that survives in the
+standard today.
+
 ### Hubs vs. Switches
 
 An old-style **hub** is a dumb physical-layer repeater: every bit it receives on one port is echoed
