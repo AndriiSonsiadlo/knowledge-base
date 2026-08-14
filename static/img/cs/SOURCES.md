@@ -54,7 +54,6 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/trie.png` | https://commons.wikimedia.org/wiki/File:Trie_example.svg | Booyabazooka (based on PNG image by Deco ). Modifications by Superm401 . | Public domain |
 | `algorithms/undirected-graph.png` | https://commons.wikimedia.org/wiki/File:6n-graf.svg | AzaToth | Public domain |
 | `assembly/call-stack-layout.png` | https://commons.wikimedia.org/wiki/File:Call_stack_layout.svg | R. S. Shaw | Public domain |
-| `assembly/program-call-stack.png` | https://commons.wikimedia.org/wiki/File:ProgramCallStack2_en.png | Agateller at English Wikipedia | Public domain |
 | `bit-manipulation/ascii-table.png` | https://commons.wikimedia.org/wiki/File:Ascii_Table-nocolor.svg | ZZT32 | Public domain |
 | `bit-manipulation/ieee754-single.png` | https://commons.wikimedia.org/wiki/File:IEEE_754_Single_Floating_Point_Format.svg | Codekaizen | CC BY 3.0 |
 | `buses-and-io/i2c-bus.png` | https://commons.wikimedia.org/wiki/File:I2C.svg | en:user:Cburnett | CC BY-SA 3.0 |
@@ -86,7 +85,6 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `protocols/dns-name-space.png` | https://commons.wikimedia.org/wiki/File:Domain_name_space.svg | unknown | Public domain |
 | `protocols/dns-resolution.png` | https://commons.wikimedia.org/wiki/File:DNS_Architecture.svg | Aaron Filbert | CC BY-SA 4.0 |
 | `protocols/http-persistent-connection.png` | https://commons.wikimedia.org/wiki/File:HTTP_persistent_connection.svg | helix84 | Public domain |
-| `protocols/http-request-telnet.png` | https://commons.wikimedia.org/wiki/File:Http_request_telnet_ubuntu.png | TheJosh | Public domain |
 | `protocols/public-key-encryption.png` | https://commons.wikimedia.org/wiki/File:Public_key_encryption.svg | Davidgothberg | Public domain |
 | `protocols/symmetric-key-encryption.png` | https://commons.wikimedia.org/wiki/File:Symmetric_key_encryption.svg | Phayzfaustyn | CC0 |
 | `storage/ext2-inode.png` | https://commons.wikimedia.org/wiki/File:Ext2-inode.svg | timtjtim | CC BY-SA 4.0 |

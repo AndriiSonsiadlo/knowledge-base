@@ -49,6 +49,21 @@ a monitor, laptop dock, or a standalone USB hub) extend the tree; devices are al
 and a keyboard plugged into the same hub cannot talk to each other directly — all traffic, even
 between two devices on the same hub, is scheduled and routed through the host.
 
+### One protocol, many connectors
+
+<Figure src="/img/cs/buses-and-io/usb-connectors.jpg"
+        alt="Six USB connectors photographed side by side against a ruler: micro-B, mini-B, another mini variant, an A receptacle, an A plug and a B plug"
+        caption="Six USB connectors, same protocol. The plug on the end of a cable says nothing about the speed or power the link will negotiate."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Usb_connectors.JPG"
+        license="Public domain" photo />
+
+:::warning[Connector, protocol and power are three independent things]
+This is the single most confusing part of modern USB. A USB-C *connector* may carry USB 2.0 at
+480 Mbit/s or USB4 at 40 Gbit/s; it may or may not support DisplayPort alternate mode; and it may
+negotiate anything from 2.5 W to 240 W of Power Delivery. Two identical-looking cables can differ by
+a factor of eighty in throughput. The shape tells you only what will physically plug in.
+:::
+
 ### Endpoints, pipes, and the four transfer types
 
 ```mermaid

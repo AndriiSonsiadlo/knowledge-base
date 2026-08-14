@@ -31,6 +31,20 @@ motivation behind **normalization**.
 
 ## Architecture / Mechanism
 
+The model's vocabulary maps onto a table in exactly three places:
+
+<Figure src="/img/cs/databases/relational-terms.png"
+        alt="A grid with one row highlighted and labelled Tuple, one column highlighted and labelled Attribute, and the whole grid braced and labelled Relation"
+        caption="Relation, tuple, attribute — the formal names for table, row and column. The theory uses the left-hand set; SQL and everyday practice use the right."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Relational_database_terms.svg"
+        license="Public domain" />
+
+One consequence of the formal definition is worth holding onto: a relation is a *set* of tuples, so
+it has **no inherent order** and no duplicates. SQL departs from this on both counts — tables are
+bags that permit duplicate rows, and `SELECT` returns rows in whatever order the engine finds
+convenient. That is why a query without `ORDER BY` has no guaranteed ordering, however stable it may
+look in testing.
+
 ```mermaid
 erDiagram
     CUSTOMERS ||--o{ ORDERS : places

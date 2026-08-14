@@ -95,6 +95,18 @@ switch's upstream bandwidth.
 
 ### Lanes and generations
 
+Lane count is not a setting — it is physically how long the slot is:
+
+<Figure src="/img/cs/buses-and-io/pcie-slots.jpg"
+        alt="Close-up photograph of a motherboard showing several PCI Express expansion slots of noticeably different physical lengths"
+        caption="PCI Express slots on a consumer motherboard. The differing lengths are differing lane counts — a short slot is x1, a full-length one x16."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PCIExpress.jpg"
+        license="CC BY-SA 3.0" photo />
+
+Because the link is point-to-point and negotiated, a shorter card works in a longer slot and runs at
+the lower lane count — an x4 SSD in an x16 slot is fine. The reverse needs an open-ended slot, and
+even where it fits, the link trains down to whatever both ends support.
+
 Bandwidth scales two ways: by adding **lanes** to a link (x1, x4, x8, x16), and by moving to a newer,
 faster **generation**. Each PCIe generation roughly doubles the raw transfer rate per lane while
 staying backward compatible:

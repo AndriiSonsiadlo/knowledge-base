@@ -59,6 +59,20 @@ mutex," but the conceptual difference matters:
 
 ### The four Coffman conditions for deadlock
 
+The canonical illustration is Dijkstra's **dining philosophers**: five philosophers around a table,
+one fork between each adjacent pair, and a philosopher needs both neighbouring forks to eat.
+
+<Figure src="/img/cs/operating-systems/dining-philosophers.png"
+        alt="Five philosophers seated around a round table, each with a bowl of spaghetti, with a single fork placed between each adjacent pair"
+        caption="Five philosophers, five forks, and each needs two. If every philosopher picks up their left fork at the same moment, all five hold one fork and wait forever for another."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Dining_philosophers.png"
+        license="CC BY-SA 3.0" />
+
+The reason this example endures is that it exhibits all four conditions below at once, and that the
+obvious fix — "just pick up the left fork, then the right" — is precisely what *causes* the deadlock
+rather than preventing it. Making one philosopher reach right-then-left breaks the symmetry, and with
+it the cycle; that asymmetry is lock ordering in disguise.
+
 A deadlock can only occur if **all four** of these hold simultaneously:
 
 1. **Mutual exclusion** — resources can't be shared; only one thread can hold a given resource.
