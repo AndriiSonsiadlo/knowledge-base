@@ -61,19 +61,28 @@ having to spill anything.
 
 ## Architecture / Mechanism: Stack Frame Anatomy
 
-```mermaid
-flowchart TB
-    subgraph Stack["Stack (grows downward)"]
-        direction TB
-        A["Caller's frame..."]
-        B["Argument 7+ (if any)"]
-        C["Return address (pushed by `call`)"]
-        D["Saved rbp (pushed by prologue)"]
-        E["Local variables"]
-        F["rsp -> top of stack"]
-    end
-    A --> B --> C --> D --> E --> F
+<Figure src="/img/cs/assembly/call-stack-layout.png"
+        alt="A call stack drawn as a column: the frame for DrawLine on top holding its locals, return address and parameters, and below it the frame for DrawSquare with the same three parts, with the stack pointer at the top and the frame pointer partway down"
+        caption="Two frames of a call stack. Each frame carries the callee's locals, the address to return to, and its parameters; the frame pointer anchors the current frame while the stack pointer marks its top."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Call_stack_layout.svg"
+        license="Public domain" />
+
+:::warning[That figure is drawn with the stack growing upward]
+On x86-64 the stack grows toward **lower** addresses, so a real memory dump is that picture flipped:
+the caller's frame sits at a higher address than the callee's, and `push` *decrements* `rsp`. Concretely,
+for a function called on System V AMD64:
+
+```text
+higher addresses
+    ...caller's frame...
+    argument 7, 8, ...        <- only args beyond the 6 register-passed ones
+    return address            <- pushed by `call`
+    saved rbp                 <- pushed by the prologue; rbp points here
+    local variables
+    ...                       <- rsp points at the lowest occupied byte
+lower addresses
 ```
+:::
 
 A typical (unoptimized) function prologue does three things: push the caller's base pointer to save
 it, make `rbp` point at the current frame, and reserve space for locals by moving `rsp`. The epilogue

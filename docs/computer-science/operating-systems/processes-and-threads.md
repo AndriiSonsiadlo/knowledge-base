@@ -32,6 +32,23 @@ private address space) explains almost every practical difference between "spawn
 
 ## Architecture / Mechanism
 
+A process is not simply "running" or "not running" — the scheduler moves it between several states,
+and knowing which one a stuck process is in is most of diagnosing it:
+
+<Figure src="/img/cs/operating-systems/process-states.png"
+        alt="Process state diagram: Created leads to Waiting, which exchanges with Running, which leads to Blocked and to Terminated, with swapped-out variants of Waiting and Blocked living in swap space"
+        caption="The state machine. The lower band matters: a swapped-out process is not just idle, it is not even resident, and waking it needs disk I/O before it can run."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Process_states.svg"
+        license="Public domain" />
+
+:::note[Naming varies by system]
+This diagram's **Waiting** is what Linux calls **runnable** (`R` in `ps`) — ready to run, waiting only
+for a CPU. Its **Blocked** is Linux's **sleeping** (`S`/`D`), waiting on I/O or a lock and *not*
+schedulable. The distinction is the one that matters when reading load average: runnable processes
+count toward it, and on Linux so do processes in uninterruptible sleep (`D`), which is why heavy disk
+I/O can drive load average up with the CPUs nearly idle.
+:::
+
 ```mermaid
 flowchart TB
     subgraph P1["Process A (own address space)"]

@@ -44,6 +44,20 @@ flowchart TB
     end
 ```
 
+### The cell itself
+
+<Figure src="/img/cs/storage/flash-cell-structure.png"
+        alt="Cross-section of a floating-gate flash cell: two N regions in a P substrate connected to a source line and bit line, with a floating gate sandwiched beneath the control gate that forms the word line"
+        caption="A floating-gate cell. The float gate is completely surrounded by insulator, so charge forced onto it stays there without power — that trapped charge is the stored bit."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Flash_cell_structure.svg"
+        license="CC BY 2.5" />
+
+Charge reaches that isolated gate only by being driven through the insulator, which is a
+mildly destructive act. Every program/erase cycle degrades the oxide a little, and after enough
+cycles it no longer holds charge reliably — **that** is what finite endurance physically *is*, and
+why the wear-levelling in the diagram above exists. It also explains the asymmetry that shapes the
+whole device: reading is gentle and cheap, writing is violent and expensive.
+
 ### Why SSDs can't overwrite in place
 
 A NAND page can be written directly only while it's in its erased (all-1s) state; flipping bits back

@@ -30,17 +30,22 @@ underneath it.
 
 ## Architecture / Mechanism
 
-```mermaid
-flowchart LR
-    subgraph HDD["HDD Assembly"]
-        Spindle["Spindle Motor<br/>(spins platters at fixed RPM)"] --- Platter1["Platter(s)"]
-        Actuator["Actuator Arm"] --- Head["Read/Write Head"]
-        Head -. "flies above surface" .- Platter1
-    end
-    Controller["Drive Controller"] --> Actuator
-    Controller --> Head
-    Controller --> Interface["SATA / SAS Interface"]
-```
+<Figure src="/img/cs/storage/hdd-anatomy.png"
+        alt="Cutaway drawing of a hard disk drive labelling the platter, spindle, read/write head, actuator arm, actuator axis, actuator, jumper block, IDE connector and power connector"
+        caption="The mechanism, labelled. The head never touches the platter — it flies a few nanometres above a surface moving past it at highway speed."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Hard_drive-en.svg"
+        license="CC BY-SA 3.0" />
+
+And the same parts in a real drive, with the lid off:
+
+<Figure src="/img/cs/storage/hdd-platters-and-head.jpg"
+        alt="Photograph of an opened hard disk drive showing the mirrored platter, the actuator arm and the read/write head resting near the spindle"
+        caption="An opened drive. Note how little of it is storage and how much is precision mechanics — this is the part that cannot be made faster by a process shrink."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Hard_disk_platters_and_head.jpg"
+        license="CC BY-SA 3.0" photo />
+
+Everything expensive about an HDD follows from that photograph: there is exactly **one** head
+assembly, it is a physical arm, and it has to be moved and then waited on.
 
 A single I/O request has to pay for three sequential delays before any bytes move:
 

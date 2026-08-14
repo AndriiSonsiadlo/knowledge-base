@@ -45,6 +45,19 @@ systems) separate a file's identity from its name: an inode holds all metadata a
 one or more directory entries can point to the same inode (hard links). Looking up a path means
 walking directory entries down to an inode, then following that inode's block pointers to the data.
 
+<Figure src="/img/cs/storage/ext2-inode.png"
+        alt="An ext2 inode with a metadata area and numbered pointer slots: the first slots point straight at data blocks, later slots point at blocks of pointers, and the last at blocks of pointers to blocks of pointers"
+        caption="An ext2 inode's block pointers. The first twelve name data blocks directly; the remaining slots reach single, double and triple indirect blocks — pointer blocks that name more blocks."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Ext2-inode.svg"
+        license="CC BY-SA 4.0" />
+
+This shape is a deliberate trade. Small files — the overwhelming majority — are reachable in one step
+through the direct pointers, while large files remain addressable by spending an extra indirection or
+two. The cost is that a read deep inside a very large file may touch two or three pointer blocks
+before it touches data, which is exactly the overhead that
+[extent-based](https://en.wikipedia.org/wiki/Extent_(file_systems)) filesystems (ext4, XFS, NTFS,
+APFS) removed by describing runs of contiguous blocks as `(start, length)` pairs instead.
+
 **FAT-style filesystems** (FAT12/16/32, and its descendants) instead chain a file's data blocks
 ("clusters") together directly via a File Allocation Table, with each directory entry pointing at the
 starting cluster. This is simpler and has less metadata overhead, which is why FAT variants remain
