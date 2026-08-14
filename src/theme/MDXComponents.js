@@ -1,4 +1,5 @@
 import MDXComponents from "@theme-original/MDXComponents";
+import Figure from "@site/src/components/Figure";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 
 // Offline <Icon /> for MDX. Renders a bundled Iconify icon body as an inline SVG,
@@ -29,4 +30,5 @@ function Icon({ icon, inline, ...rest }) {
 export default {
 	...MDXComponents,
 	Icon,
+	Figure,
 };

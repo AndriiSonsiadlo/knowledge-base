@@ -1067,6 +1067,42 @@ body {
   @apply border border-slate-700 shadow-md;
 }
 
+/* ============ Figures ============ */
+/* Third-party technical diagrams are drawn as dark strokes on a transparent or white
+   canvas. Rendering them directly against the dark theme makes them unreadable, so the
+   plate stays light in both themes. Photographs opt out via `photo`. */
+.kb-figure {
+  @apply my-6 flex flex-col items-center;
+}
+
+.kb-figure__plate {
+  @apply flex w-full justify-center rounded-lg bg-white px-4 py-4;
+}
+
+.kb-figure__plate--photo {
+  @apply bg-transparent p-0;
+}
+
+.kb-figure .kb-figure__plate img {
+  @apply mx-auto my-0 h-auto max-w-full border-0 shadow-none;
+}
+
+.kb-figure__plate--photo img {
+  @apply rounded-lg;
+}
+
+.kb-figure__caption {
+  @apply mt-3 max-w-2xl text-center text-sm text-slate-600 dark:text-slate-400;
+}
+
+.kb-figure__credit {
+  @apply text-xs text-slate-500 dark:text-slate-500;
+}
+
+.kb-figure__credit a {
+  @apply underline decoration-dotted underline-offset-2;
+}
+
 /* ============ Breadcrumbs ============ */
 .breadcrumbs {
   @apply mb-6 flex items-center text-sm;
