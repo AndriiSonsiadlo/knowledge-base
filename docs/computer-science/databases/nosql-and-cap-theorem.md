@@ -32,6 +32,20 @@ relational model isn't the best fit for every shape of data.
 
 ## Architecture / Mechanism
 
+<Figure src="/img/cs/databases/cap-theorem.png"
+        alt="Three overlapping circles labelled Consistency, Availability and Partition-Tolerance, with the pairwise overlaps marked CA, CP and AP and no region common to all three"
+        caption="The classic drawing: you may sit in a pairwise overlap, never in the centre. Read it with care — the caveat below matters more than the picture."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:CAP_Theorem.svg"
+        license="CC BY-SA 4.0" />
+
+:::warning[The Venn diagram is the most-misread figure in distributed systems]
+It suggests three symmetric options to pick two from. That is not the situation. **CA is not a
+choice available to a distributed system** — you cannot opt out of network partitions, you can only
+decide how to behave when one happens. A single-node database is genuinely CA; anything spread
+across a network is choosing between CP and AP. Treat the CA lobe as describing a system that has
+simply not been partitioned yet.
+:::
+
 ```mermaid
 flowchart TD
     P["Network Partition Occurs"] --> Choice{"Choose one"}

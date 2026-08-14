@@ -34,6 +34,19 @@ UTF-8 encodes every Unicode code point (`U+0000` to `U+10FFFF`) in **1 to 4 byte
 that ASCII bytes (`0x00`-`0x7F`) are completely unchanged — this is why UTF-8 is backward
 compatible with ASCII: any valid ASCII file is already valid UTF-8.
 
+The table it stays compatible with is this one, unchanged since 1967:
+
+<Figure src="/img/cs/bit-manipulation/ascii-table.png"
+        alt="The 7-bit ASCII table, listing control characters in the first two columns and printable characters — digits, uppercase letters, lowercase letters and punctuation — in the remaining columns"
+        caption="7-bit ASCII: 128 code points, of which the first 32 are control characters. Everything above 0x7F was left undefined — the gap that a hundred incompatible 8-bit code pages, and eventually Unicode, moved into."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Ascii_Table-nocolor.svg"
+        license="Public domain" />
+
+Two pieces of deliberate design in that layout still pay off. Digits start at `0x30`, so
+`c - '0'` converts a digit character to its value. And uppercase and lowercase differ by exactly one
+bit (`0x20`), which is why case conversion for ASCII is `c | 0x20` and `c & ~0x20` — a trick worth
+recognising in others' code, though never one to apply to non-ASCII text.
+
 | Code point range | Bytes | Bit pattern |
 |---|---|---|
 | `U+0000`–`U+007F` | 1 | `0xxxxxxx` |

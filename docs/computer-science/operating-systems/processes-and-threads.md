@@ -100,6 +100,34 @@ process* is cheaper precisely because the page tables (and therefore the TLB) do
 | **1:1 (kernel threads)** | The OS scheduler, directly | One thread blocking (e.g., on I/O) doesn't stall its siblings | POSIX threads (`pthreads`) on Linux, Windows threads |
 | **N:1 / M:N (green threads)** | A userspace runtime, multiplexed onto one or few kernel threads | A blocking syscall can stall the whole runtime unless it's wrapped in a non-blocking/async I/O layer | Early Java "green threads", Go's goroutines (M:N onto OS threads), Erlang processes |
 
+### Thread pools: stop creating threads per unit of work
+
+Creating a thread is far cheaper than creating a process, but it is not free — it means a syscall, a
+fresh kernel stack, and a new entry in the scheduler's run queue, typically tens of microseconds.
+For work items measured in microseconds themselves, creation dominates. The standard answer is to
+create a fixed set of threads once and feed them work:
+
+<Figure src="/img/cs/operating-systems/thread-pool.png"
+        alt="A queue of pending tasks feeding a fixed row of worker threads, one of which is idle, with finished tasks accumulating in a completed queue on the other side"
+        caption="Threads are created once and reused. Work queues up in front of the pool rather than spawning a thread each, so cost scales with the work, not with the thread count."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Thread_pool.svg"
+        license="CC BY-SA 3.0" />
+
+Sizing the pool is the part people get wrong, and the right answer depends on what the work does:
+
+| Workload | Sensible pool size | Why |
+|---|---|---|
+| **CPU-bound** | ≈ number of physical cores | More threads than cores just adds context switches; there is no idle time to fill. |
+| **I/O-bound** | Considerably more than cores | Threads spend most of their life blocked, so a core can usefully carry many of them. |
+| **Mixed** | Separate pools | One pool per workload class; a slow I/O task must not occupy a slot meant for CPU work. |
+
+:::warning[Unbounded queues turn backpressure into memory exhaustion]
+A pool with a fixed thread count and an *unbounded* task queue does not reject work when overloaded —
+it accepts it and grows the queue until the process runs out of memory. Bound the queue and decide
+explicitly what happens when it is full (block the submitter, drop, or fail fast). Java's
+`Executors.newFixedThreadPool` uses an unbounded queue by default, which is exactly this trap.
+:::
+
 ### fork/exec (POSIX) vs. CreateProcess (Windows)
 
 POSIX splits "make a new process" and "run a different program in it" into two distinct syscalls:

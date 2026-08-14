@@ -46,16 +46,15 @@ SELECT * FROM customers WHERE email = 'alice@example.com';
 
 ### Why B-trees specifically
 
-```mermaid
-flowchart TB
-    Root["Root node (few keys, fits in cache)"]
-    Root --> N1["Internal node"]
-    Root --> N2["Internal node"]
-    N1 --> L1["Leaf: sorted keys + row pointers"]
-    N1 --> L2["Leaf: sorted keys + row pointers"]
-    N2 --> L3["Leaf: sorted keys + row pointers"]
-    N2 --> L4["Leaf: sorted keys + row pointers"]
-```
+<Figure src="/img/cs/databases/b-tree.png"
+        alt="A two-level B-tree: a root node holding the keys 7 and 16 with three child pointers, leading to leaves holding 1,2,5,6 then 9,12 then 18,21"
+        caption="A B-tree node holds many keys, not one. The root's keys 7 and 16 partition the space into three ranges, and one pointer follow lands in the right leaf."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:B-tree.svg"
+        license="CC BY-SA 3.0" />
+
+Compare that to a binary search tree, where each node splits the space only two ways. The B-tree's
+high fan-out is the entire point: nodes hold hundreds of keys, so the tree stays shallow, and depth
+is what costs I/O.
 
 A B-tree stays **balanced** (every leaf is the same distance from the root) and **shallow** (each
 node holds many keys, so even billions of rows need only 3-4 levels of traversal). Two properties

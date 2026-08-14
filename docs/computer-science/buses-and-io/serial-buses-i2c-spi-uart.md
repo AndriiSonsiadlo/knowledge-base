@@ -32,15 +32,16 @@ that assumes you know the difference) is a routine embedded-systems and hardware
 
 ### I2C — two wires, addressed, multi-master
 
-```mermaid
-flowchart LR
-    MCU["Microcontroller (Controller)"] ---|SDA| S1["Temp Sensor (0x48)"]
-    MCU ---|SDA| S2["EEPROM (0x50)"]
-    MCU ---|SDA| S3["RTC (0x68)"]
-    MCU ---|SCL| S1
-    MCU ---|SCL| S2
-    MCU ---|SCL| S3
-```
+<Figure src="/img/cs/buses-and-io/i2c-bus.png"
+        alt="An I2C bus schematic: a controller and three peripherals all tapping the same two SDA and SCL lines, which are tied to Vdd through a pair of pull-up resistors"
+        caption="Every device hangs off the same two lines. The two resistors to Vdd are the pull-ups that make the open-drain scheme work — without them the bus never returns high."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:I2C.svg"
+        license="CC BY-SA 3.0" />
+
+:::note[Terminology]
+The figure uses the older *master/slave* labels. The current I2C specification, and this page, use
+**controller** and **peripheral** (or *target*) for the same roles.
+:::
 
 I2C uses exactly two shared lines — **SDA** (data) and **SCL** (clock) — no matter how many devices
 are on the bus. Both lines are **open-drain**, pulled high by resistors; any device can pull either
@@ -72,17 +73,15 @@ mechanism used for arbitration.
 
 ### SPI — four wires, full-duplex, chip-select
 
-```mermaid
-flowchart LR
-    MCU["Microcontroller (Controller)"] -->|MOSI| D1["SD Card"]
-    D1 -->|MISO| MCU
-    MCU -->|SCLK| D1
-    MCU -->|"CS #1"| D1
-    MCU -->|MOSI| D2["Display"]
-    D2 -->|MISO| MCU
-    MCU -->|SCLK| D2
-    MCU -->|"CS #2"| D2
-```
+<Figure src="/img/cs/buses-and-io/spi-three-peripherals.png"
+        alt="An SPI controller wired to three peripherals: SCLK, MOSI and MISO are shared by all three, while three separate slave-select lines each run to exactly one peripheral"
+        caption="SCLK, MOSI and MISO are shared; the select lines are not. Three peripherals need three dedicated select pins — the cost that I2C's addressing avoids."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:SPI_three_slaves.svg"
+        license="CC BY-SA 3.0" />
+
+The pin count is the trade-off in one picture. I2C reaches any number of devices on two wires;
+SPI needs `3 + N` wires for `N` devices, and in exchange gets full-duplex transfers, far higher clock
+rates, and no addressing or acknowledgement protocol to implement.
 
 SPI has no addressing scheme at all. Instead, the controller wires a separate **chip-select** line to
 each device and asserts exactly one at a time — whichever device sees its CS line active is the one

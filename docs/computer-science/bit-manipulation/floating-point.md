@@ -44,10 +44,20 @@ binary64 (64 bits total):
  sign, bias=1023
 ```
 
-```mermaid
-flowchart LR
-    S["Sign<br/>1 bit"] --> E["Exponent<br/>8 (float) / 11 (double) bits, biased"] --> F["Fraction<br/>23 (float) / 52 (double) bits"]
-```
+Worked through with real bits:
+
+<Figure src="/img/cs/bit-manipulation/ieee754-single.png"
+        alt="A 32-bit float shown bit by bit: sign bit 0, exponent bits 01111100, and a fraction beginning 01 followed by zeros, annotated as equalling 0.15625"
+        caption="The bit pattern for 0.15625. Sign 0 (positive); exponent 01111100 = 124, which is 124 − 127 = −3 after removing the bias; fraction 0.01₂, giving 1.25 × 2⁻³."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:IEEE_754_Single_Floating_Point_Format.svg"
+        license="CC BY 3.0" />
+
+Two details in that picture cause most floating-point surprises. The exponent is **biased**, not
+signed — you subtract 127 to get the real one, which is what makes bit patterns compare in the same
+order as the numbers they encode. And the leading `1.` of the mantissa is **implicit**: it is never
+stored, which buys an extra bit of precision but means the encoding cannot represent zero at all
+without a special case (exponent bits all zero), the first of several such carve-outs alongside
+infinity and NaN.
 
 The value is reconstructed as:
 
