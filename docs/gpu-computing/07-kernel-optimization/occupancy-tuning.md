@@ -16,7 +16,7 @@ Occupancy is the supply of independent warps available to hide latency, nothing 
 
 ## Computing it
 
-The three limiters from [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) — registers/thread, shared memory/block, and thread/block slots — come from the compiler and the launch configuration, not from guessing. `nvcc -Xptxas -v` reports the register and shared-memory usage the compiler actually settled on for a given kernel:
+The three limiters from [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) — registers/thread, shared memory/block, and thread/block slots — come from the compiler and the launch configuration, not from guessing. `nvcc -Xptxas -v` reports the register and shared-memory usage the compiler actually settled on for a given kernel. The block below is representative sample output, not a real captured compile — it illustrates the fields to read and the shared-memory figure (8448 bytes) matches the padded `sgemmTiled` tile arrays worked out in [Shared Memory Tiling](./shared-memory-tiling.md), but the register count is illustrative; compile the kernel yourself to get the number that applies to your toolchain and target architecture:
 
 ```text
 ptxas info    : Compiling entry function '_Z6sgemmTiled...' for 'sm_80'
@@ -38,7 +38,7 @@ __global__ void __launch_bounds__(256, 4) sgemmTiled(int N, const float* __restr
 }
 ```
 
-The same `-Xptxas -v` output shows the effect directly — compare register counts with and without the annotation:
+The same kind of `-Xptxas -v` output shows the effect directly — the pair below is, again, representative rather than a captured compile, illustrating the register count dropping once the annotation caps the budget; compare your own before/after output the same way:
 
 ```text
 // without __launch_bounds__

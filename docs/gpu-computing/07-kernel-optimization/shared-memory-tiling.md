@@ -79,16 +79,16 @@ This assumes `N` is evenly divisible by `TILE`, so the tile loop covers the whol
 
 `TILE` trades reuse against shared-memory pressure and blocks/SM, not a free parameter to maximize:
 
-| Tile size | Reuse per element | Shared memory / block (2 tiles, FP32) | Effect on occupancy |
+| Tile size | Reuse per element | Shared memory / block (two arrays, `TILE x (TILE + 1)`, FP32) | Effect on occupancy |
 |---|---|---|---|
-| 16 | 16x | 16 x 16 x 2 x 4 bytes x 2 = 4 KB (plus padding) | Lower reuse, but leaves more shared-memory budget for other resident blocks |
-| 32 | 32x | 32 x 33 x 2 x 4 bytes x 2 ≈ 16.9 KB | Higher reuse, but a larger per-block shared-memory footprint can cut blocks/SM, per the shared-memory limiter in [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) |
+| 16 | 16x | 2 x 16 x 16 x 4 bytes = 2048 bytes = 2 KB (unpadded figure — the actual padded allocation is slightly larger) | Lower reuse, but leaves more shared-memory budget for other resident blocks |
+| 32 | 32x | 2 x 32 x 33 x 4 bytes = 8448 bytes = 8.25 KB (includes the `+1` pad) | Higher reuse, but a larger per-block shared-memory footprint can cut blocks/SM, per the shared-memory limiter in [The Register File and Occupancy](../02-gpu-hardware-architecture/register-file-and-occupancy.md) |
 
-A larger tile raises arithmetic intensity linearly but consumes shared memory quadratically (`TILE x TILE` elements per matrix), so past some point a bigger tile actually lowers occupancy enough to hurt overall throughput even though intensity keeps climbing — the tile size that maximizes measured throughput is rarely the largest one that fits.
+The 8448-byte figure for `TILE = 32` is the same shared-memory-per-block number the sample `-Xptxas -v` output in [Occupancy Tuning](./occupancy-tuning.md) reports for `sgemmTiled`. A larger tile raises arithmetic intensity linearly but consumes shared memory quadratically (`TILE x TILE` elements per matrix), so past some point a bigger tile actually lowers occupancy enough to hurt overall throughput even though intensity keeps climbing — the tile size that maximizes measured throughput is rarely the largest one that fits.
 
-:::note[Why `TILE + 1`]
+## Conflict-free layout
+
 `As` and `Bs` are declared `[TILE][TILE + 1]` rather than `[TILE][TILE]`. The inner loop above reads `As[threadIdx.y][k]` and `Bs[k][threadIdx.x]` — a column-wise read of `Bs` across the warp — which, on an unpadded `[TILE][TILE]` layout with `TILE` a multiple of 32, lands every thread in the same shared-memory bank and serializes the read. Padding each row by one extra word breaks that alignment and spreads the accesses across distinct banks at the cost of one wasted word per row. See [Shared Memory Bank Conflicts](../04-cuda-memory-model/bank-conflicts.md) for the full derivation of why `+1` specifically fixes it.
-:::
 
 ## What tiling does not fix
 
