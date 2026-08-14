@@ -35,7 +35,7 @@ reasoning.
 | <Icon icon="lucide:network" inline /> | [Computer Networks](./computer-networks/intro.md) | OSI/TCP-IP models, data link, IP, TCP/UDP |
 | <Icon icon="lucide:globe" inline /> | [Application Protocols](./protocols/intro.md) | DNS, HTTP/HTTPS, TLS |
 | <Icon icon="lucide:database" inline /> | [Databases](./databases/intro.md) | Relational model, indexing, ACID, NoSQL/CAP |
-| <Icon icon="lucide:waypoints" inline /> | [Algorithms & Data Structures](./algorithms/intro.md) | Searching, sorting, complexity trade-offs, and problem-solving patterns |
+| <Icon icon="lucide:waypoints" inline /> | [Algorithms & Data Structures](./algorithms/intro.md) | Complexity analysis, core data structures, sorting, searching, graph algorithms, problem-solving patterns |
 
 ## Suggested Reading Path
 
@@ -58,7 +58,10 @@ flowchart LR
 - <Icon icon="lucide:cpu" inline /> **Performance engineering:** [CPU & Processor Architecture](./cpu-architecture/intro.md) (all pages) → [Memory Hierarchy & RAM](./memory-hierarchy/intro.md) → [Assembly & Low-Level Programming](./assembly/intro.md).
 
 :::tip[Conventions used across these docs]
-- Diagrams are Mermaid; tables are preferred over prose for comparisons.
+- **Figures** (real diagrams and photographs) are used wherever one exists for the concept; Mermaid
+  is reserved for flows and decisions that no static figure captures well. Every figure carries a
+  caption and its source — the full list lives in `static/img/cs/SOURCES.md`.
+- Tables are preferred over prose for comparisons.
 - Admonitions flag the important bits: `info` for context, `warning`/`danger` for real foot-guns
   (security issues, performance traps).
 - Every page ends with a **References** section and a **Books & Videos** subsection pointing at the
