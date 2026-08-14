@@ -93,6 +93,6 @@ On systems with hardware-coherent memory — Grace-Hopper's NVLink-C2C, and Pasc
 ## See also
 
 - [Pinned Memory and Host Transfers](./pinned-memory-and-transfers.md) — the explicit-copy alternative, and where "asynchronous" actually means asynchronous.
-- [Memory Spaces Overview](./memory-spaces-overview.md) — how managed memory relates to the other six spaces.
+- [Memory Spaces Overview](./memory-spaces-overview.md) — how managed memory relates to the other five spaces.
 - [Memory Allocation APIs](../06-cuda-runtime-and-apis/memory-allocation-apis.md) — `cudaMallocManaged` alongside the other allocation functions.
 - [GPU & Accelerators](../readme.md) — the section index and its three learning paths.

@@ -47,7 +47,7 @@ __global__ void divergentKernel(int* data, int n) {
 
 ## Divergence that does not cost anything
 
-A branch only costs extra when lanes *within the same warp* disagree. A condition that is uniform across every lane of a warp — true for all 32 or false for all 32 — is not divergence at all, even though it is still a branch and still shows up as an `if` in the source. Two conditions are guaranteed warp-uniform because of how thread indices map to warps: branching on `blockIdx.x` (every thread in a warp shares the same block), and branching on `threadIdx.x / 32` (the warp index itself, since a warp is always 32 consecutive `threadIdx.x` values within a block's linear layout).
+A branch only costs extra when lanes *within the same warp* disagree. A condition that is uniform across every lane of a warp — true for all 32 or false for all 32 — is not divergence at all, even though it is still a branch and still shows up as an `if` in the source. Two conditions are guaranteed warp-uniform because of how thread indices map to warps: branching on `blockIdx.x` (every thread in a warp shares the same block), and branching on `threadIdx.x / 32` (the warp index itself, provided the block's x-extent is a multiple of 32 — true of any 1-D block — since only then is a warp always 32 consecutive `threadIdx.x` values).
 
 ```cpp showLineNumbers
 // Warp-uniform: every lane in a given warp shares the same blockIdx.x

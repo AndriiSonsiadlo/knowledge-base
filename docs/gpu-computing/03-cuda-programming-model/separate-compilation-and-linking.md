@@ -36,11 +36,11 @@ nvcc -arch=sm_80 a.o b.o -o app          # nvcc performs the device link
 
 Relocatable device code is not free. Calls across translation units can no longer be inlined the way calls within one TU can, so the compiler must fall back to conservative register allocation and emit real ABI calls in the generated SASS instead of folding the callee's body into the caller. For small, hot kernels — the kind called millions of times per launch — that shows up as a measurable slowdown relative to the same logic compiled whole-program.
 
+## When you cannot avoid it
+
 :::note[Cases that force separate compilation]
 Some patterns cannot be expressed as whole-program device code at all: device-side `virtual` dispatch across translation units, dynamic parallelism (a kernel launching another kernel), `__device__` global variables shared across multiple `.cu` files, and linking against device-side libraries that expose callbacks, such as cuFFT's device callback API. Any of these forces `-rdc=true`, regardless of the performance cost above.
 :::
-
-## When you cannot avoid it
 
 :::tip[CMake support is a single target property]
 `set_target_properties(tgt PROPERTIES CUDA_SEPARABLE_COMPILATION ON)` turns on relocatable device code and the device-link step for a CMake target, without hand-assembling the `-rdc=true` and multi-step `nvcc` invocation shown above. See [Building CUDA with CMake](../09-tooling-profiling-and-debugging/building-cuda-with-cmake.md) for the rest of a CUDA CMake setup.

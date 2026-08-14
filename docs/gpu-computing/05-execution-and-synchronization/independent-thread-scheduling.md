@@ -40,8 +40,8 @@ __device__ int warpReduceOld(volatile int* s, int lane) {
 This pattern is a data race on every current GPU, `volatile` or not, and the fact that it can still appear to produce correct results some of the time — because independent thread scheduling doesn't reorder things *maximally*, just without a guarantee — makes it more dangerous, not less. The fix is the `_sync` family of warp intrinsics, which carry explicit synchronization and an explicit participant list built in:
 
 ```cpp showLineNumbers
-__inline__ __device__ int warpReduceCorrect(int val, int lane) {
-    for (int offset = 16; offset > 0; offset >>= 1) {
+__inline__ __device__ int warpReduceCorrect(int val) {
+    for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
         val += __shfl_down_sync(0xffffffff, val, offset);
     }
     return val;   // lane 0 holds the total

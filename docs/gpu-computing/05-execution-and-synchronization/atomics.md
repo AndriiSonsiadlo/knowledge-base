@@ -81,7 +81,7 @@ __global__ void histPrivatized(const int* data, int n, int* globalHist, int nBin
 }
 ```
 
-This turns a grid-wide contention problem into a per-block one, where shared-memory atomics are cheap, and collapses the expensive global step to at most one atomic per bin per block rather than one per input element. [Histogram](../13-applied-kernels-and-patterns/histogram.md) works through this pattern as a complete applied kernel. On compute capability 9.0 and newer, thread block clusters can go a step further and share the private accumulator across a cluster instead of a single block — see [Distributed Shared Memory](../04-cuda-memory-model/distributed-shared-memory.md) for that cluster-level histogram.
+This kernel assumes `localHist` is allocated (via the launch's dynamic shared-memory argument) for at least `nBins` ints — a smaller allocation lets the zeroing and accumulation loops write past the end of shared memory. This turns a grid-wide contention problem into a per-block one, where shared-memory atomics are cheap, and collapses the expensive global step to at most one atomic per bin per block rather than one per input element. [Histogram](../13-applied-kernels-and-patterns/histogram.md) works through this pattern as a complete applied kernel. On compute capability 9.0 and newer, thread block clusters can go a step further and share the private accumulator across a cluster instead of a single block — see [Distributed Shared Memory](../04-cuda-memory-model/distributed-shared-memory.md) for that cluster-level histogram.
 
 ## See also
 

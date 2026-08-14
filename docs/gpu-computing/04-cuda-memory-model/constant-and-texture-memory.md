@@ -36,7 +36,11 @@ Global data a kernel only ever reads for the kernel's lifetime can route through
 float v = __ldg(&data[i]);
 ```
 
-This automatic routing has been in place since compute capability 3.5 (Kepler GK110), alongside `__ldg` itself, so it holds on every GPU generation this section covers — the compiler routes eligible loads through the read-only path automatically whenever it can prove a pointer is `const` and `__restrict__`-qualified, without needing `__ldg()` written explicitly:
+:::note[Automatic routing since CC 3.5]
+This automatic routing has been in place since compute capability 3.5 (Kepler GK110), alongside `__ldg` itself, so it holds on every GPU generation this section covers — see [Compute Capability](../02-gpu-hardware-architecture/compute-capability.md).
+:::
+
+The compiler routes eligible loads through the read-only path automatically whenever it can prove a pointer is `const` and `__restrict__`-qualified, without needing `__ldg()` written explicitly:
 
 ```cpp
 __global__ void auto_readonly(const float* __restrict__ data, float* out, int n) {

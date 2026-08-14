@@ -76,7 +76,7 @@ nvcc -O2 -arch=sm_80 saxpy.cu -o saxpy
 `-arch=sm_80` tells `nvcc` which compute capability to generate code for — Ampere in this case. Running the resulting binary should print `y[0] = 4.000000`, matching `2.0 * 1.0 + 2.0`.
 
 :::warning[This program checks no return codes]
-Every CUDA API call here — `cudaMalloc`, `cudaMemcpy`, the kernel launch itself — can fail, and none of the failures are checked. That's fine for a first example, but every later page in this section uses `CUDA_CHECK(...)`, a wrapper macro defined in [Error Handling and Checking](../06-cuda-runtime-and-apis/error-handling.md), and real code should too: an unchecked `cudaMalloc` failure surfaces later as a silent wrong answer or a segfault, far from where the actual problem occurred.
+Every CUDA API call here — `cudaMalloc`, `cudaMemcpy`, the kernel launch itself — can fail, and none of the failures are checked. That's fine for a first example, but every later page in this section uses `CUDA_CHECK(...)`, a wrapper macro defined in [Error Handling and Checking](../06-cuda-runtime-and-apis/error-handling.md) later in this section, and real code should too: an unchecked `cudaMalloc` failure surfaces later as a silent wrong answer or a segfault, far from where the actual problem occurred.
 :::
 
 ## What just happened

@@ -46,7 +46,7 @@ __inline__ __device__ float blockReduceSum(float val) {
 }
 ```
 
-`shared` is sized for 32 warps — 1024 threads, the maximum block size — regardless of the actual block size, so it's always large enough. The `__syncthreads()` between the two stages is load-bearing for the same reason [Block Synchronization](./block-synchronization.md) describes generally: every warp's total must actually be written to `shared` before warp 0 reads any of it.
+`shared` is sized for 32 warps — 1024 threads, the maximum block size — regardless of the actual block size, so it's always large enough. The `__syncthreads()` between the two stages is load-bearing for the same reason [Block Synchronization](./block-synchronization.md) describes generally: every warp's total must actually be written to `shared` before warp 0 reads any of it. `blockReduceSum` assumes a 1-D block (so `lane` and `wid` are the true lane and warp id) and full convergence at entry, since it inherits the `0xffffffff` mask from `warpReduceSum`.
 
 ## The two-phase grid reduction
 

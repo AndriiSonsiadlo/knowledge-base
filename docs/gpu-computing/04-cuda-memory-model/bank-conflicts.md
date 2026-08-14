@@ -16,7 +16,7 @@ Shared memory is physically organized into **32 banks**, each 4 bytes wide, inte
 
 ## What counts as a conflict
 
-Threads in a warp hitting **distinct banks** are serviced in one cycle, no matter how those addresses are otherwise scattered within the 32-bank space. Threads hitting **distinct addresses within the same bank** cannot be serviced together: N threads colliding on one bank serialize into N sequential cycles, one address at a time. This is a **bank conflict**, and the [glossary](../00-overview/glossary.md#bank-conflict) entry for it applies the term specifically to this same-bank, different-address case.
+Threads in a warp hitting **distinct banks** are serviced in one cycle, no matter how those addresses are otherwise scattered within the 32-bank space. Threads hitting **distinct addresses within the same bank** cannot be serviced together: N threads colliding on one bank serialize into N sequential cycles, one address at a time. This is a **bank conflict** — the [glossary](../00-overview/glossary.md#bank-conflict) entry defines it as addresses that map to the same memory bank.
 
 ## The broadcast exception
 
@@ -46,10 +46,10 @@ Padding wastes shared memory — one word per row, which adds up when shared mem
 
 ```cpp
 // column index swizzled instead of padded
-int col = threadIdx.x ^ threadIdx.y;
+int col = k ^ threadIdx.x;
 ```
 
-Indexing `tile[threadIdx.y][col]` into an *unpadded* `tile[32][32]` with this swizzled column spreads a warp's accesses across distinct banks the same way padding does, but keeps every row exactly 32 words wide. The tradeoff is complexity: the swizzle function has to be inverted consistently everywhere the tile is written and read, whereas padding only changes a declaration. Reach for swizzling specifically when shared memory is the occupancy limiter and the wasted padding column would drop a block below the next occupancy tier; otherwise padding is simpler and just as fast.
+Indexing `tile[threadIdx.x][col]` into an *unpadded* `tile[32][32]` with this swizzled column spreads the same column read established above — `tile[threadIdx.x][k]` for a fixed `k` — across distinct banks the same way padding does, but keeps every row exactly 32 words wide. The tradeoff is complexity: the swizzle function has to be inverted consistently everywhere the tile is written and read, whereas padding only changes a declaration. Reach for swizzling specifically when shared memory is the occupancy limiter and the wasted padding column would drop a block below the next occupancy tier; otherwise padding is simpler and just as fast.
 
 ## Measuring conflicts
 

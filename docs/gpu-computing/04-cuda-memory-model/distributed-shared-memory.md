@@ -35,7 +35,6 @@ clusterHist(int* bins, const int* input, int n, int binsPerBlock) {
     extern __shared__ int smem[];
     cg::cluster_group cluster = cg::this_cluster();
     const unsigned rank = cluster.block_rank();
-    const unsigned nBlocks = cluster.num_blocks();
 
     for (int i = threadIdx.x; i < binsPerBlock; i += blockDim.x) smem[i] = 0;
     cluster.sync();
@@ -51,11 +50,10 @@ clusterHist(int* bins, const int* input, int n, int binsPerBlock) {
 
     for (int i = threadIdx.x; i < binsPerBlock; i += blockDim.x)
         atomicAdd(&bins[rank * binsPerBlock + i], smem[i]);
-    (void)nBlocks;
 }
 ```
 
-Each block zeroes its own slice of `smem`, the first `cluster.sync()` guarantees every block's zeroing is visible before any block starts accumulating into it, every thread computes which block owns the bin it just read and does an `atomicAdd` through the mapped pointer for that block, the second `cluster.sync()` guarantees every cluster-wide contribution has landed before any block flushes its slice to global memory, and only then does each block add its own privatized bins into the final `bins` array.
+This kernel assumes the total bin count equals `cluster.num_blocks() * binsPerBlock` exactly — a smaller total leaves `owner` and `map_shared_rank` reaching past the cluster's blocks, and a larger one drops the excess bins on the floor. Each block zeroes its own slice of `smem`, the first `cluster.sync()` guarantees every block's zeroing is visible before any block starts accumulating into it, every thread computes which block owns the bin it just read and does an `atomicAdd` through the mapped pointer for that block, the second `cluster.sync()` guarantees every cluster-wide contribution has landed before any block flushes its slice to global memory, and only then does each block add its own privatized bins into the final `bins` array.
 
 ## When it beats global atomics
 
