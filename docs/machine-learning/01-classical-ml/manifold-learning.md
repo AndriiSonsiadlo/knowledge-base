@@ -14,6 +14,12 @@ t-SNE and UMAP produce the 2-D scatter plots of high-dimensional embeddings that
 t-SNE and UMAP preserve local neighbourhoods, not global geometry; cluster sizes and inter-cluster distances in the output are largely meaningless.
 :::
 
+<Figure
+  src="/img/ml/classical/manifold-swiss-roll.png"
+  alt="A Swiss roll in three dimensions and its unrolled two-dimensional structure"
+  caption="Points close in Euclidean distance can be far apart along the manifold — the two facing surfaces of the roll are adjacent in 3-D but distant along the sheet. Manifold learning recovers the intrinsic coordinates on the right."
+/>
+
 ## Why linear projection fails on curved manifolds
 
 [PCA and SVD](./pca-and-svd.md) can only find linear combinations of features. If the true structure of the data is a curved, lower-dimensional surface embedded in a high-dimensional space (imagine a rolled-up sheet of paper in 3-D), a linear projection will cut straight through the curve rather than "unrolling" it — points that are far apart along the manifold's surface can end up projected close together.

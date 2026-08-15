@@ -14,6 +14,12 @@ Everything in this section so far assumed a reward function already exists. For 
 When you cannot write down a reward function, learn one from human comparisons, then optimise against it - carefully, because the learned reward can be gamed.
 :::
 
+<Figure
+  src="/img/ml/rl/rlhf-pipeline.png"
+  alt="The four RLHF stages: pretraining, supervised fine-tuning, reward model training, and reinforcement learning against the reward"
+  caption="Four stages, each with a different objective and dataset. The KL penalty in the final stage is essential — without it the policy drifts into whatever exploits the reward model rather than what humans actually preferred."
+/>
+
 ## The problem: "be helpful" has no programmable reward
 
 Unlike this section's grid world or CartPole, there's no simple scalar function of a language model's output that captures "helpful and harmless" — the goal is inherently subjective, contextual, and resistant to hand-coding, exactly the kind of goal [RL Problem Setup](./rl-problem-setup.md) flagged the reward hypothesis as struggling with.

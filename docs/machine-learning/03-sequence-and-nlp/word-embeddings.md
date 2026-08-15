@@ -14,6 +14,12 @@ One-hot encoding a vocabulary treats every word as equally different from every 
 A word's meaning is approximated by the company it keeps — embeddings are the numerical form of that assumption.
 :::
 
+<Figure
+  src="/img/ml/nlp/word-embeddings.png"
+  alt="Word vectors showing a consistent gender offset between related pairs, and clusters of semantically similar words"
+  caption="Embeddings place words so that geometry carries meaning: the offset from *king* to *queen* is roughly the offset from *man* to *woman*. Similar words cluster, which is what makes nearest-neighbour retrieval over embeddings work."
+/>
+
 ## One-hot encoding and why it carries no similarity
 
 Representing each word as a vector with a single 1 and zeros elsewhere gives every pair of distinct words an identical Euclidean distance and a dot product of exactly zero — the representation is correct as an *identifier* but carries no information about meaning or relatedness at all.

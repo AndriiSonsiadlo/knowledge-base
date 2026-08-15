@@ -14,6 +14,12 @@ The fastest way to make training slower is to leave the GPU waiting on the CPU �
 Most speedups come from keeping the GPU fed and from using fewer bits per number, not from a better algorithm.
 :::
 
+<Figure
+  src="/img/ml/deep/float-formats.png"
+  alt="Bit layouts for FP32, TF32, BF16, FP16 and FP8 showing sign, exponent and mantissa widths"
+  caption="Exponent bits buy dynamic range; mantissa bits buy precision. BF16 keeps FP32's full 8-bit exponent and sacrifices mantissa — which is exactly why it trains stably where FP16 needs loss scaling to avoid underflow."
+/>
+
 ## CPU vs. GPU for this workload
 
 A GPU's advantage is massive parallelism for the matrix multiplications and convolutions dominating neural network computation — thousands of simple cores versus a CPU's few complex ones. The trade: every operation must be batched and vectorised to actually use that parallelism; a Python loop over individual examples wastes nearly all of a GPU's potential.

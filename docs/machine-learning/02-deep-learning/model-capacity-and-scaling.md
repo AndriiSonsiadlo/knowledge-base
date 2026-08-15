@@ -14,6 +14,12 @@ How big should the model be? The classical answer from [Bias-Variance Tradeoff](
 Capacity, data, and compute are jointly constrained — scaling one without the others buys nothing.
 :::
 
+<Figure
+  src="/img/ml/deep/scaling-laws.png"
+  alt="Log-log plot of test loss against parameter count for three compute budgets, each with a marked optimum"
+  caption="Loss falls as a power law in parameters, data and compute — straight lines on log–log axes. Each compute budget has its own optimal model size, which is the result Chinchilla made concrete."
+/>
+
 ## Parameter count as a crude capacity proxy
 
 More parameters generally means more representational capacity — but it's a crude proxy: architecture matters enormously (a well-designed 10M-parameter CNN can outperform a poorly-designed 50M-parameter one), and not every parameter contributes equally to a model's effective expressiveness.

@@ -14,11 +14,23 @@ Choosing between an overnight batch job and a 50-millisecond synchronous API is 
 The serving pattern is set by latency and freshness requirements, and it should be chosen before the model is designed.
 :::
 
+<Figure
+  src="/img/ml/mlops/deployment-strategies.png"
+  alt="Blue-green, canary and shadow deployment strategies shown as traffic splits between the current and new model"
+  caption="Three ways to put a new model in front of traffic. Shadow is the only one with no user-visible risk — the new model scores real requests but its output is discarded — which makes it the right first step for a model you do not yet trust."
+/>
+
 ## Batch scoring: cheapest, simplest, and sufficient more often than teams assume
 
 Run predictions on a scheduled job over a batch of inputs, writing results somewhere to be read later — no real-time infrastructure, no latency budget to manage, the simplest and cheapest pattern by a wide margin. Many use cases (daily risk scores, weekly recommendations refreshed overnight) genuinely don't need anything more real-time than this, even when a team defaults to building real-time infrastructure out of habit.
 
 ## Real-time synchronous serving
+
+<Figure
+  src="/img/ml/mlops/latency-percentiles.png"
+  alt="A long-tailed latency histogram with p50, p95 and p99 marked far apart, and the mean sitting misleadingly low"
+  caption="Serving latency is long-tailed, so the mean is close to the median and describes almost nobody's experience of the slow requests. SLAs are written in percentiles for this reason."
+/>
 
 A client sends a request, waits, and receives a prediction directly in the response — required when a decision is needed immediately as part of an interactive flow (a fraud check blocking a transaction). This is the pattern with the tightest latency budget and the most operational complexity of the options here.
 

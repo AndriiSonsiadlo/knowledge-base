@@ -14,6 +14,12 @@ Almost nobody trains a vision model from scratch anymore, and there's a good str
 Early layers learn generic edges and textures that transfer across almost any image task — only the later layers are task-specific.
 :::
 
+<Figure
+  src="/img/ml/vision/transfer-learning.png"
+  alt="A convolutional stack with early layers frozen and the final layers and classifier head marked for retraining"
+  caption="Early layers learn edges and textures that transfer across almost any vision task; later layers are specific to the original labels. Freeze the general part, retrain the specific part — and with little data, freeze more."
+/>
+
 ## What pretrained features actually contain, layer by layer
 
 Early layers: edge detectors, colour blobs, simple textures — visibly similar across almost any CNN trained on natural images, regardless of the final task. Middle layers: more complex textures, simple parts (eyes, wheels, wood grain). Late layers: increasingly abstract, task-specific combinations closely tied to the original training objective (e.g. "this pattern predicts golden retriever"). Transfer learning works because the early and middle layers' generic features are useful for a very wide range of downstream tasks, even ones the original model never saw.

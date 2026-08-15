@@ -14,6 +14,12 @@ The world moved and the model did not. A model is a snapshot of relationships le
 Distinguish a change in the inputs from a change in the input-output relationship, because they call for different responses.
 :::
 
+<Figure
+  src="/img/ml/mlops/drift-types.png"
+  alt="Three panels contrasting no drift, covariate drift where the input distribution moves, and concept drift where the input-output relationship changes"
+  caption="Covariate drift moves P(x) and is visible from inputs alone. Concept drift changes P(y|x) with the inputs unchanged — invisible without labels, which is why it is the dangerous one."
+/>
+
 ## Covariate shift, prior shift, and concept drift, each defined
 
 **Covariate shift**: $p(x)$ changes, but $p(y \mid x)$ stays the same — the input distribution shifts (more users from a new region), but the underlying relationship between features and label is unchanged. **Prior shift**: $p(y)$ changes on its own (the base rate of fraud rises during a specific event), independent of any change in features. **Concept drift**: $p(y \mid x)$ itself changes — the *relationship* between inputs and the correct output changes (a spam classifier's notion of "spam" evolves as spammers adapt their tactics). Distinguishing which of these is happening matters directly: covariate shift can sometimes be corrected by re-weighting, while genuine concept drift requires the model to actually learn something different.
@@ -23,6 +29,12 @@ Distinguish a change in the inputs from a change in the input-output relationshi
 **Sudden**: an abrupt, one-time change (a new product launch, a policy change). **Gradual**: a slow transition from one relationship to another over time. **Incremental**: many small, continuously accumulating changes. **Recurring**: a pattern that cycles back (seasonal effects, day-of-week patterns) — not truly "drift" in the sense of permanent change, but needs to be distinguished from genuine drift so seasonal cycles aren't mistaken for a persistent shift requiring intervention.
 
 ## Detecting input drift without labels: PSI, KL divergence, Kolmogorov-Smirnov
+
+<Figure
+  src="/img/ml/mlops/drift-detection.png"
+  alt="A population stability index rising past warning thresholds weeks before measured accuracy visibly declines"
+  caption="Input drift is measurable the moment it starts; accuracy only moves once labels arrive, which can be weeks later. Monitoring inputs buys you that gap."
+/>
 
 Because input drift ($p(x)$ changing) doesn't require waiting for labels, it can be detected immediately from unlabelled live data alone, using several standard statistics per feature: **PSI** (Population Stability Index, below), **KL divergence** ([Information Theory](../00-foundations/information-theory.md)'s measure of distributional difference), and the **Kolmogorov-Smirnov (KS) test** (comparing empirical cumulative distributions directly, without binning). Each is applied per-feature, comparing the live distribution against the training-time reference distribution.
 

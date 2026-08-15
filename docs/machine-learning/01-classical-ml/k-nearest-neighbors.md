@@ -20,6 +20,12 @@ To classify a new point $x$: compute its distance to every training point, take 
 
 ## Choosing k
 
+<Figure
+  src="/img/ml/classical/knn-k-effect.png"
+  alt="Three decision boundaries for k of 1, 15 and 75 on the same two-moons data, progressing from jagged to nearly linear"
+  caption="k is the bias–variance dial made visible. At k = 1 every noisy point carves out its own island; at k = 75 the boundary is almost linear and the moons are lost. Nothing about the model changes but that one number."
+/>
+
 Small $k$ (e.g. $k=1$) fits the local structure tightly — low bias, high variance, sensitive to noise (a single mislabelled neighbour flips the prediction). Large $k$ smooths the decision boundary — higher bias, lower variance. This is the [Bias-Variance Tradeoff](../00-foundations/bias-variance-tradeoff.md) made directly visible by a single hyperparameter.
 
 ## Distance metrics

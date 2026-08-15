@@ -14,11 +14,23 @@ Making the model cheap enough to serve, without quietly making it wrong. Every o
 Every optimisation trades accuracy, latency, or memory - measure all three before and after, or you are guessing.
 :::
 
+<Figure
+  src="/img/ml/mlops/batching-tradeoff.png"
+  alt="Throughput rising with batch size while per-request latency also rises, with an SLA ceiling marking the largest usable batch"
+  caption="Batching amortises fixed per-call overhead, so throughput climbs — but every request now waits for the whole batch. The SLA sets the ceiling, and that is what picks the batch size."
+/>
+
 ## Profile before optimising: where the time actually goes
 
 Before applying any technique below, measure where time is actually spent — preprocessing, the forward pass itself, postprocessing, or I/O. Optimising the model's forward pass when the real bottleneck is preprocessing (exactly [Deploying Vision Models](../04-computer-vision/deploying-vision-models.md)'s latency-budget lesson) wastes effort on the part that was never the constraint.
 
 ## Quantisation: dynamic, static, and quantisation-aware training
+
+<Figure
+  src="/img/ml/mlops/quantization.png"
+  alt="Memory footprint falling from FP32 to INT4 alongside relative task quality holding to INT8 then dropping"
+  caption="Quantization is mostly a memory and bandwidth win. Quality holds remarkably well down to INT8; below that the drop becomes real, and INT4 needs careful per-channel schemes to stay usable."
+/>
 
 As introduced in [Deploying Vision Models](../04-computer-vision/deploying-vision-models.md): **dynamic** quantisation converts weights at load time, activations computed at the original precision at runtime. **Static** quantisation quantises both ahead of time using a calibration dataset. **Quantisation-aware training (QAT)** simulates quantisation *during* training, letting the model adapt — generally the smallest accuracy cost, at the highest implementation effort.
 

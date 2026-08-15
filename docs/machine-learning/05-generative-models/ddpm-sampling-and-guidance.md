@@ -40,6 +40,12 @@ Train a separate classifier on noisy images at every timestep, then use its grad
 
 ## Classifier-free guidance, and the guidance scale as a quality/diversity dial
 
+<Figure
+  src="/img/ml/generative/guidance-scale.png"
+  alt="Four sample distributions at guidance scales of 0, 1.5, 5 and 15, tightening and losing diversity as the scale rises"
+  caption="The guidance scale extrapolates away from the unconditional prediction. Raising it tightens adherence to the prompt and visibly destroys diversity — the characteristic over-saturated look of an over-guided image."
+/>
+
 Train a single network that can operate both conditionally and unconditionally (randomly dropping the conditioning signal during training), then at sampling time extrapolate away from the unconditional prediction toward the conditional one:
 
 $$

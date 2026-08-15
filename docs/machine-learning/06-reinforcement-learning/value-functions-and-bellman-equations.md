@@ -14,6 +14,12 @@ tags: [reinforcement-learning, bellman, value-functions]
 The value of a state equals the immediate reward plus the discounted value of what comes next; every algorithm in this section exploits that recursion.
 :::
 
+<Figure
+  src="/img/ml/rl/gridworld-value-iteration.png"
+  alt="A gridworld with its optimal value function and the greedy policy derived from it"
+  caption="V*(s) is the expected return from each state under optimal play. Once you have it the policy is free: at every state, take the action leading to the highest-valued neighbour — which is what the arrows in the third panel are."
+/>
+
 ## The state-value function V^π
 
 $$

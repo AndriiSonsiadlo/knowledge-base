@@ -14,6 +14,12 @@ The architecture that took over NLP turns out to work for images too, once you a
 An image is a sequence of patches - once you accept that, the entire transformer stack transfers unchanged.
 :::
 
+<Figure
+  src="/img/ml/vision/vit-patches.png"
+  alt="An image divided into sixteen patches on a grid and then flattened into a sequence of sixteen tokens"
+  caption="A ViT cuts the image into fixed patches, flattens each into a vector, and feeds the result to a standard transformer. There is no convolution anywhere — the locality a CNN has built in must instead be learned from data, which is why ViTs need far more of it."
+/>
+
 ## Patch embedding: split, flatten, project
 
 Divide the image into fixed-size non-overlapping patches (e.g. $16\times16$ pixels); flatten each patch into a single vector; linearly project each flattened patch into the model's embedding dimension — the resulting sequence of patch embeddings is exactly analogous to a sequence of token embeddings in [Word Embeddings](../03-sequence-and-nlp/word-embeddings.md).

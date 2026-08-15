@@ -14,6 +14,12 @@ Every generative family so far trades away exact likelihood for something else: 
 If every layer is invertible and you can compute its Jacobian determinant, you can transform a simple distribution into a complex one and still know the exact density.
 :::
 
+<Figure
+  src="/img/ml/generative/normalizing-flow.png"
+  alt="A Gaussian base density transformed through invertible layers into an increasingly complex target density"
+  caption="A flow is a chain of *invertible* maps from a simple base density to a complex one. Invertibility is what makes the exact likelihood computable — and also what constrains the architecture severely, since every layer must have a tractable Jacobian determinant."
+/>
+
 ## The change-of-variables formula for densities
 
 If $z \sim p_z(z)$ and $x = f(z)$ for an invertible $f$, then:

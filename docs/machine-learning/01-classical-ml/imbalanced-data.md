@@ -14,6 +14,12 @@ tags: [classical-ml, imbalance, evaluation]
 Imbalance is a metric-and-threshold problem before it is a sampling problem — fix the evaluation first, then decide whether to touch the data.
 :::
 
+<Figure
+  src="/img/ml/classical/imbalanced-resampling.png"
+  alt="A heavily imbalanced dataset, the same data after undersampling the majority, and after SMOTE has interpolated synthetic minority points"
+  caption="Three views of a 94/6 split. Undersampling is cheap but discards real data; SMOTE interpolates new minority points between existing ones. Both change the base rate, so any probability the model outputs afterwards needs recalibrating."
+/>
+
 ## Where imbalance comes from
 
 Rare-event prediction (fraud, disease, equipment failure), where the rare class is inherently uncommon in the real world — not a data-collection mistake to be "fixed" by resampling, but a genuine property of the problem the model must be evaluated against honestly.

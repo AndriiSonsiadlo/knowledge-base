@@ -14,6 +14,12 @@ The offline metric improved, and the business metric did not. This gap is common
 Offline metrics are proxies; only an online experiment measures the thing you actually care about.
 :::
 
+<Figure
+  src="/img/ml/mlops/ab-testing.png"
+  alt="Statistical power against sample size for three effect sizes, and a daily-peeking confidence interval that briefly crosses significance by chance"
+  caption="Small effects need enormous samples: detecting a 1 % relative lift takes roughly twenty-five times the traffic of a 5 % one. The right panel shows why fixed horizons matter — check daily and you will eventually see a 'significant' result that is pure noise."
+/>
+
 ## Why offline and online results diverge
 
 **Feedback loops**: a deployed model's predictions can change future user behaviour, which then changes the data the model sees next — an effect no static offline evaluation set can capture. **Distribution shift**: live traffic drifts from the offline evaluation set over time ([Data and Concept Drift](./data-and-concept-drift.md)). **Proxy mismatch**: the offline metric (accuracy, F1) is rarely the actual business goal (revenue, retention, satisfaction) — it's a proxy chosen because it's measurable offline, and proxies can diverge from what they're meant to approximate.

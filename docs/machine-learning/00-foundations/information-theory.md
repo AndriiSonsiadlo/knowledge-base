@@ -14,6 +14,12 @@ Cross-entropy is the default classification loss for a precise reason: it measur
 Cross-entropy is the average number of bits you waste by encoding reality with the wrong distribution; minimising it means matching the truth.
 :::
 
+<Figure
+  src="/img/ml/foundations/information-theory.png"
+  alt="Binary entropy peaking at p equals one half, surprisal rising as probability falls, and two bar distributions illustrating KL divergence"
+  caption="Entropy is maximised by maximum uncertainty; surprisal makes rare events expensive to encode. KL divergence measures the extra bits spent coding the true distribution P with the model's Q — which is exactly what cross-entropy loss minimises."
+/>
+
 ## Information content of an event
 
 An event that's certain to happen tells you nothing when it occurs; an event that's rare and surprising tells you a lot. Information content formalises "surprise":

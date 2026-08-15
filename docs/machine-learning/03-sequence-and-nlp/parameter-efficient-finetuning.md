@@ -14,6 +14,12 @@ Full fine-tuning of a seven-billion-parameter model requires storing gradients a
 Weight updates during fine-tuning are low-rank in practice, so you can train a small factorisation of the update instead of the weights themselves.
 :::
 
+<Figure
+  src="/img/ml/nlp/lora.png"
+  alt="A frozen weight matrix beside a low-rank product of two thin matrices, merged at inference"
+  caption="LoRA freezes the pretrained matrix and trains a low-rank update beside it. At rank 8 that is roughly 0.4 % of the original parameter count — and because the product merges back at inference, it costs no extra latency."
+/>
+
 ## Why full fine-tuning is expensive
 
 For a model with $P$ parameters trained with Adam, [GPU Training and Mixed Precision](../02-deep-learning/gpu-training-and-mixed-precision.md) already established roughly $4P$ values are needed just for optimiser state (parameters, gradients, two moment buffers) — for a 7B model, this alone requires tens of gigabytes, before counting activations.

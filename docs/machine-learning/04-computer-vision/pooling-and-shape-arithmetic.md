@@ -14,6 +14,12 @@ A CNN's spatial resolution has to shrink somewhere between a 224×224 input and 
 Pooling trades spatial precision for invariance and compute, and modern architectures increasingly do it with strided convolutions instead.
 :::
 
+<Figure
+  src="/img/ml/vision/pooling.png"
+  alt="A 4×4 input reduced to 2×2 by max pooling and by average pooling, with the pooling windows outlined"
+  caption="Pooling halves the spatial dimensions by summarising each window. Max pooling keeps the strongest response and discards where exactly it occurred — a deliberate trade of spatial precision for translation tolerance."
+/>
+
 ## Max pooling
 
 Slide a window (e.g. $2\times2$) across the feature map, keeping only the maximum value in each window — reduces spatial resolution while preserving the strongest activation in each local region, the assumption being that the strongest response is the most informative one.

@@ -14,6 +14,12 @@ Every model in this knowledge base is measured against linear regression, and fo
 Fitting a line is solving a convex least-squares problem — there is exactly one answer, and you can write it down in closed form.
 :::
 
+<Figure
+  src="/img/ml/classical/linear-regression-fit.png"
+  alt="A fitted regression line with vertical residual segments drawn to each point, and the corresponding residual plot"
+  caption="Least squares minimises the sum of the squared vertical distances — the grey segments. Squaring is what makes distant points dominate the fit, and why a single outlier can tilt the whole line."
+/>
+
 ## The model
 
 $$
@@ -50,6 +56,12 @@ $$
 The normal equation requires inverting $X^\top X$, a $d \times d$ matrix — cost $O(d^3)$. For millions of features, or when $X^\top X$ is singular (perfectly collinear features), the closed form is infeasible or undefined, and [Gradient Descent](../00-foundations/gradient-descent.md) becomes the practical choice.
 
 ## Assumptions and what breaks when they fail
+
+<Figure
+  src="/img/ml/classical/anscombe-quartet.png"
+  alt="Four scatter plots with visibly different shapes that all share the same fitted line and summary statistics"
+  caption="Anscombe's quartet: four datasets with identical means, variances, correlation and regression line. Summary statistics alone cannot tell them apart — which is the entire argument for plotting your data first."
+/>
 
 - **Linearity**: the true relationship is (approximately) linear in the features — fails on curved relationships, fixed by polynomial features below.
 - **Independence**: errors aren't correlated across examples — fails for time series with autocorrelated residuals.

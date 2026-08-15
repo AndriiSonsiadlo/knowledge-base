@@ -14,6 +14,12 @@ Naive Bayes assumes something that is almost never true — that every feature i
 Assuming conditional independence of features makes the posterior trivial to compute — the probabilities are badly calibrated but the argmax is often right.
 :::
 
+<Figure
+  src="/img/ml/classical/naive-bayes.png"
+  alt="Class-conditional density curves for two classes, and a decision boundary on correlated data fitted under the independence assumption"
+  caption="Naive Bayes models each feature's class-conditional density independently. The right panel shows it working on visibly correlated data — the probability estimates are badly calibrated, but the arg-max, and therefore the classification, often survives."
+/>
+
 ## Bayes' rule applied to classification
 
 $$

@@ -14,6 +14,12 @@ The training bill arrives, and most of it bought idle GPU time — a genuinely c
 Utilisation, not hourly rate, decides training cost - a half-idle expensive GPU beats neither a well-fed cheap one nor a smaller model.
 :::
 
+<Figure
+  src="/img/ml/mlops/cost-breakdown.png"
+  alt="Training as a small one-off share of lifetime compute spend against inference as the dominant recurring share, with cumulative cost curves crossing early"
+  caption="Training is a headline number paid once; inference is paid on every request forever. For most deployed models the crossover arrives within months, which is why inference optimisation usually returns more than training optimisation."
+/>
+
 ## Where the money goes: compute, storage, egress, idle time
 
 **Compute**: the GPU/CPU hours actually used. **Storage**: datasets, checkpoints, and logged artefacts accumulating over time. **Egress**: data transfer costs, often underestimated, particularly moving large datasets or model weights between regions or providers. **Idle time**: paid-for compute sitting unused between jobs, or during a job that's bottlenecked elsewhere — frequently the largest, least visible line item.

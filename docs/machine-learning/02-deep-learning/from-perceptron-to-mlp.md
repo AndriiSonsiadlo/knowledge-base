@@ -14,6 +14,12 @@ In 1958, Frank Rosenblatt built a model that could learn simple logical patterns
 A single linear unit can only draw a straight boundary; stacking units with a non-linearity between them removes that ceiling entirely.
 :::
 
+<Figure
+  src="/img/ml/deep/xor-problem.png"
+  alt="AND and OR shown as linearly separable, and XOR shown with no single line able to separate its classes"
+  caption="AND and OR need one line; XOR needs two. A single perceptron can only draw one, which is the limitation that stalled neural networks for years — and the reason a hidden layer exists."
+/>
+
 ## The biological analogy, and how far it goes
 
 The perceptron was loosely inspired by a biological neuron — inputs (dendrites) weighted and summed, compared against a threshold, producing an output (axon firing or not). The analogy is useful for intuition and stops there: real neurons involve timing, chemistry, and dynamics that this simplified model doesn't attempt to capture.

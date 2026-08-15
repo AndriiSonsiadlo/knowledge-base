@@ -14,6 +14,12 @@ Every model so far in this curriculum has learned from labelled examples — her
 RL differs from supervised learning in three ways at once - the feedback is evaluative rather than instructive, it is delayed, and the agent's own actions decide what data it ever sees.
 :::
 
+<Figure
+  src="/img/ml/rl/agent-environment-loop.png"
+  alt="An agent sending actions to an environment which returns states and rewards in a closed loop"
+  caption="The whole of RL is this loop. Crucially the agent is never told the correct action — only how good the outcome was — which is what separates it from supervised learning."
+/>
+
 ## The agent-environment loop
 
 At each timestep $t$, the agent observes a state $s_t$, selects an action $a_t$, and the environment responds with a reward $r_{t+1}$ and a new state $s_{t+1}$. This loop — observe, act, receive consequence — repeats for the duration of an episode, and is the only interface the agent ever has with the world.

@@ -14,11 +14,15 @@ Generating an image from nothing in one shot is hard. Diffusion sidesteps the di
 Learning to remove a little noise is easy; iterating that easy problem a thousand times solves the hard problem of generating from nothing.
 :::
 
+<Figure
+  src="/img/ml/generative/diffusion-process.png"
+  alt="A structured two-dimensional distribution progressively destroyed by noise across six steps, and the reverse denoising sequence beneath it"
+  caption="The forward process destroys structure with noise on a fixed schedule and requires no learning at all. The model learns only to undo one step — and chaining those small reversals from pure noise is what generates a sample."
+/>
+
 ## The intuition: a hard problem decomposed into many easy ones
 
 Predicting a clean image directly from pure noise requires the network to somehow invent all of an image's structure in one step. Predicting *slightly less noisy* from *slightly more noisy*, repeated a thousand times, only ever asks the network to do a small, local correction — a far easier learning problem, and the entire reason diffusion works at all.
-
-![Diffusion forward and reverse process](https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Diffusion_model.png/800px-Diffusion_model.png)
 
 ## The forward process: fixed, no learning, Gaussian noise on a schedule
 
@@ -41,6 +45,12 @@ $$
 This closed form is what makes training practical: given a clean image $x_0$ and any timestep $t$, you can sample a noised $x_t$ directly, without simulating all $t$ forward steps.
 
 ## Noise schedules and what they change
+
+<Figure
+  src="/img/ml/generative/diffusion-schedule.png"
+  alt="Linear and cosine noise schedules plotted as signal remaining against timestep, and the signal-noise blend at each step"
+  caption="The schedule fixes how much signal survives at each timestep. The linear schedule destroys information too early in the trajectory, which is why the cosine schedule replaced it for image models."
+/>
 
 **Linear schedule**: $\beta_t$ increases linearly from a small value to a larger one across the $T$ steps — the original DDPM choice. **Cosine schedule**: shaped to add noise more gradually near $t=0$ and $t=T$, which empirically improves sample quality, particularly at lower step counts — the schedule directly controls how much "signal" remains at each intermediate timestep, and a badly-chosen schedule can waste steps where noise is added too fast to be useful for learning.
 

@@ -14,6 +14,12 @@ GANs are famously hard to train, and the failure modes are specific and recognis
 Adversarial training has no single loss to monitor - the losses can look fine while the model produces one image forever.
 :::
 
+<Figure
+  src="/img/ml/generative/mode-collapse.png"
+  alt="A target distribution with eight modes, a collapsed generator covering only two, and a healthy generator covering all eight"
+  caption="Mode collapse: the generator finds a small set of outputs the discriminator cannot reject and stops exploring. The loss curves can look entirely healthy while this happens, which is why GAN evaluation needs coverage metrics rather than loss."
+/>
+
 ## Why the loss curves tell you almost nothing
 
 In supervised learning, a falling loss means the model is improving. In [Generative Adversarial Networks](./generative-adversarial-networks.md), $D$'s and $G$'s losses are each defined *relative to the other, currently-changing network* — a generator loss can fall simply because the discriminator got weaker, not because sample quality improved. Two networks chasing a moving target produces loss curves that oscillate, plateau, or look deceptively stable while the actual samples are garbage.

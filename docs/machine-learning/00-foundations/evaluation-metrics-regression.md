@@ -70,6 +70,12 @@ $R^2$ can be high on a curved relationship fit with a linear model that is syste
 
 ## Residual analysis as the real diagnostic
 
+<Figure
+  src="/img/ml/foundations/residual-diagnostics.png"
+  alt="Three residual plots: structureless, curved, and fanning outward"
+  caption="A single R² cannot distinguish these three. Curvature means a missing non-linear term; a fan means the variance depends on the prediction, which breaks the constant-variance assumption behind most confidence intervals."
+/>
+
 Plotting residuals ($y_i - \hat y_i$) against predicted values or against each feature reveals problems no single number does: a curved pattern means the model is missing non-linearity; a funnel shape (residual spread growing with prediction) means heteroscedasticity, violating the constant-noise assumption behind squared-error losses.
 
 ## Quantile loss for prediction intervals

@@ -14,6 +14,12 @@ Fraud, equipment failure, network intrusions — the interesting class is often 
 Anomaly detection is what you do when the positive class is too rare, too varied, or too unknown to learn a classifier for.
 :::
 
+<Figure
+  src="/img/ml/classical/anomaly-detection.png"
+  alt="Mahalanobis distance contours around a dense cluster, and the same points with those beyond a threshold flagged"
+  caption="Anomaly detection models what normal looks like and flags whatever falls far outside it. The contour you pick as the boundary sets the false-positive rate — and that is a business decision, not a statistical one."
+/>
+
 ## Outlier vs. novelty vs. anomaly
 
 **Outlier**: a point unusual relative to the rest of a static dataset. **Novelty**: a point unusual relative to a *training* distribution, encountered at inference time on new data. **Anomaly**: often used interchangeably with both, sometimes reserved for cases implying an underlying fault or malicious cause. The distinction matters for which sklearn API you use (`fit_predict` for outlier detection on a fixed set, `fit` then `predict` for novelty detection on new points).

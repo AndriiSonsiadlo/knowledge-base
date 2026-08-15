@@ -14,6 +14,12 @@ Every algorithm in this section has quietly relied on some exploration mechanism
 Exploration is a resource-allocation problem, and every method here is a different answer to "what should I be uncertain about".
 :::
 
+<Figure
+  src="/img/ml/rl/exploration-strategies.png"
+  alt="Average reward and percentage of optimal actions for greedy, epsilon-greedy, decaying epsilon and UCB on a ten-armed bandit"
+  caption="A ten-armed bandit averaged over 300 runs. Pure greedy locks onto whichever arm happened to look good first and plateaus well below optimal — the clearest possible demonstration that some exploration is not optional."
+/>
+
 ## The exploration/exploitation dilemma stated
 
 Every action choice is implicitly a trade-off: **exploit** the action currently believed best, guaranteeing (as far as current beliefs go) good short-term return, or **explore** an uncertain alternative, risking worse short-term return in exchange for potentially discovering something even better. No fixed strategy is unconditionally correct — the right balance depends on how much time remains to exploit any discovery.

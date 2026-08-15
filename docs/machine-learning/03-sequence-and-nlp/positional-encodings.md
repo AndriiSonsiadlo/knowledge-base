@@ -14,6 +14,12 @@ Attention computes a weighted average over a set of positions — and a set has 
 Attention is order-blind — shuffle the input and the output is identical, so position must be injected explicitly, and how you inject it decides whether the model can extrapolate past its training length.
 :::
 
+<Figure
+  src="/img/ml/nlp/positional-encoding.png"
+  alt="A sinusoidal positional encoding heatmap, individual dimension waves at different frequencies, and a position-similarity matrix"
+  caption="Self-attention is permutation-invariant, so position has to be injected. Each dimension is a wave of a different frequency; the similarity matrix on the right shows the payoff — the encoding of two positions depends on the distance between them."
+/>
+
 ## The permutation-equivariance proof
 
 Scaled dot-product attention (from [Attention Mechanism](./attention-mechanism.md)) computes scores and a weighted sum purely from the *set* of $Q, K, V$ vectors — permuting the input rows permutes the output rows identically, with no other change. Formally, attention is a **permutation-equivariant** function: $f(\text{permute}(x)) = \text{permute}(f(x))$. Without an explicit positional signal, "the cat sat on the mat" and "mat the sat on cat the" would produce identical (permuted) representations.

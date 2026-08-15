@@ -14,6 +14,12 @@ Bagging and boosting are both ensembles of the *same* base learner. This page co
 An ensemble helps in proportion to how uncorrelated its members' errors are — identical models averaged give you nothing.
 :::
 
+<Figure
+  src="/img/ml/classical/bagging-vs-boosting.png"
+  alt="Bagging shown as independent parallel trees feeding an average, and boosting as a chain of trees each correcting the previous"
+  caption="The structural difference. Bagging trains independently and in parallel, attacking variance; boosting trains sequentially with each model correcting its predecessor, attacking bias. That dependency is also why boosting cannot be parallelised across trees."
+/>
+
 ## The three families
 
 **Bagging** ([Random Forests and Bagging](./random-forests-and-bagging.md)): parallel, same base learner, reduces variance. **Boosting** ([Gradient Boosting](./gradient-boosting.md)): sequential, same base learner, reduces bias. **Stacking**: combines predictions from *different* model types via a learned combination rule.

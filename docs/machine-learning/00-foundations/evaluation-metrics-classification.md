@@ -14,6 +14,12 @@ Accuracy is the wrong metric more often than it is the right one. A model that p
 Pick the metric from the cost of each error type, not from convention.
 :::
 
+<Figure
+  src="/img/ml/foundations/confusion-matrix.png"
+  alt="A two-by-two confusion matrix with 850 true negatives, 50 false positives, 30 false negatives and 70 true positives"
+  caption="Every classification metric is a ratio computed from these four cells. With 10 % positives, predicting 'negative' always would score 90 % accuracy while catching nothing."
+/>
+
 ## The confusion matrix
 
 | | Predicted positive | Predicted negative |
@@ -57,9 +63,21 @@ Specificity is recall's mirror on the negative class — "of everything actually
 
 ## The threshold is a choice
 
+<Figure
+  src="/img/ml/foundations/threshold-tradeoff.png"
+  alt="Overlapping score distributions for positives and negatives with a threshold line, shading the false positives and false negatives it creates"
+  caption="The model produces a score; you choose the threshold. Moving it left catches more positives at the cost of more false alarms. Where you put it is a business decision, not a modelling one."
+/>
+
 Most classifiers output a probability, not a hard label; the 0.5 cutoff is a convention, not a law. Moving the threshold trades precision for recall in a predictable, continuous way — the right threshold comes from the actual cost of each error type, decided during problem framing ([The ML Workflow](./the-ml-workflow.md)), not left at the library default.
 
 ## ROC curve and AUC
+
+<Figure
+  src="/img/ml/foundations/roc-vs-precision-recall.png"
+  alt="An ROC curve with high AUC beside a precision-recall curve for the same model showing much weaker performance"
+  caption="The same model on the same imbalanced data. ROC looks strong because true negatives dominate the false-positive rate; the precision–recall curve, which ignores true negatives, shows the real weakness. On imbalanced problems, trust the right-hand plot."
+/>
 
 The ROC curve plots true positive rate (recall) against false positive rate ($FPR = \frac{FP}{FP+TN}$) as the threshold sweeps from 0 to 1. AUC (area under this curve) summarises performance across all thresholds at once — 0.5 is random guessing, 1.0 is perfect separation.
 

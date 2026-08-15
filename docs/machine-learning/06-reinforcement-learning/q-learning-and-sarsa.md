@@ -50,6 +50,12 @@ That single substituted term changes what each algorithm is actually optimising 
 
 ## The cliff-walking example
 
+<Figure
+  src="/img/ml/rl/cliff-walking.png"
+  alt="The cliff-walking grid with Q-learning taking the optimal path along the edge and SARSA taking a safer route, plus their learning curves"
+  caption="The classic separation between the two. Q-learning learns the optimal path and hugs the cliff; SARSA learns the value of the ε-greedy policy it actually follows, so it accounts for the chance of a random step into the cliff and detours. Under exploration SARSA therefore earns more — −25 against −53 in this run."
+/>
+
 On a grid with a cliff running along one edge (stepping into it ends the episode with a large penalty), SARSA — because it accounts for its own ε-greedy exploration in its value estimates — learns a **safe** path that stays away from the cliff edge, since an exploratory random step near the edge would be catastrophic. Q-learning, evaluating the purely greedy optimal policy regardless of the exploration actually used, learns the **risky, optimal** path directly along the cliff edge — and then, still exploring with ε-greedy during training, occasionally falls in. This is the canonical illustration of the on/off-policy distinction actually mattering for real behaviour, not just as a theoretical label.
 
 ## Expected SARSA

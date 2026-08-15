@@ -14,6 +14,12 @@ Automating the path from a commit to a deployed model, with gates that can actua
 ML CI/CD has three pipelines, not one - code, training, and deployment - and each needs its own trigger and its own gate.
 :::
 
+<Figure
+  src="/img/ml/mlops/ml-test-pyramid.png"
+  alt="A four-tier test pyramid with unit tests at the base, then data validation, integration tests and model quality gates"
+  caption="The classical test pyramid plus a tier that does not exist in ordinary software: data validation. Most production ML failures are data failures, and no amount of unit testing on the transform code catches them."
+/>
+
 ## What differs from software CI/CD
 
 Standard software CI/CD tests code against a fixed, deterministic expectation — the same input should always produce the same output, and a test either passes or fails unambiguously. ML systems add: **data as an input** (correctness depends on data the CI system doesn't fully control), **non-deterministic outputs** ([Reproducibility](./reproducibility.md)'s natural run-to-run variance, even when seeded imperfectly), and **statistical quality gates** (pass/fail decided by a metric threshold with sampling noise, not a binary assertion) — all requiring CI/CD practices beyond what standard software testing assumes.

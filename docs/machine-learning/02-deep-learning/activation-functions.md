@@ -14,6 +14,12 @@ The non-linearity between layers is what makes depth meaningful at all — [From
 An activation is chosen for the shape of its derivative as much as for the shape of itself — saturation is what kills training.
 :::
 
+<Figure
+  src="/img/ml/deep/activation-functions.png"
+  alt="Six activation functions plotted with their derivatives, plus the sigmoid gradient bounded at one quarter and its effect compounded over depth"
+  caption="Each activation with its derivative dashed. The bottom-right panels are the reason ReLU displaced sigmoid: the sigmoid's gradient never exceeds ¼, so twenty stacked layers multiply the signal by at most 4⁻²⁰."
+/>
+
 ## Sigmoid
 
 $$

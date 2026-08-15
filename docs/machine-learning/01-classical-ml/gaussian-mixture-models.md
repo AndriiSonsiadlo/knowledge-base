@@ -14,6 +14,12 @@ k-means forces every point into exactly one cluster, with no notion of confidenc
 Model the data as a weighted sum of Gaussians and each point gets a probability of belonging to each cluster instead of a hard label.
 :::
 
+<Figure
+  src="/img/ml/classical/gmm-vs-kmeans.png"
+  alt="k-means hard spherical assignments beside a GMM's soft elliptical components fitted by expectation maximisation"
+  caption="A GMM generalises k-means in two ways: components can be elliptical rather than spherical, and membership is a probability rather than a hard label. The colour gradient in the right panel is that soft assignment."
+/>
+
 ## The mixture model
 
 $$

@@ -14,6 +14,12 @@ Fitting a model is estimating parameters from a finite sample — and every esti
 Nearly every loss function in ML is a negative log-likelihood in disguise.
 :::
 
+<Figure
+  src="/img/ml/foundations/sampling-and-confidence.png"
+  alt="Left: sampling distributions narrowing as sample size grows. Right: twenty-five confidence intervals, most containing the true value"
+  caption="Standard error shrinks as 1/√n, so quartering your error costs sixteen times the data. On the right, '95 % confident' describes the procedure: run it many times and about 95 % of the intervals it produces will contain the truth."
+/>
+
 ## Population vs. sample
 
 The **population** is the entire (often infinite, unobservable) set of things you care about; the **sample** is the finite subset you actually observed. Every statistic computed from a sample is an **estimate** of some population quantity, not the quantity itself.

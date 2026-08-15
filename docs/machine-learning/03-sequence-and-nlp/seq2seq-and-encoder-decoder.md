@@ -14,6 +14,12 @@ Translation, summarisation, and question answering all share a structural challe
 Compress the input into a state, then generate the output from it — and the compression step is exactly where the architecture fails.
 :::
 
+<Figure
+  src="/img/ml/nlp/seq2seq-bottleneck.png"
+  alt="An encoder compressing a source sentence into one context vector feeding a decoder, with attention links drawn between all positions"
+  caption="The original design forced the entire source sentence through one fixed-size vector — the bottleneck that capped translation quality on long sentences. Attention, drawn faintly here, removed it by letting every output position read every input position."
+/>
+
 ## The task shape
 
 Unlike [Recurrent Neural Networks](./recurrent-neural-networks.md)'s sequence-to-one or one-to-sequence cases, translation genuinely needs sequence-to-sequence: variable input length, variable (and generally different) output length, with no assumed one-to-one alignment between input and output positions.

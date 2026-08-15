@@ -14,6 +14,12 @@ A model can be wrong in exactly two ways: it can be too simple to capture the re
 Expected error decomposes into bias squared, variance, and irreducible noise — diagnosis tells you whether to add capacity or add data.
 :::
 
+<Figure
+  src="/img/ml/foundations/bias-variance-tradeoff.png"
+  alt="Left: degree 1, 3 and 12 polynomial fits to 14 noisy points. Right: bias squared falling, variance rising, and their sum forming a U"
+  caption="Left, the same 14 points fitted at three capacities — the degree-12 curve chases noise at the edges. Right, the decomposition: total error is a U because bias falls and variance rises, and the irreducible noise floor never moves."
+/>
+
 ## The decomposition, derived
 
 For a model $\hat f$ trained on a random sample, predicting at a fixed point $x$ with true value $y = f(x) + \epsilon$ (noise $\epsilon$, $\mathbb{E}[\epsilon]=0$, $\text{Var}(\epsilon) = \sigma^2$):

@@ -14,6 +14,12 @@ Random forests average many independent trees to cancel out variance. Gradient b
 Fit each new tree to the residual errors of the ensemble so far — boosting reduces bias where bagging reduced variance.
 :::
 
+<Figure
+  src="/img/ml/classical/boosting-stages.png"
+  alt="A sequence showing the data, then the boosted fit after 1, 5 and 40 decision stumps progressively approaching the true curve"
+  caption="Each stump is fitted to what the ensemble still gets wrong. Individually they are useless; summed with a small learning rate they converge on the target — which is why boosting reduces bias where bagging reduces variance."
+/>
+
 ## Boosting vs. bagging, side by side
 
 | | Bagging | Boosting |

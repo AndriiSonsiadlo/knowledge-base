@@ -14,6 +14,12 @@ Self-attention consumes more of a transformer's compute than any other single op
 Multiple heads let the model attend to several kinds of relationship at once, at no extra cost, by splitting the same embedding across subspaces.
 :::
 
+<Figure
+  src="/img/ml/nlp/qkv-attention.png"
+  alt="The scaled dot-product attention pipeline from input through query, key and value projections to the softmax-weighted output"
+  caption="Queries and keys produce the scores; values carry the content that gets mixed. The √d divisor keeps the dot products from growing with dimension and driving the softmax into a near-one-hot regime where gradients vanish."
+/>
+
 ## The Q/K/V projections and their shapes
 
 From the same input $x \in \mathbb{R}^{n \times d}$, three learned linear projections produce $Q = xW_Q$, $K = xW_K$, $V = xW_V$, each typically shape $(n, d)$ — self-attention because all three come from the *same* sequence, not from separate encoder/decoder inputs.
@@ -53,6 +59,12 @@ When batching sequences of different lengths, shorter sequences are padded to a 
 Self-attention can be viewed as computing, for every pair of positions, an edge weight in a fully-connected graph over the sequence — unlike a CNN's fixed local connectivity or an RNN's fixed sequential connectivity, attention's connectivity pattern is entirely learned and can, in principle, connect any two positions directly regardless of their distance in the sequence.
 
 ## The O(n²) memory problem
+
+<Figure
+  src="/img/ml/nlp/attention-quadratic-cost.png"
+  alt="Log-log plot of attention cost growing quadratically with sequence length while feed-forward cost grows linearly"
+  caption="Attention is O(n²) in sequence length while the feed-forward layers are linear. Below a few thousand tokens the MLPs dominate the cost; past that, attention takes over — which is what every long-context method is trying to fix."
+/>
 
 Storing the full attention weight matrix requires $O(n^2)$ memory *per head, per layer* — for long sequences, this becomes the dominant memory cost, often exceeding the memory used by the model's parameters themselves.
 

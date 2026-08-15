@@ -14,6 +14,12 @@ Principal component analysis answers a simple question with surprisingly deep ma
 PCA rotates the data onto the axes of greatest variance; keeping the first few axes keeps most of the information.
 :::
 
+<Figure
+  src="/img/ml/classical/pca-explained.png"
+  alt="Correlated data with principal component arrows, the same data rotated into the component basis, and a scree plot of explained variance"
+  caption="PC1 is the direction of maximum variance and PC2 is orthogonal to it. Rotating into that basis leaves the data uncorrelated; the scree plot then tells you how many components you can keep before losing real signal."
+/>
+
 ## The intuition: variance = information
 
 A feature that never varies tells you nothing about which example you're looking at; a feature with large spread distinguishes examples strongly. PCA's core bet is that directions of high variance are the directions carrying the most information — not always true, but true often enough to be extremely useful.

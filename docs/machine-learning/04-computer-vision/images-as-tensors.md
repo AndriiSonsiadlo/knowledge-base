@@ -14,6 +14,12 @@ Before any model sees a pixel, an image is a grid of numbers — and the convent
 Nearly every vision bug is a layout, range, or colour-order mismatch, not a model problem.
 :::
 
+<Figure
+  src="/img/ml/vision/images-as-tensors.png"
+  alt="An RGB image decomposed into its separate red, green and blue channel matrices"
+  caption="An image is a tensor of numbers: height × width × channels. Every convolution, augmentation and normalisation in this section is arithmetic on exactly this array."
+/>
+
 ## Pixels, channels, bit depth
 
 A pixel is one spatial location's colour value; a channel is one colour component (red, green, blue) stored as a separate 2-D grid; bit depth (commonly 8 bits per channel, values 0–255) sets how finely colour is quantised.

@@ -14,6 +14,12 @@ Every network up to this point has processed a single fixed-size input. Language
 An RNN reuses one weight matrix at every timestep, which gives it unbounded context in principle and a vanishing gradient in practice.
 :::
 
+<Figure
+  src="/img/ml/nlp/rnn-unrolled.png"
+  alt="An RNN unrolled across five timesteps sharing one set of weights, with the backpropagation-through-time path marked"
+  caption="Unrolled, an RNN is a very deep network that reuses one weight matrix at every step. The red path is backpropagation through time — and repeatedly multiplying by the same matrix is precisely why the gradient vanishes or explodes."
+/>
+
 ## Why feedforward networks cannot handle variable length
 
 An MLP's input layer has a fixed number of units — there's no natural way to feed it a 5-word sentence one moment and a 50-word sentence the next without padding to some fixed maximum (wasteful) or truncating (lossy). RNNs sidestep this by processing one token at a time, regardless of sequence length.

@@ -14,6 +14,12 @@ For two decades, networks deeper than a handful of layers simply refused to trai
 Gradients are products of many terms — anything consistently below one vanishes, anything consistently above one explodes, and both fail silently.
 :::
 
+<Figure
+  src="/img/ml/deep/weight-init-and-gradient-flow.png"
+  alt="Gradient magnitude across layers under vanishing, healthy and exploding regimes on a log scale"
+  caption="Gradients are a product of per-layer Jacobians, so any consistent deviation from 1.0 compounds geometrically. The right-hand panel is the whole problem: ×0.6 per layer leaves the early layers with nothing to learn from."
+/>
+
 ## The product-of-Jacobians view
 
 [Backpropagation](./backpropagation.md)'s delta recursion, $\delta^{[l]} = (W^{[l+1]\top}\delta^{[l+1]}) \odot g'(z^{[l]})$, applied repeatedly across $L$ layers, means the gradient reaching layer 1 is (roughly) a product of $L$ Jacobian-like terms, one per layer. Multiplying many numbers together: if each factor is reliably less than 1, the product shrinks exponentially with depth; if each factor is reliably greater than 1, the product grows exponentially.

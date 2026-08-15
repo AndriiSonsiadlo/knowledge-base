@@ -14,6 +14,12 @@ A model that's 98% accurate on your test set can still be completely wrong about
 Attribution methods show where a prediction came from, which is how you catch a model that is right for the wrong reason.
 :::
 
+<Figure
+  src="/img/ml/vision/gradcam.png"
+  alt="An input image, a Grad-CAM heatmap, and the two overlaid showing which region drove the prediction"
+  caption="Grad-CAM weights the final convolutional feature maps by the gradient of the target class, producing a coarse map of what the model actually used. It shows *where* the evidence was, not *why* it counted as evidence."
+/>
+
 ## Why accuracy alone hides shortcut learning
 
 A model optimises whatever correlates with the label in its training data — if a spurious feature (background snow, a watermark, an imaging artefact specific to one data source) happens to correlate with the label in that data, the model may learn to rely on the spurious feature instead of the genuine one, and accuracy alone cannot distinguish "learned the real pattern" from "learned a shortcut that happened to work on this test set."

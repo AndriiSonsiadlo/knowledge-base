@@ -14,6 +14,12 @@ Every deep learning project, regardless of architecture or task, runs the same t
 Forward, loss, zero_grad, backward, step — in that order, every time, and the order is not negotiable.
 :::
 
+<Figure
+  src="/img/ml/deep/training-loop.png"
+  alt="The six stages of a training loop shown as a cycle: batch, forward, loss, backward, optimizer step, and zero grad"
+  caption="The loop every training script runs. `zero_grad()` is the step that is easiest to omit and hardest to notice missing — PyTorch accumulates gradients, so forgetting it silently sums them across batches."
+/>
+
 ## The canonical loop
 
 ```

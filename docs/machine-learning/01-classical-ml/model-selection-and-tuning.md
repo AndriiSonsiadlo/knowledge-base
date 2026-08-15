@@ -14,6 +14,12 @@ Every hyperparameter search is a way of spending a limited resource: the informa
 Every hyperparameter decision spends some of your validation set — budget it like a finite resource.
 :::
 
+<Figure
+  src="/img/ml/classical/grid-vs-random-search.png"
+  alt="Grid search covering only five distinct values of the important parameter, versus random search covering twenty-five"
+  caption="With the same 25 trials, grid search tests only 5 distinct values of the parameter that actually matters, because it spends the rest varying one that does not. Random search tests 25 — which is why it wins whenever some parameters matter far more than others."
+/>
+
 ## Parameters vs. hyperparameters
 
 **Parameters** are learned by the training objective (weights, tree splits). **Hyperparameters** are chosen before training and held fixed (learning rate, tree depth, regularisation strength) — the training loss can never be used to choose them, since the training loss is always minimised by the least-regularised, most-flexible setting, which is precisely the overfitting direction.
@@ -27,6 +33,12 @@ Enumerate every combination of a fixed set of values per hyperparameter. Cost gr
 Sampling hyperparameter combinations randomly, rather than exhaustively, tends to find better configurations for the same total number of trials — because in most problems only a few hyperparameters actually matter much, and grid search wastes trials varying unimportant ones on a fixed grid while barely varying the important ones. Random search explores every hyperparameter's full range on every trial, so it's far more likely to hit a good value for the hyperparameters that matter, even at the same trial budget.
 
 ## Coarse-to-fine search
+
+<Figure
+  src="/img/ml/classical/validation-curve.png"
+  alt="Training error falling monotonically while validation error forms a U, with the minimum marked"
+  caption="Sweeping one hyperparameter while holding the rest fixed. The gap between the curves is overfitting; the validation minimum is the setting to keep."
+/>
 
 Start with a wide, coarse random search to identify a promising region of hyperparameter space, then run a narrower, finer search (grid or random) within that region — more efficient than a single very fine search across the entire original space.
 

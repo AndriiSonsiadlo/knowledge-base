@@ -14,6 +14,12 @@ Every algorithm so far has taken a plain gradient step on the policy — and a p
 A policy update that is too large destroys the policy irrecoverably, so constrain how far each update is allowed to move.
 :::
 
+<Figure
+  src="/img/ml/rl/ppo-clipping.png"
+  alt="The PPO clipped objective plotted against the probability ratio for positive and negative advantage"
+  caption="PPO's clipping flattens the objective once the policy ratio leaves [1−ε, 1+ε], so there is no gradient rewarding a further move. That is what keeps the update inside a trust region without TRPO's second-order machinery."
+/>
+
 ## Why a large policy update is catastrophic in a way a large supervised update is not
 
 In supervised learning, a bad gradient step produces a worse model on a *fixed* dataset — recoverable, since the next step sees the same data again. In RL, the *data itself* comes from the current policy: a large, destructive update produces a bad policy, which then generates bad, uninformative trajectories, which then makes it hard to even get a useful gradient to recover — the data distribution moves with the policy, and a bad enough move can be effectively irreversible.

@@ -14,11 +14,15 @@ Every generative model so far has needed an explicit loss function measuring "ho
 Replace the loss function with a second network - the discriminator learns what "real" means so the generator does not have to be told.
 :::
 
+<Figure
+  src="/img/ml/generative/gan-architecture.png"
+  alt="A generator turning noise into fake samples and a discriminator judging them against real samples, with the generator's gradient fed back"
+  caption="Two networks with opposing objectives: the discriminator learns to spot fakes, the generator learns to defeat it. There is no loss to minimise jointly — training seeks an equilibrium, which is why GANs are so much less stable than everything else here."
+/>
+
 ## The two-player setup
 
 A **generator** $G$ and a **discriminator** $D$ are trained simultaneously, in opposition — $G$ tries to produce samples $D$ cannot distinguish from real data; $D$ tries to correctly distinguish $G$'s generated samples from real ones. Neither network is ever told directly what "realistic" means — that entire notion is learned adversarially, through the interaction.
-
-![GAN architecture: generator and discriminator in opposition](https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/GAN.png/800px-GAN.png)
 
 ## The generator
 

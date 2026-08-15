@@ -14,6 +14,12 @@ The learning rate is the single hyperparameter that most determines whether trai
 Large steps early to explore, small steps late to settle — every schedule is a way of saying that.
 :::
 
+<Figure
+  src="/img/ml/deep/lr-schedules.png"
+  alt="Constant, step, exponential and cosine learning-rate schedules, plus linear warmup followed by cosine decay"
+  caption="Warmup plus cosine decay is the transformer default. The warmup exists because early gradients are large and poorly conditioned — starting at full rate can move the weights somewhere training never recovers from."
+/>
+
 ## The learning rate as the dominant hyperparameter
 
 Too high and training diverges outright; too low and training crawls, or gets stuck in a shallow local structure it could have escaped with a larger step. Nearly every other hyperparameter matters less than getting this one into a reasonable range first.

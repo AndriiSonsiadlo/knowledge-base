@@ -14,6 +14,12 @@ A fully-connected layer applied directly to a 224×224 RGB image would need over
 A convolution is a small filter slid across the image, which buys translation equivariance and cuts parameters by orders of magnitude.
 :::
 
+<Figure
+  src="/img/ml/vision/convolution-mechanics.png"
+  alt="A 5×5 input, a 3×3 vertical-edge kernel, and the resulting 3×3 output with the top-left computation shown"
+  caption="One kernel position: multiply the patch elementwise by the kernel and sum. Sliding that operation across the input produces the output — and with no padding a 5×5 input and 3×3 kernel give a 3×3 result."
+/>
+
 ## Why a fully-connected layer on images is hopeless
 
 For a 224×224×3 image flattened to a vector, a single fully-connected output unit needs $224 \times 224 \times 3 \approx 150{,}000$ weights — a modest hidden layer of just 1,000 such units already needs 150 million parameters, before any depth is added, and with zero structural knowledge that nearby pixels are related.
@@ -27,6 +33,12 @@ Slide a small filter (e.g. $3\times3$) across the image; at each position, compu
 The filter (kernel) values are learned parameters, exactly like a fully-connected layer's weights — but a single kernel is reused at *every* spatial position, rather than each position getting its own independent set of weights.
 
 ## Classic hand-designed kernels, as intuition
+
+<Figure
+  src="/img/ml/vision/convolution-kernels.png"
+  alt="The same input image processed by identity, blur, two Sobel edge detectors and a sharpening kernel"
+  caption="The operation is fixed; only the nine numbers change. Classical vision hand-designed these kernels — a CNN learns them from data instead, which is the whole shift the architecture represents."
+/>
 
 Before learned kernels, image processing used hand-designed ones: an edge-detection kernel (a small matrix approximating a spatial derivative) highlights sharp intensity changes; a blur kernel (a small uniform-averaging matrix) smooths the image; a sharpen kernel amplifies local contrast. Learned kernels in a trained CNN often converge to something visually resembling these classic edge/blob detectors in the earliest layers — a useful sanity check that the network has learned something sensible.
 
@@ -50,6 +62,12 @@ $$
 A real convolutional layer has $C_{\text{in}}$ input channels and produces $C_{\text{out}}$ output channels — each output channel is produced by its *own* set of $C_{\text{in}}$ kernels (one per input channel, summed together), so the total parameter count is $k \times k \times C_{\text{in}} \times C_{\text{out}}$ — this is where the overwhelming majority of a CNN's parameters actually live.
 
 ## Receptive field
+
+<Figure
+  src="/img/ml/vision/receptive-field.png"
+  alt="Successive 3×3 convolutions shrinking a 9×9 input to a single unit, illustrating receptive field growth"
+  caption="Each 3×3 convolution widens the receptive field by 2. Stacking three of them sees the same 7×7 region as one 7×7 kernel, using fewer parameters and inserting two extra non-linearities along the way."
+/>
 
 The region of the *original input* that a given output unit's value depends on. A single layer's receptive field equals its kernel size, but receptive field grows with depth — stacking layers lets deep units respond to increasingly large regions of the input, even though each individual layer only looks at a small local neighbourhood.
 

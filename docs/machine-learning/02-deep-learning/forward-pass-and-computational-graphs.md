@@ -14,6 +14,12 @@ A neural network is a function composition, layer feeding layer, and the graph o
 Writing the forward pass as a graph of primitive operations is what makes automatic differentiation mechanical rather than clever.
 :::
 
+<Figure
+  src="/img/ml/deep/computational-graph.png"
+  alt="A computational graph with input, weight and bias leaves flowing through matrix multiply, add, sigmoid and loss nodes"
+  caption="The forward pass computes values left to right; the backward pass applies the chain rule right to left. Every framework builds this graph so it can walk it backwards automatically."
+/>
+
 ## Layer as affine transform plus activation
 
 Each layer computes:

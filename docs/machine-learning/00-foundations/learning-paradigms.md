@@ -14,6 +14,12 @@ Before picking an algorithm, answer one question: what does the training signal 
 Paradigms are classified by what supervision is available, not by what model is used — a neural network can be trained under any of them.
 :::
 
+<Figure
+  src="/img/ml/foundations/learning-paradigms.png"
+  alt="Three panels: labelled points with a boundary, unlabelled points with discovered groups, and a trajectory collecting rewards"
+  caption="The three paradigms on the same scatter of points. Supervised learning is told the answer; unsupervised must find structure; reinforcement learning only ever sees how good the outcome was."
+/>
+
 ## Supervised learning
 
 Every training example comes with the "correct answer." The model learns a function $f: X \to Y$ from labelled pairs $(x_i, y_i)$.

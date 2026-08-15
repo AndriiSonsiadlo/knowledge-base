@@ -14,7 +14,19 @@ Networks deeper than twenty or so layers were, for years, essentially untrainabl
 Normalising activations inside the network keeps every layer's input distribution stable, which lets you use higher learning rates without divergence.
 :::
 
+<Figure
+  src="/img/ml/deep/normalization-axes.png"
+  alt="Four grids showing which batch and channel elements are averaged together by batch, layer, instance and group normalization"
+  caption="The only thing separating these four is which axes get averaged into one mean and variance. Batch norm reaches across the batch — which is why it misbehaves at batch size 1 and why transformers use layer norm instead."
+/>
+
 ## The problem: distribution shift between layers
+
+<Figure
+  src="/img/ml/deep/normalization-effect.png"
+  alt="Pre-activation distributions drifting across layers without normalization and staying centred with it, plus faster loss convergence"
+  caption="Without normalization the pre-activation distribution drifts and widens with depth. Keeping it centred is what allows a higher learning rate, which is where most of the speed-up actually comes from."
+/>
 
 As training updates earlier layers' weights, the distribution of activations feeding into later layers keeps changing, layer by layer, step by step — every layer is perpetually adapting to a target that itself keeps moving, which slows convergence and makes high learning rates risky.
 

@@ -14,6 +14,12 @@ tags: [reinforcement-learning, mdp, theory]
 If the current state contains everything relevant about the past, the optimal action depends only on where you are - not on how you got there.
 :::
 
+<Figure
+  src="/img/ml/rl/gridworld-value-iteration.png"
+  alt="A gridworld MDP with goal and trap states, the optimal value function computed by value iteration, and the greedy policy arrows"
+  caption="A 4×4 gridworld solved by value iteration. The values and arrows are computed, not drawn — note the cell below the trap points *down and away* from the +1 goal, because reaching it via the trap is worse than the longer route."
+/>
+
 ## The MDP tuple (S, A, P, R, γ)
 
 An MDP is defined by five components: the state space $\mathcal{S}$, the action space $\mathcal{A}$, the transition function $P(s' \mid s, a)$, the reward function $R(s, a, s')$, and the discount factor $\gamma$. Together, this tuple fully specifies the environment's dynamics — everything an agent could possibly need to know about how the world responds to its actions.
@@ -39,6 +45,12 @@ P(\tau \mid \pi) = P(s_0) \prod_{t=0}^{T-1} \pi(a_t \mid s_t) \, P(s_{t+1} \mid 
 $$
 
 ## The objective: expected return
+
+<Figure
+  src="/img/ml/rl/discount-factor.png"
+  alt="Exponential decay curves for discount factors of 0.5, 0.9, 0.99 and 0.999 against steps into the future"
+  caption="γ sets how far ahead the agent effectively plans — roughly 1/(1−γ) steps. At γ = 0.9 a reward fifty steps away is worth half a percent of an immediate one, so the agent is functionally blind to it."
+/>
 
 $$
 J(\pi) = \mathbb{E}_{\tau \sim \pi} \left[ G_0 \right] = \mathbb{E}_{\tau \sim \pi} \left[ \sum_{t=0}^{\infty} \gamma^t r_{t+1} \right]

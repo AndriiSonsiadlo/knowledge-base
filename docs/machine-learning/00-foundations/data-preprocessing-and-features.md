@@ -16,6 +16,12 @@ Preprocessing is part of the model — it must be fitted on training data only a
 
 ## Numeric scaling
 
+<Figure
+  src="/img/ml/foundations/feature-scaling.png"
+  alt="The same two-feature cloud shown raw, standardised, and min-max scaled"
+  caption="Raw features spanning different ranges dominate any distance- or gradient-based method. Standardisation centres and rescales; min–max squeezes into a fixed interval and is far more sensitive to outliers."
+/>
+
 - **Standardisation** ($z = \frac{x - \mu}{\sigma}$): centres at zero, unit variance. Required for distance-based methods ([k-NN](../01-classical-ml/k-nearest-neighbors.md)), gradient-descent-trained linear models, and neural networks.
 - **Min-max scaling** ($x' = \frac{x - \min}{\max - \min}$): bounds to $[0, 1]$. Sensitive to outliers (a single extreme value compresses everything else).
 - **Robust scaling** (using median and IQR instead of mean and std): tolerant of outliers.
@@ -60,6 +66,12 @@ Multiplying two features together (or squaring one) lets a linear model capture 
 - **Embedded methods**: the model itself performs selection during fitting (L1 regularisation zeroing out coefficients, tree-based feature importances).
 
 ## Pipeline and ColumnTransformer
+
+<Figure
+  src="/img/ml/foundations/preprocessing-leakage.png"
+  alt="Two diagrams: scaling before splitting, which leaks test statistics into training, versus fitting the scaler inside the training fold only"
+  caption="Fitting a scaler before splitting leaks the test set's mean and variance into training. The result is an optimistic validation score that vanishes in production. Fit on train, apply to test — always in that order."
+/>
 
 The leak-proof way to combine all of the above: wrap every preprocessing step and the model itself into a single `Pipeline`, so that calling `.fit()` inside a single cross-validation fold fits the scaler, encoder, and model *only* on that fold's training data — nothing from the validation portion ever touches the fitted transformers.
 

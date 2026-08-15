@@ -14,6 +14,12 @@ tags: [generative, vae, elbo, probabilistic]
 Force the latent space to match a known prior, and sampling becomes "draw from the prior and decode".
 :::
 
+<Figure
+  src="/img/ml/generative/vae.png"
+  alt="A VAE encoding to a mean and standard deviation with the reparameterisation trick, and a latent grid decoded into smoothly varying outputs"
+  caption="A VAE encodes to a *distribution* rather than a point, and the reparameterisation trick moves the sampling off the gradient path so backpropagation still works. The KL term is what keeps the latent space continuous enough for the grid on the right to vary smoothly."
+/>
+
 ## The problem restated
 
 A plain autoencoder's encoder maps each input to a single point in latent space, with nothing constraining the overall shape of that space — leaving gaps a random draw is likely to land in.

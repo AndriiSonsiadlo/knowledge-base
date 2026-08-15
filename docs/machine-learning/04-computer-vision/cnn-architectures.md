@@ -14,6 +14,12 @@ Fifteen years of vision architecture research boiled down to a handful of ideas 
 Architectures evolved by making networks deeper while finding ways to keep them trainable and affordable.
 :::
 
+<Figure
+  src="/img/ml/vision/cnn-architectures.png"
+  alt="Log-log scatter of classic CNN architectures by depth and parameter count from LeNet to ResNet-152"
+  caption="Depth grew by more than an order of magnitude while parameter counts did not — VGG-16 has more parameters than ResNet-152. Skip connections and 1×1 bottlenecks are what decoupled the two."
+/>
+
 ## LeNet-5
 
 One of the earliest practical CNNs (1998), designed for handwritten digit recognition — a small stack of convolution and pooling layers followed by fully-connected layers, establishing the basic conv-pool-conv-pool-FC pattern that every later architecture, in some form, still follows.

@@ -14,6 +14,12 @@ In 2015, researchers found something strange: a 56-layer network had *higher* tr
 Adding the input back to the output gives the gradient a path that skips the layer entirely, so depth stops degrading trainability.
 :::
 
+<Figure
+  src="/img/ml/deep/skip-connections.png"
+  alt="A residual block with an identity shortcut bypassing two weight layers, and error curves showing plain networks degrading with depth while residual ones improve"
+  caption="The shortcut means the block only has to learn the *change* to its input, and gives the gradient an unobstructed path backwards. Before it, adding layers to a plain network made test error worse — the degradation problem ResNet solved."
+/>
+
 ## The degradation problem
 
 The surprising part was specifically that *training* error (not just test error) was worse for the deeper network — ruling out overfitting as the explanation, since overfitting produces low training error and high test error, not high training error on both. A deeper network should, in principle, be at least as capable as a shallower one (it could learn to make its extra layers behave as the identity function) — but gradient descent, in practice, was failing to find even that trivial solution.

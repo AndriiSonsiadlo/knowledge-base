@@ -14,6 +14,12 @@ The cheapest way to get more training data isn't collecting more — it's transf
 Augmentation encodes the invariances you want the model to have — which makes the wrong augmentation actively harmful.
 :::
 
+<Figure
+  src="/img/ml/vision/data-augmentation.png"
+  alt="One image shown under flip, rotation, crop, brightness, contrast, noise and cutout transformations"
+  caption="Every panel carries the same label. Augmentation encodes the invariances you believe the task has — and picking wrong matters: a horizontal flip is free for pet photos and fatal for reading digits."
+/>
+
 ## Augmentation as regularisation
 
 From [Regularization in Deep Nets](../02-deep-learning/regularization-in-deep-nets.md): forcing the model to produce the same prediction across many synthetic variations of the same underlying image is a direct way to discourage memorising exact pixel values, one of the strongest and cheapest regularisers available for vision tasks.

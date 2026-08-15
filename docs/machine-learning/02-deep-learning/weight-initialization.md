@@ -14,6 +14,12 @@ Before the first gradient is ever computed, a choice has already been made that 
 Initialise so that activation variance is preserved layer to layer — too small and the signal dies, too large and it explodes.
 :::
 
+<Figure
+  src="/img/ml/deep/weight-init-and-gradient-flow.png"
+  alt="Activation standard deviation across thirty layers under four initialisation scales, and gradient magnitude compounding across twenty layers"
+  caption="Initialisation scale decides whether a signal survives depth at all. He initialisation (√(2/n)) holds the activation variance roughly constant through thirty ReLU layers; being off by a constant factor collapses or explodes it exponentially."
+/>
+
 ## Why zeros fail
 
 If every weight starts at zero, every unit in a layer computes the identical output (zero), receives the identical gradient, and updates identically forever — a **symmetry** that is never broken. Every unit in a layer stays a perfect copy of every other unit for the entire course of training, which means a layer with 1000 units effectively behaves like a layer with 1 unit. This is provable directly: if $W$ is all zeros, $z = Wx = 0$ regardless of $x$, and the gradient with respect to every row of $W$ is identical by symmetry.

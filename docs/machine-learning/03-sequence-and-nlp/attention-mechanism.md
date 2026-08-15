@@ -14,6 +14,12 @@ Instead of compressing the entire input into one fixed vector and hoping nothing
 Attention is a differentiable lookup — a weighted average of values, where the weights come from how well a query matches each key.
 :::
 
+<Figure
+  src="/img/ml/nlp/attention-weights.png"
+  alt="An attention weight heatmap over a sentence where the verb attends to its true subject, beside a causal mask matrix"
+  caption="Attention weights over a sentence with a relative clause: *was* attends back to *cat*, its actual subject, rather than to the nearer *mouse*. The causal mask on the right is what stops a decoder reading tokens it has not generated yet."
+/>
+
 ## The bottleneck problem, restated
 
 [Seq2Seq and Encoder-Decoder](./seq2seq-and-encoder-decoder.md)'s decoder only ever sees the encoder's *final* hidden state — every intermediate hidden state, computed at real cost during encoding, is simply discarded.

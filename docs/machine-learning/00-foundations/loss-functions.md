@@ -14,6 +14,12 @@ The loss is the only thing the model actually optimises. Every other design choi
 A loss encodes both the task and your assumptions about noise; the metric you report and the loss you train are frequently not the same function.
 :::
 
+<Figure
+  src="/img/ml/foundations/loss-functions.png"
+  alt="Left: squared error, absolute error and Huber loss against residual. Right: cross-entropy and hinge loss against predicted probability"
+  caption="Squared error punishes outliers quadratically; absolute error does not; Huber is quadratic near zero and linear beyond it. On the right, cross-entropy is unbounded — a confident wrong prediction is penalised without limit."
+/>
+
 ## What makes a valid loss
 
 A loss $L(\hat y, y)$ must be differentiable (or subdifferentiable) with respect to the model's parameters, and it must be minimised exactly when predictions match targets. Accuracy fails the first requirement — it's a step function, flat almost everywhere, with zero useful gradient. This is why classifiers train on cross-entropy but get *reported* on accuracy.

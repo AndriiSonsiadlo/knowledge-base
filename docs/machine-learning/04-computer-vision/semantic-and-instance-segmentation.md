@@ -14,6 +14,12 @@ tags: [computer-vision, segmentation, unet]
 Segmentation networks are encoder-decoders - downsample to understand, upsample to localise, and skip connections carry back the spatial detail lost on the way down.
 :::
 
+<Figure
+  src="/img/ml/vision/vision-task-types.png"
+  alt="Classification, detection, semantic segmentation and instance segmentation compared on one scene"
+  caption="Semantic segmentation assigns a class to every pixel; instance segmentation additionally separates individual objects of that class. The distinction only matters when objects of the same class touch — which in practice is most of the time."
+/>
+
 ## Semantic vs. instance vs. panoptic segmentation
 
 **Semantic segmentation**: every pixel gets a class label, but distinct objects of the same class aren't distinguished (all "car" pixels are just "car," whether from one car or five). **Instance segmentation**: distinguishes individual object instances — each car gets its own separate mask, extending [Object Detection](./object-detection.md)'s per-object framing down to pixel precision. **Panoptic segmentation**: combines both — every pixel gets a class label, and object-class pixels are additionally split into distinct instances.

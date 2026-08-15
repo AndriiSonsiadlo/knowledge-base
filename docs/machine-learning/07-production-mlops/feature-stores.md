@@ -14,6 +14,12 @@ The same feature, computed two different ways in two different places, gives two
 A feature store exists to guarantee that training and serving compute a feature identically - everything else it does is convenience.
 :::
 
+<Figure
+  src="/img/ml/mlops/training-serving-skew.png"
+  alt="A training pipeline and a serving pipeline computing the same feature differently, producing silent quality loss"
+  caption="Training–serving skew: the same feature computed twice, in two languages, by two teams. The model is identical and the metrics look fine offline — the loss shows up only in production, which is the problem a feature store exists to remove."
+/>
+
 ## Training/serving skew, defined and illustrated
 
 **Training/serving skew** is any difference between how a feature is computed at training time versus at serving time — a different aggregation window, a subtly different join, a rounding difference. A concrete example: training computes "average purchase amount over the last 30 days" using a batch job with full historical data; serving computes it with a slightly different window boundary due to timezone handling — the model was trained on one distribution of that feature and is being fed a subtly different one at inference time, with no error raised anywhere.

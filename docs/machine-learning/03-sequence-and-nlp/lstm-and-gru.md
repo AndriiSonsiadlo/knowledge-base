@@ -14,6 +14,12 @@ Plain RNNs forget almost everything within a few dozen timesteps — the vanishi
 An additive cell state with multiplicative gates gives gradients a highway through time, the same trick residual connections use through depth.
 :::
 
+<Figure
+  src="/img/ml/nlp/lstm-cell.png"
+  alt="An LSTM cell with forget, input and output gates operating on a cell-state highway, and gradient decay curves for RNN versus LSTM"
+  caption="The cell state runs across the top almost untouched — information passes along it by addition rather than repeated multiplication. That additive path is what keeps the gradient alive over long spans, as the right panel shows."
+/>
+
 ## The problem, restated
 
 A plain RNN's hidden state is *overwritten* at every step — $h_t$ depends on $h_{t-1}$ only through a repeated matrix multiplication and squashing non-linearity, exactly the multiplicative chain that vanishes across many steps.

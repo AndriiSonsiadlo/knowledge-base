@@ -14,6 +14,12 @@ The model outputs a probability distribution over the entire vocabulary at every
 Decoding is a design decision separate from the model, and it changes output quality more than most fine-tuning does.
 :::
 
+<Figure
+  src="/img/ml/nlp/decoding-strategies.png"
+  alt="The same next-token distribution reshaped by low temperature, high temperature, top-k truncation and nucleus sampling"
+  caption="All four operate on the same logits. Temperature rescales before the softmax; top-k keeps a fixed number of candidates; nucleus sampling keeps the smallest set reaching probability p, so the number of candidates adapts to how confident the model is."
+/>
+
 ## Greedy decoding, and why it produces loops
 
 At every step, pick the single highest-probability token. Cheap and deterministic, but prone to a specific, recognisable failure: once the model enters a locally-repetitive pattern (a phrase that scores well when repeated), greedy decoding has no mechanism to escape it, producing visible loops of repeated words or phrases.

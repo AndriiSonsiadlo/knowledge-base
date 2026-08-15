@@ -14,6 +14,12 @@ tags: [reinforcement-learning, actor-critic, a2c]
 Use a learned value function as the policy gradient's baseline and you get TD's low variance with policy gradient's direct optimisation.
 :::
 
+<Figure
+  src="/img/ml/rl/algorithm-map.png"
+  alt="The RL algorithm landscape grouped into value-based, policy-based, actor-critic and model-based families"
+  caption="Where the algorithms sit relative to each other. Actor–critic methods are the middle ground this page occupies: a policy that acts, plus a value estimate that criticises, which cuts the variance that plagues pure policy gradients."
+/>
+
 ## The two components: actor and critic
 
 The **actor** is the policy $\pi_\theta(a \mid s)$, exactly as in [Policy Gradient Methods](./policy-gradient-methods.md) — it selects actions. The **critic** is a learned value function $V_\phi(s)$ (or $Q_\phi(s,a)$), trained via TD learning ([Monte Carlo and TD Learning](./monte-carlo-and-td-learning.md)) to estimate how good the actor's choices actually are — the critic's only job is to *judge*, feeding that judgement back to improve the actor.

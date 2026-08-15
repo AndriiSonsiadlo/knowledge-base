@@ -14,6 +14,12 @@ The test set is spent the moment you make a decision based on it. If you tune a 
 The test set is spent the moment you make a decision based on it — the validation set exists to absorb those decisions.
 :::
 
+<Figure
+  src="/img/ml/foundations/cross-validation-schemes.png"
+  alt="Top: five-fold cross-validation with each fold validated once. Bottom: time-series splits where validation always follows training in time"
+  caption="k-fold reuses every block for validation exactly once. For time series it is invalid — training on the future to predict the past leaks information — so the split must always move forward in time."
+/>
+
 ## The three splits and the job of each
 
 - **Training set**: what the model's parameters are fit to.

@@ -14,6 +14,12 @@ The 2017 paper that introduced the transformer had a blunt thesis: attention was
 Removing recurrence makes every position computable in parallel, which is what turned scale from a research problem into an engineering one.
 :::
 
+<Figure
+  src="/img/ml/nlp/transformer-block.png"
+  alt="Post-LN and pre-LN transformer blocks side by side, showing LayerNorm after the residual add versus before the sublayer"
+  caption="The 2017 paper put LayerNorm after the residual add; every modern model puts it before. Pre-LN leaves a clean identity path from input to output, which is why it trains without the warmup schedule Post-LN requires."
+/>
+
 ## The motivation: recurrence blocks parallelism
 
 [Recurrent Neural Networks](./recurrent-neural-networks.md)'s hidden state $h_t$ requires $h_{t-1}$ to already exist — an inherently sequential dependency chain that no amount of extra hardware can shortcut. Self-attention (from [Attention Mechanism](./attention-mechanism.md)) computes every position's output from the *whole* sequence simultaneously, with no such dependency — every position's attention computation can run in parallel on modern hardware.

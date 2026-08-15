@@ -14,6 +14,12 @@ Models don't see text — they see a sequence of integers, and every choice abou
 Subword tokenisation is the compromise between an unbounded word vocabulary and a character sequence too long to model.
 :::
 
+<Figure
+  src="/img/ml/nlp/tokenization-granularity.png"
+  alt="The word tokenization split into characters, into two subword pieces, and kept as a single word token"
+  caption="Characters give a tiny vocabulary but very long sequences; whole words give short sequences but a huge vocabulary that still breaks on unseen words. Subword tokenisation is the compromise every modern model uses."
+/>
+
 ## The classic pipeline, and why most of it is obsolete
 
 Older NLP pipelines lowercased text, stripped punctuation, applied stemming (crudely chopping suffixes) or lemmatisation (reducing to a dictionary root), and removed "stop words" (common function words like "the," "is"). Modern subword tokenisers and large pretrained models learn to handle case, morphology, and function words directly from data — most of this classic pipeline is now unnecessary, and can actively hurt performance by discarding information (case can be meaningful; "not" is a stop word that changes meaning entirely if removed).

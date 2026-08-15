@@ -14,6 +14,12 @@ Training a model is repeated use of one operation: measure the slope of the loss
 The gradient points in the direction of steepest ascent, so the negative gradient is the only direction a first-order method ever needs.
 :::
 
+<Figure
+  src="/img/ml/foundations/derivatives-and-gradients.png"
+  alt="Left: a cubic curve with tangent lines at three points. Right: contours of a quadratic bowl with gradient arrows pointing outward"
+  caption="The derivative is the slope of the tangent. In more than one dimension the gradient points in the direction of steepest *increase* — which is why gradient descent subtracts it."
+/>
+
 ## Derivative as local slope
 
 For a scalar function $f(x)$, the derivative $f'(x) = \frac{df}{dx}$ is the instantaneous rate of change — how much $f$ changes for a tiny change in $x$. It is the slope of the tangent line at that point.

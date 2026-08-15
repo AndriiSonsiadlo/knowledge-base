@@ -14,6 +14,12 @@ k-means is the clustering algorithm everyone reaches for first — and its simpl
 k-means alternates two trivial steps to minimise within-cluster variance — and in doing so assumes clusters are spherical, similarly sized, and equally dense.
 :::
 
+<Figure
+  src="/img/ml/classical/kmeans-iterations.png"
+  alt="Four snapshots of k-means converging from a deliberately poor initialisation to three well-separated clusters"
+  caption="k-means alternates two steps: assign each point to its nearest centroid, then move each centroid to the mean of its points. From this deliberately bad initialisation it still converges — but only to a local optimum, which is why k-means++ and restarts exist."
+/>
+
 ## The objective
 
 $$
@@ -45,6 +51,12 @@ Because $J$ is non-convex in the joint (assignment, centroid) space, different r
 Naive random initialisation can place initial centroids poorly, leading to slow convergence or a bad local optimum. **k-means++** instead chooses initial centroids sequentially, each one selected with probability proportional to its squared distance from the nearest already-chosen centroid — spreading the initial centroids out and substantially improving both convergence speed and final quality.
 
 ## Choosing k
+
+<Figure
+  src="/img/ml/classical/kmeans-limitations.png"
+  alt="k-means splitting two crescent moons incorrectly, splitting an elongated cluster, and an elbow plot with a clear bend at four"
+  caption="k-means assumes roughly spherical, similarly sized clusters. Crescents and unequal spreads both defeat it. The elbow plot on the right is the standard heuristic for k — here bending cleanly at the true value of four."
+/>
 
 - **Elbow method**: plot $J$ against $k$; look for the point where the marginal decrease in $J$ sharply slows.
 - **Silhouette score**: measures how similar each point is to its own cluster versus the nearest other cluster, averaged; higher is better.

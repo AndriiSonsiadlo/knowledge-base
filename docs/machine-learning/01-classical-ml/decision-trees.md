@@ -14,6 +14,12 @@ Every other model in this section requires some statistical literacy to interpre
 A tree recursively splits the feature space on whichever single question most reduces impurity — greedy, interpretable, and prone to memorising everything.
 :::
 
+<Figure
+  src="/img/ml/classical/decision-tree-depth.png"
+  alt="Three decision boundaries from trees of depth 1, 3 and 12, all composed of axis-aligned rectangles"
+  caption="Every tree boundary is a union of axis-aligned rectangles — a diagonal separation always costs a staircase of splits. Depth is the capacity knob: at 12 the tree is fencing off individual noise points."
+/>
+
 ## The recursive splitting algorithm
 
 At each node, consider every possible (feature, threshold) split; pick the one that most reduces impurity in the resulting two child nodes; recurse on each child until a stopping condition is met.

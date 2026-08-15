@@ -14,6 +14,12 @@ A model that memorises its training set — including its noise and its idiosync
 Every regulariser encodes a preference for simpler explanations, whether through the loss, the data, or the training procedure.
 :::
 
+<Figure
+  src="/img/ml/foundations/learning-curves-overfitting.png"
+  alt="Training loss falling steadily while validation loss falls then turns upward, with the minimum marked"
+  caption="Overfitting is visible as a gap that opens between the two curves. The validation minimum is the early-stopping point; everything to the right of it buys training loss at the cost of generalisation."
+/>
+
 ## Memorisation vs. generalisation
 
 A model with enough capacity can always achieve zero training error by memorising every training example, including its noise. That is never the goal — the goal is a model that performs well on data it has never seen. The gap between training and validation performance is the direct evidence of how much memorisation is happening (see [Bias-Variance Tradeoff](./bias-variance-tradeoff.md)).
@@ -37,6 +43,12 @@ $$
 Geometrically, this shrinks all weights toward zero smoothly and proportionally — large weights are pulled down harder than small ones, but nothing is forced to exactly zero.
 
 ## L1 and sparsity
+
+<Figure
+  src="/img/ml/foundations/l1-l2-constraint-geometry.png"
+  alt="Two panels showing elliptical loss contours meeting a circular L2 region off-axis and a diamond L1 region exactly on its corner"
+  caption="Why L1 zeroes coefficients and L2 only shrinks them. The solution is where the loss contour first touches the constraint region — the diamond's corners sit on the axes, so contact there sets a coefficient to exactly zero. Both solutions here are solved for, not drawn by eye."
+/>
 
 $$
 L_{\text{total}} = L_{\text{data}} + \lambda \sum_i |w_i|

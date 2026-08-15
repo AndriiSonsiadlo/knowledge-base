@@ -24,6 +24,12 @@ Weight decay directly shrinks weights each step: $w \leftarrow w - \eta(\nabla L
 
 ## Dropout: the algorithm
 
+<Figure
+  src="/img/ml/deep/dropout.png"
+  alt="A fully connected network beside the same network with half its hidden units and their edges removed by a dropout mask"
+  caption="Dropout samples a different subnetwork every batch, so no unit can rely on any specific other unit being present. At test time the full network is used with activations scaled to match the training-time expectation."
+/>
+
 During training, randomly zero out each unit's activation with probability $p$ (independently, per unit, per forward pass):
 
 $$

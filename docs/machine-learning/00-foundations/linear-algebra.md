@@ -14,6 +14,12 @@ A layer in a neural network, a linear regression model, and a batch of predictio
 A layer, a linear model, and a batch of predictions are all the same operation — $Xw$.
 :::
 
+<Figure
+  src="/img/ml/foundations/linear-algebra-geometry.png"
+  alt="Three panels: a unit circle transformed into an ellipse with eigenvectors marked, a vector projection, and an SVD decomposition"
+  caption="The three geometric facts that matter. A matrix is a transformation; eigenvectors are the directions it merely scales; the dot product is a projection; and SVD says any matrix is a rotation, a stretch, and another rotation."
+/>
+
 ## Vectors and vector spaces
 
 A vector $x \in \mathbb{R}^d$ is an ordered list of $d$ numbers. Geometrically, it's a point (or an arrow from the origin) in $d$-dimensional space. A dataset of $n$ examples, each with $d$ features, is stored as a matrix $X \in \mathbb{R}^{n \times d}$ — one row per example.

@@ -14,6 +14,12 @@ Every model in the classical ML and deep learning sections so far predicts a lab
 A discriminative model learns p(y | x); a generative model learns p(x), which is a much harder question and buys you sampling.
 :::
 
+<Figure
+  src="/img/ml/generative/discriminative-vs-generative.png"
+  alt="A discriminative model drawing only a boundary between two classes, beside a generative model fitting the density of each class"
+  caption="A discriminative model needs only the boundary; a generative model learns the whole distribution. That is more work and more error-prone — but it is what makes sampling new data possible at all."
+/>
+
 ## Discriminative vs. generative, stated precisely
 
 A **discriminative** model learns $p(y \mid x)$ — given an input, what's the distribution over labels ([Logistic Regression](../01-classical-ml/logistic-regression.md), most of classical ML and deep learning). A **generative** model learns $p(x)$ (or $p(x, y)$) — the distribution over the data itself, which is what lets you *sample* new, novel $x$ values, something a discriminative model has no mechanism to do at all.
@@ -50,6 +56,12 @@ Maximum likelihood ([Statistics and Estimation](../00-foundations/statistics-and
 | $p_\theta(x)$ | the model's approximation, parameterised by $\theta$ |
 
 ## The three-way trade: quality, coverage, speed
+
+<Figure
+  src="/img/ml/generative/generative-trilemma.png"
+  alt="A scatter of generative model families positioned by sample quality and mode coverage with bubble size showing sampling speed"
+  caption="The generative trilemma: high sample quality, broad mode coverage, and fast sampling — pick two. Diffusion buys quality and coverage with slow iterative sampling; GANs are fast and sharp but drop modes."
+/>
 
 **Sample quality**: how convincing individual generated samples look. **Mode coverage**: whether the model captures the *full diversity* of the true distribution, or collapses onto only some of it. **Sampling speed**: how many computational steps are needed to produce one sample. No family in this section wins on all three simultaneously — GANs historically won quality but risked poor coverage ([GAN Training Challenges](./gan-training-challenges.md)); VAEs had good coverage but blurrier quality; diffusion models achieve strong quality and coverage at the cost of slow, iterative sampling ([Diffusion Models](./diffusion-models.md), [Flow Matching and Consistency Models](./flow-matching-and-consistency-models.md) address the speed side directly).
 

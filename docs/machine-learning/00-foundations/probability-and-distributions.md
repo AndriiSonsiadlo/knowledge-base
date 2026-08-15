@@ -14,6 +14,12 @@ A classifier doesn't output "the answer" — it outputs a belief, expressed as a
 A classifier's output is a conditional distribution $p(y \mid x)$, and every loss here is a statement about that distribution.
 :::
 
+<Figure
+  src="/img/ml/foundations/common-distributions.png"
+  alt="A six-panel grid of normal, binomial, Poisson, exponential and beta distributions plus a central limit theorem demonstration"
+  caption="The distributions that recur throughout ML. The last panel is the central limit theorem in action: averages of uniform samples become normal remarkably quickly, which is why the normal assumption is so often defensible."
+/>
+
 ## Sample space, events, random variables
 
 The **sample space** $\Omega$ is the set of all possible outcomes (e.g., all six faces of a die). An **event** is a subset of $\Omega$ (e.g., "rolled an even number"). A **random variable** $X$ is a function mapping outcomes to numbers, letting you talk about "the value" rather than "the outcome."

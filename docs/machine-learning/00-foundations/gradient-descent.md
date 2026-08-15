@@ -28,9 +28,21 @@ $$
 
 ## Learning rate: too small, too large, just right
 
+<Figure
+  src="/img/ml/foundations/learning-rate-regimes.png"
+  alt="Three contour plots of the same elongated bowl showing a crawling path, a converging path, and a diverging oscillation"
+  caption="The same loss surface and starting point, three learning rates. Too small never arrives in the budget you have; too large diverges. Note the middle path still bends — it descends the steep axis first, then travels the shallow one."
+/>
+
 Too small: convergence is correct but painfully slow — thousands of steps to get anywhere. Too large: the update overshoots the minimum, and the loss can oscillate or diverge entirely, sometimes growing without bound. The right learning rate depends on the loss surface's curvature, which is why [Learning Rate Schedules](../02-deep-learning/learning-rate-schedules.md) exist — a fixed value rarely stays optimal throughout training.
 
 ## Batch vs. stochastic vs. mini-batch
+
+<Figure
+  src="/img/ml/foundations/gradient-descent-variants.png"
+  alt="Three loss curves: a smooth batch curve, a slightly noisy mini-batch curve, and a very noisy stochastic curve"
+  caption="Gradient noise rises as the batch shrinks. The noise is not purely a cost — it is what lets SGD escape shallow local minima that full-batch descent settles into."
+/>
 
 - **Batch (full-dataset) gradient descent**: compute the exact gradient over every training example before stepping. Correct direction, but one step per full pass over the data — very slow for large datasets.
 - **Stochastic gradient descent (SGD)**: estimate the gradient from a single random example. Noisy, but incredibly cheap per step, and the noise itself has a mild regularising effect.

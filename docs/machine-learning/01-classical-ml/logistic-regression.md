@@ -14,6 +14,12 @@ Despite the name, logistic regression is a classifier, and it remains the first 
 It is a linear model on the log-odds — the sigmoid only converts that line into a probability.
 :::
 
+<Figure
+  src="/img/ml/classical/logistic-regression.png"
+  alt="The sigmoid function mapping real values to probabilities, and a linear decision boundary separating two classes"
+  caption="The sigmoid turns an unbounded score into a probability. The boundary it produces is always linear in the input features — the curve is in the probability, not in the separator."
+/>
+
 ## Why linear regression fails for classification
 
 Fitting $\hat y = Xw$ directly to 0/1 labels produces predictions outside $[0,1]$, and squared error penalises a wildly wrong confident prediction the same way it penalises a mild one — the wrong loss for a probability.

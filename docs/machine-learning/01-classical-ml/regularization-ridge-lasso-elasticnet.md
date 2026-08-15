@@ -28,6 +28,12 @@ Adding $\lambda I$ to $X^\top X$ before inverting guarantees the matrix is inver
 
 ## Lasso (L1) and why the corner causes sparsity
 
+<Figure
+  src="/img/ml/foundations/l1-l2-constraint-geometry.png"
+  alt="Loss contours meeting a round L2 constraint region off-axis and a diamond L1 region exactly on a corner"
+  caption="The corner is the whole mechanism. Because the L1 region's vertices lie on the axes, the first point of contact with the loss contour is very often one of them — and at that point a coefficient is exactly zero."
+/>
+
 Lasso minimises $\|Xw - y\|_2^2 + \lambda\|w\|_1$, with no closed form (solved by coordinate descent or similar iterative methods). The geometric argument: constrained optimisation of a smooth loss against an L1 ball (a diamond in 2D) tends to land at a corner of the diamond, where one or more coordinates are exactly zero — against an L2 ball (a circle), the smooth loss contours are tangent to the circle at an arbitrary point, essentially never exactly on an axis.
 
 | Symbol | Meaning |
@@ -53,6 +59,12 @@ $\lambda$ is a hyperparameter, not learned by the training objective itself — 
 The penalty term treats every coefficient's scale identically, so a feature measured in thousands (income) will be penalised far more harshly than one measured in single digits (age) unless both are standardised first — otherwise the regularisation strength isn't actually comparable across features.
 
 ## Coefficient paths
+
+<Figure
+  src="/img/ml/foundations/ridge-vs-lasso-paths.png"
+  alt="Ridge coefficient paths shrinking smoothly toward zero beside lasso paths hitting exactly zero one by one"
+  caption="Both penalties shrink coefficients as α rises, but only lasso sets them to exactly zero — and it does so one at a time, which is what makes it a feature selector. Ridge keeps every coefficient, however small."
+/>
 
 Plotting each coefficient's value as $\lambda$ sweeps from 0 to large reveals ridge's smooth shrinkage toward (but not to) zero, versus lasso's coefficients hitting exactly zero one by one as $\lambda$ grows — a direct visual confirmation of the sparsity argument above.
 

@@ -14,6 +14,12 @@ Classification answers "what is in this image?" Detection answers a harder quest
 Detection reframes classification as "classify plus regress a box", and the whole design space is about how you propose the boxes.
 :::
 
+<Figure
+  src="/img/ml/vision/vision-task-types.png"
+  alt="The same scene under classification, object detection, semantic segmentation and instance segmentation"
+  caption="Four tasks on one image, in increasing order of output detail. Semantic segmentation labels every pixel but cannot separate two adjacent animals; instance segmentation can, which is exactly the harder problem."
+/>
+
 ## The task, and why a classifier alone cannot do it
 
 A classifier outputs one label for the whole image, with no notion of location or count — it cannot say "there are three dogs, here, here, and here." Detection needs, per object, both a class label *and* a bounding box, and needs to handle a variable, unknown number of objects per image.
@@ -23,6 +29,12 @@ A classifier outputs one label for the whole image, with no notion of location o
 **xyxy**: (x_min, y_min, x_max, y_max) — the top-left and bottom-right corners. **xywh**: (x_center, y_center, width, height) — centre point plus size. **Normalised**: coordinates as fractions of image dimensions (0 to 1) rather than raw pixels, making the format independent of image resolution. Converting between these incorrectly — swapping width/height, mixing normalised and pixel coordinates — is a routine, easy-to-miss source of silently wrong training data.
 
 ## Intersection over Union (IoU)
+
+<Figure
+  src="/img/ml/vision/iou.png"
+  alt="Four pairs of overlapping boxes with IoU values of 0.05, 0.35, 0.62 and 0.88"
+  caption="IoU is the overlap divided by the combined area. A detection usually counts as correct above 0.5 — an arbitrary line, which is why detection benchmarks report mAP averaged over several thresholds instead."
+/>
 
 $$
 \text{IoU} = \frac{\text{Area of overlap}}{\text{Area of union}}

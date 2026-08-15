@@ -14,6 +14,12 @@ Some data simply cannot be separated by a straight line — two concentric circl
 Any algorithm written purely in terms of dot products can swap that dot product for a kernel and gain a non-linear boundary for free.
 :::
 
+<Figure
+  src="/img/ml/classical/kernel-trick.png"
+  alt="Concentric rings that no line can separate in two dimensions, then the same points lifted into three dimensions where a flat plane separates them"
+  caption="The kernel trick in one picture. Data that needs a circular boundary in 2-D needs only a flat plane once lifted by a radial feature — and the kernel computes the inner products in that higher space without ever building it."
+/>
+
 ## The problem: non-linearly-separable data
 
 Concentric circles, XOR-like patterns, spirals — data where no hyperplane in the original feature space separates the classes.

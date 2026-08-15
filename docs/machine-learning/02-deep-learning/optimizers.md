@@ -14,6 +14,12 @@ Plain gradient descent takes the same fixed-size step in every direction, every 
 Modern optimisers differ in how they estimate the direction (momentum) and how they scale each coordinate (adaptive learning rates).
 :::
 
+<Figure
+  src="/img/ml/deep/optimizer-trajectories.png"
+  alt="Four optimizer trajectories on an elongated ravine, with SGD zigzagging and stalling while momentum, RMSProp and Adam reach the minimum"
+  caption="A ravine — steep across, shallow along — is the surface that separates the optimizers. At a well-tuned rate SGD still flips sign on all 60 steps and stops short; momentum reaches the minimum with 13 oscillations. These paths are simulated, not sketched."
+/>
+
 ## SGD recap and its problems
 
 Plain [Gradient Descent](../00-foundations/gradient-descent.md) — $w \leftarrow w - \eta \nabla L(w)$ — struggles with three things: narrow ravines (it oscillates across the narrow direction while barely progressing along the long direction), noisy gradients (mini-batch estimates jitter around the true gradient), and a single learning rate applied identically to every parameter regardless of how differently-scaled their gradients are.

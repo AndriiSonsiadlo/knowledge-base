@@ -14,6 +14,12 @@ A single unconstrained decision tree overfits badly. Grow a few hundred of them,
 Bagging cuts variance by averaging decorrelated models; random feature subsets are what make the trees decorrelated enough for it to work.
 :::
 
+<Figure
+  src="/img/ml/classical/random-forest-smoothing.png"
+  alt="A single deep tree's jagged boundary beside the smooth boundary of sixty averaged bootstrapped trees"
+  caption="Averaging many high-variance trees, each fitted to a bootstrap sample, cancels their individual errors. The forest's boundary is smooth even though every tree composing it is a staircase."
+/>
+
 ## Bootstrap sampling
 
 For each of $B$ trees, draw a **bootstrap sample**: $n$ examples sampled with replacement from the original $n$-example training set. Roughly 63% of the original examples appear at least once in each bootstrap sample; the rest are duplicated or omitted at random.

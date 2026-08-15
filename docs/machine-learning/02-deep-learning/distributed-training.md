@@ -14,6 +14,12 @@ One GPU stops being enough for three distinct reasons — training is too slow, 
 Pick the parallelism that matches your bottleneck — data parallel when the dataset is the problem, model parallel when the model does not fit.
 :::
 
+<Figure
+  src="/img/ml/deep/parallelism-strategies.png"
+  alt="Data parallelism replicating the model across GPUs, pipeline parallelism splitting it by layer, and tensor parallelism splitting individual matrices"
+  caption="Three ways to split training across devices. Data parallel is the simplest and the default; the other two exist for when the model itself no longer fits on one GPU, and both pay for it in communication."
+/>
+
 ## The three bottlenecks
 
 **Too slow**: the model fits fine on one GPU, but training would take too long — the fix is more GPUs doing the same work in parallel (data parallelism). **Model too large**: the model's parameters, gradients, and optimiser state don't fit in one GPU's memory at all — the fix is splitting the model itself across GPUs (model parallelism). **Batch too small**: memory constraints force an uncomfortably small per-GPU batch — multiple GPUs can combine into a larger effective batch even if each individually stays small.

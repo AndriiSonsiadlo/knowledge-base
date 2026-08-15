@@ -14,6 +14,12 @@ k-means needs to be told $k$ in advance, and assumes every cluster is roughly ro
 Hierarchical clustering defers the choice of k to a dendrogram cut; density methods define clusters by connectivity, so shape stops mattering.
 :::
 
+<Figure
+  src="/img/ml/classical/dbscan-vs-kmeans.png"
+  alt="k-means cutting straight through two crescent moons beside DBSCAN correctly following each crescent and marking outliers"
+  caption="DBSCAN follows connected regions of high density, so it recovers the crescents k-means cannot — and it labels genuine outliers as noise rather than forcing every point into a cluster."
+/>
+
 ## Agglomerative clustering
 
 Start with every point as its own cluster; repeatedly merge the two closest clusters; stop when one cluster remains (or a target count is reached). The full sequence of merges is a **dendrogram** — a tree recording the order and distance of every merge.
@@ -26,6 +32,12 @@ Start with every point as its own cluster; repeatedly merge the two closest clus
 - **Ward's method**: merges whichever pair minimises the resulting increase in within-cluster variance — tends to produce well-balanced clusters, similar in spirit to k-means' objective.
 
 ## Reading a dendrogram
+
+<Figure
+  src="/img/ml/classical/dendrogram.png"
+  alt="A dendrogram of eight points with a horizontal cut line producing two clusters"
+  caption="Hierarchical clustering produces the whole merge tree; you choose k afterwards by picking a cut height. The tall vertical gap just below the cut is the visual signal that two clusters is the natural answer here."
+/>
 
 The height of each merge represents the distance at which it occurred. Cutting the dendrogram horizontally at a chosen height yields a clustering: every vertical line crossed by the cut becomes a separate cluster. A large vertical gap between two merge heights suggests a natural place to cut.
 

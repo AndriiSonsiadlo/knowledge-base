@@ -14,6 +14,12 @@ Geometric intuitions built in two or three dimensions stop being true once you h
 As dimensions grow, volume concentrates in the corners, all distances converge, and "nearest neighbour" stops meaning anything.
 :::
 
+<Figure
+  src="/img/ml/foundations/curse-of-dimensionality.png"
+  alt="Left: the ratio of farthest to nearest distance collapsing as dimensions rise. Right: the fraction of a cube near its centre falling exponentially"
+  caption="As dimensions grow, all pairwise distances converge — so 'nearest neighbour' stops being meaningful — and the volume of a cube flees to its corners, leaving the centre essentially empty."
+/>
+
 ## Data sparsity grows exponentially with dimension
 
 To cover a $d$-dimensional space at the same density as a 1-D line covered with 10 points, you'd need $10^d$ points. At $d = 2$ that's 100 points; at $d = 20$ it's $10^{20}$ — no realistic dataset comes close. Any fixed-size dataset becomes exponentially sparser as dimension grows, and "nearby" points in high dimensions are, in practice, still very far apart.

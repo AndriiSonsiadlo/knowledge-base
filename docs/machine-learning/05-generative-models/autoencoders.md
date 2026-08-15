@@ -14,6 +14,12 @@ Train a network to copy its input to its output, and the task sounds trivially e
 Forcing reconstruction through a narrow layer makes the network learn what matters and discard what does not - it is non-linear compression.
 :::
 
+<Figure
+  src="/img/ml/generative/autoencoder.png"
+  alt="An encoder narrowing to a latent bottleneck and a decoder widening back to a reconstruction"
+  caption="An autoencoder is trained only to reproduce its input. The bottleneck is what forces it to learn a compressed representation rather than the identity function — and a plain autoencoder's latent space has no structure that makes sampling meaningful."
+/>
+
 ## The encoder-bottleneck-decoder shape
 
 An **encoder** compresses the input $x$ into a lower-dimensional latent representation $z$; a **decoder** reconstructs an approximation $\hat x$ from $z$ alone. The bottleneck's width (the dimensionality of $z$) is the key architectural choice — narrower forces more aggressive compression.

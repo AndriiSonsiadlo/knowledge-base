@@ -16,6 +16,12 @@ Only the support vectors matter — the rest of the training set could be delete
 
 ## The maximum-margin idea
 
+<Figure
+  src="/img/ml/classical/svm-margin.png"
+  alt="Two linearly separable classes with a maximum-margin separator, its two margin lines, and three circled support vectors"
+  caption="The separator is placed to maximise the distance to the nearest point of either class. Only the three circled points — the support vectors, which sit exactly on the margin — determine it; deleting any other point changes nothing."
+/>
+
 Among the infinitely many lines that separate two classes, SVM picks the one maximising the distance to the nearest point of either class — intuitively, the line with the most "breathing room," which tends to generalise better to new points near the boundary.
 
 ## Functional vs. geometric margin
