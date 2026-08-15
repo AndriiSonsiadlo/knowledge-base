@@ -8,7 +8,7 @@ tags: [gpu, cuda, libraries, decision-guide]
 
 # Choosing a Library Over a Kernel
 
-NVIDIA's math libraries are tuned per architecture by engineers with access to the SASS scheduler, the microarchitecture team, and hardware that hasn't shipped yet. A hand-written GEMM that reaches 60% of cuBLAS's throughput on the same shapes is, realistically, a good hand-written GEMM — the remaining 40% is instruction scheduling, tile-size search, and register allocation tuned per compute capability by people who do nothing else. [Programming Tensor Cores](../07-kernel-optimization/programming-tensor-cores.md) makes this same point about `wmma` kernels specifically; this page generalizes it to the whole library landscape and gives a rule for when to reach for one, and when not to.
+NVIDIA's math libraries are tuned per architecture by engineers with access to the SASS scheduler, the microarchitecture team, and hardware that hasn't shipped yet. As a rule of thumb rather than a measured benchmark — the actual gap varies by shape, precision, and architecture generation — a hand-written GEMM that reaches something like 60% of cuBLAS's throughput on the same shapes, on the same architecture, is realistically a good hand-written GEMM. The remaining gap is instruction scheduling, tile-size search, and register allocation tuned per compute capability by people who do nothing else. [Programming Tensor Cores](../07-kernel-optimization/programming-tensor-cores.md) makes this same point about `wmma` kernels specifically; this page generalizes it to the whole library landscape and gives a rule for when to reach for one, and when not to.
 
 ## The default answer is a library
 

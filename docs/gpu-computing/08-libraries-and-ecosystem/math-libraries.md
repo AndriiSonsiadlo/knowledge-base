@@ -34,6 +34,15 @@ The pitfall that catches almost everyone: a real-to-complex transform of length 
 cuRAND generates pseudo- and quasi-random numbers on the GPU through two distinct entry points. The **host API** creates a generator (`curandCreateGenerator(&gen, CURAND_RNG_PSEUDO_DEFAULT)`), seeds it (`curandSetPseudoRandomGeneratorSeed`), and then bulk-fills a device buffer in one call (`curandGenerateUniform`, `curandGenerateNormal`) — the natural fit when random numbers are a discrete step in a larger pipeline, like initializing weights before training starts. The **device API** instead gives each thread its own generator state (`curandState`), initialized in-kernel with `curand_init` and drawn from with `curand_uniform`/`curand_normal` calls inside the kernel body — the fit for something like Monte Carlo sampling, where every thread needs its own private stream of random draws as part of a larger kernel.
 
 ```cpp showLineNumbers
+// Run once, outside the hot loop, to hoist the expensive per-thread init.
+__global__ void initStates(curandState* states, unsigned long long seed, int n) {
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= n) return;
+    // Distinct sequence number per thread gives statistically independent streams.
+    curand_init(seed, /* sequence = */ i, /* offset = */ 0, &states[i]);
+}
+
+// Run every iteration, reusing the state initStates already set up.
 __global__ void mcKernel(curandState* states, float* out, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i >= n) return;
@@ -45,7 +54,7 @@ __global__ void mcKernel(curandState* states, float* out, int n) {
 ```
 
 :::warning[Seeding and per-thread state]
-`curand_init` with a distinct sequence number per thread is the correct way to get statistically independent streams, but the call itself is relatively expensive — it should be done once, outside the hot loop, into a persisted `curandState` array (as above), never called fresh inside a kernel that runs every iteration. The opposite mistake is seeding every thread with the *same* seed and sequence number: that produces identical or heavily correlated random streams across threads, which silently corrupts anything downstream that assumes independence, such as a Monte Carlo estimate's variance.
+`curand_init` with a distinct sequence number per thread, as `initStates` does above, is the correct way to get statistically independent streams, but the call itself is relatively expensive — it belongs in a one-time setup kernel like `initStates`, called once outside the hot loop into a persisted `curandState` array, never called fresh inside a kernel that runs every iteration. The opposite mistake is seeding every thread with the *same* seed and sequence number: that produces identical or heavily correlated random streams across threads, which silently corrupts anything downstream that assumes independence, such as a Monte Carlo estimate's variance.
 :::
 
 ## cuSPARSE
@@ -53,6 +62,13 @@ __global__ void mcKernel(curandState* states, float* out, int n) {
 cuSPARSE covers sparse matrix operations — sparse matrix-vector product (SpMV), sparse matrix-matrix product (SpMM/SpGEMM), and format conversions — through a **generic API** built around opaque, format-agnostic descriptors rather than one function signature per storage format. The most common format is **CSR** (compressed sparse row): three arrays — row offsets (one entry per row plus a terminal sentinel, giving each row's start index into the other two arrays), column indices, and values — that together store only the nonzero entries of a matrix, at the cost of no longer being able to index an element in constant time the way a dense array allows.
 
 ```cpp showLineNumbers
+cusparseHandle_t handle;
+cusparseCreate(&handle);
+cusparseSetStream(handle, stream);
+
+const float alpha = 1.0f, beta = 0.0f;
+// rows, cols, nnz and the d_rowOffsets/d_colIdx/d_values/d_x/d_y device buffers
+// are the CSR matrix and dense vectors described in the paragraph above.
 cusparseSpMatDescr_t matA;
 cusparseDnVecDescr_t vecX, vecY;
 cusparseCreateCsr(&matA, rows, cols, nnz, d_rowOffsets, d_colIdx, d_values,
@@ -62,6 +78,7 @@ cusparseCreateDnVec(&vecX, cols, d_x, CUDA_R_32F);
 cusparseCreateDnVec(&vecY, rows, d_y, CUDA_R_32F);
 
 size_t bufferSize;
+void* dBuffer;
 cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE,
                          &alpha, matA, vecX, &beta, vecY,
                          CUDA_R_32F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize);
@@ -75,7 +92,27 @@ Every generic-API operation follows the same two-call protocol: an `_bufferSize`
 
 ## cuSOLVER
 
-cuSOLVER factors and solves dense and sparse linear systems — LU, Cholesky, QR, eigenvalue and singular value decompositions — split across two handle types for two different problem classes. `cusolverDnHandle_t` covers dense factorizations (built on cuBLAS and cuSPARSE internally), and `cusolverSpHandle_t` covers sparse direct solvers (sparse Cholesky, sparse QR, sparse LU) built on cuSPARSE. Dense routines follow the same workspace-query pattern as cuSPARSE — call `cusolverDnSgetrf_bufferSize` to learn how much scratch space an LU factorization of a given size needs, allocate it, then call `cusolverDnSgetrf` itself — and every factorization call takes a `devInfo` output parameter: a single device-resident integer, one per call, that the caller must copy back to the host and check explicitly, since cuSOLVER's factorization calls themselves return only whether the *call* launched correctly, not whether the *factorization* succeeded (a zero pivot in LU, say, shows up in `devInfo`, not in the call's own return status).
+cuSOLVER factors and solves dense and sparse linear systems — LU, Cholesky, QR, eigenvalue and singular value decompositions — split across two handle types for two different problem classes. `cusolverDnHandle_t` covers dense factorizations (built on cuBLAS and cuSPARSE internally), and `cusolverSpHandle_t` covers sparse direct solvers (sparse Cholesky, sparse QR, sparse LU) built on cuSPARSE. Dense routines follow the same workspace-query pattern as cuSPARSE — call `cusolverDnSgetrf_bufferSize` to learn how much scratch space an LU factorization of a given size needs, allocate it, then call `cusolverDnSgetrf` itself:
+
+```cpp showLineNumbers
+cusolverDnHandle_t handle;
+cusolverDnCreate(&handle);
+cusolverDnSetStream(handle, stream);
+
+int lwork = 0;
+cusolverDnSgetrf_bufferSize(handle, m, n, d_A, lda, &lwork);
+cudaMalloc(&d_work, lwork * sizeof(float));
+
+int* devInfo;
+cudaMalloc(&devInfo, sizeof(int));
+cusolverDnSgetrf(handle, m, n, d_A, lda, d_work, d_pivot, devInfo);
+
+int hInfo;
+cudaMemcpy(&hInfo, devInfo, sizeof(int), cudaMemcpyDeviceToHost);
+// hInfo == 0: success; hInfo > 0: U(hInfo, hInfo) is exactly zero (singular factor)
+```
+
+Every factorization call takes that `devInfo` output parameter: a single device-resident integer, one per call, that the caller must copy back to the host and check explicitly, since cuSOLVER's factorization calls themselves return only whether the *call* launched correctly, not whether the *factorization* succeeded — a zero pivot in LU, say, shows up in `devInfo` as above, not in the call's own return status.
 
 ## Shared conventions
 

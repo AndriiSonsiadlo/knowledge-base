@@ -23,7 +23,7 @@ CUBLAS_CHECK(cublasSetStream(h, stream));
 :::note[`CUBLAS_CHECK` is a cuBLAS-specific analogue of `CUDA_CHECK`]
 [`CUDA_CHECK`](../06-cuda-runtime-and-apis/error-handling.md) checks a `cudaError_t` against `cudaSuccess`. cuBLAS calls return a different enum, `cublasStatus_t`, so they need their own checking macro rather than reusing `CUDA_CHECK` — the two are not interchangeable. `CUBLAS_CHECK` is local to this page and defined the same way, just against the cuBLAS status type:
 
-```cpp
+```cpp showLineNumbers
 #define CUBLAS_CHECK(call)                                                  \
     do {                                                                    \
         cublasStatus_t st_ = (call);                                        \
