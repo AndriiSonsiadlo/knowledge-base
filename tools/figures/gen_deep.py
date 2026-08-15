@@ -48,7 +48,9 @@ def xor_problem():
 
 # ---------------------------------------------------------------- activations
 def activations():
-    f, axes = grid(2, 4, 13.2, 6.2, sharex=True)
+    # No sharex: the bottom-right panel is indexed by layer depth (1-25), and
+    # sharing that range would squash the six activation curves (x in [-4, 4]).
+    f, axes = grid(2, 4, 13.2, 6.2)
     x = np.linspace(-4, 4, 500)
 
     def relu(v): return np.maximum(0, v)
@@ -90,8 +92,9 @@ def activations():
     ax.legend(fontsize=9.5)
 
     axes[0, 0].legend(fontsize=9.5, loc="upper left")
-    for ax in axes[1, :2]:
+    for ax in list(axes[0]) + list(axes[1][:2]):
         ax.set_xlabel("x")
+    axes[1, 2].set_xlabel("x")
     f.tight_layout()
     save(f, "deep/activation-functions.png")
 
