@@ -24,12 +24,12 @@ cuda-gdb extends `gdb` with CUDA-specific commands for switching focus between t
 
 ```text
 break kernel.cu:42
-cuda thread (0,0,0) block (1,0,0)
+cuda block (1,0,0) thread (0,0,0)
 info cuda threads
 p var
 ```
 
-`break kernel.cu:42` sets a breakpoint on a source line inside device code, same as a host breakpoint. `cuda thread (0,0,0) block (1,0,0)` switches the debugger's focus to a specific thread within a specific block, so subsequent commands inspect that thread's state. `info cuda threads` lists resident threads and which ones are currently stopped at the breakpoint, grouped by their program counter. `p var` prints a variable's value in the currently focused thread, exactly like host `gdb`.
+`break kernel.cu:42` sets a breakpoint on a source line inside device code, same as a host breakpoint. `cuda block (1,0,0) thread (0,0,0)` switches the debugger's focus to a specific thread within a specific block, so subsequent commands inspect that thread's state. `info cuda threads` lists resident threads and which ones are currently stopped at the breakpoint, grouped by their program counter. `p var` prints a variable's value in the currently focused thread, exactly like host `gdb`.
 
 ## Compute Sanitizer
 
