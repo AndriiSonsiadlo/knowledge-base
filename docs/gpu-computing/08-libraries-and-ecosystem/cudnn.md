@@ -30,7 +30,11 @@ Setting that flag tells PyTorch to call the empirical, `cudnnFindConvolutionForw
 
 ## The graph API
 
-cuDNN 8 introduced the graph API as the library's current direction: instead of calling one fixed function per operation, the caller assembles a small operation graph — a convolution feeding into a bias add feeding into an activation, say — and cuDNN selects a **fused engine** that executes the whole graph as one kernel where possible. This is how `conv + bias + activation` becomes a single kernel launch instead of three separate ones, each with its own read and write of the intermediate tensor; it's the same fusion motivation that makes `cublasLt` epilogues worth having in [cuBLAS](./cublas.md), applied to the much larger operation set cuDNN covers.
+cuDNN 8 introduced the graph API as the library's current direction: instead of calling one fixed function per operation, the caller assembles a small operation graph out of nodes and describes how they connect, then hands the whole graph to cuDNN rather than invoking each operation as a separate call.
+
+## Fused operations
+
+Given a graph, cuDNN selects a **fused engine** that executes the whole thing as one kernel where possible, rather than one kernel per node. A convolution feeding into a bias add feeding into an activation is the canonical example: `conv + bias + activation` becomes a single kernel launch instead of three separate ones, each of which would otherwise read and write the intermediate tensor to global memory in between. This is the same fusion motivation that makes `cublasLt` epilogues worth having in [cuBLAS](./cublas.md) — bias and activation folded into the GEMM's output stage instead of a separate pass — applied here to the much larger operation set cuDNN covers, including normalization and attention subgraphs the graph API can fuse the same way.
 
 ## Where it sits under a framework
 
