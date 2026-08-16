@@ -36,9 +36,17 @@ flowchart TB
   Wrow["A operands"] -->|"stream right, one row per cycle"| A11
   Wcol["B operands"] -->|"stream down, one column per cycle"| A11
   A41 -->|"partial sums out"| Out["C results"]
+  A42 -->|"partial sums out"| Out
+  A43 -->|"partial sums out"| Out
+  A44 -->|"partial sums out"| Out
 ```
 
 Each cell holds one multiply-accumulate unit and a small amount of local storage. On every cycle it multiplies the operand arriving from the left by the operand arriving from above, adds that product to the partial sum arriving from above (or held locally, depending on the dataflow — see below), and forwards operands and partial sum to its neighbors. After enough cycles for the pipeline to fill, the array is producing one row of finished output per cycle, with every cell doing useful work on every cycle — that steady-state utilization is what a systolic GEMM is optimizing for, and it is why NPU compilers care so much about tiling a matrix multiply to actually fill the array's fixed dimensions.
+
+![A grid of multiply-accumulate cells mid-computation, each showing its two incoming operands and running product, with the OUTPUT column on the right populated as finished results emerge from the bottom edge of the array](/img/gpu/12-npu-and-inference-accelerators/tpu-systolic-array.png)
+*Source: [Google Cloud TPU system architecture](https://docs.cloud.google.com/tpu/docs/system-architecture-tpu-vm) (frame extracted from an animated figure)*
+
+That single frame is a snapshot of the same process the diagram above models schematically: values already resident in cells being multiplied and accumulated while results appear at the array's edge, which is what "steady-state utilization" looks like in an actual implementation rather than an idealized flowchart.
 
 ## Weight-stationary
 
