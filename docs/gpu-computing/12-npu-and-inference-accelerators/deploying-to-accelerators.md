@@ -58,7 +58,6 @@ The steps above, in the order they should happen, verifiable one at a time:
 
 ## See also
 
-- [What Is an NPU?](./what-is-an-npu.md) — the operator-coverage argument this page's checklist builds on.
 - [TensorRT](./tensorrt.md) — the deep option for the NVIDIA-GPU row of the target-selection table.
 - [ONNX and ONNX Runtime](./onnx-and-runtimes.md) — export format and execution-provider fallback in depth.
 - [Quantization for Accelerators](./quantization-for-accelerators.md) — the quantization vocabulary and technique this page's validation step assumes.
