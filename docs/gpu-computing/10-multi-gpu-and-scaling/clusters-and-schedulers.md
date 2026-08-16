@@ -35,7 +35,7 @@ srun torchrun --nproc_per_node=4 train.py
 
 Kubernetes exposes a GPU as the extended resource `nvidia.com/gpu`, requested in a pod's resource limits:
 
-```json
+```json showLineNumbers
 {
   "apiVersion": "v1",
   "kind": "Pod",
