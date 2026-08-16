@@ -53,6 +53,8 @@ GPU3    SYS     SYS     NV18     X      32-63          1
 
 - **`NV18`** — connected via NVLink presenting the full 18-link aggregate bandwidth for that generation (as if the pair were directly wired, typically because an NVSwitch routes all of both GPUs' links between them). GPU0↔GPU1 and GPU2↔GPU3 above have this — the fast path.
 - **`PIX`** — connected through at most a single PCIe bridge/switch, no NVLink involved. Slower than NVLink but still a single local hop; GPU0↔GPU2 above.
+- **`PXB`** — connected through multiple PCIe bridges, but without crossing a host bridge. One step down from `PIX`; it does not appear in the sample above, but it is common on servers with deeper PCIe switch trees.
+- **`NODE`** — connected within a single NUMA node, but crossing a host bridge rather than staying on a PCIe switch. Between `PXB` and `SYS`.
 - **`SYS`** — the connection has to cross the host's CPU-to-CPU interconnect (e.g. between NUMA sockets), traversing PCIe on both sides plus the socket link in between. This is the slowest path shown here, and it's what appears whenever two GPUs have neither an NVLink connection nor a shared local PCIe root complex — GPU0↔GPU3, GPU1↔GPU2, and GPU1↔GPU3 above.
 
 A design that assumes uniform GPU-to-GPU bandwidth on a system whose topology looks like this will badly misjudge the cost of communication between, say, GPU1 and GPU3.
