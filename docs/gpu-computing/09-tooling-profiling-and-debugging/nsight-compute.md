@@ -35,13 +35,19 @@ GPU Speed Of Light Throughput
     ...
 ```
 
-The console excerpt above is illustrative, not a captured run — but the shape is the point: a large gap between the two percentages, with memory far ahead of compute, is what a memory-bound kernel's Speed of Light section looks like before opening any other section.
+The console excerpt above is illustrative, not a captured run — but the shape is the point: a large gap between the two percentages, with memory far ahead of compute, is what a memory-bound kernel's Speed of Light section looks like before opening any other section. The screenshot under [The roofline chart](#the-roofline-chart) below shows the real section in the GUI, where the same percentages appear as `SOL SM`, `SOL Memory`, and the per-level `SOL L1/TEX`, `SOL L2` and `SOL DRAM` rows.
 
 ## Memory Workload Analysis
 
-This section is a diagram of the memory path — registers, shared memory, L1, L2, DRAM — with the measured traffic Nsight Compute observed moving through each level for this kernel. The single most useful number in it is the ratio of requests to sectors per request: a warp's memory instruction issues one request, and if that request has to touch more DRAM/L2 sectors than the minimum the access pattern requires, the excess sectors are wasted bandwidth. That ratio is coalescing efficiency, and a poor one here is the concrete evidence behind a Speed of Light result that looks memory-bound without yet explaining why.
+![The Memory Workload Analysis chart: kernel, global/local/texture/surface/shared paths, L1/TEX cache, L2 cache, and device memory, with measured traffic and hit rates on every edge](/img/gpu/09-tooling-profiling-and-debugging/memory-chart-a100.png)
+*Source: [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/)*
+
+This section is a diagram of the memory path — registers, shared memory, L1, L2, DRAM — with the measured traffic Nsight Compute observed moving through each level for this kernel. In the chart above, the annotated hit rates make the story immediate: an L1 hit rate near zero alongside an L2 hit rate near 98% says the working set is missing L1 entirely but is still being caught before DRAM. The single most useful number in it is the ratio of requests to sectors per request: a warp's memory instruction issues one request, and if that request has to touch more DRAM/L2 sectors than the minimum the access pattern requires, the excess sectors are wasted bandwidth. That ratio is coalescing efficiency, and a poor one here is the concrete evidence behind a Speed of Light result that looks memory-bound without yet explaining why.
 
 ## The roofline chart
+
+![The Speed of Light section with its roofline chart: SOL percentages for SM, memory, L1/TEX, L2 and DRAM above a log-log plot showing the memory-bandwidth boundary, the peak-performance boundary, the ridge point where they meet, and the kernel's achieved value far below both](/img/gpu/09-tooling-profiling-and-debugging/roofline-overview.png)
+*Source: [NVIDIA Nsight Compute Profiling Guide](https://docs.nvidia.com/nsight-compute/ProfilingGuide/)*
 
 The roofline chart plots this kernel's achieved performance against the hardware's compute and bandwidth ceilings on a single log-log plot, arithmetic intensity on the x-axis and throughput on the y-axis. Where the kernel's point lands relative to the two roofline segments — the sloped bandwidth-bound line and the flat compute-bound line — shows at a glance which ceiling is actually limiting it and how much headroom is left before that ceiling. [Roofline in Practice](./roofline-in-practice.md) works through deriving and reading this chart by hand from raw counters; this page only covers where to find it in the report.
 
