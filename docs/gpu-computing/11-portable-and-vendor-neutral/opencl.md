@@ -85,7 +85,7 @@ The verbosity above is a symptom of choices that, in retrospect, cost OpenCL the
 
 - **Separate-source compilation.** Kernels as plain strings, compiled at runtime by `clBuildProgram`, means no type checking between host argument-setting calls (`clSetKernelArg`, indexed by number) and the kernel signature, and no IDE support — no autocomplete, no jump-to-definition, no compile-time error at the call site when an argument type is wrong.
 - **No single-source C++.** OpenCL C is a C dialect, not C++; there was no way to share types, templates, or host/device code the way CUDA's single-source `.cu` model always could.
-- **Vendor implementation quality diverged.** Different vendors' OpenCL drivers supported different subsets of each spec version at different quality levels, so "OpenCL code" often meant "OpenCL code tested against one vendor's driver," undermining the portability the standard was supposed to guarantee.
+- **Vendor implementation quality diverged.** Different vendors' OpenCL drivers supported different subsets of each spec version at different quality levels, so "OpenCL code" often meant "OpenCL code tested against one vendor's driver," undermining the portability the standard was supposed to guarantee — historically; modern drivers are far more uniform, which is part of why [The Portability Problem](./the-portability-problem.md) treats source and functional portability as largely solved today.
 - **CUDA's library ecosystem simply outgrew it.** cuBLAS, cuDNN, and the rest of NVIDIA's library stack gave CUDA programmers production-quality primitives years before OpenCL's ecosystem caught up, and by the time SYCL and HIP offered single-source portable alternatives, CUDA's library lead was hard to close.
 
 ## Where it still matters

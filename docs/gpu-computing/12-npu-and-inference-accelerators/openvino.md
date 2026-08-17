@@ -21,10 +21,10 @@ OpenVINO's native format is the **IR** (Intermediate Representation): a pair of 
 It is worth being explicit that converting to IR is an optimization, not a requirement: OpenVINO's runtime reads ONNX files directly, and a model already in `.onnx` form can be handed straight to the OpenVINO runtime — including through [ONNX Runtime's OpenVINO execution provider](./onnx-and-runtimes.md), which wraps this same toolkit — without a conversion step at all. Converting to IR ahead of time buys IR-specific graph optimizations and skips ONNX-to-IR translation at load time, which matters for a model loaded repeatedly, but it is a performance decision, not a prerequisite for running the model on OpenVINO.
 
 ```bash
-ovc model.onnx --output_model model
+ovc model.onnx --output_model model.xml
 ```
 
-That single line reads `model.onnx` and writes `model.xml` and `model.bin` next to it, using default conversion settings. `openvino.convert_model` covers the same ground from Python, and is the only supported path for frameworks `ovc` cannot ingest directly, PyTorch chief among them — the function traces or scripts the model itself rather than parsing an already-exported file, so there is no separate export step to keep in sync with the conversion step.
+That single line reads `model.onnx` and writes `model.xml` and `model.bin` next to it, using default conversion settings — `--output_model` needs the `.xml` extension to be unambiguous, since a value without one is interpreted as a directory name and produces `model/model.xml` instead. `openvino.convert_model` covers the same ground from Python, and is the only supported path for frameworks `ovc` cannot ingest directly, PyTorch chief among them — the function traces or scripts the model itself rather than parsing an already-exported file, so there is no separate export step to keep in sync with the conversion step.
 
 ## Device plugins
 

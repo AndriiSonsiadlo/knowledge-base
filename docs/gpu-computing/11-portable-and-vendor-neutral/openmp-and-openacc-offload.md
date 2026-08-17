@@ -52,7 +52,7 @@ for (int i = 0; i < n; ++i)
     y[i] = a * x[i] + y[i];
 ```
 
-`copyin`/`copyout` are OpenACC's direct equivalents of `map(to:)`/`map(from:)`, and its parallelism hierarchy is named `gang`/`worker`/`vector` — roughly the same three levels OpenMP splits into `teams`/`distribute`/`simd`, under different names. OpenACC has a distinctly NVIDIA-centric history (it originated from work at NVIDIA/PGI, now NVIDIA's HPC SDK), and it has a particularly strong position in Fortran HPC, where a large fraction of existing scientific codebases still live and where OpenACC compiler support has historically been ahead of OpenMP's.
+`copyin`/`copyout` are OpenACC's direct equivalents of `map(to:)`/`map(from:)`, and its parallelism hierarchy is named `gang`/`worker`/`vector` — roughly the same three levels OpenMP splits into `teams`/`distribute`/`simd`, under different names. OpenACC was founded in 2011 by Cray, CAPS, NVIDIA, and PGI; PGI was later acquired by NVIDIA and its compiler became NVIDIA's HPC SDK, which is where OpenACC's NVIDIA-centric reputation today mostly comes from. It has a particularly strong position in Fortran HPC, where a large fraction of existing scientific codebases still live and where OpenACC compiler support has historically been ahead of OpenMP's.
 
 ## The incremental-porting appeal
 

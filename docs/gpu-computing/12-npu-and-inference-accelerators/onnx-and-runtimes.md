@@ -34,7 +34,7 @@ ORT's hardware abstraction is the **execution provider (EP)**: a pluggable backe
 | DirectML | Any DirectX 12 GPU on Windows | Mature on Windows; the vendor-agnostic way to reach NVIDIA/AMD/Intel GPUs from one EP. |
 | CoreML | Apple silicon (GPU/Neural Engine) | Mature on macOS/iOS; the standard path to Apple's Neural Engine from ORT. |
 | QNN | Qualcomm Hexagon NPUs (Snapdragon) | Actively developed; operator coverage narrower than CPU/CUDA, growing quickly. |
-| OpenVINO | Intel CPUs, integrated GPUs, and VPUs | Mature on Intel hardware; see [OpenVINO](./openvino.md) for the toolkit ORT is wrapping here. |
+| OpenVINO | Intel CPUs, integrated and discrete GPUs, and NPUs | Mature on Intel hardware; see [OpenVINO](./openvino.md) for the toolkit ORT is wrapping here. |
 | ROCm | AMD GPUs | Functional, less mature than CUDA; coverage and tuning lag the NVIDIA path. |
 
 EPs are registered with a session in priority order, and ORT assigns each graph node to the highest-priority EP that claims support for it.

@@ -31,7 +31,7 @@ Answer these before comparing options, because each one eliminates a chunk of th
 | Vulkan/DirectX compute | Broadest GPU driver support | GLSL/HLSL plus C++/C# host code | High — different object model entirely | High when tuned, but ceremony discourages tuning | Deep for graphics; sparse for pure compute |
 | Metal | Apple only | MSL (C++14 dialect) plus Swift/Objective-C/C++ host | High — different API and memory model | High on Apple silicon specifically, via unified memory | Mature for Apple's own stack (MPS, Core ML); nowhere else |
 | WebGPU | Anywhere a browser or `wgpu`/Dawn runs | WGSL | High — smallest, most restricted shader language here | Lowest ceiling of this table, by design (sandbox limits) | Young but growing; the only browser-native option |
-| Triton | NVIDIA, growing AMD support | Python, compiled to a kernel | Low for the kernels it targets (matmul-like, tile-based) | Near-hand-tuned for the patterns it's designed around | Strong and growing fast inside PyTorch's compiler stack |
+| [Triton](../08-libraries-and-ecosystem/triton.md) | NVIDIA, growing AMD support | Python, compiled to a kernel | Low for the kernels it targets (matmul-like, tile-based) | Near-hand-tuned for the patterns it's designed around | Strong and growing fast inside PyTorch's compiler stack |
 
 Reading down the "effort to port from CUDA" column repeats the same lesson [The Portability Problem](./the-portability-problem.md) makes at length: API-level effort is low almost everywhere, and the real cost is always in the rows that table doesn't have columns for — warp intrinsics, tuning, and library maturity.
 

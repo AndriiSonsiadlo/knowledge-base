@@ -26,7 +26,7 @@ trtexec --onnx=model.onnx --saveEngine=model.plan \
         --maxShapes=input:32x3x224x224
 ```
 
-`--onnx` gives the source graph and `--saveEngine` names the output `.plan` file. `--fp16` requests half-precision kernels wherever TensorRT judges them safe. `--memPoolSize=workspace:4096` bounds the scratch memory (in MB by default) the builder's kernel search is allowed to use — a tighter budget can rule out an otherwise-faster kernel that needs more workspace than it's given, so this is a real accuracy-of-search knob, not just a memory cap. `--minShapes`/`--optShapes`/`--maxShapes`, each in `name:dimensions` form, are covered next.
+`--onnx` gives the source graph and `--saveEngine` names the output `.plan` file. `--fp16` requests half-precision kernels wherever TensorRT judges them safe. `--memPoolSize=workspace:4096` bounds the scratch memory (in MiB by default) the builder's kernel search is allowed to use — a tighter budget can rule out an otherwise-faster kernel that needs more workspace than it's given, so this is a real accuracy-of-search knob, not just a memory cap. The flag only recognizes the single-letter suffixes `B`/`K`/`M`/`G`; writing `MiB` instead of `M` doesn't error, it silently parses as an unrecognized suffix and collapses the value to a tiny fraction of what was intended, so a workspace that looks generous on the command line can actually starve the kernel search. `--minShapes`/`--optShapes`/`--maxShapes`, each in `name:dimensions` form, are covered next.
 
 ## Precision modes
 

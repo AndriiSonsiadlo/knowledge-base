@@ -24,7 +24,7 @@ Qualcomm's Hexagon NPU is reached through the Qualcomm AI Engine Direct SDK, com
 
 ## Arm Ethos-U
 
-Ethos-U is a different class of device entirely — a microNPU meant for Cortex-M microcontrollers, not phone or laptop SoCs. It is INT8-only in practice (8-bit or 16-bit signed operands are what the hardware accelerates; anything else doesn't run on it), and the entry point is TensorFlow Lite for Microcontrollers (TFLite Micro) combined with the Vela compiler. Vela takes an already-INT8-quantized `.tflite` model and rewrites the operators Ethos-U supports into a single custom Ethos-U operator, leaving unsupported operators untouched to run on the Cortex-M core itself via optimized CMSIS-NN kernels. The operator set Vela can map is small by design, and the whole model must be compiled ahead of time on a workstation — there is no on-device compilation or dynamic graph loading, which is the tradeoff for running inference in kilobytes of SRAM instead of gigabytes of DRAM.
+Ethos-U is a different class of device entirely — a microNPU meant for Cortex-M microcontrollers, not phone or laptop SoCs. It accepts only 8-bit (signed or unsigned) or 16-bit signed integer operands — anything else doesn't run on it — and the entry point is TensorFlow Lite for Microcontrollers (TFLite Micro) combined with the Vela compiler. Vela takes an already-INT8-quantized `.tflite` model and rewrites the operators Ethos-U supports into a single custom Ethos-U operator, leaving unsupported operators untouched to run on the Cortex-M core itself via optimized CMSIS-NN kernels. The operator set Vela can map is small by design, and the whole model must be compiled ahead of time on a workstation — there is no on-device compilation or dynamic graph loading, which is the tradeoff for running inference in kilobytes of SRAM instead of gigabytes of DRAM.
 
 ## Laptop NPUs
 
@@ -34,7 +34,7 @@ Intel AI Boost and AMD XDNA are the NPUs built into recent Intel Core Ultra and 
 |---|---|---|---|
 | Apple Neural Engine | Core ML only (no direct API) | INT8, FP16 | On-device vision/ML on iOS, iPadOS, macOS |
 | Qualcomm Hexagon | QNN SDK / AI Engine Direct; also ONNX Runtime QNN EP, LiteRT | INT8 primary, INT16/FP16 on newer parts | Android and Windows-on-Snapdragon inference |
-| Arm Ethos-U | TFLite Micro + Vela compiler | INT8 (8/16-bit signed) | Always-on microcontroller-class inference |
+| Arm Ethos-U | TFLite Micro + Vela compiler | INT8 / INT16 (signed) | Always-on microcontroller-class inference |
 | Intel AI Boost / AMD XDNA | OpenVINO, DirectML, ONNX Runtime | INT8, FP16 | Sustained low-power inference on AI PCs |
 
 ## The common constraints
