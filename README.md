@@ -111,6 +111,28 @@ To add new documentation:
 
 The search functionality will automatically index your new content.
 
+### Illustrations
+
+I prefer real figures over drawn diagrams. If a photo, screenshot, or published vendor figure shows
+the thing better than a box-and-arrow diagram would, that is what should go on the page — a real
+profiler screenshot or an official architecture figure carries detail a hand-drawn diagram cannot.
+
+Mermaid diagrams are still the right choice when the content is genuinely structural — object models,
+pipelines, decision flows — or when no properly-sourced figure exists. A good diagram beats a bad or
+irrelevant image, and the two often work best together: a schematic that labels the mechanism sitting
+next to a figure that shows the real thing.
+
+For any third-party image:
+
+- Add a row to `static/img/gpu/SOURCES.md` with the source URL, publisher, retrieval date, and notes,
+  and put an italic source caption on the page right under the image.
+- Take it from the vendor's own documentation. Don't grab something off a blog or an image host just
+  to have a picture on the page.
+- Be honest about what it is — if it's a frame pulled out of an animation, or a crop, say so.
+- Keep an eye on file size. This deploys to GitHub Pages, so a multi-megabyte GIF isn't worth it;
+  pull a representative frame or downscale instead.
+- Reference images as `/img/<path>/<name>.png` — no `/knowledge-base` prefix, Docusaurus adds it.
+
 ## Technology Stack
 
 This site is built with:
