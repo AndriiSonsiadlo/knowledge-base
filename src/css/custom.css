@@ -1489,13 +1489,23 @@ button {
 }
 
 /* WaveDrom diagrams (src/components/WaveDrom) sit on the same light plate as
-   <Figure />. Wide waveforms scroll inside the figure rather than the page. */
+   <Figure />. WaveDrom emits SVGs with explicit pixel widths (a 32-bit register
+   strip is 800px, wider than the content column), so wide diagrams scroll
+   inside the figure rather than being scaled down into illegibility, and the
+   page body never scrolls horizontally. */
 .kb-wavedrom .kb-figure__plate {
   overflow-x: auto;
+  /* The plate centers with justify-content, but centering an overflowing
+     scroll container makes its leading edge unreachable; the auto margin
+     below centers narrow diagrams without that failure mode. */
+  justify-content: flex-start;
 }
 
 .kb-wavedrom svg {
   display: block;
-  max-width: 100%;
-  height: auto;
+  /* The plate is a flex container: without this the SVG is shrunk to fit
+     instead of overflowing, which is the bug this block exists to avoid. */
+  flex-shrink: 0;
+  /* Centers when the diagram fits; resolves to 0 when it overflows. */
+  margin-inline: auto;
 }
