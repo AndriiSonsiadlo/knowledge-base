@@ -24,7 +24,7 @@
 		"write-heading-ids": "docusaurus write-heading-ids",
 		"typecheck": "tsc",
 		"gen-icons": "node scripts/gen-icons.mjs",
-		"test:plugins": "node --test scripts/remark-wavedrom.test.mjs",
+		"test:plugins": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/remark-wavedrom.test.mjs",
 		"lint": "biome check",
 		"format": "biome format --write"
 	},
