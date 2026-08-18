@@ -1,5 +1,8 @@
 import MDXComponents from "@theme-original/MDXComponents";
 import Figure from "@site/src/components/Figure";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import WaveDrom from "@site/src/components/WaveDrom";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 
 // Offline <Icon /> for MDX. Renders a bundled Iconify icon body as an inline SVG,
@@ -31,4 +34,7 @@ export default {
 	...MDXComponents,
 	Icon,
 	Figure,
+	WaveDrom,
+	Tabs,
+	TabItem,
 };

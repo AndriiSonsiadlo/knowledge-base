@@ -1487,3 +1487,15 @@ button {
   display: block;        /* allows margin auto centering */
   margin: 2rem auto;     /* top/bottom + auto left/right */
 }
+
+/* WaveDrom diagrams (src/components/WaveDrom) sit on the same light plate as
+   <Figure />. Wide waveforms scroll inside the figure rather than the page. */
+.kb-wavedrom .kb-figure__plate {
+  overflow-x: auto;
+}
+
+.kb-wavedrom svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
