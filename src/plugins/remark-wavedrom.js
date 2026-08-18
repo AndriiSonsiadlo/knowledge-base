@@ -11,6 +11,11 @@ import wavedrom from "wavedrom";
 // as a JSX expression and fail the build on.
 //
 // Fence meta: ```wavedrom title="SPI mode 0" alt="SPI mode 0 timing"
+//
+// This plugin is ESM while the sibling plugins in this directory are CommonJS:
+// the unified/remark ecosystem is ESM-only. The test script disables Node's
+// MODULE_TYPELESS_PACKAGE_JSON advisory rather than setting "type": "module",
+// which would break those CommonJS siblings.
 
 const META_PAIR = /(\w+)="([^"]*)"/g;
 
