@@ -1,4 +1,5 @@
 import { themes as prismThemes } from "prism-react-renderer";
+import remarkWavedrom from "./src/plugins/remark-wavedrom.js";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -76,7 +77,7 @@ const config = {
           showLastUpdateTime: true,
           editUrl:
             "https://github.com/AndriiSonsiadlo/knowledge-base/tree/master/",
-          remarkPlugins: [require("remark-math")],
+          remarkPlugins: [require("remark-math"), remarkWavedrom],
           rehypePlugins: [require("rehype-katex")],
         },
         blog: false,
@@ -149,6 +150,15 @@ const config = {
               "CUDA, GPU architecture, kernel optimization, and NPU/inference accelerators.",
             icon: "🚀",
           },
+          {
+            type: "docSidebar",
+            sidebarId: "embeddedSidebar",
+            position: "left",
+            label: "Embedded Systems",
+            description:
+              "Bare-metal firmware, Cortex-M architecture, RTOS, embedded Linux, safety and security.",
+            icon: "🔌",
+          },
           // {
           //   to: "/blog",
           //   label: "Blog",
@@ -219,14 +229,18 @@ const config = {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
         additionalLanguages: [
+          "armasm",
           "bash",
           "cmake",
           "csharp",
+          "diff",
           "glsl",
           "hlsl",
           "ini",
           "json",
+          "makefile",
           "python",
+          "toml",
           "wgsl",
         ],
         additionalPlugins: ["line-numbers", "show-language"],
@@ -265,6 +279,10 @@ const config = {
         // Use false to debug, but it incurs huge perf costs
         disableInDev: true,
       }),
+    ],
+    [
+      "docusaurus-plugin-image-zoom",
+      { selector: ".markdown img, .kb-figure__plate img" },
     ],
     [
       "./src/plugins/blog-plugin",
