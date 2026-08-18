@@ -406,17 +406,36 @@ Append to `src/css/custom.css`:
 
 ```css
 /* WaveDrom diagrams (src/components/WaveDrom) sit on the same light plate as
-   <Figure />. Wide waveforms scroll inside the figure rather than the page. */
+   <Figure />. WaveDrom emits SVGs with explicit pixel widths (a 32-bit register
+   strip is 800px, wider than the content column), so wide diagrams scroll
+   inside the figure rather than being scaled down into illegibility, and the
+   page body never scrolls horizontally. */
 .kb-wavedrom .kb-figure__plate {
   overflow-x: auto;
+  /* The plate centers with justify-content, but centering an overflowing
+     scroll container makes its leading edge unreachable; the auto margin
+     below centers narrow diagrams without that failure mode. */
+  justify-content: flex-start;
 }
 
 .kb-wavedrom svg {
   display: block;
-  max-width: 100%;
-  height: auto;
+  /* The plate is a flex container: without this the SVG is shrunk to fit
+     instead of overflowing, which is the bug this block exists to avoid. */
+  flex-shrink: 0;
+  /* Centers when the diagram fits; resolves to 0 when it overflows. */
+  margin-inline: auto;
 }
 ```
+
+:::warning[Do not reintroduce `max-width: 100%` here]
+An earlier revision of this plan specified `max-width: 100%; height: auto;` on `.kb-wavedrom svg`.
+That is wrong and was caught in Task 3's review. WaveDrom SVGs carry explicit pixel `width`/`height`
+plus a `viewBox`, so `max-width: 100%` scales them *down* to fit and the plate's `overflow-x: auto`
+never triggers — wide diagrams squash instead of scrolling. `.kb-figure__plate` is also a flex
+container (`@apply flex w-full justify-center …`), so `flex-shrink: 0` is required as well or the
+flex parent squashes the SVG by a second, independent mechanism.
+:::
 
 - [ ] **Step 4: Verify the build still passes**
 
