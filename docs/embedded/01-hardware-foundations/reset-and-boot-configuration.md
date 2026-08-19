@@ -51,7 +51,7 @@ flowchart LR
 
 Two details in that diagram do real work on the bench.
 
-**The pulse generator "guarantees a minimum reset pulse duration of 20 µs for each internal reset source"** (RM0383 Rev 4, §6.1.2). This is why a debug probe can see a reset that lasted only as long as a watchdog rollover: the hardware stretches it. It is also why `NRST` is an output as well as an input, and why tying it to something that drives hard high is a mistake.
+**The pulse generator "guarantees a minimum reset pulse duration of 20 µs for each internal reset source"** — RM0383 Rev 4 puts that sentence in §6.1.2 "Power reset", in the paragraph immediately preceding Figure 11, but note that it is scoped to *every* internal source rather than to power resets alone, which is why it applies to the watchdog and software rows of the diagram too. This is why a debug probe can see a reset that lasted only as long as a watchdog rollover: the hardware stretches it. It is also why `NRST` is an output as well as an input, and why tying it to something that drives hard high is a mistake.
 
 **The `NRST` input is filtered.** DS10314 Rev 8, §6.3.17, Table 56: a pulse of up to `100 ns` is guaranteed to be filtered out, and a pulse of `300 ns` or more (at V<sub>DD</sub> > 2.7 V) is guaranteed to be seen. Between those, behaviour is unspecified. The same table gives the pin's permanent weak pull-up as `30/40/50 kΩ` (min/typ/max) and the generated reset pulse duration as `20 µs` minimum. The datasheet's Figure 32, "Recommended NRST pin protection", shows a `0.1 µF` capacitor to ground as the standard defence against parasitic resets.
 

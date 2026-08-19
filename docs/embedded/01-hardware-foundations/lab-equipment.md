@@ -18,7 +18,7 @@ That gap is the whole reason a bench exists. Each instrument on it answers exact
 
 ## The mapping, in one table
 
-| Instrument | The question it answers | What it cannot see | Typical cost |
+| Instrument | The question it answers | What it cannot see | Approx. cost |
 |---|---|---|---|
 | **Multimeter** | "Is this real?" — is the rail at the right voltage, are these two points connected, are these two nets shorted | Anything that happens fast. It reports a steady state, not an event. | $30–60 |
 | **Logic analyzer** | "What actually went out on the wire?" — the bits, their timing, decoded back into I²C addresses or UART bytes | Voltage. It reduces every signal to above-threshold or below-threshold and throws the shape away. | $12–15 |
@@ -27,6 +27,8 @@ That gap is the whole reason a bench exists. Each instrument on it answers exact
 | **Serial console (ST-LINK VCP)** | "What does my code think is happening?" — a running narrative in your own words | The truth, as opposed to your program's belief about it | included |
 | **Current measurement (`JP6` + meter, or a power profiler)** | "Where is my energy going?" — average draw, and with a profiler, the shape of the current over time | Anything about correctness | $0 with `JP6`; $100+ for a profiler |
 | **Bench power supply** | "What happens at 3.0 V? At 2.7 V?" — behaviour across the supply envelope, with a current limit protecting a suspect board | Anything about signals | $60+ |
+
+Prices are approximate, in USD, and were checked in **August 2026** — the same basis as the kit table in [What Hardware to Buy](./what-hardware-to-buy.md), which is the source for the multimeter and logic-analyzer figures. The oscilloscope, power-profiler and bench-supply rows are order-of-magnitude entry points rather than quotes for a specific model; treat them as "which shelf", not as a price.
 
 The rest of this page is one real bug per row.
 
