@@ -68,12 +68,28 @@ Even on the 78 `FT` pins the tolerance is fenced by two conditions people routin
 
 Even within spec, an `FT` pin at 5 V is not free: the datasheet's leakage row for `V_IN = 5 V` allows up to `3 µA`, against `±1 µA` within the normal range (Table 53). That row is titled "I/O FT/TC input leakage current" and names both structures, but a leakage figure is not a tolerance rating — what makes a pin 5 V tolerant is the `FT` marking in Table 7 and nothing else.
 
-:::warning[Driving 5 V into a 3.3 V pin destroys it, and it does so quietly]
-A `TC` pin is specified as a standard 3.3 V I/O (datasheet, Table 7). Nothing in the datasheet says it will survive 5 V, so 5 V on `PA0-WKUP` or `PB5` is an out-of-specification condition — full stop. For reference, Table 11 ("Voltage characteristics") rates V<sub>IN</sub> on `FT` and `TC` pins at `V_SS − 0.3 V` to `V_DD + 4.0 V`, and on any other pin at `V_SS − 0.3 V` to `4.0 V`; those are destruction limits for the pin structure, not a statement that a `TC` pin works as a 5 V input.
+:::warning[The datasheet is ambiguous about `TC` pins, so treat them as 3.3 V]
+This is the one place where DS10314 does not agree with itself, and it is worth seeing the disagreement rather than being handed a rule.
 
-What actually happens above V<sub>DD</sub> is that the pin's internal protection diode to V<sub>DD</sub> starts conducting, and current flows *into the chip's supply rail through your signal wire*. That current is not something you have a budget to spend: Table 12 ("Current characteristics") allows **at most `−5 mA` and no positive injection at all** on `FT` and `TC` pins, `±25 mA` summed over every pin — and these are absolute maximum ratings, which the datasheet itself frames as "stress ratings only… functional operation of the device at these conditions is not implied" (§6.2). Table 52 ("I/O current injection susceptibility") is stricter still per pin: for `PB5`, along with `PB3`, `PB4`, `PB6`–`PB9`, `PC13`–`PC15` and others, the permitted negative injection is `−0 mA` — none.
+The **Table 7 legend** classifies the pin: `FT` = "5 V tolerant I/O", `TC` = "Standard 3.3 V I/O". That is the only place in the document that distinguishes them.
 
-So the correct reading is "no injected current", not "up to 5 mA of headroom". Inject anyway and you get some combination of a dead pin, a chip that resets at random, an ADC that reads wrong on completely unrelated channels — the datasheet warns explicitly that "negative injection disturbs the analog performance of the device" — or a part that works today and fails in three weeks.
+Every table that carries a *number*, however, groups them together:
+
+| Table | What it says about `TC` |
+|---|---|
+| Table 11, "Voltage characteristics" (absolute maximum) | V<sub>IN</sub> "on FT and TC pins" is `V_SS − 0.3 V` to `V_DD + 4.0 V` |
+| Table 12, "Current characteristics" (absolute maximum) | Injected current "on FT and TC pins" is `−5/+0 mA` |
+| Table 14, "General operating conditions" | V<sub>IN</sub> "on RST, FT and TC pins" is `−0.3` to **`5.5 V`** for `2 V ≤ V_DD ≤ 3.6 V`, with footnote 6: "To sustain a voltage higher than V<sub>DD</sub>+0.3, the internal Pull-up and Pull-Down resistors must be disabled" |
+
+Table 14 is the operating-conditions table — the "where the part is guaranteed to work" table described in [Reading a Datasheet](./reading-a-datasheet.md). Read literally, it does permit 5 V on a `TC` pin. So it is not true that the datasheet is silent on the question; it is that the datasheet answers it two different ways.
+
+**Obey the Table 7 legend.** It is the classification ST states per pin and per structure, it is the more conservative of the two readings, and the cost of being wrong is asymmetric: following the legend on an `FT` pin costs you nothing, while following Table 14 on a `TC` pin risks a pin that the part's own pinout table says is a standard 3.3 V I/O. Concretely: do not feed 5 V into `PA0-WKUP` or `PB5`. Level-shift instead, as below.
+
+Beyond the classification, everything past V<sub>DD</sub> + 0.3 V on *any* pin is fenced by the same current limits, and that is where the real damage happens.
+
+What happens above V<sub>DD</sub> is that the pin's internal protection diode to V<sub>DD</sub> starts conducting, and current flows *into the chip's supply rail through your signal wire*. That current is not something you have a budget to spend: Table 12 ("Current characteristics") allows **at most `−5 mA` and no positive injection at all** on `FT` and `TC` pins, `±25 mA` summed over every pin — and these are absolute maximum ratings, which the datasheet itself frames as "stress ratings only… functional operation of the device at these conditions is not implied" (§6.2). Table 52 ("I/O current injection susceptibility") is stricter still per pin: for `PB5`, along with `PB3`, `PB4`, `PB6`–`PB9`, `PC13`–`PC15` and others, the permitted negative injection is `−0 mA` — none.
+
+So the correct reading is "design for no injected current". For the pins Table 52 lists at `−0 mA`, `PB5` among them, that is literally the number. For the rest, `PA0-WKUP` included, `−5 mA` is an absolute maximum rather than a design allowance — the same section that publishes it calls it a stress rating. Inject anyway and you get some combination of a dead pin, a chip that resets at random, an ADC that reads wrong on completely unrelated channels — the datasheet warns explicitly that "negative injection disturbs the analog performance of the device" — or a part that works today and fails in three weeks.
 
 That last outcome is the dangerous one, because it teaches the wrong lesson. "I connected a 5 V sensor and it worked fine" is not evidence that it was safe. **Check the `FT`/`TC` marking for the specific pin, in Table 8, before you connect anything that is not 3.3 V.**
 :::
