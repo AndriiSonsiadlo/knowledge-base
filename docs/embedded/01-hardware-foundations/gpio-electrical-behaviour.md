@@ -60,18 +60,18 @@ flowchart TB
         RPU["Pull-up resistor<br/>to the bus rail"] --> PIND(["pin"])
         PIND --> NMOSD["N-MOS"]
         NMOSD -->|"conducts when driving 0"| VSSD["VSS"]
-        NOTED["No P-MOS at all.<br/>Drives low, or lets go."]
+        NOTED["No P-MOS in the output stage.<br/>Drives low, or lets go."]
     end
 ```
 
-**Push-pull** is the default and the right choice for almost everything you drive alone: an LED, a chip-select line, a PWM output. It actively drives both directions, so edges are fast and the level is stiff against noise. RM0383 §8.3.1 describes open-drain as the mode where "only the N-MOS is activated when 0 is output" — which is exactly the difference. In open-drain, driving a `1` does not drive anything; it turns the transistor off and lets the pin float, and something external has to pull it high.
+**Push-pull** is the default and the right choice for almost everything you drive alone: an LED, a chip-select line, a PWM output. It actively drives both directions, so edges are fast and the level is stiff against noise. RM0383 §8.3.1 describes open-drain as the mode where "only the N-MOS is activated when 0 is output" — which is exactly the difference. The P-MOS is still physically on the die, since `OTYPER` is a per-pin runtime choice and the same pin can be push-pull again on the next write; what open-drain does is leave it permanently out of the output stage. So in open-drain, driving a `1` does not drive anything: the N-MOS turns off, nothing pulls the pin up, and something external has to.
 
 That sounds like a downside. It is the entire point.
 
 | | Push-pull | Open-drain |
 |---|---|---|
 | Driving `0` | N-MOS on, pin pulled to V<sub>SS</sub> | N-MOS on, pin pulled to V<sub>SS</sub> |
-| Driving `1` | P-MOS on, pin driven to V<sub>DD</sub> | Both transistors off — pin released |
+| Driving `1` | P-MOS on, pin driven to V<sub>DD</sub> | N-MOS off, no P-MOS to turn on — pin released |
 | Needs an external pull-up | No | **Yes**, or the line never goes high |
 | Rise time | Fast, set by the driver | Slow, set by pull-up resistor × bus capacitance |
 | Two devices both driving | **Short circuit** if they disagree | Safe — the `0` wins |
@@ -129,7 +129,9 @@ Two different limits are easy to conflate. **Drive strength** is how much curren
 
 For the STM32F411 (datasheet §6.3.16, "Output driving current"): the GPIOs "can sink or source up to ±8 mA, and sink or source up to ±20 mA (with a relaxed V<sub>OL</sub>/V<sub>OH</sub>) except PC13, PC14 and PC15 which can sink or source up to ±3 mA." At 8 mA the part guarantees `V_OL ≤ 0.4 V` and `V_OH ≥ V_DD − 0.4 V`; at 20 mA those relax to `1.3 V` and `V_DD − 1.3 V` respectively (Table 54). Sitting above all of it is the absolute maximum of `±25 mA` per pin and `120 mA` summed over every I/O (Table 12).
 
-`PC13`, `PC14` and `PC15` deserve their own note, because on the Nucleo the **USER button `B1` is on `PC13`** (UM1724 §6.5). The datasheet's Table 8 note 2 explains why they are special: they "are supplied through the power switch. Since the switch only sinks a limited amount of current (3 mA), the use of GPIOs PC13 to PC15 in output mode is limited: the speed should not exceed 2 MHz with a maximum load of 30 pF. **These I/Os must not be used as a current source (e.g. to drive an LED).**"
+`PC13`, `PC14` and `PC15` deserve their own note. The datasheet's Table 8 note 2 explains why they are special: they "are supplied through the power switch. Since the switch only sinks a limited amount of current (3 mA), the use of GPIOs PC13 to PC15 in output mode is limited: the speed should not exceed 2 MHz with a maximum load of 30 pF. **These I/Os must not be used as a current source (e.g. to drive an LED).**"
+
+Every one of those restrictions is on *output* use. As inputs they are ordinary pins, which is why the Nucleo can put the **USER button `B1` on `PC13`** (UM1724 Rev 17, §7.7 "Push-buttons") without trouble. The trap is the reverse direction: `PC13` is the pin already wired to a button on your board and therefore the obvious free pin to grab, and hanging an LED on it is exactly what note 2 forbids.
 
 `GPIOx_OSPEEDR` then trades edge rate against noise and power. The datasheet's Table 55 ("I/O AC characteristics") gives the maximum output frequency for each setting:
 
@@ -144,7 +146,7 @@ The temptation is to set everything to the fastest setting. Resist it: a fast ed
 
 ## Leakage, and why unused pins matter when the board sleeps
 
-A GPIO configured as an input leaks a small current: `±1 µA` maximum for `V_SS ≤ V_IN ≤ V_DD`, rising to `3 µA` for an FT or TC pin held at 5 V (datasheet, Table 53). One microamp is nothing while the chip is running. It stops being nothing when the chip is asleep — the same datasheet gives Stop-mode current for this part as low as `14 µA` typical at 25 °C with the flash in deep power-down and the low-power regulator selected (Table 28, at V<sub>DD</sub> = 3.6 V). A handful of pins leaking a microamp each is then a measurable fraction of the whole system's sleep budget.
+A GPIO configured as an input leaks a small current: `±1 µA` maximum for `V_SS ≤ V_IN ≤ V_DD`, rising to `3 µA` at `V_IN = 5 V` on the row the datasheet titles "I/O FT/TC input leakage current" (Table 53). Note that this leakage row is not what grants 5 V tolerance — only the `FT` marking in the Table 7 legend does that, and on this part exactly two I/O pins are `TC` rather than `FT`: `PA0-WKUP` and `PB5`. See [Voltage Levels and Logic](./voltage-levels-and-logic.md) for what that means in practice. One microamp is nothing while the chip is running. It stops being nothing when the chip is asleep — the same datasheet gives Stop-mode current for this part as low as `14 µA` typical at 25 °C with the flash in deep power-down and the low-power regulator selected (Table 28, at V<sub>DD</sub> = 3.6 V). A handful of pins leaking a microamp each is then a measurable fraction of the whole system's sleep budget.
 
 Worse than leakage is a **floating input near the switching threshold**, which leaves both transistors of the input stage partly conducting and can draw far more than the specified leakage. This is the single most common reason a low-power design misses its battery-life target, and the fix is trivial: before sleeping, give every unused pin a defined state — an internal pull-up or pull-down via `GPIOx_PUPDR`, or analog mode, which disconnects the digital input buffer entirely.
 
@@ -184,7 +186,7 @@ RM0383 §8.3.1: "During and just after reset, the alternate functions are not ac
 
 ## References
 
-- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), chapter 8 "General-purpose I/Os (GPIO)". Table 23 port bit configuration, §8.3.1 reset state and open-drain behaviour, §8.3.3 the control registers, §8.3.5 atomic `BSRR` access. Consulted at Rev 3.
+- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), chapter 8 "General-purpose I/Os (GPIO)". Table 23 port bit configuration, §8.3.1 reset state and open-drain behaviour, §8.3.3 the control registers, §8.3.5 atomic `BSRR` access. Consulted at Rev 4 (May 2025).
 - NXP Semiconductors — [**UM10204**, *I²C-bus specification and user manual*](https://www.nxp.com/docs/en/user-guide/UM10204.pdf). §3.1.1 for the open-drain and wired-AND requirement, §7.1 for pull-up resistor sizing, §7.2 for what to do above the bus-capacitance limit. The primary source for anything I²C. Quotes here were taken from Rev 6 and re-checked against **Rev 7.0** (1 October 2021), the revision currently at that link; the section numbers and the quoted sentences are unchanged between them.
-- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). §6.3.16 output driving current, Table 12 current absolute maximum ratings, Table 53 I/O static characteristics, Table 54 output voltage characteristics, Table 55 I/O AC characteristics, Table 8 note 2 on `PC13`–`PC15`.
-- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §6.5 and Table 29. Which board features land on the restricted and debug pins.
+- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). §6.3.16 output driving current, Table 12 current absolute maximum ratings, Table 53 I/O static characteristics, Table 54 output voltage characteristics, Table 55 I/O AC characteristics, Table 7 legend, and Table 8 note 2 on `PC13`–`PC15`. Consulted at **DS10314 Rev 8** (January 2024).
+- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §7.7 "Push-buttons" and Table 29 "ST morpho connector on NUCLEO-F401RE, NUCLEO-F411RE, NUCLEO-F446RE". Which board features land on the restricted and debug pins. Consulted at Rev 17 (September 2025).
