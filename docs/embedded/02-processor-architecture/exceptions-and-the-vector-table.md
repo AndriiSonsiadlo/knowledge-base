@@ -87,13 +87,13 @@ The offsets and reserved slots are RM0383 Rev 4, Table 37 "Vector table for STM3
 
 ## The system exceptions
 
-The first sixteen entries are architectural: they mean the same thing on every Cortex-M, and the numbers are the values `IPSR.ISR_NUMBER` takes. From PM0214 Rev 10, Table 17 "Properties of the different exception types" and RM0383 Rev 4, Table 37:
+The first sixteen entries are architectural: they mean the same thing on every Cortex-M. Their numbers are also the values `IPSR.ISR_NUMBER` reports — with the one exception you would expect, since the processor is never *in* the reset exception once code is running. PM0214 Rev 10, Table 6 assigns `0: Thread mode`, **`1: Reserved`**, `2: NMI`, `3: Hard fault` and so on, so `IPSR` never reads 1. From PM0214 Rev 10, Table 17 "Properties of the different exception types" and RM0383 Rev 4, Table 37:
 
 | Exception no. | CMSIS `IRQn` | Name | Priority | Vector offset | Activation |
 |---|---|---|---|---|---|
 | 1 | — (no CMSIS IRQn) | **Reset** | −3, "the highest" | `0x0000_0004` | Asynchronous |
 | 2 | −14 | **NMI** | −2, fixed | `0x0000_0008` | Asynchronous |
-| 3 | −13 | **HardFault** | −1, fixed | `0x0000_000C` | — |
+| 3 | −13 | **HardFault** | −1, fixed | `0x0000_000C` | — ‡ |
 | 4 | −12 | MemManage | Configurable | `0x0000_0010` | Synchronous |
 | 5 | −11 | BusFault | Configurable | `0x0000_0014` | Synchronous when precise, asynchronous when imprecise |
 | 6 | −10 | UsageFault | Configurable | `0x0000_0018` | Synchronous |
@@ -105,7 +105,11 @@ The first sixteen entries are architectural: they mean the same thing on every C
 | 15 | −1 | **SysTick** | Configurable | `0x0000_003C` | Asynchronous |
 | 16 and above | 0 and above | IRQ0 upwards | Configurable | `0x0000_0040` and up, in steps of 4 | Asynchronous |
 
-† The two documents differ on this slot. RM0383 Rev 4, Table 37 names `0x0000_0030` "Debug Monitor"; PM0214 Rev 10, Table 17 lists exceptions 12–13 together as Reserved. Take RM0383 as authoritative for this device, and treat the slot as one you do not populate unless you are writing debug-monitor code. The CMSIS `IRQn` column throughout is CMSIS's numbering, not a field in either table — see the note below.
+† PM0214's two tables describe this slot differently, and both are right about different things. Its **Table 17** groups exceptions 12–13 as Reserved; its **Table 6**, defining what `IPSR` reports, is more specific — `11: SVCall`, **`12: Reserved for Debug`**, `13: Reserved`, `14: PendSV`, `15: SysTick`. RM0383 Rev 4, Table 37 names the vector at `0x0000_0030` outright: "Debug Monitor". So the slot is real, reserved for debug use, and not one you populate unless you are writing debug-monitor code.
+
+‡ PM0214 Rev 10, Table 17 leaves HardFault's Activation cell blank, and that is not an omission. A HardFault is always an *escalation* of something else (§2.4.2), so it inherits the character of whatever escalated into it — synchronous when a UsageFault or a precise BusFault escalates, asynchronous when an imprecise BusFault does. There is no single value the cell could hold.
+
+The **CMSIS `IRQn`** column is CMSIS's own numbering, not a field in either ST table. The negative values come from `core_cm4.h`, where the system-exception enumerators run `NonMaskableInt_IRQn = -14` … `SVCall_IRQn = -5`, `DebugMonitor_IRQn = -4`, `PendSV_IRQn = -2`, `SysTick_IRQn = -1`. PM0214's Table 17 carries the same values in its IRQ-number column and explains why they are negative — see the note below.
 
 Three columns of that table are load-bearing.
 
@@ -223,6 +227,7 @@ One more, which is not silent but is easy to misread: **changing a vector at run
 
 ## References
 
-- STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf), consulted at **Rev 10** (March 2020). §2.3 "Exception model" throughout: §2.3.1 exception states, §2.3.2 exception types (the `SVCall` and `PendSV` descriptions quoted), **Table 17** "Properties of the different exception types" for the priority/offset/activation table and the CMSIS IRQ-numbering footnote, §2.3.4 "Vector table" for the structure and the LSB rule, §2.3.5 for the priority ordering and the priority-0 default, §2.3.7 for stacking, the parallel vector fetch, tail-chaining and late arrival; §2.4.2 for the four escalation-to-HardFault conditions; §2.2.4 for the vector-table `DMB` requirement; §4.4.4 for `VTOR`/`TBLOFF` bits[29:9] and the 128-word alignment; §4.4.9 and §4.4.19 for `SHCSR` and its reset value. Be aware of the §2.3.4-versus-§4.4.4 inconsistency on the `VTOR` range, discussed above.
+- STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf), consulted at **Rev 10** (March 2020). §2.3 "Exception model" throughout: §2.3.1 exception states, §2.3.2 exception types (the `SVCall` and `PendSV` descriptions quoted), **Table 17** "Properties of the different exception types" for the priority/offset/activation table (including the deliberately blank Activation cell on the HardFault row) and the CMSIS IRQ-numbering footnote, **Table 6** for the `IPSR.ISR_NUMBER` encodings — the source for `1: Reserved` and `12: Reserved for Debug`, §2.3.4 "Vector table" for the structure and the LSB rule, §2.3.5 for the priority ordering and the priority-0 default, §2.3.7 for stacking, the parallel vector fetch, tail-chaining and late arrival; §2.4.2 for the four escalation-to-HardFault conditions; §2.2.4 for the vector-table `DMB` requirement; §4.4.4 for `VTOR`/`TBLOFF` bits[29:9] and the 128-word alignment; §4.4.9 and §4.4.19 for `SHCSR` and its reset value. Be aware of the §2.3.4-versus-§4.4.4 inconsistency on the `VTOR` range, discussed above.
 - Arm — [***Armv7-M Architecture Reference Manual***](https://developer.arm.com/documentation/ddi0403/latest/), consulted at **DDI 0403E.e (ID021621)**. §B1.5.5 for the reset pseudocode quoted at the top of this page — the `MSP` load and its `AND 0xFFFFFFFC`, `SP_process` UNKNOWN, `LR = 0xFFFFFFFF`, `EPSR.T` from vector bit 0 and the masked branch; §B3.2.5 "Vector Table Offset Register, VTOR" for the architectural `TBLOFF` bits[31:7] definition, the RAZ/WI note and the write-all-ones discovery technique; §B1.5.6–§B1.5.8 for exception entry, stacking and return.
 - STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), consulted at **Rev 4** (May 2025). **Table 37** "Vector table for STM32F411xC/E" for every device-specific offset, including the final `SPI5` entry at `0x0000 0194` that fixes the table length; §10.1.1 for the 52 maskable channels and the 4 implemented priority bits; §2.4 and Table 3 for the boot-time alias that puts the table at address zero in the first place.
+- Arm — **CMSIS-Core(M) device header `core_cm4.h`**, the `IRQn_Type` enumeration. The source for the negative `IRQn` values in the system-exception table, including `DebugMonitor_IRQn = -4`. These are a software convention layered on top of the architecture's exception numbers, not a hardware register field.

@@ -29,29 +29,33 @@ PM0214 Rev 10, Table 2 "Summary of processor mode, execution privilege level, an
 
 The asymmetry is deliberate. Thread mode is where your code lives and where you get choices. Handler mode is where the processor puts itself when an exception arrives, and it removes both choices: PM0214 Rev 10 §2.1.2, "In Handler mode, the processor always uses the main stack", and §2.1.1, "Software execution is always privileged."
 
-The state machine is small enough to draw completely.
+The state machine is small enough to draw completely. Two independent bits give Thread mode four combinations; Handler mode has none, which is the whole asymmetry in one picture.
 
 ```mermaid
 stateDiagram-v2
     direction LR
     [*] --> ThreadMSP: Reset<br/>CONTROL = 0x00000000
 
-    state "Thread mode<br/>privileged, MSP" as ThreadMSP
-    state "Thread mode<br/>privileged, PSP" as ThreadPSP
-    state "Thread mode<br/>unprivileged, PSP" as ThreadUnpriv
+    state "Thread mode<br/>privileged, MSP<br/>CONTROL = 0b000" as ThreadMSP
+    state "Thread mode<br/>privileged, PSP<br/>CONTROL = 0b010" as ThreadPSP
+    state "Thread mode<br/>unprivileged, MSP<br/>CONTROL = 0b001" as ThreadUnprivMSP
+    state "Thread mode<br/>unprivileged, PSP<br/>CONTROL = 0b011" as ThreadUnpriv
     state "Handler mode<br/>always privileged<br/>always MSP" as Handler
 
     ThreadMSP --> ThreadPSP: MSR CONTROL, #2<br/>SPSEL = 1, then ISB
     ThreadPSP --> ThreadMSP: MSR CONTROL, #0<br/>SPSEL = 0, then ISB
+    ThreadMSP --> ThreadUnprivMSP: MSR CONTROL, #1<br/>nPRIV = 1, then ISB
     ThreadPSP --> ThreadUnpriv: MSR CONTROL, #3<br/>nPRIV = 1, then ISB
 
     ThreadMSP --> Handler: exception taken<br/>frame pushed to MSP
     ThreadPSP --> Handler: exception taken<br/>frame pushed to PSP
+    ThreadUnprivMSP --> Handler: exception taken<br/>frame pushed to MSP
     ThreadUnpriv --> Handler: exception taken<br/>frame pushed to PSP
     Handler --> Handler: higher-priority exception<br/>preempts, nesting
 
     Handler --> ThreadMSP: EXC_RETURN = 0xFFFFFFF9<br/>or 0xFFFFFFE9
     Handler --> ThreadPSP: EXC_RETURN = 0xFFFFFFFD<br/>or 0xFFFFFFED
+    Handler --> ThreadUnprivMSP: same EXC_RETURN values<br/>nPRIV is left unchanged
     Handler --> ThreadUnpriv: same EXC_RETURN values<br/>nPRIV is left unchanged
 ```
 
