@@ -34,9 +34,27 @@ Every row here is *Armv7-M ARM* DDI 0403E.e, **Table B3-1 "Armv7-M address map"*
 | `0xE000_0000`–`0xE00F_FFFF` | **PPB** | **Strongly-ordered** | **XN** | — | "1MB region reserved as the PPB. This supports key resources, including the System Control Space, and debug features." |
 | `0xE010_0000`–`0xFFFF_FFFF` | Vendor_SYS | Device | **XN** | — | "Vendor system region." |
 
-Four things follow directly.
+Five things follow directly.
 
-**Everything above `0x4000_0000` is execute-never, and an enabled MPU cannot change that.** *Armv7-M ARM* §B3.1 carries the note "An enabled MPU cannot change the XN property of the System memory region", and the `DefaultPermissions()` pseudocode in §B3.5 assigns `perms.xn = '1'` for address bits `[31:29]` of `010`, `110` and `111` — the Peripheral, Device and System regions. Any attempt to fetch an instruction from one raises a MemManage fault. This is why a corrupted function pointer that lands in peripheral space produces a fault rather than executing garbage.
+**The Peripheral region and everything from `0xA000_0000` upward is execute-never.** The `DefaultPermissions()` pseudocode in *Armv7-M ARM* §B3.5 enumerates it one region at a time, keyed on address bits `[31:29]`:
+
+```text
+case address<31:29> of
+  when '000' perms.xn = '0';   /* 0x00000000  Code               */
+  when '001' perms.xn = '0';   /* 0x20000000  SRAM               */
+  when '010' perms.xn = '1';   /* 0x40000000  Peripheral         */
+  when '011' perms.xn = '0';   /* 0x60000000  RAM                */
+  when '100' perms.xn = '0';   /* 0x80000000  RAM                */
+  when '101' perms.xn = '1';   /* 0xA0000000  Device, shareable  */
+  when '110' perms.xn = '1';   /* 0xC0000000  Device, non-shar.  */
+  when '111' perms.xn = '1';   /* 0xE0000000  System             */
+```
+
+So XN covers exactly four of the eight partitions — `010`, `101`, `110` and `111` — and this matches the XN column of the table above, including the two blanks: **the external RAM regions `0x6000_0000`–`0x9FFF_FFFF` are Normal memory and are executable.** That is not a curiosity; running code out of external RAM is a real technique on parts that have an external memory controller.
+
+Any attempt to fetch an instruction from one of the four XN partitions raises a MemManage fault, which is why a corrupted function pointer landing in peripheral space produces a fault rather than executing garbage.
+
+**Of those four, only the System region's XN is beyond an enabled MPU's reach.** *Armv7-M ARM* §B3.1 carries the note "An enabled MPU cannot change the XN property of the System memory region", and §B3.5 states the rule and its scope: "The MPU is restricted in how it can change the default memory map attributes associated with System space, that is, for addresses `0xE0000000` and higher. System space is always marked as XN, Execute Never." The `CheckPermission` path enforces it unconditionally — `if address<31:29> == '111' then // enforce System space execute never; perms.xn = '1';`. For the Peripheral and Device regions the default XN is a *default*: an MPU region covering them can clear it.
 
 **The Private Peripheral Bus is where Arm's own hardware lives.** Inside it, `0xE000_E000`–`0xE000_EFFF` is the System Control Space, holding the NVIC, SysTick, the SCB, the MPU registers, and the fault status registers (*Armv7-M ARM* §B1.3). Those addresses are identical on every Cortex-M, which is exactly why CMSIS core code is portable and vendor peripheral code is not.
 
@@ -179,7 +197,7 @@ And the one that is not a fault at all, which makes it the worst: **bit-banding 
 
 ## References
 
-- Arm — [***Armv7-M Architecture Reference Manual***](https://developer.arm.com/documentation/ddi0403/latest/), consulted at **DDI 0403E.e (ID021621)**. §B3.1 "The system address map" with **Table B3-1** (the eight partitions, their memory types, XN and cache attributes) and **Table B3-2** (the PPB/Vendor_SYS split of the System region); §B3.1.1 "General rules for PPB register accesses" for the word-access rule and little-endian requirement; §B1.3 for the System Control Space at `0xE000_E000`; §B3.5 `DefaultPermissions()` for the XN assignment by address bits. Bit-banding is **not** described anywhere in this manual, which is the evidence for it being a processor rather than an architecture feature.
+- Arm — [***Armv7-M Architecture Reference Manual***](https://developer.arm.com/documentation/ddi0403/latest/), consulted at **DDI 0403E.e (ID021621)**. §B3.1 "The system address map" with **Table B3-1** (the eight partitions, their memory types, XN and cache attributes) and **Table B3-2** (the PPB/Vendor_SYS split of the System region); §B3.1.1 "General rules for PPB register accesses" for the word-access rule and little-endian requirement; §B1.3 for the System Control Space at `0xE000_E000`; §B3.5 "Protected Memory System Architecture, PMSAv7" for the `DefaultPermissions()` per-region XN assignment quoted above (XN on address bits `[31:29]` of `010`, `101`, `110` and `111` — note that the two RAM partitions `011` and `100` are **not** XN), for the "System space is always marked as XN" restriction on an enabled MPU, and for the `address<31:29> == '111'` enforcement in the permission-check pseudocode. Bit-banding is **not** described anywhere in this manual, which is the evidence for it being a processor rather than an architecture feature.
 - STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf), consulted at **Rev 10** (March 2020). §2.2 "Memory model" and Figure 8 for the map as ST states it; §2.2.1 for the Normal/Device/Strongly-ordered definitions and the write-buffering distinction; §2.2.2 and **Table 12** for the ordering guarantees between types; §2.2.3 and Table 13 for per-region access behaviour and the Code-region recommendation; §2.2.4 for the barrier instructions and when to use them; §2.2.5 with **Tables 14 and 15** for the bit-band regions, aliases and mapping formula; §2.2.7 for `LDREX`/`STREX`. Note that Table 13's PPB row prints its address range inconsistently with Figure 8 in the version consulted — Figure 8 and the *Armv7-M ARM* agree on `0xE000_0000`–`0xE00F_FFFF`, which is the value used above.
 - STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), consulted at **Rev 4** (May 2025). §2.2–§2.3 with **Table 1** "STM32F411xC/E register boundary addresses" for every peripheral base address quoted; §2.3.1 for the 128 KB of SRAM; §2.3.3 "Bit banding" for the worked `0x22006008` example and the statement that bit-band operations are unavailable to DMA and other bus masters; §2.4 with **Table 2** (boot modes) and **Table 3** (memory mapping versus boot mode) for the alias at address zero.
 - STMicroelectronics — [**PM0253**, *STM32F7 and STM32H7 series Cortex-M7 processor programming manual*](https://www.st.com/resource/en/programming_manual/pm0253-stm32f7-series-and-stm32h7-series-cortexm7-processor-programming-manual-stmicroelectronics.pdf), consulted at **Rev 6** (May 2026). §3.1.1 for the quoted bit-banding compatibility statement, and its §2.2 memory-model chapter — which describes the same eight regions as PM0214 but contains no bit-band region, alias or formula.

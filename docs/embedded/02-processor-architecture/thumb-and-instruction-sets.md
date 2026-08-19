@@ -80,7 +80,7 @@ The Cortex-M4's architecture is not plain Armv7-M but **Armv7E-M** — the "E" i
 
 Two visible consequences for ordinary firmware, both of which show up in the register model:
 
-- `APSR.Q` exists and is **sticky**: it records that a saturation occurred at some point and stays set until software clears it with an `MRS` (PM0214 Rev 10, Table 5).
+- `APSR.Q` exists and is **sticky**: PM0214 Rev 10, Table 5 defines it as a "Sticky saturation flag" that "Indicates when an `SSAT` or `USAT` instruction results in saturation, or indicates a DSP overflow", and adds "This bit is cleared to zero by software using an `MRS` instruction." Read that last sentence as ST wrote it, not as a recipe: `MRS` is the *read* half of the read-modify-write, and the instruction that actually clears the bit is the `MSR` that writes the modified value back to `APSR`. CMSIS's `__get_APSR()` / `__set_APSR()` pair is that sequence.
 - `APSR.GE[3:0]` exists, written by SIMD instructions and consumed by `SEL` (Table 5 again).
 
 Neither appears on a Cortex-M3, whose architecture is plain Armv7-M. This is also, incidentally, why ST's own documentation is careful: DS10314 Rev 8 §3.1 says the processor "supports a set of DSP instructions, which allow efficient signal processing and complex algorithm execution", and PM0253 Rev 6 §3.1.1 warns that you cannot move code to a Cortex-M3 "if it contains floating-point operations or DSP extensions".
