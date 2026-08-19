@@ -48,7 +48,7 @@ Embedded engineering has its own vocabulary, and a lot of it is acronyms that me
 
 **ASIL — Automotive Safety Integrity Level.** ISO 26262's automotive-specific equivalent of SIL, rated QM (no safety requirement) then A through D (highest), assigned per hazard based on severity, exposure, and controllability. Covered once the safety-and-reliability folder of this section is published.
 
-**Devicetree.** A data structure (and the text-format `.dts` files that describe it) used mainly in embedded Linux to describe hardware — which peripherals exist, their addresses, and how they're wired — so the same kernel binary can support different boards by loading a different devicetree rather than being recompiled per board. Covered once the embedded-Linux folder of this section is published.
+**Devicetree.** A data structure (and the text-format `.dts` files that describe it) used to describe hardware — which peripherals exist, their addresses, and how they're wired — so the same kernel or firmware binary can support different boards by loading a different devicetree rather than being recompiled per board. Most associated with embedded Linux, but just as central to Zephyr, which this section also covers. Covered once the embedded-Linux folder of this section is published.
 
 **`no_std`.** A Rust attribute that opts a program out of Rust's standard library (which assumes an OS underneath it — heap allocation, threads, file I/O) in favor of just `core`, the subset that works with no operating system present at all. The mechanism that makes Rust usable for bare-metal embedded firmware. Covered once the languages-and-practice folder of this section is published.
 
@@ -74,7 +74,7 @@ Embedded engineering has its own vocabulary, and a lot of it is acronyms that me
 | OTA | Over-the-air firmware update | Not yet published |
 | SIL | Safety Integrity Level (IEC 61508) | Not yet published |
 | ASIL | Automotive Safety Integrity Level (ISO 26262) | Not yet published |
-| Devicetree | Hardware-description data structure used by embedded Linux | Not yet published |
+| Devicetree | Hardware-description data structure used by embedded Linux and Zephyr alike | Not yet published |
 | `no_std` | Rust without the OS-dependent standard library | Not yet published |
 
 :::warning
@@ -91,7 +91,8 @@ Don't assume "MPU" means the same thing every time you see it, including within 
 
 ## References
 
-- Arm — [Glossary](https://developer.arm.com/documentation/dui0801/l/Glossary) (developer.arm.com) — Arm's own terminology reference for MCU, MPU, NVIC, SWD, and other Cortex-M-specific terms defined above.
+- Arm, *Cortex-M4 Devices Generic User Guide* (document DUI0553), publisher Arm Limited — the Arm reference that defines the NVIC and the MPU in the same terms used throughout this glossary; cited by title rather than linked because the specific document URL Arm serves this from changes across doc-version updates.
+- Joseph Yiu, *The Definitive Guide to Arm Cortex-M3 and Cortex-M4 Processors* — covers MCU, MPU, MMU, NVIC, SWD, and JTAG at the level of detail this glossary summarizes, written by an Arm architect.
 - FreeRTOS — [RTOS concepts and terminology](https://www.freertos.org/features.html) — the source for this glossary's tick and RTOS definitions, from the kernel's own documentation.
 - IEC 61508 and ISO 26262 (the standards themselves, paywalled documents) — the normative sources for the SIL and ASIL definitions above; this glossary summarizes their intent rather than reproducing normative text.
 - The Rust Embedded Working Group — [The Embedded Rust Book](https://docs.rust-embedded.org/book/) — the primary source for `no_std` and what it means to write Rust with no operating system underneath it.
