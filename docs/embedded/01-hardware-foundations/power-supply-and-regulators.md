@@ -61,7 +61,7 @@ The same board's numbers make the shape of the problem concrete. All of these ar
 | Standby, RTC and LSE off | `2.1 µA` | Table 30 |
 | **In-rush** at regulator power-on (POR, or wakeup from Standby) | `160 mA` typ., `200 mA` max | Table 19 |
 
-Read the first and last rows together. The chip's *steady* draw at full tilt is about 21 mA. Its *transient* draw the instant the internal 1.2 V regulator starts up is up to 200 mA — an order of magnitude more, for the `31 µs` that Table 19's in-rush energy figure (`5.4 µC` at V<sub>DD</sub> = 1.7 V) is characterised over. A supply sized for the average will brown out on that spike, and it will do so at exactly the moment you can least observe it: before any of your code has run.
+Read the first and last rows together. The chip's *steady* draw at full tilt is about 21 mA. Its *transient* draw the instant the internal 1.2 V regulator starts up is up to 200 mA — an order of magnitude more. Table 19 also gives the in-rush *energy*, `5.4 µC`, under the stated condition "V<sub>DD</sub> = 1.7 V, T<sub>A</sub> = 125 °C, I<sub>RUSH</sub> = 171 mA for 31 µs" — so ST's own characterisation point puts the spike in the tens of microseconds, not the milliseconds. A supply sized for the average will brown out on that spike, and it will do so at exactly the moment you can least observe it: before any of your code has run.
 
 And read the run and standby rows together: a factor of about ten thousand separates them. This is why regulator quiescent current is not a rounding error. A regulator that idles at 100 µA in a system whose sleeping microcontroller draws 2.8 µA is spending 97% of the sleep budget on the regulator.
 
