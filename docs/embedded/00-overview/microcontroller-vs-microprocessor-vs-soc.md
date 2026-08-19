@@ -32,17 +32,17 @@ A **system on chip (SoC)** integrates a microprocessor core (or several, sometim
 flowchart TB
     subgraph MCU["Microcontroller (e.g. STM32F411RE)"]
         direction TB
-        CPU1["Cortex-M4F core"] --> FLASH1["On-chip flash — 512 KB\n(code, XIP)"]
-        CPU1 --> SRAM1["On-chip SRAM — 128 KB\n(data, stack, heap)"]
-        CPU1 -.optional.-> MPU1["MPU\n(fixed physical regions,\nno translation)"]
+        CPU1["Cortex-M4F core"] --> FLASH1["On-chip flash — 512 KB<br/>(code, XIP)"]
+        CPU1 --> SRAM1["On-chip SRAM — 128 KB<br/>(data, stack, heap)"]
+        CPU1 -.optional.-> MPU1["MPU<br/>(fixed physical regions,<br/>no translation)"]
     end
 
     subgraph SOC["Microprocessor / SoC (e.g. STM32MP1-class, i.MX 8)"]
         direction TB
-        CPU2["Cortex-A core"] --> MMU2["MMU\n(virtual → physical\ntranslation + isolation)"]
+        CPU2["Cortex-A core"] --> MMU2["MMU<br/>(virtual → physical<br/>translation + isolation)"]
         MMU2 --> BUS["External memory bus"]
-        BUS --> DRAM["Off-chip DDR RAM\n(hundreds of MB–GBs)"]
-        BUS --> EFLASH["Off-chip flash / eMMC\n(bootloader, kernel, rootfs)"]
+        BUS --> DRAM["Off-chip DDR RAM<br/>(hundreds of MB–GBs)"]
+        BUS --> EFLASH["Off-chip flash / eMMC<br/>(bootloader, kernel, rootfs)"]
         CPU2 -.boot only.-> BOOTROM["Small on-chip boot ROM"]
     end
 ```
@@ -51,7 +51,7 @@ The microcontroller's flash is *execute-in-place* — the CPU fetches instructio
 
 ## The practical consequence: can it run Linux at all?
 
-Linux's memory management assumes an MMU exists — per-process virtual address spaces, demand paging, and copy-on-write `fork()` are all built on top of hardware address translation. (There is a `uClinux` variant that runs without one, but it's a legacy, MPU-only path with none of the process isolation guarantees, not a mainstream option.) So the MCU/microprocessor split isn't just a memory-size difference — it's the fork point for the entire "what runs on this thing" decision covered next: an MCU without an MMU is never going to boot Linux, no matter how much flash you give it, while a microprocessor or SoC with an MMU can run bare-metal, an RTOS, *or* Linux, and picking among those becomes an engineering trade-off rather than a hardware limit. See [Bare-Metal, RTOS, or Linux](./bare-metal-vs-rtos-vs-linux.md).
+Linux's memory management assumes an MMU exists — per-process virtual address spaces, demand paging, and copy-on-write `fork()` are all built on top of hardware address translation. (There is a no-MMU configuration, `CONFIG_MMU=n`, historically associated with the `uClinux` project — its no-MMU support merged into mainline Linux in the 2.6 series, so "uClinux" today is a historical label rather than a separate fork. It runs on hardware with no memory-protection hardware at all, MPU or otherwise, and gives up every process-isolation guarantee normal Linux provides. It exists, but it's a legacy, niche path, not a mainstream option.) So the MCU/microprocessor split isn't just a memory-size difference — it's the fork point for the entire "what runs on this thing" decision covered next: running Linux on a microcontroller-class part with no MMU is realistic only in that narrow, isolation-free configuration, while a microprocessor or SoC with an MMU can run bare-metal, an RTOS, *or* full Linux with the process isolation guarantees people normally mean by "Linux," and picking among those becomes an engineering trade-off rather than a hardware limit. See [Bare-Metal, RTOS, or Linux](./bare-metal-vs-rtos-vs-linux.md).
 
 :::warning
 Don't assume enabling the Cortex-M's MPU gets you anything like an operating system's memory protection. The MPU only allow/deny-lists a handful of fixed *physical* address ranges (8 or 16 regions on most Cortex-M parts) — it has no concept of a virtual address space, no per-task page tables, and no way to give two tasks each their own private memory that they can't accidentally see or corrupt without you manually carving up and assigning every region yourself. Engineers coming from Linux/desktop work routinely expect MPU-based "protection" to behave like MMU-based process isolation and are surprised, usually after a real bug, that it doesn't.

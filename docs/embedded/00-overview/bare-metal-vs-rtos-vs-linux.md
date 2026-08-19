@@ -22,22 +22,22 @@ An engineer coming from application software tends to reach for the environment 
 
 ```mermaid
 flowchart TD
-    A[Start: choosing an execution model] --> B{Need a filesystem, network stack,\nor GUI framework as a first-class feature?}
-    B -- Yes --> C{Does the BOM already include an\nMMU-capable microprocessor/SoC\nwith MB-class RAM?}
+    A[Start: choosing an execution model] --> B{Need a filesystem, network stack,<br/>or GUI framework as a first-class feature?}
+    B -- Yes --> C{Does the BOM already include an<br/>MMU-capable microprocessor/SoC<br/>with MB-class RAM?}
     C -- Yes --> D[Linux]
-    C -- No --> E[That requirement forces a hardware\nchange — re-scope before choosing software]
-    B -- No --> F{Multiple independent activities needing\npriority-based preemption, timeouts,\nor several developers sharing one codebase?}
+    C -- No --> E[That requirement forces a hardware<br/>change — re-scope before choosing software]
+    B -- No --> F{Multiple independent activities needing<br/>priority-based preemption, timeouts,<br/>or several developers sharing one codebase?}
     F -- Yes --> G[RTOS — FreeRTOS or Zephyr]
-    F -- No --> H{Hard, tightly-bounded deadline where\neven an RTOS's scheduling jitter\nis unacceptable?}
-    H -- Yes --> I[Bare-metal: ISR-driven,\nno scheduler at all]
-    H -- No --> J[Bare-metal is still worth trying first —\nadd an RTOS only once the main-loop\napproach genuinely runs out of room]
+    F -- No --> H{Hard, tightly-bounded deadline where<br/>even an RTOS's scheduling jitter<br/>is unacceptable?}
+    H -- Yes --> I[Bare-metal: ISR-driven,<br/>no scheduler at all]
+    H -- No --> J[Bare-metal is still worth trying first —<br/>add an RTOS only once the main-loop<br/>approach genuinely runs out of room]
 ```
 
 ## Compared directly
 
 | | Bare-metal | RTOS | Linux |
 |---|---|---|---|
-| Determinism | Highest — no scheduler between you and the CPU | High — bounded, designed for hard real-time | Low by default — CFS is fair, not bounded (PREEMPT_RT changes this, at a cost) |
+| Determinism | Highest — no scheduler between you and the CPU | High — bounded, designed for hard real-time | Low by default — the default fair-share scheduler (CFS, replaced by EEVDF in kernel 6.6) is fair, not bounded (`CONFIG_PREEMPT_RT` changes this, at a cost) |
 | Memory cost | Lowest — no framework overhead | Low — tens of KB flash, small per-task RAM overhead | High — MB-class RAM and flash/storage required |
 | Boot time | Microseconds to milliseconds | Milliseconds | Hundreds of milliseconds to seconds |
 | Driver availability | None — you write every peripheral driver | Vendor HAL plus whatever the RTOS ecosystem provides | Enormous — the mainline kernel driver ecosystem |
@@ -48,7 +48,7 @@ flowchart TD
 Most products reach for more than they need. It's genuinely common to see a project pull in an RTOS to manage two or three activities that a well-structured bare-metal main loop with a couple of timer interrupts would have handled with less code, less RAM, and fewer new bug classes — and just as common to see a project pull in Linux for a UI and a network connection that a Cortex-M part with a small TCP/IP stack and a display driver could have handled at a fraction of the bill-of-materials cost and power draw. The decision flow above is deliberately biased toward the cheaper option at each fork, because the cost of under-provisioning (hit a wall, add the next layer) is almost always smaller than the cost of over-provisioning (carry an OS's complexity, memory footprint, and failure modes for a job that never needed it).
 
 :::warning
-Don't assume "runs on Linux" means "meets my deadline." Stock Linux's default scheduler (CFS) is not designed for hard real-time and can defer a ready thread by tens of milliseconds under load — enough to blow a control-loop deadline that a bare-metal or RTOS build would have hit every time. Teams that discover this after their Linux port is otherwise working end up either bolting on the `PREEMPT_RT` patch set or moving the hard-real-time portion back onto a small RTOS or microcontroller running alongside the Linux core — a rewrite, not a patch, and far cheaper to rule out at the design stage than to discover once the port is finished.
+Don't assume "runs on Linux" means "meets my deadline." Stock Linux's default fair-share scheduler (CFS, replaced by EEVDF in kernel 6.6) is not designed for hard real-time and can defer a ready thread by tens of milliseconds under load — enough to blow a control-loop deadline that a bare-metal or RTOS build would have hit every time. Teams that discover this after their Linux port is otherwise working end up either enabling `CONFIG_PREEMPT_RT` (the real-time preemption support merged into mainline as of kernel 6.12) or moving the hard-real-time portion back onto a small RTOS or microcontroller running alongside the Linux core — a real architecture change, not a config flip, and far cheaper to rule out at the design stage than to discover once the port is finished.
 :::
 
 ## See also
@@ -63,4 +63,4 @@ Don't assume "runs on Linux" means "meets my deadline." Stock Linux's default sc
 
 - [FreeRTOS documentation](https://www.freertos.org/Documentation/RTOS_book.html) — the kernel's own documentation and design overview; the primary source for how an RTOS scheduler actually behaves.
 - Bootlin — [Embedded Linux training materials](https://bootlin.com/training/embedded-linux/) (CC BY-SA) — freely available slides and labs covering exactly the boot-time and driver-ecosystem trade-offs described above, from a company that does this training professionally.
-- [The Linux Kernel documentation](https://docs.kernel.org/) — the kernel's own scheduler documentation, and the entry point for the `PREEMPT_RT` real-time patch set now merged into mainline; the primary source for how far stock Linux is from hard real-time by default.
+- [The Linux Kernel documentation](https://docs.kernel.org/) — the kernel's own scheduler documentation, and the entry point for `CONFIG_PREEMPT_RT`, the real-time preemption support merged into mainline as of kernel 6.12; the primary source for how far stock Linux is from hard real-time by default.
