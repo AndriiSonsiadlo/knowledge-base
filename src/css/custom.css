@@ -862,12 +862,12 @@ body {
   text-align-last: left;
 }
 
-.markdown ul,
+.markdown ul:not([role="tablist"]),
 .markdown ol {
   @apply pl-6 mb-4 space-y-2;
 }
 
-.markdown ul {
+.markdown ul:not([role="tablist"]) {
   list-style-type: disc;
 }
 
@@ -875,7 +875,7 @@ body {
   list-style-type: decimal;
 }
 
-.markdown li {
+.markdown li:not([role="tab"]) {
   @apply list-item;
   display: list-item;
 }
