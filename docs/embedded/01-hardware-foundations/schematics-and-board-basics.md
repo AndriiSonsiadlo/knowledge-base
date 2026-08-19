@@ -36,7 +36,7 @@ The two that surprise software engineers are `SB` and `0 Ω` resistors. Both exi
 
 ## Power rails, traced end to end
 
-Every board has a small number of **power rails** — nets that distribute a particular voltage — and tracing them is the first thing to do with an unfamiliar board, because almost every "the board does nothing" problem is a power problem. On the Nucleo-64 the chain looks like this (simplified from UM1724 §6.3, "Power supply and power selection", and its Appendix A schematics):
+Every board has a small number of **power rails** — nets that distribute a particular voltage — and tracing them is the first thing to do with an unfamiliar board, because almost every "the board does nothing" problem is a power problem. On the Nucleo-64 the chain looks like this (simplified from UM1724 Rev 17, §7.5, "Power supply and power selection", and its Appendix A schematics):
 
 ```mermaid
 flowchart LR
@@ -58,10 +58,10 @@ flowchart LR
 
 Four things fall out of that one diagram, and each of them is a real bench symptom:
 
-- **The ST-LINK is powered before the target is.** UM1724 §6.3.1 spells out the sequence: only the ST-LINK section is powered before USB enumeration, because the host offers just 100 mA at that point. The board then requests 300 mA, and only if the host grants it does the target STM32 come up and the red `LD3` light. **A dark `LD3` with a live ST-LINK means the USB host refused the current**, not that your firmware crashed.
-- **`JP5` chooses where the 5 V comes from**, and `JP1` tells the ST-LINK how much current to ask for (UM1724 Table 6). Defaults, from §5.1: `JP1` off, `JP5` on `U5V`, `JP6` on.
-- **`JP6` sits in series with the microcontroller's supply.** Pull the jumper, put an ammeter across the two pins, and you are measuring the STM32's own current draw with no other instrument (UM1724 §6.6). Leave it out with no ammeter and the microcontroller simply is not powered — a genuinely confusing five minutes if you forgot.
-- **`SB2` is the 3.3 V regulator's output link.** UM1724 Table 10 documents that turning `SB2` off disconnects the `LD39050PU33R` output — which is exactly what you do when you want to feed the board 3.3 V from elsewhere (§6.3.3), and exactly what will make an otherwise healthy board look dead if it was disturbed.
+- **The ST-LINK is powered before the target is.** UM1724 §7.5.1 spells out the sequence: only the ST-LINK section is powered before USB enumeration, because the host offers just 100 mA at that point. The board then requests 300 mA, and only if the host grants it does the target STM32 come up and the red `LD3` light. **A dark `LD3` with a live ST-LINK means the USB host refused the current**, not that your firmware crashed.
+- **`JP5` chooses where the 5 V comes from**, and `JP1` tells the ST-LINK how much current to ask for (UM1724 Table 6). Defaults, from §6.1 "Getting started": `JP1` off, `JP5` on `U5V`, `JP6` on.
+- **`JP6` sits in series with the microcontroller's supply.** Pull the jumper, put an ammeter across the two pins, and you are measuring the STM32's own current draw with no other instrument (UM1724 §7.8, "JP6 (IDD)"). Leave it out with no ammeter and the microcontroller simply is not powered — a genuinely confusing five minutes if you forgot.
+- **`SB2` is the 3.3 V regulator's output link.** UM1724 Table 10 documents that turning `SB2` off disconnects the `LD39050PU33R` output — which is exactly what you do when you want to feed the board 3.3 V from elsewhere (§7.5.3), and exactly what will make an otherwise healthy board look dead if it was disturbed.
 
 ## Decoupling capacitors: the components you will never touch but must recognise
 
@@ -85,7 +85,7 @@ The distinction matters when you are asking "why is this pin not going low." A p
 
 This is the whole skill in one example, and it needs three documents.
 
-1. **The board manual says what the LED is.** UM1724 §6.4: "User LD2: the green LED is a user LED connected to Arduino signal D13 corresponding to STM32 I/O `PA5` (pin 21) or `PB13` (pin 34) depending on the STM32 target… when the I/O is HIGH value, the LED is on."
+1. **The board manual says what the LED is.** UM1724 §7.6, "LEDs": "User LD2: the green LED is a user LED connected to Arduino signal D13 corresponding to STM32 I/O `PA5` (pin 21) or `PB13` (pin 34) depending on the STM32 target… when the I/O is HIGH value, the LED is on."
 2. **A per-board table resolves the "depending on."** UM1724 Table 16, "Arduino connectors on NUCLEO-F401RE and NUCLEO-F411RE", lists `CN5` pin 6 = `D13` = `PA5`. So on *this* board it is `PA5`, and driving it high lights the LED.
 3. **A solder bridge can break the connection.** UM1724 Table 10: `SB21 (LD2-LED)` — "ON: Green user LED LD2 is connected to D13 of Arduino signal. OFF: Green user LED LD2 is not connected." Default is on.
 
@@ -115,7 +115,7 @@ UM1724's Appendix A carries the complete Nucleo-64 schematics. Twenty minutes tr
 
 ## References
 
-- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf). §6.3 power supply and selection, §6.4 LEDs, §6.5 push-buttons, §6.6 the `JP6` current-measurement jumper, Table 10 solder bridges, Table 16 Arduino pin mapping, Table 29 ST morpho pin mapping, and Appendix A full schematics. Consulted at Rev 12 (DocID025833).
+- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf). §7.5 power supply and selection, §7.6 LEDs, §7.7 push-buttons, §7.8 the `JP6` current-measurement jumper, Table 10 solder bridges, Table 16 Arduino pin mapping, Table 29 ST morpho pin mapping, and the full schematics appendix. Consulted at Rev 17 (September 2025).
 - STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf), §6.1.6 "Power supply scheme" (Figure 17). The vendor's own decoupling requirement, in the vendor's own words.
 - STMicroelectronics — [**AN2867**, *Guidelines for oscillator design on STM8AF/AL/S and STM32 MCUs/MPUs*](https://www.st.com/resource/en/application_note/an2867-guidelines-for-oscillator-design-on-stm8afals-and-stm32-mcusmpus-stmicroelectronics.pdf). Referenced from both the datasheet and UM1724 for the crystal and load-capacitor part of the schematic; a good example of what an application note is for.
 - KiCad project — [KiCad documentation](https://docs.kicad.org/). Free, open-source schematic capture. Drawing a two-component schematic yourself teaches net and designator conventions faster than reading about them.

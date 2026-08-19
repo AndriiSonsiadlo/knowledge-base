@@ -20,7 +20,7 @@ RM0383 §6.2.6 states it plainly: "After a system reset, the HSI oscillator is s
 
 | Source | What it is | Frequency | Accuracy / notes | Source |
 |---|---|---|---|---|
-| **HSI** | High-Speed Internal RC oscillator | 16 MHz | `±1%` factory-calibrated at 25 °C. Widens to `−4%/+4%` over −10 to 85 °C and `−8%/+5.5%` over −40 to 125 °C. Starts in `2.2 µs` typical | Datasheet Table 39; RM0383 §6.2.2 |
+| **HSI** | High-Speed Internal RC oscillator | 16 MHz | `±1%` factory-calibrated at T<sub>A</sub> = 25 °C. Widens to `−4%/+4%` over T<sub>A</sub> = −10 to 85 °C, `−8%/+4.5%` over −40 to 105 °C, and `−8%/+5.5%` over −40 to 125 °C. Starts in `2.2 µs` typical | Datasheet Table 39; RM0383 §6.2.2 |
 | **HSE** | High-Speed External crystal, resonator, or clock input | 4–26 MHz crystal | Accuracy is the *crystal's*, not the chip's — typically tens of ppm. Starts in about `2 ms` | Datasheet Table 37; RM0383 §6.2.1 |
 | **PLL** | Phase-locked loop multiplying HSI or HSE up | Output 24–100 MHz | VCO runs 100–432 MHz; input must land in 0.95–2.10 MHz; locks in `75–300 µs` | Datasheet Table 41; RM0383 §6.2.3 |
 | **LSI** | Low-Speed Internal RC oscillator | ~32 kHz | Very loose: `17 kHz` min, `32 kHz` typical, `47 kHz` max. Drives the independent watchdog and can wake the chip from Stop/Standby | Datasheet Table 40; RM0383 §6.2.5 |
@@ -67,7 +67,7 @@ Four things in that picture bite people:
 
 An RC oscillator is a resistor and a capacitor: cheap, instant, on-chip, and temperature-dependent. A crystal is a mechanically resonant slice of quartz: expensive, needs two external capacitors and a couple of milliseconds to start, and drifts by tens of parts per million rather than percent. That is roughly a thousandfold difference in stability, and it is the entire reason both exist on the same chip.
 
-Where it matters is asynchronous communication. Put concrete numbers on a UART frame: in 8N1 the receiver finds the start edge, then samples the stop bit about 9.5 bit times later. If the two ends' clocks disagree, the sampling point walks; once the accumulated error reaches half a bit time — roughly `5%` across both ends combined — the frame breaks. Now compare that with the HSI's specification: `±1%` at 25 °C, but `−4%/+4%` across −10 to 85 °C (datasheet Table 39). A link with an HSI-clocked STM32 at one end has already spent most of its error budget on temperature alone, before the other end has contributed anything.
+Where it matters is asynchronous communication. Put concrete numbers on a UART frame: in 8N1 the receiver finds the start edge, then samples the stop bit about 9.5 bit times later. If the two ends' clocks disagree, the sampling point walks; once the accumulated error reaches half a bit time — roughly `5%` across both ends combined — the frame breaks. Now compare that with the HSI's specification: `±1%` at T<sub>A</sub> = 25 °C, but `−4%/+4%` across T<sub>A</sub> = −10 to 85 °C (datasheet Table 39). Those are **ambient** temperatures — Table 39's conditions footnote reads "V<sub>DD</sub> = 3.3 V, T<sub>A</sub> = −40 to 125 °C unless otherwise specified" — so a chip working hard inside a warm enclosure sits further along that curve than the room thermometer suggests. A link with an HSI-clocked STM32 at one end has already spent most of its error budget on temperature alone, before the other end has contributed anything.
 
 This is the practical rule that falls out:
 
@@ -76,7 +76,7 @@ This is the practical rule that falls out:
 - **LSE (32.768 kHz) is what you use for real time**, because the RTC needs to keep running on battery and needs to still be right in a month. LSI cannot do that job at 17–47 kHz.
 
 :::note[ppm, and why it is the unit crystals are sold in]
-Crystal accuracy is quoted in parts per million. The 8 MHz crystal ST recommends for the `X3` footprint on this board is specified at **20 ppm** (UM1724 §6.7.1) — that is 0.002%, about five hundred times tighter than the HSI at room temperature. Twenty ppm is also about 1.7 seconds of drift per day, which is why a wristwatch needs a trimmer and a datalogger needs an RTC that can be corrected.
+Crystal accuracy is quoted in parts per million. The 8 MHz crystal ST recommends for the `X3` footprint on this board is specified at **20 ppm** (UM1724 Rev 17, §7.9.1) — that is 0.002%, about five hundred times tighter than the HSI at room temperature. Twenty ppm is also about 1.7 seconds of drift per day, which is why a wristwatch needs a trimmer and a datalogger needs an RTC that can be corrected.
 :::
 
 ## PLLs and jitter
@@ -104,14 +104,14 @@ The habit that avoids both: in every driver's init function, the first statement
 
 ## Where the clock on your board actually comes from
 
-The Nucleo-64 is more interesting than it looks here, and UM1724 §6.7 explains why. **The `X3` crystal footprint is empty** — the manual says the on-board HSE crystal is "not provided", and lists the recommended part (8 MHz, 16 pF, 20 ppm) for anyone who wants to fit one. Instead, the HSE input can be fed from the ST-LINK microcontroller's clock output: "MCO output of ST-LINK MCU is used as input clock. This frequency cannot be changed, it is fixed at 8 MHz and connected to PF0/PD0/PH0-OSC_IN of the STM32 microcontroller."
+The Nucleo-64 is more interesting than it looks here, and UM1724 Rev 17, §7.9 "OSC clock" explains why. **The `X3` crystal footprint is empty** — the manual says the on-board HSE crystal is "not provided", and lists the recommended part (8 MHz, 16 pF, 20 ppm) for anyone who wants to fit one. Instead, the HSE input can be fed from the ST-LINK microcontroller's clock output: "MCO output of ST-LINK MCU is used as input clock. This frequency cannot be changed, it is fixed at 8 MHz and connected to PF0/PD0/PH0-OSC_IN of the STM32 microcontroller."
 
-Which of those you get depends on the board revision, and UM1724 §6.7.1 is explicit about it:
+Which of those you get depends on the board revision, and UM1724 §7.9.1 is explicit about it:
 
 - **`MB1136 C-01`** — configured as **HSE not used**.
 - **`MB1136 C-02` or higher** — configured to use the **ST-LINK MCO** as clock input.
 
-The revision is on a sticker on the underside of the PCB. The same section-pair (§6.7.2) says the 32.768 kHz `X2` crystal is likewise absent on `C-01` and present from `C-02` onward. So "does this board have a crystal" has a per-board answer, and code that assumes HSE is available will hang waiting for `HSERDY` on a board where nothing is connected to `OSC_IN`. This is a real, common first-hour failure with Nucleo boards, and it is documented in exactly one place.
+The revision is on a sticker on the underside of the PCB. The same section pair (§7.9.2, "OSC 32 KHz clock supply") says the 32.768 kHz `X2` crystal is likewise absent on `C-01` and present from `C-02` onward. So "does this board have a crystal" has a per-board answer, and code that assumes HSE is available will hang waiting for `HSERDY` on a board where nothing is connected to `OSC_IN`. This is a real, common first-hour failure with Nucleo boards, and it is documented in exactly one place.
 
 :::tip[The clock security system exists for this]
 RM0383 §6.2.7: with the CSS enabled, if the HSE fails, "the system clock switches to the HSI oscillator and the HSE oscillator is disabled", and a non-maskable interrupt fires. That turns a dead crystal from a hang into a degraded-but-running system that can log the fault. It costs one bit to enable and is worth it on any product that ships with an external oscillator — though note the NMI "is executed indefinitely unless the CSS interrupt pending bit is cleared", so the handler must clear `CSSC` in `RCC_CIR`.
@@ -127,7 +127,7 @@ RM0383 §6.2.7: with the CSS enabled, if the HSE fails, "the system clock switch
 
 ## References
 
-- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), chapter 6 "Reset and clock control (RCC)". Figure 12 is the clock tree this page's diagram simplifies; §6.2.1–§6.2.7 cover each source, the PLL, SYSCLK selection, and the clock security system. Consulted at Rev 3.
-- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). Table 37 HSE, Table 38 LSE, Table 39 HSI, Table 40 LSI, Table 41 main PLL including jitter and lock time, Table 14 bus frequency limits, Table 10 register boundary addresses. Every frequency and tolerance quoted above.
-- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §6.7 "OSC clock". The per-board-revision answer to "does this board have a crystal", and the solder-bridge configurations for each option.
+- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), chapter 6 "Reset and clock control (RCC)". Figure 12 is the clock tree this page's diagram simplifies; §6.2.1–§6.2.7 cover each source, the PLL, SYSCLK selection, and the clock security system. Consulted at Rev 4 (May 2025).
+- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). Table 37 HSE, Table 38 LSE, Table 39 HSI, Table 40 LSI, Table 41 main PLL including jitter and lock time, Table 14 bus frequency limits, Table 10 register boundary addresses. Every frequency and tolerance quoted above. Consulted at **DS10314 Rev 8** (January 2024).
+- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §7.9 "OSC clock". Consulted at Rev 17 (September 2025). The per-board-revision answer to "does this board have a crystal", and the solder-bridge configurations for each option.
 - STMicroelectronics — [**AN2867**, *Guidelines for oscillator design on STM8AF/AL/S and STM32 MCUs/MPUs*](https://www.st.com/resource/en/application_note/an2867-guidelines-for-oscillator-design-on-stm8afals-and-stm32-mcusmpus-stmicroelectronics.pdf). Cited by both the datasheet and UM1724. Read this before choosing a crystal or its load capacitors — the safety-factor calculation it describes is the difference between an oscillator that starts every time and one that starts on most units.

@@ -19,7 +19,7 @@ Once you know the shape of the set, the whole thing becomes tractable — you st
 | **Datasheet** | *Can I use this part?* Electrical limits, pin assignments, package, timing, current consumption, operating conditions, ordering codes. Numbers with tolerances. | **DS10314** — *STM32F411xC/E datasheet* | ~150 pages |
 | **Reference manual** | *How do I program it?* Every peripheral, every register, every bit field, and the sequences you must follow. No electrical numbers. | **RM0383** — *STM32F411xC/E advanced Arm-based 32-bit MCUs* | ~840 pages |
 | **Errata sheet** | *What is broken in this silicon?* Known hardware defects, which die revisions they affect, and whether a workaround exists. | **ES0287** — *STM32F411xC/xE device errata* | Short — tens of pages |
-| **Application note** | *How do people normally do this?* Design guidance for one specific problem, written once so the support engineers stop answering it. | e.g. **AN2867** — *Oscillator design guide*, cited by both the datasheet and UM1724 | Varies; usually tens of pages |
+| **Application note** | *How do people normally do this?* Design guidance for one specific problem, written once so the support engineers stop answering it. | e.g. **AN2867** — *Guidelines for oscillator design on STM8AF/AL/S and STM32 MCUs/MPUs*, cited by both the datasheet and UM1724 | Varies; usually tens of pages |
 
 Two more sit alongside them for this board, and they matter as much:
 
@@ -34,7 +34,7 @@ Two more sit alongside them for this board, and they matter as much:
 
 A datasheet's first pages are marketing — a feature bullet list and a block diagram. The value is further in, in the numbered tables, and there are three groups worth knowing by name.
 
-**Absolute maximum ratings** are the destruction limits. For the STM32F411, Table 11 ("Voltage characteristics") gives the supply rail as `−0.3 V` to `4.0 V` and the input voltage on a non-5 V-tolerant pin as `VSS − 0.3 V` to `4.0 V`; Table 12 ("Current characteristics") caps the current sunk or sourced by any single I/O pin at `25 mA` and by all I/Os together at `120 mA`. The datasheet's own framing is worth quoting because people misread it constantly: "These are stress ratings only and functional operation of the device at these conditions is not implied" (§6.2). Exceeding them may destroy the part; *approaching* them is already outside the specified behaviour.
+**Absolute maximum ratings** are the destruction limits. For the STM32F411, Table 11 ("Voltage characteristics") gives the supply rail as `−0.3 V` to `4.0 V`, the input voltage on `FT` and `TC` pins as `VSS − 0.3 V` to `VDD + 4.0 V`, and the input voltage on any other pin as `VSS − 0.3 V` to `4.0 V`; Table 12 ("Current characteristics") caps the current sunk or sourced by any single I/O pin at `25 mA` and by all I/Os together at `120 mA`. The datasheet's own framing is worth quoting because people misread it constantly: "These are stress ratings only and functional operation of the device at these conditions is not implied" (§6.2). Exceeding them may destroy the part; *approaching* them is already outside the specified behaviour.
 
 **Operating conditions** are where the part is guaranteed to work. Table 14 gives `VDD` as `1.7 V` to `3.6 V`, the AHB clock as `0` to `100 MHz` in the highest voltage-scaling mode, and — a detail that catches everyone once — the APB1 bus as `0` to `50 MHz` while APB2 goes to `100 MHz`.
 
@@ -68,7 +68,11 @@ Full-text searching "OTYPER" in RM0383 returns dozens of hits scattered across c
 
 ## The errata: the one people skip
 
-The errata sheet is a short document listing defects in the silicon itself: things the chip does that the reference manual says it should not. Every complex chip has them. ST's errata sheets tabulate each limitation against the affected device revisions and label it with whether a workaround exists — ES0287 uses `A` for "workaround available", `P` for partial, and `N` for none.
+The errata sheet is a short document listing defects in the silicon itself: things the chip does that the reference manual says it should not. Every complex chip has them.
+
+ST's errata sheets tabulate each limitation against the *device revisions* it affects. For the STM32F411xC/xE, ES0287 Rev 6 (February 2025) Table 3, "Summary of device limitations", has one status column per silicon revision — `Rev. A`, `Rev. 1` and `Rev. 2` — and fills each cell with a workaround status, defined in §1 as "A = workaround available", "N = no workaround available", "P = partial workaround available". A workaround counts as partial "if it only reduces the rate of occurrence and/or consequences of the limitation, or if it is fully effective for only a subset of instances on the device or in only a subset of operating modes".
+
+So an entry is only relevant to you if it is listed against *your* silicon revision. ES0287 Table 2, "Device variants", ties each revision to a device marking on the package and to a `REV_ID[15:0]` value in the `DBGMCU_IDCODE` register — `Rev. A` is `0x1000` — so you can read your revision out of the chip from the debugger rather than squinting at the package.
 
 It gets skipped for a completely understandable reason: it is the only document in the set whose contents you cannot guess from the title, it is written in dense negative language, and reading it feels like pessimism at a stage where you are trying to get an LED to blink. The cost of skipping it is asymmetric, though. A missing feature announces itself in five minutes. A silicon erratum announces itself as *intermittent* misbehaviour — a bus that hangs one time in ten thousand, a timer that occasionally reports a stale value, a peripheral that must not be reconfigured while a transfer is in flight — and you will spend days assuming your code is wrong, because the reference manual says the hardware works.
 
@@ -82,7 +86,7 @@ The same trap applies one level up: the *series* is STM32F4, the *family* is STM
 
 ## A note on revisions
 
-Every ST document carries a revision number and a date on its cover, and both the content and the *table numbering* change between revisions. The revisions consulted while writing this section are RM0383 Rev 3, the STM32F411xC/E datasheet Rev 7, and UM1724 Rev 12; ST has since published newer revisions of all three. When a table number cited on these pages does not match your copy, the fix is to search for the table's *title* rather than its number — titles are far more stable. When a *value* does not match, believe your copy: it is newer.
+Every ST document carries a revision number and a date on its cover, and both the content and the *table numbering* change between revisions. The revisions consulted for these pages are the STM32F411xC/E datasheet **DS10314 Rev 8** (January 2024), **RM0383 Rev 4** (May 2025), **UM1724 Rev 17** (September 2025), and **ES0287 Rev 6** (February 2025). When a table number cited on these pages does not match your copy, the fix is to search for the table's *title* rather than its number — titles are far more stable than numbers, and the section numbering of UM1724 in particular has shifted between revisions. When a *value* does not match, believe your copy: it is newer.
 
 ## See also
 
@@ -94,8 +98,8 @@ Every ST document carries a revision number and a date on its cover, and both th
 
 ## References
 
-- STMicroelectronics — [**RM0383**, *STM32F411xC/E advanced Arm-based 32-bit MCUs reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf). The programming reference for every peripheral on this part. Consulted here at Rev 3; ST's current revision is newer.
+- STMicroelectronics — [**RM0383**, *STM32F411xC/E advanced Arm-based 32-bit MCUs reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf). The programming reference for every peripheral on this part. Consulted at Rev 4 (May 2025).
 - STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). Absolute maximum ratings (§6.2), operating conditions (§6.3.1), and every per-block characteristics table.
-- STMicroelectronics — [**ES0287**, *STM32F411xC/xE device errata*](https://www.st.com/resource/en/errata_sheet/es0287-stm32f411xcxe-device-errata-stmicroelectronics.pdf). The list of things this silicon gets wrong, with per-revision applicability and workaround status. Read the entries for a peripheral before you use it.
+- STMicroelectronics — [**ES0287**, *STM32F411xC/xE device errata*](https://www.st.com/resource/en/errata_sheet/es0287-stm32f411xcxe-device-errata-stmicroelectronics.pdf). The list of things this silicon gets wrong, with per-revision applicability and workaround status. §1 defines the `A`/`N`/`P` status codes and Table 2 the silicon revisions. Consulted at Rev 6 (February 2025). Read the entries for a peripheral before you use it.
 - STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf). The core-side companion to RM0383: registers, exceptions, NVIC, MPU, and the instruction set.
 - STMicroelectronics — [STM32F411 documentation index](https://www.st.com/en/microcontrollers-microprocessors/stm32f411/documentation.html). The authoritative list of every current document for this family, which is where to go when a revision cited here has moved on.

@@ -48,20 +48,34 @@ For the second direction, the arithmetic is the same arithmetic as above, applie
 
 ### What "5 V tolerant" actually buys you on this part
 
-The STM32F411's pinout table marks each I/O as either `FT` — "5 V tolerant I/O" — or `TC` — "Standard 3.3 V I/O" (datasheet, Table 7 legend). The tolerance is real but it is fenced by three conditions that people routinely miss:
+The datasheet classifies every pin by its **I/O structure**, and the legend has exactly four entries (Table 7, "Legend/abbreviations used in the pinout table"):
 
-1. **It is per pin, not per chip.** On the STM32F411, `PA0-WKUP` and `PB5` are `TC` (datasheet, Table 8, "Pin definitions"). `PB5` is Arduino pin **`D4`** on the Nucleo (UM1724, Table 16) — a header pin, right where a beginner will put a wire.
-2. **It does not apply in every mode.** Table 8's own note reads: "FT = 5 V tolerant except when in analog mode or oscillator mode." Configure an FT pin as an ADC input and its 5 V tolerance is gone.
-3. **The internal pull resistors must be off.** Table 53, note 5: "To sustain a voltage higher than V<sub>DD</sub> +0.3 V, the internal pull-up/pull-down resistors must be disabled."
+| Code | Definition, verbatim |
+|---|---|
+| `FT` | 5 V tolerant I/O |
+| `TC` | Standard 3.3 V I/O |
+| `B` | Dedicated BOOT0 pin |
+| `NRST` | Bidirectional reset pin with embedded weak pull-up resistor |
 
-Even within spec, an FT pin at 5 V is not free: the datasheet allows up to `3 µA` of leakage on an FT/TC input at `V_IN = 5 V`, against `±1 µA` within the normal range (Table 53).
+Only `FT` means 5 V tolerant. `TC` is an ordinary 3.3 V pin, and there is no third grade in between.
+
+Going through Table 8 ("STM32F411xC/xE pin definitions") row by row, this part has **80 I/O rows: 78 are `FT` and exactly two are `TC`** — **`PA0-WKUP`** and **`PB5`**. Both of the two are on the Nucleo's Arduino headers: `PA0` is **`A0`** (`CN8` pin 1, `ADC1_0`) and `PB5` is **`D4`** (`CN9` pin 5), per UM1724 Rev 17, Table 16, "Arduino connectors on NUCLEO-F401RE and NUCLEO-F411RE". The two pins least able to take 5 V are precisely the two a beginner reaches for first.
+
+Even on the 78 `FT` pins the tolerance is fenced by two conditions people routinely miss:
+
+1. **It does not apply in every mode.** Table 8's own note 4 reads: "FT = 5 V tolerant except when in analog mode or oscillator mode (for PC14, PC15, PH0 and PH1)." Configure an `FT` pin as an ADC input and its 5 V tolerance is gone.
+2. **The internal pull resistors must be off.** Table 53, note 5: "To sustain a voltage higher than V<sub>DD</sub> +0.3 V, the internal pull-up/pull-down resistors must be disabled."
+
+Even within spec, an `FT` pin at 5 V is not free: the datasheet's leakage row for `V_IN = 5 V` allows up to `3 µA`, against `±1 µA` within the normal range (Table 53). That row is titled "I/O FT/TC input leakage current" and names both structures, but a leakage figure is not a tolerance rating — what makes a pin 5 V tolerant is the `FT` marking in Table 7 and nothing else.
 
 :::warning[Driving 5 V into a 3.3 V pin destroys it, and it does so quietly]
-The absolute maximum input voltage on a **non**-5 V-tolerant STM32F411 pin is `V_SS − 0.3 V` to `4.0 V` (datasheet, Table 11, "Voltage characteristics"). Five volts is outside that, full stop.
+A `TC` pin is specified as a standard 3.3 V I/O (datasheet, Table 7). Nothing in the datasheet says it will survive 5 V, so 5 V on `PA0-WKUP` or `PB5` is an out-of-specification condition — full stop. For reference, Table 11 ("Voltage characteristics") rates V<sub>IN</sub> on `FT` and `TC` pins at `V_SS − 0.3 V` to `V_DD + 4.0 V`, and on any other pin at `V_SS − 0.3 V` to `4.0 V`; those are destruction limits for the pin structure, not a statement that a `TC` pin works as a 5 V input.
 
-What actually happens is that the pin's internal protection diode to V<sub>DD</sub> starts conducting, and current flows *into the chip's supply rail through your signal wire*. The datasheet caps this at `−5/+0 mA` injected per FT/TC pin and `±25 mA` summed across all pins (Table 12, "Current characteristics"). Below that the part usually survives; above it you get some combination of a dead pin, a chip that resets at random, an ADC that reads wrong on completely unrelated channels — the datasheet warns explicitly that "negative injection disturbs the analog performance of the device" — or a part that works today and fails in three weeks.
+What actually happens above V<sub>DD</sub> is that the pin's internal protection diode to V<sub>DD</sub> starts conducting, and current flows *into the chip's supply rail through your signal wire*. That current is not something you have a budget to spend: Table 12 ("Current characteristics") allows **at most `−5 mA` and no positive injection at all** on `FT` and `TC` pins, `±25 mA` summed over every pin — and these are absolute maximum ratings, which the datasheet itself frames as "stress ratings only… functional operation of the device at these conditions is not implied" (§6.2). Table 52 ("I/O current injection susceptibility") is stricter still per pin: for `PB5`, along with `PB3`, `PB4`, `PB6`–`PB9`, `PC13`–`PC15` and others, the permitted negative injection is `−0 mA` — none.
 
-That last outcome is the dangerous one, because it teaches the wrong lesson. "I connected a 5 V sensor and it worked fine" is not evidence that it was safe. **Check the FT/TC marking for the specific pin, in Table 8, before you connect anything that is not 3.3 V.**
+So the correct reading is "no injected current", not "up to 5 mA of headroom". Inject anyway and you get some combination of a dead pin, a chip that resets at random, an ADC that reads wrong on completely unrelated channels — the datasheet warns explicitly that "negative injection disturbs the analog performance of the device" — or a part that works today and fails in three weeks.
+
+That last outcome is the dangerous one, because it teaches the wrong lesson. "I connected a 5 V sensor and it worked fine" is not evidence that it was safe. **Check the `FT`/`TC` marking for the specific pin, in Table 8, before you connect anything that is not 3.3 V.**
 :::
 
 ## Getting between the two: level shifting
@@ -88,7 +102,7 @@ In practice a floating input:
 
 This is not an exotic condition. RM0383 §8.3.1 is explicit that "during and just after reset, the alternate functions are not active and the I/O ports are configured in input floating mode" — floating is the **default state of almost every pin on the chip** until your firmware says otherwise.
 
-The fix is to give the net a defined idle state. The STM32 has internal pull-up and pull-down resistors on every GPIO, selected by `GPIOx_PUPDR` (RM0383 §8.3.1), with an equivalent resistance of `30–50 kΩ`, typically `40 kΩ` (datasheet, Table 53). That is weak — fine for a button, too weak for a fast bus or a noisy environment, where an external resistor of a few kilohms is the right answer.
+The fix is to give the net a defined idle state. The STM32 has internal pull-up and pull-down resistors on every GPIO, selected by `GPIOx_PUPDR` (RM0383 §8.3.3, "I/O port control registers"), with an equivalent resistance of `30–50 kΩ`, typically `40 kΩ` (datasheet, Table 53). That is weak — fine for a button, too weak for a fast bus or a noisy environment, where an external resistor of a few kilohms is the right answer.
 
 :::tip[The hand test]
 If a reading changes when you wave your hand near a wire, that net is floating or very high impedance. It takes two seconds and it separates "my code is wrong" from "my circuit is wrong" faster than any amount of stepping through a debugger.
@@ -104,7 +118,7 @@ If a reading changes when you wave your hand near a wire, that net is floating o
 
 ## References
 
-- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). Table 11 voltage absolute maximum ratings, Table 12 current absolute maximum ratings, Table 14 general operating conditions, Table 53 I/O static characteristics, Table 54 output voltage characteristics, Table 7/Table 8 per-pin FT and TC markings. Every number on this page comes from here; the revision consulted was Rev 7 (DocID026289).
-- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), §8.3 "GPIO functional description". The reset state of the I/O ports and the `GPIOx_PUPDR` control of the internal pull resistors.
-- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §6.3 and Table 16. Which rail the board actually runs at, and which header pin is which microcontroller pin.
+- STMicroelectronics — [**STM32F411xC/E datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). Table 11 voltage absolute maximum ratings, Table 12 current absolute maximum ratings, Table 14 general operating conditions, Table 52 I/O current injection susceptibility, Table 53 I/O static characteristics, Table 54 output voltage characteristics, Table 7 legend and Table 8 per-pin `FT`/`TC` markings. Every number on this page comes from here; the revision consulted was **DS10314 Rev 8** (January 2024).
+- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), §8.3.1 for the reset state of the I/O ports and §8.3.3 for the `GPIOx_PUPDR` control of the internal pull resistors. Consulted at Rev 4 (May 2025).
+- STMicroelectronics — [**UM1724**, *STM32 Nucleo-64 boards (MB1136)*](https://www.st.com/resource/en/user_manual/um1724-stm32-nucleo64-boards-mb1136-stmicroelectronics.pdf), §7.5 "Power supply and power selection" and Table 16 "Arduino connectors on NUCLEO-F401RE and NUCLEO-F411RE". Which rail the board actually runs at, and which header pin is which microcontroller pin. Consulted at Rev 17 (September 2025).
 - Ben Eater — [Digital logic on a breadboard](https://eater.net/) video series. Free. Watching a logic level be built out of transistors, on real hardware, makes the threshold tables stop feeling arbitrary.
