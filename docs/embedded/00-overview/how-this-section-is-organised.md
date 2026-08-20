@@ -16,22 +16,22 @@ Numeric prefixes (`00`, `01`, `02`...) exist only to order folders on disk — t
 
 | Folder | Question it answers |
 |---|---|
-| `00-overview` | What does "embedded" mean, and what are the words everyone assumes you already know? |
-| `01-hardware-foundations` | What hardware do I choose, and what does a datasheet or schematic actually tell me? |
-| `02-processor-architecture` | How does a Cortex-M core actually work — registers, memory map, pipeline? |
-| `03-toolchain-and-build` | How does source code become a flashable image on this target? |
-| `04-bare-metal-programming` | What runs before `main()`, and how do I write register-level code without an OS? |
-| `05-peripherals-and-drivers` | How do I talk to GPIO, UART/SPI/I2C, DMA, and external memory correctly? |
-| `06-interrupts-timing-and-real-time` | How do interrupts and the NVIC work, and what actually breaks timing determinism? |
-| `07-rtos` | How do tasks, scheduling, and synchronization work — in FreeRTOS and in Zephyr? |
-| `08-connectivity-and-protocols` | How do I get USB, Ethernet/TCP-IP, or wireless working on constrained hardware? |
-| `09-low-power-design` | How do I make a battery-powered design actually last? |
-| `10-embedded-linux` | When is Linux the right call, and how does the boot chain and driver model work? |
-| `11-debugging-and-testing` | How do I debug a hardfault, and how do I test firmware at all? |
-| `12-safety-and-reliability` | What do IEC 61508, ISO 26262, DO-178C, and IEC 62304 actually require of me? |
-| `13-security` | How do I secure boot, storage, and communication on a constrained device? |
-| `14-firmware-lifecycle` | How do I version, update, and support firmware after it ships? |
-| `15-languages-and-practice` | How do I structure firmware well, and what do Rust and MicroPython change? |
+| 📖 `00-overview` | What does "embedded" mean, and what are the words everyone assumes you already know? |
+| 🔧 `01-hardware-foundations` | What hardware do I choose, and what does a datasheet or schematic actually tell me? |
+| 🧠 `02-processor-architecture` | How does a Cortex-M core actually work — registers, memory map, pipeline? |
+| 🛠️ `03-toolchain-and-build` | How does source code become a flashable image on this target? |
+| ⚡ `04-bare-metal-programming` | What runs before `main()`, and how do I write register-level code without an OS? |
+| 🔌 `05-peripherals-and-drivers` | How do I talk to GPIO, UART/SPI/I2C, DMA, and external memory correctly? |
+| ⏱️ `06-interrupts-timing-and-real-time` | How do interrupts and the NVIC work, and what actually breaks timing determinism? |
+| 🧵 `07-rtos` | How do tasks, scheduling, and synchronization work — in FreeRTOS and in Zephyr? |
+| 📡 `08-connectivity-and-protocols` | How do I get USB, Ethernet/TCP-IP, or wireless working on constrained hardware? |
+| 🔋 `09-low-power-design` | How do I make a battery-powered design actually last? |
+| 🐧 `10-embedded-linux` | When is Linux the right call, and how does the boot chain and driver model work? |
+| 🐞 `11-debugging-and-testing` | How do I debug a hardfault, and how do I test firmware at all? |
+| 🛡️ `12-safety-and-reliability` | What do IEC 61508, ISO 26262, DO-178C, and IEC 62304 actually require of me? |
+| 🔒 `13-security` | How do I secure boot, storage, and communication on a constrained device? |
+| ♻️ `14-firmware-lifecycle` | How do I version, update, and support firmware after it ships? |
+| 🧩 `15-languages-and-practice` | How do I structure firmware well, and what do Rust and MicroPython change? |
 
 ## Four learning paths
 

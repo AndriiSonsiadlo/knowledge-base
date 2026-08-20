@@ -29,30 +29,39 @@ for a specific topic and it is not in the sidebar, it has not been published yet
 missing or broken.
 :::
 
-## How this section is organised
+:::info[How this is organised]
+The section is sixteen numbered folders, `00` through `15`, each self-contained around one
+theme — numeric prefixes only order them on disk, the sidebar label comes from each folder's
+`_category_.json`. The full folder map (one row per folder, phrased as the question it answers)
+and the reasoning behind the "link out to `computer-science/` instead of repeating it" policy
+live on [How This Section Is Organised](./00-overview/how-this-section-is-organised.md) — this
+page stays a short index; that one is the expanded reference.
+:::
 
-The section is organised as sixteen numbered folders, `00` through `15`, each self-contained
-around one theme. Numeric prefixes only order the folders on disk; the sidebar label for each
-comes from its `_category_.json`.
+## Sections
 
 | Folder | Covers |
 |---|---|
-| `00-overview` | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
-| `01-hardware-foundations` | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
-| `02-processor-architecture` | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
-| `03-toolchain-and-build` | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
-| `04-bare-metal-programming` | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
-| `05-peripherals-and-drivers` | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
-| `06-interrupts-timing-and-real-time` | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
-| `07-rtos` | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
-| `08-connectivity-and-protocols` | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
-| `09-low-power-design` | Sleep modes, power budgeting, and low-power peripheral design |
-| `10-embedded-linux` | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
-| `11-debugging-and-testing` | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
-| `12-safety-and-reliability` | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
-| `13-security` | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
-| `14-firmware-lifecycle` | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
-| `15-languages-and-practice` | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
+| 📖 [`00-overview`](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
+| 🔧 [`01-hardware-foundations`](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
+| 🧠 [`02-processor-architecture`](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
+| 🛠️ `03-toolchain-and-build` | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
+| ⚡ `04-bare-metal-programming` | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
+| 🔌 `05-peripherals-and-drivers` | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
+| ⏱️ `06-interrupts-timing-and-real-time` | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
+| 🧵 `07-rtos` | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
+| 📡 `08-connectivity-and-protocols` | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
+| 🔋 `09-low-power-design` | Sleep modes, power budgeting, and low-power peripheral design |
+| 🐧 `10-embedded-linux` | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
+| 🐞 `11-debugging-and-testing` | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
+| 🛡️ `12-safety-and-reliability` | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
+| 🔒 `13-security` | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
+| ♻️ `14-firmware-lifecycle` | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
+| 🧩 `15-languages-and-practice` | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
+
+`00-overview` through `02-processor-architecture` are published, so their row links straight to
+the folder's first page; `03` onward stay plain text until their tasks land (folders 03–04 land
+later in this same phase, 05–15 in Phases 2 and 3).
 
 ## Four learning paths
 
