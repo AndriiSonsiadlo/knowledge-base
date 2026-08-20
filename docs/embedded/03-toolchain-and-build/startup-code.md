@@ -32,7 +32,7 @@ flowchart TD
     RH --> CPY["Copy .data<br/>from _sidata to _sdata.._edata"]
     CPY --> ZER["Zero .bss<br/>_sbss.._ebss"]
     ZER --> OK(["Globals are now valid<br/>nothing before this point may touch one"])
-    OK --> SI["SystemInit, optional<br/>VTOR, FPU enable, clock tree"]
+    OK --> SI["SystemInit, weak no-op by default<br/>VTOR, FPU enable, clock tree"]
     SI --> LIA["__libc_init_array<br/>walks .preinit_array and .init_array"]
     LIA --> M["main"]
     M --> RET{"Does main return?"}
@@ -116,7 +116,11 @@ extern uint32_t _ebss;     /* .bss end in RAM                */
 
 extern void __libc_init_array(void);
 extern int  main(void);
-extern void SystemInit(void);   /* optional; see below */
+
+/* Weak no-op so this file links on its own. Define a strong SystemInit()
+   anywhere in the project and it replaces this one -- same mechanism as the
+   handler aliases above. See the note under this listing. */
+__attribute__((weak)) void SystemInit(void) { }
 
 __attribute__((noreturn))
 void Reset_Handler(void)
@@ -135,7 +139,8 @@ void Reset_Handler(void)
 
     /* --- from here on, globals are valid --- */
 
-    /* 3. Optional low-level init: VTOR, FPU enable, clock tree. */
+    /* 3. Low-level init: VTOR, FPU enable, clock tree.
+          No-op unless the project defines a strong SystemInit(). */
     SystemInit();
 
     /* 4. Run C++ static constructors and __attribute__((constructor)) functions. */
@@ -154,7 +159,9 @@ void Reset_Handler(void)
 
 **Why the loops use word pointers.** `_sdata` and `_edata` are 4-byte-aligned by the `ALIGN(4)` directives in the linker script, so word copies are safe and are four times faster than byte copies. If you change the script's alignment, change this.
 
-**`SystemInit()` is optional and its placement is a real decision.** CMSIS-Core's convention is that `SystemInit` runs from `Reset_Handler` and does only the minimum a device needs before C code is safe — on STM32 parts ST's version enables the FPU's coprocessor access and sets `SCB->VTOR`. Two rules govern it:
+**`SystemInit()` is defined weak here so the file links standalone.** The call is unconditional — what is optional is whether you *supply* one. As written above it resolves to the empty weak definition and costs a `bx lr`; define a strong `SystemInit()` in any other translation unit and the linker uses yours instead, with no edit to this file. That is the same weak-symbol mechanism the handler aliases use, and it is why vendor startup files can call `SystemInit` without knowing whether your project has one.
+
+CMSIS-Core's convention is that `SystemInit` runs from `Reset_Handler` and does only the minimum a device needs before C code is safe — on STM32 parts ST's version enables the FPU's coprocessor access and sets `SCB->VTOR`. Two rules govern it:
 
 - If you call it **before** the `.data` copy — which some vendor startup files do, in order to configure external RAM that `.data` might live in — it must not touch a single global. That is a strong constraint and it is easy to violate accidentally through a HAL function.
 - Configuring the full clock tree here is a choice, not a requirement. Doing it late, from `main`, is easier to debug because you have a working runtime when it fails; doing it early means every timing constant is correct from the first instruction. Bare-metal projects in this section do it from `main`.
