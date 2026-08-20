@@ -70,7 +70,7 @@ Arm tells you the core name and you look up what it implies. RISC-V tells you th
 | `V` | Vector | The Helium/NEON analogue. Rare on small MCUs. |
 | `G` | Shorthand for `IMAFDZicsr_Zifencei` | "General purpose". |
 
-So `RV32IMAC` is a 32-bit core with multiply/divide, atomics and compressed instructions — and **no floating-point unit**, which is the string the ESP32-C3 and many other MCU-class parts carry. `RV32EC` is the ten-cent end of the market. The string goes straight into the compiler: `-march=rv32imac -mabi=ilp32`. Get it wrong and you either fail to link against a differently-built libc or execute an instruction the silicon does not implement.
+So `RV32IMAC` is a 32-bit core with multiply/divide, atomics and compressed instructions — and **no floating-point unit**, which is the string the ESP32-C6 and many other MCU-class parts carry. The earlier ESP32-C3 is `RV32IMC` — one letter apart, and that letter is the atomics an RTOS wants for its `lr.w`/`sc.w` primitives. `RV32EC` is the ten-cent end of the market. The string goes straight into the compiler: `-march=rv32imac -mabi=ilp32`. Get it wrong and you either fail to link against a differently-built libc or execute an instruction the silicon does not implement.
 
 This is the mental shift that matters most. On Arm, "Cortex-M4" narrows things down and the vendor's optional choices are a short list ([The Cortex-M Family](./arm-cortex-m-profiles.md) covers reading them out). On RISC-V, the ISA string *is* the contract, and it is the first thing to look for in a datasheet.
 

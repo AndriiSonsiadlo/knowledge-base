@@ -80,7 +80,7 @@ SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk   /* processor clock, not AHB/8      
 
 Four behaviours that are easy to get wrong:
 
-**The reload value is N−1.** The counter counts *through* zero, so a reload of `N-1` produces a period of `N` clocks. Writing `100000` rather than `99999` gives a tick that is one part in 100,000 slow — invisible on an oscilloscope, and about 8.6 seconds of drift per day.
+**The reload value is N−1.** The counter counts *through* zero, so a reload of `N-1` produces a period of `N` clocks. Writing `100000` rather than `99999` gives a tick that is one part in 100,000 slow — invisible on an oscilloscope, and about 0.86 seconds of drift per day.
 
 **Writing `STK_VAL` does not raise the interrupt.** It clears the counter and `COUNTFLAG`; the exception logic is untouched. This is the documented way to restart the timer cleanly.
 

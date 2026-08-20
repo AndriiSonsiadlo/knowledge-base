@@ -82,7 +82,7 @@ The shape of the conclusion is stable even if the exact figures are not: with th
 
 ## Lazy stacking
 
-The FPU adds 17 words of context — `S0`–`S15` plus `FPSCR` plus a reserved word — to what the hardware would have to push on every exception. Pushing that unconditionally would nearly triple interrupt latency for the overwhelmingly common case of a handler that never touches a float. **Lazy stacking** is Arm's answer, and it is the default: `FPCCR.ASPEN` and `FPCCR.LSPEN` both reset to 1 (*Armv7-M ARM* DDI 0403E.e §B1.5.5).
+The FPU adds 18 words of context — `S0`–`S15` plus `FPSCR` plus a reserved word — to what the hardware would have to push on every exception. Pushing that unconditionally would nearly triple interrupt latency for the overwhelmingly common case of a handler that never touches a float. **Lazy stacking** is Arm's answer, and it is the default: `FPCCR.ASPEN` and `FPCCR.LSPEN` both reset to 1 (*Armv7-M ARM* DDI 0403E.e §B1.5.5).
 
 Here is the sequence, and it is worth being precise because the two halves are usually conflated:
 
