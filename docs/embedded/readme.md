@@ -38,22 +38,22 @@ Numeric prefixes (`00`, `01`, `02`...) exist only to order folders on disk — t
 
 | Section | Covers |
 |---|---|
-| <Icon name="book-open" /> [Overview](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
-| <Icon name="wrench" /> [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
-| <Icon name="cpu" /> [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
-| <Icon name="hammer" /> [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
-| <Icon name="zap" /> [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
-| <Icon name="plug" /> Peripherals and Drivers | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
-| <Icon name="timer" /> Interrupts, Timing and Real-Time | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
-| <Icon name="git-fork" /> RTOS | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
-| <Icon name="wifi" /> Connectivity and Protocols | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
-| <Icon name="battery" /> Low-Power Design | Sleep modes, power budgeting, and low-power peripheral design |
-| <Icon name="terminal" /> Embedded Linux | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
-| <Icon name="bug" /> Debugging and Testing | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
-| <Icon name="shield" /> Safety and Reliability | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
-| <Icon name="lock" /> Security | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
-| <Icon name="refresh-cw" /> Firmware Lifecycle | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
-| <Icon name="puzzle" /> Languages and Practice | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
+| <Icon icon="lucide:book-open" inline /> [Overview](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
+| <Icon icon="lucide:wrench" inline /> [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
+| <Icon icon="lucide:cpu" inline /> [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
+| <Icon icon="lucide:hammer" inline /> [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
+| <Icon icon="lucide:zap" inline /> [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
+| <Icon icon="lucide:plug" inline /> Peripherals and Drivers | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
+| <Icon icon="lucide:timer" inline /> Interrupts, Timing and Real-Time | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
+| <Icon icon="lucide:git-fork" inline /> RTOS | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
+| <Icon icon="lucide:wifi" inline /> Connectivity and Protocols | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
+| <Icon icon="lucide:battery" inline /> Low-Power Design | Sleep modes, power budgeting, and low-power peripheral design |
+| <Icon icon="lucide:terminal" inline /> Embedded Linux | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
+| <Icon icon="lucide:bug" inline /> Debugging and Testing | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
+| <Icon icon="lucide:shield" inline /> Safety and Reliability | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
+| <Icon icon="lucide:lock" inline /> Security | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
+| <Icon icon="lucide:refresh-cw" inline /> Firmware Lifecycle | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
+| <Icon icon="lucide:puzzle" inline /> Languages and Practice | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
 
 Overview through Bare-Metal Programming are published, so their row links straight to
 the folder's first page; `05` onward stay plain text until their tasks land in Phases 2 and 3.
