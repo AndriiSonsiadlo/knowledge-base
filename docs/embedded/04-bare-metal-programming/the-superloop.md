@@ -179,16 +179,20 @@ Two details that are easy to get wrong:
 
 The superloop's one number is the **worst-case loop period**: the sum of the worst-case execution time of every task that can run in the same pass, plus the interrupt time stolen from it. That number is the latency floor for anything the loop must respond to.
 
+The numbers below are an illustration of the method, not measurements from any particular board — yours come from a GPIO toggle and a scope, and from the timing tables in your part's datasheet. What transfers is the shape of the table, not the figures in it.
+
 | Task | Typical | Worst case | When the worst case happens |
 |---|---|---|---|
 | `command_task` | 5 µs | 400 µs | A full 64-byte line arrives at once and `dispatch()` runs |
 | `sensor_task` | 30 µs | 30 µs | Fixed — reads a register the ISR already filled |
 | `control_task` | 80 µs | 80 µs | Fixed-point PID, no branches on data |
 | `display_task` | 0 µs | 12 ms | Full-screen SPI refresh at 100 Hz frame rate |
-| `log_task` | 0 µs | 25 ms | Flash page erase blocks the bus |
-| **Loop worst case** | | **≈ 37.5 ms** | All of them in one pass, which is rare but not impossible |
+| `log_task` | 0 µs | ~400 ms | A flash **sector** erase, which stalls the flash bus |
+| **Loop worst case** | | **≈ 412 ms** | All of them in one pass, which is rare but not impossible |
 
-The typical column is irrelevant to correctness. If a button must be acknowledged within 20 ms and the loop can take 37.5 ms, the design is wrong even though it will pass every test you run by hand, because the two slow tasks rarely coincide. This is the value of writing the table down: the failure is arithmetic, and it is visible before it is a bug.
+The `log_task` row is the one that ruins the budget, and it is worth being precise about why it is so large. The smallest erasable unit on an STM32F411 is a 16 KB **sector**, not a page — the part has no page erase at all — and sector erase times on the STM32F4 family are measured in *hundreds of milliseconds*, rising with sector size and falling supply voltage. The exact figures are in the flash memory characteristics table of the device datasheet (DS10314 for the F411xC/E), not in the reference manual, and they vary enough between sector sizes and voltage ranges that the only correct thing to do is look up the row for your part. The `~400 ms` above is a round stand-in of the right order of magnitude, not a datasheet value.
+
+The typical column is irrelevant to correctness. If a button must be acknowledged within 20 ms and the loop can take 412 ms, the design is wrong even though it will pass every test you run by hand, because the slow task rarely runs. This is the value of writing the table down: the failure is arithmetic, and it is visible before it is a bug.
 
 The remedies, in the order to try them:
 
@@ -212,7 +216,7 @@ Equally worth stating: none of the following is a reason to leave. Task count on
 :::warning[The feature that worked, added to the loop, that broke a feature nobody touched]
 The characteristic superloop bug is a regression in code you did not modify.
 
-You add logging. `log_task` writes to flash, and a flash page erase on an STM32F4 stalls for up to 25 ms — worse, the erase blocks the flash bus, so *code fetch* stalls too and the CPU is not merely busy, it is stopped (RM0383 §3.6.2 on flash program/erase timing). The loop period goes from 500 µs to 25 ms in the passes where logging happens. Meanwhile the encoder task, which was written months ago and has not been edited, counts pulses by polling a pin. It was sampling at 2 kHz and needed 1 kHz. Now it samples once per 25 ms in those passes and loses counts. The position drifts, slowly, only while logging is enabled.
+You add logging. `log_task` writes to flash, and eventually it has to erase — and on an STM32F411 the smallest erasable unit is a 16 KB sector, which takes *hundreds of milliseconds*. Worse, an erase or program operation stalls accesses to the flash, so *code fetch* stalls too and the CPU is not merely busy, it is stopped (RM0383 Rev 4 §3.5 "Erase and program operations", §3.5.3 "Erase"; the timings themselves are in the DS10314 datasheet's flash characteristics table). The loop period goes from 500 µs to several hundred milliseconds in the passes where an erase happens. Meanwhile the encoder task, which was written months ago and has not been edited, counts pulses by polling a pin. It was sampling at 2 kHz and needed 1 kHz. Now it samples once in that entire window and loses counts. The position drifts, slowly, only while logging is enabled.
 
 Nothing in the diff touched the encoder. The blame lands on the encoder code, because that is where the wrong number appears, and the person debugging it goes looking for a hardware problem in a subsystem that is fine.
 
@@ -237,4 +241,4 @@ Three habits that prevent this outright:
 - Miro Samek — [***Practical UML Statecharts in C/C++***](https://www.state-machine.com/psicc2), 2nd edition, and the free [**"Modern Embedded Systems Programming"** video course](https://www.state-machine.com/video-course). Lessons 39–41 build a non-blocking event loop and the run-to-completion model directly; the book's chapters 2–3 cover the state-machine implementation techniques (nested switch, state tables, state pointers) the parser above uses the simplest of.
 - Jack Ganssle — [**"A Guide to Debouncing"**](http://www.ganssle.com/debouncing.htm) and the [**Embedded Muse**](http://www.ganssle.com/tem-back.htm) archive. The debounce paper is a worked non-blocking-state-machine example with real measurements of switch bounce durations, which is where the periods in a task table should come from.
 - Linux kernel — [**`include/linux/jiffies.h`**](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/linux/jiffies.h). The `time_after`/`time_before` macros and their `(long)(a) - (long)(b) < 0` formulation — the wrap-safe comparison the scheduler above depends on, with the kernel's own comment explaining why the naive form is wrong.
-- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), Rev 4. §3.6 for flash program and erase operations and the bus stall during them — the source of the 25 ms figure in the warning above.
+- STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), Rev 4. §3.5 "Erase and program operations" and §3.5.3 "Erase" for the sector-erase model — the STM32F411 has no page erase, only 16 KB, 64 KB and 128 KB sectors — and for the fact that flash accesses stall while an erase or program is in progress, which is the bus-stall claim in the warning above. Note that RM0383 does **not** give erase *timings*; those are in STMicroelectronics — [**DS10314**, *STM32F411xC/E datasheet*](https://www.st.com/resource/en/datasheet/stm32f411re.pdf), "Flash memory characteristics", where sector erase times are given per sector size and supply-voltage range.

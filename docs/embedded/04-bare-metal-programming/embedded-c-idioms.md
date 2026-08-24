@@ -112,7 +112,7 @@ _Static_assert(sizeof(msg_t) == 7, "protocol says 7 bytes on the wire");
 _Static_assert(offsetof(msg_t, crc) == 5, "crc must follow value immediately");
 ```
 
-Without `packed` the same struct is **12 bytes** on ARM, not 7 — the compiler inserts three padding bytes before `value` and one after `crc`. Sending it over a wire, writing it to flash, or comparing it with `memcmp` are all then wrong in a way no test on a single target will reveal. The `_Static_assert` costs nothing and fails at compile time on the day the layout changes.
+Without `packed` the same struct is **12 bytes** on ARM, not 7 — the compiler inserts three padding bytes before `value` (to 4-align it at offset 4) and two after `crc` (to round the struct up to a multiple of its 4-byte alignment). Sending it over a wire, writing it to flash, or comparing it with `memcmp` are all then wrong in a way no test on a single target will reveal. The `_Static_assert` costs nothing and fails at compile time on the day the layout changes.
 
 ## Bitfields are not for hardware registers
 
@@ -134,9 +134,28 @@ set_b:
         bx      lr
 ```
 
-The compiler correctly noticed that field `b` lives entirely within the first byte, so it used a byte access. That is a perfectly legal optimisation on memory. On a peripheral it can be a disaster: a great many hardware registers are documented as 32-bit access only, and a byte write to them is ignored, or writes the wrong thing, or generates a bus fault. Nothing in the C source says "this must be one 32-bit store", and nothing in the type system can say it.
+The compiler correctly noticed that field `b` lives entirely within the first byte, so it used a byte access. That is a perfectly legal optimisation on memory. On a peripheral it can be a disaster: a great many hardware registers are documented as 32-bit access only, and a byte write to them is ignored, or writes the wrong thing, or generates a bus fault. Nothing in the C source says "this must be one 32-bit store".
 
-That is the decisive objection, and there are four more:
+:::note[The struct above is not `volatile`, and that matters here]
+A real register would be, and on ARM that changes this particular listing. The Arm EABI mandates that a `volatile` bitfield is accessed using the width of its declared container type, which GCC implements as `-fstrict-volatile-bitfields` — on by default for ARM targets. Declaring the same three fields `volatile uint32_t` and recompiling gives:
+
+```armasm
+set_vb:
+        ldr     r3, [r0, #0]       @ full 32-bit read — the ARM EABI rule
+        movs    r2, #5
+        bfi     r3, r2, #3, #5
+        str     r3, [r0, #0]       @ full 32-bit write
+        bx      lr
+```
+
+*GCC 14.2.Rel1, `-Os -mcpu=cortex-m4 -mthumb`, with and without `-fno-strict-volatile-bitfields` — identical output in this case.*
+
+So on ARM GCC with `volatile`, the access-width objection does not bite. It bites on targets or toolchains without that ABI rule, on compilers that do not implement it, and if the flag is ever turned off — and it depends on an ABI guarantee rather than on anything the C standard promises, which is a thin thing to build a register map on.
+
+The width objection is therefore the least portable of the five, not the strongest. **Each of the four below is independently sufficient**, and all four apply even in the `volatile` ARM case above — note that the listing is still a `ldr`…`str` read-modify-write, not one atomic operation.
+:::
+
+The remaining objections:
 
 - **Bit order within a unit is implementation-defined.** C17 §6.7.2.1¶11: whether the first declared field occupies the low-order or high-order bits is up to the implementation. GCC on ARM puts it low; another compiler may not. Your register map is then silently mirrored.
 - **The allocation unit and padding are implementation-defined too** (§6.7.2.1¶11). Whether a field that would straddle a boundary is split or moved is not specified.
@@ -253,7 +272,7 @@ Three habits, each about ten seconds of typing:
 - ISO/IEC — **9899:2018** (C17). §6.7.2.1¶11 for bitfields: the implementation-defined allocation order within a storage unit and the implementation-defined addressable allocation unit — the two clauses that make bitfield register maps non-portable; §6.3.1.1 for the integer promotions behind the `p[0] << 24` trap; §6.5.7 for shift behaviour, including the undefined result of shifting into the sign bit; §6.7.9 for designated initialisers and the zero-initialisation of omitted members. The freely available [N2310 working draft](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n2310.pdf) tracks the published text closely.
 - Carnegie Mellon University SEI — [**CERT C Coding Standard**](https://wiki.sei.cmu.edu/confluence/display/c/SEI+CERT+C+Coding+Standard). EXP36-C (do not cast pointers to more strictly aligned types) is the rule the `*(uint32_t *)(buf + 1)` example violates; INT13-C on bitwise operators and unsigned operands; INT34-C on shifts; EXP11-C on type-punning; and the "Bit Manipulation" recommendations covering the `U` suffix idiom.
 - MISRA — [***MISRA C:2012***](https://misra.org.uk/product/misra-c2012-third-edition-first-revision/), third edition, first revision. Directive 4.6 (use typedefs indicating size and signedness), Rule 6.1 and 6.2 on permitted bitfield types, Rule 8.7 and 8.8 on internal linkage and `static`, Rule 10.x on the essential type model, and Rule 15.6 on compound statements — the codified forms of most of the table above.
-- Free Software Foundation — [**GCC manual, "Common Type Attributes"**](https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html) and [**"Structures, Unions, Enumerations, and Bit-Fields Implementation"**](https://gcc.gnu.org/onlinedocs/gcc/Structures-unions-enumerations-and-bit-fields-implementation.html). `packed` and `aligned`, and GCC's documented answers to every question C17 §6.7.2.1 leaves implementation-defined — which is the only reason the bitfield layout on your target is predictable at all.
+- Free Software Foundation — [**GCC manual, "Common Type Attributes"**](https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html) and [**"Structures, Unions, Enumerations, and Bit-Fields Implementation"**](https://gcc.gnu.org/onlinedocs/gcc/Structures-unions-enumerations-and-bit-fields-implementation.html). `packed` and `aligned`, and GCC's documented answers to every question C17 §6.7.2.1 leaves implementation-defined — which is the only reason the bitfield layout on your target is predictable at all. See also [**`-fstrict-volatile-bitfields`**](https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html) in "Options for Code Generation Conventions": the flag that makes a `volatile` bitfield be accessed at the width of its declared type, enabled by default where the target ABI requires it, as the Arm EABI does.
 - Arm — [**Armv7-M Architecture Reference Manual**](https://developer.arm.com/documentation/ddi0403/latest/) (DDI 0403), §A3.2 "Alignment support". Which instructions support unaligned access (`LDR`, `LDRH` and their store forms) and which never do (`LDM`, `STM`, `LDRD`, `STRD`, and all exclusive accesses); `CCR.UNALIGN_TRP` for turning permitted unaligned accesses into UsageFaults. The Armv6-M manual's corresponding section states that unaligned access is not supported at all, which is what the Cortex-M0 listing above reflects.
 
 *Instruction listings on this page were produced with Arm GNU Toolchain 14.2.Rel1 (GCC 14.2.1) at `-Os -mthumb`, targeting `-mcpu=cortex-m4` and `-mcpu=cortex-m0`.*
