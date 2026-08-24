@@ -8,7 +8,6 @@ tags: [computer-science, buses, i2c, spi, uart, embedded, serial]
 
 # Serial Buses — I2C, SPI & UART
 
-## Overview
 
 Below the level of PCIe and USB, most chip-to-chip communication on a circuit board — a sensor
 talking to a microcontroller, an EEPROM storing settings, a display taking pixel data — happens over

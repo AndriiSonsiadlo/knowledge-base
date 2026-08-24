@@ -8,7 +8,6 @@ tags: [computer-science, networking, ethernet, mac-address, arp, switches]
 
 # The Data Link Layer
 
-## Overview
 
 The data link layer is responsible for moving frames between devices on the *same* local network
 segment — the "last hop" addressing problem, solved before a packet ever needs to think about

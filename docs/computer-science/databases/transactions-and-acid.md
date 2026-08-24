@@ -8,7 +8,6 @@ tags: [computer-science, databases, transactions, acid, isolation, mvcc]
 
 # Transactions & ACID
 
-## Overview
 
 A **transaction** groups multiple reads/writes into a single logical unit of work. ACID —
 **A**tomicity, **C**onsistency, **I**solation, **D**urability — is the set of guarantees a

@@ -8,7 +8,6 @@ tags: [computer-science, networking, tcp, udp, congestion-control, flow-control]
 
 # The Transport Layer: TCP and UDP
 
-## Overview
 
 The transport layer is where "get some bytes from A to B" becomes either a reliable, ordered
 **stream** (TCP) or a fast, minimal, unordered **datagram** service (UDP). Almost everything you do

@@ -8,7 +8,6 @@ tags: [computer-science, networking, ip, subnetting, cidr, routing, nat]
 
 # The Network Layer and Routing
 
-## Overview
 
 The network layer's job is addressing and forwarding *across* different networks — the piece that
 lets a packet leave your home LAN, cross however many intermediate networks, and arrive at a server

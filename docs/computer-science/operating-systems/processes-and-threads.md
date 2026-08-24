@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, processes, threads, context-switch]
 
 # Processes & Threads
 
-## Overview
 
 A **process** is the OS's unit of isolation: a running program with its own private address space,
 open file descriptors, and execution state, walled off from every other process by the kernel. A

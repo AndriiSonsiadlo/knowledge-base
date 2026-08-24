@@ -8,7 +8,6 @@ tags: [cmake, testing, integration, best-practices]
 
 # Test Integration
 
-## Overview
 
 Test integration in CMake involves structuring your project to support different types of tests (unit, integration, system), managing test dependencies, and creating a smooth testing workflow. This goes beyond basic CTest usage to build a comprehensive testing strategy.
 

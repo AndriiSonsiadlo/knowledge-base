@@ -8,7 +8,6 @@ tags: [computer-science, protocols, http, dns, tls]
 
 # Application Protocols — Overview
 
-## Overview
 
 Application protocols define the actual *content and semantics* of messages exchanged over a network
 connection — as opposed to the [transport/network layers](../computer-networks/intro.md), which only

@@ -8,7 +8,6 @@ tags: [computer-science, cpu, pipelining, hazards]
 
 # Pipelining
 
-## Overview
 
 Pipelining overlaps the fetch-decode-execute stages of *multiple* instructions so that, once the
 pipeline is full, the CPU completes roughly one instruction per clock cycle instead of one every four

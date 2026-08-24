@@ -7,7 +7,6 @@ tags: [pandas, missing-data, data-cleaning]
 
 # Missing Data
 
-## Overview
 
 Missing data appears as `NaN` (Not a Number), `None`, or `NaT` (Not a Time) in pandas. Handling it correctly is crucial for data analysis.
 

@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, virtual-memory, paging, thrashing]
 
 # Memory Management
 
-## Overview
 
 The OS gives every process the illusion of a large, private, contiguous address space, even though
 physical RAM is smaller, shared among many processes, and fragmented. It does this with **virtual

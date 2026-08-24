@@ -8,7 +8,6 @@ tags: [computer-science, databases, indexing, b-tree, lsm-tree, storage-engines]
 
 # Indexing & Storage Engines
 
-## Overview
 
 Without an index, finding a row that matches a condition means reading every row in the table — a
 **full table scan**. That's fine for a hundred rows and disastrous for a hundred million. An index is

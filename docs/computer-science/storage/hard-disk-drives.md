@@ -8,7 +8,6 @@ tags: [computer-science, storage, hdd, disk, seek-time, rpm]
 
 # Hard Disk Drives (HDDs)
 
-## Overview
 
 A **hard disk drive** stores data as magnetized regions on spinning platters, read and written by a
 head that flies just above the surface on a moving actuator arm. Every part of that description is

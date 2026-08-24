@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, kernel, processes]
 
 # Operating Systems — Overview
 
-## Overview
 
 An operating system's job is to let multiple programs safely share one machine's hardware — CPU,
 RAM, storage, and I/O devices — without those programs having to coordinate with each other directly

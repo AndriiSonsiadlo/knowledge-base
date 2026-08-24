@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, complexity, big-o]
 
 # Big-O Notation
 
-## Overview
 
 Big-O describes an **upper bound on growth**. Saying an algorithm is `O(n²)` claims that beyond some
 input size, its cost is at most a constant multiple of n² — never that it *is* n², and never anything

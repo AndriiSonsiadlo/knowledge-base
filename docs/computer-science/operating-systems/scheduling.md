@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, scheduling, cfs, round-robin]
 
 # Scheduling
 
-## Overview
 
 There are almost always more runnable threads than CPU cores. The **scheduler** is the kernel
 component that decides which thread runs on which core for how long. Every scheduling policy is a

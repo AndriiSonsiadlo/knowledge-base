@@ -8,7 +8,6 @@ tags: [computer-science, overview, von-neumann, abstraction]
 
 # How Computers Work — A Mental Model
 
-## Overview
 
 A computer is a stack of **abstraction layers**. Each layer hides the complexity of the one below
 it and exposes a simpler interface to the one above it. You write a Python loop; underneath, a CPU

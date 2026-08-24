@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, backtracking, recursion]
 
 # Backtracking
 
-## Overview
 
 Backtracking searches a space of candidate solutions by building them one choice at a time, and
 abandoning a partial candidate the moment it cannot possibly lead to a valid one. It is

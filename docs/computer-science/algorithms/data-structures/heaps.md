@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, heap, priority-queue]
 
 # Heaps & Priority Queues
 
-## Overview
 
 A **priority queue** answers one question: *what is the most important item right now?* A **binary
 heap** is the standard way to implement it — a tree whose only ordering rule is that a parent

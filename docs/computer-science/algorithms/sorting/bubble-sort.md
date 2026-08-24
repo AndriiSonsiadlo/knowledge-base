@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, bubble-sort]
 
 # Bubble Sort
 
-## Overview
 
 Bubble sort repeatedly walks the list comparing adjacent pairs and swapping them when they are out of
 order. Each pass carries the largest remaining element to the end — it "bubbles up" — so after `k`

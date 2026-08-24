@@ -8,7 +8,6 @@ tags: [computer-science, storage, nvme, sata, ahci, pcie, m2]
 
 # NVMe & Storage Interfaces
 
-## Overview
 
 The physical storage medium (platters, NAND cells) is only half the story — data still has to travel
 between the drive and the CPU over some standardized **interface**. That interface stack evolved

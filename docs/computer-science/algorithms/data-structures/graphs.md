@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, graph]
 
 # Graphs
 
-## Overview
 
 A graph is a set of **vertices** and a set of **edges** connecting them. That is nearly no structure
 at all, which is precisely why it models so much: road networks, social connections, package

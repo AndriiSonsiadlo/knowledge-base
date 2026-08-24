@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, hash-table, hashing]
 
 # Hash Tables
 
-## Overview
 
 A hash table turns a key into an array index by running it through a **hash function**, then reads or
 writes that slot directly. Because indexing an array is O(1), lookup by arbitrary key becomes O(1)

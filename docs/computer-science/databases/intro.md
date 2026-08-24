@@ -8,7 +8,6 @@ tags: [computer-science, databases, acid, indexing]
 
 # Databases — Overview
 
-## Overview
 
 A database management system (DBMS) exists to store data reliably, query it efficiently, and let
 multiple clients read and write it concurrently without corrupting it — three goals that are each

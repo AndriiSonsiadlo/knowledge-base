@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, binary, hexadecimal, bitwise]
 
 # Binary, Hex, and Bitwise Building Blocks
 
-## Overview
 
 Computers store everything as fixed-width sequences of bits (`0`/`1`). **Binary** is how the
 hardware sees a value; **hexadecimal** is a compact, human-friendly way to *write* the same bits

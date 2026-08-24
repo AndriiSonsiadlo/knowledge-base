@@ -7,7 +7,6 @@ tags: [ pandas, data-analysis, python ]
 
 # Reading and Writing Data
 
-## Overview
 
 **_pandas_** can read from and write to many file formats. The most common pattern is `pd.read_*()`
 for reading and `df.to_*()` for writing.

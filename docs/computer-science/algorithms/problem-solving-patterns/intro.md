@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns]
 
 # Problem-Solving Patterns — Overview
 
-## Overview
 
 The named algorithms in the earlier sections are instances of a smaller number of recurring
 **strategies**. Recognising the strategy is what lets you solve a problem you have never seen, and it

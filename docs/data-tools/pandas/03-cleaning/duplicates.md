@@ -7,7 +7,6 @@ tags: [pandas, duplicates, data-cleaning]
 
 # Handling Duplicates
 
-## Overview
 
 Duplicate rows are common in real-world data. **_pandas_** provides simple methods to find and remove them.
 

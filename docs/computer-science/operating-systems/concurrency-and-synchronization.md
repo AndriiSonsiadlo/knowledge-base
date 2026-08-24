@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, concurrency, mutex, semaphore, deadl
 
 # Concurrency & Synchronization
 
-## Overview
 
 Threads within a process share memory, which makes communication cheap but introduces a real hazard:
 if two threads read and write the same data without coordination, the outcome depends on the exact

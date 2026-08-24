@@ -8,7 +8,6 @@ tags: [computer-science, databases, sql, relational-model, normalization]
 
 # Relational Model & SQL
 
-## Overview
 
 The relational model, introduced by Edgar F. Codd in 1970, represents all data as **relations**
 (tables) of **tuples** (rows) with a fixed set of typed **attributes** (columns). SQL (Structured

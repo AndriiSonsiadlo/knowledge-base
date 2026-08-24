@@ -8,7 +8,6 @@ tags: [computer-science, buses, pcie, interconnect, topology]
 
 # System Interconnects — Buses, Topology & PCIe
 
-## Overview
 
 Every wire diagram of a computer hides the same question: how do the CPU, RAM, and peripherals
 actually exchange bits? The [overview page](./intro.md) introduced the **bus** as a shared pathway

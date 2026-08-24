@@ -8,7 +8,6 @@ tags: [computer-science, assembly, low-level, x86-64]
 
 # Assembly & Low-Level Programming — Overview
 
-## Overview
 
 Assembly language is a human-readable, (mostly) one-to-one text representation of machine code — the
 literal instructions an [ISA](../cpu-architecture/instruction-set-architecture.md) defines. Learning

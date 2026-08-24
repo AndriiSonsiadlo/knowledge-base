@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, searching]
 
 # Searching Algorithms — Overview
 
-## Overview
 
 Searching looks trivial and hides the most useful trade-off in the field: **how much do you pay up
 front to make later lookups cheap?** Linear search pays nothing and costs O(n) every time. Binary

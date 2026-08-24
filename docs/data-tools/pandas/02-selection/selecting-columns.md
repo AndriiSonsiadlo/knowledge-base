@@ -7,7 +7,6 @@ tags: [ pandas, columns, selection, dataframe ]
 
 # Selecting Columns
 
-## Overview
 
 Column selection is one of the most common operations in **_pandas_**. There are several ways to
 select columns, each with different use cases and behaviors.

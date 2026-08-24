@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, heapsort, heap]
 
 # Heapsort
 
-## Overview
 
 Heapsort is [selection sort](./selection-sort.md) with a better way of selecting. Selection sort scans
 the unsorted region to find its maximum in O(n); heapsort keeps that region as a

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, two-pointers, sliding-window]
 
 # Two Pointers & Sliding Window
 
-## Overview
 
 Both patterns replace a nested loop with a single pass by maintaining two indices that only ever move
 forward. The result is O(n) where brute force is O(n²), and the saving comes from **not re-examining**

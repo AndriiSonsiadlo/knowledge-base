@@ -8,7 +8,6 @@ tags: [computer-science, buses, usb, usb-c, usb-pd]
 
 # USB — Architecture, Transfer Types & Speeds
 
-## Overview
 
 USB (Universal Serial Bus) is the dominant peripheral connection standard for everything from mice
 and keyboards to external SSDs and displays. Unlike I2C or SPI, USB is **host-centric**: exactly one

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, searching, binary-search]
 
 # Binary Search
 
-## Overview
 
 Binary search compares the target against the middle element of a **sorted** array and discards half
 the remaining range at every step. Twenty steps suffice for a million elements; thirty for a billion.

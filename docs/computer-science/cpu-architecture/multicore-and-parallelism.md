@@ -8,7 +8,6 @@ tags: [computer-science, cpu, multicore, smp, amdahls-law, hyper-threading]
 
 # Multicore & Parallelism
 
-## Overview
 
 Making a single CPU core faster (higher clock speed, deeper pipelines, wider superscalar execution)
 ran into physical limits in the mid-2000s: higher clock speeds need more voltage, which increases

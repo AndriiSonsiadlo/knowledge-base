@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, greedy]
 
 # Greedy Algorithms
 
-## Overview
 
 A greedy algorithm makes the choice that looks best right now and never reconsiders it. When that
 works it is the cheapest strategy available — usually one sorted pass, O(n log n) or better, with no

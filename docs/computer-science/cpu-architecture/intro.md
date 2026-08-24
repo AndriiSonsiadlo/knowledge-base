@@ -8,7 +8,6 @@ tags: [computer-science, cpu, processor, architecture]
 
 # CPU & Processor Architecture — Overview
 
-## Overview
 
 The CPU (Central Processing Unit) is the component that actually *executes* a program: it repeatedly
 reads an instruction from memory, figures out what it means, and carries it out. Everything else in

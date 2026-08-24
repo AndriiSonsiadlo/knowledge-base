@@ -8,7 +8,6 @@ tags: [computer-science, networking, osi, tcp-ip, encapsulation]
 
 # The OSI and TCP/IP Models
 
-## Overview
 
 Two competing layer models are used to describe networking: the **OSI model** (7 layers, designed by
 committee in the late 1970s/80s as a vendor-neutral standard) and the **TCP/IP model** (4-5 layers,

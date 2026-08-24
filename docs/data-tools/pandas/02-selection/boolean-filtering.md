@@ -7,7 +7,6 @@ tags: [ pandas, filtering, boolean, conditions, query ]
 
 # Boolean Filtering
 
-## Overview
 
 Boolean filtering selects rows based on conditions. It's one of the most common operations in data
 analysis - filtering data to find what you need.

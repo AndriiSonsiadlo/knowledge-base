@@ -7,7 +7,6 @@ tags: [ pandas, data-analysis, python ]
 
 # Core Concepts
 
-## Overview
 
 pandas has three fundamental data structures:
 

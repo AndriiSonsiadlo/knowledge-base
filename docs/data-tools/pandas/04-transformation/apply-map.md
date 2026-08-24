@@ -7,7 +7,6 @@ tags: [pandas, apply, map, transform, functions]
 
 # Apply and Map
 
-## Overview
 
 pandas provides several methods to apply custom functions to data:
 

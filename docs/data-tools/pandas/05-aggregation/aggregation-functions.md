@@ -7,7 +7,6 @@ tags: [pandas, aggregation, groupby, agg, statistics]
 
 # Aggregation Functions
 
-## Overview
 
 Aggregation combines multiple values into a single summary value. Common operations include sum, mean, count, min, max, and custom aggregations.
 

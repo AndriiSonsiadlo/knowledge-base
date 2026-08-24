@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, unicode, utf-8, ascii]
 
 # Character Encoding
 
-## Overview
 
 Text is stored as bits too — a **character encoding** is the mapping between abstract characters
 and the bytes that represent them. **ASCII** was the original, US-English-only 7-bit scheme;

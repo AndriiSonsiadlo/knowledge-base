@@ -8,7 +8,6 @@ tags: [computer-science, cpu, instruction-cycle]
 
 # The Fetch-Decode-Execute Cycle
 
-## Overview
 
 Every instruction a CPU runs goes through the same basic loop: fetch it from memory, decode what it
 means, execute it, and store the result. This cycle, repeated billions of times per second, is the

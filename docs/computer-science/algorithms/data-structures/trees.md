@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, tree, bst]
 
 # Trees & Binary Search Trees
 
-## Overview
 
 A tree is a set of nodes where each node has one parent (except the root) and no cycles. That single
 constraint is what makes trees useful: it guarantees exactly one path between any two nodes, so

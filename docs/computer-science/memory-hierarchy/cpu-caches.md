@@ -8,7 +8,6 @@ tags: [computer-science, memory, cache, mesi, cache-coherence]
 
 # CPU Caches
 
-## Overview
 
 A CPU cache is a small amount of fast SRAM that sits between the core and main memory, holding
 recently-used data so most memory accesses never have to pay DRAM's latency. Modern CPUs use several

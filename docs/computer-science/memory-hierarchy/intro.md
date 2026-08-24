@@ -8,7 +8,6 @@ tags: [computer-science, memory, ram, cache, virtual-memory]
 
 # Memory Hierarchy & RAM — Overview
 
-## Overview
 
 No single memory technology is simultaneously fast, large, and cheap. Computers instead use a
 **hierarchy**: a small amount of extremely fast memory (registers, caches) backed by progressively

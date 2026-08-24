@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, searching, linear-search]
 
 # Linear Search
 
-## Overview
 
 Linear search examines each element in turn until it finds what it is looking for or runs out. It is
 the only search that works on **any** sequence with no preconditions whatsoever — unsorted, singly

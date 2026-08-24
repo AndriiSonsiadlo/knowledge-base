@@ -7,7 +7,6 @@ tags: [pandas, reshape, pivot, melt, stack, unstack]
 
 # Reshaping Data
 
-## Overview
 
 Reshaping transforms data between wide and long formats. Common operations:
 

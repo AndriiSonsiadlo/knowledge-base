@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, graphs, dijkstra, bellman-ford]
 
 # Shortest Paths
 
-## Overview
 
 "Shortest" means fewest edges on an unweighted graph and lowest total weight on a weighted one, and
 the two need different algorithms. Which one you need is decided by two questions: are the edges

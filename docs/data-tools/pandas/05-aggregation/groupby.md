@@ -7,7 +7,6 @@ tags: [pandas, groupby, aggregation, split-apply-combine]
 
 # GroupBy Operations
 
-## Overview
 
 GroupBy implements the **split-apply-combine** pattern:
 

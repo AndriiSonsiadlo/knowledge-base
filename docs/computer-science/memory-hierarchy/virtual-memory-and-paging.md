@@ -8,7 +8,6 @@ tags: [computer-science, memory, virtual-memory, paging, tlb, mmu]
 
 # Virtual Memory & Paging
 
-## Overview
 
 Every process behaves as if it owns the entire address space and as if its memory is one large,
 contiguous block — neither is physically true. **Virtual memory** is the hardware/OS collaboration

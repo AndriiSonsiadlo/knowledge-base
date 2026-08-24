@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, complexity, big-o]
 
 # Complexity & Analysis — Overview
 
-## Overview
 
 Measuring an algorithm by timing it tells you about your laptop, your compiler, your input, and the
 background processes competing with you. **Complexity analysis** asks a different question — how does

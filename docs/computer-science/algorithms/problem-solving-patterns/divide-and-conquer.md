@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, divide-and-conquer, recursion]
 
 # Divide & Conquer
 
-## Overview
 
 Divide and conquer breaks a problem into independent subproblems of the same kind, solves those
 recursively, and combines the results. The leverage comes from the subproblems being **independent** —

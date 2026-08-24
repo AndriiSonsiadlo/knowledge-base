@@ -8,7 +8,6 @@ tags: [computer-science, cpu, superscalar, out-of-order, branch-prediction, spec
 
 # Superscalar & Out-of-Order Execution
 
-## Overview
 
 A simple pipeline gets throughput to about one instruction per cycle. Modern high-performance CPUs
 go further: they fetch and decode *multiple* instructions per cycle (**superscalar**), and execute

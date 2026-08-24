@@ -8,7 +8,6 @@ tags: [computer-science, buses, io, pcie, dma, interrupts]
 
 # Buses & I/O — Overview
 
-## Overview
 
 A CPU, RAM, storage, and peripherals are separate physical chips — a **bus** is the shared electrical
 pathway (wires + protocol) that lets them exchange data. This section covers how components talk to

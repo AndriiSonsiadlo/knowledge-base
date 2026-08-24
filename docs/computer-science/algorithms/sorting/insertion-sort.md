@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, insertion-sort]
 
 # Insertion Sort
 
-## Overview
 
 Insertion sort builds the sorted result one element at a time, taking the next element and sliding it
 back into its correct place among those already sorted — exactly how most people sort a hand of

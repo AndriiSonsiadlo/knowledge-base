@@ -8,7 +8,6 @@ tags: [computer-science, operating-systems, ipc, pipes, shared-memory, sockets]
 
 # Inter-Process Communication
 
-## Overview
 
 Processes are deliberately isolated from each other — that's the whole point of giving each one its
 own address space (see [Processes & Threads](./processes-and-threads.md)). But isolated processes

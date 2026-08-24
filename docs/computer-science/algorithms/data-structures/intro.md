@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures]
 
 # Data Structures — Overview
 
-## Overview
 
 A data structure is a decision about **which operations you want to be cheap**. There is no structure
 that makes everything fast; each one buys speed on some operations by giving it up on others, and

@@ -8,7 +8,6 @@ tags: [computer-science, storage, filesystems, ext4, journaling, copy-on-write]
 
 # Filesystems Basics
 
-## Overview
 
 A raw storage device — HDD or SSD — just exposes a flat array of addressable blocks; it has no
 concept of "files" or "directories" at all. A **filesystem** is the layer of data structures and

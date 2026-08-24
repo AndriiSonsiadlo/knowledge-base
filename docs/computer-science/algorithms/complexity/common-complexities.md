@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, complexity, amortized, space-complexity]
 
 # Common Complexities
 
-## Overview
 
 In practice you meet perhaps eight growth classes. Recognising which one a piece of code falls into —
 and, more usefully, recognising the *problem shape* that produces each — is most of what complexity

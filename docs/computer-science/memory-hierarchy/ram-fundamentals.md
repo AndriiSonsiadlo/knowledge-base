@@ -8,7 +8,6 @@ tags: [computer-science, memory, ram, dram, sram, ddr]
 
 # RAM Fundamentals
 
-## Overview
 
 "RAM" isn't one technology — it's a family. The RAM that makes up multi-gigabyte main memory
 (**DRAM**) and the RAM that makes up tiny, ultra-fast on-chip caches and registers (**SRAM**) trade

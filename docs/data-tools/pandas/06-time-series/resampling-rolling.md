@@ -7,7 +7,6 @@ tags: [pandas, resampling, rolling, time-series, windows]
 
 # Resampling and Rolling Windows
 
-## Overview
 
 Time series analysis often requires:
 

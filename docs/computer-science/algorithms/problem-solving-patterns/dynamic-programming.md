@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, dynamic-programming, memoization]
 
 # Dynamic Programming
 
-## Overview
 
 Dynamic programming applies when a problem has **overlapping subproblems** — the same sub-computation
 arising many times across a recursion. Solving each one once and reusing the answer converts

@@ -8,7 +8,6 @@ tags: [computer-science, databases, nosql, cap-theorem, distributed-systems]
 
 # NoSQL & the CAP Theorem
 
-## Overview
 
 Once a database is replicated across multiple machines to survive failures and scale reads, it
 becomes a **distributed system**, and distributed systems are subject to the **CAP theorem**: a

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, stack, queue, deque]
 
 # Stacks & Queues
 
-## Overview
 
 Stacks and queues are not new storage — they are **restrictions** on storage. Both hold a sequence,
 and both deliberately refuse to let you reach into the middle of it. That refusal is the feature: an

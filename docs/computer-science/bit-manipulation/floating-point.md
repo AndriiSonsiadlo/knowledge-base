@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, floating-point, ieee-754]
 
 # Floating Point: IEEE 754
 
-## Overview
 
 Floating point is a way to represent a huge range of real numbers — from `1e-300` to `1e300` — in
 a fixed number of bits, by storing a *sign*, an *exponent*, and a *fraction* (mantissa) instead of

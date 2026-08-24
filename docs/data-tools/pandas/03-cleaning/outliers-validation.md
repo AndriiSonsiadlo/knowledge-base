@@ -7,7 +7,6 @@ tags: [pandas, outliers, validation, data-quality]
 
 # Outliers and Data Validation
 
-## Overview
 
 Outliers are data points that differ significantly from other observations. Data validation ensures your data meets expected criteria before analysis.
 

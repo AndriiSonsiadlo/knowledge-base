@@ -8,7 +8,6 @@ tags: [computer-science, assembly, low-level, x86-64, calling-convention, stack]
 
 # Calling Conventions and the Stack
 
-## Overview
 
 When one function calls another, both sides need to agree on where the arguments go, where the
 return value comes back, and which registers each side is allowed to clobber without asking. This

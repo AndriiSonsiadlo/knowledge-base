@@ -8,7 +8,6 @@ tags: [computer-science, assembly, low-level, x86-64, disassembly, debugging]
 
 # Reading Disassembly
 
-## Overview
 
 Disassembly is the practical skill this whole section builds toward: given compiled machine code —
 a binary, a core dump, or a debugger stopped mid-crash — recover and read the assembly instructions

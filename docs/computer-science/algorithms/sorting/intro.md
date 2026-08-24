@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting]
 
 # Sorting Algorithms — Overview
 
-## Overview
 
 Sorting is the most-studied problem in the field, and not because arranging things in order is
 especially useful on its own. It is studied because it is the smallest problem where every major

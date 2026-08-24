@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, bit-manipulation, bitmasks, algori
 
 # Bit Manipulation Techniques
 
-## Overview
 
 Bit-manipulation techniques are small, well-known patterns for testing, setting, and transforming
 individual bits directly — no allocation, usually no branching, a handful of CPU cycles. They show

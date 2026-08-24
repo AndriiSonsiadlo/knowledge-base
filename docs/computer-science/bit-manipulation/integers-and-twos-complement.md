@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, integers, twos-complement, overflo
 
 # Integers & Two's Complement
 
-## Overview
 
 A fixed-width integer has a fixed number of bits, so it can only represent a finite range of
 values — and once you allow negative numbers, you need a rule for *which* bit patterns mean

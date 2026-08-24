@@ -7,7 +7,6 @@ tags: [pandas, pivot, melt, reshape, pivot-table]
 
 # Pivot Tables and Melt
 
-## Overview
 
 Pivot tables and melt are powerful reshaping tools:
 

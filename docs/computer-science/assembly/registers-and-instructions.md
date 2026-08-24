@@ -8,7 +8,6 @@ tags: [computer-science, assembly, low-level, x86-64, registers]
 
 # x86-64 Registers and Instructions
 
-## Overview
 
 Every x86-64 instruction operates on a small set of named storage locations — **registers** — and/or
 memory. Unlike a high-level language with an unlimited number of named variables, an x86-64 CPU

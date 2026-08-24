@@ -7,7 +7,6 @@ tags: [pandas, strings, text, data-cleaning]
 
 # String Operations
 
-## Overview
 
 pandas provides string methods through the `.str` accessor. These methods work on Series containing strings and are essential for text data cleaning.
 

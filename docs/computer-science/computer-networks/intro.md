@@ -8,7 +8,6 @@ tags: [computer-science, networking, osi, tcp-ip]
 
 # Computer Networks — Overview
 
-## Overview
 
 A computer network lets independent machines exchange data despite being built by different vendors,
 running different software, and connected over physically different media (copper, fiber, radio).

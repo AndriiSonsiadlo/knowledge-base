@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, linked-list]
 
 # Linked Lists
 
-## Overview
 
 A linked list stores each element in its own node, together with a pointer to the next one. Nothing
 is contiguous, so there is no arithmetic that finds element `i` — you follow pointers from the head

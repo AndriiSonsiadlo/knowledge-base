@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, graphs]
 
 # Graph Algorithms — Overview
 
-## Overview
 
 Once a problem is expressed as a [graph](../data-structures/graphs.md), a small set of algorithms
 answers most of the questions worth asking about it: what is reachable, what is closest, and in what

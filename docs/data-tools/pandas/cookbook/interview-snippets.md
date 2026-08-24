@@ -7,7 +7,6 @@ tags: [pandas, interview, coding, questions]
 
 # Interview Snippets
 
-## Overview
 
 Common pandas questions asked in data science and analytics interviews. Each snippet includes the problem, solution, and explanation.
 

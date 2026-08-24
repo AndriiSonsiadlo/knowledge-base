@@ -8,7 +8,6 @@ tags: [computer-science, cpu, isa, risc, cisc, x86, arm]
 
 # Instruction Set Architecture (ISA)
 
-## Overview
 
 An **Instruction Set Architecture** is the set of instructions a CPU can execute, plus the rules for
 how they're encoded as bits, what registers exist, and how memory is addressed. It's a *contract*:

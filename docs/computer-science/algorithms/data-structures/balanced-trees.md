@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, avl, red-black-tree, b-tre
 
 # Balanced Trees
 
-## Overview
 
 A [binary search tree](./trees.md) is O(log n) only while it stays short, and nothing in the plain
 insertion algorithm keeps it short. A **self-balancing** tree restores a height bound after every

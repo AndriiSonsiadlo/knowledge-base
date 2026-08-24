@@ -8,7 +8,6 @@ tags: [computer-science, protocols, http, https, http2, http3, web]
 
 # HTTP and HTTPS
 
-## Overview
 
 HTTP is the request/response protocol underlying the Web and most modern APIs: a client sends a
 request for a resource, a server sends back a response. HTTPS is simply HTTP layered on top of TLS

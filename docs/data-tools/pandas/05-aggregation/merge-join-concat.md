@@ -7,7 +7,6 @@ tags: [ pandas, merge, join, concat, combine, dataframes ]
 
 # Merge, Join, and Concat
 
-## Overview
 
 pandas provides several methods to combine DataFrames:
 

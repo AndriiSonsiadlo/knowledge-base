@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, graphs, bfs, dfs]
 
 # Traversal: BFS & DFS
 
-## Overview
 
 Breadth-first and depth-first search both visit every vertex reachable from a start point, in
 O(V + E), using the same loop. They differ in one line — whether the frontier is a queue or a stack —

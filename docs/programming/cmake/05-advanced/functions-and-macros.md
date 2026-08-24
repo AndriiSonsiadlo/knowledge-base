@@ -8,7 +8,6 @@ tags: [cmake, functions, macros, reusability, scripting]
 
 # Functions and Macros
 
-## Overview
 
 Functions and macros allow you to create reusable CMake code, reducing duplication and improving maintainability. While they appear similar, they have important differences in how they handle variable scope.
 

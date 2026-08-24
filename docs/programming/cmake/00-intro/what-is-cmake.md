@@ -8,7 +8,6 @@ tags: [ c++, cmake ]
 
 # What is CMake?
 
-## Overview
 
 CMake is a **cross-platform build system generator**. It doesn't build your code directly - instead,
 it generates native build files (Makefiles, Visual Studio projects, Ninja files, etc.) for your

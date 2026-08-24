@@ -8,7 +8,6 @@ tags: [computer-science, io, interrupts, dma, polling]
 
 # I/O & Interrupts — Polling, IRQs & DMA
 
-## Overview
 
 Peripherals are slow compared to a CPU: a disk read can take milliseconds, which is millions of CPU
 cycles. The [overview page](./intro.md) briefly contrasted polling and interrupts; this page works

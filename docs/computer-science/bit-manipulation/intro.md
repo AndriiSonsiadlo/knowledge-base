@@ -8,7 +8,6 @@ tags: [computer-science, data-representation, binary, bits]
 
 # Data Representation
 
-## Overview
 
 Every value a computer manipulates — an integer, a character, a color, an instruction — is ultimately
 a fixed-width string of bits. This section covers how those bits encode meaning: binary/hexadecimal

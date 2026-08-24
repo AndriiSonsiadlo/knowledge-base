@@ -7,7 +7,6 @@ tags: [pandas, binning, categorical, discretization]
 
 # Binning and Categorical Data
 
-## Overview
 
 **Binning** converts continuous data into discrete intervals (bins). **Categorical data** represents discrete categories with limited unique values. Both are essential for analysis and visualization.
 

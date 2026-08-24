@@ -7,7 +7,6 @@ tags: [ pandas, indexing, loc, iloc, selection ]
 
 # loc vs iloc
 
-## Overview
 
 **_pandas_** provides two main indexers for selecting data:
 

@@ -7,7 +7,6 @@ tags: [pandas, sorting, ranking, ordering]
 
 # Sorting and Ranking
 
-## Overview
 
 Sorting organizes data by values. Ranking assigns positions based on values. Both are essential for analysis and presentation.
 

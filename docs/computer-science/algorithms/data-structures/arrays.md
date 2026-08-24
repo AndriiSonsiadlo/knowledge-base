@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, arrays]
 
 # Arrays & Dynamic Arrays
 
-## Overview
 
 An array is a block of contiguous memory holding equally-sized elements. That one property gives it
 everything else: because element `i` lives at `base + i × element_size`, indexing is a single

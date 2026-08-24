@@ -8,7 +8,6 @@ tags: [computer-science, storage, hdd, ssd, nvme]
 
 # Storage: HDD, SSD & NVMe — Overview
 
-## Overview
 
 Storage is the **persistent** tier of the memory hierarchy: unlike RAM, it retains data with the
 power off. This section covers the two dominant physical technologies (spinning magnetic disks and

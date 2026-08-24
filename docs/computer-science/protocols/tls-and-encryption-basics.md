@@ -8,7 +8,6 @@ tags: [computer-science, protocols, tls, security, encryption, https]
 
 # TLS and Encryption Basics
 
-## Overview
 
 **TLS (Transport Layer Security)** is what turns HTTP into HTTPS — and secures plenty of other
 protocols besides (SMTP, database connections, and more). It runs on top of a reliable transport

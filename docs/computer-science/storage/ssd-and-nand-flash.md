@@ -8,7 +8,6 @@ tags: [computer-science, storage, ssd, nand-flash, ftl, wear-leveling, trim]
 
 # SSDs & NAND Flash
 
-## Overview
 
 A **solid-state drive** has no moving parts — it stores bits as trapped electrical charge in NAND
 flash memory cells. That solves the mechanical latency problem of HDDs, but flash comes with its own

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, mergesort, divide-and-conquer]
 
 # Mergesort
 
-## Overview
 
 Mergesort splits the array in half, sorts each half recursively, and merges the two sorted halves
 back together. The insight is that **merging two already-sorted sequences is linear** — you compare

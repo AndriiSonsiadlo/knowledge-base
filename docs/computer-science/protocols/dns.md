@@ -8,7 +8,6 @@ tags: [computer-science, protocols, dns, networking]
 
 # DNS (Domain Name System)
 
-## Overview
 
 DNS is the Internet's naming system — it translates human-readable names like `example.com` into the
 IP addresses machines actually need to route traffic (see

@@ -7,7 +7,6 @@ tags: [pandas, datetime, time-series, dates]
 
 # DateTime Basics
 
-## Overview
 
 Working with dates and times is essential for time series analysis. pandas provides powerful datetime functionality through:
 

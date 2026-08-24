@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, graphs, dag, topological-sort]
 
 # Topological Sort
 
-## Overview
 
 A topological sort orders the vertices of a **directed acyclic graph** so that every edge points
 forward — if A must happen before B, A appears earlier. It is the algorithm behind build systems,

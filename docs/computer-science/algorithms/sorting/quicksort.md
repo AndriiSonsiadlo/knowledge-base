@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, quicksort, divide-and-conquer]
 
 # Quicksort
 
-## Overview
 
 Quicksort picks an element as the **pivot**, rearranges the array so that everything smaller sits to
 its left and everything larger to its right, then recurses on both sides. After partitioning, the

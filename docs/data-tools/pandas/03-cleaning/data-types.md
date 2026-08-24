@@ -7,7 +7,6 @@ tags: [pandas, dtypes, data-types, conversion, optimization]
 
 # Data Types
 
-## Overview
 
 Understanding and managing data types is crucial for:
 

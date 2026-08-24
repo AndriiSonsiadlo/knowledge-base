@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, selection-sort]
 
 # Selection Sort
 
-## Overview
 
 Selection sort divides the array into a sorted prefix and an unsorted remainder. Each round it scans
 the remainder for the smallest element and swaps it into place at the boundary.

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, sorting, timsort, introsort, pdqsort]
 
 # Choosing a Sort
 
-## Overview
 
 In almost every situation the correct answer is **call your language's built-in sort**. Those
 implementations are hybrids refined over decades, and they beat hand-written sorts on nearly every

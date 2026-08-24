@@ -8,7 +8,6 @@ tags: [cmake, custom-commands, custom-targets, build-process]
 
 # Custom Commands and Targets
 
-## Overview
 
 Custom commands and targets extend CMake's build process beyond compiling code. Use them for:
 
