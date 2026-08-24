@@ -1,6 +1,6 @@
 ---
 title: Computer Science
-sidebar_label: Overview
+sidebar_label: Introduction
 sidebar_position: 0
 tags: [computer-science]
 ---
