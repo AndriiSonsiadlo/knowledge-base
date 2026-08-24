@@ -36,39 +36,39 @@ Numeric prefixes (`00`, `01`, `02`...) exist only to order folders on disk — t
 
 ## Sections
 
-| Section | Covers |
-|---|---|
-| <Icon icon="lucide:book-open" inline /> [Overview](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
-| <Icon icon="lucide:wrench" inline /> [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
-| <Icon icon="lucide:cpu" inline /> [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
-| <Icon icon="lucide:hammer" inline /> [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
-| <Icon icon="lucide:zap" inline /> [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
-| <Icon icon="lucide:plug" inline /> Peripherals and Drivers | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
-| <Icon icon="lucide:timer" inline /> Interrupts, Timing and Real-Time | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
-| <Icon icon="lucide:git-fork" inline /> RTOS | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
-| <Icon icon="lucide:wifi" inline /> Connectivity and Protocols | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
-| <Icon icon="lucide:battery" inline /> Low-Power Design | Sleep modes, power budgeting, and low-power peripheral design |
-| <Icon icon="lucide:terminal" inline /> Embedded Linux | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
-| <Icon icon="lucide:bug" inline /> Debugging and Testing | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
-| <Icon icon="lucide:shield" inline /> Safety and Reliability | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
-| <Icon icon="lucide:lock" inline /> Security | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
-| <Icon icon="lucide:refresh-cw" inline /> Firmware Lifecycle | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
-| <Icon icon="lucide:puzzle" inline /> Languages and Practice | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
+| Icon | Section | Covers |
+|:----:|---------|--------|
+| <Icon icon="lucide:book-open" inline /> | [Overview](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
+| <Icon icon="lucide:wrench" inline /> | [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
+| <Icon icon="lucide:cpu" inline /> | [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
+| <Icon icon="lucide:hammer" inline /> | [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
+| <Icon icon="lucide:zap" inline /> | [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
+| <Icon icon="lucide:plug" inline /> | Peripherals and Drivers | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
+| <Icon icon="lucide:timer" inline /> | Interrupts, Timing and Real-Time | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
+| <Icon icon="lucide:git-fork" inline /> | RTOS | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
+| <Icon icon="lucide:wifi" inline /> | Connectivity and Protocols | USB device stacks, Ethernet and TCP/IP on constrained devices, and wireless connectivity |
+| <Icon icon="lucide:battery" inline /> | Low-Power Design | Sleep modes, power budgeting, and low-power peripheral design |
+| <Icon icon="lucide:terminal" inline /> | Embedded Linux | When Linux is the right call, the boot chain, device drivers, and build systems (Yocto, Buildroot) |
+| <Icon icon="lucide:bug" inline /> | Debugging and Testing | JTAG/SWD, hardfault debugging, unit testing firmware, and hardware-in-the-loop testing |
+| <Icon icon="lucide:shield" inline /> | Safety and Reliability | IEC 61508, ISO 26262, DO-178C, and IEC 62304 — structure, intent, and engineering consequences, not the normative text |
+| <Icon icon="lucide:lock" inline /> | Security | Secure boot, TrustZone-M, secure communication on MCUs, and firmware update security |
+| <Icon icon="lucide:refresh-cw" inline /> | Firmware Lifecycle | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
+| <Icon icon="lucide:puzzle" inline /> | Languages and Practice | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
 
 Overview through Bare-Metal Programming are published, so their row links straight to
 the folder's first page; `05` onward stay plain text until their tasks land in Phases 2 and 3.
 
 ## Four learning paths
 
-These are reading orders through the folders above by name, not literal links yet — most of the target pages don't exist until later tasks in this build finish, at which point the section's navigation gets wired up so you can click straight through.
+These are reading orders through the sections above. Published sections link to their first page; planned sections stay as text until their tasks land in later phases.
 
-**Day one** — you have no embedded background and want to see something work before you study why it worked. Overview (this folder) → Hardware Foundations (what to buy) → Bare-Metal Programming (your first bare-metal blink) → then back to Processor Architecture and Toolchain and Build to understand why it worked. This path deliberately defers the toolchain and architecture theory until after a first success, because motivation matters more than sequencing when you're starting from zero.
+**Day one** — you have no embedded background and want to see something work before you study why it worked. [Overview](./00-overview/what-embedded-means.md) (this folder) → [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) (what to buy) → [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) (your first bare-metal blink) → then back to [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) and [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) to understand why it worked. This path deliberately defers the toolchain and architecture theory until after a first success, because motivation matters more than sequencing when you're starting from zero.
 
-**I have a board and nothing works** — a troubleshooting path, not a syllabus. Hardware Foundations (is it even powered correctly) → Toolchain and Build (is the image actually getting onto the chip) → Bare-Metal Programming (is the startup code doing what you think) → Debugging and Testing (systematic hardfault and JTAG/SWD debugging once the basics check out).
+**I have a board and nothing works** — a troubleshooting path, not a syllabus. [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) (is it even powered correctly) → [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) (is the image actually getting onto the chip) → [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) (is the startup code doing what you think) → Debugging and Testing (systematic hardfault and JTAG/SWD debugging once the basics check out).
 
-**I'm building a product** — the path from a working prototype to something shippable. Bare-Metal Programming → Peripherals and Drivers → RTOS → Low-Power Design → Firmware Lifecycle. This is roughly the order real product timelines hit these concerns: get something running, add the drivers a real product needs, add concurrency once the driver count makes a main loop unwieldy, then power and lifecycle once the product itself is close to done.
+**I'm building a product** — the path from a working prototype to something shippable. [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) → Peripherals and Drivers → RTOS → Low-Power Design → Firmware Lifecycle. This is roughly the order real product timelines hit these concerns: get something running, add the drivers a real product needs, add concurrency once the driver count makes a main loop unwieldy, then power and lifecycle once the product itself is close to done.
 
-**I'm moving to Linux** — for engineers whose target has (or will have) an MMU-capable microprocessor or SoC. Processor Architecture (what's different about an applications core) → Embedded Linux (boot chain, drivers, build systems) → Debugging and Testing (debugging looks different again once there's an OS in the way).
+**I'm moving to Linux** — for engineers whose target has (or will have) an MMU-capable microprocessor or SoC. [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) (what's different about an applications core) → Embedded Linux (boot chain, drivers, build systems) → Debugging and Testing (debugging looks different again once there's an OS in the way).
 
 ## Why some links leave the section — the no-duplication policy
 

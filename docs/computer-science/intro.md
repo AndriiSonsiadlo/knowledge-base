@@ -22,18 +22,18 @@ reasoning.
 
 ## Sections
 
-|   | Section | What it covers |
-|---|---------|----------------|
-| <Icon icon="lucide:map" inline /> | [Overview](./overview/intro.md) | The abstraction-layer mental model and reading order |
+| Icon | Section | What it covers |
+|:----:|---------|----------------|
+| <Icon icon="lucide:book-open" inline /> | [Overview](./overview/intro.md) | The abstraction-layer mental model and reading order |
 | <Icon icon="lucide:binary" inline /> | [Data Representation](./bit-manipulation/intro.md) | Binary/hex, two's complement, bitwise techniques |
 | <Icon icon="lucide:cpu" inline /> | [CPU & Processor Architecture](./cpu-architecture/intro.md) | ISA, fetch-decode-execute, pipelining, superscalar/OoO, multicore |
 | <Icon icon="lucide:memory-stick" inline /> | [Memory Hierarchy & RAM](./memory-hierarchy/intro.md) | Registers, caches, DRAM, virtual memory |
 | <Icon icon="lucide:hard-drive" inline /> | [Storage: HDD, SSD & NVMe](./storage/intro.md) | Magnetic disks, NAND flash, storage interfaces |
-| <Icon icon="lucide:cable" inline /> | [Buses & I/O](./buses-and-io/intro.md) | Address/data/control buses, PCIe, DMA, interrupts |
+| <Icon icon="lucide:plug" inline /> | [Buses & I/O](./buses-and-io/intro.md) | Address/data/control buses, PCIe, DMA, interrupts |
 | <Icon icon="lucide:layers" inline /> | [Operating Systems](./operating-systems/intro.md) | Processes/threads, scheduling, memory management, sync |
 | <Icon icon="lucide:terminal" inline /> | [Assembly & Low-Level Programming](./assembly/intro.md) | Registers, instructions, calling conventions, disassembly |
 | <Icon icon="lucide:network" inline /> | [Computer Networks](./computer-networks/intro.md) | OSI/TCP-IP models, data link, IP, TCP/UDP |
-| <Icon icon="lucide:globe" inline /> | [Application Protocols](./protocols/intro.md) | DNS, HTTP/HTTPS, TLS |
+| <Icon icon="lucide:lock" inline /> | [Application Protocols](./protocols/intro.md) | DNS, HTTP/HTTPS, TLS |
 | <Icon icon="lucide:database" inline /> | [Databases](./databases/intro.md) | Relational model, indexing, ACID, NoSQL/CAP |
 | <Icon icon="lucide:waypoints" inline /> | [Algorithms & Data Structures](./algorithms/intro.md) | Complexity analysis, core data structures, sorting, searching, graph algorithms, problem-solving patterns |
 
@@ -54,7 +54,7 @@ flowchart LR
 ```
 
 - <Icon icon="lucide:rocket" inline /> **New to systems programming:** [Overview](./overview/intro.md) → [CPU & Processor Architecture](./cpu-architecture/intro.md) → [Memory Hierarchy & RAM](./memory-hierarchy/intro.md) → [Operating Systems](./operating-systems/intro.md).
-- <Icon icon="lucide:server" inline /> **Backend / infrastructure focus:** [Operating Systems](./operating-systems/intro.md) → [Computer Networks](./computer-networks/intro.md) → [Application Protocols](./protocols/intro.md) → [Databases](./databases/intro.md).
+- <Icon icon="lucide:database" inline /> **Backend / infrastructure focus:** [Operating Systems](./operating-systems/intro.md) → [Computer Networks](./computer-networks/intro.md) → [Application Protocols](./protocols/intro.md) → [Databases](./databases/intro.md).
 - <Icon icon="lucide:cpu" inline /> **Performance engineering:** [CPU & Processor Architecture](./cpu-architecture/intro.md) (all pages) → [Memory Hierarchy & RAM](./memory-hierarchy/intro.md) → [Assembly & Low-Level Programming](./assembly/intro.md).
 
 :::tip[Conventions used across these docs]
