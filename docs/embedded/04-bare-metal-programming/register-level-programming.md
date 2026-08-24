@@ -30,7 +30,8 @@ Within that region each vendor lays out its own map. On the STM32F411RE (RM0383 
 | `0x4002 0400` | AHB1 | GPIOB — each port is `0x400` further on |
 | `0x4002 3800` | AHB1 | **RCC** |
 | `0x4002 3C00` | AHB1 | FLASH interface |
-| `0x4002 6000` | AHB1 | DMA2 |
+| `0x4002 6000` | AHB1 | DMA1 |
+| `0x4002 6400` | AHB1 | DMA2 |
 | `0xE000 E000` | — | Cortex-M core peripherals: SysTick, NVIC, SCB |
 
 Two structural facts fall out of that table and both matter in practice.
