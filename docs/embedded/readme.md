@@ -21,12 +21,11 @@ in depth under `computer-science/`; embedded pages link out to that material and
 register-level and Cortex-M-specific parts on top, rather than repeating it.
 
 :::note[This section is being written]
-Right now this landing page is the only page here — that is why the sidebar shows just
-"Overview". The first content folders, `00-overview` through `04-bare-metal-programming`, are
-being written next and will cover the material described below. Everything from
-`05-peripherals-and-drivers` onward is planned but does not exist yet. If you came here looking
-for a specific topic and it is not in the sidebar, it has not been published yet — nothing is
-missing or broken.
+Folders `00-overview` through `04-bare-metal-programming` are published — 51 pages covering
+everything from "what embedded means" through a complete first bare-metal blink. Everything from
+`05-peripherals-and-drivers` onward is planned but does not exist yet: those folders will not
+appear in the sidebar until later phases land. If you came here looking for a specific topic and
+it is not in the sidebar, it has not been published yet — nothing is missing or broken.
 :::
 
 :::info[How this is organised]
@@ -59,23 +58,22 @@ page stays a short index; that one is the expanded reference.
 | ♻️ `14-firmware-lifecycle` | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
 | 🧩 `15-languages-and-practice` | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
 
-`00-overview` through `02-processor-architecture` are published, so their row links straight to
-the folder's first page; `03` onward stay plain text until their tasks land (folders 03–04 land
-later in this same phase, 05–15 in Phases 2 and 3).
+`00-overview` through `04-bare-metal-programming` are published, so their row links straight to
+the folder's first page; `05` onward stay plain text until their tasks land in Phases 2 and 3.
 
 ## Four learning paths
 
-These describe a reading order through folders and pages by name; they are not yet links,
-because most of the target pages do not exist yet. Once a target page is published, the
-navigation gets wired up so you can click through directly — for now, use the sidebar or search
-to find a folder once it appears.
+Folders `00`–`04` are published, so each path below links straight through those steps. Steps
+that land in folders `05`–`15` are still prose-only — those folders are not written yet, and
+`onBrokenLinks: "throw"` means linking to a page that does not exist yet would fail the build.
+Once a later phase publishes those folders, the remaining steps get wired up the same way.
 
 | Path | Suggested order | What it gets you |
 |---|---|---|
-| **Day one** | `00-overview` (what embedded means) → `01-hardware-foundations` (what hardware to buy) → `04-bare-metal-programming` (your first bare-metal blink) → then back to `02-processor-architecture` and `03-toolchain-and-build` for why it worked | A blinking LED before the theory, then the theory that explains it — the fastest way to stay motivated as a beginner |
-| **I have a board and nothing works** | `01-hardware-foundations` → `03-toolchain-and-build` → `04-bare-metal-programming` → `11-debugging-and-testing` | A troubleshooting path from "is the board even powered" through toolchain issues to systematic hardfault debugging |
-| **I'm building a product** | `04-bare-metal-programming` → `05-peripherals-and-drivers` → `07-rtos` → `09-low-power-design` → `14-firmware-lifecycle` | The path from a working prototype to something with drivers, a scheduler, a power budget, and an update story |
-| **I'm moving to Linux** | `02-processor-architecture` → `10-embedded-linux` → `11-debugging-and-testing` | What changes when the target has an MMU and runs Linux instead of bare metal or an RTOS |
+| **Day one** | [`00-overview`](./00-overview/what-embedded-means.md) (what embedded means) → [`01-hardware-foundations`](./01-hardware-foundations/what-hardware-to-buy.md) (what hardware to buy) → [`04-bare-metal-programming`](./04-bare-metal-programming/your-first-bare-metal-blink.md) (your first bare-metal blink) → then back to [`02-processor-architecture`](./02-processor-architecture/arm-cortex-m-profiles.md) and [`03-toolchain-and-build`](./03-toolchain-and-build/cross-compilation.md) for why it worked | A blinking LED before the theory, then the theory that explains it — the fastest way to stay motivated as a beginner |
+| **I have a board and nothing works** | [`01-hardware-foundations`](./01-hardware-foundations/what-hardware-to-buy.md) → [`03-toolchain-and-build`](./03-toolchain-and-build/cross-compilation.md) → [`04-bare-metal-programming`](./04-bare-metal-programming/your-first-bare-metal-blink.md) → `11-debugging-and-testing` | A troubleshooting path from "is the board even powered" through toolchain issues to systematic hardfault debugging |
+| **I'm building a product** | [`04-bare-metal-programming`](./04-bare-metal-programming/your-first-bare-metal-blink.md) → `05-peripherals-and-drivers` → `07-rtos` → `09-low-power-design` → `14-firmware-lifecycle` | The path from a working prototype to something with drivers, a scheduler, a power budget, and an update story |
+| **I'm moving to Linux** | [`02-processor-architecture`](./02-processor-architecture/arm-cortex-m-profiles.md) → `10-embedded-linux` → `11-debugging-and-testing` | What changes when the target has an MMU and runs Linux instead of bare metal or an RTOS |
 
 ## Master reference list
 
