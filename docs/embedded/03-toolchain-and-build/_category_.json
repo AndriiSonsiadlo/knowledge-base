@@ -2,6 +2,7 @@
   "label": "4. Toolchain and Build",
   "position": 4,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "Cross-compilation, CMake, linker scripts, and the build pipeline."
   }
 }

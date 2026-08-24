@@ -2,6 +2,7 @@
   "label": "5. Bare-Metal Programming",
   "position": 5,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "Startup code, vector tables, register-level programming, and your first blink."
   }
 }

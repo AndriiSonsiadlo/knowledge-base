@@ -2,6 +2,7 @@
   "label": "2. Hardware Foundations",
   "position": 2,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "Choosing hardware, reading datasheets, schematics, power, and lab equipment."
   }
 }

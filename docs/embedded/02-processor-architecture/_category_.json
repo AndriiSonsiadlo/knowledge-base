@@ -2,6 +2,7 @@
   "label": "3. Processor Architecture",
   "position": 3,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "Cortex-M cores, registers, memory maps, pipelines, and instruction sets."
   }
 }
