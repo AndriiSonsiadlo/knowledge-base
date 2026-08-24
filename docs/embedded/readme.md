@@ -44,8 +44,8 @@ page stays a short index; that one is the expanded reference.
 | 📖 [`00-overview`](./00-overview/what-embedded-means.md) | What "embedded" means as a discipline, the microcontroller/microprocessor/SoC distinction, the landscape of architectures and vendors, bare-metal vs. RTOS vs. Linux, and a glossary |
 | 🔧 [`01-hardware-foundations`](./01-hardware-foundations/what-hardware-to-buy.md) | Choosing hardware, schematics and board basics, power and reset behaviour, and what a datasheet actually tells you |
 | 🧠 [`02-processor-architecture`](./02-processor-architecture/arm-cortex-m-profiles.md) | The Cortex-M register model, memory map and bit-banding, and the pipeline and instruction-set concerns specific to microcontroller cores |
-| 🛠️ `03-toolchain-and-build` | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
-| ⚡ `04-bare-metal-programming` | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
+| 🛠️ [`03-toolchain-and-build`](./03-toolchain-and-build/cross-compilation.md) | Cross-compilers, CMake for embedded, linker scripts, ELF/map files, and the build pipeline from source to flashable image |
+| ⚡ [`04-bare-metal-programming`](./04-bare-metal-programming/your-first-bare-metal-blink.md) | Startup code, vector tables, register-level programming, critical sections, and your first bare-metal blink |
 | 🔌 `05-peripherals-and-drivers` | GPIO, UART/SPI/I2C in depth, DMA, external memory, and flash/EEPROM emulation |
 | ⏱️ `06-interrupts-timing-and-real-time` | The NVIC, timing determinism, scheduling theory as it applies to interrupts, and what breaks determinism on cores with caches |
 | 🧵 `07-rtos` | Task and scheduling concepts, synchronization primitives, FreeRTOS, and Zephyr |
