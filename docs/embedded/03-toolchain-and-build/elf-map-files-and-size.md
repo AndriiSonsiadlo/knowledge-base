@@ -106,10 +106,12 @@ The `--gc-sections` row is the other half of the story: with `-ffunction-section
 
 ## Finding the 12 KB: `nm`
 
-`nm` sorted by size is the fastest instrument in the box. `--print-size` adds the size column, `--size-sort` orders by it, `--radix=d` gives decimal so you can do arithmetic in your head:
+`nm` sorted by size is the fastest instrument in the box. `--print-size` adds the size column, `--size-sort` orders by it, `--radix=d` gives decimal so you can do arithmetic in your head.
+
+**From here to the end of the page, every listing is the `printf` variant** — row two of the table above, the 4500-byte one — not the 440-byte baseline built by the command at the top of this page. That is deliberate: the baseline is too small to have anything interesting to find, and the whole point of these tools is finding things. Run the same commands on your own firmware and expect different names, but the same shapes.
 
 ```text
-$ arm-none-eabi-nm --print-size --size-sort --radix=d blink.elf | tail -8
+$ arm-none-eabi-nm --print-size --size-sort --radix=d blink-printf.elf | tail -8
 134219052 00000148 T _free_r
 134221452 00000168 T __swsetup_r
 134220192 00000218 T _printf_common
@@ -132,11 +134,13 @@ arm-none-eabi-objdump -d blink.elf     # disassembly, to see what a function bec
 arm-none-eabi-readelf -A blink.elf     # build attributes: the CPU and float ABI actually used
 ```
 
+(those three work equally well on either binary)
+
 `objdump -h` is the direct check on the VMA/LMA split from [Memory Sections and VMA vs LMA](./memory-sections.md); `readelf -A` is the hard-float verification from [Cross-Compilation](./cross-compilation.md).
 
 ## The map file, section by section
 
-`-Wl,-Map=blink.map,--cref` produces four parts, in this order. Paths below are shortened for width; a real map file spells out every toolchain path in full, which is why the file is 1200 lines for a firmware this small.
+`-Wl,-Map=blink.map,--cref` produces four parts, in this order. Paths below are shortened for width; a real map file spells out every toolchain path in full, which is why the file is 1200 lines for a firmware this small. As flagged above, the excerpts are from `blink-printf.map`.
 
 **1. Archive members included, and who asked for them.** The most useful part of the file and the first thing in it. Each pair of lines is "this archive member was linked" / "because this object referenced this symbol":
 
@@ -152,6 +156,8 @@ Archive member included to satisfy reference by file (symbol)
 ```
 
 That is the 4 KB, traced to its cause in three lines: your `main.o` referenced `printf`, which dragged in `libc_a-printf.o`, which dragged in `_impure_ptr`, and so on down the chain. When something you did not ask for is in your binary, **this is where you look first** — it names the object file that asked for it.
+
+One caution about reading this part: it lists what the linker **pulled in**, not what survived. The 440-byte baseline — no `printf` anywhere — still lists 24 archive members here, because `crt0.o` references `exit` and `memset` and `--specs=nosys.specs` supplies the syscall stubs to satisfy them. `--gc-sections` then discards nearly all of that code, which is how the image is still 440 bytes. So a long list is not by itself a problem; cross-check anything alarming against part 4 or against `nm` before you go hunting.
 
 **2. Discarded input sections.** Everything `--gc-sections` deleted. Long and rarely interesting, except when the thing you are hunting for is *missing* — a vector table that vanished for want of a `KEEP` shows up here, which is the confirmation for the failure described in [The Linker Script](./the-linker-script.md).
 

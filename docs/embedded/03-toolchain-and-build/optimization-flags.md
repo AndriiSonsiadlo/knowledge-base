@@ -182,7 +182,6 @@ The general principle underneath: **an optimization level is not a correctness s
 - [Reading the Map File](./elf-map-files-and-size.md) — how every number in the table above was measured, and why `printf` dwarfs all of them.
 - [Startup Code: Reset to `main`](./startup-code.md) — `-ftree-loop-distribute-patterns`, an optimization that turns the `.data` copy loop into a `memcpy` call that is not usable yet.
 - [The Linker Script](./the-linker-script.md) — `KEEP`, and why `--gc-sections` deletes vector tables that are not protected.
-- [Cross-Compilation](./cross-compilation.md) — the target flags that must accompany these on both compile and link.
 - [Choosing a Toolchain](./toolchains-and-compilers.md) — why the compiler version is part of the answer, and why pinning it is mandatory.
 - [SysTick and Core Peripherals](../02-processor-architecture/systick-and-core-peripherals.md) — the timer to use instead of a spin loop.
 

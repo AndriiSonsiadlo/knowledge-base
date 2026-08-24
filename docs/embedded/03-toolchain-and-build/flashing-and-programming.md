@@ -189,7 +189,6 @@ The habit worth keeping: **read the option bytes before writing them, and never 
 - [Lab Equipment](../01-hardware-foundations/lab-equipment.md) — the on-board ST-LINK, its virtual COM port, and the meter you reach for at step 5.
 - [Reading the Map File](./elf-map-files-and-size.md) — where the `.elf`, `.bin` and `.hex` come from, and why the ELF is the safer thing to flash.
 - [CMake for Embedded](./cmake-for-embedded.md) — wiring the OpenOCD command above into a `flash` build target.
-- [Build Systems and Vendor Tooling](./build-systems-and-vendor-tools.md) — what `pio run -t upload` and `west flash` are doing underneath.
 - [The Cortex-M Memory Map](../02-processor-architecture/memory-map-and-bit-banding.md) — why `0x08000000` is the address a raw `.bin` must be written to.
 
 ## References

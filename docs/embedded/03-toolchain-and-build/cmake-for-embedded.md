@@ -80,9 +80,9 @@ The tell that it worked is a single word in the configure output:
 Two consequences worth understanding rather than just accepting:
 
 - **Anything that needs to *run* a test program is now impossible**, and always was. `check_c_source_runs()` and `try_run()` cannot work when the target is a different computer that is not attached. If a dependency's CMake code calls them, it was never going to cross-compile without patching — this setting makes that fact surface early instead of after a confusing link error.
-- **`check_c_source_compiles` and `check_symbol_exists` still work**, because compiling is genuinely all they need. Header and symbol probes remain available.
+- **`check_c_source_compiles` and `check_symbol_exists` still run**, because compiling is all they need to produce an answer — but read that answer carefully. Under `STATIC_LIBRARY` these probes **never link**, so they can only tell you that a declaration was visible, not that an implementation exists. A `check_function_exists`-style probe is the sharp edge: a call to an undeclared-but-referenced function compiles happily into an object file and the check reports success, even when nothing in the link would ever provide the symbol. You then discover the truth as an undefined reference when your real executable links. Treat these as *header* probes, and confirm anything you actually depend on by linking the real target.
 
-The alternative some projects use is `set(CMAKE_TRY_COMPILE_TARGET_TYPE OBJECT_LIBRARY)`, which is very slightly cheaper because it skips the `ar` step. `STATIC_LIBRARY` is the value in CMake's own cross-compiling documentation and the one every embedded example uses; take the well-trodden one.
+There is no other value to reach for. `CMAKE_TRY_COMPILE_TARGET_TYPE` accepts exactly two: `EXECUTABLE`, the default that fails here, and `STATIC_LIBRARY`. Anything else — `OBJECT_LIBRARY` is the plausible-looking guess — is not recognised, so CMake falls back to building an executable and you get the identical "is not able to compile a simple test program" failure, now with a setting in your toolchain file that looks like it should have prevented it.
 
 ## A complete toolchain file
 
@@ -279,7 +279,6 @@ The habit that catches all of them: when a change to a file appears to have no e
 - [The Linker Script](./the-linker-script.md) — the `stm32f411re.ld` that `-T` and `LINK_DEPENDS` refer to.
 - [Reading the Map File](./elf-map-files-and-size.md) — what to do with the `blink.map` and `--print-memory-usage` output this build produces.
 - [What is CMake?](../../programming/cmake/00-intro/what-is-cmake.md) — CMake itself: the model, targets, and everything this page assumes.
-- [Custom Commands and Targets](../../programming/cmake/05-advanced/custom-commands.md) — the general form of the `objcopy` post-build step and the `flash` target.
 - [Build Systems and Vendor Tooling](./build-systems-and-vendor-tools.md) — when CMake is the right answer and when PlatformIO or `west` is.
 
 ## References

@@ -163,7 +163,6 @@ The same discipline applies to any generator — protobuf stubs, SVD-derived hea
 - [Cross-Compilation](./cross-compilation.md) — the flags every one of these build systems is ultimately passing.
 - [Reading the Map File](./elf-map-files-and-size.md) — what to check after any of these produces a binary.
 - [Flashing and Programming](./flashing-and-programming.md) — what `pio run -t upload`, `west flash` and the CubeIDE run button do underneath.
-- [Build Systems: CMake](../../programming/cpp/01-toolchain-and-build/build-systems-cmake.md) — the general, non-embedded treatment.
 
 ## References
 
