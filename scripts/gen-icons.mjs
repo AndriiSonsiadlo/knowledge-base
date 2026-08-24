@@ -22,6 +22,8 @@ const WANT = [
 	// Boost sections
 	"hammer", "puzzle", "type", "repeat", "sigma", "calculator",
 	"hard-drive", "network", "database", "clock", "git-fork",
+	// Embedded sections
+	"zap", "plug", "timer", "wifi", "battery", "terminal", "shield", "lock", "refresh-cw",
 ];
 
 const out = { prefix: "lucide", icons: {}, width: full.width ?? 24, height: full.height ?? 24 };

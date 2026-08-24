@@ -55,7 +55,6 @@ Don't assume "runs on Linux" means "meets my deadline." Stock Linux's default fa
 
 - [Microcontroller, Microprocessor, SoC](./microcontroller-vs-microprocessor-vs-soc.md) — the hardware property (an MMU or not) that decides whether Linux is even on the table.
 - [The Embedded Landscape](./the-embedded-landscape.md) — which chip families this decision typically maps onto.
-- [How This Section Is Organised](./how-this-section-is-organised.md) — where the RTOS and embedded Linux material actually lives once you've picked a lane.
 - [Glossary](./glossary.md) — RTOS, tick, jitter, and WCET, defined precisely.
 - [Embedded Systems](../readme.md) — the section index and its four learning paths.
 

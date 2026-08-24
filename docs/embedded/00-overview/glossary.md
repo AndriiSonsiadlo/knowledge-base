@@ -86,7 +86,6 @@ Don't assume "MPU" means the same thing every time you see it, including within 
 - [Microcontroller, Microprocessor, SoC](./microcontroller-vs-microprocessor-vs-soc.md) — the MCU/MPU/MMU/SoC distinction this glossary's most confusable entries come from.
 - [Bare-Metal, RTOS, or Linux](./bare-metal-vs-rtos-vs-linux.md) — RTOS, tick, and jitter in the context of the decision they actually drive.
 - [What "Embedded" Actually Means](./what-embedded-means.md) — why this many acronyms exist in the first place: real constraints that needed names.
-- [How This Section Is Organised](./how-this-section-is-organised.md) — which folder each not-yet-published term will eventually live in.
 - [Embedded Systems](../readme.md) — the section index and its four learning paths.
 
 ## References
