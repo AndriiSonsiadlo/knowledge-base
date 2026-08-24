@@ -1483,9 +1483,16 @@ button {
 }
 
 /* ============ Memraid Graphs / Flowcharts ============ */
+.docusaurus-mermaid-container {
+  overflow: visible !important;
+  height: auto !important;
+}
+
 .docusaurus-mermaid-container svg {
   display: block;        /* allows margin auto centering */
   margin: 2rem auto;     /* top/bottom + auto left/right */
+  max-width: 100%;
+  height: auto;
 }
 
 /* WaveDrom diagrams (src/components/WaveDrom) sit on the same light plate as
