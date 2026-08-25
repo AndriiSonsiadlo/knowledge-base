@@ -1484,20 +1484,43 @@ button {
 
 /* ============ Memraid Graphs / Flowcharts ============ */
 .docusaurus-mermaid-container {
-  overflow: visible !important;
+  /* Wide LR diagrams (many nodes side by side) used to be squeezed to the
+     column width via svg max-width:100%, shrinking node text to unreadable
+     sizes. Render at natural size and let it scroll horizontally instead —
+     same fix already applied to WaveDrom diagrams below. */
+  overflow-x: auto !important;
+  overflow-y: visible !important;
   height: auto !important;
 }
 
 .docusaurus-mermaid-container svg {
-  display: block;        /* allows margin auto centering */
-  margin: 2rem auto;     /* top/bottom + auto left/right */
-  max-width: 100%;
+  display: block;
+  margin: 2rem auto;      /* top/bottom + auto left/right when it fits */
+  min-width: min-content; /* never shrink below natural node/text size */
   height: auto;
   /* SVG roots are overflow:hidden by default (UA stylesheet), so the div's
-     overflow:visible above doesn't help — the SVG clips its own content
+     overflow above doesn't help — the SVG clips its own content
      whenever Mermaid's computed viewBox undershoots the real layout
      height, cutting off the last node. */
   overflow: visible !important;
+}
+
+/* Each node label sits in its own <foreignObject>, which clips its HTML
+   content the same way the outer svg does — the diamond/rect shape is
+   sized for the label, but wrapped multi-line labels overflow it and get
+   cut off at the bottom without this. */
+.docusaurus-mermaid-container foreignObject {
+  overflow: visible !important;
+}
+
+/* foreignObject content is real HTML, so it inherits .markdown p's
+   text-align: justify — that's what stretches node labels edge-to-edge
+   instead of centering them in the shape. */
+.docusaurus-mermaid-container p,
+.docusaurus-mermaid-container .nodeLabel,
+.docusaurus-mermaid-container .edgeLabel {
+  text-align: center !important;
+  text-align-last: center !important;
 }
 
 /* WaveDrom diagrams (src/components/WaveDrom) sit on the same light plate as
