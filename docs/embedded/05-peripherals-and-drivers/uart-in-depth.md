@@ -34,7 +34,7 @@ Four things in that picture are worth stating precisely, because they are the on
 
 - **Data goes out LSB first.** A logic analyser configured for MSB-first shows every byte bit-reversed, which looks exactly like a baud mismatch until you notice `0x41` reading back as `0x82`.
 - **The stop bit is not a bit, it is a minimum idle time.** One stop bit means "the line must be high for at least one bit period before the next start edge". A receiver that finds the line low where the stop bit should be raises a framing error (`FE`), and that is the flag that actually tells you the baud rate is wrong.
-- **Parity, when enabled, replaces a data bit rather than adding one.** On STM32 the `M` bit in `USART_CR1` selects a 8- or 9-bit word *including* parity. 8-E-1 therefore means `M = 0`, `PCE = 1`, and seven bits of payload — set `M = 1` if you want eight payload bits plus parity, which is the configuration everyone forgets and which produces a receiver that sees every byte shifted.
+- **Parity, when enabled, replaces a data bit rather than adding one.** The `M` bit in `USART_CR1` selects the *total* word length — 8 bits (`M = 0`) or 9 (`M = 1`) — and with `PCE = 1` the parity bit occupies the most significant position **inside** that word rather than being appended to it (RM0383 §19.6.4). So **8-E-1 requires `M = 1`**: a nine-bit word of which eight bits are payload. Leaving `M = 0` with parity enabled gives you 7-E-1 and a far end that sees every byte truncated to seven bits. Nine bits is also the ceiling — this USART cannot produce a ten-bit word, so 9 data bits *plus* parity is not a configuration that exists on this part.
 - **The sample point is 9.5 bit times from the edge for the last bit of an 8-N-1 frame.** That number is the entire tolerance budget, derived below.
 
 ## `USART_BRR`: the divider, exactly
@@ -76,20 +76,20 @@ error      = (115 207.37 − 115 200) / 115 200 = +0.0064 %
 
 Six ten-thousandths of a percent. That link will never fail for timing reasons. Now the same arithmetic on a board running from the 16 MHz HSI because nobody configured the PLL:
 
-| `f_CK` | Target | `BRR` | `USARTDIV` | Achieved | Error |
-|---|---|---|---|---|---|
-| 50 MHz | 115 200 | `0x01B2` | 27.125 | 115 207.4 | **+0.006 %** |
-| 50 MHz | 921 600 | `0x0036` | 3.375 | 925 925.9 | **+0.47 %** |
-| 16 MHz | 115 200 | `0x008B` | 8.6875 | 115 107.9 | **−0.08 %** |
-| 16 MHz | 230 400 | `0x0045` | 4.3125 | 231 884.1 | **+0.64 %** |
-| 16 MHz | 921 600 | `0x0011` | 1.0625 | 941 176.5 | **+2.12 %** |
-| 8 MHz | 921 600 | `0x0011` (`OVER8`) | 1.125 | 888 888.9 | **−3.55 %** |
+| `f_CK` | `OVER8` | Target | `BRR` | `USARTDIV` | Achieved | Error |
+|---|---|---|---|---|---|---|
+| 50 MHz | 0 | 115 200 | `0x01B2` | 27.125 | 115 207.4 | **+0.006 %** |
+| 50 MHz | 0 | 921 600 | `0x0036` | 3.375 | 925 925.9 | **+0.47 %** |
+| 16 MHz | 0 | 115 200 | `0x008B` | 8.6875 | 115 107.9 | **−0.08 %** |
+| 16 MHz | 0 | 230 400 | `0x0045` | 4.3125 | 231 884.1 | **+0.64 %** |
+| 16 MHz | 0 | 921 600 | `0x0011` | 1.0625 | 941 176.5 | **+2.12 %** |
+| 16 MHz | **1** | 921 600 | `0x0021` | 2.125 | 941 176.5 | **+2.12 %** |
 
 The pattern is the one to internalise: **error grows as `USARTDIV` shrinks**, because the fraction field is a fixed number of sixteenths and those sixteenths are a larger share of a small divider. A divider above about 16 gives you error in the hundredths of a percent for free. A divider below 4 is where links start being flaky on cold mornings.
 
 ### `OVER8` does not make the baud rate more accurate
 
-This is the part almost every tutorial gets backwards. Compare the `OVER8 = 1` column for any row above against `OVER8 = 0` and the achieved baud rate is *identical* — not similar, identical. The reason is arithmetic: `OVER8` doubles `USARTDIV` and simultaneously coarsens the fraction from sixteenths to eighths, so the granularity in hertz is unchanged.
+This is the part almost every tutorial gets backwards. The last two rows of the table are the same clock and the same target rate in the two oversampling modes, and the achieved baud rate is *identical* — not similar, identical: 941 176.5 either way, `+2.12 %` either way. The reason is arithmetic: `OVER8` doubles `USARTDIV` and simultaneously coarsens the fraction from sixteenths to eighths, so the granularity in hertz is unchanged.
 
 ```text
 OVER16:  step in USARTDIV = 1/16,  baud = f/(16·D)   → relative step = (1/16)/D
@@ -119,7 +119,7 @@ Two more things narrow it further in practice. The figure is the *total* across 
 Two consequences that follow directly:
 
 - **A crystal is not always necessary, but the HSI is not always sufficient.** The STM32F411's internal HSI is factory-trimmed to ±1% at 25 °C but drifts to roughly ±3% over the full −40 to +105 °C range (STM32F411 datasheet DS10314, "Internal clock source characteristics"). At room temperature a HSI-clocked UART works; in a car in July it does not, and the failure is intermittent framing errors that nobody can reproduce on a desk.
-- **Longer frames are less tolerant.** 9 data bits plus parity plus one stop bit puts the last sample 11.5 bit times out instead of 9.5, shrinking the budget by about 17%.
+- **A nine-bit word is less tolerant.** The longest frame this USART can send is `M = 1` with `PCE = 1` — one start bit, a nine-bit word carrying eight data bits plus parity, one stop bit. That puts the stop bit's centre **10.5** bit times from the resync edge instead of 9.5, so every figure in the table above scales by 9.5 / 10.5: about **9.5 % less margin**. `OVER16` falls from ≈ 3.6 % to **≈ 3.3 %** and `OVER8` from ≈ 2.0 % to **≈ 1.8 %**. That last number is the one that matters — with parity and eight data bits at `OVER8`, the total budget is already *below* the 2 % rule of thumb, so the rule stops being conservative and becomes the hard limit.
 
 ## The overrun error nobody handles
 
