@@ -186,9 +186,9 @@ The second version of the same mistake is subtler and worse: circular DMA is set
 
 ## See also
 
-- [DMA](../05-peripherals-and-drivers/dma.md) — the controller, circular mode, the half-transfer interrupt, and the arbitration cost this page prices.
 - [Interrupt Latency](./interrupt-latency.md) — where the ~300 ns per-event overhead comes from and how to measure your own.
 - [Deferred Work](./deferred-work.md) — what to do inside the interrupt once you have chosen it, so the handler stays short.
+- [DMA](../05-peripherals-and-drivers/dma.md) — the controller, circular mode, the half-transfer interrupt, and the arbitration cost this page prices.
 - [UART in Depth](../05-peripherals-and-drivers/uart-in-depth.md) — the worked hybrid: circular DMA plus `IDLE`-line detection, and the overrun error that polling and interrupts both have to handle.
 - [The Anatomy of a Peripheral](../05-peripherals-and-drivers/anatomy-of-a-peripheral.md) — the status-flag and enable conventions that every polling loop on this part is written against.
 

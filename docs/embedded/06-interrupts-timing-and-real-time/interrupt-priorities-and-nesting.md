@@ -20,9 +20,11 @@ Two properties of the Cortex-M implementation shape how you express it, and both
 
 ## Numbers run backwards, and there are four of them
 
-**Numerically lower means more urgent.** Priority 0 pre-empts priority 3; priority 15 pre-empts nothing. PM0214 Rev 10 §2.3.5 states the comparison directly — "a lower priority value indicating a higher priority" — and every sentence you read or write about this topic has to be checked against that inversion, because English does not agree with it. "Raising the priority of the interrupt" means writing a *smaller* number. "Raising `BASEPRI`" means writing a smaller number too, which blocks *more*. It is worth adopting a convention in comments and sticking to it: say "more urgent" and "less urgent", never "higher" and "lower".
+Two facts established on [The NVIC](../02-processor-architecture/the-nvic.md) constrain everything below, and both are worth restating as *design* rules rather than register rules.
 
-**The STM32F411 implements 4 priority bits, in the upper nibble.** The architecture allows an implementation 3 to 8 bits and requires that they be the most significant ones, with the rest reading as zero (PM0214 Rev 10 §4.3.7; RM0383 Rev 4 §10.1.1 states the count for this device: 16 programmable levels). So the usable scale is 0–15, and a raw register write must be pre-shifted by `8 - __NVIC_PRIO_BITS` = 4. `NVIC_SetPriority(TIM2_IRQn, 3)` writes `0x30`; `NVIC->IP[TIM2_IRQn] = 3` writes bits that do not exist and leaves the interrupt at level 0.
+**Numerically lower means more urgent**, so English works against you the whole time. "Raising the priority of the interrupt" means writing a *smaller* number; "raising `BASEPRI`" also means writing a smaller number, which blocks *more*. Adopt a convention in comments and identifiers and never break it: say **more urgent** and **less urgent**, never higher and lower. Half the confusion in this area is vocabulary, not hardware.
+
+**You have 16 usable levels, numbered 0–15**, because the STM32F411 implements four priority bits — and every raw register write must be pre-shifted, which is why nothing below writes a bare number. The NVIC page has the bit layout, the shift, and the `NVIC_SetPriority` arithmetic.
 
 Sixteen levels sounds generous and is not, once you start reserving space. Plan on using six to eight of them.
 
@@ -37,21 +39,13 @@ The priority byte is split by a binary point set globally in `AIRCR.PRIGROUP` (P
 
 Concretely: two interrupts at preempt 5 with sub-priorities 0 and 3. If both go pending while the core is in thread mode, sub-0 runs first and sub-3 tail-chains behind it. If sub-3's handler is *already running* and sub-0 goes pending, sub-0 waits — the entire duration of sub-3's handler — and then tail-chains. Sub-priority buys you ordering, never responsiveness. If two things must not delay each other, they need different **preempt** priorities, full stop.
 
-### What `PRIGROUP` does to the four bits you actually have
+### Choosing a `PRIGROUP`, given what it costs
 
-[The NVIC](../02-processor-architecture/the-nvic.md) gives the architectural table across all eight priority bits. Reduced to the four this part implements — bits `[7:4]`, with `[3:0]` reading as zero — the choice collapses to four distinct outcomes:
+[The NVIC](../02-processor-architecture/the-nvic.md) tabulates what every `PRIGROUP` value splits the priority byte into, with a column giving the effective result on this part's four implemented bits. The design consequence of that table is a single trade, and it is the only thing you need to carry into a scheme: **every sub-priority you buy costs you a preemption level.** The default (`NVIC_PRIORITYGROUP_4`) spends all four bits on preemption; the alternatives take bits away from it.
 
-| `AIRCR.PRIGROUP` | Binary point | Implemented preempt bits | Implemented sub bits | You get | Reason to choose it |
-|---|---|---|---|---|---|
-| `0b000`–`0b011` | at bit 4 or below | `[7:4]` — 4 | none | **16 preempt levels, no sub-priority** | The default. Maximum freedom to say "this may interrupt that" |
-| `0b100` | `0bxxx.yyyyy` | `[7:5]` — 3 | `[4]` — 1 | 8 preempt × 2 sub | Rarely useful: two sub-levels is barely an ordering |
-| `0b101` | `0bxx.yyyyyy` | `[7:6]` — 2 | `[5:4]` — 2 | 4 preempt × 4 sub | A system with four genuine urgency tiers and ties to break inside each |
-| `0b110` | `0bx.yyyyyyy` | `[7]` — 1 | `[6:4]` — 3 | 2 preempt × 8 sub | "Urgent" and "not urgent", finely ordered within each |
-| `0b111` | `0b.yyyyyyyy` | none | `[7:4]` — 4 | 1 preempt × 16 sub | **Nothing ever pre-empts anything.** A cooperative interrupt system |
+Since sub-priority never causes preemption, that trade is almost always bad. Preemption levels are the scarce resource — they are the only thing that can protect a deadline — and sub-priority only reorders things that were already going to wait. Take the default unless you can name the two interrupts whose *ordering* matters while their *latency* does not.
 
-The four values `0b000` through `0b011` are indistinguishable on this part, because the sub-priority bits they nominate are all unimplemented. That is why ST's HAL calls `0b011` `NVIC_PRIORITYGROUP_4` and CubeMX picks it: you cannot do better than 16 preempt levels here, and every alternative trades some of them away.
-
-The bottom row is worth a moment. `PRIGROUP = 0b111` gives a system where every interrupt runs to completion — no nesting, ever, one exception frame maximum, and free mutual exclusion between all handlers. For a small system with uniformly short handlers that is a genuinely defensible configuration, and it is the one Armv6-M parts get whether they want it or not. It is a design choice, not a degenerate case.
+The one setting worth a second look is the far end, where no bits are left for preemption at all: every interrupt then runs to completion, one exception frame is the maximum, and all handlers get free mutual exclusion against each other. For a small system with uniformly short handlers that is a defensible configuration rather than a degenerate one — and it is what Armv6-M parts get whether they choose it or not.
 
 ### What nests against what
 
@@ -178,14 +172,13 @@ The default `PRIGROUP` on this part gives you 16 preempt levels, so flattening i
 
 ## The ceiling that `BASEPRI` imposes
 
-A `BASEPRI`-based critical section is, in effect, a **priority ceiling**: for its duration the processor's execution priority is raised to the threshold, and every interrupt at or numerically above that threshold is held pending. This has a consequence that is easy to state and easy to forget.
+[Critical Sections and Atomicity](../04-bare-metal-programming/critical-sections-and-atomicity.md) establishes the mechanism and the discipline that comes with it: a `BASEPRI` threshold splits the system into interrupts that keep running during every critical section — and must therefore touch no protected state — and interrupts that are maskable and may. What that page leaves open is the question this one has to answer: **where in your numbering do you put the line, and what does putting it there cost?**
 
-**Choosing a `BASEPRI` threshold partitions your interrupts into two populations with different rules.**
+Two design consequences follow, and neither is a property of the mechanism.
 
-- **Below the threshold (numerically smaller, more urgent).** These keep running during every critical section in the program. Their latency is unaffected by your locking — which is exactly why they exist. In exchange, **they may not touch any data a critical section protects**, and under an RTOS they may not call any kernel API, because the kernel's own critical sections cannot mask them.
-- **At or above the threshold.** These are maskable, so they may safely share data with thread-mode code using critical sections, and may call the kernel. In exchange they pay the latency of every critical section in the system, including the kernel's.
+**The ceiling has to be a number in your scheme, decided before the first interrupt is assigned.** In the band table above it sits at 5, between Control and Fast I/O, which is why levels 0 and 2 are documented as "touches no shared state" — that restriction is not a property of those interrupts, it is the price of putting them above the line. Move the line and the restriction moves with it. Deciding it late means auditing every handler you already wrote.
 
-FreeRTOS formalises exactly this split as `configMAX_SYSCALL_INTERRUPT_PRIORITY`, and its documentation's insistence that an ISR above that threshold must never call a `...FromISR` function is this rule, not a quirk of that kernel.
+**Keep a spare level on the unmaskable side.** Level 4 in the table has no occupant on purpose. With the ceiling at 5, levels 0, 2 and 4 are the interrupts no critical section can delay, and 4 is the slot for the one you discover six months in — something that must not wait for a lock but does not belong beside the emergency stop. Without a spare there, the only way to add it is to renumber the safety band, which is the change you least want to be making late.
 
 The ceiling also sets a floor on latency for everything maskable, which is the number you carry into a budget:
 
@@ -211,8 +204,7 @@ Two configuration mistakes that produce a system which appears to have a priorit
 
 ## References
 
-- STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf), Rev 10. §2.3.5 for the priority ordering rule quoted above; §4.3.7 for the `NVIC_IPR` priority registers and the implemented-bit rule that forces the upper-nibble shift; §4.4.5 for `AIRCR`, the `PRIGROUP` field that positions the binary point, and the `0x5FA` write key.
+- STMicroelectronics — [**PM0214**, *STM32 Cortex-M4 MCUs and MPUs programming manual*](https://www.st.com/resource/en/programming_manual/pm0214-stm32-cortexm4-mcus-and-mpus-programming-manual-stmicroelectronics.pdf), Rev 10. §2.3.5 for the priority ordering rule that makes lower numbers more urgent; §4.4.8–§4.4.10 for `SHPR1`–`SHPR3`, the system-handler priority registers that hold `SysTick`, `PendSV` and `SVCall` rather than the NVIC's `IPR` array; §4.4.5 for `AIRCR` and the `PRIGROUP` field whose trade-off this page's scheme is built around.
 - Arm — [***Armv7-M Architecture Reference Manual***](https://developer.arm.com/documentation/ddi0403/latest/) (DDI 0403E.e). §B1.5.4 for execution priority and the exact definition of when a pending exception pre-empts; §B3.2 for the priority-grouping definition, which is where "sub-priority never causes preemption" is normative rather than descriptive.
 - STMicroelectronics — [**RM0383**, *STM32F411xC/E reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), Rev 4. §10.1.1 for this device's 16 programmable priority levels and its maskable channel count; **Table 37** for the interrupt position numbers that break ties when two exceptions share a priority.
-- Amazon Web Services — [**FreeRTOS interrupt priority configuration**](https://www.freertos.org/Documentation/02-Kernel/03-Supported-devices/02-Customization#configmax_syscall_interrupt_priority). `configMAX_SYSCALL_INTERRUPT_PRIORITY` as the canonical worked example of a masking ceiling, and the rule that interrupts more urgent than it must not call kernel APIs — the partition described in the ceiling section.
 - Arm — [**CMSIS-Core (Cortex-M) documentation**](https://arm-software.github.io/CMSIS_6/latest/Core/index.html). `NVIC_SetPriority`, `NVIC_SetPriorityGrouping`, `NVIC_EncodePriority` and the `__NVIC_PRIO_BITS` device macro — worth reading rather than only calling, because the shift they perform is the difference between the 0–15 scale and the register contents.
