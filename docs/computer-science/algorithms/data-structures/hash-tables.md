@@ -58,6 +58,9 @@ bucket 03 -> (empty)
 **Open addressing** — everything lives in the array itself, and a collision probes for another free
 slot by a fixed rule (linear probing: try the next slot; quadratic; double hashing):
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def insert_linear_probe(table, key, value):
     i = hash(key) % len(table)
@@ -65,6 +68,23 @@ def insert_linear_probe(table, key, value):
         i = (i + 1) % len(table)     # walk forward until a free slot
     table[i] = (key, value)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+struct Slot { bool used = false; Key key; Value value; };
+
+void insert_linear_probe(std::vector<Slot>& table, const Key& key, const Value& value) {
+    std::size_t i = std::hash<Key>{}(key) % table.size();
+    while (table[i].used && table[i].key != key)
+        i = (i + 1) % table.size();      // walk forward until a free slot
+    table[i] = {true, key, value};
+}
+```
+
+</TabItem>
+</Tabs>
 
 | | Separate chaining | Open addressing |
 |---|---|---|
@@ -91,6 +111,9 @@ doubling argument as [dynamic arrays](./arrays.md).
 
 ## Practical Usage
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Pre-size when the count is known, to avoid repeated rehashing
 seen = dict()                      # Python: no capacity argument
@@ -107,6 +130,29 @@ def two_sum(nums, target):
         seen[x] = i
     return None
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Pre-size when the count is known, to avoid repeated rehashing
+std::unordered_map<std::string, int> seen;
+seen.reserve(expected_size);        // max_load_factor defaults to 1.0
+
+// The classic use: turning a nested scan into a single pass
+std::optional<std::pair<int, int>> two_sum(const std::vector<int>& nums, int target) {
+    std::unordered_map<int, int> seen;              // value -> index
+    for (int i = 0; i < static_cast<int>(nums.size()); ++i) {
+        auto it = seen.find(target - nums[i]);      // O(1) instead of an inner loop
+        if (it != seen.end()) return std::pair{it->second, i};
+        seen[nums[i]] = i;
+    }
+    return std::nullopt;
+}
+```
+
+</TabItem>
+</Tabs>
 
 That rewrite — replacing an O(n²) nested scan with an O(n) pass and a hash table — is the single most
 common application of the structure, and worth recognising on sight.

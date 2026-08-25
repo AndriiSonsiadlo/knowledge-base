@@ -40,6 +40,9 @@ quadratic worst case; heapsort has neither problem.
 The array is used as both the heap and the output. The heap occupies a shrinking prefix; the sorted
 result grows as a suffix behind it.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def heapsort(a):
     n = len(a)
@@ -66,6 +69,39 @@ def sift_down(a, i, size):
         i = largest
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void sift_down(std::vector<int>& a, int i, int size) {
+    for (;;) {
+        int largest = i;
+        for (int child : {2 * i + 1, 2 * i + 2})
+            if (child < size && a[child] > a[largest]) largest = child;
+        if (largest == i) return;
+        std::swap(a[i], a[largest]);
+        i = largest;
+    }
+}
+
+void heapsort(std::vector<int>& a) {
+    int n = static_cast<int>(a.size());
+
+    // Phase 1: build a max-heap in place — O(n), not O(n log n)
+    for (int i = n / 2 - 1; i >= 0; --i)
+        sift_down(a, i, n);
+
+    // Phase 2: repeatedly move the max to the end and shrink the heap
+    for (int end = n - 1; end > 0; --end) {
+        std::swap(a[0], a[end]);        // largest element to its final position
+        sift_down(a, 0, end);           // restore the heap over the remaining prefix
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 Phase 1 is O(n) — see the [heaps page](../data-structures/heaps.md) for why building a heap is linear
 rather than n log n. Phase 2 does n extractions at O(log n) each, so it dominates: **O(n log n)**
 overall.
@@ -84,6 +120,9 @@ Heapsort is rarely the top-level choice, but it occupies two important roles:
 - **Memory-constrained and real-time systems.** Embedded and kernel contexts where an O(n) allocation
   is unacceptable and an O(n²) tail is unacceptable. The Linux kernel's `sort()` is a heapsort.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Partial sorting: the top k without sorting everything — O(n + k log n)
 import heapq
@@ -92,6 +131,26 @@ def top_k(items, k):
     heapq.heapify(heap)                       # O(n)
     return [heapq.heappop(heap) for _ in range(k)]   # k × O(log n)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Partial sorting: the top k without sorting everything — O(n + k log n)
+std::vector<int> top_k(std::vector<int> items, int k) {
+    std::priority_queue<int, std::vector<int>, std::greater<>>
+        heap(std::greater<>{}, std::move(items));          // heapify: O(n)
+    std::vector<int> out;
+    for (int i = 0; i < k && !heap.empty(); ++i) {         // k x O(log n)
+        out.push_back(heap.top());
+        heap.pop();
+    }
+    return out;
+}
+```
+
+</TabItem>
+</Tabs>
 
 Stopping phase 2 after k extractions gives the k largest elements in O(n + k log n) — better than a
 full sort when k is small, which is the same argument behind `heapq.nlargest`.

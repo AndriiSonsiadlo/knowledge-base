@@ -70,6 +70,9 @@ nothing about the range you might actually be operating in.
 
 The mechanical rules cover most cases:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # O(1) — the work does not depend on n
 def first(items):
@@ -98,6 +101,45 @@ def count_halvings(n):
         steps += 1
     return steps
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// O(1) — the work does not depend on n
+int first(const std::vector<int>& items) {
+    return items[0];
+}
+
+// O(n) — one pass
+long long total(const std::vector<int>& items) {
+    long long acc = 0;
+    for (int x : items)      // n iterations
+        acc += x;            // O(1) each
+    return acc;
+}
+
+// O(n²) — nested loops over the same input
+bool has_duplicate(const std::vector<int>& items) {
+    for (std::size_t i = 0; i < items.size(); ++i)             // n
+        for (std::size_t j = i + 1; j < items.size(); ++j)     // up to n
+            if (items[i] == items[j]) return true;
+    return false;
+}
+
+// O(log n) — the search space halves each step
+int count_halvings(int n) {
+    int steps = 0;
+    while (n > 1) {
+        n /= 2;
+        ++steps;
+    }
+    return steps;
+}
+```
+
+</TabItem>
+</Tabs>
 
 - **Sequential blocks add**, and the larger wins: `O(n) + O(n²) = O(n²)`.
 - **Nested loops multiply**: a loop of n containing a loop of m is `O(n·m)`.

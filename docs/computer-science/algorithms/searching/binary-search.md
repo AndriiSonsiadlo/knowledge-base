@@ -35,6 +35,9 @@ not.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def binary_search(a, target):
     lo, hi = 0, len(a) - 1          # inclusive bounds
@@ -48,6 +51,25 @@ def binary_search(a, target):
             hi = mid - 1
     return -1
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int binary_search(const std::vector<int>& a, int target) {
+    int lo = 0, hi = static_cast<int>(a.size()) - 1;   // inclusive bounds
+    while (lo <= hi) {                  // <= because lo == hi is a valid range of one
+        int mid = lo + (hi - lo) / 2;   // overflow-safe midpoint
+        if (a[mid] == target) return mid;
+        if (a[mid] < target) lo = mid + 1;   // +1: mid is excluded, guaranteeing progress
+        else                 hi = mid - 1;
+    }
+    return -1;
+}
+```
+
+</TabItem>
+</Tabs>
 
 Every line above is where implementations go wrong:
 
@@ -70,6 +92,9 @@ Exact-match search is the least useful form. Far more often you want the **inser
 first position where a predicate becomes true. This version never terminates early, always converges
 on a boundary, and handles duplicates and absent values uniformly:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def lower_bound(a, target):
     """Index of the first element >= target. Returns len(a) if none."""
@@ -83,6 +108,25 @@ def lower_bound(a, target):
     return lo
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Index of the first element >= target. Returns a.size() if there is none.
+std::size_t lower_bound(const std::vector<int>& a, int target) {
+    std::size_t lo = 0, hi = a.size();       // half-open: hi is one past the end
+    while (lo < hi) {
+        std::size_t mid = lo + (hi - lo) / 2;
+        if (a[mid] < target) lo = mid + 1;
+        else                 hi = mid;       // no -1: mid may itself be the answer
+    }
+    return lo;
+}
+```
+
+</TabItem>
+</Tabs>
+
 From `lower_bound` everything else follows: `a[i] == target` tests membership, `upper_bound - lower_bound`
 counts occurrences, and the returned index is exactly where an insert would preserve order.
 
@@ -90,6 +134,9 @@ counts occurrences, and the returned index is exactly where an insert would pres
 
 The technique applies to any **monotonic predicate** — any question whose answer, once true, stays
 true. The "array" can be a range of candidate answers that is never materialised:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 # Smallest capacity that ships all packages within `days`
@@ -112,11 +159,43 @@ def min_capacity(weights, days):
     return lo
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Smallest capacity that ships all packages within `days`
+int min_capacity(const std::vector<int>& weights, int days) {
+    auto feasible = [&](int cap) {           // monotonic: if cap works, cap+1 works
+        int needed = 1, load = 0;
+        for (int w : weights) {
+            if (load + w > cap) { ++needed; load = 0; }
+            load += w;
+        }
+        return needed <= days;
+    };
+
+    int lo = *std::max_element(weights.begin(), weights.end());
+    int hi = std::accumulate(weights.begin(), weights.end(), 0);
+    while (lo < hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (feasible(mid)) hi = mid;
+        else               lo = mid + 1;
+    }
+    return lo;
+}
+```
+
+</TabItem>
+</Tabs>
+
 This "binary search on the answer" pattern turns an optimisation problem into O(log range) feasibility
 checks, and it is one of the highest-value techniques in competitive programming and in real capacity
 planning alike.
 
 ## Practical Usage
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 import bisect
@@ -128,6 +207,21 @@ found = i < len(a) and a[i] == x     # membership test
 
 bisect.insort(a, x)                  # insert, keeping the list sorted (O(n) for the shift)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+auto i = std::lower_bound(a.begin(), a.end(), x);   // first position with *i >= x
+auto j = std::upper_bound(a.begin(), a.end(), x);   // first position with *j > x
+auto count = j - i;                                 // occurrences of x
+bool found = std::binary_search(a.begin(), a.end(), x);    // membership test
+
+a.insert(std::lower_bound(a.begin(), a.end(), x), x);      // insert, keeping it sorted (O(n) for the shift)
+```
+
+</TabItem>
+</Tabs>
 
 Equivalents elsewhere: C++ `std::lower_bound`/`upper_bound`/`equal_range`, Java
 `Arrays.binarySearch` (which returns `-(insertion point) - 1` when absent), Rust

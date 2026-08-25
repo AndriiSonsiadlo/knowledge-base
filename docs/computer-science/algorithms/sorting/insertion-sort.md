@@ -38,6 +38,9 @@ small subarrays to it.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def insertion_sort(a):
     for i in range(1, len(a)):
@@ -50,6 +53,27 @@ def insertion_sort(a):
         a[j + 1] = key      # drop key into the gap
     return a
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void insertion_sort(std::vector<int>& a) {
+    for (std::size_t i = 1; i < a.size(); ++i) {
+        int key = a[i];
+        int j = static_cast<int>(i) - 1;
+        // Shift everything greater than key one position right
+        while (j >= 0 && a[j] > key) {
+            a[j + 1] = a[j];
+            --j;
+        }
+        a[j + 1] = key;     // drop key into the gap
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 Note that the inner loop **shifts** rather than swaps — one write per displaced element instead of
 three. That is roughly a 3× constant-factor win over the swap-based formulation, and it is why
@@ -82,6 +106,9 @@ exploit.
 
 ## Practical Usage
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # The way insertion sort is actually used: as the base case of a bigger sort
 SMALL = 16
@@ -94,6 +121,27 @@ def hybrid_sort(a, lo, hi):
     hybrid_sort(a, lo, p)
     hybrid_sort(a, p + 1, hi)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// The way insertion sort is actually used: as the base case of a bigger sort
+constexpr int SMALL = 16;
+
+void hybrid_sort(std::vector<int>& a, int lo, int hi) {
+    if (hi - lo < SMALL) {
+        insertion_sort_range(a, lo, hi);        // cheap, cache-friendly, no recursion
+        return;
+    }
+    int p = partition(a, lo, hi);
+    hybrid_sort(a, lo, p);
+    hybrid_sort(a, p + 1, hi);
+}
+```
+
+</TabItem>
+</Tabs>
 
 The reason this wins below the threshold: insertion sort has almost no per-element overhead, does no
 recursion, allocates nothing, and touches memory strictly sequentially. Quicksort's partitioning and

@@ -231,7 +231,9 @@ const config = {
         additionalLanguages: [
           "armasm",
           "bash",
+          "c",
           "cmake",
+          "cpp",
           "csharp",
           "diff",
           "glsl",

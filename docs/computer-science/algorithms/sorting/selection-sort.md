@@ -35,6 +35,9 @@ possible for a sort that moves elements individually. Everything else about it i
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def selection_sort(a):
     n = len(a)
@@ -47,6 +50,25 @@ def selection_sort(a):
             a[i], a[smallest] = a[smallest], a[i]    # one swap per round
     return a
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void selection_sort(std::vector<int>& a) {
+    int n = static_cast<int>(a.size());
+    for (int i = 0; i < n - 1; ++i) {
+        int smallest = i;
+        for (int j = i + 1; j < n; ++j)          // scan the unsorted remainder
+            if (a[j] < a[smallest]) smallest = j;
+        if (smallest != i)
+            std::swap(a[i], a[smallest]);        // one swap per round
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 The comparison count is fixed at `n(n−1)/2` regardless of input — the inner loop always runs to the
 end, because you cannot know an element is the minimum until you have seen every candidate. This is

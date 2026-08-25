@@ -35,6 +35,9 @@ makes the idea of an invariant ("after pass k, the tail is sorted") completely v
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def bubble_sort(a):
     n = len(a)
@@ -49,6 +52,29 @@ def bubble_sort(a):
             break
     return a
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void bubble_sort(std::vector<int>& a) {
+    int n = static_cast<int>(a.size());
+    for (int i = 0; i < n - 1; ++i) {
+        bool swapped = false;
+        // After i passes the last i elements are already in place
+        for (int j = 0; j < n - 1 - i; ++j) {
+            if (a[j] > a[j + 1]) {
+                std::swap(a[j], a[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break;      // a clean pass means the list is sorted
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 Two details separate the textbook version from the naive one:
 

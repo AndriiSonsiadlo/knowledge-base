@@ -56,6 +56,9 @@ error condition ("circular dependency"). See
 
 **Adjacency list** — each vertex stores its neighbours:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 graph = {
     1: [2, 5],
@@ -69,7 +72,32 @@ graph = {
 weighted = {1: [(2, 7), (5, 3)], ...}
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::unordered_map<int, std::vector<int>> graph{
+    {1, {2, 5}},
+    {2, {1, 3, 5}},
+    {3, {2, 4}},
+    {4, {3, 5, 6}},
+    {5, {1, 2, 4}},
+    {6, {4}},
+};
+// Weighted: store (neighbour, weight) pairs
+std::unordered_map<int, std::vector<std::pair<int, int>>> weighted{
+    {1, {{2, 7}, {5, 3}}},
+    // ...
+};
+```
+
+</TabItem>
+</Tabs>
+
 **Adjacency matrix** — a V×V grid where `m[i][j]` marks an edge:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 #      1  2  3  4  5  6
@@ -80,6 +108,22 @@ m = [[0, 1, 0, 0, 1, 0],   # 1
      [1, 1, 0, 1, 0, 0],   # 5
      [0, 0, 0, 1, 0, 0]]   # 6
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+//                                    1  2  3  4  5  6
+std::array<std::array<int, 6>, 6> m{{{0, 1, 0, 0, 1, 0},    // 1
+                                     {1, 0, 1, 0, 1, 0},    // 2
+                                     {0, 1, 0, 1, 0, 0},    // 3
+                                     {0, 0, 1, 0, 1, 1},    // 4
+                                     {1, 1, 0, 1, 0, 0},    // 5
+                                     {0, 0, 0, 1, 0, 0}}};  // 6
+```
+
+</TabItem>
+</Tabs>
 
 | | Adjacency list | Adjacency matrix |
 |---|---|---|
@@ -98,6 +142,9 @@ wants matrix form (Floyd–Warshall, spectral methods).
 
 ## Practical Usage
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 from collections import defaultdict
 
@@ -110,6 +157,24 @@ for u, v in edges:
 # Degree of a vertex
 len(graph[v])
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Building an undirected graph from an edge list
+std::unordered_map<int, std::vector<int>> graph;
+for (auto [u, v] : edges) {
+    graph[u].push_back(v);
+    graph[v].push_back(u);      // omit this line for a directed graph
+}
+
+// Degree of a vertex
+graph[v].size();
+```
+
+</TabItem>
+</Tabs>
 
 | Domain | Vertices | Edges | Question asked |
 |---|---|---|---|

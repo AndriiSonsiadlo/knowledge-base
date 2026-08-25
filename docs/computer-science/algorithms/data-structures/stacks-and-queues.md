@@ -40,6 +40,9 @@ wrong structure.
 A stack is a dynamic array with two of its operations hidden — appending and removing at the end are
 already O(1) amortized:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 stack = []
 stack.append(x)      # push
@@ -47,8 +50,26 @@ top = stack[-1]      # peek
 x = stack.pop()      # pop
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::vector<int> stack;
+stack.push_back(x);         // push
+int top = stack.back();     // peek
+stack.pop_back();           // pop — returns nothing, so read back() first
+
+std::stack<int> s;          // the adaptor, when the interface should forbid indexing
+```
+
+</TabItem>
+</Tabs>
+
 A queue is the case where the array representation goes wrong. Removing from the front of an array is
 O(n), so the naive version is quadratic:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 queue = []
@@ -56,10 +77,26 @@ queue.append(x)      # O(1)
 x = queue.pop(0)     # O(n) — every remaining element shifts down
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::vector<int> queue;
+queue.push_back(x);             // O(1)
+int front = queue.front();
+queue.erase(queue.begin());     // O(n) — every remaining element shifts down
+```
+
+</TabItem>
+</Tabs>
+
 The fix is a **circular buffer**: keep `head` and `tail` indices into a fixed array and wrap them
 modulo capacity, so neither end ever moves data. That is what real deque implementations do (Python's
 `collections.deque` uses a doubly linked list of fixed-size blocks, which achieves the same O(1) ends
 while allowing unbounded growth).
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 from collections import deque
@@ -68,6 +105,21 @@ q = deque()
 q.append(x)          # enqueue at the back — O(1)
 x = q.popleft()      # dequeue from the front — O(1)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::deque<int> q;
+q.push_back(x);         // enqueue at the back — O(1)
+int front = q.front();  // dequeue from the front — O(1)
+q.pop_front();
+
+std::queue<int> adaptor;   // std::queue wraps a deque with exactly this interface
+```
+
+</TabItem>
+</Tabs>
 
 :::warning[Use the right type, or the complexity silently changes]
 `list.pop(0)` and `list.insert(0, x)` are O(n) in Python; `deque.popleft()` and `deque.appendleft()`
@@ -81,6 +133,9 @@ The [call stack](../../assembly/calling-conventions-and-the-stack.md) is a stack
 calls nest: a function returns to its most recent caller, which is precisely LIFO. Every recursive
 algorithm therefore uses a stack whether or not it names one, and any recursion can be rewritten
 iteratively by managing that stack yourself — which is how you avoid stack-overflow on deep inputs.
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 # Recursive depth-first traversal — the call stack does the bookkeeping
@@ -103,6 +158,35 @@ def dfs_iterative(root):
         stack.append(node.left)
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Recursive depth-first traversal — the call stack does the bookkeeping
+void dfs(Node* node) {
+    if (!node) return;
+    visit(node);
+    dfs(node->left);
+    dfs(node->right);
+}
+
+// The same traversal with an explicit stack — bounded by the heap, not the stack
+void dfs_iterative(Node* root) {
+    std::vector<Node*> stack{root};
+    while (!stack.empty()) {
+        Node* node = stack.back();
+        stack.pop_back();
+        if (!node) continue;
+        visit(node);
+        stack.push_back(node->right);   // pushed first, so popped last
+        stack.push_back(node->left);
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Practical Usage
 
 | Problem | Structure | Why |
@@ -117,6 +201,9 @@ def dfs_iterative(root):
 
 A worked example — bracket matching, which is the canonical use and about as short as an algorithm gets:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def balanced(s):
     pairs = {")": "(", "]": "[", "}": "{"}
@@ -129,6 +216,29 @@ def balanced(s):
                 return False        # wrong closer, or nothing open
     return not stack                # anything left open is unbalanced
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+bool balanced(std::string_view s) {
+    static const std::unordered_map<char, char> pairs{{')', '('}, {']', '['}, {'}', '{'}};
+    std::vector<char> stack;
+    for (char ch : s) {
+        if (ch == '(' || ch == '[' || ch == '{') {
+            stack.push_back(ch);
+        } else if (auto it = pairs.find(ch); it != pairs.end()) {
+            if (stack.empty() || stack.back() != it->second)
+                return false;       // wrong closer, or nothing open
+            stack.pop_back();
+        }
+    }
+    return stack.empty();           // anything left open is unbalanced
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Edge Cases & Pitfalls
 

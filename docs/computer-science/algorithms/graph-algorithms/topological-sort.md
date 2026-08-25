@@ -40,6 +40,9 @@ a package manager or build tool needs to report.
 
 Repeatedly take a vertex with no remaining prerequisites, output it, and remove its edges:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 from collections import deque
 
@@ -66,6 +69,43 @@ def topological_sort(graph):
     return order
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// graph: u -> [dependents...], an edge u -> v meaning u must come before v.
+using Graph = std::unordered_map<int, std::vector<int>>;
+
+std::vector<int> topological_sort(const Graph& graph) {
+    std::unordered_map<int, int> in_degree;
+    for (const auto& [u, outs] : graph) {
+        in_degree.try_emplace(u, 0);
+        for (int v : outs) ++in_degree[v];
+    }
+
+    std::deque<int> queue;
+    for (const auto& [v, d] : in_degree)
+        if (d == 0) queue.push_back(v);
+
+    std::vector<int> order;
+    while (!queue.empty()) {
+        int u = queue.front();
+        queue.pop_front();
+        order.push_back(u);
+        for (int v : graph.at(u))
+            if (--in_degree[v] == 0)        // u is done; one prerequisite satisfied
+                queue.push_back(v);
+    }
+
+    if (order.size() != graph.size())       // some vertices never reached in-degree 0
+        throw std::runtime_error("graph contains a cycle");
+    return order;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The final length check is the cycle detection: vertices inside a cycle always have at least one
 unsatisfied prerequisite, so they never enter the queue.
 
@@ -73,6 +113,9 @@ unsatisfied prerequisite, so they never enter the queue.
 
 Run [depth-first search](./traversal.md) and prepend each vertex as it *finishes*. A vertex finishes
 only after everything it depends on has, so the reversed finishing order is a topological order:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def topological_sort_dfs(graph):
@@ -96,6 +139,35 @@ def topological_sort_dfs(graph):
     return order[::-1]                  # reverse the finishing order
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+enum Colour { WHITE, GREY, BLACK };
+
+std::vector<int> topological_sort_dfs(const Graph& graph) {
+    std::unordered_map<int, Colour> colour;
+    for (const auto& [v, outs] : graph) colour[v] = WHITE;
+    std::vector<int> order;
+
+    auto visit = [&](int u, auto&& self) -> void {
+        if (colour[u] == GREY) throw std::runtime_error("graph contains a cycle");
+        if (colour[u] == BLACK) return;
+        colour[u] = GREY;
+        for (int v : graph.at(u)) self(v, self);
+        colour[u] = BLACK;
+        order.push_back(u);                 // post-order: pushed after all descendants
+    };
+
+    for (const auto& [v, outs] : graph) visit(v, visit);
+    std::reverse(order.begin(), order.end());   // reverse the finishing order
+    return order;
+}
+```
+
+</TabItem>
+</Tabs>
+
 | | Kahn's | DFS-based |
 |---|---|---|
 | Traversal | Breadth-first | Depth-first |
@@ -108,6 +180,9 @@ Kahn's is usually preferable: it is iterative, its cycle detection is a single c
 extends naturally to the parallel case below.
 
 ## Practical Usage
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 # Everything at the same "level" has no dependencies between its members,
@@ -131,6 +206,39 @@ def parallel_batches(graph):
         ready = nxt
     return batches
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Everything at the same "level" has no dependencies between its members,
+// so each level can be executed in parallel.
+std::vector<std::vector<int>> parallel_batches(const Graph& graph) {
+    std::unordered_map<int, int> in_degree;
+    for (const auto& [u, outs] : graph) {
+        in_degree.try_emplace(u, 0);
+        for (int v : outs) ++in_degree[v];
+    }
+
+    std::vector<int> ready;
+    for (const auto& [v, d] : in_degree)
+        if (d == 0) ready.push_back(v);
+
+    std::vector<std::vector<int>> batches;
+    while (!ready.empty()) {
+        batches.push_back(ready);           // this whole batch can run concurrently
+        std::vector<int> next;
+        for (int u : ready)
+            for (int v : graph.at(u))
+                if (--in_degree[v] == 0) next.push_back(v);
+        ready = std::move(next);
+    }
+    return batches;
+}
+```
+
+</TabItem>
+</Tabs>
 
 This is what `make -j` and modern build systems do: compute the dependency levels, then run each
 level's tasks in parallel. The number of batches is the graph's **critical path length**, and it is a

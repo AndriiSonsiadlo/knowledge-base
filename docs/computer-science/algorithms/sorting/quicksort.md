@@ -37,6 +37,9 @@ quicksort is usually the faster of the two, despite a worst case that is quadrat
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def quicksort(a, lo=0, hi=None):
     if hi is None:
@@ -59,6 +62,39 @@ def partition(a, lo, hi):
     a[i], a[hi] = a[hi], a[i]     # put the pivot between the two regions
     return i
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Lomuto scheme: pivot is the last element.
+int partition(std::vector<int>& a, int lo, int hi) {
+    int pivot = a[hi];
+    int i = lo;                       // boundary of the "smaller than pivot" region
+    for (int j = lo; j < hi; ++j) {
+        if (a[j] < pivot) {
+            std::swap(a[i], a[j]);
+            ++i;
+        }
+    }
+    std::swap(a[i], a[hi]);           // put the pivot between the two regions
+    return i;
+}
+
+void quicksort(std::vector<int>& a, int lo, int hi) {
+    if (lo >= hi) return;
+    int p = partition(a, lo, hi);
+    quicksort(a, lo, p - 1);          // the pivot at p is already final
+    quicksort(a, p + 1, hi);
+}
+
+void quicksort(std::vector<int>& a) {
+    quicksort(a, 0, static_cast<int>(a.size()) - 1);
+}
+```
+
+</TabItem>
+</Tabs>
 
 <Figure src="/img/cs/algorithms/quicksort.gif"
         alt="Animation of quicksort on a set of bars, with a pivot chosen and elements swapped around it, then the same process repeating on each side"
@@ -100,6 +136,9 @@ position; randomise it or use median-of-three.
 The Lomuto scheme above is easier to read, but Hoare's original does about three times fewer swaps
 and handles duplicate-heavy input better:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def hoare_partition(a, lo, hi):
     pivot = a[(lo + hi) // 2]
@@ -116,6 +155,25 @@ def hoare_partition(a, lo, hi):
         a[i], a[j] = a[j], a[i]
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int hoare_partition(std::vector<int>& a, int lo, int hi) {
+    int pivot = a[lo + (hi - lo) / 2];
+    int i = lo - 1, j = hi + 1;
+    for (;;) {
+        do { ++i; } while (a[i] < pivot);
+        do { --j; } while (a[j] > pivot);
+        if (i >= j) return j;         // note: returns a split point, not a pivot index
+        std::swap(a[i], a[j]);
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 Note the different contract — it returns a boundary, so the recursion becomes
 `quicksort(a, lo, j)` and `quicksort(a, j + 1, hi)`, with no element excluded. Mixing up the two
 schemes' contracts is a classic source of infinite recursion.
@@ -123,6 +181,9 @@ schemes' contracts is a classic source of infinite recursion.
 ## Practical Usage
 
 Production quicksorts are always hybrids:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def introsort(a, lo, hi, depth_budget):
@@ -137,6 +198,32 @@ def introsort(a, lo, hi, depth_budget):
 
 # Entry point: budget of 2·log₂(n) partitions before giving up on quicksort
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void introsort(std::vector<int>& a, int lo, int hi, int depth_budget) {
+    if (hi - lo < 16) {
+        insertion_sort_range(a, lo, hi);            // small ranges: insertion sort wins
+    } else if (depth_budget == 0) {
+        heapsort_range(a, lo, hi);                  // too deep: bail out to a guaranteed O(n log n)
+    } else {
+        int p = partition(a, lo, hi);
+        introsort(a, lo, p - 1, depth_budget - 1);
+        introsort(a, p + 1, hi, depth_budget - 1);
+    }
+}
+
+// Entry point: budget of 2·log₂(n) partitions before giving up on quicksort
+void introsort(std::vector<int>& a) {
+    int n = static_cast<int>(a.size());
+    introsort(a, 0, n - 1, 2 * std::bit_width(static_cast<unsigned>(n)));
+}
+```
+
+</TabItem>
+</Tabs>
 
 **Introsort** — this exact structure — is what C++'s `std::sort` uses. It keeps quicksort's speed
 while making the O(n²) worst case unreachable, because exceeding the depth budget hands the range to

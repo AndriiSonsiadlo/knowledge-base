@@ -35,6 +35,9 @@ length, and never moves any other element.
 
 ### The core operations
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 class Node:
     def __init__(self, value, nxt=None):
@@ -57,6 +60,42 @@ def get(head, n):
     return head
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+struct Node {
+    int value;
+    Node* next = nullptr;
+};
+
+// Insert after a node we already hold — O(1), no traversal
+void insert_after(Node* node, int value) {
+    node->next = new Node{value, node->next};
+}
+
+// Delete the node after a node we hold — O(1)
+void delete_after(Node* node) {
+    if (node->next) {
+        Node* dead = node->next;
+        node->next = dead->next;
+        delete dead;
+    }
+}
+
+// Find the nth node — O(n), and this is the catch
+Node* get(Node* head, int n) {
+    while (head && n) {
+        head = head->next;
+        --n;
+    }
+    return head;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The asymmetry is the whole story. Every operation is O(1) **given a reference to the right node**,
 and getting that reference is O(n). A linked list only pays off when the traversal was going to
 happen anyway, or when you were handed the node by something else.
@@ -72,6 +111,9 @@ removes the most common source of off-by-one bugs in list code.
 
 Linked lists are where the [two-pointer pattern](../problem-solving-patterns/two-pointers-and-sliding-window.md)
 earns its keep, because you cannot index:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 # Middle of the list in one pass: fast moves twice per slow step
@@ -90,6 +132,34 @@ def has_cycle(head):
             return True
     return False
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Middle of the list in one pass: fast moves twice per slow step
+Node* middle(Node* head) {
+    Node* slow = head;
+    for (Node* fast = head; fast && fast->next; fast = fast->next->next)
+        slow = slow->next;
+    return slow;
+}
+
+// Cycle detection (Floyd's algorithm): if there is a loop, fast laps slow
+bool has_cycle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Practical Usage
 

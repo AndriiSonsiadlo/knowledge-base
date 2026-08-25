@@ -46,6 +46,9 @@ queue. Reaching for Dijkstra's adds a log factor and considerable machinery for 
 Nearly every algorithm here is the same loop with a different container and a different bookkeeping
 rule:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def traverse(graph, start):
     frontier = container([start])       # stack → DFS, queue → BFS, heap → Dijkstra's
@@ -58,6 +61,29 @@ def traverse(graph, start):
                 visited.add(neighbour)
                 frontier.add(neighbour)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void traverse(const Graph& graph, int start) {
+    Container frontier{start};          // stack → DFS, queue → BFS, heap → Dijkstra's
+    std::unordered_set<int> visited{start};
+    while (!frontier.empty()) {
+        int node = frontier.take();     // pop_back / pop_front / pop the minimum
+        process(node);
+        for (int neighbour : graph.at(node)) {
+            if (!visited.count(neighbour)) {
+                visited.insert(neighbour);
+                frontier.add(neighbour);
+            }
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 Swapping a stack for a queue turns depth-first into breadth-first. Swapping the queue for a
 [priority queue](../data-structures/heaps.md) keyed by distance turns BFS into Dijkstra's. The

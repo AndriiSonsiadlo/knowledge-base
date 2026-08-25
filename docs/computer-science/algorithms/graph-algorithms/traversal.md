@@ -38,6 +38,9 @@ solve.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 from collections import deque
 
@@ -74,6 +77,54 @@ def dfs_recursive(graph, node, visited=None):
             yield from dfs_recursive(graph, nb, visited)
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+using Graph = std::unordered_map<int, std::vector<int>>;
+
+std::vector<int> bfs(const Graph& graph, int start) {
+    std::unordered_set<int> visited{start};
+    std::deque<int> queue{start};
+    std::vector<int> order;
+    while (!queue.empty()) {
+        int node = queue.front();           // FIFO — the oldest frontier vertex
+        queue.pop_front();
+        order.push_back(node);
+        for (int nb : graph.at(node))
+            if (visited.insert(nb).second)  // mark on ENQUEUE, not on dequeue
+                queue.push_back(nb);
+    }
+    return order;
+}
+
+std::vector<int> dfs(const Graph& graph, int start) {
+    std::unordered_set<int> visited;
+    std::vector<int> stack{start}, order;
+    while (!stack.empty()) {
+        int node = stack.back();            // LIFO — the newest frontier vertex
+        stack.pop_back();
+        if (!visited.insert(node).second) continue;
+        order.push_back(node);
+        const auto& nbs = graph.at(node);
+        for (auto it = nbs.rbegin(); it != nbs.rend(); ++it)
+            if (!visited.count(*it)) stack.push_back(*it);
+    }
+    return order;
+}
+
+void dfs_recursive(const Graph& graph, int node,
+                   std::unordered_set<int>& visited, std::vector<int>& order) {
+    visited.insert(node);
+    order.push_back(node);
+    for (int nb : graph.at(node))
+        if (!visited.count(nb)) dfs_recursive(graph, nb, visited, order);
+}
+```
+
+</TabItem>
+</Tabs>
+
 :::danger[Mark vertices visited when you enqueue, not when you dequeue]
 In BFS, marking on dequeue lets a vertex enter the queue several times before it is first processed —
 once per neighbour that reaches it. On a dense graph the queue can grow to O(E), and the shortest-path
@@ -89,6 +140,9 @@ genuinely different bookkeeping, and copying one's structure to the other is a c
 BFS processes vertices in non-decreasing distance from the start, so the first time it reaches a
 vertex is necessarily by a path with the fewest edges. Recording distance and predecessor as you go
 gives the path itself:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def shortest_path(graph, start, goal):
@@ -109,6 +163,38 @@ def shortest_path(graph, start, goal):
     return None                         # goal unreachable
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::optional<std::vector<int>> shortest_path(const Graph& graph, int start, int goal) {
+    std::unordered_map<int, int> prev{{start, start}};   // start is its own predecessor
+    std::deque<int> queue{start};
+    while (!queue.empty()) {
+        int node = queue.front();
+        queue.pop_front();
+        if (node == goal) {
+            std::vector<int> path;
+            for (int v = goal; ; v = prev[v]) {
+                path.push_back(v);
+                if (v == start) break;
+            }
+            std::reverse(path.begin(), path.end());
+            return path;
+        }
+        for (int nb : graph.at(node))
+            if (!prev.count(nb)) {
+                prev[nb] = node;
+                queue.push_back(nb);
+            }
+    }
+    return std::nullopt;                                 // goal unreachable
+}
+```
+
+</TabItem>
+</Tabs>
+
 DFS can reach the goal by an arbitrarily long detour, because it commits to a branch before
 considering alternatives. It answers "is there a path", never "what is the shortest path".
 
@@ -125,6 +211,9 @@ considering alternatives. It answers "is there a path", never "what is the short
 | Flood fill | Either | DFS is shorter; BFS avoids deep recursion |
 | Bipartiteness check | BFS | Two-colour by level |
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Connected components — the pattern for any "do it for the whole graph" question
 def components(graph):
@@ -137,10 +226,34 @@ def components(graph):
     return groups
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Connected components — the pattern for any "do it for the whole graph" question
+std::vector<std::vector<int>> components(const Graph& graph) {
+    std::unordered_set<int> seen;
+    std::vector<std::vector<int>> groups;
+    for (const auto& [v, outs] : graph) {       // every vertex, not just one start point
+        if (seen.count(v)) continue;
+        auto group = bfs(graph, v);
+        seen.insert(group.begin(), group.end());
+        groups.push_back(std::move(group));
+    }
+    return groups;
+}
+```
+
+</TabItem>
+</Tabs>
+
 ### Cycle detection needs three states, not two
 
 For a directed graph, "visited" is insufficient — you must distinguish a vertex still being explored
 from one already finished:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 WHITE, GREY, BLACK = 0, 1, 2            # unvisited, on the stack, finished
@@ -160,6 +273,35 @@ def has_cycle(graph):
 
     return any(colour[v] == WHITE and visit(v) for v in graph)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+enum Colour { WHITE, GREY, BLACK };     // unvisited, on the stack, finished
+
+bool has_cycle(const Graph& graph) {
+    std::unordered_map<int, Colour> colour;
+    for (const auto& [v, outs] : graph) colour[v] = WHITE;
+
+    auto visit = [&](int v, auto&& self) -> bool {
+        colour[v] = GREY;
+        for (int nb : graph.at(v)) {
+            if (colour[nb] == GREY) return true;            // back edge to an ancestor → cycle
+            if (colour[nb] == WHITE && self(nb, self)) return true;
+        }
+        colour[v] = BLACK;                                  // fully explored
+        return false;
+    };
+
+    for (const auto& [v, outs] : graph)
+        if (colour[v] == WHITE && visit(v, visit)) return true;
+    return false;
+}
+```
+
+</TabItem>
+</Tabs>
 
 Reaching a **BLACK** vertex is fine — it means the graph reconverges, not that it loops. Only a
 **GREY** vertex, still on the current path, indicates a cycle. Treating both as "visited" reports

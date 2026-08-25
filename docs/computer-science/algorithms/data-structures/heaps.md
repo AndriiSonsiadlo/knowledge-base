@@ -53,6 +53,9 @@ right(i)  = 2i + 2
 
 Both work by moving one element along a single root-to-leaf path, which is why both are O(log n):
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def push(heap, value):
     heap.append(value)                 # place at the end — keeps the shape
@@ -81,6 +84,41 @@ def pop_max(heap):
     return top
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void push(std::vector<int>& heap, int value) {
+    heap.push_back(value);                  // place at the end — keeps the shape
+    std::size_t i = heap.size() - 1;
+    while (i > 0) {                         // sift up while it outranks its parent
+        std::size_t parent = (i - 1) / 2;
+        if (heap[parent] >= heap[i]) break;
+        std::swap(heap[parent], heap[i]);
+        i = parent;
+    }
+}
+
+int pop_max(std::vector<int>& heap) {
+    int top = heap[0];
+    heap[0] = heap.back();                  // move the last element to the root
+    heap.pop_back();
+    std::size_t i = 0, n = heap.size();
+    for (;;) {                              // sift down while a child outranks it
+        std::size_t largest = i;
+        for (std::size_t child : {2 * i + 1, 2 * i + 2})
+            if (child < n && heap[child] > heap[largest]) largest = child;
+        if (largest == i) break;
+        std::swap(heap[i], heap[largest]);
+        i = largest;
+    }
+    return top;
+}
+```
+
+</TabItem>
+</Tabs>
+
 | Operation | Cost |
 |---|---|
 | Peek at the extreme | O(1) |
@@ -97,6 +135,9 @@ nodes are leaves and cost nothing, a quarter can sift at most one level, and so 
 :::
 
 ## Practical Usage
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 import heapq
@@ -119,6 +160,38 @@ heapq.heappush(pq, (priority, next(counter), task))
 # Top-k without sorting everything: O(n log k), not O(n log n)
 top_10 = heapq.nlargest(10, huge_list)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// std::priority_queue is a MAX-heap by default
+std::priority_queue<int> pq;
+pq.push(2);                     // O(log n)
+int largest = pq.top();         // O(1)
+pq.pop();                       // O(log n)
+
+// For a min-heap, swap the comparator — no negation trick needed
+std::priority_queue<int, std::vector<int>, std::greater<>> min_pq;
+
+// The heap algorithms also work in place on any random-access range
+std::vector<int> heap{5, 1, 8, 3};
+std::make_heap(heap.begin(), heap.end());                       // O(n)
+heap.push_back(2);
+std::push_heap(heap.begin(), heap.end());                       // O(log n)
+std::pop_heap(heap.begin(), heap.end()); heap.pop_back();       // O(log n)
+
+// Pair (priority, item); a counter breaks ties so tasks are never compared
+using Entry = std::tuple<int, long, Task>;
+std::priority_queue<Entry, std::vector<Entry>, std::greater<>> tasks;
+tasks.push({priority, counter++, task});
+
+// Top-k without sorting everything: O(n log k), not O(n log n)
+std::partial_sort(v.begin(), v.begin() + 10, v.end(), std::greater<>{});
+```
+
+</TabItem>
+</Tabs>
 
 Where priority queues show up:
 

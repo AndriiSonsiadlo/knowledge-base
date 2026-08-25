@@ -36,6 +36,9 @@ on every input, with no worst case to worry about.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def merge_sort(a):
     if len(a) <= 1:
@@ -56,6 +59,33 @@ def merge(left, right):
     out.extend(right[j:])
     return out
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::vector<int> merge(const std::vector<int>& left, const std::vector<int>& right) {
+    std::vector<int> out;
+    out.reserve(left.size() + right.size());
+    auto i = left.begin(), j = right.begin();
+    while (i != left.end() && j != right.end())
+        out.push_back(*i <= *j ? *i++ : *j++);      // <= keeps the sort stable
+    out.insert(out.end(), i, left.end());           // one side is exhausted; append the rest
+    out.insert(out.end(), j, right.end());
+    return out;
+}
+
+std::vector<int> merge_sort(const std::vector<int>& a) {
+    if (a.size() <= 1) return a;
+    auto mid = a.begin() + static_cast<std::ptrdiff_t>(a.size() / 2);
+    auto left  = merge_sort(std::vector<int>(a.begin(), mid));   // sort each half
+    auto right = merge_sort(std::vector<int>(mid, a.end()));
+    return merge(left, right);
+}
+```
+
+</TabItem>
+</Tabs>
 
 <Figure src="/img/cs/algorithms/mergesort.gif"
         alt="Animation of mergesort on a set of bars, showing adjacent runs being merged into progressively longer sorted runs until the whole array is ordered"
@@ -91,6 +121,9 @@ Mergesort is the right choice when:
   mergesort is *better* on a list than on an array.
 - **You want to parallelise.** The two recursive calls share nothing.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Bottom-up mergesort — no recursion, same complexity
 def merge_sort_iterative(a):
@@ -101,6 +134,26 @@ def merge_sort_iterative(a):
         width *= 2
     return a
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Bottom-up mergesort — no recursion, same complexity
+void merge_sort_iterative(std::vector<int>& a) {
+    auto n = static_cast<std::ptrdiff_t>(a.size());
+    for (std::ptrdiff_t width = 1; width < n; width *= 2) {
+        for (std::ptrdiff_t i = 0; i < n; i += 2 * width) {
+            auto mid = std::min(i + width, n);
+            auto end = std::min(i + 2 * width, n);
+            std::inplace_merge(a.begin() + i, a.begin() + mid, a.begin() + end);
+        }
+    }
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Edge Cases & Pitfalls
 

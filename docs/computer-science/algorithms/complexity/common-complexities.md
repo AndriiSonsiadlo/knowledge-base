@@ -49,12 +49,28 @@ the price of assuming something about the keys (bounded range, fixed width).
 Some operations are usually cheap and occasionally expensive, in a pattern where the expensive cases
 pay for themselves. A **dynamic array** (`list`, `vector`, `ArrayList`) is the canonical example:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Appending is O(1) — until capacity runs out
 items = []
 for i in range(n):
     items.append(i)   # occasionally: allocate a bigger buffer, copy everything
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// push_back is amortised O(1) — until capacity runs out
+std::vector<int> items;
+for (int i = 0; i < n; ++i)
+    items.push_back(i);   // occasionally: allocate a bigger buffer, move everything
+```
+
+</TabItem>
+</Tabs>
 
 Doubling the capacity when it fills means a resize at sizes 1, 2, 4, 8, …, n, copying
 `1 + 2 + 4 + … + n < 2n` elements in total across the whole run. Spread across n appends, that is
