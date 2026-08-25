@@ -29,6 +29,9 @@ option available, for reasons that have nothing to do with complexity.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def linear_search(items, target):
     for i, x in enumerate(items):
@@ -37,13 +40,43 @@ def linear_search(items, target):
     return -1
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int linear_search(const std::vector<int>& items, int target) {
+    for (std::size_t i = 0; i < items.size(); ++i)
+        if (items[i] == target) return static_cast<int>(i);
+    return -1;
+}
+```
+
+</TabItem>
+</Tabs>
+
 There is nothing more to the algorithm. What is worth noting is the generalisation: because it never
 assumes an ordering, the comparison can be **any predicate**, not just equality.
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 # Binary search cannot do this — there is no ordering to exploit
 first_error = next((r for r in records if r.status >= 500), None)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Binary search cannot do this — there is no ordering to exploit
+auto first_error = std::find_if(records.begin(), records.end(),
+                                [](const Record& r) { return r.status >= 500; });
+// first_error == records.end() when no record matches
+```
+
+</TabItem>
+</Tabs>
 
 That is the real dividing line between the two searches. [Binary search](./binary-search.md) needs a
 property that partitions the sequence monotonically; linear search needs nothing.
@@ -75,6 +108,9 @@ Where linear search is the right choice regardless of size:
   stream. Binary search on a linked list would cost O(n) per probe, making it *worse* than scanning.
 - **The data does not exist yet.** Searching a generator or a network stream as it arrives.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Sentinel search: remove the bounds check by guaranteeing a match
 def sentinel_search(a, target):
@@ -86,6 +122,25 @@ def sentinel_search(a, target):
     a[-1] = last
     return i if i < len(a) - 1 or last == target else -1
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Sentinel search: remove the bounds check by guaranteeing a match
+int sentinel_search(std::vector<int>& a, int target) {
+    int n = static_cast<int>(a.size());
+    int last = a[n - 1];
+    a[n - 1] = target;              // the scan is now guaranteed to terminate
+    int i = 0;
+    while (a[i] != target) ++i;
+    a[n - 1] = last;
+    return (i < n - 1 || last == target) ? i : -1;
+}
+```
+
+</TabItem>
+</Tabs>
 
 The sentinel trick removes one comparison per iteration. It is a genuine micro-optimisation in tight
 C loops and a curiosity everywhere else — modern compilers and branch predictors have largely erased

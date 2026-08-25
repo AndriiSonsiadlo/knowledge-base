@@ -35,6 +35,9 @@ does not hold, greedy is simply wrong and DP is the fallback.
 
 Given intervals with start and end times, select the largest number that do not overlap.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def max_non_overlapping(intervals):
     intervals.sort(key=lambda iv: iv[1])        # sort by EARLIEST END TIME
@@ -45,6 +48,28 @@ def max_non_overlapping(intervals):
             last_end = end
     return count
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int max_non_overlapping(std::vector<std::pair<int, int>>& intervals) {
+    std::sort(intervals.begin(), intervals.end(),
+              [](const auto& a, const auto& b) { return a.second < b.second; });  // EARLIEST END TIME
+    int count = 0;
+    int last_end = std::numeric_limits<int>::min();
+    for (auto [start, end] : intervals) {
+        if (start >= last_end) {
+            ++count;
+            last_end = end;
+        }
+    }
+    return count;
+}
+```
+
+</TabItem>
+</Tabs>
 
 **Why this is correct**, argued properly: let *g* be the interval with the earliest end time, and let
 *O* be any optimal solution. If *O* contains *g*, done. If not, let *f* be the first interval in *O*.
@@ -58,6 +83,9 @@ you which criterion is the right one.
 
 ### Where greedy fails: making change
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def change_greedy(coins, amount):
     coins = sorted(coins, reverse=True)
@@ -68,6 +96,27 @@ def change_greedy(coins, amount):
             amount -= c
     return used if amount == 0 else None
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::optional<std::vector<int>> change_greedy(std::vector<int> coins, int amount) {
+    std::sort(coins.begin(), coins.end(), std::greater<>{});
+    std::vector<int> used;
+    for (int c : coins) {
+        while (amount >= c) {
+            used.push_back(c);
+            amount -= c;
+        }
+    }
+    if (amount != 0) return std::nullopt;
+    return used;
+}
+```
+
+</TabItem>
+</Tabs>
 
 With coins `[1, 5, 10, 25]` this is optimal for every amount. With `[1, 3, 4]` and a target of 6, it
 takes 4 + 1 + 1 = **three** coins, while the optimum is 3 + 3 = **two**.

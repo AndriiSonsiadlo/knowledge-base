@@ -29,6 +29,9 @@ sliding window exploits **contiguity**.
 
 ### Two pointers on sorted data
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def pair_with_sum(a, target):
     """a is sorted. Find indices of two values summing to target."""
@@ -44,6 +47,26 @@ def pair_with_sum(a, target):
     return None
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// a is sorted. Find indices of two values summing to target.
+std::optional<std::pair<int, int>> pair_with_sum(const std::vector<int>& a, int target) {
+    int lo = 0, hi = static_cast<int>(a.size()) - 1;
+    while (lo < hi) {
+        int s = a[lo] + a[hi];
+        if (s == target) return std::pair{lo, hi};
+        if (s < target) ++lo;    // need more: the smallest value cannot be part of any answer
+        else            --hi;    // need less: the largest value cannot be either
+    }
+    return std::nullopt;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The correctness argument is what makes this work, and it is worth stating: when `s < target`, `a[lo]`
 paired with the *largest* remaining value is already too small, so it cannot pair with anything
 smaller either — discarding it loses no solution. Each step eliminates one element permanently, so
@@ -57,6 +80,9 @@ instead.
 The window `[left, right)` expands to include new elements and contracts when it violates a
 constraint. Because both pointers only advance, the total work is O(n) even though the code contains
 nested loops:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def longest_unique_substring(s):
@@ -82,6 +108,42 @@ def min_window_with_sum(a, target):
     return best if best < float("inf") else 0
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int longest_unique_substring(std::string_view s) {
+    std::unordered_map<char, int> seen;         // character -> most recent index
+    int left = 0, best = 0;
+    for (int right = 0; right < static_cast<int>(s.size()); ++right) {
+        auto it = seen.find(s[right]);
+        if (it != seen.end() && it->second >= left)
+            left = it->second + 1;              // contract past the previous occurrence
+        seen[s[right]] = right;
+        best = std::max(best, right - left + 1);
+    }
+    return best;
+}
+
+// Shortest contiguous run of positive numbers summing to >= target.
+int min_window_with_sum(const std::vector<int>& a, int target) {
+    int left = 0, total = 0;
+    int best = std::numeric_limits<int>::max();
+    for (int right = 0; right < static_cast<int>(a.size()); ++right) {
+        total += a[right];
+        while (total >= target) {               // contract while the constraint still holds
+            best = std::min(best, right - left + 1);
+            total -= a[left];
+            ++left;
+        }
+    }
+    return best == std::numeric_limits<int>::max() ? 0 : best;
+}
+```
+
+</TabItem>
+</Tabs>
+
 :::info[The inner `while` does not make this quadratic]
 `left` never decreases and never exceeds n, so across the entire outer loop the inner loop executes
 at most n times in total. The complexity is O(n), not O(n²) — an **amortized** argument of the same
@@ -94,6 +156,9 @@ A third variant, where one pointer moves faster than the other. On a
 [linked list](../data-structures/linked-lists.md) this finds the middle or detects a cycle in one
 pass and O(1) space; on an array it removes elements in place:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def remove_duplicates(a):
     """a is sorted. Compact unique values into the front; return the new length."""
@@ -104,6 +169,23 @@ def remove_duplicates(a):
             write += 1
     return write
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// a is sorted. Compact unique values into the front; return the new length.
+std::size_t remove_duplicates(std::vector<int>& a) {
+    std::size_t write = 0;
+    for (std::size_t read = 0; read < a.size(); ++read)
+        if (read == 0 || a[read] != a[read - 1])
+            a[write++] = a[read];
+    return write;     // the standard library spells this std::unique(a.begin(), a.end())
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Practical Usage
 
@@ -119,6 +201,9 @@ def remove_duplicates(a):
 | Palindrome check | Two pointers converging |
 | Cycle detection in a linked list | Fast/slow (Floyd's) |
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Fixed-size window: compute the first sum, then roll it forward
 def max_sum_of_k(a, k):
@@ -129,6 +214,25 @@ def max_sum_of_k(a, k):
         best = max(best, total)
     return best
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Fixed-size window: compute the first sum, then roll it forward
+int max_sum_of_k(const std::vector<int>& a, int k) {
+    int total = std::accumulate(a.begin(), a.begin() + k, 0);
+    int best = total;
+    for (std::size_t i = k; i < a.size(); ++i) {
+        total += a[i] - a[i - k];    // add the entrant, drop the leaver — O(1) per step
+        best = std::max(best, total);
+    }
+    return best;
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Edge Cases & Pitfalls
 

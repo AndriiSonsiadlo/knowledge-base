@@ -44,6 +44,9 @@ larger.**
 That invariant makes search a sequence of one-way decisions. Looking for 7: at 8 go left, at 3 go
 right, at 6 go right, found — three comparisons instead of nine.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def search(node, key):
     while node:
@@ -62,6 +65,35 @@ def insert(node, key):
     return node          # equal keys ignored; a real implementation decides a policy
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+struct Node {
+    int value;
+    Node* left = nullptr;
+    Node* right = nullptr;
+};
+
+Node* search(Node* node, int key) {
+    while (node) {
+        if (key == node->value) return node;
+        node = key < node->value ? node->left : node->right;
+    }
+    return nullptr;
+}
+
+Node* insert(Node* node, int key) {
+    if (!node) return new Node{key};
+    if (key < node->value)      node->left  = insert(node->left, key);
+    else if (key > node->value) node->right = insert(node->right, key);
+    return node;        // equal keys ignored; a real implementation decides a policy
+}
+```
+
+</TabItem>
+</Tabs>
+
 Both are O(height). The entire question is therefore what the height is.
 
 ### Deletion, and the one case that is awkward
@@ -70,6 +102,9 @@ Removing a node with zero or one child is a splice. Removing a node with **two**
 neither child can take its place without violating the invariant. The fix is to replace the value with
 its **in-order successor** (the smallest value in the right subtree), then delete that successor,
 which by construction has at most one child:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def delete(node, key):
@@ -92,6 +127,31 @@ def delete(node, key):
     return node
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+Node* remove(Node* node, int key) {          // named remove — delete is a keyword
+    if (!node) return nullptr;
+    if (key < node->value) {
+        node->left = remove(node->left, key);
+    } else if (key > node->value) {
+        node->right = remove(node->right, key);
+    } else {
+        if (!node->left)  { Node* r = node->right; delete node; return r; }
+        if (!node->right) { Node* l = node->left;  delete node; return l; }
+        Node* succ = node->right;                // smallest value greater than node
+        while (succ->left) succ = succ->left;
+        node->value = succ->value;
+        node->right = remove(node->right, succ->value);
+    }
+    return node;
+}
+```
+
+</TabItem>
+</Tabs>
+
 ### Traversals
 
 | Order | Visits | Produces | Used for |
@@ -101,6 +161,9 @@ def delete(node, key):
 | **Post-order** | left, right, node | Children before parents | Freeing memory, evaluating expressions |
 | **Level-order** | Breadth-first by depth | Row by row | Printing, shortest path in an unweighted tree |
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def in_order(node):
     if node:
@@ -108,6 +171,21 @@ def in_order(node):
         yield node.value                  # sorted output for a BST
         yield from in_order(node.right)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void in_order(Node* node, std::vector<int>& out) {
+    if (!node) return;
+    in_order(node->left, out);
+    out.push_back(node->value);          // sorted output for a BST
+    in_order(node->right, out);
+}
+```
+
+</TabItem>
+</Tabs>
 
 In-order traversal of a BST yielding sorted output is not a coincidence — it is the invariant
 restated. It also gives a neat correctness check: if an in-order walk is not sorted, the tree is not

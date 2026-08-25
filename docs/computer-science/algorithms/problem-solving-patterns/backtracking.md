@@ -30,6 +30,9 @@ reduce a space of 10²⁰ candidates to a few thousand actually explored.
 
 Every backtracking algorithm has the same shape:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def backtrack(state, choices):
     if is_goal(state):
@@ -43,12 +46,36 @@ def backtrack(state, choices):
         undo(state, choice)             # UNDO — the defining step
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void backtrack(State& state, const Choices& choices) {
+    if (is_goal(state)) {
+        record(state);
+        return;
+    }
+    for (const auto& choice : choices) {
+        if (!is_valid(state, choice)) continue;   // prune: this branch cannot work
+        apply(state, choice);                     // make the choice
+        backtrack(state, next_choices);           // recurse
+        undo(state, choice);                      // UNDO — the defining step
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 The `undo` is what distinguishes backtracking from ordinary recursion. Because the state is shared
 and mutated in place, each branch must leave it exactly as it found it.
 
 ### N-queens
 
 Place N queens on an N×N board so none attack another.
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def solve_n_queens(n):
@@ -76,6 +103,42 @@ def solve_n_queens(n):
     return solutions
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::vector<std::vector<int>> solve_n_queens(int n) {
+    std::vector<std::vector<int>> solutions;
+    std::unordered_set<int> cols, diag, anti;
+    std::vector<int> placement;
+
+    auto place = [&](int row, auto&& self) -> void {
+        if (row == n) {
+            solutions.push_back(placement);
+            return;
+        }
+        for (int col = 0; col < n; ++col) {
+            // Two queens share a diagonal iff row-col matches; an anti-diagonal iff row+col does
+            if (cols.count(col) || diag.count(row - col) || anti.count(row + col))
+                continue;                                    // prune
+            cols.insert(col); diag.insert(row - col); anti.insert(row + col);
+            placement.push_back(col);
+
+            self(row + 1, self);
+
+            placement.pop_back();                            // undo
+            cols.erase(col); diag.erase(row - col); anti.erase(row + col);
+        }
+    };
+
+    place(0, place);
+    return solutions;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The three sets are what make this fast. Checking conflicts in O(1) rather than rescanning the board
 turns an impractical search into one that solves n = 8 instantly. **The quality of the pruning check
 determines whether backtracking is usable at all.**
@@ -87,6 +150,9 @@ billion to 8⁸ ≈ 16.7 million before any constraint check runs.
 ### Permutations and subsets
 
 The two most common shapes, worth recognising:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def permutations(items):
@@ -119,6 +185,53 @@ def subsets(items):
     build(0)
     return result
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+std::vector<std::vector<int>> permutations(const std::vector<int>& items) {
+    std::vector<std::vector<int>> result;
+    std::vector<int> current;
+    std::vector<bool> used(items.size(), false);
+
+    auto build = [&](auto&& self) -> void {
+        if (current.size() == items.size()) {
+            result.push_back(current);          // copy — current keeps mutating
+            return;
+        }
+        for (std::size_t i = 0; i < items.size(); ++i) {
+            if (used[i]) continue;
+            used[i] = true; current.push_back(items[i]);
+            self(self);
+            current.pop_back(); used[i] = false;    // undo
+        }
+    };
+    build(build);
+    return result;
+}
+
+std::vector<std::vector<int>> subsets(const std::vector<int>& items) {
+    std::vector<std::vector<int>> result;
+    std::vector<int> current;
+
+    auto build = [&](std::size_t i, auto&& self) -> void {
+        if (i == items.size()) {
+            result.push_back(current);
+            return;
+        }
+        self(i + 1, self);                      // exclude items[i]
+        current.push_back(items[i]);
+        self(i + 1, self);                      // include items[i]
+        current.pop_back();                     // undo
+    };
+    build(0, build);
+    return result;
+}
+```
+
+</TabItem>
+</Tabs>
 
 Permutations are O(n!) and subsets O(2ⁿ) — both unavoidable, since that is how many outputs there
 are. Backtracking does not make these problems cheap; it makes *constrained* versions cheap, where

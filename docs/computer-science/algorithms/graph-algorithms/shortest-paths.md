@@ -37,6 +37,9 @@ factor comes from.
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Dijkstra_Animation.gif"
         license="Public domain" />
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 import heapq
 
@@ -62,6 +65,48 @@ def dijkstra(graph, start):
     return dist, prev
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// graph: node -> [(neighbour, weight), ...] with all weights >= 0.
+using Graph = std::unordered_map<int, std::vector<std::pair<int, int>>>;
+
+struct Paths {
+    std::unordered_map<int, int> dist;
+    std::unordered_map<int, int> prev;
+};
+
+Paths dijkstra(const Graph& graph, int start) {
+    Paths out{{{start, 0}}, {}};
+    using Entry = std::pair<int, int>;                      // (distance, node)
+    std::priority_queue<Entry, std::vector<Entry>, std::greater<>> pq;
+    pq.push({0, start});
+    std::unordered_set<int> done;
+
+    while (!pq.empty()) {
+        auto [d, node] = pq.top();
+        pq.pop();
+        if (done.count(node)) continue;                     // a stale entry — skip it
+        done.insert(node);                                  // dist[node] is now final
+
+        for (auto [nb, weight] : graph.at(node)) {
+            int candidate = d + weight;
+            auto it = out.dist.find(nb);
+            if (it == out.dist.end() || candidate < it->second) {
+                out.dist[nb] = candidate;
+                out.prev[nb] = node;
+                pq.push({candidate, nb});                   // lazy deletion
+            }
+        }
+    }
+    return out;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The `done` check implements **lazy deletion**: `heapq` cannot decrease an existing entry's key, so
 the code pushes a new one and ignores the outdated copy when it surfaces. This is the standard
 workaround, it keeps the complexity correct, and it is simpler than maintaining an indexed heap.
@@ -80,6 +125,9 @@ simply wrong. If any weight can be negative, use Bellman–Ford.
 
 Relax **every** edge, V−1 times. Slower, but it makes no assumption about sign, and it can detect
 negative cycles:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def bellman_ford(vertices, edges, start):
@@ -102,6 +150,41 @@ def bellman_ford(vertices, edges, start):
     return dist
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+struct Edge { int u, v, w; };                               // weights may be negative
+
+std::unordered_map<int, long long> bellman_ford(const std::vector<int>& vertices,
+                                                const std::vector<Edge>& edges,
+                                                int start) {
+    constexpr long long INF = std::numeric_limits<long long>::max() / 4;
+    std::unordered_map<int, long long> dist;
+    for (int v : vertices) dist[v] = INF;
+    dist[start] = 0;
+
+    for (std::size_t i = 1; i < vertices.size(); ++i) {     // any shortest path has ≤ V−1 edges
+        bool changed = false;
+        for (const auto& [u, v, w] : edges) {
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                changed = true;
+            }
+        }
+        if (!changed) break;                                // early exit once stable
+    }
+
+    for (const auto& [u, v, w] : edges)                     // a further improvement means a negative cycle
+        if (dist[u] + w < dist[v])
+            throw std::runtime_error("negative cycle reachable from start");
+    return dist;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The V−1 bound is the whole proof: a shortest path visits each vertex at most once, so it has at most
 V−1 edges, and each pass extends every path by at least one edge.
 
@@ -115,9 +198,22 @@ When you want the path to *one* target rather than to everything, A\* orders the
 `distance so far + estimated distance remaining`. With an **admissible** heuristic — one that never
 overestimates — it returns the true shortest path while exploring far fewer vertices.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 priority = dist[node] + heuristic(node, goal)   # the only change from Dijkstra's
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int priority = dist[node] + heuristic(node, goal);   // the only change from Dijkstra's
+```
+
+</TabItem>
+</Tabs>
 
 For map routing, straight-line distance is the standard admissible heuristic. A heuristic of zero
 turns A\* back into Dijkstra's exactly.

@@ -39,6 +39,9 @@ And two ways to implement it:
 
 ### The same problem, three ways
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # 1. Naive recursion — O(2ⁿ). fib(n-1) and fib(n-2) recompute the same values.
 def fib_naive(n):
@@ -59,6 +62,39 @@ def fib_table(n):
     return prev
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// 1. Naive recursion — O(2ⁿ). fib(n-1) and fib(n-2) recompute the same values.
+long long fib_naive(int n) {
+    return n < 2 ? n : fib_naive(n - 1) + fib_naive(n - 2);
+}
+
+// 2. Top-down: identical logic, plus a cache — O(n)
+long long fib_memo(int n) {
+    static std::unordered_map<int, long long> cache;
+    if (n < 2) return n;
+    auto it = cache.find(n);
+    if (it != cache.end()) return it->second;
+    return cache[n] = fib_memo(n - 1) + fib_memo(n - 2);
+}
+
+// 3. Bottom-up: fill a table in dependency order — O(n) time, O(1) space
+long long fib_table(int n) {
+    long long prev = 0, cur = 1;
+    for (int i = 0; i < n; ++i) {
+        long long next = prev + cur;
+        prev = cur;
+        cur = next;
+    }
+    return prev;
+}
+```
+
+</TabItem>
+</Tabs>
+
 The third version is what the second becomes once you notice only two entries are ever needed. That
 progression — recurrence, memoise, tabulate, shrink the table — is the standard workflow.
 
@@ -66,6 +102,9 @@ progression — recurrence, memoise, tabulate, shrink the table — is the stand
 
 **0/1 knapsack**: choose items with weights and values, maximising value within a capacity, taking
 each item at most once. [Greedy by value-per-weight fails here](./greedy-algorithms.md).
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def knapsack(weights, values, capacity):
@@ -82,8 +121,35 @@ def knapsack(weights, values, capacity):
     return dp[n][capacity]
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int knapsack(const std::vector<int>& weights, const std::vector<int>& values, int capacity) {
+    int n = static_cast<int>(weights.size());
+    // dp[i][c] = best value using the first i items within capacity c
+    std::vector<std::vector<int>> dp(n + 1, std::vector<int>(capacity + 1, 0));
+
+    for (int i = 1; i <= n; ++i) {
+        int w = weights[i - 1], v = values[i - 1];
+        for (int c = 0; c <= capacity; ++c) {
+            dp[i][c] = dp[i - 1][c];                    // skip item i
+            if (w <= c)                                 // or take it, if it fits
+                dp[i][c] = std::max(dp[i][c], dp[i - 1][c - w] + v);
+        }
+    }
+    return dp[n][capacity];
+}
+```
+
+</TabItem>
+</Tabs>
+
 Each cell depends only on the previous row, so one row suffices — provided you iterate capacity
 **downward**, so that each item is used at most once:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def knapsack_1d(weights, values, capacity):
@@ -93,6 +159,24 @@ def knapsack_1d(weights, values, capacity):
             dp[c] = max(dp[c], dp[c - w] + v)
     return dp[capacity]
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int knapsack_1d(const std::vector<int>& weights, const std::vector<int>& values, int capacity) {
+    std::vector<int> dp(capacity + 1, 0);
+    for (std::size_t i = 0; i < weights.size(); ++i) {
+        int w = weights[i], v = values[i];
+        for (int c = capacity; c >= w; --c)     // DOWNWARD — reversing this allows reuse
+            dp[c] = std::max(dp[c], dp[c - w] + v);
+    }
+    return dp[capacity];
+}
+```
+
+</TabItem>
+</Tabs>
 
 :::warning[The iteration direction encodes the problem]
 Iterating capacity downward gives **0/1 knapsack** — each item usable once. Iterating *upward* gives
@@ -126,6 +210,9 @@ Most of the difficulty is choosing what the table indexes. Ask:
 | Longest increasing subsequence | `dp[i]` = best ending at i | O(n²), or O(n log n) with binary search |
 | Matrix chain multiplication | `dp[i][j]` = best cost for the range | O(n³) |
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Edit distance — the engine behind spell-checkers and `diff`
 def edit_distance(a, b):
@@ -146,6 +233,34 @@ def edit_distance(a, b):
                                    dp[i - 1][j - 1])     # substitute
     return dp[m][n]
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Edit distance — the engine behind spell-checkers and `diff`
+int edit_distance(std::string_view a, std::string_view b) {
+    int m = static_cast<int>(a.size()), n = static_cast<int>(b.size());
+    std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1, 0));
+    for (int i = 0; i <= m; ++i) dp[i][0] = i;      // delete all of a's prefix
+    for (int j = 0; j <= n; ++j) dp[0][j] = j;      // insert all of b's prefix
+
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            if (a[i - 1] == b[j - 1])
+                dp[i][j] = dp[i - 1][j - 1];                   // free match
+            else
+                dp[i][j] = 1 + std::min({dp[i - 1][j],         // delete
+                                         dp[i][j - 1],         // insert
+                                         dp[i - 1][j - 1]});   // substitute
+        }
+    }
+    return dp[m][n];
+}
+```
+
+</TabItem>
+</Tabs>
 
 :::tip[Start top-down]
 Write the naive recursion first and confirm it is correct. Then add `@lru_cache` — often the entire

@@ -33,6 +33,9 @@ logarithmic rather than linear.
 
 ## Architecture / Mechanism
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 def divide_and_conquer(problem):
     if is_small_enough(problem):
@@ -41,6 +44,23 @@ def divide_and_conquer(problem):
     results = [divide_and_conquer(p) for p in subproblems]
     return combine(results)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+Result divide_and_conquer(const Problem& problem) {
+    if (is_small_enough(problem))
+        return solve_directly(problem);          // base case
+    std::vector<Result> results;
+    for (const auto& p : divide(problem))
+        results.push_back(divide_and_conquer(p));
+    return combine(results);
+}
+```
+
+</TabItem>
+</Tabs>
 
 ### The Master Theorem
 
@@ -70,6 +90,9 @@ Strassen 7 where the naive method does 8. Neither changes the subproblem size; t
 
 ## Practical Usage
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Maximum subarray, divide and conquer — O(n log n)
 # (Kadane's algorithm solves this in O(n); this version shows the pattern.)
@@ -92,6 +115,38 @@ def max_subarray(a, lo, hi):
 
     return max(left, right, best_left + best_right)
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Maximum subarray, divide and conquer — O(n log n)
+// (Kadane's algorithm solves this in O(n); this version shows the pattern.)
+int max_subarray(const std::vector<int>& a, int lo, int hi) {
+    if (lo == hi) return a[lo];
+    int mid = lo + (hi - lo) / 2;
+    int left  = max_subarray(a, lo, mid);           // entirely in the left half
+    int right = max_subarray(a, mid + 1, hi);       // entirely in the right half
+
+    // The third case: crossing the midpoint. This is the "combine" step.
+    int best_left = std::numeric_limits<int>::min(), total = 0;
+    for (int i = mid; i >= lo; --i) {
+        total += a[i];
+        best_left = std::max(best_left, total);
+    }
+    int best_right = std::numeric_limits<int>::min();
+    total = 0;
+    for (int i = mid + 1; i <= hi; ++i) {
+        total += a[i];
+        best_right = std::max(best_right, total);
+    }
+
+    return std::max({left, right, best_left + best_right});
+}
+```
+
+</TabItem>
+</Tabs>
 
 Where the pattern shows up beyond sorting:
 

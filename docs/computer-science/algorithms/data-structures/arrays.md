@@ -47,6 +47,9 @@ references, with the objects themselves scattered across the heap.
 Appending is cheap until capacity is exhausted, at which point the whole buffer is reallocated and
 copied:
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Conceptually, what append does
 def append(self, value):
@@ -58,6 +61,27 @@ def append(self, value):
     self.buffer[self.size] = value
     self.size += 1
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Conceptually, what push_back does
+void push_back(const T& value) {
+    if (size_ == capacity_) {
+        capacity_ = std::max<std::size_t>(1, capacity_ * 2);    // the factor matters
+        T* new_buffer = allocate(capacity_);
+        std::uninitialized_move_n(buffer_, size_, new_buffer);  // O(n), but rare
+        deallocate(buffer_);
+        buffer_ = new_buffer;
+    }
+    buffer_[size_] = value;
+    ++size_;
+}
+```
+
+</TabItem>
+</Tabs>
 
 Doubling means resizes happen at sizes 1, 2, 4, 8, …, n, copying fewer than `2n` elements in total
 across n appends — **O(1) amortized**. Growing by a fixed amount instead (say +10 each time) makes
@@ -79,6 +103,9 @@ trade, not a speed one.
 
 ## Practical Usage
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
 # Reserve capacity when the final size is known — avoids repeated reallocation
 result = [None] * n          # Python: allocate once
@@ -94,14 +121,51 @@ for row in range(rows):
 # on large matrices for identical arithmetic.
 ```
 
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+// Reserve capacity when the final size is known — avoids repeated reallocation
+std::vector<int> result;
+result.reserve(n);              // one allocation; no reallocation while filling
+
+// Iterate in memory order. This nesting is right for row-major layouts:
+for (std::size_t row = 0; row < rows; ++row)
+    for (std::size_t col = 0; col < cols; ++col)
+        total += matrix[row][col];      // consecutive addresses
+
+// Reversing the loops touches memory with a stride of `cols` elements,
+// wasting most of every cache line fetched — often several times slower
+// on large matrices for identical arithmetic.
+```
+
+</TabItem>
+</Tabs>
+
 Removing from the middle of an array is O(n) because everything after the gap shifts down. When
 order does not matter, swapping the last element into the hole makes it O(1):
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
 
 ```python showLineNumbers
 def remove_unordered(items, i):
     items[i] = items[-1]     # overwrite the hole with the last element
     items.pop()              # then drop the (now duplicated) tail
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+void remove_unordered(std::vector<int>& items, std::size_t i) {
+    items[i] = items.back();    // overwrite the hole with the last element
+    items.pop_back();           // then drop the (now duplicated) tail
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Edge Cases & Pitfalls
 
