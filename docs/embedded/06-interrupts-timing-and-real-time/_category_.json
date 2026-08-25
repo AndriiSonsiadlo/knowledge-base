@@ -1,0 +1,8 @@
+{
+  "label": "Interrupts, Timing and Real-Time",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "Interrupt latency and priority design, deferring work out of handlers, and the timing analysis that turns \"fast\" into \"on time\"."
+  }
+}
