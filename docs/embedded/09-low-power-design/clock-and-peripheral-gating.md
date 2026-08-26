@@ -37,7 +37,7 @@ This is an illustrative model built from datasheet-typical figures, not a page f
 
 | Quantity | Value | Basis |
 |---|---|---|
-| Run-mode current slope | ~100 µA/MHz | ST's headline Run-mode figure for this part (DS10314 Table "Current consumption in Run mode"); treat as illustrative — read the exact table row for your voltage scale and cache/prefetch configuration |
+| Run-mode current slope | ~100 µA/MHz | ST's headline Run-mode figure for this part, corroborated against DS10314's "Current consumption in Run mode" table rather than read directly from a fetched copy of it; treat as illustrative — verify the exact table row for your voltage scale and cache/prefetch configuration |
 | PLL lock time | ~200 µs | [Configuring the Clock Tree](../04-bare-metal-programming/clock-tree-configuration.md), "on the order of a couple of hundred microseconds," RM0383 |
 | Stop-mode current (LP regulator, flash off) | 9 µA typical, `TA = 25 °C` | [Sleep Modes](./sleep-modes.md), DS10314 |
 | Supply | 3.3 V | Nucleo board |
@@ -93,12 +93,12 @@ Dropping the system clock to save Run-mode current is a one-line change to `RCC_
 
 - [Sleep Modes](./sleep-modes.md) — the Stop-mode current this page's comparison is built on, and the wake-latency cost that bounds how deep a sleep is worth entering for a short idle interval.
 - [Energy Budgets](./energy-budgets.md) — the same active/sleep current split used here, carried through to an actual battery lifetime.
+- [Wake Sources and Event-Driven Design](./wake-sources-and-event-driven-design.md) — the architectural version of "leftover time spent in Stop instead of Run": restructuring firmware so it is asleep by default rather than idling.
 - [Configuring the Clock Tree](../04-bare-metal-programming/clock-tree-configuration.md) — the PLL arithmetic and flash-latency ordering this page's worked example and warning both depend on.
-- [Wake Sources and Event-Driven Design](../09-low-power-design/wake-sources-and-event-driven-design.md) — the architectural version of "leftover time spent in Stop instead of Run": restructuring firmware so it is asleep by default rather than idling.
 - [Determinism Killers](../06-interrupts-timing-and-real-time/determinism-killers.md) — clock and voltage scaling from the timing side: what changing frequency mid-program does to WCET assumptions.
 
 ## References
 
 - STMicroelectronics — [**RM0383**, *STM32F411xC/E advanced Arm-based 32-bit MCUs reference manual*](https://www.st.com/resource/en/reference_manual/rm0383-stm32f411xce-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), consulted at Rev 4. Chapter 6 ("Reset and clock control (RCC)") for the `RCC_AHBxENR`/`RCC_APBxENR` peripheral clock-gate bits; §5.1.4 for the voltage-scale/frequency table and the requirement that the PLL be off to change scale; Chapter 5 ("Power controller (PWR)") for the low-power-mode context this page's comparison sits alongside.
-- STMicroelectronics — [**STM32F411xC/STM32F411xE datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). The Run-mode current-consumption table this page's ~100 µA/MHz figure is drawn from, broken out by voltage scale and by which of prefetch/ART/caches are enabled.
+- STMicroelectronics — [**STM32F411xC/STM32F411xE datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). The Run-mode current-consumption table this page's ~100 µA/MHz figure is corroborated against, broken out by voltage scale and by which of prefetch/ART/caches are enabled — verify against the primary table before designing to it.
 - STMicroelectronics — [**AN4365**, *Using STM32F4 MCU power modes with best dynamic efficiency*](https://www.st.com/resource/en/application_note/an4365-using-stm32f4-mcu-power-modes-with-best-dynamic-efficiency-stmicroelectronics.pdf). Works the same run-fast-versus-run-slow question from ST's own measured current traces across the F4 family, including the diminishing-returns case for very short work bursts this page's "where the overhead can eat the win" section describes.
