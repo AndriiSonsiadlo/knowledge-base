@@ -42,8 +42,8 @@ The worked example below deliberately stays inside the continuous-drain-like reg
 
 | Quantity | Value | Source |
 |---|---|---|
-| Sleep current, `I_sleep` | 9 µA typical | DS10314 Stop-mode table, `LPDS=1, FPDS=1`, `TA = 25 °C` — see [Sleep Modes](./sleep-modes.md) |
-| Active current, `I_active` | 1.6 mA | 16 MHz HSI Run mode at ST's ~100 µA/MHz Run-mode figure (DS10314 Table "Current consumption in Run mode") — see [Clock and Peripheral Gating](./clock-and-peripheral-gating.md) for the caveats on this figure |
+| Sleep current, `I_sleep` | 9 µA typical | Corroborated against DS10314's Stop-mode table, `LPDS=1, FPDS=1`, `TA = 25 °C` — see [Sleep Modes](./sleep-modes.md) for the sourcing caveat |
+| Active current, `I_active` | 1.6 mA | 16 MHz HSI Run mode at ST's ~100 µA/MHz Run-mode figure, corroborated against DS10314's "Current consumption in Run mode" table — see [Clock and Peripheral Gating](./clock-and-peripheral-gating.md) for the caveats on this figure |
 | Active time per wake, `t_active` | 15 ms | assumed: sample a sensor, compute, write to a backup register |
 | Wake period, `T` | 60 s | assumed sampling interval |
 | Supply | 3.0 V nominal | CR2032 |
@@ -96,5 +96,5 @@ A lifetime budget built from current measured on a bench, mid-development, with 
 ## References
 
 - Panasonic Industry — [**CR2032 technical data sheet**](https://na.industrial.panasonic.com/products/batteries/primary-lithium-batteries/coin-type/coin-type-manganese-dioxide-lithium/model/CR2032). Nominal voltage and capacity, the standard continuous-drain test condition the 225 mAh figure is measured under, self-discharge rate, and the pulse-discharge characteristic curves referenced above for higher-current loads.
-- STMicroelectronics — [**STM32F411xC/STM32F411xE datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). The Stop-mode current table this page's `I_sleep` is drawn from, and the Run-mode current-per-MHz figure used for `I_active`.
+- STMicroelectronics — [**STM32F411xC/STM32F411xE datasheet**](https://www.st.com/resource/en/datasheet/stm32f411re.pdf) (DS10314). The Stop-mode current table this page's `I_sleep` is corroborated against, and the Run-mode current-per-MHz figure used for `I_active` — verify both against the primary table before designing to them; see [Sleep Modes](./sleep-modes.md) for the sourcing caveat.
 - Nordic Semiconductor — [**nRF24L01+ product specification**](https://www.nordicsemi.com/Products/nRF24L01P). Cited for the representative radio transmit-current figure (~11.3 mA at 0 dBm) used to illustrate why a radio dominates a battery budget the way this page's MCU-only example does not.
