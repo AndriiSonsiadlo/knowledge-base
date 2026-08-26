@@ -1,0 +1,8 @@
+{
+  "label": "Real-Time Operating Systems",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "When a kernel earns its RAM, how tasks are scheduled and switched, and the synchronisation that comes back with pre-emption."
+  }
+}
