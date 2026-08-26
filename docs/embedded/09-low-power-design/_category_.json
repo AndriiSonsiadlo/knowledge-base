@@ -1,0 +1,8 @@
+{
+  "label": "Low-Power Design",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "description": "Sleep modes, energy budgets, clock and peripheral gating, and event-driven wake strategies for battery-powered firmware."
+  }
+}
