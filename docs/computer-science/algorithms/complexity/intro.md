@@ -11,9 +11,9 @@ tags: [computer-science, algorithms, complexity, big-o]
 <Recall
   invariant="Complexity describes how work grows as input grows, not how long a specific run took on a specific machine."
   costs={[
-    ["counting statements executed (worst)", "exact, but ties the count to one implementation"],
-    ["counting abstract operations (worst)", "portable across implementations, still exact"],
-    ["asymptotic class (worst)", "O(n) — survives changes in hardware, language, constant factors"],
+    ["array index lookup (worst)", "O(1)"],
+    ["find_max, one linear scan of n elements (worst)", "O(n)"],
+    ["binary search over sorted data (worst)", "O(log n)"],
   ]}
   reachFor="Comparing two approaches before writing either, or explaining why one already-working piece of code is slow at scale."
   trap="Timing one run on one machine and treating the number as the algorithm's complexity — a faster laptop or a warmer cache changes the timing without changing the growth rate."

@@ -224,7 +224,7 @@ int count_halvings(int n) {
 - **Best/average/worst are separate questions from O/Ω/Θ**, though the two are constantly conflated.
   You can state a Θ bound on the worst case, or an O bound on the average case; the notation and the
   case being analysed are independent choices.
-- **Amortized is not average.** See [Common Complexities](./common-complexities.md) — an amortized
+- **Amortized is not average.** See [Amortized Analysis](./amortized-analysis.md) — an amortized
   bound is a guarantee over any sequence of operations, not a probabilistic statement.
 
 ## Comparisons
@@ -246,5 +246,5 @@ int count_halvings(int n) {
 
 ## Related Pages
 
-- [Common Complexities](./common-complexities.md) — the growth classes you will actually meet, plus amortized and space analysis.
+- [Common Complexities](./common-complexities.md) — a named algorithm for each growth class, and what a given n costs at realistic hardware speeds.
 - [Sorting Algorithms](../sorting/intro.md) — where these bounds get their most familiar workout.
