@@ -1,0 +1,8 @@
+{
+  "label": "Debugging and Testing",
+  "position": 12,
+  "link": {
+    "type": "generated-index",
+    "description": "On-target debugging, fault forensics, instrumentation that does not change the bug, and testing firmware off the hardware."
+  }
+}
