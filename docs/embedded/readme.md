@@ -56,9 +56,9 @@ Numeric prefixes (`00`, `01`, `02`...) exist only to order folders on disk — t
 | <Icon icon="lucide:refresh-cw" inline /> | Firmware Lifecycle | Versioning, OTA updates, field diagnostics, and long-term maintenance of shipped firmware |
 | <Icon icon="lucide:puzzle" inline /> | Languages and Practice | Firmware architecture and layering, embedded Rust, MicroPython, and machine learning on microcontrollers |
 
-Overview through Debugging and Testing (except Connectivity and Protocols) are published, so
-their row links straight to the folder's first page; `08` (Connectivity and Protocols), `10`
-(Embedded Linux) and `12`–`15` stay plain text until their tasks land in Phases 2 and 3.
+A published folder's row links straight to its first page. The rows still in plain text are the
+ones not yet written — `08` (Connectivity and Protocols), `10` (Embedded Linux) and `12`–`15` —
+and they become links as Phase 3 lands them.
 
 ## Four learning paths
 
