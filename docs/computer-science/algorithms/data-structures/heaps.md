@@ -8,6 +8,17 @@ tags: [computer-science, algorithms, data-structures, heap, priority-queue]
 
 # Heaps & Priority Queues
 
+<Recall
+  invariant="Every parent outranks its children; the tree is complete."
+  costs={[
+    ["peek (worst)", "O(1)"],
+    ["push / pop (worst)", "O(log n)"],
+    ["build from n items (worst)", "O(n)"],
+    ["find an arbitrary value (worst)", "O(n)"],
+  ]}
+  reachFor="You only ever need the extreme, repeatedly: k-th largest, next event, Dijkstra's frontier."
+  trap="Python's heapq is min-only and takes no reverse= — negate the keys, or wrap them in a class with an inverted __lt__."
+/>
 
 A **priority queue** answers one question: *what is the most important item right now?* A **binary
 heap** is the standard way to implement it — a tree whose only ordering rule is that a parent

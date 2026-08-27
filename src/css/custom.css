@@ -1103,6 +1103,66 @@ body {
   @apply underline decoration-dotted underline-offset-2;
 }
 
+/* --- <Recall /> --------------------------------------------------------- */
+/* The recall card at the top of every algorithms page. Colour never carries
+   meaning on its own, so it stays legible in print and in both themes. */
+.kb-recall {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 1.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-left: 4px solid var(--ifm-color-primary);
+  border-radius: var(--ifm-global-radius);
+  background: var(--ifm-background-surface-color);
+}
+
+.kb-recall__row {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+}
+
+.kb-recall__label {
+  color: var(--ifm-color-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.kb-recall__body {
+  line-height: 1.5;
+}
+
+.kb-recall__costs {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 1rem;
+}
+
+.kb-recall__cost-label {
+  color: var(--ifm-color-emphasis-800);
+}
+
+.kb-recall__cost {
+  justify-self: end;
+  padding: 0 0.35rem;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .kb-recall__row {
+    grid-template-columns: 1fr;
+  }
+
+  .kb-recall__costs {
+    grid-template-columns: 1fr auto;
+  }
+}
+
 /* ============ Breadcrumbs ============ */
 .breadcrumbs {
   @apply mb-6 flex items-center text-sm;
