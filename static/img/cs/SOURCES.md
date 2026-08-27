@@ -36,6 +36,8 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/dag.png` | https://commons.wikimedia.org/wiki/File:Directed_acyclic_graph_2.svg | Johannes Rössel ( talk ) | Public domain |
 | `algorithms/dfs-order.png` | https://commons.wikimedia.org/wiki/File:Depth-first-tree.svg | Alexander Drichel | CC BY-SA 3.0 |
 | `algorithms/dijkstra.gif` | https://commons.wikimedia.org/wiki/File:Dijkstra_Animation.gif | Ibmua | Public domain |
+| `algorithms/dsu-disjoint-sets-final.png` | https://commons.wikimedia.org/wiki/File:Dsu_disjoint_sets_final.svg | 93willy | CC BY-SA 3.0 |
+| `algorithms/dsu-disjoint-sets-init.png` | https://commons.wikimedia.org/wiki/File:Dsu_disjoint_sets_init.svg | 93willy | CC BY-SA 3.0 |
 | `algorithms/hash-collision.png` | https://commons.wikimedia.org/wiki/File:Hash_table_4_1_1_0_0_1_0_LL.svg | Jorge Stolfi | Public domain |
 | `algorithms/hash-table-load-factor.png` | https://commons.wikimedia.org/wiki/File:Hash_table_average_insertion_time.png | Derrick Coetzee ( User:Dcoetzee ) | Public domain |
 | `algorithms/hash-table.png` | https://commons.wikimedia.org/wiki/File:Hash_table_3_1_1_0_1_0_0_SP.svg | Jorge Stolfi | CC BY-SA 3.0 |
