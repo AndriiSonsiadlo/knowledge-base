@@ -326,7 +326,7 @@ Executable checks:
 
 ### Existing gates
 
-- `npm run build` — `onBrokenLinks: "throw"`, and 41 new pages means many new relative links. Run
+- `npm run build` — `onBrokenLinks: "throw"`, and 42 new pages means many new relative links. Run
   after every folder batch, not only at the end.
 - `npx biome check` on the touched paths only. Repo-wide `npm run lint` fails on a documented
   pre-existing baseline in unrelated files.
