@@ -228,7 +228,7 @@ The diagnosis is two minutes once you suspect it: read `SP` at the moment of fai
 - [Static Memory and Why `malloc` Is Banned](./static-memory-and-no-malloc.md) — the heap growing up toward the stack growing down, and the collision neither one detects.
 - [Memory Sections](../03-toolchain-and-build/memory-sections.md) — `.data`, `.bss`, and the `_sstack`/`_estack` symbols the painting code uses.
 - [Exceptions and the Vector Table](../02-processor-architecture/exceptions-and-the-vector-table.md) — the 32-byte frame the hardware pushes, and the extended frame when the FPU is in use.
-- [ELF, Map Files and Size](../03-toolchain-and-build/elf-map-files-and-size.md) — reading the actual `.bss` extent and stack reservation out of the map file.
+- [Hardfault Debugging](../11-debugging-and-testing/hardfault-debugging.md) — reading the fault-status registers and stacked frame this page's overflow trips, once it actually happens.
 
 ## References
 

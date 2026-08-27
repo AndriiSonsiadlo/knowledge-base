@@ -188,9 +188,9 @@ Both failures leave a system that passes on the bench and misses deadlines in th
 
 - [Priorities and Nesting](./interrupt-priorities-and-nesting.md) — how to bound the preemption term, which is the largest and least visible contributor above.
 - [Deferred Work](./deferred-work.md) — the technique that keeps handler execution time short, and therefore keeps everyone else's latency short.
-- [Polling, Interrupt, or DMA](./polling-interrupt-or-dma.md) — when the right answer to a latency problem is to stop taking the interrupt at all.
 - [The NVIC](../02-processor-architecture/the-nvic.md) — arbitration, the priority byte, and the tail-chaining timeline this page refers to.
 - [Critical Sections and Atomicity](../04-bare-metal-programming/critical-sections-and-atomicity.md) — the masking mechanisms whose duration is term 2 of the budget.
+- [Tracing](../11-debugging-and-testing/tracing.md) — capturing the actual interrupt-to-ISR gap on hardware instead of trusting the budget's arithmetic.
 
 ## References
 

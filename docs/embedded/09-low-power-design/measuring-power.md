@@ -70,6 +70,7 @@ A board that runs correctly from a bench supply and resets repeatedly the moment
 - [Clock and Peripheral Gating](./clock-and-peripheral-gating.md) — why an unexplained current step almost always means a peripheral clock that was never gated off.
 - [Energy Budgets](./energy-budgets.md) — the average-current arithmetic a measured trace validates or corrects.
 - [Brownout and Power-Loss Safety](./brownout-and-power-loss-safety.md) — the failure a measurement's own burden voltage can accidentally trigger, and the real version of the same symptom this page's warning is a false positive for.
+- [Oscilloscope for Firmware Engineers](../11-debugging-and-testing/oscilloscope-for-firmware-engineers.md) — reading the current-shunt trace itself, and the probing and bandwidth pitfalls that distort it.
 
 ## References
 
