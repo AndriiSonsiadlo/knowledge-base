@@ -38,9 +38,8 @@ The **failure function** is that reasoning precomputed for every prefix of the p
 the search begins. `fail[i]` is the length of the longest *proper* prefix of `pattern[0..i]` that is
 also a suffix of it. With it, the search pointer into the text only ever moves forward — which is what
 makes KMP O(n + m) worst case and, more practically, what makes it usable on a stream you cannot
-rewind. The **Z-algorithm** computes the same information in a different shape: for each position of a
-string, how far it agrees with the string's own start. The two are interconvertible; which one you
-reach for is mostly a matter of which is easier to get right on the day.
+rewind. The **Z-algorithm** computes the same information in a different shape — for each position of
+a string, how far it agrees with the string's own start — and the two are interconvertible.
 
 :::info[Prerequisites]
 Comfortable with [arrays](../data-structures/arrays.md) and 0-based index arithmetic. Nothing here
@@ -131,6 +130,7 @@ def kmp_search(text, pattern):
 
 ```cpp showLineNumbers
 #include <algorithm>
+#include <cassert>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -245,20 +245,40 @@ You will rarely type any of this: the standard search routines are already worst
   is fast on average, not worst-case linear.
 - **Streaming input.** The real reason to write KMP yourself. The search loop touches each text
   character exactly once and never seeks backwards, so it runs over a socket, a pipe, or a ring buffer
-  with only `k` and `fail` retained — O(m) memory regardless of how much text goes past.
+  with only `k` and `fail` retained — O(m) memory in the worst case, regardless of how much text goes
+  past.
 - **Fixed-size buffers.** Matching across chunk boundaries falls out for free: carry `k` from one chunk
   to the next and the match is found even when it straddles the seam.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
 ```python showLineNumbers
+# both implementations, checked on the traced input
 assert failure("abacaba") == [0, 0, 1, 0, 1, 2, 3]
 assert failure("aaaa") == [0, 1, 2, 3]              # every prefix is a border of the next
-assert kmp_search("abacabadabacaba", "abacaba") == [0, 8]
+assert kmp_search("abacabadabacaba", "abacaba") == [0, 8]   # the traced search
 assert kmp_search("aaaa", "aa") == [0, 1, 2]        # overlaps, which a "skip m" loop would miss
 
 assert z_array("abacaba") == [7, 0, 1, 0, 3, 0, 1]
 assert z_search("abacabadabacaba", "abacaba") == [0, 8]
 assert z_search("aaaa", "aa") == [0, 1, 2]          # the two agree, as they must
 ```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    assert((failure("abacaba") == std::vector<int>{0, 0, 1, 0, 1, 2, 3}));
+    assert((kmp_search("abacabadabacaba", "abacaba") == std::vector<int>{0, 8}));
+    assert((kmp_search("aaaa", "aa") == std::vector<int>{0, 1, 2}));  // overlaps kept
+    assert((z_array("abacaba") == std::vector<int>{7, 0, 1, 0, 3, 0, 1}));
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Edge Cases & Pitfalls
 

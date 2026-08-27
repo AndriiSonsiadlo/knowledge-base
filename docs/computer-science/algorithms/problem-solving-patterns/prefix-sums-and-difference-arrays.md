@@ -22,7 +22,8 @@ tags: [computer-science, algorithms, patterns, prefix-sums, arrays]
 />
 
 Summing a range of an array costs time proportional to the range. Do it once and nobody notices; do it
-inside a loop over every possible range and an O(n) inner sum turns an O(n²) enumeration into O(n³).
+over each of the Θ(n²) possible ranges and an inner sum that is O(n) in the worst case makes the whole
+enumeration O(n³) worst case.
 The fix is not a cleverer summing loop. It is to sum *once*, up front, and store the running total, so
 that every later question is answered by arithmetic on two stored numbers instead of by touching the
 data at all.
@@ -287,11 +288,10 @@ whose reads all happen after the writes.
 
 ## Edge Cases & Pitfalls
 
-- **Integer overflow in C++.** `int` prefix sums over a long array overflow silently, and signed
-  overflow is undefined behaviour — the compiler may optimise on the assumption it cannot happen.
-  10⁵ elements of magnitude 10⁵ already exceed a 32-bit range. Accumulate into `long long`; see
+- **Integer overflow in C++.** A prefix array outgrows `int` long before the input looks large, and
+  the result is a silently wrong query rather than an error — accumulate into `long long`. See
   [integers and two's complement](../../bit-manipulation/integers-and-twos-complement.md). Python's
-  `int` is arbitrary precision, so this failure mode does not exist there.
+  `int` is arbitrary precision, so the failure mode does not exist there.
 - **The stale prefix.** Mutating `a[i]` after building `P` leaves every `P[j]` for `j > i` wrong and
   nothing complains — queries return plausible wrong numbers. Mutable data wants a Fenwick or segment
   tree, at O(log n) worst case per update.
@@ -304,6 +304,7 @@ whose reads all happen after the writes.
   [`math.fsum`](https://docs.python.org/3/library/math.html#math.fsum) avoids the loss "by tracking
   multiple intermediate partial sums" but is not incremental, so it does not build a prefix array
   cheaply; for float-heavy work prefer a segment tree, which sums pairwise.
+
 ## Comparisons
 
 | | Prefix sums | Difference array | [Fenwick / segment tree](../data-structures/trees.md) | Recompute each query |
@@ -321,7 +322,6 @@ difference array; interleaved, a Fenwick tree — the O(log n) is the price of n
 
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.4 "Analysis of Algorithms" — the cost model this pattern
   argues with, using three-sum as the worked O(n³) enumeration made cheaper by precomputation.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §15.3 — "reuse a computed subresult", the principle prefix sums are the simplest instance of.
 - [`itertools.accumulate`](https://docs.python.org/3/library/itertools.html#itertools.accumulate) —
   CPython docs; note the `initial` keyword added in 3.8.
 - [`[partial.sum]`](https://eel.is/c++draft/partial.sum) and

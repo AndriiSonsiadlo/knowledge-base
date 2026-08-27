@@ -58,11 +58,11 @@ Comfortable with [trees](./trees.md) as a parent-pointer structure, and with
 
 The two optimisations attack different halves of the same problem. Union by rank stops tall trees from
 being *built*; path compression flattens the ones that were. Either alone leaves a per-operation cost
-of O(log n) — union by rank in the **worst case**, because a rank-k tree can still have height k
-(Sedgewick & Wayne, 4th ed., §1.5, Proposition H: weighted quick-union gives depth at most lg n);
-path compression alone **amortized**, because the first walk down a long chain still pays for its
-whole length (Tarjan & van Leeuwen, 1984). Together they give the amortized α(n) bound proved in
-CLRS 4th ed. §19.4.
+of O(log n) — balanced linking in the **worst case**, because a tree of rank k can still have height
+k (Sedgewick & Wayne, 4th ed., §1.5, Proposition H proves the lg n depth bound for union by *size*;
+union by rank gives the same bound); path compression alone **amortized**, because linking a large
+tree under a small root keeps rebuilding depth faster than compression flattens it (Tarjan & van
+Leeuwen, 1984). Together they give the amortized α(n) bound proved in CLRS 4th ed. §19.4.
 
 ## Mechanism
 
@@ -89,7 +89,7 @@ follows a `find`.
 Traced over `0..5`, with the operations `union(0,1) union(2,3) union(1,3) find(0) find(3)`:
 
 ```text
-union over 0..5, operations: union(0,1) union(2,3) union(1,3) find(0)
+union over 0..5, operations: union(0,1) union(2,3) union(1,3) find(0) find(3)
 
   op            parent array            forest
   start         [0, 1, 2, 3, 4, 5]      six singletons
@@ -194,9 +194,9 @@ Where it earns its place:
 
 - **Kruskal's minimum spanning tree.** Sort the edges by weight and take each one whose endpoints are
   not already connected. The DSU *is* the cycle test, and it is what makes the algorithm O(E log E) worst
-  case rather than O(VE) — see CLRS 4th ed. §21.2 and Sedgewick & Wayne §4.3.
+  case rather than a worst-case O(VE) — see CLRS 4th ed. §21.2 and Sedgewick & Wayne §4.3.
 - **Connected components.** Union every edge, then `components` is the answer in O(1) worst case. Compare
-  with a [traversal](../graph-algorithms/traversal.md), which needs a full O(V + E) pass per batch.
+  with a [traversal](../graph-algorithms/traversal.md), which needs a full O(V + E) worst-case pass per batch.
 - **Cycle detection in an undirected graph.** `union(u, v)` returning `False` means the edge closes a
   cycle. This does *not* work for directed graphs — direction is exactly the information the structure
   discards.
@@ -213,7 +213,7 @@ Where it earns its place:
 def kruskal(n, edges):
     """edges: (weight, u, v). Returns the total weight of a minimum spanning tree."""
     dsu, total = DSU(n), 0
-    for weight, u, v in sorted(edges):       # O(E log E) — the sort dominates
+    for weight, u, v in sorted(edges):       # O(E log E) worst case — the sort dominates
         if dsu.union(u, v):                  # False means it would close a cycle
             total += weight
     return total
@@ -282,9 +282,9 @@ long long kruskal(int n, std::vector<Edge> edges) {
 |---|---|---|---|
 | Model | Incremental — edges arrive over time | Offline — the whole graph must be known | Incremental |
 | Merge two groups | O(α(n)) amortized | n/a | O(n) worst — relabel the smaller set |
-| "Same group?" query | O(α(n)) amortized | O(V + E) per traversal | O(1) average |
-| Enumerate a group's members | O(n) — a full scan | O(size) | O(size) |
-| Split a group | Not supported | Recompute | O(size) |
+| "Same group?" query | O(α(n)) amortized | O(V + E) worst, per traversal | O(1) average |
+| Enumerate a group's members | O(n) worst — a full scan | O(size) worst | O(size) worst |
+| Split a group | Not supported | Recompute, O(V + E) worst | O(size) worst |
 | Memory | One or two int arrays | Visited array plus a frontier | One entry per element |
 
 Union-find wins when connectivity queries are interleaved with edge insertions. A traversal wins when
