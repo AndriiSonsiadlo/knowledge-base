@@ -8,6 +8,18 @@ tags: [computer-science, algorithms, complexity, big-o]
 
 # Big-O Notation
 
+<Recall
+  invariant="f(n) = O(g(n)) holds when some constant c and threshold n₀ make f(n) ≤ c·g(n) for every n ≥ n₀ — a claim about large n only, never about all n."
+  costs={[
+    ["O(f) — upper bound", "grows no faster than f"],
+    ["Ω(f) — lower bound", "grows no slower than f"],
+    ["Θ(f) — tight bound", "bounded above and below by f"],
+    ["o(f) — strict upper bound", "grows strictly slower than f"],
+    ["ω(f) — strict lower bound", "grows strictly faster than f"],
+  ]}
+  reachFor="Stating how an algorithm's cost scales in a way that survives a change of hardware, language, or constant factor."
+  trap="Dropping constants unconditionally. At small n, or when the constant is itself huge (a 10 MB lookup table hidden inside an O(1) step), the dropped term is the one that decides the real running time."
+/>
 
 Big-O describes an **upper bound on growth**. Saying an algorithm is `O(n²)` claims that beyond some
 input size, its cost is at most a constant multiple of n² — never that it *is* n², and never anything
@@ -24,7 +36,12 @@ large enough n those genuinely stop mattering.
 | **O(f)** | Grows *no faster than* f | Upper bound — "at worst this" |
 | **Ω(f)** | Grows *no slower than* f | Lower bound — "at best this" |
 | **Θ(f)** | Bounded above *and* below by f | Tight bound — "exactly this rate" |
-| **o(f)** | Grows *strictly slower* than f | Strict upper bound |
+| **o(f)** | Grows *strictly slower* than f | Strict upper bound — never touches f itself |
+| **ω(f)** | Grows *strictly faster* than f | Strict lower bound — never touches f itself |
+
+`O` and `Ω` allow equality with `c·g(n)` in the limit; `o` and `ω` forbid it — `n = o(n²)` is true,
+`n² = o(n²)` is false. `Θ` is the conjunction `O ∩ Ω`: a function is Θ(g) exactly when it is both O(g)
+and Ω(g) for the same g.
 
 Informal usage almost always says "O" where "Θ" is meant. Saying mergesort is O(n log n) is true but
 weak — it is also O(n³), since that is a valid upper bound too. Saying mergesort is Θ(n log n) is the
@@ -66,6 +83,40 @@ So `f(n) = O(n²)`. The other terms are not *wrong*, they simply stop being the 
 at n = 100 this function is dominated by a constant — a real reminder that asymptotic claims say
 nothing about the range you might actually be operating in.
 
+There are two situations where dropping the constant genuinely misleads:
+
+- **Small n.** The table above shows it directly — up to n ≈ 500 the constant term `90000` outweighs
+  the quadratic term, so an "O(n²)" label predicts nothing useful about behaviour in that range.
+- **A huge constant hidden inside a low-order term.** An `O(1)` step that is implemented as a lookup
+  into a 10 MB table pays for a cache miss on essentially every call — the asymptotic class says
+  "constant", but the constant is a full round trip to main memory, not a register read. Two O(1)
+  algorithms with wildly different real constants are not interchangeable just because the notation
+  puts them in the same class.
+
+### Verifying a bound directly
+
+Proving `3n² + 5n + 2 = O(n²)` means exhibiting a `c` and an `n₀` that make the formal definition hold:
+
+```text
+claim:  3n² + 5n + 2 ≤ c · n²   for all n ≥ n₀
+
+try n₀ = 1, and bound each term by n² for n ≥ 1:
+  5n  ≤ 5n²      (since n ≤ n² when n ≥ 1)
+  2   ≤ 2n²      (since 1 ≤ n² when n ≥ 1)
+
+so  3n² + 5n + 2  ≤  3n² + 5n² + 2n²  =  10n²   for all n ≥ 1
+
+check n = 1:  3 + 5 + 2 = 10   ≤  10 · 1 = 10    ✓ (equality, the tightest case)
+check n = 5:  75 + 25 + 2 = 102  ≤  10 · 25 = 250  ✓
+
+c = 10, n₀ = 1 satisfy the definition, so 3n² + 5n + 2 = O(n²).
+```
+
+The choice of `c = 10, n₀ = 1` is not unique — a smaller `c` also works provided `n₀` moves out to
+compensate: `c = 4, n₀ = 6` clears every n from 6 onward (`3·36 + 5·6 + 2 = 140 ≤ 4·36 = 144`), even
+though it fails at n = 3. Any pair that clears every n from `n₀` onward is a valid proof; the
+definition asks for existence, not for the tightest possible constants.
+
 ### Reading complexity off code
 
 The mechanical rules cover most cases:
@@ -100,12 +151,22 @@ def count_halvings(n):
         n //= 2
         steps += 1
     return steps
+
+
+assert first([5, 1, 8, 3]) == 5
+assert total([5, 1, 8, 3]) == 17
+assert has_duplicate([5, 1, 8, 3]) is False
+assert has_duplicate([5, 1, 8, 5]) is True
+assert count_halvings(1_000_000) == 19            # floor(log2(1_000_000)) divisions to reach 1
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <cstddef>
+#include <vector>
+
 // O(1) — the work does not depend on n
 int first(const std::vector<int>& items) {
     return items[0];
