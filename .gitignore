@@ -92,3 +92,6 @@ dist
 
 # superpowers SDD scratch
 .superpowers/
+
+# python venv for tools/figures (local only)
+.venv/
