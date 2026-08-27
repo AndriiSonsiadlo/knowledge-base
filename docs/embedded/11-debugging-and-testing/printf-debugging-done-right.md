@@ -28,7 +28,7 @@ If adding logging makes the bug disappear, treat that as a result rather than a 
 | **Blocking UART `printf`** | Formatting, then a busy-wait on the wire: **86.8 µs per byte at 115200** | 11.5 KB/s | No | High — the core waits for the wire |
 | **SWO / ITM** | One store to a PPB address, a few core cycles (**tens of ns**), plus a wait if the FIFO is full | SWO baud limited; at 2 MHz NRZ, **~100 KB/s of payload** | Yes (SWO pin) | Low |
 | **SEGGER RTT** | A `memcpy` into a RAM ring buffer — **"one microsecond or less" for a line of text** | SEGGER: up to ~3.5 MB/s in background mode | Yes (probe reads RAM) | Low |
-| **DMA-backed UART ring** | A `memcpy` into a RAM ring buffer, ~**1 µs**; the DMA drains it later | UART baud limited: 11.5 KB/s at 115200, 460 KB/s at 4.6 Mbaud | **No** | Low, until the ring fills |
+| **DMA-backed UART ring** | A `memcpy` into a RAM ring buffer, ~**1 µs**; the DMA drains it later | UART baud limited: 11.5 KB/s at 115200, 1.25 MB/s at the 12.5 Mbaud `f_CK/8` ceiling | **No** | Low, until the ring fills |
 
 Reading the throughput column carefully matters, because it is a different constraint from the per-call cost. RTT's per-call cost is a `memcpy`; if you log faster than the probe drains the buffer, you either block or drop — the buffer size and the drop policy become the design decision, not the transport.
 
@@ -101,7 +101,7 @@ Four decisions in that sketch, and each one is where an implementation usually g
 - **Timestamp on entry, not on transmission.** The whole point is knowing *when* something happened; a line stamped when the DMA drained it is stamped with the wrong time. `DWT->CYCCNT` is the cheap source.
 - **Calling it from an ISR must be safe.** Either make the producer path lock-free for one producer and mask briefly for the general case, or accept that only one priority level may log. Do not put a mutex in it.
 
-The transport can then be a UART, and it can be fast: at 4.6 Mbaud — `PCLK/16` with `OVER8` on this part — the same forty-character line takes 87 µs on the wire and zero microseconds of your core's time.
+The transport can then be a UART, and it can be fast. [UART In Depth](../05-peripherals-and-drivers/uart-in-depth.md) derives the ceiling: `OVER8 = 1` gives `baud = f_CK / (8 × USARTDIV)`, so USART1 with `PCLK2` at its 100 MHz APB2 ceiling tops out at `f_CK/8` = **12.5 Mbit/s**. At that rate the same forty-character line — 400 bit times in 8-N-1 — takes **32 µs** on the wire and zero microseconds of your core's time. In practice the binding constraint is usually the host end rather than the MCU: most USB-serial adapters will not accept anything close to 12.5 Mbaud, and the clock-deviation budget `OVER8` leaves you — roughly 2 %, or 1.8 % once parity is in the frame, per that page — is not much to absorb a cheap adapter's own error on top of your own.
 
 ## When even a `memcpy` is too much: deferred and binary logging
 
@@ -125,7 +125,7 @@ The intermediate step, if a full binary scheme is too much machinery, is to log 
 
 - [The Debug Toolbox](./the-debug-toolbox.md) — the perturbation table this page is the detailed version of, and when logging is the wrong instrument entirely.
 - [SysTick and the Core Peripherals](../02-processor-architecture/systick-and-core-peripherals.md) — the ITM registers, the bring-up order, the `DWT->CYCCNT` timestamp source, and the guard that stops an ITM write hanging an unprobed board.
-- [UART In Depth](../05-peripherals-and-drivers/uart-in-depth.md) — the framing the 86.8 µs comes from, `OVER8`, and the overrun that a halted core causes.
+- [UART In Depth](../05-peripherals-and-drivers/uart-in-depth.md) — the framing every wire-time figure on this page is computed from, the `OVER8` baud ceiling and what it costs in clock tolerance, and the overrun that a halted core causes.
 - [DMA](../05-peripherals-and-drivers/dma.md) — the transfer, the complete interrupt that advances `tail`, and the memory barrier the ring buffer needs.
 - [Reading the Map File](../03-toolchain-and-build/elf-map-files-and-size.md) — the measured flash cost of linking `printf` at all, which is the other reason to avoid it.
 
