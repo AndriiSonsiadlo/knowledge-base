@@ -66,7 +66,7 @@ Adding it up for this part, derived from the sizes above rather than quoted from
 - A task that has never executed a floating-point instruction: 32 bytes hardware + 36 bytes software = **68 bytes** of context on its own stack at the moment of a switch.
 - A task with live floating-point context: 104 bytes hardware (8 + 18 words, extended frame) + 36 + 64 = **204 bytes**, and up to 208 with the alignment word.
 
-That third-of-a-kilobyte difference is charged to **every task that has ever touched a float**, and it is the most commonly omitted term in RTOS stack sizing. [Stacks and Heaps in an RTOS](./stacks-and-heaps-in-an-rtos.md) puts it into a budget.
+That 136-byte difference is charged to **every task that has ever touched a float**, and it is the most commonly omitted term in RTOS stack sizing. [Stacks and Heaps in an RTOS](./stacks-and-heaps-in-an-rtos.md) puts it into a budget.
 
 ## The handler, line by line
 

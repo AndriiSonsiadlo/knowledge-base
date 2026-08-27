@@ -51,7 +51,7 @@ The same shape recurs elsewhere on the part in weaker forms worth knowing about 
 { "signal": [
   { "name": "EXTI/RTC event", "wave": "0..10..............." },
   { "name": "Core state", "wave": "2.3.4...........2...", "data": ["Stop", "waking", "active: read, process, re-arm", "Stop"] },
-  { "name": "Current (approx)", "wave": "2.3.4...........2...", "data": ["9 uA", "~1.6 mA", "~10 mA", "9 uA"] }
+  { "name": "Current (approx)", "wave": "2.3.4...........2...", "data": ["9 µA", "~1.6 mA", "~10 mA", "9 µA"] }
 ],
   "config": { "hscale": 2 }
 }
