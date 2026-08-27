@@ -167,11 +167,66 @@ def kmp_failure_table():
     save(f, "algorithms/kmp-failure-table.png")
 
 
+def recursion_tree():
+    """Mergesort's recursion tree for n = 8: work per node, and the level sum on the right."""
+    f, ax = fig(8.4, 5.2)
+    clean(ax)
+    ax.set_xlim(-0.5, 9.6)
+    ax.set_ylim(-0.6, 4.3)
+
+    # (label, x, level) for each node, level 0 at the top (root)
+    levels = [
+        [("n=8", 4.0)],
+        [("n=4", 1.8), ("n=4", 6.2)],
+        [("n=2", 0.8), ("n=2", 2.8), ("n=2", 5.2), ("n=2", 7.2)],
+        [("n=1", 0.3), ("n=1", 1.3), ("n=1", 2.3), ("n=1", 3.3),
+         ("n=1", 4.7), ("n=1", 5.7), ("n=1", 6.7), ("n=1", 7.7)],
+    ]
+    ys = [4.0, 2.8, 1.6, 0.4]
+    positions = {}
+    for depth, (row, y) in enumerate(zip(levels, ys)):
+        for i, (label, x) in enumerate(row):
+            positions[(depth, i)] = (x, y)
+
+    # edges: each node at depth d, index i has two children at depth d+1, index 2i, 2i+1
+    for depth in range(len(levels) - 1):
+        for i in range(len(levels[depth])):
+            x0, y0 = positions[(depth, i)]
+            for child in (2 * i, 2 * i + 1):
+                if (depth + 1, child) in positions:
+                    x1, y1 = positions[(depth + 1, child)]
+                    ax.plot([x0, x1], [y0 - 0.28, y1 + 0.28], color=C.grey, lw=1.6, zorder=1)
+
+    for depth, row in enumerate(levels):
+        for i, (label, x) in enumerate(row):
+            y = ys[depth]
+            ax.add_patch(plt.Circle((x, y), 0.30, facecolor="white", edgecolor=C.blue,
+                                    lw=2.0, zorder=3))
+            ax.text(x, y, label, ha="center", va="center", fontsize=10.5, fontweight="bold",
+                    color=C.black, zorder=4)
+
+    # level work, and the running total on the right
+    work = ["cn (1 subproblem × cn)", "2 · c(n/2) = cn", "4 · c(n/4) = cn", "8 · c(n/8) = cn"]
+    for y, label in zip(ys, work):
+        ax.text(9.5, y, label, ha="right", va="center", fontsize=11, color=C.red,
+                fontweight="bold")
+
+    ax.text(9.5, 4.6, "work per level", ha="right", va="center", fontsize=11.5,
+            color=C.grey, fontweight="bold")
+    ax.axhline(-0.15, color=C.light, lw=1.2)
+    ax.text(4.0, -0.5, "log₂8 = 3 levels below the root, each costing Θ(n) → Θ(n log n) total",
+            ha="center", va="center", fontsize=11.5, color=C.black)
+    ax.set_title("Mergesort's recursion tree, n = 8: Θ(n) work at every one of the log n levels",
+                 fontsize=13.5)
+    save(f, "algorithms/recursion-tree.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
     "prefix_sum_bands": prefix_sum_bands,
     "kmp_failure_table": kmp_failure_table,
+    "recursion_tree": recursion_tree,
 }
 
 if __name__ == "__main__":
