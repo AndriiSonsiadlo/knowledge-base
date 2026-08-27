@@ -158,8 +158,8 @@ Two instrumentation failures, both of which corrupt the thing they were installe
 - [Stacks and Heaps in an RTOS](./stacks-and-heaps-in-an-rtos.md) — high-water marks in full, including the words-versus-bytes trap that makes a stack report lie by 4×.
 - [Tasks and Scheduling](./tasks-and-scheduling.md) — `uxTaskGetSystemState()` and the `TaskStatus_t` snapshot every statistic on this page comes out of.
 - [Priority Inversion and Deadlock](./priority-inversion-and-deadlock.md) — the failure the trace above shows, and what to do once you have recognised it.
-- [Worst-Case Execution Time](../06-interrupts-timing-and-real-time/wcet.md) — the case where the response window is filled by your own code, and measurement will not bound it.
 - [Interrupt Latency](../06-interrupts-timing-and-real-time/interrupt-latency.md) — the front half of the response time, and how to measure it without a tracer at all.
+- [Tracing](../11-debugging-and-testing/tracing.md) — the bare-metal tracing mechanism this page's RTOS-aware view sits on top of.
 
 ## References
 

@@ -203,7 +203,7 @@ Two ways to build a handoff that is 99.9 % correct, which is the worst kind.
 - [Interrupt Latency](./interrupt-latency.md) — why handler duration is a system-wide cost, and how to measure the handler you just wrote.
 - [Priorities and Nesting](./interrupt-priorities-and-nesting.md) — the same-preempt-level trick that gives two handlers free mutual exclusion.
 - [Interrupt Handlers in C](../04-bare-metal-programming/interrupt-handlers-in-c.md) — handler naming, flag clearing, and the list of things that must never run in one.
-- [DMA](../05-peripherals-and-drivers/dma.md) — the alternative to deferring work: not taking the interrupt in the first place.
+- [ISR-Safe APIs](../07-rtos/isr-safe-apis.md) — the `FromISR` variants that let a handler hand work to an RTOS task instead of a bare deferred-work queue.
 
 ## References
 

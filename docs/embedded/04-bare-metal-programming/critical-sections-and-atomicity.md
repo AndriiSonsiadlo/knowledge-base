@@ -268,8 +268,8 @@ Both are invisible to code review of the section itself, because the section loo
 - [The NVIC](../02-processor-architecture/the-nvic.md) — priority numbers, implemented bits, and pre-emption, all of which `BASEPRI` is defined in terms of.
 - [What `volatile` Does and Does Not Do](./volatile-and-the-compiler.md) — why the qualifier is necessary and insufficient, and the read-modify-write race this page fixes.
 - [Interrupt Handlers in C](./interrupt-handlers-in-c.md) — the other side of every race here, and the table of which sharing shapes need a section at all.
-- [A GPIO Driver from Scratch](./gpio-driver-from-scratch.md) — `BSRR`, the hardware-atomic option at the top of the decision tree.
 - [Concurrency and Synchronization](../../computer-science/operating-systems/concurrency-and-synchronization.md) — the general theory of races, mutual exclusion and deadlock that this page assumes.
+- [Hardfault Debugging](../11-debugging-and-testing/hardfault-debugging.md) — the fault this page's mistakes eventually produce when a critical section runs long enough to matter, and how to recognise it.
 
 ## References
 

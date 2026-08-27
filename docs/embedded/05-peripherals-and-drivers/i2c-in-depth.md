@@ -231,9 +231,9 @@ The STM32F411 uses ST's first-generation I²C peripheral: `CR2.FREQ`, `CCR`, `TR
 
 - [The Anatomy of a Peripheral](./anatomy-of-a-peripheral.md) — the bring-up sequence this page's `FREQ`/`CCR`/`TRISE` configuration is step 4 of, and the RCC read-back guard before it.
 - [Writing a Driver Worth Reusing](./writing-a-portable-driver.md) — the layer boundary that the 7-bit-to-8-bit address shift belongs on, and the I²C seam used as its worked example.
-- [SPI in Depth](./spi-in-depth.md) — the push-pull alternative, four wires instead of two, with none of the electrical failure modes above and none of the addressing either.
 - [Serial Buses — I2C, SPI & UART](../../computer-science/buses-and-io/serial-buses-i2c-spi-uart.md) — what I²C is, its speed grades and topology, and how to choose between the three buses.
 - [GPIO Electrical Behaviour](../01-hardware-foundations/gpio-electrical-behaviour.md) — open-drain outputs, internal versus external pull-ups, and the sink-current limits that set `R_p(min)` above.
+- [Logic Analyzer Workflows](../11-debugging-and-testing/logic-analyzer-workflows.md) — catching a stuck-low SDA or a missing ACK on the capture instead of guessing from symptoms alone.
 
 ## References
 
