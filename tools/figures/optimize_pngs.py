@@ -29,7 +29,16 @@ MAX_MEAN_ERROR = 2.0
 
 def optimise(path: pathlib.Path, dry_run: bool = False):
     before = path.stat().st_size
-    original = Image.open(path).convert("RGB")
+    source = Image.open(path)
+    if source.mode in ("RGBA", "LA", "PA") or "transparency" in source.info:
+        # Transparent pixels are usually black underneath, so a bare convert("RGB")
+        # turns a Commons line drawing into a black rectangle. Composite onto white
+        # instead — which is what <Figure>'s light plate shows anyway.
+        source = source.convert("RGBA")
+        original = Image.new("RGB", source.size, "white")
+        original.paste(source, mask=source.split()[-1])
+    else:
+        original = source.convert("RGB")
 
     quant = original.quantize(colors=256, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
     restored = quant.convert("RGB")
