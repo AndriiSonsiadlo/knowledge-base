@@ -21,11 +21,12 @@ in depth under `computer-science/`; embedded pages link out to that material and
 register-level and Cortex-M-specific parts on top, rather than repeating it.
 
 :::note[This section is being written]
-Folders Overview through Bare-Metal Programming are published — 51 pages covering
-everything from "what embedded means" through a complete first bare-metal blink. Everything from
-Peripherals and Drivers onward is planned but does not exist yet: those folders will not
-appear in the sidebar until later phases land. If you came here looking for a specific topic and
-it is not in the sidebar, it has not been published yet — nothing is missing or broken.
+Folders Overview through RTOS, plus Low-Power Design and Debugging and Testing, are published —
+105 pages covering everything from "what embedded means" through hardfault debugging and
+hardware-in-the-loop testing. Folders 08, 10, and 12–15 are planned but do not exist yet: those
+folders will not appear in the sidebar until later phases land. If you came here looking for a
+specific topic and it is not in the sidebar, it has not been published yet — nothing is missing
+or broken.
 :::
 
 ## How this section is organised
@@ -64,11 +65,11 @@ These are reading orders through the sections above. Published sections link to 
 
 **Day one** — you have no embedded background and want to see something work before you study why it worked. [Overview](./00-overview/what-embedded-means.md) (this folder) → [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) (what to buy) → [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) (your first bare-metal blink) → then back to [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) and [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) to understand why it worked. This path deliberately defers the toolchain and architecture theory until after a first success, because motivation matters more than sequencing when you're starting from zero.
 
-**I have a board and nothing works** — a troubleshooting path, not a syllabus. [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) (is it even powered correctly) → [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) (is the image actually getting onto the chip) → [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) (is the startup code doing what you think) → Debugging and Testing (systematic hardfault and JTAG/SWD debugging once the basics check out).
+**I have a board and nothing works** — a troubleshooting path, not a syllabus. [Hardware Foundations](./01-hardware-foundations/what-hardware-to-buy.md) (is it even powered correctly) → [Toolchain and Build](./03-toolchain-and-build/cross-compilation.md) (is the image actually getting onto the chip) → [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) (is the startup code doing what you think) → [Debugging and Testing](./11-debugging-and-testing/the-debug-toolbox.md) (systematic hardfault and JTAG/SWD debugging once the basics check out).
 
-**I'm building a product** — the path from a working prototype to something shippable. [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) → Peripherals and Drivers → RTOS → Low-Power Design → Firmware Lifecycle. This is roughly the order real product timelines hit these concerns: get something running, add the drivers a real product needs, add concurrency once the driver count makes a main loop unwieldy, then power and lifecycle once the product itself is close to done.
+**I'm building a product** — the path from a working prototype to something shippable. [Bare-Metal Programming](./04-bare-metal-programming/your-first-bare-metal-blink.md) → [Peripherals and Drivers](./05-peripherals-and-drivers/anatomy-of-a-peripheral.md) → [RTOS](./07-rtos/why-an-rtos.md) → [Low-Power Design](./09-low-power-design/energy-budgets.md) → Firmware Lifecycle. This is roughly the order real product timelines hit these concerns: get something running, add the drivers a real product needs, add concurrency once the driver count makes a main loop unwieldy, then power and lifecycle once the product itself is close to done.
 
-**I'm moving to Linux** — for engineers whose target has (or will have) an MMU-capable microprocessor or SoC. [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) (what's different about an applications core) → Embedded Linux (boot chain, drivers, build systems) → Debugging and Testing (debugging looks different again once there's an OS in the way).
+**I'm moving to Linux** — for engineers whose target has (or will have) an MMU-capable microprocessor or SoC. [Processor Architecture](./02-processor-architecture/arm-cortex-m-profiles.md) (what's different about an applications core) → Embedded Linux (boot chain, drivers, build systems) → [Debugging and Testing](./11-debugging-and-testing/the-debug-toolbox.md) (debugging looks different again once there's an OS in the way).
 
 ## Why some links leave the section — the no-duplication policy
 

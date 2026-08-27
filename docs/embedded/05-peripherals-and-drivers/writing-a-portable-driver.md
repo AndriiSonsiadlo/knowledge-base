@@ -312,7 +312,7 @@ Every wait gets a deadline and every timeout gets a distinct status code, as in 
 - [Timers and Counters](./timers-and-counters.md) — a worked driver for one peripheral, and the `timer_clock_hz()` helper as an example of deriving a constant instead of hard-coding it.
 - [CMSIS and Vendor HALs](../04-bare-metal-programming/cmsis-and-vendor-hals.md) — what sits underneath the peripheral access layer, and the register-versus-LL-versus-HAL choice this structure lets you defer.
 - [Static Memory and Why `malloc` Is Banned](../04-bare-metal-programming/static-memory-and-no-malloc.md) — why every structure here is caller-allocated and file-scope `static`.
-- [Embedded C Idioms](../04-bare-metal-programming/embedded-c-idioms.md) — designated initialisers for the `const` configuration tables, and the packed-struct and endianness rules for parsing a device's register block.
+- [Mocking Hardware](../11-debugging-and-testing/mocking-hardware.md) — how the register-versus-mock seam this layer creates gets exercised in a host-side unit test.
 
 ## References
 

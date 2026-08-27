@@ -227,9 +227,9 @@ On STM32 the peripheral is a **USART** — it has a synchronous mode with a cloc
 
 - [The Anatomy of a Peripheral](./anatomy-of-a-peripheral.md) — the six-step bring-up sequence this page's step 4 plugs into, and the read-back guard after the clock enable.
 - [SPI in Depth](./spi-in-depth.md) — the same peripheral shape with a clock wire, which is exactly what removes every tolerance problem on this page.
-- [I2C in Depth](./i2c-in-depth.md) — the third bus, and the one where the failure modes are electrical rather than temporal.
 - [Serial Buses — I2C, SPI & UART](../../computer-science/buses-and-io/serial-buses-i2c-spi-uart.md) — what a UART is, the pin and topology comparison against SPI and I²C, and when to choose it.
 - [Configuring the Clock Tree](../04-bare-metal-programming/clock-tree-configuration.md) — where `PCLK1` and `PCLK2` come from, and why an HSI-only configuration is the root cause of half the failures above.
+- [Logic Analyzer Workflows](../11-debugging-and-testing/logic-analyzer-workflows.md) — capturing a frame on the wire to tell a baud-rate mismatch from a framing error at a glance.
 
 ## References
 

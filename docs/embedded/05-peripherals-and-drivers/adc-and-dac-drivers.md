@@ -53,7 +53,7 @@ With `PCLK2` at 100 MHz the only prescaler values that stay legal are `/4` (25 M
 RM0383 §11.5 gives the arithmetic in one line:
 
 ```text
-T_conv = sampling time + 12 cycles          (12-bit resolution)
+T_conv = sampling time + 12 cycles          (at 12-bit resolution)
 ```
 
 Sampling time is per channel, chosen from eight values in `ADC_SMPR1`/`ADC_SMPR2`: **3, 15, 28, 56, 84, 112, 144 or 480 `ADCCLK` cycles** (RM0383 §11.12.4). At 30 MHz the extremes are 15 cycles = 500 ns and 492 cycles = 16.4 µs — a factor of 33 in throughput, decided by one three-bit field per channel.

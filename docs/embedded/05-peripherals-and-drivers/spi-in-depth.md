@@ -191,9 +191,9 @@ SPI has no formal specification. The mode numbering, the names `CPOL` and `CPHA`
 
 - [The Anatomy of a Peripheral](./anatomy-of-a-peripheral.md) — the bring-up sequence, the RCC read-back guard, and the SPI2 worked example this page continues.
 - [UART in Depth](./uart-in-depth.md) — the same peripheral shape without a clock wire, and the sampling-tolerance problem that a shared clock removes entirely.
-- [I2C in Depth](./i2c-in-depth.md) — two wires instead of four, at the cost of open-drain edges and every failure mode that follows from them.
 - [Serial Buses — I2C, SPI & UART](../../computer-science/buses-and-io/serial-buses-i2c-spi-uart.md) — what SPI is, its pin and topology cost, and when to pick it over the other two.
 - [Signal Integrity and Noise](../01-hardware-foundations/signal-integrity-and-noise.md) — the ringing, ground-return and capacitive-loading effects that set the clock ceiling derived above.
+- [Logic Analyzer Workflows](../11-debugging-and-testing/logic-analyzer-workflows.md) — capturing the four modes above on real hardware to confirm CPOL/CPHA match what the driver configured.
 
 ## References
 
