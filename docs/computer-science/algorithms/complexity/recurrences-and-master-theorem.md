@@ -205,8 +205,8 @@ theorem does not apply.
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 4 — "Divide-and-Conquer",
   the master theorem's three cases with full proof, plus the recursion-tree and substitution methods.
-- Sedgewick & Wayne, *Algorithms*, 4th ed., §5.1 (Suffix Arrays, mergesort context) and §2.2 — the
-  recursion-tree argument applied directly to mergesort's Θ(n log n) bound.
+- Sedgewick & Wayne, *Algorithms*, 4th ed., §2.2 — mergesort, with the recursion-tree argument applied
+  directly to its Θ(n log n) bound.
 - Karatsuba, A. & Ofman, Y. (1962) — the original T(n) = 3T(n/2) + Θ(n) multiplication algorithm this
   page worked through.
 

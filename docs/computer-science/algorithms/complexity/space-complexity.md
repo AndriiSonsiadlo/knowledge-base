@@ -14,7 +14,7 @@ tags: [computer-science, algorithms, complexity, space-complexity, recursion]
     ["recursive sum of n elements, call stack (worst)", "Θ(n) auxiliary"],
     ["iterative sum of n elements (worst)", "Θ(1) auxiliary"],
     ["mergesort auxiliary buffer (worst)", "Θ(n) auxiliary"],
-    ["quicksort recursion stack, balanced (worst)", "Θ(log n) auxiliary"],
+    ["quicksort recursion stack (average/expected)", "Θ(log n) auxiliary"],
     ["quicksort recursion stack, unbalanced/adversarial (worst)", "Θ(n) auxiliary"],
     ["in-place insertion sort (worst)", "Θ(1) auxiliary"],
   ]}

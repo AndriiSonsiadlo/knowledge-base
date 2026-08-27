@@ -83,12 +83,14 @@ as 3-SAT, which is itself known NP-complete (via Cook–Levin).
 
 Cook–Levin is the anchor every other NP-completeness proof stands on: it shows *directly*, from the
 definition of a nondeterministic Turing machine, that Boolean satisfiability (general CNF-SAT, and by a
-further reduction 3-SAT) is NP-hard — the computation of any nondeterministic polynomial-time machine on
-any input can be encoded as a Boolean formula whose satisfying assignments correspond exactly to
-accepting computations. Every other NP-completeness result in the standard catalogue, including this
-page's 3-SAT-to-Clique argument, is a reduction *from* 3-SAT rather than a repeat of that machine-encoding
-argument, which is why the technique is called out as the base case for the entire method: prove one
-problem NP-hard from first principles, then reduce everything else to it or from it.
+further reduction 3-SAT) is NP-complete — the computation of any nondeterministic polynomial-time machine
+on any input can be encoded as a Boolean formula whose satisfying assignments correspond exactly to
+accepting computations, which supplies the NP-hardness half of the proof; membership in NP is the easy
+half, since a proposed assignment is checked in polynomial time by substitution. Every other
+NP-completeness result in the standard catalogue, including this page's 3-SAT-to-Clique argument, is a
+reduction *from* 3-SAT rather than a repeat of that machine-encoding argument, which is why the technique
+is called out as the base case for the entire method: prove one problem NP-complete from first
+principles, then reduce everything else to it or from it.
 
 Given a 3-CNF formula with `k` clauses, build a graph with one group of up to 3 nodes per clause — one
 node per literal in that clause — and connect two nodes with an edge exactly when they come from
@@ -183,8 +185,8 @@ What to do once a problem is confirmed intractable:
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 34 — "NP-Completeness",
   including the Cook–Levin theorem and the 3-SAT-to-Clique reduction worked through here.
-- Sedgewick & Wayne, *Algorithms*, 4th ed., §6.4 — "Intractability", a practitioner-oriented
-  introduction to recognising NP-hard problems.
+- Sedgewick & Wayne, *Algorithms*, 4th ed., Ch. 6 "Context" — the closing chapter's discussion of
+  intractability, a practitioner-oriented introduction to recognising NP-hard problems.
 - Garey, M. R. & Johnson, D. S., *Computers and Intractability* (1979) — the classic reference catalogue
   of NP-complete problems, still the standard "is my problem on this list" lookup.
 - Clay Mathematics Institute, "P vs NP Problem" — the official Millennium Prize problem statement,
