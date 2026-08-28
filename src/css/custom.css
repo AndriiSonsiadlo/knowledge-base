@@ -2017,23 +2017,23 @@ button {
 /* Sidebar collapses toward the left edge: point left, "«". The base icon
    is an up chevron, so -90deg turns it left. */
 [class*="collapseSidebarButton_"]::before {
-  left: calc(50% - 4px);
+  left: calc(50% - 2.5px);
   transform: translate(-50%, -50%) rotate(-90deg);
 }
 
 [class*="collapseSidebarButton_"]::after {
-  left: calc(50% + 4px);
+  left: calc(50% + 2.5px);
   transform: translate(-50%, -50%) rotate(-90deg);
 }
 
 /* Sidebar expands back out to the right: point right, "»". */
 [class*="expandButton_"]::before {
-  left: calc(50% - 4px);
+  left: calc(50% - 2.5px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
 [class*="expandButton_"]::after {
-  left: calc(50% + 4px);
+  left: calc(50% + 2.5px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
