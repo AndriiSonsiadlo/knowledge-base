@@ -1,5 +1,6 @@
 import { themes as prismThemes } from "prism-react-renderer";
 import remarkWavedrom from "./src/plugins/remark-wavedrom.js";
+import knowledgeGraphPlugin from "./src/plugins/knowledge-graph-plugin.js";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -298,6 +299,7 @@ const config = {
     ["./src/plugins/webpack-alias.js", {}],
     ["./src/plugins/tailwind-config.js", {}],
     ["./src/plugins/recent-docs-plugin.js", { limit: 6 }],
+    [knowledgeGraphPlugin, { scopes: ["linux/"] }],
     [
       "ideal-image",
       /** @type {import('@docusaurus/plugin-ideal-image').PluginOptions} */
