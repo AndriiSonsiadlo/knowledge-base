@@ -808,7 +808,10 @@ div[class^='docItemContainer_'] article img {
   translate: -50% 0;
   margin-top: 0.45rem;
   min-width: 12.5rem;
-  padding: 0.4rem;
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   border: 1px solid var(--glass-border-color);
   border-radius: 0.9rem;
   background: rgb(240 234 247 / 0.94);
@@ -824,16 +827,28 @@ div[class^='docItemContainer_'] article img {
   box-shadow: 0 22px 44px rgb(0 0 0 / 0.45);
 }
 
-/* Invisible bridge across the visual gap between trigger and menu. It is part
-   of the menu, so the cursor never leaves .dropdown while crossing it, and it
-   inherits the menu's pointer-events: none while closed. */
-.navbar__items--center .dropdown__menu::before {
+/* Invisible bridge across the visual gap between trigger and menu, so a slow
+   diagonal drag never leaves .dropdown and drops :hover.
+   It hangs off .dropdown, not off .dropdown__menu: Infima gives the menu
+   overflow-y: auto (for its max-height: 80vh), which clips any child placed
+   outside the menu box — a bridge parented to the menu is never painted.
+   Wider than the trigger because the menu is wider and centred on it.
+   Inert unless the dropdown is open, so it can't eat clicks on the page
+   content that sits right under the navbar. */
+.navbar__items--center .dropdown::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  height: 0.75rem;
+  top: 100%;
+  left: 50%;
+  width: max(100%, 16rem);
+  height: 0.5rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.navbar__items--center .dropdown:hover::after,
+.navbar__items--center .dropdown--show::after {
+  pointer-events: auto;
 }
 
 .navbar__items--center .dropdown__link {
