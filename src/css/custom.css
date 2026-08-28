@@ -1113,38 +1113,66 @@ body {
    meaning on its own, so it stays legible in print and in both themes. */
 .kb-recall {
   display: grid;
-  gap: 0.5rem;
   margin: 0 0 1.75rem;
-  padding: 1rem 1.25rem;
   border: 1px solid var(--ifm-color-emphasis-300);
   border-left: 4px solid var(--ifm-color-primary);
   border-radius: var(--ifm-global-radius);
   background: var(--ifm-background-surface-color);
+  box-shadow: var(--ifm-global-shadow-lw);
+  overflow: hidden;
 }
 
 .kb-recall__row {
   display: grid;
   grid-template-columns: 8.5rem 1fr;
-  gap: 0.25rem 1rem;
+  gap: 0.3rem 1.25rem;
   align-items: baseline;
+  padding: 0.85rem 1.25rem;
+}
+
+.kb-recall__row + .kb-recall__row {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
 }
 
 .kb-recall__label {
   color: var(--ifm-color-primary);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  align-self: start;
+  padding-top: 0.2rem;
 }
 
 .kb-recall__body {
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
+.kb-recall__body code,
+.kb-recall__cost-label code {
+  font-size: 0.85em;
+}
+
+/* the Costs row's own mini-table: one bordered row per [label, cost] pair,
+   instead of the label/value pairs running together as one paragraph. */
 .kb-recall__costs {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.15rem 1rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: calc(var(--ifm-global-radius) - 2px);
+  overflow: hidden;
+}
+
+.kb-recall__cost-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.7rem;
+}
+
+.kb-recall__cost-row + .kb-recall__cost-row {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
 }
 
 .kb-recall__cost-label {
@@ -1152,10 +1180,8 @@ body {
 }
 
 .kb-recall__cost {
-  justify-self: end;
-  padding: 0 0.35rem;
-  font-family: var(--ifm-font-family-monospace);
-  font-size: 0.85rem;
+  flex-shrink: 0;
+  text-align: right;
 }
 
 @media (max-width: 480px) {
@@ -1163,8 +1189,14 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .kb-recall__costs {
-    grid-template-columns: 1fr auto;
+  .kb-recall__cost-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+
+  .kb-recall__cost {
+    text-align: left;
   }
 }
 

@@ -9,7 +9,7 @@ tags: [computer-science, algorithms, patterns, prefix-sums, arrays]
 # Prefix Sums & Difference Arrays
 
 <Recall
-  invariant="P[i] holds the sum of the first i elements, so any range sum is one subtraction: sum(l, r) = P[r+1] − P[l]."
+  invariant="`P[i]` holds the sum of the first i elements, so any range sum is one subtraction: `sum(l, r) = P[r+1] − P[l]`."
   costs={[
     ["build P from n elements (worst)", "O(n)"],
     ["range sum after building (worst)", "O(1)"],
@@ -18,7 +18,7 @@ tags: [computer-science, algorithms, patterns, prefix-sums, arrays]
     ["difference array: range update (worst)", "O(1)"],
   ]}
   reachFor="Many range queries over data that does not change, or many range updates with all the reads deferred to the end."
-  trap="Off-by-one at the boundary. Define P with a leading zero — P[0] = 0, P[i] = P[i−1] + a[i−1] — and the inclusive range [l, r] is P[r+1] − P[l] with no special case for l = 0."
+  trap="Off-by-one at the boundary. Define P with a leading zero — `P[0] = 0`, `P[i] = P[i−1] + a[i−1]` — and the inclusive range [l, r] is `P[r+1] − P[l]` with no special case for `l = 0`."
 />
 
 Summing a range of an array costs time proportional to the range. Do it once and nobody notices; do it

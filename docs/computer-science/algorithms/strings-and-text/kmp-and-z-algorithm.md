@@ -9,7 +9,7 @@ tags: [computer-science, algorithms, strings, pattern-matching]
 # KMP & the Z-Algorithm
 
 <Recall
-  invariant="fail[i] is the length of the longest proper prefix of pattern[0..i] that is also a suffix of it — so on a mismatch the pattern slides to that border and the text pointer never moves back."
+  invariant="`fail[i]` is the length of the longest proper prefix of `pattern[0..i]` that is also a suffix of it — so on a mismatch the pattern slides to that border and the text pointer never moves back."
   costs={[
     ["build the failure function (worst)", "O(m)"],
     ["search after building (worst)", "O(n)"],
@@ -18,7 +18,7 @@ tags: [computer-science, algorithms, strings, pattern-matching]
     ["Z-array over a string (worst)", "O(n)"],
   ]}
   reachFor="One pattern, a long text, and a guarantee is needed — no worst case where the naive scan degrades to O(nm)."
-  trap="fail[i] must be a *proper* prefix: fail[0] is always 0, never i+1. Getting that wrong makes the algorithm loop forever on a run of identical characters."
+  trap="`fail[i]` must be a *proper* prefix: `fail[0]` is always 0, never `i+1`. Getting that wrong makes the algorithm loop forever on a run of identical characters."
 />
 
 The naive substring scan tries the pattern at every text position and, on a mismatch, throws away
