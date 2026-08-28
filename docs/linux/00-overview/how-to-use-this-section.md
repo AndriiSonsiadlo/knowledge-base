@@ -33,3 +33,34 @@ Every reference into the kernel source names a file and a symbol and never a lin
 line numbers rot within one release. Path resolution happens in
 <Src file="fs/namei.c" symbol="path_openat" />, the allocator lives in
 <Src file="mm/page_alloc.c" />, and <Src symbol="handle_mm_fault" /> is where a fault is resolved.
+
+## Labs state where they run
+
+Every lab carries a host badge. `QEMU lab` needs the virtual machine from
+[Setting Up a Lab](../01-lab-and-toolchain/the-lab-machine.md); `Any Linux` runs anywhere;
+`WSL2 OK` is explicitly confirmed to work under WSL2. Every lab shows expected output, not just
+commands.
+
+<Lab host="qemu" title="Confirm your lab kernel is the pinned version" time="2 min">
+
+1. Boot the lab VM and run:
+
+   ```bash
+   uname -r
+   ```
+
+2. Expected output — the version string starts with the pinned release:
+
+   ```text
+   6.18.0
+   ```
+
+**If it fails:** you booted the distribution's kernel rather than the one you built. Check the
+`-kernel` argument in your QEMU invocation.
+
+</Lab>
+
+## Videos are linked, never stored
+
+Where a talk develops an idea better than a page can, it is embedded. The video stays on its own
+host; nothing is committed to this repository.
