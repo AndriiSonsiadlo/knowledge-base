@@ -22,6 +22,11 @@ const config = {
   onBrokenLinks: "throw",
   customFields: {
     githubUrl: "https://github.com/AndriiSonsiadlo/knowledge-base",
+    // The Linux section is pinned to one LTS. Every source link on every page
+    // is generated from this value by <Src>. Bumping it re-points the whole
+    // section; see docs/superpowers/specs/2026-08-28-linux-kernel-docs-design.md.
+    // v6.18: released 2025-11-30, longterm, projected EOL Dec 2028.
+    linuxKernelVersion: "v6.18",
   },
   markdown: {
     mermaid: true,
