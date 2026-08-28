@@ -27,6 +27,9 @@ function Formatted({ text, className }) {
 }
 
 export default function KernelFacts({ structure = [], path, observe, trap }) {
+  if (!path || !observe || !trap) {
+    throw new Error("<KernelFacts> requires `path`, `observe`, and `trap`");
+  }
   return (
     <aside className="kb-kernel-facts">
       <div className="kb-kernel-facts__row">

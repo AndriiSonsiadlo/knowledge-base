@@ -42,7 +42,11 @@ function suggest(target, candidates) {
     .map(([, id]) => id);
 }
 
-// Iterative DFS with three colours. Returns the first cycle as a path, or null.
+// Iterative DFS. Colour only gates re-visiting: BLACK nodes are fully
+// explored and skipped, WHITE nodes are queued, GREY is set on entry but
+// never read back for the cycle check itself — a cycle is detected directly
+// by `path.includes(next)`, i.e. a node reachable from itself via the
+// current DFS stack. Returns the first cycle as a path, or null.
 function findCycle(adjacency) {
   const WHITE = 0;
   const GREY = 1;
@@ -149,6 +153,7 @@ export function buildGraph(docs, options = {}) {
       label: doc.frontMatter?.sidebar_label ?? doc.title,
       permalink: doc.permalink,
       folder: folderOf(doc),
+      sidebarPosition: doc.frontMatter?.sidebar_position ?? 0,
       external: !inScope(id, scopes),
     };
   });
