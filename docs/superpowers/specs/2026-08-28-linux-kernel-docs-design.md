@@ -36,7 +36,10 @@ writing the actual `.md` content is a mechanical follow-the-outline exercise.
 | Missing prerequisites | **Backfilled into `docs/computer-science/`** as new pages, not duplicated into `docs/linux/` | User |
 | Embedded overlap | `docs/embedded/10-embedded-linux` shrinks from 14 pages to 5; the embedded spec is amended in the same commit | User |
 | Currency | Verified against live documentation via **context7 MCP** at write time, per the per-folder table below | User |
-| New tooling | `asciinema-player` for real terminal sessions; existing WaveDrom reused for bit-field layouts; Graphviz considered and rejected (see [Rejected tooling](#rejected-tooling)) | This spec |
+| Authoring order | **Scaffold before writing** — every page in a phase created as a one-sentence stub with full frontmatter before any is written properly, so links and graph nodes resolve immediately | User |
+| Figures | **No licence gating.** Pick the image that teaches best, whatever its origin; log a `SOURCES.md` row so it can be re-sourced. Overrides `CLAUDE.md`'s blog-image restriction for this section | User |
+| Video and GIF | Video **embedded or referenced, never committed**; GIF **may be committed** where motion is the mechanism | User |
+| New tooling | `asciinema-player` for real terminal sessions; a ~20-line `<Video>` iframe component; existing WaveDrom reused for bit-field layouts; Graphviz-as-a-renderer rejected, but the Graphviz gallery's kernel diagram used as a figure (see [Rejected tooling](#rejected-tooling)) | This spec |
 
 ---
 
@@ -162,8 +165,10 @@ Recorded so it is not re-litigated:
   unrelated to the repository.
 - **`@docusaurus/theme-live-codeblock`.** Executes JavaScript in the browser. Nothing in this
   section is JavaScript.
-- **Video / GIF.** Ruled out by `CLAUDE.md`'s file-size guidance. `<Cast>` covers the use case at a
-  fraction of the size and stays greppable.
+
+Video and animated GIF were previously listed here and are **not** rejected — see
+[Video and animated GIF](#images) for the policy. `<Cast>` does not replace them; it covers a
+different case (a terminal session you want to scrub and read), and all three coexist.
 
 ### New files
 
@@ -174,11 +179,12 @@ src/components/PrereqBlock/index.jsx
 src/components/KernelFacts/index.jsx
 src/components/Lab/index.jsx
 src/components/Cast/index.jsx
+src/components/Video/index.jsx
 src/components/Src/index.jsx
 src/lib/kernelSource.js
 src/css/custom.css                      (edited — new component classes)
 src/theme/DocItem/Layout/index.js       (edited — inject PrereqBlock)
-src/theme/MDXComponents.js              (edited — register Lab, KernelFacts, Cast, Src, KnowledgeGraph)
+src/theme/MDXComponents.js              (edited — register Lab, KernelFacts, Cast, Video, Src, KnowledgeGraph)
 static/casts/linux/*.cast
 static/img/linux/SOURCES.md
 static/img/linux/<folder-slug>/...
@@ -362,6 +368,26 @@ rather than writing a second formatter.
 - Budget: **≤ 25 casts across the section**, concentrated in folders 01, 17, 18, 19. Keep each under
   ~90 seconds.
 
+### `<Video>` — embedded talks and explainers
+
+```jsx
+<Video
+  src="https://www.youtube.com/embed/<id>"
+  title="Paul McKenney — RCU: What is it, and how does it work?"
+  caption="The clearest available explanation of grace periods, from the person who wrote RCU." />
+```
+
+A responsive 16:9 `<iframe>` wrapper with `loading="lazy"`, `allowfullscreen`, and a caption line —
+roughly twenty lines of JSX and some CSS. No plugin, no dependency.
+
+- **Nothing is committed.** The video stays where it lives; the repository holds a URL.
+- `title` is required and becomes the iframe's accessible name.
+- Use it where watching genuinely beats reading — a conference talk that develops an idea over
+  forty minutes, an animation of an algorithm, a recorded debugging session. Roughly one per folder
+  at most; a page is not a playlist.
+- Where a video is worth naming but not worth interrupting the page for, it goes in `## References`
+  instead. Prefer that for anything over ~an hour.
+
 ### `<Src>` — pinned source links
 
 ```md
@@ -387,6 +413,60 @@ section — line numbers rot within one release, symbol names and paths survive 
 ---
 
 ## Page conventions
+
+### Rule 1 — scaffold the whole folder before writing any of it
+
+**Every `.md` file in a folder is created, with complete frontmatter and a one-sentence body,
+before a single page in that folder is written properly.**
+
+A stub is:
+
+```md
+---
+id: the-page-fault-handler
+title: The Page Fault Handler
+sidebar_label: Page fault handler
+sidebar_position: 5
+tags: [linux, kernel, memory-management]
+prerequisites: [linux/08-memory-management/mm-struct-and-vmas]
+draft: false
+---
+
+# The Page Fault Handler
+
+How the CPU's page-fault exception becomes a resolved mapping, a swapped-in page, or a SIGSEGV.
+
+:::info[Not yet written]
+This page is a stub. See [the roadmap](/docs/linux/00-overview/roadmap) for what lands when.
+:::
+```
+
+Why this is a rule and not a preference:
+
+- **Every link resolves from the first day.** `onBrokenLinks: "throw"` means a link to an unwritten
+  page fails the build, so without stubs pages can only ever link backwards. With stubs, any page
+  may link to any other in its phase immediately, and the writing order stops constraining the
+  prose.
+- **The knowledge-graph plugin needs the nodes to exist.** A `prerequisites` entry pointing at a
+  file that is not there throws. Scaffolding first means the graph is complete and correct from the
+  start, and it renders the section's real shape while the section is still being written.
+- **The sidebar shows the real destination**, so gaps are visible rather than invisible.
+- One sentence is enough. It is the page's own `description` in one line — write it from the
+  outline's brief, and it is usually already written there.
+
+`draft: false` is explicit on stubs: they are meant to be visible and linkable. A stub is not
+hidden — a one-line honest placeholder beats a 404, and the `:::info` block says plainly that it is
+not finished.
+
+The scaffold step is the **first task of every phase**, and it covers every folder in that phase at
+once, not one folder at a time.
+
+### Rule 2 — every folder gets a `_category_.json` with a real description
+
+Created during the scaffold step, never later. See
+[Folder `_category_.json`](#folder-_categoryjson) for the shape. The `description` is a required
+field, not an optional one: it is what the reader sees on the folder's generated index page and in
+the sidebar hover, and an empty one wastes the section's most-visited navigation surface.
 
 ### Frontmatter
 
@@ -420,8 +500,12 @@ related: [<doc-id>, ...]           # optional
 }
 ```
 
-`position` equals the numeric folder prefix + 1, so `00-overview` is position 1. The `description`
-is always filled — the generated index page is a real navigation surface, and an empty one wastes it.
+`position` equals the numeric folder prefix + 1, so `00-overview` is position 1.
+
+**`description` is mandatory** (Rule 2). One sentence, written to answer "what will I learn here",
+not to restate the label. `"Boot and Init"` → *"The full chain from firmware to a login prompt: UEFI,
+boot loaders, the kernel image, initramfs, PID 1, and systemd's dependency graph."* — not *"Pages
+about boot and init."*
 
 ### Page structure
 
@@ -450,14 +534,19 @@ frontmatter.
 
 ### Admonitions
 
-The four the knowledge base already uses. Do not invent more.
+Five types. Do not invent more.
 
 | Admonition | Use for |
 |---|---|
 | `:::info[...]` | Framing the problem a mechanism solves; version-scoped notes |
 | `:::note[...]` | Side facts; arm64 contrast callouts; "this changed in 6.x" |
 | `:::tip[...]` | Practical guidance, rules of thumb, the flag that saves an hour |
-| `:::warning[...]` | Real hazards only: things that corrupt data, hang a machine, or teach a wrong model that is expensive to unlearn. Used where warranted, never as template furniture |
+| `:::warning[...]` | Real hazards: things that corrupt data, hang a machine, or teach a wrong model that is expensive to unlearn. Used where warranted, never as template furniture |
+| `:::danger[...]` | **Irreversible or destructive.** A command that destroys data, bricks a boot, or locks you out — `dd` to the wrong device, `mkfs` on a mounted disk, writing to `/dev/mem`, `echo c > /proc/sysrq-trigger`, an `insmod` that panics, a `chmod` on `/`, enrolling the wrong Secure Boot key. States what is lost and whether it is recoverable |
+
+`:::danger` is the reason many of this section's labs are QEMU-only: the honest version of a lab
+often *is* destructive, and a snapshot-able VM is what makes it safe to run. Where a lab carries a
+`:::danger`, the `<Lab>` host badge must not be `any-linux`.
 
 **arm64 contrast callouts** are a recurring `:::note` and are the mechanism by which this section
 stays honest about being x86-64-first. They appear where the difference is structural, not
@@ -479,6 +568,8 @@ Each tool has exactly one job, so pages stay predictable and a reader learns to 
 | **WaveDrom `signal`** | The few genuinely time-axis things: interrupt latency breakdown, DMA transfer phases, an RCU grace period against reader critical sections |
 | **`<Figure>`** | Real things a drawing cannot convey: canonical published stack diagrams, `perf` and profiler screenshots, real flamegraphs, `crash` output, hardware topology |
 | **`<Cast>`** | Interactive tool sessions where the *interaction* is the lesson |
+| **Animated GIF** (via `<Figure>`) | The few things where *motion* is the mechanism: buddy split/coalesce, rbtree rebalance, TLB fill and shootdown, a sliding TCP window, overlayfs copy-up |
+| **`<Video>`** | A talk or explainer that develops an idea over minutes, from someone who built the thing. Embedded, never committed |
 | **`<Tabs>`** | Two or three genuine alternatives side by side: x86-64 vs arm64, cgroup v1 vs v2, iptables vs nftables, `strace` vs `bpftrace`, glibc vs musl vs raw `syscall()` |
 | **Table** | Comparison and enumeration: GFP flag semantics, lock selection, scheduler class comparison, namespace types, sanitizer coverage |
 
@@ -500,35 +591,67 @@ Referenced through `<Figure>` with a `/img/linux/...` path — **no** `/knowledg
 `useBaseUrl` prepends `baseUrl` itself.
 
 Every file gets a row in `static/img/linux/SOURCES.md` with `file`, `source_url`, `publisher`,
-`license`, `retrieved`, `notes` — one column more than `static/img/gpu/SOURCES.md`, because this
-section leans on copyleft sources whose licence terms require attribution and must therefore be
-tracked per file, not assumed.
+`retrieved`, `notes`, mirroring `static/img/gpu/SOURCES.md`. This exists so an image can be
+**re-sourced, re-cropped, or updated later** — that is its whole job. Notes must say if an image is
+a crop, a frame extracted from an animation, or a screenshot of a UI, because someone replacing it
+later depends on knowing that.
 
-**Preferred sources, in order:**
+**Selection rule: pick the image that teaches the topic best.** Relevance and clarity are the only
+bar. Download whatever fits — vendor documentation, a conference slide, a wiki diagram, a good blog
+figure. Caption it, credit the source in the caption, log the row in `SOURCES.md`, move on. Do not
+spend time on licence analysis, and do not reject a genuinely better figure for a worse one.
 
-1. **kernel.org documentation and the source tree's own `Documentation/`** — the authority.
-2. **Bootlin training materials** (CC BY-SA) — the best license-clean source for kernel and driver
-   figures. Attribute the licence in the caption.
-3. **Thomas-Krenn wiki — "Linux Storage Stack Diagram"** by Werner Fischer and Georg Schönberger,
-   CC BY-SA 3.0. The canonical storage-stack figure, and licence-clean. Folder 12's anchor image.
-   Use the revision matching the pinned kernel where one exists; state the diagram's kernel version
-   in the caption, because it is versioned and readers will compare it to their own system.
-4. **Wikimedia Commons** — explicit licence metadata; good for hardware topology and standard
-   protocol figures.
-5. **Brendan Gregg's diagrams** (Linux performance observability map, flamegraphs) — licence must be
-   **checked per image** before use, not assumed from the site as a whole. If a specific image's
-   terms are unclear, do not use it; redraw the concept in Mermaid and cite his page in
-   `## References` instead.
-6. **Own screenshots** from the QEMU lab — `perf report`, `crash`, a flamegraph of a real workload,
-   `htop` under load. These are free of licence questions entirely and should be the default for
-   anything showing tool output.
+:::note[Departure from `CLAUDE.md`]
+`CLAUDE.md` says never to substitute an image from a blog or image host just to have a figure. That
+constraint is **lifted for this section** by explicit instruction: any well-chosen image is
+acceptable regardless of origin. The `SOURCES.md` row requirement stays — provenance is still how
+the image gets maintained.
+:::
 
-Never substitute a blog or image-host copy of a figure to have one. **If no properly-sourced figure
-exists, draw it in Mermaid — that is the correct outcome, not a fallback.**
+**Where the good figures actually are**, roughly in order of usefulness:
 
-Size discipline: `static/img/gpu/` is ~1.2 MB for 129 pages. `static/img/linux/` should stay in the
-same order of magnitude. Prefer PNG screenshots downscaled to ≤ 1400 px wide; prefer SVG for
-anything vector. `static/casts/linux/` should stay under ~500 KB total.
+1. **kernel.org documentation and the source tree's own `Documentation/`** — the authority, and it
+   contains more diagrams than people expect.
+2. **The Graphviz gallery's Linux kernel diagram** —
+   `https://graphviz.org/Gallery/directed/Linux_kernel_diagram.svg`. A whole-kernel subsystem map,
+   already SVG, and it renders crisply at any zoom. Use it as the anchor figure on
+   `04-kernel-architecture-and-idioms/the-source-tree-map.md`, with `docusaurus-plugin-image-zoom`
+   doing the work — it is far too dense to read inline, and it is exactly the kind of figure zoom
+   exists for. **Pair it with the folder's own Mermaid simplification**: the SVG shows the real
+   scale of the thing, the Mermaid diagram shows the six boxes a reader should actually hold in
+   their head. Cross-reference it again from `00-overview/what-this-section-covers.md`.
+3. **Thomas-Krenn wiki — "Linux Storage Stack Diagram"** by Werner Fischer and Georg Schönberger.
+   The canonical storage-stack figure and folder 12's anchor image. Use the revision closest to the
+   pinned kernel and state that revision's kernel version in the caption — it is versioned, and
+   readers will compare it against their own system.
+4. **Bootlin training materials** — technically excellent, and the deepest well of embedded-Linux
+   and driver figures anywhere.
+5. **Brendan Gregg's diagrams** — the Linux performance observability map is the single best figure
+   in existence for folder 17's opening page, and the flamegraph examples for the `perf` page.
+6. **Wikimedia Commons** — hardware topology, standard protocol figures, connector photographs.
+7. **Own screenshots from the QEMU lab** — `perf report`, a real flamegraph, `crash` output, an
+   `htop` under load, a `KernelShark` trace. Default to these for anything showing tool output;
+   nothing third-party will match the section's own pinned kernel.
+
+Mermaid remains the right answer when the content is *structural* (a call path, a state machine, a
+decision flow) — not as a fallback for a missing image, but because a drawn schematic is genuinely
+the better tool for those. A figure and a schematic side by side is often better than either.
+
+**Video and animated GIF.** Both allowed:
+
+- **Video is embedded or linked, never committed.** Use the [`<Video>` component](#video--embedded-talks-and-explainers) for an
+  embed, or a `## References` entry for a link. No video files enter the repository — a talk that
+  explains RCU or the boot process is worth pointing at, and worth nothing as 200 MB of git history.
+- **GIFs may be downloaded and committed**, into `static/img/linux/<folder-slug>/`, when the motion
+  itself carries the lesson — a buddy allocator splitting and coalescing, a red-black tree
+  rebalancing, a TCP window sliding. Same `SOURCES.md` row as any other image. Keep an individual
+  GIF under ~2 MB; above that, extract a representative frame or link the source instead.
+
+Size discipline: `static/img/gpu/` is ~1.2 MB for 129 pages, and this section is larger and more
+figure-heavy, so it will be bigger. Keep it sane rather than to a fixed number: prefer SVG for
+anything vector (the two anchor diagrams above are both SVG and cost almost nothing), downscale PNG
+screenshots to ≤ 1400 px wide, and keep `static/casts/linux/` under ~500 KB total. This deploys to
+GitHub Pages — no single asset should be tens of megabytes.
 
 ### External references
 
@@ -793,7 +916,7 @@ before the subsystem folders for that reason.
 | File | Title | Brief |
 |---|---|---|
 | `monolithic-with-modules.md` | Monolithic, With Modules | Where Linux sits in the architecture taxonomy and why: one address space, no message passing between subsystems, loadable modules for build-time flexibility, not isolation. The honest trade-off — a driver bug is a kernel bug. Links to the CS backfill page for the theory **[WAH]** |
-| `the-source-tree-map.md` | The Source Tree, Mapped | Every top-level directory in one line each, with the four that matter most expanded: `kernel/`, `mm/`, `fs/`, `drivers/`. Where a given question's answer lives, as a lookup table. The page a reader returns to for years |
+| `the-source-tree-map.md` | The Source Tree, Mapped | Every top-level directory in one line each, with the four that matter most expanded: `kernel/`, `mm/`, `fs/`, `drivers/`. Where a given question's answer lives, as a lookup table. The page a reader returns to for years. **Anchor figure: the Graphviz gallery's `Linux_kernel_diagram.svg`**, zoomable, showing the real subsystem graph — paired with a six-box Mermaid simplification of what to actually hold in your head |
 | `kconfig-and-kbuild.md` | Kconfig and Kbuild | `Kconfig` language, symbol dependencies, tristate and why `m` exists, `.config` as the single source of truth, how `Makefile` `obj-$(CONFIG_FOO)` turns a symbol into a compiled object. Why `#ifdef CONFIG_` is everywhere and how to read past it |
 | `modules-in-practice.md` | Kernel Modules | `module_init`/`module_exit`, `MODULE_LICENSE` and what "tainted" means, parameters, `modprobe` vs `insmod`, dependency resolution via `modules.dep`, `/proc/modules` and `/sys/module`. Out-of-tree builds against kernel headers **[Lab]** |
 | `exported-symbols-and-the-module-abi.md` | Exported Symbols and the Non-Stable ABI | `EXPORT_SYMBOL` vs `EXPORT_SYMBOL_GPL`, symbol versioning (`modversions`), and the deliberate absence of a stable in-kernel ABI — what that means for out-of-tree drivers, and why "don't break user space" and "break modules freely" are consistent positions, not hypocrisy **[WAH]** |
@@ -1121,21 +1244,123 @@ Each phase is its own implementation plan and ends at a green `npm run build`.
 not by discipline. Where a Phase 1 page genuinely wants to point forward, it says so in prose
 without a link, and the link is added when the target lands.
 
+**Within a phase, forward links are free**, because Rule 1 scaffolds every page in the phase before
+any of them is written. That is the point of the rule: writing order stops dictating link
+direction.
+
+### The shape every phase follows
+
+Phases 2–5 share one shape. Phase 1 is the exception only because it carries the infrastructure.
+
+1. **Scaffold** — create every `.md` file for every folder in the phase, with full frontmatter, the
+   one-sentence body, and the `:::info[Not yet written]` block; plus every `_category_.json` with
+   its description. One commit. `npm run build` must be green at the end of it: the graph is
+   complete, the sidebar is complete, every link target exists.
+2. **CS backfill** — write that phase's `computer-science/` prerequisite pages, and the backlinks
+   into them from the existing CS pages listed in the backfill table. These come first because the
+   Linux pages of this phase declare them in `prerequisites`.
+3. **Write folder by folder, in numeric order.** Within a folder, write the landing-style and
+   foundational pages before the ones that depend on them, so the prose can build.
+4. **Figures and casts for the phase** — gathered in one pass at the end rather than page by page.
+   Batching means the `SOURCES.md` rows and the QEMU recording session happen once.
+5. **Review pass over the whole phase** against the checklist below, then a green
+   `npm run build && npm run serve`.
+
+**Per-phase review checklist**, applied before a phase is called done:
+
+- Every page has its visual anchor, its `## References` (2–6, annotated), and its `<KernelFacts>`
+  with a real `Trap`.
+- Every symbol, path, and struct field named on a page has been checked against the pinned source.
+- Every arch-specific claim names its architecture; the arm64 contrast notes listed in
+  [Admonitions](#admonitions) are present where the phase covers those topics.
+- Every `## Misconceptions` entry is mirrored into `00-overview/misconceptions-index.md`.
+- Every context7 verification listed for the phase's folders has been done and dated.
+- No stub bodies remain in the phase's folders.
+
 ### Phase 1 ordering
 
 Infrastructure is proven before bulk writing begins:
 
 1. Choose and record the pinned LTS version; set `customFields.linuxKernelVersion`.
-2. `src/lib/kernelSource.js` + `<Src>`; verify a generated Elixir link resolves in a real browser.
+2. `src/lib/kernelSource.js` + `<Src>`; verify both Elixir route forms resolve in a real browser.
 3. `knowledge-graph-plugin.js` + `<PrereqBlock>` + `DocItem/Layout` injection. Prove the three throw
    conditions (unknown id, cycle, missing key) actually fail the build.
-4. `<KernelFacts>`, `<Lab>` and their CSS.
+4. `<KernelFacts>`, `<Lab>`, `<Video>` and their CSS.
 5. `asciinema-player` install, `<Cast>`, and one real recorded cast rendering in a **production**
    build (`npm run build && npm run serve`) — the SSR-safety of the dynamic import must be proven,
    not assumed.
 6. `<KnowledgeGraph>` on `roadmap.md`.
-7. Section wiring: `sidebars.js`, navbar, Prism languages, `_category_.json` files.
-8. Then, and only then, the CS backfill pages and folders 00–04.
+7. Section wiring: `sidebars.js`, navbar, Prism languages, `readme.md`.
+8. **Scaffold folders 00–04** (Rule 1) — every stub, every `_category_.json`. Green build.
+9. CS backfill 1, 2, 17 and their backlinks.
+10. Write folders 00 → 04 in order. Folder 04's `the-source-tree-map.md` carries the Graphviz kernel
+    diagram; fetch it during the figure pass.
+11. Figure/cast pass, then the phase review checklist.
+
+### Phase 2 ordering
+
+The hardest phase: it contains the two folders (08 memory, 09 locking) that everything later leans
+on, and its CS backfill is the load-bearing hardware material.
+
+1. Scaffold folders 05–10 and their `_category_.json` files. Green build.
+2. CS backfill 3 (memory ordering), 4 (hardware atomics), 6 (TLB hardware), 7 (MESI), 8 (NUMA),
+   10 (interrupt controllers), plus backlinks. **Backfill 3 and 7 gate folder 09** and must be
+   solid before the RCU and barrier pages are attempted.
+3. Folders in order: 05 → 06 → 07 → 08 → 09 → 10.
+4. Within 08, write `page-tables-and-the-walk` and `mm-struct-and-vmas` before
+   `the-page-fault-handler`; within 09, write `memory-ordering-and-barriers` before everything else
+   and `rcu-the-idea` before `rcu-in-practice`.
+5. context7 verification for EEVDF (folder 07) and folios/MGLRU (folder 08) — both are actively
+   moving and most published material is stale.
+6. Figures and labs pass, then the review checklist.
+
+### Phase 3 ordering
+
+1. Scaffold folders 11–13. Green build.
+2. CS backfill 12 (RAID), 13 (crash consistency), 14 (sockets API), 15 (ARP/ICMP), 16 (NAT theory),
+   plus backlinks.
+3. Folders in order: 11 → 12 → 13. Each opens with its map page
+   (`why-vfs-exists`, `the-block-layer-map`, `the-network-stack-map`), written first — the rest of
+   each folder refers back to it constantly.
+4. Fetch the Thomas-Krenn storage-stack diagram during 12's figure pass.
+5. context7 verification for `io_uring` (folder 12) and nftables/iproute2/BBR (folder 13).
+6. Figures and labs pass, then the review checklist.
+
+### Phase 4 ordering
+
+1. Scaffold folders 14–16. Green build.
+2. CS backfill 5 (hardware virtualization), 9 (PCIe), 11 (DMA/IOMMU), 18 (isolation theory), plus
+   backlinks. **Backfill 9 and 11 gate folder 14**.
+3. Folders in order: 14 → 15 → 16. Folder 14's `the-linux-device-model` is written first and folder
+   15's `what-a-container-actually-is` second, because both are the framing their folders depend on.
+4. The two build-it-yourself labs (`lab-a-character-driver`, `building-a-container-from-scratch`)
+   are written and **actually run in the QEMU lab** before their surrounding pages are finalised —
+   what the lab turns out to require reshapes the pages around it.
+5. context7 verification for driver-model and DMA APIs (14), cgroup v2 and OCI/runc (15), and
+   seccomp/SELinux/AppArmor tooling (16).
+6. Figures and labs pass, then the review checklist. Additional check for folder 16: no page
+   contains working exploit code or a step-by-step exploitation procedure.
+
+### Phase 5 ordering
+
+No CS backfill. This phase is where the section's own earlier folders get cross-referenced heavily,
+so it is deliberately last.
+
+1. Scaffold folders 17–19. Green build.
+2. Folder 17 first, in order, because folders 18 and 19 both assume its tools.
+3. **Record the cast library in one session** — this phase carries most of the section's ~25 casts
+   (`ftrace`, `perf`, `gdb`-on-kernel, `bpftrace`, `crash`). One QEMU session, one kernel version,
+   one recording pass; do not record them page by page.
+4. Folder 18, then 19.
+5. context7 verification for `perf`/`crash` (17), libbpf/bpftrace/BCC (18), and `b4`/`checkpatch`
+   and the current submitting-patches process (19).
+6. **Final whole-section pass**, beyond the per-phase checklist:
+   - `00-overview/misconceptions-index.md` completed from every folder's `## Misconceptions`.
+   - `00-overview/glossary.md` completed, every term linked to its owning page.
+   - `00-overview/roadmap.md`'s six learning paths verified end to end — walk each path and confirm
+     every prerequisite of every page on it appears earlier in that path.
+   - The no-duplication table re-checked against what was actually written.
+   - `static/img/linux/SOURCES.md` complete, one row per file, no orphans in either direction.
 
 ---
 
@@ -1152,4 +1377,6 @@ Infrastructure is proven before bulk writing begins:
 | Labs that only work on the author's machine | Every lab carries a host badge and shows expected output; the QEMU invocation is defined once in folder 01 and reused verbatim |
 | Duplication with `computer-science/` and `embedded/` | Normative no-duplication table; the embedded spec is amended in the same commit as this one |
 | 247 pages stall half-written | Five phases, each independently shippable and each ending at a green build. Folders 00–04 alone are a coherent, useful section |
-| Figure licences | `SOURCES.md` gains a `license` column; per-image licence check required, with Mermaid as the correct fallback |
+| A figure or GIF cannot be re-sourced later | Every image file has a `SOURCES.md` row with its origin URL and retrieval date, and notes saying if it is a crop or an extracted frame |
+| Repository bloat from images and GIFs | SVG preferred for vector figures, PNG downscaled to ≤ 1400 px, individual GIFs under ~2 MB, video never committed, casts under ~500 KB total |
+| Links break while a phase is mid-write | Rule 1 — every page in a phase is scaffolded with frontmatter and a one-line body before any of them is written, so every link target and every graph node exists from the phase's first commit |
