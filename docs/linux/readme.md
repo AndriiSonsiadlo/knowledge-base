@@ -31,3 +31,8 @@ folio conversion, `io_uring` — the page says so explicitly.
 
 Nearly every hands-on exercise runs against a kernel you build yourself, booted under QEMU. A
 kernel panic there costs you nothing and you can attach a debugger to the virtual CPU itself.
+[Setting Up a Lab](./01-lab-and-toolchain/the-lab-machine.md) covers the whole setup, including
+what WSL2 can and cannot do.
+
+See [the roadmap](./00-overview/roadmap.md) for the dependency graph and the learning paths
+through everything here.

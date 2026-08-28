@@ -1,0 +1,8 @@
+{
+  "label": "Guided Traces",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "Six familiar things followed all the way down — a command, a write, a fault, a packet, a boot, a container — as narrative maps into the rest of the section."
+  }
+}

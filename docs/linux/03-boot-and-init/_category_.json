@@ -1,0 +1,8 @@
+{
+  "label": "Boot and Init",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "The full chain from firmware to a login prompt: UEFI, boot loaders, the kernel image, early setup, initramfs, PID 1, and systemd's dependency graph."
+  }
+}

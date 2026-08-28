@@ -1,0 +1,8 @@
+{
+  "label": "Kernel Architecture and Idioms",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "The structure of the kernel and the C idioms it is written in — the prerequisite for reading any kernel source at all."
+  }
+}
