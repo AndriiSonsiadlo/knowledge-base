@@ -1,0 +1,8 @@
+{
+  "label": "Overview",
+  "position": 1,
+  "link": {
+    "type": "generated-index",
+    "description": "What this section covers, the kernel/user-space boundary, the hardware Linux assumes, and the roadmap through everything else."
+  }
+}

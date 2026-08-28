@@ -1,0 +1,125 @@
+{
+  "root": "docs/linux",
+  "folders": [
+    {
+      "dir": "00-overview",
+      "label": "Overview",
+      "position": 1,
+      "description": "What this section covers, the kernel/user-space boundary, the hardware Linux assumes, and the roadmap through everything else.",
+      "roadmapLink": "./roadmap.md",
+      "pages": [
+        { "file": "what-this-section-covers.md", "id": "what-this-section-covers", "title": "What This Section Covers", "sidebar_label": "What this covers", "sidebar_position": 1, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "The scope of this section, what it deliberately leaves out, and what \"understanding Linux\" means in practice." },
+        { "file": "the-kernel-userspace-boundary.md", "id": "the-kernel-userspace-boundary", "title": "The Kernel/User-Space Boundary", "sidebar_label": "The boundary", "sidebar_position": 2, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Two worlds separated by one hardware-enforced door, and why every mechanism in this section is shaped by that door." },
+        { "file": "what-linux-actually-is.md", "id": "what-linux-actually-is", "title": "What Linux Actually Is", "sidebar_label": "What Linux is", "sidebar_position": 3, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Kernel, GNU, and distribution pulled apart, plus the two design commitments that still constrain everything: a stable user-space ABI and no stable module ABI." },
+        { "file": "hardware-the-kernel-assumes.md", "id": "hardware-the-kernel-assumes", "title": "The Hardware the Kernel Assumes", "sidebar_label": "Hardware assumed", "sidebar_position": 4, "tags": ["linux", "kernel"], "prerequisites": [], "related": ["computer-science/cpu-architecture/privilege-levels-and-protection", "computer-science/cpu-architecture/exceptions-traps-and-interrupts"], "summary": "The seven hardware capabilities every Linux mechanism rests on, each linked to the Computer Science page that owns it." },
+        { "file": "distributions-and-what-differs.md", "id": "distributions-and-what-differs", "title": "Distributions and What Actually Differs", "sidebar_label": "Distributions", "sidebar_position": 5, "tags": ["linux"], "prerequisites": ["linux/overview/what-linux-actually-is"], "summary": "Same kernel, different packaging: what genuinely varies between distributions and the much longer list of things that do not." },
+        { "file": "how-to-use-this-section.md", "id": "how-to-use-this-section", "title": "How to Use This Section", "sidebar_label": "How to use this", "sidebar_position": 6, "tags": ["linux"], "prerequisites": [], "summary": "The folder ladder and why it is ordered that way, how the prerequisite blocks work, how labs are marked by host, and what each row of the closing facts card means." },
+        { "file": "roadmap.md", "id": "roadmap", "title": "Roadmap and Knowledge Graph", "sidebar_label": "Roadmap", "sidebar_position": 7, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "The dependency graph across the whole section, plus six named learning paths through it." },
+        { "file": "glossary.md", "id": "glossary", "title": "Glossary", "sidebar_label": "Glossary", "sidebar_position": 8, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Every term this section uses as though you already know it, defined in a paragraph and linked to the page that owns it." },
+        { "file": "misconceptions-index.md", "id": "misconceptions-index", "title": "Index of Misconceptions", "sidebar_label": "Misconceptions", "sidebar_position": 9, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Every widely-held wrong belief this section corrects, gathered in one place and linked to the correction." }
+      ]
+    },
+    {
+      "dir": "01-lab-and-toolchain",
+      "label": "Setting Up a Lab",
+      "position": 2,
+      "description": "Build a kernel, boot it under QEMU, and attach a debugger — the machine every hands-on exercise in this section assumes.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "the-lab-machine.md", "id": "the-lab-machine", "title": "The Lab Machine", "sidebar_label": "The lab machine", "sidebar_position": 1, "tags": ["linux", "kernel", "lab"], "prerequisites": [], "summary": "Why QEMU is the spine of every lab here, what to install on the host, and what each lab host badge means." },
+        { "file": "getting-and-navigating-the-source.md", "id": "getting-and-navigating-the-source", "title": "Getting the Source", "sidebar_label": "Getting the source", "sidebar_position": 2, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/the-lab-machine"], "summary": "Cloning or downloading the pinned kernel, what the repository costs in disk and time, and a first orientation pass through the tree." },
+        { "file": "building-a-kernel.md", "id": "building-a-kernel", "title": "Building a Kernel", "sidebar_label": "Building a kernel", "sidebar_position": 3, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/getting-and-navigating-the-source"], "summary": "From defconfig to a bootable image, including the debug options that make the rest of this section's labs possible." },
+        { "file": "a-minimal-rootfs.md", "id": "a-minimal-rootfs", "title": "A Minimal Root Filesystem", "sidebar_label": "A minimal rootfs", "sidebar_position": 4, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/building-a-kernel"], "summary": "A static BusyBox, a directory skeleton, and an /init packed into an initramfs — early user space made concrete instead of magical." },
+        { "file": "booting-your-kernel-in-qemu.md", "id": "booting-your-kernel-in-qemu", "title": "Booting Your Kernel in QEMU", "sidebar_label": "Booting in QEMU", "sidebar_position": 5, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/a-minimal-rootfs"], "summary": "The canonical QEMU invocation every later lab reuses, explained flag by flag." },
+        { "file": "debugging-the-kernel-with-gdb.md", "id": "debugging-the-kernel-with-gdb", "title": "Debugging the Kernel with GDB", "sidebar_label": "GDB on the kernel", "sidebar_position": 6, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/booting-your-kernel-in-qemu"], "summary": "Attaching a debugger to the virtual CPU, loading vmlinux symbols, and walking live kernel structures — the highest-leverage skill in this section." },
+        { "file": "a-full-system-vm-and-wsl2.md", "id": "a-full-system-vm-and-wsl2", "title": "A Full-System VM, and What WSL2 Can Do", "sidebar_label": "Full VM and WSL2", "sidebar_position": 7, "tags": ["linux", "kernel", "lab"], "prerequisites": ["linux/lab-and-toolchain/booting-your-kernel-in-qemu"], "summary": "A Debian VM for the labs that need systemd and real block devices, then an honest account of which labs WSL2 can and cannot run." }
+      ]
+    },
+    {
+      "dir": "02-guided-traces",
+      "label": "Guided Traces",
+      "position": 3,
+      "description": "Six familiar things followed all the way down — a command, a write, a fault, a packet, a boot, a container — as narrative maps into the rest of the section.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "what-happens-when-you-type-ls.md", "id": "what-happens-when-you-type-ls", "title": "What Happens When You Type `ls`", "sidebar_label": "Typing ls", "sidebar_position": 1, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Twenty mechanisms, named and linked, between a keystroke and a directory listing on your screen." },
+        { "file": "the-life-of-a-write.md", "id": "the-life-of-a-write", "title": "The Life of a `write()`", "sidebar_label": "Life of a write", "sidebar_position": 2, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Where your data actually is at each moment between write() returning and the bytes reaching the device, and what fsync changes." },
+        { "file": "the-life-of-a-page-fault.md", "id": "the-life-of-a-page-fault", "title": "The Life of a Page Fault", "sidebar_label": "Life of a fault", "sidebar_position": 3, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "An ordinary first touch of freshly allocated memory, traced from the CPU exception to the instruction re-executing — the normal case, not an error." },
+        { "file": "the-life-of-a-packet.md", "id": "the-life-of-a-packet", "title": "The Life of a Packet", "sidebar_label": "Life of a packet", "sidebar_position": 4, "tags": ["linux", "kernel"], "prerequisites": [], "summary": "Wire to socket and back again, through the DMA ring, NAPI, GRO, netfilter, routing, and TCP." },
+        { "file": "from-power-on-to-login-prompt.md", "id": "from-power-on-to-login-prompt", "title": "From Power-On to Login Prompt", "sidebar_label": "Power-on to login", "sidebar_position": 5, "tags": ["linux", "kernel", "boot"], "prerequisites": [], "summary": "Every handoff between pressing the power button and a login prompt, with the artefact each stage passes to the next." },
+        { "file": "the-life-of-a-container.md", "id": "the-life-of-a-container", "title": "The Life of a Container", "sidebar_label": "Life of a container", "sidebar_position": 6, "tags": ["linux", "kernel", "containers"], "prerequisites": [], "summary": "docker run de-mystified: a container is a process started with unusual arguments, and here is every one of them." }
+      ]
+    },
+    {
+      "dir": "03-boot-and-init",
+      "label": "Boot and Init",
+      "position": 4,
+      "description": "The full chain from firmware to a login prompt: UEFI, boot loaders, the kernel image, early setup, initramfs, PID 1, and systemd's dependency graph.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "firmware-bios-and-uefi.md", "id": "firmware-bios-and-uefi", "title": "Firmware: BIOS and UEFI", "sidebar_label": "BIOS and UEFI", "sidebar_position": 1, "tags": ["linux", "boot"], "prerequisites": ["linux/guided-traces/from-power-on-to-login-prompt"], "summary": "What the firmware does before anything Linux exists, and why UEFI made boot loaders simpler and boot debugging harder." },
+        { "file": "the-boot-chain.md", "id": "the-boot-chain", "title": "The Boot Chain", "sidebar_label": "The boot chain", "sidebar_position": 2, "tags": ["linux", "boot"], "prerequisites": ["linux/boot-and-init/firmware-bios-and-uefi"], "summary": "The whole handoff sequence in one diagram, with the exact artefact passed at each step and where each one lives on disk." },
+        { "file": "bootloaders-grub-and-friends.md", "id": "bootloaders-grub-and-friends", "title": "Boot Loaders", "sidebar_label": "Boot loaders", "sidebar_position": 3, "tags": ["linux", "boot"], "prerequisites": ["linux/boot-and-init/the-boot-chain"], "summary": "GRUB 2, systemd-boot, and direct EFI stub boot — and the four things any boot loader must do." },
+        { "file": "the-kernel-command-line.md", "id": "the-kernel-command-line", "title": "The Kernel Command Line", "sidebar_label": "Kernel command line", "sidebar_position": 4, "tags": ["linux", "boot"], "prerequisites": ["linux/boot-and-init/bootloaders-grub-and-friends"], "summary": "How parameters reach the kernel, how they are parsed, and the dozen worth knowing — the most useful boot debugging tool there is." },
+        { "file": "secure-boot-and-signed-kernels.md", "id": "secure-boot-and-signed-kernels", "title": "Secure Boot and Signed Kernels", "sidebar_label": "Secure Boot", "sidebar_position": 5, "tags": ["linux", "boot", "security"], "prerequisites": ["linux/boot-and-init/bootloaders-grub-and-friends"], "summary": "The chain of trust from firmware keys to a signed kernel and signed modules, and what it does and does not protect against." },
+        { "file": "the-kernel-image.md", "id": "the-kernel-image", "title": "Inside `bzImage`", "sidebar_label": "Inside bzImage", "sidebar_position": 6, "tags": ["linux", "kernel", "boot"], "prerequisites": ["linux/boot-and-init/the-boot-chain"], "summary": "The layout of a compressed kernel image, and why vmlinux, vmlinuz, and bzImage are three different things." },
+        { "file": "early-boot-and-arch-setup.md", "id": "early-boot-and-arch-setup", "title": "Early Boot: Getting to C", "sidebar_label": "Early boot", "sidebar_position": 7, "tags": ["linux", "kernel", "boot"], "prerequisites": ["linux/boot-and-init/the-kernel-image"], "summary": "x86-64 from 16-bit entry through protected mode and early page tables into long mode, and the far simpler arm64 equivalent." },
+        { "file": "start-kernel-and-initcalls.md", "id": "start-kernel-and-initcalls", "title": "`start_kernel` and the Initcall Order", "sidebar_label": "start_kernel", "sidebar_position": 8, "tags": ["linux", "kernel", "boot"], "prerequisites": ["linux/boot-and-init/early-boot-and-arch-setup"], "summary": "What the kernel brings up and in what order, and why driver initialisation order is a level rather than a list." },
+        { "file": "initramfs-and-early-userspace.md", "id": "initramfs-and-early-userspace", "title": "initramfs and Early User Space", "sidebar_label": "initramfs", "sidebar_position": 9, "tags": ["linux", "kernel", "boot"], "prerequisites": ["linux/boot-and-init/start-kernel-and-initcalls"], "summary": "Why a root filesystem needs a root filesystem, and how the chicken-and-egg is broken." },
+        { "file": "switch-root-and-pid-1.md", "id": "switch-root-and-pid-1", "title": "`switch_root` and PID 1", "sidebar_label": "switch_root and PID 1", "sidebar_position": 10, "tags": ["linux", "kernel", "boot"], "prerequisites": ["linux/boot-and-init/initramfs-and-early-userspace"], "summary": "Mounting the real root, the three constantly-confused ways to change it, and what makes PID 1 special." },
+        { "file": "systemd-the-model.md", "id": "systemd-the-model", "title": "systemd: The Model", "sidebar_label": "systemd model", "sidebar_position": 11, "tags": ["linux", "boot"], "prerequisites": ["linux/boot-and-init/switch-root-and-pid-1"], "summary": "Units, the separation of dependency from ordering, targets instead of runlevels, and the transaction computed at every boot." },
+        { "file": "systemd-in-practice-and-boot-debugging.md", "id": "systemd-in-practice-and-boot-debugging", "title": "systemd in Practice, and Debugging a Broken Boot", "sidebar_label": "systemd and boot debugging", "sidebar_position": 12, "tags": ["linux", "boot"], "prerequisites": ["linux/boot-and-init/systemd-the-model", "linux/boot-and-init/the-kernel-command-line"], "summary": "Socket activation, journald, and unit supervision, then the playbook for a machine that will not finish booting." }
+      ]
+    },
+    {
+      "dir": "04-kernel-architecture-and-idioms",
+      "label": "Kernel Architecture and Idioms",
+      "position": 5,
+      "description": "The structure of the kernel and the C idioms it is written in — the prerequisite for reading any kernel source at all.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "monolithic-with-modules.md", "id": "monolithic-with-modules", "title": "Monolithic, With Modules", "sidebar_label": "Monolithic with modules", "sidebar_position": 1, "tags": ["linux", "kernel"], "prerequisites": ["linux/overview/the-kernel-userspace-boundary"], "related": ["computer-science/operating-systems/os-structure-monolithic-microkernel-hybrid"], "summary": "Where Linux sits in the architecture taxonomy, why, and the honest cost: a driver bug is a kernel bug." },
+        { "file": "the-source-tree-map.md", "id": "the-source-tree-map", "title": "The Source Tree, Mapped", "sidebar_label": "The source tree", "sidebar_position": 2, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/monolithic-with-modules"], "summary": "Every top-level directory in a line, the four that matter expanded, and a lookup table from question to location." },
+        { "file": "kconfig-and-kbuild.md", "id": "kconfig-and-kbuild", "title": "Kconfig and Kbuild", "sidebar_label": "Kconfig and Kbuild", "sidebar_position": 3, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/the-source-tree-map", "linux/lab-and-toolchain/building-a-kernel"], "summary": "How a configuration symbol becomes a compiled object, and how to read past the CONFIG_ ifdefs that are everywhere." },
+        { "file": "modules-in-practice.md", "id": "modules-in-practice", "title": "Kernel Modules", "sidebar_label": "Modules", "sidebar_position": 4, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/kconfig-and-kbuild"], "summary": "Loading, unloading, parameters, dependency resolution, taint, and building a module out of tree." },
+        { "file": "exported-symbols-and-the-module-abi.md", "id": "exported-symbols-and-the-module-abi", "title": "Exported Symbols and the Non-Stable ABI", "sidebar_label": "Exported symbols", "sidebar_position": 5, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/modules-in-practice"], "summary": "Why \"never break user space\" and \"break modules freely\" are a consistent pair of positions rather than hypocrisy." },
+        { "file": "the-kernel-c-dialect.md", "id": "the-kernel-c-dialect", "title": "The Kernel Is Not C You Know", "sidebar_label": "The kernel C dialect", "sidebar_position": 6, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/the-source-tree-map"], "summary": "Freestanding C with no libc, no floating point, a tiny stack, GCC extensions in daily use, and the annotations sparse checks." },
+        { "file": "kernel-data-structures.md", "id": "kernel-data-structures", "title": "Kernel Data Structures", "sidebar_label": "Data structures", "sidebar_position": 7, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/the-kernel-c-dialect"], "summary": "Intrusive lists, hlists, red-black trees, xarrays, and IDRs — why intrusive containers, and what they cost." },
+        { "file": "container-of-and-embedded-structs.md", "id": "container-of-and-embedded-structs", "title": "`container_of` and Embedded Structs", "sidebar_label": "container_of", "sidebar_position": 8, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/kernel-data-structures"], "summary": "The central Linux idiom derived from scratch, after which kobjects, the VFS, and the device model all become readable at once." },
+        { "file": "error-handling-idioms.md", "id": "error-handling-idioms", "title": "Error Handling", "sidebar_label": "Error handling", "sidebar_position": 9, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/the-kernel-c-dialect"], "summary": "Negative errno, the ERR_PTR pointer-range trick, and why goto-based unwinding is correct here rather than shameful." },
+        { "file": "reference-counting-and-lifetime.md", "id": "reference-counting-and-lifetime", "title": "Reference Counting and Object Lifetime", "sidebar_label": "Reference counting", "sidebar_position": 10, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/error-handling-idioms"], "summary": "refcount_t, kref, get/put pairing, and the use-after-free class of bug the whole convention exists to prevent." },
+        { "file": "kobjects-sysfs-and-the-object-model.md", "id": "kobjects-sysfs-and-the-object-model", "title": "kobjects, ksets, and sysfs", "sidebar_label": "kobjects and sysfs", "sidebar_position": 11, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/container-of-and-embedded-structs", "linux/kernel-architecture-and-idioms/reference-counting-and-lifetime"], "summary": "The kernel's object model, and how /sys is generated from it rather than written." },
+        { "file": "memory-safety-in-kernel-c.md", "id": "memory-safety-in-kernel-c", "title": "What Goes Wrong in Kernel C", "sidebar_label": "What goes wrong", "sidebar_position": 12, "tags": ["linux", "kernel"], "prerequisites": ["linux/kernel-architecture-and-idioms/reference-counting-and-lifetime"], "summary": "The recurring bug classes as a catalogue, each with its symptom and the tool that catches it, plus where Rust-for-Linux stands." }
+      ]
+    }
+  ],
+  "external": [
+    {
+      "path": "docs/computer-science/cpu-architecture/privilege-levels-and-protection.md",
+      "id": "privilege-levels-and-protection",
+      "title": "Privilege Levels and Protection",
+      "sidebar_label": "Privilege levels",
+      "sidebar_position": 7,
+      "tags": ["computer-science", "cpu-architecture", "protection"],
+      "summary": "How a CPU enforces the difference between privileged and unprivileged code, and why that boundary cannot be forged in software."
+    },
+    {
+      "path": "docs/computer-science/cpu-architecture/exceptions-traps-and-interrupts.md",
+      "id": "exceptions-traps-and-interrupts",
+      "title": "Exceptions, Traps, and Interrupts",
+      "sidebar_label": "Exceptions and traps",
+      "sidebar_position": 8,
+      "tags": ["computer-science", "cpu-architecture", "interrupts"],
+      "summary": "The taxonomy every operating system is built on: faults, traps, aborts, and asynchronous interrupts, and what \"precise\" means."
+    },
+    {
+      "path": "docs/computer-science/operating-systems/os-structure-monolithic-microkernel-hybrid.md",
+      "id": "os-structure-monolithic-microkernel-hybrid",
+      "title": "OS Structure: Monolithic, Microkernel, Hybrid",
+      "sidebar_label": "OS structure",
+      "sidebar_position": 7,
+      "tags": ["computer-science", "operating-systems", "architecture"],
+      "summary": "The architectural taxonomy operating systems are classified by, and the real trade-offs behind a debate that is usually argued badly."
+    }
+  ]
+}
