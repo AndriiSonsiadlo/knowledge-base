@@ -833,6 +833,11 @@ div[class^='docItemContainer_'] article img {
 .navbar__items--center .dropdown {
   align-self: stretch;
   align-items: center;
+  /* Infima's .navbar__item padding lands on this wrapper div, while the
+     inner .navbar__link (a separate element here, unlike a plain nav link
+     where both classes share one element) carries its own padding too -
+     stacking the two doubles the trigger's box compared to its siblings. */
+  padding: 0;
 }
 
 .navbar__items--center .dropdown > .navbar__link::after {
