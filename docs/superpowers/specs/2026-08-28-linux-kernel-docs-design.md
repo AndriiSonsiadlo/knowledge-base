@@ -680,21 +680,24 @@ is normative — check it before drafting any page whose subject appears here.
 
 ### Amendment to the embedded-systems spec
 
-`docs/superpowers/specs/2026-08-18-embedded-systems-docs-design.md` specifies
-`10-embedded-linux` as 14 pages. That folder is **not yet written**. Amend it, in the same commit
-as this spec, to **5 pages** covering only what is genuinely embedded-specific:
+`docs/superpowers/specs/2026-08-18-embedded-systems-docs-design.md` specified `10-embedded-linux`
+as 14 pages. That folder is **not yet written**. **Amendment applied** — the folder is now 7 pages,
+covering only what is genuinely embedded-specific:
 
 | Kept | Reason |
 |---|---|
-| `when-you-need-linux.md` | The MCU-vs-MPU decision; no equivalent in `docs/linux/` |
-| `devicetree.md` | Central to embedded Linux, marginal on x86-64 |
-| `u-boot-and-embedded-boot.md` | A different boot chain from UEFI/GRUB |
-| `buildroot-and-yocto.md` | Building a distribution; no equivalent elsewhere |
-| `preempt-rt-and-real-time-linux.md` | Real-time is the embedded reason to care |
+| `when-you-need-linux.md` | The MCU-vs-MPU decision, plus the cross-compilation delta (`ARCH`/`CROSS_COMPILE`/`uImage`); no equivalent in `docs/linux/` |
+| `u-boot-and-embedded-boot.md` | BootROM → SPL → U-Boot is a different chain from UEFI/GRUB |
+| `device-tree.md` | Central to embedded Linux, marginal on x86-64; also carries the GPIO/IIO/SPI/I2C bindings |
+| `yocto.md` | Building a distribution; no equivalent elsewhere |
+| `buildroot.md` | As above, plus read-only rootfs with an overlay |
+| `realtime-linux.md` | PREEMPT_RT and `cyclictest`; preemption models themselves stay in `linux/07-scheduling` |
+| `boot-time-optimization.md` | A product constraint with no desktop/server analogue |
 
-The other nine planned pages (kernel basics, drivers, filesystems, debugging, networking) become
-links into `docs/linux/`. Update the embedded spec's page count and its own no-duplication table
-accordingly.
+The seven removed pages (kernel build, modules, character drivers, driver frameworks, user-space
+hardware access, root filesystems, the generic boot chain) become links into `docs/linux/`. The
+embedded spec carries an `:::note[Amended 2026-08-28]` block mapping each removed page to its new
+owner, and its section total drops from 174 to 167 pages with Phase 3 dropping from 68 to 61.
 
 ---
 
