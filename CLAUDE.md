@@ -14,6 +14,36 @@ Commit as you go — after each self-contained change, not batched at the end of
 
 A personal knowledge-base documentation site built with **Docusaurus 3.9** (React 19, Node ≥20). Content is Markdown under `docs/`; the rest is a customized Docusaurus theme. Deployed to GitHub Pages at `https://andriisonsiadlo.github.io/knowledge-base/`.
 
+## Shell output: rtk
+
+`rtk` (Rust Token Killer, `~/.local/bin/rtk`) filters and compacts command output before it reaches the model. It is installed, and a `PreToolUse` hook in `~/.claude/settings.json` (`rtk hook claude`) **rewrites Bash commands automatically**. Verified rewrites:
+
+| You type | Actually runs |
+|---|---|
+| `cat FILE` | `rtk read FILE` |
+| `head -50 FILE` | `rtk read FILE --max-lines 50` |
+| `grep -rn ...` | `rtk grep -rn ...` |
+| `ls -la`, `find`, `wc -l`, `curl -s` | `rtk ls` / `rtk find` / `rtk wc` / `rtk curl` |
+| `git status`, `git log`, `git diff` | `rtk git ...` |
+| `npm run build` / `npm run typecheck` | `rtk npm run ...` |
+| `npx docusaurus ...` | `rtk npx ...` |
+
+So **do not type the `rtk` prefix by hand** for those — the hook already did it, and `rtk rtk git status` is not a command.
+
+**What the hook does not catch.** Reach for rtk explicitly here:
+
+- `sed -n '1,20p' FILE` — not rewritten. Use `rtk read FILE --max-lines 20` instead; it is the single biggest source of wasted tokens in this repo, since reading Markdown docs is most of the work.
+- Pipelines, heredocs, and `python3 -`/`node` scripts pass through unfiltered. If such a command prints a lot, pipe it: `... | rtk pipe`.
+
+**One trap — the lint gate.** The hook rewrites `npm run lint` to bare `rtk lint` and `npx biome check .` to `rtk lint check .`, discarding the npm script. `rtk lint` speaks ESLint, not Biome: it reported `Lint: No issues found` on `src/lib` while Biome was reporting a real `organizeImports` violation and a formatting diff on the same file. **Never trust a rewritten lint command.** Run it raw:
+
+```bash
+rtk run 'npm run lint'      # raw shell, no filter, no rewrite
+rtk proxy <cmd>             # unfiltered but still counted in `rtk gain`
+```
+
+`npm run build` is the correctness gate and is safe under `rtk npm` — it still fails loudly on a broken link. `rtk gain` shows savings so far; `rtk discover` lists commands still being run the expensive way.
+
 ## Commands
 
 ```bash
