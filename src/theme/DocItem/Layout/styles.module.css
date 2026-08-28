@@ -32,7 +32,5 @@
 }
 
 .lastUpdated {
-	margin: 0 0 0 auto;
-	font-size: 0.8rem;
-	color: var(--ifm-color-emphasis-600);
+	margin-left: auto;
 }

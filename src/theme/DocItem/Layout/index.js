@@ -10,7 +10,6 @@ import DocItemTOCDesktop from "@theme/DocItem/TOC/Desktop";
 import DocItemTOCMobile from "@theme/DocItem/TOC/Mobile";
 import DocVersionBadge from "@theme/DocVersionBadge";
 import DocVersionBanner from "@theme/DocVersionBanner";
-import LastUpdated from "@theme/LastUpdated";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
@@ -34,6 +33,13 @@ function useDocTOC() {
     desktop,
   };
 }
+
+const dateFormatter = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 
 function useReadingTime(articleRef) {
   const [minutes, setMinutes] = useState(null);
@@ -72,8 +78,9 @@ export default function DocItemLayout({ children }) {
                   <p className={styles.readingTime}>{readingMinutes} min read</p>
                 )}
                 {metadata.lastUpdatedAt && (
-                  <p className={styles.lastUpdated}>
-                    <LastUpdated lastUpdatedAt={metadata.lastUpdatedAt} />
+                  <p className={clsx(styles.readingTime, styles.lastUpdated)}>
+                    Updated{" "}
+                    {dateFormatter.format(new Date(metadata.lastUpdatedAt))}
                   </p>
                 )}
               </div>
