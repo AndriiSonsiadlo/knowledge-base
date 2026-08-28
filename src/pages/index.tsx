@@ -1,5 +1,4 @@
 import CategoryGrid from "@components/CategoryGrid";
-import CursorGlow from "@components/CursorGlow";
 import GlassCard from "@components/GlassCard";
 import HomeIntro from "@components/HomeIntro";
 import RecentDocs from "@components/RecentDocs";
@@ -21,7 +20,6 @@ export default function Home(): ReactNode {
       <div
         className={clsx(styles.heroGradient, "relative w-full overflow-hidden")}
       >
-        <CursorGlow />
         {/* Animated background elements */}
         <div className={styles.heroAurora} />
         <div className={clsx(styles.heroBlob, styles.heroBlobPrimary)} />
