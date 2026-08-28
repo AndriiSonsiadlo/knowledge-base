@@ -68,6 +68,21 @@ amortized-analysis question, not a recursion-tree one. Recursive code with the e
 shape gets the master theorem's O(1) shortcut; anything the theorem's conditions do not cover falls back
 to a recursion tree, drawn by hand, or full substitution with induction.
 
+## Recall
+
+<Recall
+  invariant="The four analysis methods in this section apply to different shapes of problem — loop counting for straight-line and nested loops, recursion trees and the master theorem for divide-and-conquer, amortized analysis for a sequence of operations on a shared structure."
+  costs={[
+    ["straight-line loop over n (worst)", "O(n) per nesting level"],
+    ["halving/doubling each step (worst)", "O(log n)"],
+    ["divide-and-conquer, balanced (worst)", "master theorem — see recurrences page"],
+    ["sequence of n ops on a shared structure (amortized)", "amortized analysis — see amortized-analysis page"],
+    ["problem confirmed NP-hard (best known, worst)", "exponential — see the P vs NP page"],
+  ]}
+  reachFor="A quick lookup while sizing up a new problem or reviewing someone else's complexity claim, rather than a first read."
+  trap="Reaching for the master theorem on a recurrence with non-constant coefficients or unequal subproblem sizes — check the exact form before applying it, not after the answer looks wrong."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed. — Ch. 3 (asymptotics),
@@ -89,16 +104,3 @@ to a recursion tree, drawn by hand, or full substitution with induction.
   table does not cover.
 - [P, NP & Intractability](./p-np-and-intractability.md) — what to do once loop counting or a
   recurrence points to an exponential bound.
-
-<Recall
-  invariant="The four analysis methods in this section apply to different shapes of problem — loop counting for straight-line and nested loops, recursion trees and the master theorem for divide-and-conquer, amortized analysis for a sequence of operations on a shared structure."
-  costs={[
-    ["straight-line loop over n (worst)", "O(n) per nesting level"],
-    ["halving/doubling each step (worst)", "O(log n)"],
-    ["divide-and-conquer, balanced (worst)", "master theorem — see recurrences page"],
-    ["sequence of n ops on a shared structure (amortized)", "amortized analysis — see amortized-analysis page"],
-    ["problem confirmed NP-hard (best known, worst)", "exponential — see the P vs NP page"],
-  ]}
-  reachFor="A quick lookup while sizing up a new problem or reviewing someone else's complexity claim, rather than a first read."
-  trap="Reaching for the master theorem on a recurrence with non-constant coefficients or unequal subproblem sizes — check the exact form before applying it, not after the answer looks wrong."
-/>

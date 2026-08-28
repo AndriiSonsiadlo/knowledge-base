@@ -279,6 +279,21 @@ the graph is fixed and you also need to *walk* it — distances, paths, or the m
 The hash-map-of-IDs approach is only competitive with the "small-to-large" merging trick, and even
 then it is O(n log n) worst case overall, against union-find's near-linear.
 
+## Recall
+
+<Recall
+  invariant="Each set is a tree whose root is the set's name; find(x) returns that root, and two elements are connected exactly when their roots match."
+  costs={[
+    ["find / union, both optimisations (amortized)", "O(α(n))"],
+    ["find / union, union by rank only (worst)", "O(log n)"],
+    ["find / union, no optimisation (worst)", "O(n)"],
+    ["build over n singletons (worst)", "O(n)"],
+    ["count components (worst)", "O(1) with a counter"],
+  ]}
+  reachFor="The question is 'are these two things in the same group?' and groups only ever merge, never split."
+  trap="Union by size or rank without path compression still gives O(log n); path compression without union by rank does too. You need both to get α(n) — and union must join roots, never the two elements directly."
+/>
+
 ## References
 
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.5 "Case Study: Union-Find" — the definitive
@@ -297,16 +312,3 @@ then it is O(n log n) worst case overall, against union-find's near-linear.
 - [Graphs](./graphs.md) — where the edges being unioned come from.
 - [Graph Traversal](../graph-algorithms/traversal.md) — the offline alternative for connectivity.
 - [Big-O Notation](../complexity/big-o-notation.md) — what "amortized α(n)" is claiming, and what it is not.
-
-<Recall
-  invariant="Each set is a tree whose root is the set's name; find(x) returns that root, and two elements are connected exactly when their roots match."
-  costs={[
-    ["find / union, both optimisations (amortized)", "O(α(n))"],
-    ["find / union, union by rank only (worst)", "O(log n)"],
-    ["find / union, no optimisation (worst)", "O(n)"],
-    ["build over n singletons (worst)", "O(n)"],
-    ["count components (worst)", "O(1) with a counter"],
-  ]}
-  reachFor="The question is 'are these two things in the same group?' and groups only ever merge, never split."
-  trap="Union by size or rank without path compression still gives O(log n); path compression without union by rank does too. You need both to get α(n) — and union must join roots, never the two elements directly."
-/>

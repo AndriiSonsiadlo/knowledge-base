@@ -305,6 +305,21 @@ whose reads all happen after the writes.
 The decision is the read/write mix: all reads, prefix sums; all writes with one read at the end, a
 difference array; interleaved, a Fenwick tree — the O(log n) is the price of not knowing the order.
 
+## Recall
+
+<Recall
+  invariant="`P[i]` holds the sum of the first i elements, so any range sum is one subtraction: `sum(l, r) = P[r+1] − P[l]`."
+  costs={[
+    ["build P from n elements (worst)", "O(n)"],
+    ["range sum after building (worst)", "O(1)"],
+    ["point update (worst)", "O(n) — rebuild"],
+    ["2-D build / query (worst)", "O(nm) / O(1)"],
+    ["difference array: range update (worst)", "O(1)"],
+  ]}
+  reachFor="Many range queries over data that does not change, or many range updates with all the reads deferred to the end."
+  trap="Off-by-one at the boundary. Define P with a leading zero — `P[0] = 0`, `P[i] = P[i−1] + a[i−1]` — and the inclusive range [l, r] is `P[r+1] − P[l]` with no special case for `l = 0`."
+/>
+
 ## References
 
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.4 "Analysis of Algorithms" — the cost model this pattern
@@ -324,16 +339,3 @@ difference array; interleaved, a Fenwick tree — the O(log n) is the price of n
   cache-friendly pass.
 - [Integers & Two's Complement](../../bit-manipulation/integers-and-twos-complement.md) — the overflow
   that silently corrupts a C++ prefix array.
-
-<Recall
-  invariant="`P[i]` holds the sum of the first i elements, so any range sum is one subtraction: `sum(l, r) = P[r+1] − P[l]`."
-  costs={[
-    ["build P from n elements (worst)", "O(n)"],
-    ["range sum after building (worst)", "O(1)"],
-    ["point update (worst)", "O(n) — rebuild"],
-    ["2-D build / query (worst)", "O(nm) / O(1)"],
-    ["difference array: range update (worst)", "O(1)"],
-  ]}
-  reachFor="Many range queries over data that does not change, or many range updates with all the reads deferred to the end."
-  trap="Off-by-one at the boundary. Define P with a leading zero — `P[0] = 0`, `P[i] = P[i−1] + a[i−1]` — and the inclusive range [l, r] is `P[r+1] − P[l]` with no special case for `l = 0`."
-/>

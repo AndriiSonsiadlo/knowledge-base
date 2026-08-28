@@ -222,19 +222,7 @@ $O(n)$ is meaningless until you say what n counts. Two common traps:
 | "Lookup is $O(1)$" | Cost does not grow with the collection | That it is fast — a hash may be expensive |
 | "This is faster, it's $O(n)$ not $O(n \log n)$" | It scales better | That it wins at your n |
 
-## References
-
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 3 — "Characterizing Running Times", the formal treatment of O, Ω and Θ.
-- Knuth, *The Art of Computer Programming*, Vol. 1, §1.2.11 — the origin of the notation's use in this field.
-
-### Books & Videos
-
-- [Big-O Cheat Sheet](https://www.bigocheatsheet.com/) — complexity tables for the common structures and sorts, useful as a lookup rather than a lesson.
-
-## Related Pages
-
-- [Common Complexities](./common-complexities.md) — a named algorithm for each growth class, and what a given n costs at realistic hardware speeds.
-- [Sorting Algorithms](../sorting/intro.md) — where these bounds get their most familiar workout.
+## Recall
 
 <Recall
   invariant="f(n) = O(g(n)) holds when some constant c and threshold n₀ make f(n) ≤ c·g(n) for every n ≥ n₀ — a claim about large n only, never about all n."
@@ -248,3 +236,17 @@ $O(n)$ is meaningless until you say what n counts. Two common traps:
   reachFor="Stating how an algorithm's cost scales in a way that survives a change of hardware, language, or constant factor."
   trap="Dropping constants unconditionally. At small n, or when the constant is itself huge (a 10 MB lookup table hidden inside an O(1) step), the dropped term is the one that decides the real running time."
 />
+
+## References
+
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 3 — "Characterizing Running Times", the formal treatment of O, Ω and Θ.
+- Knuth, *The Art of Computer Programming*, Vol. 1, §1.2.11 — the origin of the notation's use in this field.
+
+### Books & Videos
+
+- [Big-O Cheat Sheet](https://www.bigocheatsheet.com/) — complexity tables for the common structures and sorts, useful as a lookup rather than a lesson.
+
+## Related Pages
+
+- [Common Complexities](./common-complexities.md) — a named algorithm for each growth class, and what a given n costs at realistic hardware speeds.
+- [Sorting Algorithms](../sorting/intro.md) — where these bounds get their most familiar workout.

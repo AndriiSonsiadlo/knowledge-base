@@ -231,6 +231,20 @@ Where priority queues show up:
 Use a heap when you only ever want the extreme; a balanced tree when you also need ordering or
 arbitrary lookup.
 
+## Recall
+
+<Recall
+  invariant="Every parent outranks its children; the tree is complete."
+  costs={[
+    ["peek (worst)", "O(1)"],
+    ["push / pop (worst)", "O(log n)"],
+    ["build from n items (worst)", "O(n)"],
+    ["find an arbitrary value (worst)", "O(n)"],
+  ]}
+  reachFor="You only ever need the extreme, repeatedly: k-th largest, next event, Dijkstra's frontier."
+  trap="Python's heapq is min-only and takes no reverse= — negate the keys, or wrap them in a class with an inverted __lt__."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heaps, heapsort, and the $O(n)$ build-heap analysis.
@@ -245,15 +259,3 @@ arbitrary lookup.
 - [Heapsort](../sorting/heapsort.md) — the sorting algorithm this structure exists inside.
 - [Shortest Paths](../graph-algorithms/shortest-paths.md) — Dijkstra's, where the priority queue determines the complexity.
 - [Scheduling](../../operating-systems/scheduling.md) — priority queues in the OS.
-
-<Recall
-  invariant="Every parent outranks its children; the tree is complete."
-  costs={[
-    ["peek (worst)", "O(1)"],
-    ["push / pop (worst)", "O(log n)"],
-    ["build from n items (worst)", "O(n)"],
-    ["find an arbitrary value (worst)", "O(n)"],
-  ]}
-  reachFor="You only ever need the extreme, repeatedly: k-th largest, next event, Dijkstra's frontier."
-  trap="Python's heapq is min-only and takes no reverse= — negate the keys, or wrap them in a class with an inverted __lt__."
-/>

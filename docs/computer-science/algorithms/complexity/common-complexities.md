@@ -202,6 +202,22 @@ hides.
 | O(n) (counting/radix sort) | The keys are bounded-range integers, so comparisons can be skipped entirely | The key range k is itself large — cost is O(n + k), and a huge k defeats the point |
 | O(2ⁿ) (exact, exponential) | n is small enough that exactness matters more than speed (n ≤ ~25) | n grows past a few dozen — an O(n²) approximation usually beats an exact exponential algorithm that never finishes |
 
+## Recall
+
+<Recall
+  invariant="The growth class is a property of the problem shape, not of any single implementation — 'for each pair' is quadratic no matter which language writes the nested loop."
+  costs={[
+    ["array index / hash lookup (average)", "O(1)"],
+    ["binary search over sorted data (worst)", "O(log n)"],
+    ["single pass over the input (worst)", "O(n)"],
+    ["comparison sort — mergesort, heapsort (worst)", "O(n log n)"],
+    ["nested pass over every pair (worst)", "O(n²)"],
+    ["every subset / every ordering (worst)", "O(2ⁿ) / O(n!)"],
+  ]}
+  reachFor="Recognising the class a piece of code falls into before running it, or the problem shape ('for each pair', 'try every subset') that predicts the class before any code is written."
+  trap="Quoting a bound with no case attached — insertion sort is O(n) only on an already-sorted input; its worst case is O(n²), and the two get conflated constantly."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 8 — "Sorting in Linear
@@ -218,17 +234,3 @@ hides.
   operations, not on every single call.
 - [Space Complexity](./space-complexity.md) — the same growth classes applied to memory.
 - [Choosing a Sort](../sorting/choosing-a-sort.md) — these trade-offs applied to one concrete decision.
-
-<Recall
-  invariant="The growth class is a property of the problem shape, not of any single implementation — 'for each pair' is quadratic no matter which language writes the nested loop."
-  costs={[
-    ["array index / hash lookup (average)", "O(1)"],
-    ["binary search over sorted data (worst)", "O(log n)"],
-    ["single pass over the input (worst)", "O(n)"],
-    ["comparison sort — mergesort, heapsort (worst)", "O(n log n)"],
-    ["nested pass over every pair (worst)", "O(n²)"],
-    ["every subset / every ordering (worst)", "O(2ⁿ) / O(n!)"],
-  ]}
-  reachFor="Recognising the class a piece of code falls into before running it, or the problem shape ('for each pair', 'try every subset') that predicts the class before any code is written."
-  trap="Quoting a bound with no case attached — insertion sort is O(n) only on an already-sorted input; its worst case is O(n²), and the two get conflated constantly."
-/>
