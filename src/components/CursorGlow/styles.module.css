@@ -2,20 +2,24 @@
 	position: absolute;
 	top: 0;
 	left: 0;
-	width: 480px;
-	height: 480px;
-	margin-left: -240px;
-	margin-top: -240px;
+	width: 360px;
+	height: 360px;
+	margin-left: -180px;
+	margin-top: -180px;
 	border-radius: 50%;
 	background: radial-gradient(
 		circle,
-		rgb(var(--brand-primary-rgb) / 0.18),
-		transparent 70%
+		rgb(var(--brand-primary-rgb) / 0.1),
+		transparent 72%
 	);
 	pointer-events: none;
 	z-index: 0;
 	opacity: 0;
-	transition: opacity 300ms ease;
+	/* Eases toward the pointer instead of snapping to it every mousemove frame
+	   — a glow glued exactly to the cursor reads as a UI element chasing you. */
+	transition:
+		opacity 400ms ease,
+		transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
 	will-change: transform;
 }
 
