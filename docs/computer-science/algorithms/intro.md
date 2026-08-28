@@ -43,7 +43,7 @@ is not decorative. Several results here only make sense in light of it:
 - **Binary search beats linear search asymptotically but not always in practice** on small arrays,
   because linear search is [cache-friendly](../memory-hierarchy/cpu-caches.md) and binary search
   jumps around.
-- **Hash tables are O(1) on paper** and can still be slow, for the same reason — see the load-factor
+- **Hash tables are $O(1)$ on paper** and can still be slow, for the same reason — see the load-factor
   curves on the [hash tables](./data-structures/hash-tables.md) page.
 - **B-trees exist instead of binary trees** in databases purely because of
   [storage](../storage/intro.md) access granularity, not because of anything algorithmic.

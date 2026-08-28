@@ -26,7 +26,7 @@ into a searchable structure.
 | **Depth** | Distance from the root to a given node |
 | **Binary tree** | Each node has at most two children |
 | **Complete** | Every level full except possibly the last, filled left to right |
-| **Balanced** | Height stays O(log n) as nodes are added — see [Balanced Trees](./balanced-trees.md) |
+| **Balanced** | Height stays $O(\log n)$ as nodes are added — see [Balanced Trees](./balanced-trees.md) |
 
 ## Architecture / Mechanism
 
@@ -94,7 +94,7 @@ Node* insert(Node* node, int key) {
 </TabItem>
 </Tabs>
 
-Both are O(height). The entire question is therefore what the height is.
+Both are $O(\text{height})$. The entire question is therefore what the height is.
 
 ### Deletion, and the one case that is awkward
 
@@ -195,7 +195,7 @@ a valid BST.
 
 :::danger[An unbalanced BST is a linked list wearing a costume]
 Insert 1, 2, 3, 4, 5 into a plain BST in that order and every node becomes the right child of the
-previous one. Height is n, and every operation is O(n) — with worse constants than an actual
+previous one. Height is n, and every operation is $O(n)$ — with worse constants than an actual
 [linked list](./linked-lists.md), because each node also carries an unused pointer.
 
 Sorted or nearly-sorted insertion order is not an unusual case; it is one of the most common ways
@@ -203,7 +203,7 @@ real data arrives. This is the entire reason [balanced trees](./balanced-trees.m
 should almost never use a hand-rolled plain BST in production code.
 :::
 
-- **Recursive traversal is O(height) in stack space.** On a degenerate tree that is O(n) frames and a
+- **Recursive traversal is $O(height)$ in stack space.** On a degenerate tree that is $O(n)$ frames and a
   possible stack overflow. Use an explicit stack for untrusted input.
 - **Duplicate keys need an explicit policy** — reject, count, or keep a list per node. Silently
   dropping them (as the `insert` above does) is a decision, so make it deliberately.
@@ -214,10 +214,10 @@ should almost never use a hand-rolled plain BST in production code.
 
 | | BST (unbalanced) | [Balanced BST](./balanced-trees.md) | [Hash table](./hash-tables.md) |
 |---|---|---|---|
-| Search / insert / delete | O(log n) avg, O(n) worst | O(log n) guaranteed | O(1) expected |
+| Search / insert / delete | $O(\log n)$ avg, $O(n)$ worst | $O(\log n)$ guaranteed | $O(1)$ expected |
 | Sorted iteration | Yes | Yes | No |
 | Range queries, min/max | Yes | Yes | No |
-| Worst case | Degenerate | Bounded | O(n) |
+| Worst case | Degenerate | Bounded | $O(n)$ |
 
 ## References
 

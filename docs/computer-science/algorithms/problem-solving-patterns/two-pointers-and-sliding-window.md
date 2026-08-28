@@ -10,7 +10,7 @@ tags: [computer-science, algorithms, patterns, two-pointers, sliding-window]
 
 
 Both patterns replace a nested loop with a single pass by maintaining two indices that only ever move
-forward. The result is O(n) where brute force is O(n²), and the saving comes from **not re-examining**
+forward. The result is $O(n)$ where brute force is $O(n^2)$, and the saving comes from **not re-examining**
 what earlier positions already ruled out.
 
 They are the same idea applied to two different structures: two pointers exploits an **ordering**,
@@ -78,7 +78,7 @@ instead.
 ### Sliding window
 
 The window `[left, right)` expands to include new elements and contracts when it violates a
-constraint. Because both pointers only advance, the total work is O(n) even though the code contains
+constraint. Because both pointers only advance, the total work is $O(n)$ even though the code contains
 nested loops:
 
 <Tabs groupId="code-lang">
@@ -146,7 +146,7 @@ int min_window_with_sum(const std::vector<int>& a, int target) {
 
 :::info[The inner `while` does not make this quadratic]
 `left` never decreases and never exceeds n, so across the entire outer loop the inner loop executes
-at most n times in total. The complexity is O(n), not O(n²) — an **amortized** argument of the same
+at most n times in total. The complexity is $O(n)$, not $O(n^2)$ — an **amortized** argument of the same
 shape as the one for [dynamic arrays](../data-structures/arrays.md).
 :::
 
@@ -154,7 +154,7 @@ shape as the one for [dynamic arrays](../data-structures/arrays.md).
 
 A third variant, where one pointer moves faster than the other. On a
 [linked list](../data-structures/linked-lists.md) this finds the middle or detects a cycle in one
-pass and O(1) space; on an array it removes elements in place:
+pass and $O(1)$ space; on an array it removes elements in place:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -237,7 +237,7 @@ int max_sum_of_k(const std::vector<int>& a, int k) {
 ## Edge Cases & Pitfalls
 
 - **Two pointers on unsorted data is simply wrong.** The elimination argument depends on the
-  ordering. Either sort first — O(n log n), which may still be worth it — or use a hash table.
+  ordering. Either sort first — $O(n \log n)$, which may still be worth it — or use a hash table.
 - **Sorting destroys original indices.** If the answer must be reported as positions in the input,
   sort `(value, index)` pairs.
 - **`while left < right` vs `<=`** decides whether an element can pair with itself. Choose
@@ -255,7 +255,7 @@ int max_sum_of_k(const std::vector<int>& a, int k) {
 
 ### Books & Videos
 
-- Bentley, J., *Programming Pearls*, Ch. 8 — the maximum-subarray problem, developed from O(n³) down to O(n) through exactly this kind of reasoning.
+- Bentley, J., *Programming Pearls*, Ch. 8 — the maximum-subarray problem, developed from $O(n^3)$ down to $O(n)$ through exactly this kind of reasoning.
 
 ## Related Pages
 

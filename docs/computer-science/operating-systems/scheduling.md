@@ -112,7 +112,7 @@ policy such as `SCHED_FIFO`/`SCHED_RR` on Linux, which preempt all normal `SCHED
 A low-priority thread holding a lock that a high-priority thread needs can block that high-priority
 thread indefinitely if a medium-priority thread keeps preempting the low-priority one. This is exactly
 what nearly doomed the Mars Pathfinder mission in 1997. The standard fix is **priority inheritance**:
-temporarily boost the lock holder to the waiter's priority.
+temporarily boost the lock holder to the waiter's priority. See [Priority Inversion and Deadlock](../../embedded/07-rtos/priority-inversion-and-deadlock.md) for the primary-sourced account of what actually happened on Pathfinder.
 :::
 
 - Too small a time slice wastes CPU time on context-switch overhead; too large a time slice hurts

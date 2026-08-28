@@ -35,7 +35,7 @@ a tree where every node has one child.
 | **Cycle** | A path returning to its start |
 | **Connected** | Every vertex reachable from every other |
 | **DAG** | Directed acyclic graph — directed, no cycles |
-| **Dense / sparse** | E close to V² / E close to V |
+| **Dense / sparse** | E close to $V^2$ / E close to V |
 
 ### DAGs deserve their own line
 
@@ -127,15 +127,15 @@ std::array<std::array<int, 6>, 6> m{{{0, 1, 0, 0, 1, 0},    // 1
 
 | | Adjacency list | Adjacency matrix |
 |---|---|---|
-| Space | O(V + E) | O(V²) |
-| Is there an edge u→v? | O(degree(u)) | **O(1)** |
-| Iterate u's neighbours | O(degree(u)) | O(V) — scans empty cells too |
-| Add an edge | O(1) | O(1) |
+| Space | $O(V + E)$ | $O(V^2)$ |
+| Is there an edge u→v? | $O(degree(u))$ | **$O(1)$** |
+| Iterate u's neighbours | $O(degree(u))$ | $O(V)$ — scans empty cells too |
+| Add an edge | $O(1)$ | $O(1)$ |
 | Best for | **Sparse graphs** — nearly all real ones | Dense graphs; matrix algorithms |
 
 :::tip[Default to the adjacency list]
 Real graphs are overwhelmingly sparse. A social network with a million users and a hundred friends
-each has 10⁸ edges — an adjacency list holds that comfortably, while the matrix needs 10¹² cells,
+each has $10^8$ edges — an adjacency list holds that comfortably, while the matrix needs $10^{12}$ cells,
 99.99% of them zero. Reach for a matrix only when the graph is genuinely dense, or when an algorithm
 wants matrix form (Floyd–Warshall, spectral methods).
 :::

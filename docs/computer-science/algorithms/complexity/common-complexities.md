@@ -32,51 +32,51 @@ reason about (see [Big-O Notation](./big-o-notation.md) for what "case" and "O" 
 
 ## Core Concepts
 
-### O(1) — Constant
+### $O(1)$ — Constant
 
 Direct addressing: reading `a[i]` from an array, or a hash table lookup, cost the same regardless of
-how large the collection is. Array indexing is O(1) worst case, arithmetic on a known offset; hash
-lookup is O(1) **average** case and O(n) **worst** case, since a pathological set of keys can collide
+how large the collection is. Array indexing is $O(1)$ worst case, arithmetic on a known offset; hash
+lookup is $O(1)$ **average** case and $O(n)$ **worst** case, since a pathological set of keys can collide
 into one bucket.
 
-### O(log n) — Logarithmic
+### $O(\log n)$ — Logarithmic
 
 [Binary search](../searching/binary-search.md) over sorted data: each comparison discards half of what
-remains, so the number of comparisons is worst-case O(log n). Balanced binary search tree operations
-(insert, find, delete) share the same bound because the tree's height is kept O(log n).
+remains, so the number of comparisons is worst-case $O(\log n)$. Balanced binary search tree operations
+(insert, find, delete) share the same bound because the tree's height is kept $O(\log n)$.
 
-### O(n) — Linear
+### $O(n)$ — Linear
 
 A single pass that looks at each element a fixed number of times: summing an array, finding its
-maximum, or [linear search](../searching/linear-search.md) through unsorted data — O(n) worst case,
+maximum, or [linear search](../searching/linear-search.md) through unsorted data — $O(n)$ worst case,
 since nothing rules out the target being last or absent.
 
-### O(n log n) — Linearithmic
+### $O(n \log n)$ — Linearithmic
 
 Divide-and-conquer with linear work to combine the halves: [mergesort](../sorting/mergesort.md) and
-[heapsort](../sorting/heapsort.md) are both Θ(n log n) worst case. So is any comparison-based sort, for
+[heapsort](../sorting/heapsort.md) are both $Θ(n \log n)$ worst case. So is any comparison-based sort, for
 a reason worth stating precisely — see below.
 
-### O(n²) — Quadratic
+### $O(n^2)$ — Quadratic
 
 Every pair: [bubble sort](../sorting/bubble-sort.md) and
 [insertion sort](../sorting/insertion-sort.md) compare or shift adjacent pairs in the worst case, and a
-naive duplicate check compares every element against every other. O(n²) worst case for all three.
+naive duplicate check compares every element against every other. $O(n^2)$ worst case for all three.
 
-### O(n³) — Cubic
+### $O(n^3)$ — Cubic
 
 Every triple: the textbook triple-nested matrix multiplication and the Floyd–Warshall all-pairs
-shortest-path algorithm both do O(n³) worst-case work, one multiply-add or relaxation per triple of
+shortest-path algorithm both do $O(n^3)$ worst-case work, one multiply-add or relaxation per triple of
 indices.
 
-### O(2ⁿ) — Exponential
+### $O(2^n)$ — Exponential
 
-Every subset: the naive recursive solution to subset-sum tries all 2ⁿ subsets, and unmemoized recursive
-Fibonacci recomputes the same subtree exponentially many times — both O(2ⁿ) worst case.
+Every subset: the naive recursive solution to subset-sum tries all $2^n$ subsets, and unmemoized recursive
+Fibonacci recomputes the same subtree exponentially many times — both $O(2^n)$ worst case.
 
-### O(n!) — Factorial
+### $O(n!)$ — Factorial
 
-Every ordering: brute-force travelling salesman and plain permutation generation both enumerate all n!
+Every ordering: brute-force travelling salesman and plain permutation generation both enumerate all $n!$
 orderings of the input, worst case, best case and average case alike — there is no shortcut input.
 
 :::tip[The shape usually tells you the class]
@@ -89,14 +89,14 @@ statement often gives the exponent before any code is written.
 
 ### The linearithmic barrier
 
-`O(n log n)` shows up constantly, and not by accident: **comparison-based sorting cannot do better**.
+$O(n \log n)$ shows up constantly, and not by accident: **comparison-based sorting cannot do better**.
 Any algorithm that only compares elements must distinguish between all `n!` possible orderings, and a
-binary comparison yields one bit, so it needs at least `log₂(n!) ≈ n log₂ n − 1.44n` comparisons worst
+binary comparison yields one bit, so it needs at least $\log_2(n!) \approx n \log_2 n - 1.44n$ comparisons worst
 case (Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 8, "Sorting in
 Linear Time" — the decision-tree argument).
 
 That is a proof about a *model*, not about sorting itself. Algorithms that inspect the values rather
-than only comparing them — counting sort, radix sort, bucket sort — escape it and reach O(n) worst
+than only comparing them — counting sort, radix sort, bucket sort — escape it and reach $O(n)$ worst
 case, at the price of assuming something about the keys (bounded range, fixed width).
 
 ### Wall-clock cost at n = 10⁶
@@ -113,7 +113,7 @@ At roughly one billion simple operations per second, fixing n = 10⁶ across the
 | O(n³) | 10¹⁸ | ~32 years |
 | O(2ⁿ) | 2¹,⁰⁰⁰,⁰⁰⁰ | unreachable — more operations than atoms in the observable universe |
 
-The O(n log n) row worked out, so the rest of the table can be redone by hand:
+The $O(n \log n)$ row worked out, so the rest of the table can be redone by hand:
 
 ```text
 n = 1,000,000
@@ -173,17 +173,17 @@ double estimate_seconds_n_log_n(long long n, double ops_per_sec = 1e9) {
 
 ## Practical Usage
 
-Rough guidance on what is tractable, assuming ~10⁸–10⁹ simple operations per second, worst case unless
-noted:
+Rough guidance on what is tractable, assuming ~$10^8$–$10^9$ simple operations per second, worst case
+unless noted:
 
 | Input size | What is comfortably affordable |
 |---|---|
-| n ≤ 10 | Anything, including O(n!) |
-| n ≤ 25 | O(2ⁿ) |
-| n ≤ 500 | O(n³) |
-| n ≤ 10,000 | O(n²) |
-| n ≤ 10,000,000 | O(n log n) |
-| n > 10,000,000 | O(n) or O(log n) — and start caring about memory bandwidth |
+| n ≤ 10 | Anything, including $O(n!)$ |
+| n ≤ 25 | $O(2^n)$ |
+| n ≤ 500 | $O(n^3)$ |
+| n ≤ 10,000 | $O(n^2)$ |
+| n ≤ 10,000,000 | $O(n \log n)$ |
+| n > 10,000,000 | $O(n)$ or $O(\log n)$ — and start caring about memory bandwidth |
 
 Two growth classes get their own page, because there is more to say about each than fits a single
 table row: [Amortized Analysis](./amortized-analysis.md) covers operations that are usually O(1) and
@@ -193,13 +193,13 @@ hides.
 
 ## Edge Cases & Pitfalls
 
-- **O(1) is not a promise of speed.** A hash lookup that computes a cryptographic digest is O(1)
+- **$O(1)$ is not a promise of speed.** A hash lookup that computes a cryptographic digest is $O(1)$
   average case and slower in practice than scanning a ten-element array.
 - **The constant can dominate at realistic sizes.** Strassen's matrix multiplication is
-  asymptotically better than the naive O(n³) worst case and loses on small matrices; galactic
+  asymptotically better than the naive $O(n^3)$ worst case and loses on small matrices; galactic
   algorithms take this to its absurd conclusion, beating everything asymptotically at input sizes
   exceeding the number of atoms in the universe.
-- **Memory access is not O(1) on real hardware.** The model assumes uniform-cost memory. Actual
+- **Memory access is not $O(1)$ on real hardware.** The model assumes uniform-cost memory. Actual
   machines have a [cache hierarchy](../../memory-hierarchy/cpu-caches.md) spanning two orders of
   magnitude in latency, which is why a "worse" algorithm with sequential access often wins at n where
   the table above says it should lose.

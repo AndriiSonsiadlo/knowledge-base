@@ -21,8 +21,8 @@ tags: [computer-science, algorithms, complexity, big-o]
   trap="Dropping constants unconditionally. At small n, or when the constant is itself huge (a 10 MB lookup table hidden inside an O(1) step), the dropped term is the one that decides the real running time."
 />
 
-Big-O describes an **upper bound on growth**. Saying an algorithm is `O(n²)` claims that beyond some
-input size, its cost is at most a constant multiple of n² — never that it *is* n², and never anything
+Big-O describes an **upper bound on growth**. Saying an algorithm is $O(n^2)$ claims that beyond some
+input size, its cost is at most a constant multiple of $n^2$ — never that it *is* $n^2$, and never anything
 at all about small inputs.
 
 That "beyond some input size" clause is the part most explanations skip, and it is the part that makes
@@ -33,26 +33,26 @@ large enough n those genuinely stop mattering.
 
 | Term | Meaning | Everyday reading |
 |---|---|---|
-| **O(f)** | Grows *no faster than* f | Upper bound — "at worst this" |
-| **Ω(f)** | Grows *no slower than* f | Lower bound — "at best this" |
-| **Θ(f)** | Bounded above *and* below by f | Tight bound — "exactly this rate" |
-| **o(f)** | Grows *strictly slower* than f | Strict upper bound — never touches f itself |
-| **ω(f)** | Grows *strictly faster* than f | Strict lower bound — never touches f itself |
+| **$O(f)$** | Grows *no faster than* f | Upper bound — "at worst this" |
+| **$Ω(f)$** | Grows *no slower than* f | Lower bound — "at best this" |
+| **$Θ(f)$** | Bounded above *and* below by f | Tight bound — "exactly this rate" |
+| **$o(f)$** | Grows *strictly slower* than f | Strict upper bound — never touches f itself |
+| **$ω(f)$** | Grows *strictly faster* than f | Strict lower bound — never touches f itself |
 
-`O` and `Ω` allow equality with `c·g(n)` in the limit; `o` and `ω` forbid it — `n = o(n²)` is true,
-`n² = o(n²)` is false. `Θ` is the conjunction `O ∩ Ω`: a function is Θ(g) exactly when it is both O(g)
-and Ω(g) for the same g.
+$O$ and $Ω$ allow equality with $c \cdot g(n)$ in the limit; $o$ and $ω$ forbid it — $n = o(n^2)$ is true,
+$n^2 = o(n^2)$ is false. $Θ$ is the conjunction $O \cap Ω$: a function is $Θ(g)$ exactly when it is both $O(g)$
+and $Ω(g)$ for the same g.
 
-Informal usage almost always says "O" where "Θ" is meant. Saying mergesort is O(n log n) is true but
-weak — it is also O(n³), since that is a valid upper bound too. Saying mergesort is Θ(n log n) is the
-stronger, more useful claim. In practice, when someone says "quicksort is O(n log n) on average",
+Informal usage almost always says "O" where "Θ" is meant. Saying mergesort is $O(n \log n)$ is true but
+weak — it is also $O(n^3)$, since that is a valid upper bound too. Saying mergesort is $Θ(n \log n)$ is the
+stronger, more useful claim. In practice, when someone says "quicksort is $O(n \log n)$ on average",
 read Θ.
 
 ## Architecture / Mechanism
 
 ### The formal definition, and what it is doing
 
-`f(n) = O(g(n))` means: there exist positive constants `c` and `n₀` such that for all `n ≥ n₀`,
+$f(n) = O(g(n))$ means: there exist positive constants `c` and $n_0$ such that for all $n \geq n_0$,
 
 ```text
 f(n) ≤ c · g(n)
@@ -66,20 +66,20 @@ f(n) ≤ c · g(n)
 
 The two knobs are what make the abstraction useful. Because you may pick **any** constant `c`, a
 factor of 100 in speed cannot change the classification. Because you may pick **any** starting point
-`n₀`, behaviour on small inputs cannot change it either.
+$n_0$, behaviour on small inputs cannot change it either.
 
 ### Why constants and lower-order terms vanish
 
-Given `f(n) = 3n² + 500n + 90000`:
+Given $f(n) = 3n^2 + 500n + 90000$:
 
-| n | 3n² | 500n | 90000 | Which dominates |
+| n | 3$n^2$ | 500n | 90000 | Which dominates |
 |---|---|---|---|---|
 | 10 | 300 | 5,000 | 90,000 | the constant |
 | 100 | 30,000 | 50,000 | 90,000 | still the constant |
-| 1,000 | 3,000,000 | 500,000 | 90,000 | n² |
-| 100,000 | 3×10¹⁰ | 5×10⁷ | 90,000 | n², overwhelmingly |
+| 1,000 | 3,000,000 | 500,000 | 90,000 | $n^2$ |
+| 100,000 | $3 \times 10^{10}$ | $5 \times 10^7$ | 90,000 | $n^2$, overwhelmingly |
 
-So `f(n) = O(n²)`. The other terms are not *wrong*, they simply stop being the story. Note also that
+So $f(n) = O(n^2)$. The other terms are not *wrong*, they simply stop being the story. Note also that
 at n = 100 this function is dominated by a constant — a real reminder that asymptotic claims say
 nothing about the range you might actually be operating in.
 
@@ -202,23 +202,23 @@ int count_halvings(int n) {
 </TabItem>
 </Tabs>
 
-- **Sequential blocks add**, and the larger wins: `O(n) + O(n²) = O(n²)`.
-- **Nested loops multiply**: a loop of n containing a loop of m is `O(n·m)`.
+- **Sequential blocks add**, and the larger wins: $O(n) + O(n^2) = O(n^2)$.
+- **Nested loops multiply**: a loop of n containing a loop of m is $O(n \cdot m)$.
 - **Halving (or doubling) the problem each step is logarithmic** — that is what a logarithm counts.
 
 ## Edge Cases & Pitfalls
 
 :::danger[The variable you dropped is still in there]
-`O(n)` is meaningless until you say what n counts. Two common traps:
+$O(n)$ is meaningless until you say what n counts. Two common traps:
 
-- **Two different inputs.** Comparing every element of one list against another is `O(n·m)`, not
-  `O(n²)` — and if m is tiny and fixed, it is effectively `O(n)`.
-- **Cost per operation.** Summing a list of integers is `O(n)`. Concatenating a list of *strings*
-  with `+=` in a loop is `O(n²)`, because each concatenation copies everything accumulated so far.
-  The loop looks identical; the per-iteration cost is not O(1).
+- **Two different inputs.** Comparing every element of one list against another is $O(n \cdot m)$, not
+  $O(n^2)$ — and if m is tiny and fixed, it is effectively $O(n)$.
+- **Cost per operation.** Summing a list of integers is $O(n)$. Concatenating a list of *strings*
+  with `+=` in a loop is $O(n^2)$, because each concatenation copies everything accumulated so far.
+  The loop looks identical; the per-iteration cost is not $O(1)$.
 :::
 
-- **`O(n²)` is not always worse than `O(n log n)`.** With a large constant hidden inside, the
+- **$O(n^2)$ is not always worse than $O(n \log n)$.** With a large constant hidden inside, the
   "better" algorithm can lose on real input sizes. This is exactly why production sorts switch to
   insertion sort below a threshold of ~16 elements.
 - **Best/average/worst are separate questions from O/Ω/Θ**, though the two are constantly conflated.
@@ -231,9 +231,9 @@ int count_halvings(int n) {
 
 | Claim | Says | Does not say |
 |---|---|---|
-| "Quicksort is O(n²)" | Its worst case is quadratic | Anything about the typical case, which is n log n |
-| "Lookup is O(1)" | Cost does not grow with the collection | That it is fast — a hash may be expensive |
-| "This is faster, it's O(n) not O(n log n)" | It scales better | That it wins at your n |
+| "Quicksort is $O(n^2)$" | Its worst case is quadratic | Anything about the typical case, which is n log n |
+| "Lookup is $O(1)$" | Cost does not grow with the collection | That it is fast — a hash may be expensive |
+| "This is faster, it's $O(n)$ not $O(n \log n)$" | It scales better | That it wins at your n |
 
 ## References
 

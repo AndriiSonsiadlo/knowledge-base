@@ -13,7 +13,7 @@ Mergesort splits the array in half, sorts each half recursively, and merges the 
 back together. The insight is that **merging two already-sorted sequences is linear** — you compare
 their two front elements and take the smaller, repeatedly.
 
-Splitting costs nothing and produces log n levels; merging costs O(n) per level. Hence O(n log n),
+Splitting costs nothing and produces log n levels; merging costs $O(n)$ per level. Hence $O(n \log n)$,
 on every input, with no worst case to worry about.
 
 <Figure src="/img/cs/algorithms/mergesort-diagram.png"
@@ -26,10 +26,10 @@ on every input, with no worst case to worry about.
 
 | Property | Value |
 |---|---|
-| Best case | O(n log n) |
-| Average | O(n log n) |
-| Worst case | **O(n log n)** — guaranteed |
-| Space | O(n) — the merge buffer |
+| Best case | $O(n \log n)$ |
+| Average | $O(n \log n)$ |
+| Worst case | **$O(n \log n)$** — guaranteed |
+| Space | $O(n)$ — the merge buffer |
 | Stable | **Yes** |
 | Adaptive | No, in the classic form (but see [Timsort](./choosing-a-sort.md)) |
 | Parallelises | Well — the two halves are independent |
@@ -93,11 +93,11 @@ std::vector<int> merge_sort(const std::vector<int>& a) {
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Merge-sort-example-300px.gif"
         license="CC BY-SA 3.0" />
 
-### Why the complexity is exactly O(n log n)
+### Why the complexity is exactly $O(n \log n)$
 
-The recursion halves the input, so it has `log₂ n` levels. Every level merges a total of n elements,
-regardless of how they are distributed across subarrays. Work per level is therefore Θ(n), and the
-total is Θ(n log n) — with no dependence on the data, which is why best, average and worst are all
+The recursion halves the input, so it has $\log_2 n$ levels. Every level merges a total of n elements,
+regardless of how they are distributed across subarrays. Work per level is therefore $Θ(n)$, and the
+total is $Θ(n \log n)$ — with no dependence on the data, which is why best, average and worst are all
 the same.
 
 ### Stability comes from one character
@@ -112,12 +112,12 @@ Mergesort is the right choice when:
 
 - **Stability is required** — sorting by a secondary key after a primary one.
 - **Worst-case guarantees matter** — real-time or adversarial contexts where
-  [quicksort's](./quicksort.md) O(n²) is unacceptable.
+  [quicksort's](./quicksort.md) $O(n^2)$ is unacceptable.
 - **The data does not fit in memory.** External mergesort reads sorted runs from disk and merges them
   with sequential I/O, which is the one access pattern [storage](../../storage/intro.md) is good at.
   This is how databases sort tables larger than RAM.
 - **You are sorting a [linked list](../data-structures/linked-lists.md).** Merging lists needs only
-  pointer rewiring — O(1) extra space, no random access required. This is the one case where
+  pointer rewiring — $O(1)$ extra space, no random access required. This is the one case where
   mergesort is *better* on a list than on an array.
 - **You want to parallelise.** The two recursive calls share nothing.
 
@@ -157,9 +157,9 @@ void merge_sort_iterative(std::vector<int>& a) {
 
 ## Edge Cases & Pitfalls
 
-:::warning[The O(n) space is the real cost]
+:::warning[The $O(n)$ space is the real cost]
 Mergesort cannot merge in place efficiently. Naive in-place merge algorithms exist but are either
-O(n²) or have constant factors bad enough to erase the benefit. For a large array this means a second
+$O(n^2)$ or have constant factors bad enough to erase the benefit. For a large array this means a second
 buffer the same size — which can be the deciding factor on memory-constrained systems, and is the
 main reason [quicksort](./quicksort.md) is preferred for in-memory array sorting.
 
@@ -168,16 +168,16 @@ per merge as the readable version above does.
 :::
 
 - **Slicing allocates.** The Python above creates new lists at every level — clear, but it does
-  roughly O(n log n) allocation. Production code passes indices into a single shared buffer.
+  roughly $O(n \log n)$ allocation. Production code passes indices into a single shared buffer.
 - **`<` instead of `<=`** in the merge silently loses stability.
-- **Recursion depth is O(log n)**, which is safe — unlike quicksort's worst case.
+- **Recursion depth is $O(\log n)$**, which is safe — unlike quicksort's worst case.
 
 ## Comparisons
 
 | | Mergesort | [Quicksort](./quicksort.md) | [Heapsort](./heapsort.md) |
 |---|---|---|---|
-| Worst case | **O(n log n)** | O(n²) | **O(n log n)** |
-| Space | O(n) | O(log n) | **O(1)** |
+| Worst case | **$O(n \log n)$** | $O(n^2)$ | **$O(n \log n)$** |
+| Space | $O(n)$ | $O(\log n)$ | **$O(1)$** |
 | Stable | **Yes** | No | No |
 | Locality | Good — sequential merges | **Excellent** | Poor — jumps around |
 | Typical speed on arrays | Good | **Fastest** | Slowest of the three |

@@ -27,10 +27,10 @@ not.
 
 | Property | Value |
 |---|---|
-| Best case | O(1) — the target is the first midpoint |
-| Average / worst | O(log n) |
-| Space | O(1) iterative, O(log n) recursive |
-| **Requires** | Sorted data **and** O(1) random access |
+| Best case | $O(1)$ — the target is the first midpoint |
+| Average / worst | $O(\log n)$ |
+| Space | $O(1)$ iterative, $O(\log n)$ recursive |
+| **Requires** | Sorted data **and** $O(1)$ random access |
 | Comparisons | ⌊log₂ n⌋ + 1 in the worst case |
 
 ## Architecture / Mechanism
@@ -188,7 +188,7 @@ int min_capacity(const std::vector<int>& weights, int days) {
 </TabItem>
 </Tabs>
 
-This "binary search on the answer" pattern turns an optimisation problem into O(log range) feasibility
+This "binary search on the answer" pattern turns an optimisation problem into $O(\log(\text{range}))$ feasibility
 checks, and it is one of the highest-value techniques in competitive programming and in real capacity
 planning alike.
 
@@ -240,7 +240,7 @@ earlier and did not, this is where it surfaces — as a wrong answer, far from t
 - **Which duplicate you get is unspecified** for exact-match search. Use `lower_bound`/`upper_bound`
   when it matters.
 - **Binary search on a [linked list](../data-structures/linked-lists.md) is pointless** — reaching
-  the midpoint is O(n), making the whole search O(n log n), worse than a plain scan.
+  the midpoint is $O(n)$, making the whole search $O(n \log n)$, worse than a plain scan.
 - **Below ~50 elements a [linear scan](./linear-search.md) is usually faster** on real hardware, for
   cache and branch-prediction reasons.
 - **Floating-point ranges never converge with `lo < hi`.** Iterate a fixed number of times (100 is
@@ -250,11 +250,11 @@ earlier and did not, this is where it surfaces — as a wrong answer, far from t
 
 | | Binary search | [Linear search](./linear-search.md) | [Hash table](../data-structures/hash-tables.md) |
 |---|---|---|---|
-| Per lookup | O(log n) | O(n) | O(1) expected |
+| Per lookup | $O(\log n)$ | $O(n)$ | $O(1)$ expected |
 | Sorted input needed | **Yes** | No | No |
 | Random access needed | **Yes** | No | No |
 | Range / nearest-match queries | **Yes** | No | No |
-| Insertion into the structure | O(n) | O(1) at the end | O(1) |
+| Insertion into the structure | $O(n)$ | $O(1)$ at the end | $O(1)$ |
 
 ## References
 

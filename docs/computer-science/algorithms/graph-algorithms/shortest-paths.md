@@ -17,10 +17,10 @@ weighted, and can any weight be negative?
 
 | Situation | Algorithm | Complexity |
 |---|---|---|
-| Unweighted graph | [BFS](./traversal.md) | O(V + E) |
-| Non-negative weights, one source | **Dijkstra's** | O((V + E) log V) |
-| Negative weights allowed, one source | **Bellman–Ford** | O(V·E) |
-| All pairs, dense graph | Floyd–Warshall | O(V³) |
+| Unweighted graph | [BFS](./traversal.md) | $O(V + E)$ |
+| Non-negative weights, one source | **Dijkstra's** | $O((V + E) \log V)$ |
+| Negative weights allowed, one source | **Bellman–Ford** | $O(V \cdot E)$ |
+| All pairs, dense graph | Floyd–Warshall | $O(V^3)$ |
 | Non-negative weights, one target known | A* with an admissible heuristic | Depends on the heuristic |
 
 ## Architecture / Mechanism
@@ -28,7 +28,7 @@ weighted, and can any weight be negative?
 ### Dijkstra's algorithm
 
 Repeatedly finalise the nearest unfinalised vertex, then relax its outgoing edges. A
-[priority queue](../data-structures/heaps.md) supplies "nearest" in O(log V), which is where the log
+[priority queue](../data-structures/heaps.md) supplies "nearest" in $O(\log V)$, which is where the log
 factor comes from.
 
 <Figure src="/img/cs/algorithms/dijkstra.gif"
@@ -235,8 +235,8 @@ turns A\* back into Dijkstra's exactly.
   Returning distances alone is a common oversight.
 - **Ties in the priority queue** compare the second tuple element. If nodes are not orderable, insert
   a counter — the same hazard described on the [heaps page](../data-structures/heaps.md).
-- **Dijkstra's on a dense graph** is O(V²) with a simple array and O((V+E) log V) with a heap; the
-  array version is actually faster when E approaches V².
+- **Dijkstra's on a dense graph** is $O(V^2)$ with a simple array and $O((V+E) \log V)$ with a heap; the
+  array version is actually faster when E approaches $V^2$.
 - **An inadmissible A\* heuristic** returns paths quickly and they are not necessarily shortest. That
   is a legitimate trade for games, and a bug for navigation.
 
@@ -246,7 +246,7 @@ turns A\* back into Dijkstra's exactly.
 |---|---|---|---|---|
 | Weights | None | Non-negative | **Any** | Any |
 | Sources | One | One | One | **All pairs** |
-| Complexity | O(V + E) | O((V + E) log V) | O(V·E) | O(V³) |
+| Complexity | $O(V + E)$ | $O((V + E) \log V)$ | $O(V \cdot E)$ | $O(V^3)$ |
 | Detects negative cycles | — | No | **Yes** | Yes |
 | Best for | Unweighted | The usual case | Negative weights | Small dense graphs |
 

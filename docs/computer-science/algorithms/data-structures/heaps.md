@@ -62,7 +62,7 @@ right(i)  = 2i + 2
 
 ### The two operations
 
-Both work by moving one element along a single root-to-leaf path, which is why both are O(log n):
+Both work by moving one element along a single root-to-leaf path, which is why both are $O(\log n)$:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -132,17 +132,17 @@ int pop_max(std::vector<int>& heap) {
 
 | Operation | Cost |
 |---|---|
-| Peek at the extreme | O(1) |
-| Insert | O(log n) |
-| Extract the extreme | O(log n) |
-| Build a heap from n items | **O(n)** — not O(n log n) |
-| Search for an arbitrary value | O(n) |
+| Peek at the extreme | $O(1)$ |
+| Insert | $O(\log n)$ |
+| Extract the extreme | $O(\log n)$ |
+| Build a heap from n items | **$O(n)$** — not $O(n \log n)$ |
+| Search for an arbitrary value | $O(n)$ |
 
 :::info[Building a heap is linear, which is not obvious]
-Sifting down from every non-leaf node, working backwards from the middle of the array, costs O(n)
-rather than O(n log n). The reason is that most nodes are near the bottom and barely move: half the
+Sifting down from every non-leaf node, working backwards from the middle of the array, costs $O(n)$
+rather than $O(n \log n)$. The reason is that most nodes are near the bottom and barely move: half the
 nodes are leaves and cost nothing, a quarter can sift at most one level, and so on. The sum
-`Σ n/2^(k+1) · k` converges to n. Use `heapq.heapify(list)` rather than pushing n times.
+$\sum n/2^{k+1} \cdot k$ converges to n. Use `heapq.heapify(list)` rather than pushing n times.
 :::
 
 ## Practical Usage
@@ -213,8 +213,8 @@ Where priority queues show up:
   [process scheduling](../../operating-systems/scheduling.md).
 - **Event simulation** — process events in timestamp order as new ones are generated.
 - **Streaming top-k** — keep a size-k min-heap; anything smaller than its root cannot make the cut.
-  This uses O(k) memory regardless of stream length.
-- **Merging k sorted sequences** — a heap over the k heads gives the next element in O(log k).
+  This uses $O(k)$ memory regardless of stream length.
+- **Merging k sorted sequences** — a heap over the k heads gives the next element in $O(\log k)$.
 
 ## Edge Cases & Pitfalls
 
@@ -222,7 +222,7 @@ Where priority queues show up:
   inverted comparison. Forgetting this is the most common heap bug in Python.
 - **Tuples compare element by element**, so `(priority, task)` will compare `task` when priorities
   tie — and raise `TypeError` if tasks are not orderable. Insert a monotonic counter between them.
-- **You cannot efficiently change or remove an arbitrary element.** Finding it is O(n). The standard
+- **You cannot efficiently change or remove an arbitrary element.** Finding it is $O(n)$. The standard
   workaround is *lazy deletion*: mark the entry invalid, push a replacement, and discard stale entries
   when they surface at the top.
 - **A heap is not sorted.** Printing the backing array shows a valid heap that looks unsorted, because
@@ -233,10 +233,10 @@ Where priority queues show up:
 
 | | Heap | [Sorted array](./arrays.md) | [Balanced BST](./balanced-trees.md) |
 |---|---|---|---|
-| Peek extreme | O(1) | O(1) | O(log n) |
-| Insert | O(log n) | O(n) | O(log n) |
-| Extract extreme | O(log n) | O(1) at one end | O(log n) |
-| Find arbitrary | O(n) | O(log n) | O(log n) |
+| Peek extreme | $O(1)$ | $O(1)$ | $O(\log n)$ |
+| Insert | $O(\log n)$ | $O(n)$ | $O(\log n)$ |
+| Extract extreme | $O(\log n)$ | $O(1)$ at one end | $O(\log n)$ |
+| Find arbitrary | $O(n)$ | $O(\log n)$ | $O(\log n)$ |
 | Sorted iteration | No | Yes | Yes |
 | Memory overhead | None — a plain array | None | Two pointers per node |
 
@@ -245,7 +245,7 @@ arbitrary lookup.
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heaps, heapsort, and the O(n) build-heap analysis.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heaps, heapsort, and the $O(n)$ build-heap analysis.
 - [CPython `heapq` source](https://github.com/python/cpython/blob/main/Lib/heapq.py) — the module's docstring is an unusually good explanation of the invariant.
 
 ### Books & Videos

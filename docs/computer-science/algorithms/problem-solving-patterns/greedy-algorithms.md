@@ -10,7 +10,7 @@ tags: [computer-science, algorithms, patterns, greedy]
 
 
 A greedy algorithm makes the choice that looks best right now and never reconsiders it. When that
-works it is the cheapest strategy available — usually one sorted pass, O(n log n) or better, with no
+works it is the cheapest strategy available — usually one sorted pass, $O(n \log n)$ or better, with no
 recursion and no table.
 
 When it does not work, it produces a plausible answer that is quietly wrong. The difficulty of greedy
@@ -175,9 +175,9 @@ is slower but does not require the proof.
 | | Greedy | [Dynamic programming](./dynamic-programming.md) | [Backtracking](./backtracking.md) |
 |---|---|---|---|
 | Choices per step | One, committed | All, memoised | All, with pruning |
-| Typical complexity | O(n log n) | O(n·states) | Exponential, pruned |
+| Typical complexity | $O(n \log n)$ | $O(n \cdot states)$ | Exponential, pruned |
 | Guarantees optimum | Only with a proof | Yes | Yes |
-| Memory | O(1) | O(states) | O(depth) |
+| Memory | $O(1)$ | $O(states)$ | $O(depth)$ |
 | Fails by | Returning a wrong answer silently | Being slow or memory-hungry | Taking too long |
 
 ## References

@@ -11,7 +11,7 @@ tags: [computer-science, algorithms, data-structures, arrays]
 
 An array is a block of contiguous memory holding equally-sized elements. That one property gives it
 everything else: because element `i` lives at `base + i × element_size`, indexing is a single
-multiply-and-add — genuinely O(1), with no search involved.
+multiply-and-add — genuinely $O(1)$, with no search involved.
 
 It is also the reason arrays are the default choice far more often than their complexity table
 suggests. Contiguity is exactly what the [memory hierarchy](../../memory-hierarchy/cpu-caches.md) is
@@ -28,7 +28,7 @@ built to reward.
 
 ## Architecture / Mechanism
 
-### Why indexing is O(1)
+### Why indexing is $O(1)$
 
 ```text
 int array of 4-byte elements, base address 0x1000
@@ -42,7 +42,7 @@ No traversal, no comparison — arithmetic. This also means an array must know i
 compile time, which is why an array of *objects* in most managed languages is really an array of
 references, with the objects themselves scattered across the heap.
 
-### Growth: how a dynamic array stays amortized O(1)
+### Growth: how a dynamic array stays amortized $O(1)$
 
 Appending is cheap until capacity is exhausted, at which point the whole buffer is reallocated and
 copied:
@@ -84,8 +84,8 @@ void push_back(const T& value) {
 </Tabs>
 
 Doubling means resizes happen at sizes 1, 2, 4, 8, …, n, copying fewer than `2n` elements in total
-across n appends — **O(1) amortized**. Growing by a fixed amount instead (say +10 each time) makes
-resizes just as frequent as the array grows, giving O(n) amortized per append.
+across n appends — **$O(1)$ amortized**. Growing by a fixed amount instead (say +10 each time) makes
+resizes just as frequent as the array grows, giving $O(n)$ amortized per append.
 
 | Language | Growth factor |
 |---|---|
@@ -142,8 +142,8 @@ for (std::size_t row = 0; row < rows; ++row)
 </TabItem>
 </Tabs>
 
-Removing from the middle of an array is O(n) because everything after the gap shifts down. When
-order does not matter, swapping the last element into the hole makes it O(1):
+Removing from the middle of an array is $O(n)$ because everything after the gap shifts down. When
+order does not matter, swapping the last element into the hole makes it $O(1)$:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -188,17 +188,17 @@ survives in every language.
 - **Two-dimensional does not mean contiguous.** `int**` in C, or a Python list of lists, is an array
   of pointers to separately-allocated rows. Only a true `int[N][M]` (or NumPy array) is one flat
   block, and only that one gets the cache behaviour described above.
-- **Insertion at the front is O(n)** for a dynamic array. If you need it often, use a
+- **Insertion at the front is $O(n)$** for a dynamic array. If you need it often, use a
   [deque](./stacks-and-queues.md), not a list.
-- **`list.pop(0)` in Python is O(n)**, and inside a loop it silently turns a linear algorithm
-  quadratic — `collections.deque.popleft()` is the O(1) form.
+- **`list.pop(0)` in Python is $O(n)$**, and inside a loop it silently turns a linear algorithm
+  quadratic — `collections.deque.popleft()` is the $O(1)$ form.
 
 ## Comparisons
 
 | | Array | [Linked list](./linked-lists.md) |
 |---|---|---|
-| Index access | O(1) | O(n) |
-| Insert/delete at a known position | O(n) | O(1) |
+| Index access | $O(1)$ | $O(n)$ |
+| Insert/delete at a known position | $O(n)$ | $O(1)$ |
 | Memory per element | Element only | Element + one or two pointers |
 | Locality | Contiguous — prefetches perfectly | Scattered — a cache miss per node |
 | Realistic verdict | The default | Only when splicing dominates and you already hold the node |
@@ -215,5 +215,5 @@ survives in every language.
 ## Related Pages
 
 - [Linked Lists](./linked-lists.md) — the contrasting layout, and when it actually wins.
-- [Common Complexities](../complexity/common-complexities.md) — where the amortized-O(1) argument is developed.
+- [Common Complexities](../complexity/common-complexities.md) — where the amortized-$O(1)$ argument is developed.
 - [CPU Caches](../../memory-hierarchy/cpu-caches.md) — why contiguity is worth so much more than the operation counts imply.

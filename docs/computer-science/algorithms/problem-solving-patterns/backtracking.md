@@ -14,7 +14,7 @@ abandoning a partial candidate the moment it cannot possibly lead to a valid one
 [depth-first search](../graph-algorithms/traversal.md) over an implicit tree of choices, with pruning.
 
 The pruning is the entire point. Without it this is brute force; with a good constraint check it can
-reduce a space of 10²⁰ candidates to a few thousand actually explored.
+reduce a space of $10^{20}$ candidates to a few thousand actually explored.
 
 ## Core Concepts
 
@@ -139,13 +139,13 @@ std::vector<std::vector<int>> solve_n_queens(int n) {
 </TabItem>
 </Tabs>
 
-The three sets are what make this fast. Checking conflicts in O(1) rather than rescanning the board
+The three sets are what make this fast. Checking conflicts in $O(1)$ rather than rescanning the board
 turns an impractical search into one that solves n = 8 instantly. **The quality of the pruning check
 determines whether backtracking is usable at all.**
 
 Placing one queen per row is itself a form of pruning — it removes every arrangement with two queens
 in a row from consideration without ever generating one, cutting the space from C(64, 8) ≈ 4.4
-billion to 8⁸ ≈ 16.7 million before any constraint check runs.
+billion to $8^8$ ≈ 16.7 million before any constraint check runs.
 
 ### Permutations and subsets
 
@@ -233,7 +233,7 @@ std::vector<std::vector<int>> subsets(const std::vector<int>& items) {
 </TabItem>
 </Tabs>
 
-Permutations are O(n!) and subsets O(2ⁿ) — both unavoidable, since that is how many outputs there
+Permutations are $O(n!)$ and subsets $O(2^n)$ — both unavoidable, since that is how many outputs there
 are. Backtracking does not make these problems cheap; it makes *constrained* versions cheap, where
 pruning removes most branches.
 
@@ -287,8 +287,8 @@ at the cost of copying.
 | | Backtracking | [DP](./dynamic-programming.md) | [Greedy](./greedy-algorithms.md) |
 |---|---|---|---|
 | Explores | All branches, pruned | All subproblems, memoised | One path |
-| Memory | O(depth) | O(states) | O(1) |
-| Complexity | Exponential, pruned | Polynomial | O(n log n) |
+| Memory | $O(depth)$ | $O(states)$ | $O(1)$ |
+| Complexity | Exponential, pruned | Polynomial | $O(n \log n)$ |
 | Use when | The state space is too large to tabulate | Subproblems overlap | The greedy choice is provably safe |
 | Returns | All solutions, or the best | The optimal value | One answer |
 

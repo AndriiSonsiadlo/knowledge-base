@@ -122,21 +122,21 @@ whose structure is too tangled to read off directly.
 ## Why It Matters
 
 <Figure src="/img/cs/algorithms/complexity-growth-rates.png"
-        alt="Eight growth curves on shared axes — 1, log₂n, √n, n, n log₂n, n², 2ⁿ and n! — where the last three climb almost vertically within the first ten inputs while the first three stay nearly flat across all one hundred"
-        caption="All eight on the same axes, for n up to 100. n², 2ⁿ and n! have already left the chart before n = 10; log₂ n has not reached 7 by n = 100. No amount of micro-optimisation moves a program between these curves."
+        alt="Eight growth curves on shared axes — 1, log₂n, √n, n, n log₂n, $n^2$, $2^n$ and n! — where the last three climb almost vertically within the first ten inputs while the first three stay nearly flat across all one hundred"
+        caption="All eight on the same axes, for n up to 100. $n^2$, $2^n$ and n! have already left the chart before n = 10; log₂ n has not reached 7 by n = 100. No amount of micro-optimisation moves a program between these curves."
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Comparison_computational_complexity.svg"
         license="CC BY-SA 4.0" />
 
 A concrete version of that picture — operations performed, at one billion operations per second:
 
-| n | O(log n) | O(n) | O(n log n) | O(n²) | O(2ⁿ) |
+| n | $O(\log n)$ | $O(n)$ | $O(n \log n)$ | $O(n^2)$ | $O(2^n)$ |
 |---|---|---|---|---|---|
 | 10 | 3 | 10 | 33 | 100 | 1,024 |
 | 1,000 | 10 | 1,000 | ~10,000 | 1,000,000 | *heat death* |
-| 1,000,000 | 20 | 1,000,000 | ~20,000,000 | 10¹² (~17 min) | — |
-| 1,000,000,000 | 30 | 10⁹ (~1 s) | ~3×10¹⁰ (~30 s) | 10¹⁸ (~32 years) | — |
+| 1,000,000 | 20 | 1,000,000 | ~20,000,000 | $10^{12}$ (~17 min) | — |
+| 1,000,000,000 | 30 | $10^9$ (~1 s) | ~$3 \times 10^{10}$ (~30 s) | $10^{18}$ (~32 years) | — |
 
-The lesson is not that O(n²) is forbidden — for n = 100 it is entirely fine and often the simplest
+The lesson is not that $O(n^2)$ is forbidden — for n = 100 it is entirely fine and often the simplest
 correct code, worst case included. The lesson is that the input size decides, and that the decision
 changes character somewhere around n = 10,000.
 
@@ -152,5 +152,5 @@ changes character somewhere around n = 10,000.
 
 - [Big-O Notation](./big-o-notation.md) — the formal definition behind the asymptotic column above.
 - [Common Complexities](./common-complexities.md) — a named algorithm for each growth class.
-- [Sorting Algorithms](../sorting/intro.md) — the classic worked example of an O(n²) versus O(n log n) choice.
+- [Sorting Algorithms](../sorting/intro.md) — the classic worked example of an $O(n^2)$ versus $O(n \log n)$ choice.
 - [Data Structures](../data-structures/intro.md) — every structure is a set of complexity trade-offs made concrete.

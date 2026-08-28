@@ -13,7 +13,7 @@ Insertion sort builds the sorted result one element at a time, taking the next e
 back into its correct place among those already sorted — exactly how most people sort a hand of
 playing cards.
 
-It is O(n²), and it is nonetheless the most *used* of the elementary sorts, because it is inside
+It is $O(n^2)$, and it is nonetheless the most *used* of the elementary sorts, because it is inside
 almost every production sorting routine. Below roughly 16–32 elements it beats
 [quicksort](./quicksort.md) and [mergesort](./mergesort.md) outright, so those algorithms hand their
 small subarrays to it.
@@ -28,12 +28,12 @@ small subarrays to it.
 
 | Property | Value |
 |---|---|
-| Best case | **O(n)** — already sorted; one comparison per element, no shifts |
-| Average | O(n²) |
-| Worst case | O(n²) — reverse sorted |
-| Space | O(1) |
+| Best case | **$O(n)$** — already sorted; one comparison per element, no shifts |
+| Average | $O(n^2)$ |
+| Worst case | $O(n^2)$ — reverse sorted |
+| Space | $O(1)$ |
 | Stable | Yes |
-| Adaptive | **Yes, strongly** — O(n + d) where d is the number of inversions |
+| Adaptive | **Yes, strongly** — $O(n + d)$ where d is the number of inversions |
 | Online | Yes — can sort a stream as elements arrive |
 
 ## Architecture / Mechanism
@@ -91,14 +91,14 @@ Tracing `[5, 1, 4, 2]`:
 
 The inner loop runs only while elements are out of order, so the total work is proportional to the
 number of **inversions** — pairs that are in the wrong relative order. Formally the cost is
-`O(n + d)`, and for nearly-sorted data d is small:
+$O(n + d)$, and for nearly-sorted data d is small:
 
 | Input | Inversions | Cost |
 |---|---|---|
-| Already sorted | 0 | O(n) |
-| One element out of place | O(n) | O(n) |
-| Every element within k positions of its home | O(nk) | O(nk) |
-| Reverse sorted | n(n−1)/2 | O(n²) |
+| Already sorted | 0 | $O(n)$ |
+| One element out of place | $O(n)$ | $O(n)$ |
+| Every element within k positions of its home | $O(nk)$ | $O(nk)$ |
+| Reverse sorted | n(n−1)/2 | $O(n^2)$ |
 
 Real data is very often nearly sorted — appended log lines, mostly-ordered records, a sorted list
 with a few recent additions. This property is what [Timsort](./choosing-a-sort.md) is built to
@@ -148,7 +148,7 @@ recursion, allocates nothing, and touches memory strictly sequentially. Quicksor
 recursion cost more than the quadratic term saves at those sizes.
 
 **Binary insertion sort** — using [binary search](../searching/binary-search.md) to find the
-insertion point — reduces comparisons to O(n log n) but leaves the shifting at O(n²). It helps only
+insertion point — reduces comparisons to $O(n \log n)$ but leaves the shifting at $O(n^2)$. It helps only
 when comparisons are much more expensive than moves.
 
 ## Edge Cases & Pitfalls
@@ -157,15 +157,15 @@ when comparisons are much more expensive than moves.
 - **The `j >= 0` bound must come first** in the `while` condition; reversing the operands indexes
   `a[-1]` in Python (silently wrapping to the end) rather than failing.
 - **Use `>` not `>=`** in the comparison. `>=` shifts past equal elements and destroys stability.
-- **It is still O(n²).** The adaptivity is real, but on genuinely random input of any size it loses
+- **It is still $O(n^2)$.** The adaptivity is real, but on genuinely random input of any size it loses
   badly — this is a small-input and nearly-sorted-input tool.
 
 ## Comparisons
 
 | | Insertion | [Bubble](./bubble-sort.md) | [Selection](./selection-sort.md) |
 |---|---|---|---|
-| Best case | O(n) | O(n) | O(n²) |
-| Writes on random input | ~n²/4 shifts | ~n²/2 swaps (×3 writes) | n − 1 swaps |
+| Best case | $O(n)$ | $O(n)$ | $O(n^2)$ |
+| Writes on random input | ~$n^2$/4 shifts | ~$n^2$/2 swaps (×3 writes) | n − 1 swaps |
 | Stable | Yes | Yes | No |
 | Adaptive | Strongly | Weakly | No |
 | Online | Yes | No | No |

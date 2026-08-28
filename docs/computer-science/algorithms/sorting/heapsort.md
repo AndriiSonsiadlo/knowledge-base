@@ -10,12 +10,12 @@ tags: [computer-science, algorithms, sorting, heapsort, heap]
 
 
 Heapsort is [selection sort](./selection-sort.md) with a better way of selecting. Selection sort scans
-the unsorted region to find its maximum in O(n); heapsort keeps that region as a
-[heap](../data-structures/heaps.md) so the maximum is at the root and extraction costs O(log n).
-That single substitution converts O(n²) into O(n log n).
+the unsorted region to find its maximum in $O(n)$; heapsort keeps that region as a
+[heap](../data-structures/heaps.md) so the maximum is at the root and extraction costs $O(\log n)$.
+That single substitution converts $O(n^2)$ into $O(n \log n)$.
 
-Its distinguishing property is the combination no other common sort offers: **O(n log n) worst case
-in O(1) space**. [Mergesort](./mergesort.md) needs a buffer; [quicksort](./quicksort.md) has a
+Its distinguishing property is the combination no other common sort offers: **$O(n \log n)$ worst case
+in $O(1)$ space**. [Mergesort](./mergesort.md) needs a buffer; [quicksort](./quicksort.md) has a
 quadratic worst case; heapsort has neither problem.
 
 <Figure src="/img/cs/algorithms/heapsort.gif"
@@ -28,10 +28,10 @@ quadratic worst case; heapsort has neither problem.
 
 | Property | Value |
 |---|---|
-| Best case | O(n log n) |
-| Average | O(n log n) |
-| Worst case | **O(n log n)** — guaranteed |
-| Space | **O(1)** — genuinely in place, no recursion |
+| Best case | $O(n \log n)$ |
+| Average | $O(n \log n)$ |
+| Worst case | **$O(n \log n)$** — guaranteed |
+| Space | **$O(1)$** — genuinely in place, no recursion |
 | Stable | No |
 | Adaptive | No — sorted input costs the same as random |
 
@@ -102,8 +102,8 @@ void heapsort(std::vector<int>& a) {
 </TabItem>
 </Tabs>
 
-Phase 1 is O(n) — see the [heaps page](../data-structures/heaps.md) for why building a heap is linear
-rather than n log n. Phase 2 does n extractions at O(log n) each, so it dominates: **O(n log n)**
+Phase 1 is $O(n)$ — see the [heaps page](../data-structures/heaps.md) for why building a heap is linear
+rather than n log n. Phase 2 does n extractions at $O(\log n)$ each, so it dominates: **$O(n \log n)$**
 overall.
 
 Using a **max**-heap rather than a min-heap is what makes the sort ascending: the largest element is
@@ -114,11 +114,11 @@ swapped to the *end*, and each subsequent one lands just before it.
 Heapsort is rarely the top-level choice, but it occupies two important roles:
 
 - **The safety net in introsort.** C++'s `std::sort` runs quicksort, and switches to heapsort when
-  recursion exceeds `2·log₂ n` levels. This makes the worst case O(n log n) without giving up
+  recursion exceeds $2 \cdot \log_2 n$ levels. This makes the worst case $O(n \log n)$ without giving up
   quicksort's speed on typical input. Heapsort is chosen for the fallback precisely because it needs
   no extra memory and has no bad case of its own.
-- **Memory-constrained and real-time systems.** Embedded and kernel contexts where an O(n) allocation
-  is unacceptable and an O(n²) tail is unacceptable. The Linux kernel's `sort()` is a heapsort.
+- **Memory-constrained and real-time systems.** Embedded and kernel contexts where an $O(n)$ allocation
+  is unacceptable and an $O(n^2)$ tail is unacceptable. The Linux kernel's `sort()` is a heapsort.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -152,12 +152,12 @@ std::vector<int> top_k(std::vector<int> items, int k) {
 </TabItem>
 </Tabs>
 
-Stopping phase 2 after k extractions gives the k largest elements in O(n + k log n) — better than a
+Stopping phase 2 after k extractions gives the k largest elements in $O(n + k \log n)$ — better than a
 full sort when k is small, which is the same argument behind `heapq.nlargest`.
 
 ## Edge Cases & Pitfalls
 
-:::warning[Heapsort is the slowest O(n log n) sort in practice]
+:::warning[Heapsort is the slowest $O(n \log n)$ sort in practice]
 Its complexity is excellent and its constant factor is not. `sift_down` jumps between indices `i`,
 `2i+1` and `2i+2` — locations that grow exponentially far apart, so each level of a sift is a fresh
 [cache miss](../../memory-hierarchy/cpu-caches.md). Quicksort's partition scans memory sequentially
@@ -178,8 +178,8 @@ complexity. Choose it for its guarantees, not for its speed.
 
 | | Heapsort | [Quicksort](./quicksort.md) | [Mergesort](./mergesort.md) | [Selection](./selection-sort.md) |
 |---|---|---|---|---|
-| Worst case | **O(n log n)** | O(n²) | **O(n log n)** | O(n²) |
-| Space | **O(1)** | O(log n) | O(n) | O(1) |
+| Worst case | **$O(n \log n)$** | $O(n^2)$ | **$O(n \log n)$** | $O(n^2)$ |
+| Space | **$O(1)$** | $O(\log n)$ | $O(n)$ | $O(1)$ |
 | Stable | No | No | **Yes** | No |
 | Locality | **Poor** | Excellent | Good | Good |
 | Typical speed | Slowest of the three | **Fastest** | Good | Very slow |
@@ -188,7 +188,7 @@ complexity. Choose it for its guarantees, not for its speed.
 ## References
 
 - Williams, J.W.J. (1964), "Algorithm 232: Heapsort", *Communications of the ACM* — the original, which introduced the heap along with it.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heapsort with the O(n) build-heap proof.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heapsort with the $O(n)$ build-heap proof.
 - [Linux kernel `lib/sort.c`](https://github.com/torvalds/linux/blob/master/lib/sort.c) — a production heapsort, with comments on why it was chosen.
 
 ### Books & Videos
