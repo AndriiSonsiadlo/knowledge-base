@@ -5,7 +5,7 @@ sidebar_position: 0
 tags: [computer-science]
 ---
 
-# Computer Science Knowledge Base
+# Computer Science
 
 A structured, top-down path through how computers actually work: from a single instruction executing
 on a CPU, up through memory, storage, and the operating system, out to networks and the databases
