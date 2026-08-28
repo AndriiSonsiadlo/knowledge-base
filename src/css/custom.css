@@ -732,21 +732,7 @@ div[class^='docItemContainer_'] article img {
   padding: 0.54rem 0.82rem;
   border-radius: 999px;
   color: rgb(63 53 80 / 0.86);
-  /* The accent bar rides on the link's own background rather than a pseudo-
-     element: ::before is the capsule and ::after is the dropdown chevron, so
-     there is no third layer to spend. Growing background-size from the centre
-     gives the same motion a scaleX pseudo-element would. */
-  background-image: linear-gradient(
-    90deg,
-    var(--brand-primary),
-    var(--brand-accent)
-  );
-  background-repeat: no-repeat;
-  background-position: 50% calc(100% - 0.3rem);
-  background-size: 0 2px;
-  transition:
-    color 180ms ease,
-    background-size 260ms cubic-bezier(0.34, 1.28, 0.64, 1);
+  transition: color 180ms ease;
 }
 
 [data-theme='dark'] .navbar__items--center .navbar__link {
@@ -806,8 +792,7 @@ div[class^='docItemContainer_'] article img {
   color: var(--brand-primary-lightest);
 }
 
-/* Capsule springs in slightly past its resting size, the bar grows out from the
-   centre underneath it — one gesture, two layers, ~260ms. */
+/* Capsule springs in slightly past its resting size. */
 .navbar__items--center .navbar__link:hover::before,
 .navbar__items--center .navbar__link--active::before,
 .navbar__items--center .dropdown--show > .navbar__link::before,
@@ -818,20 +803,8 @@ div[class^='docItemContainer_'] article img {
   transform: scale(1);
 }
 
-.navbar__items--center .navbar__link:hover,
-.navbar__items--center .dropdown--show > .navbar__link {
-  background-size: 1.15rem 2px;
-}
-
-/* Current section reads stronger than a passing hover: a wider bar and a ring
-   that holds the capsule even after the cursor leaves. */
-.navbar__items--center .navbar__link--active,
-.navbar__items--center
-  .dropdown:has(.dropdown__link--active)
-  > .navbar__link {
-  background-size: 1.6rem 2px;
-}
-
+/* Current section reads stronger than a passing hover: a ring and a soft glow
+   that hold the capsule even after the cursor leaves. */
 .navbar__items--center .navbar__link--active::before,
 .navbar__items--center
   .dropdown:has(.dropdown__link--active)
