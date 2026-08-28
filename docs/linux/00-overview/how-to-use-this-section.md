@@ -64,3 +64,16 @@ commands.
 
 Where a talk develops an idea better than a page can, it is embedded. The video stays on its own
 host; nothing is committed to this repository.
+
+## Terminal sessions are replayable
+
+Tool pages carry recorded sessions you can scrub through. They are text, not video — a few
+kilobytes each — and the decisive output always appears as a code block too, because the player
+does not render without JavaScript and the offline search cannot index it.
+
+<Cast src="/casts/linux/hello.cast" caption="Checking the running kernel version in the lab VM" />
+
+```text
+$ uname -r
+6.18.0
+```

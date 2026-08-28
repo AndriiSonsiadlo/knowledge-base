@@ -1,3 +1,4 @@
+import Cast from "@site/src/components/Cast";
 import Figure from "@site/src/components/Figure";
 import KernelFacts from "@site/src/components/KernelFacts";
 import Lab from "@site/src/components/Lab";
@@ -38,6 +39,7 @@ function Icon({ icon, inline, ...rest }) {
 export default {
   ...MDXComponents,
   Icon,
+  Cast,
   Figure,
   KernelFacts,
   Lab,
