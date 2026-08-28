@@ -25,13 +25,13 @@ possible for a sort that moves elements individually. Everything else about it i
 
 | Property | Value |
 |---|---|
-| Best case | O(n²) — no early exit is possible |
-| Average | O(n²) |
-| Worst case | O(n²) |
-| Space | O(1) |
+| Best case | $O(n^2)$ — no early exit is possible |
+| Average | $O(n^2)$ |
+| Worst case | $O(n^2)$ |
+| Space | $O(1)$ |
 | Stable | No (in the standard swap-based form) |
 | Adaptive | No — sorted input costs exactly as much as random input |
-| Swaps | **O(n)** — exactly n − 1 |
+| Swaps | **$O(n)$** — exactly n − 1 |
 
 ## Architecture / Mechanism
 
@@ -88,7 +88,7 @@ Swapping a distant minimum into position jumps it over intervening elements, whi
 values. With `[2a, 2b, 1]`, the first round swaps `1` with `2a`, giving `[1, 2b, 2a]` — the two `2`s
 have exchanged their original order.
 
-Stability is recoverable by shifting the intervening block instead of swapping, but that costs O(n)
+Stability is recoverable by shifting the intervening block instead of swapping, but that costs $O(n)$
 writes per round and forfeits the algorithm's only advantage.
 
 ## Practical Usage
@@ -111,15 +111,15 @@ That is a narrow niche, and it is the entire case for this algorithm.
   only when sorting by a secondary key.
 - **Selection sort and [heapsort](./heapsort.md) are the same idea.** Both repeatedly extract the
   extreme from the unsorted region; heapsort just uses a [heap](../data-structures/heaps.md) to find
-  it in O(log n) instead of O(n), which is exactly what converts O(n²) into O(n log n).
+  it in $O(\log n)$ instead of $O(n)$, which is exactly what converts $O(n^2)$ into $O(n \log n)$.
 
 ## Comparisons
 
 | | Selection | [Bubble](./bubble-sort.md) | [Insertion](./insertion-sort.md) |
 |---|---|---|---|
-| Comparisons | n(n−1)/2 always | O(n²), O(n) if sorted | O(n²), O(n) if nearly sorted |
-| Writes | **n − 1 swaps** | O(n²) | O(n²) |
-| Best case | O(n²) | O(n) | O(n) |
+| Comparisons | n(n−1)/2 always | $O(n^2)$, $O(n)$ if sorted | $O(n^2)$, $O(n)$ if nearly sorted |
+| Writes | **n − 1 swaps** | $O(n^2)$ | $O(n^2)$ |
+| Best case | $O(n^2)$ | $O(n)$ | $O(n)$ |
 | Stable | No | Yes | Yes |
 | Choose when | Writes dominate cost | Never | Small or nearly-sorted input |
 

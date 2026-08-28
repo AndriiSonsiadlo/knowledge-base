@@ -9,7 +9,7 @@ tags: [computer-science, algorithms, data-structures, avl, red-black-tree, b-tre
 # Balanced Trees
 
 
-A [binary search tree](./trees.md) is O(log n) only while it stays short, and nothing in the plain
+A [binary search tree](./trees.md) is $O(\log n)$ only while it stays short, and nothing in the plain
 insertion algorithm keeps it short. A **self-balancing** tree restores a height bound after every
 modification, converting the average case into a guarantee.
 
@@ -64,7 +64,7 @@ Red-black permits a looser bound and so rebalances less, giving faster insertion
 | Height | ≤ 1.44 log₂ n — shorter | ≤ 2 log₂ n |
 | Lookup | Faster | Slightly slower |
 | Insert / delete | More rotations | Fewer rotations |
-| Rotations per delete | O(log n) | ≤ 3 |
+| Rotations per delete | $O(\log n)$ | ≤ 3 |
 | Used by | Some in-memory indexes | C++ `map`/`set`, Java `TreeMap`, Linux CFS scheduler, `epoll` |
 
 Red-black won the standard-library slot almost everywhere, because mixed read/write workloads are the

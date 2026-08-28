@@ -32,7 +32,7 @@ And two ways to implement it:
 | Structure | Recursion + a cache | Iteration over a table |
 | Computes | Only reachable subproblems | All subproblems |
 | Order | Implicit, from the recursion | You must choose a valid order |
-| Stack | O(depth) — can overflow | None |
+| Stack | $O(depth)$ — can overflow | None |
 | Easier to | **Write**, from the recurrence | **Optimise for space** |
 
 ## Architecture / Mechanism
@@ -201,14 +201,14 @@ Most of the difficulty is choosing what the table indexes. Ask:
 
 | Problem | State | Complexity |
 |---|---|---|
-| Fibonacci | `dp[i]` = i-th number | O(n) |
-| Climbing stairs, coin change (count ways) | `dp[i]` = ways to reach i | O(n·k) |
-| Coin change (fewest coins) | `dp[i]` = fewest coins for amount i | O(n·k) |
-| 0/1 knapsack | `dp[i][c]` | O(n·capacity) |
-| Longest common subsequence | `dp[i][j]` = LCS of prefixes | O(n·m) |
-| Edit distance (Levenshtein) | `dp[i][j]` = edits between prefixes | O(n·m) |
-| Longest increasing subsequence | `dp[i]` = best ending at i | O(n²), or O(n log n) with binary search |
-| Matrix chain multiplication | `dp[i][j]` = best cost for the range | O(n³) |
+| Fibonacci | `dp[i]` = i-th number | $O(n)$ |
+| Climbing stairs, coin change (count ways) | `dp[i]` = ways to reach i | $O(n \cdot k)$ |
+| Coin change (fewest coins) | `dp[i]` = fewest coins for amount i | $O(n \cdot k)$ |
+| 0/1 knapsack | `dp[i][c]` | $O(n \cdot capacity)$ |
+| Longest common subsequence | `dp[i][j]` = LCS of prefixes | $O(n \cdot m)$ |
+| Edit distance (Levenshtein) | `dp[i][j]` = edits between prefixes | $O(n \cdot m)$ |
+| Longest increasing subsequence | `dp[i]` = best ending at i | $O(n^2)$, or $O(n \log n)$ with binary search |
+| Matrix chain multiplication | `dp[i][j]` = best cost for the range | $O(n^3)$ |
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -280,11 +280,11 @@ stall.
   [topological sort](../graph-algorithms/topological-sort.md) of the state graph.
 - **Reconstructing the solution, not just its value**, needs either a parent table or a backward walk
   through the finished table. Most implementations return only the optimum and then need rewriting.
-- **Pseudo-polynomial complexity.** Knapsack's O(n·capacity) is polynomial in the *value* of the
+- **Pseudo-polynomial complexity.** Knapsack's $O(n \cdot capacity)$ is polynomial in the *value* of the
   capacity but exponential in the number of bits used to write it — which is why knapsack is still
   NP-hard despite the DP solution.
-- **Memory can be the binding constraint.** An O(n·m) table for two 100,000-character strings is
-  10¹⁰ cells. Use the rolling-row trick, or Hirschberg's algorithm for linear space.
+- **Memory can be the binding constraint.** An $O(n \cdot m)$ table for two 100,000-character strings is
+  $10^{10}$ cells. Use the rolling-row trick, or Hirschberg's algorithm for linear space.
 
 ## Comparisons
 
@@ -293,7 +293,7 @@ stall.
 | Subproblems | Overlapping | — | **Independent** | Overlapping or not |
 | Choices considered | All | One | All | All, pruned |
 | Guarantees optimum | Yes | Only with a proof | Yes | Yes |
-| Typical cost | Polynomial | O(n log n) | O(n log n) | Exponential |
+| Typical cost | Polynomial | $O(n \log n)$ | $O(n \log n)$ | Exponential |
 
 ## References
 

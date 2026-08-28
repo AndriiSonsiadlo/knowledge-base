@@ -12,7 +12,7 @@ tags: [computer-science, algorithms, data-structures, stack, queue, deque]
 Stacks and queues are not new storage — they are **restrictions** on storage. Both hold a sequence,
 and both deliberately refuse to let you reach into the middle of it. That refusal is the feature: an
 interface with two operations has far fewer ways to be used incorrectly, and the restriction is
-exactly what makes the operations O(1).
+exactly what makes the operations $O(1)$.
 
 ## Core Concepts
 
@@ -24,7 +24,7 @@ exactly what makes the operations O(1).
 | **Inspect** | `peek` / `top` | `front` | `front` / `back` |
 | **Models** | Nesting, backtracking, undo | Fairness, buffering, arrival order | Both, plus sliding windows |
 
-All operations are O(1). `search` is not part of either interface; if you need it, you have chosen the
+All operations are $O(1)$. `search` is not part of either interface; if you need it, you have chosen the
 wrong structure.
 
 <Figure src="/img/cs/algorithms/stack.png"
@@ -38,7 +38,7 @@ wrong structure.
 ### Implementation
 
 A stack is a dynamic array with two of its operations hidden — appending and removing at the end are
-already O(1) amortized:
+already $O(1)$ amortized:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -66,7 +66,7 @@ std::stack<int> s;          // the adaptor, when the interface should forbid ind
 </Tabs>
 
 A queue is the case where the array representation goes wrong. Removing from the front of an array is
-O(n), so the naive version is quadratic:
+$O(n)$, so the naive version is quadratic:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -92,7 +92,7 @@ queue.erase(queue.begin());     // O(n) — every remaining element shifts down
 
 The fix is a **circular buffer**: keep `head` and `tail` indices into a fixed array and wrap them
 modulo capacity, so neither end ever moves data. That is what real deque implementations do (Python's
-`collections.deque` uses a doubly linked list of fixed-size blocks, which achieves the same O(1) ends
+`collections.deque` uses a doubly linked list of fixed-size blocks, which achieves the same $O(1)$ ends
 while allowing unbounded growth).
 
 <Tabs groupId="code-lang">
@@ -122,8 +122,8 @@ std::queue<int> adaptor;   // std::queue wraps a deque with exactly this interfa
 </Tabs>
 
 :::warning[Use the right type, or the complexity silently changes]
-`list.pop(0)` and `list.insert(0, x)` are O(n) in Python; `deque.popleft()` and `deque.appendleft()`
-are O(1). The same trap exists as `ArrayList` versus `ArrayDeque` in Java, and `std::vector` versus
+`list.pop(0)` and `list.insert(0, x)` are $O(n)$ in Python; `deque.popleft()` and `deque.appendleft()`
+are $O(1)$. The same trap exists as `ArrayList` versus `ArrayDeque` in Java, and `std::vector` versus
 `std::deque` in C++. Nothing warns you — the loop simply becomes quadratic.
 :::
 
@@ -257,12 +257,12 @@ bool balanced(std::string_view s) {
 
 | | Array-backed | Linked-list-backed |
 |---|---|---|
-| Stack push/pop | O(1) amortized, contiguous | O(1) always, one allocation each |
-| Queue operations | O(1) with a circular buffer | O(1) with head and tail pointers |
+| Stack push/pop | $O(1)$ amortized, contiguous | $O(1)$ always, one allocation each |
+| Queue operations | $O(1)$ with a circular buffer | $O(1)$ with head and tail pointers |
 | Memory | Compact, may over-allocate | One or two pointers per element |
-| Worst-case latency | Occasional O(n) resize | No resize spike |
+| Worst-case latency | Occasional $O(n)$ resize | No resize spike |
 
-Array-backed is the right default; linked-list-backed matters when a single O(n) resize pause is
+Array-backed is the right default; linked-list-backed matters when a single $O(n)$ resize pause is
 unacceptable.
 
 ## References

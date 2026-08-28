@@ -20,10 +20,10 @@ option available, for reasons that have nothing to do with complexity.
 
 | Property | Value |
 |---|---|
-| Best case | O(1) — the target is first |
-| Average | O(n/2) → O(n) |
-| Worst case | O(n) — last, or absent |
-| Space | O(1) |
+| Best case | $O(1)$ — the target is first |
+| Average | $O(n/2)$ → $O(n)$ |
+| Worst case | $O(n)$ — last, or absent |
+| Space | $O(1)$ |
 | Requires | Nothing — not even random access |
 | Works on | Arrays, linked lists, streams, generators, any iterable |
 
@@ -105,7 +105,7 @@ Where linear search is the right choice regardless of size:
 - **The data is unsorted and used once.** Sorting to search once is strictly worse.
 - **The predicate is not an ordering.** "First record matching this regex" has no sorted form.
 - **The sequence is not random-access** — a [linked list](../data-structures/linked-lists.md) or a
-  stream. Binary search on a linked list would cost O(n) per probe, making it *worse* than scanning.
+  stream. Binary search on a linked list would cost $O(n)$ per probe, making it *worse* than scanning.
 - **The data does not exist yet.** Searching a generator or a network stream as it arrives.
 
 <Tabs groupId="code-lang">
@@ -150,10 +150,10 @@ the gain, and it mutates the array, which rules it out for shared or immutable d
 
 - **Returning `0` for "not found"** collides with a valid index. Return `-1`, `None`, or an optional
   type — and be consistent across the codebase.
-- **Repeated linear searches inside a loop** silently make the enclosing algorithm O(n²). This is the
+- **Repeated linear searches inside a loop** silently make the enclosing algorithm $O(n^2)$. This is the
   single most common cause of accidental quadratic behaviour, and the fix is almost always a
   [hash table](../data-structures/hash-tables.md) — see the `two_sum` example there.
-- **`in` on a list is O(n)**; on a set or dict it is O(1). In Python they look identical at the call
+- **`in` on a list is $O(n)$**; on a set or dict it is $O(1)$. In Python they look identical at the call
   site, which is what makes the mistake easy.
 - **Duplicates.** Decide whether you want the first match, the last, or all of them.
 
@@ -161,8 +161,8 @@ the gain, and it mutates the array, which rules it out for shared or immutable d
 
 | | Linear | [Binary](./binary-search.md) | [Hash](../data-structures/hash-tables.md) |
 |---|---|---|---|
-| Per lookup | O(n) | O(log n) | O(1) expected |
-| Preparation | None | Sort: O(n log n) | Build: O(n) |
+| Per lookup | $O(n)$ | $O(\log n)$ | $O(1)$ expected |
+| Preparation | None | Sort: $O(n \log n)$ | Build: $O(n)$ |
 | Requires sorted data | No | **Yes** | No |
 | Requires random access | No | **Yes** | No |
 | Arbitrary predicates | **Yes** | Only monotonic ones | Exact keys only |

@@ -26,10 +26,10 @@ makes the idea of an invariant ("after pass k, the tail is sorted") completely v
 
 | Property | Value |
 |---|---|
-| Best case | O(n) — one pass over already-sorted data, with the early exit |
-| Average | O(n²) |
-| Worst case | O(n²) — reverse-sorted input |
-| Space | O(1) — sorts in place |
+| Best case | $O(n)$ — one pass over already-sorted data, with the early exit |
+| Average | $O(n^2)$ |
+| Worst case | $O(n^2)$ — reverse-sorted input |
+| Space | $O(1)$ — sorts in place |
 | Stable | Yes — only strictly out-of-order neighbours are swapped |
 | Adaptive | Yes, with the early-exit optimisation |
 
@@ -80,8 +80,8 @@ Two details separate the textbook version from the naive one:
 
 - **`n - 1 - i`** — the tail is already sorted, so re-scanning it is wasted work. Without this the
   algorithm does the same number of comparisons regardless of progress.
-- **`swapped`** — a pass with no swaps proves the list is ordered, giving the O(n) best case. Without
-  it, bubble sort is O(n²) even on sorted input.
+- **`swapped`** — a pass with no swaps proves the list is ordered, giving the $O(n)$ best case. Without
+  it, bubble sort is $O(n^2)$ even on sorted input.
 
 Tracing `[5, 1, 4, 2]`:
 
@@ -97,7 +97,7 @@ Tracing `[5, 1, 4, 2]`:
 Bubble sort is not merely asymptotically poor — it is the *slowest* of the quadratic sorts by a
 constant factor too, because it performs far more swaps than
 [insertion](./insertion-sort.md) or [selection](./selection-sort.md) sort for the same input. On
-nearly-sorted data insertion sort matches its O(n) best case while being faster everywhere else, and
+nearly-sorted data insertion sort matches its $O(n)$ best case while being faster everywhere else, and
 on random data it does a fraction of the writes.
 
 There is no input distribution on which bubble sort is the right choice. If you want a simple sort
@@ -113,9 +113,9 @@ for small arrays, use insertion sort.
 
 | | Bubble | [Selection](./selection-sort.md) | [Insertion](./insertion-sort.md) |
 |---|---|---|---|
-| Comparisons | O(n²) | O(n²) always | O(n²), O(n) if nearly sorted |
-| Swaps / writes | O(n²) — the most | **O(n)** — the fewest | O(n²), but few if nearly sorted |
-| Best case | O(n) | O(n²) | O(n) |
+| Comparisons | $O(n^2)$ | $O(n^2)$ always | $O(n^2)$, $O(n)$ if nearly sorted |
+| Swaps / writes | $O(n^2)$ — the most | **$O(n)$** — the fewest | $O(n^2)$, but few if nearly sorted |
+| Best case | $O(n)$ | $O(n^2)$ | $O(n)$ |
 | Stable | Yes | No | Yes |
 | Worth using | No | When writes are expensive | Yes, for small or nearly-sorted input |
 

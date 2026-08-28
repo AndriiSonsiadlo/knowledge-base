@@ -39,13 +39,13 @@ concatenated from sorted pieces.
 
 Timsort scans for existing sorted **runs**, extends short ones using
 [insertion sort](./insertion-sort.md), and then merges runs under rules that keep the merge tree
-balanced. On already-sorted input it finds one run and finishes in O(n).
+balanced. On already-sorted input it finds one run and finishes in $O(n)$.
 
 | Property | Value |
 |---|---|
-| Best case | **O(n)** — already sorted, or a handful of runs |
-| Worst case | O(n log n) |
-| Space | O(n) |
+| Best case | **$O(n)$** — already sorted, or a handful of runs |
+| Worst case | $O(n \log n)$ |
+| Space | $O(n)$ |
 | Stable | Yes |
 
 ### Introsort — quicksort that cannot degrade
@@ -53,16 +53,16 @@ balanced. On already-sorted input it finds one run and finishes in O(n).
 C++'s `std::sort`. Runs [quicksort](./quicksort.md), but:
 
 - switches to [insertion sort](./insertion-sort.md) for ranges below ~16 elements;
-- switches to [heapsort](./heapsort.md) when recursion exceeds `2·log₂ n` levels.
+- switches to [heapsort](./heapsort.md) when recursion exceeds $2 \cdot \log_2 n$ levels.
 
-The depth limit is what removes quicksort's O(n²) worst case, without slowing the common path.
+The depth limit is what removes quicksort's $O(n^2)$ worst case, without slowing the common path.
 
 ### pdqsort — pattern-defeating quicksort
 
 Rust's `sort_unstable` and Go's `slices.Sort`. Introsort plus pattern detection: it recognises
 already-sorted and reverse-sorted runs, uses three-way partitioning when duplicates are common, and
 breaks up adversarial patterns by shuffling deterministically when partitions come out badly. The
-result is O(n) on several common shapes while keeping introsort's guarantees.
+result is $O(n)$ on several common shapes while keeping introsort's guarantees.
 
 ## How to Choose
 
@@ -83,11 +83,11 @@ flowchart TD
 | Sorting by a secondary key after a primary | A **stable** sort |
 | Hard real-time or adversarial input | [Heapsort](./heapsort.md) or introsort — bounded worst case |
 | Data larger than RAM | External [mergesort](./mergesort.md) |
-| Integer keys in a small known range | Counting sort — O(n + k) |
-| Fixed-width keys (integers, dates, strings) | Radix sort — O(nw) |
+| Integer keys in a small known range | Counting sort — $O(n + k)$ |
+| Fixed-width keys (integers, dates, strings) | Radix sort — $O(nw)$ |
 | Fewer than ~16 elements | [Insertion sort](./insertion-sort.md) |
-| Only need the top k | A [heap](../data-structures/heaps.md) — O(n + k log n) |
-| Only need the median or k-th element | Quickselect — O(n) average |
+| Only need the top k | A [heap](../data-structures/heaps.md) — $O(n + k \log n)$ |
+| Only need the median or k-th element | Quickselect — $O(n)$ average |
 
 :::tip[Sort keys, not records]
 When elements are large, sorting them directly copies a lot of bytes per move. Sort an array of
@@ -113,7 +113,7 @@ Write `<`, never `<=`, in a comparator.
 
 - **Comparing floats with NaN breaks the ordering**, since every comparison with NaN is false. Filter
   or handle NaN explicitly.
-- **Sorting a mostly-sorted list with an unstable sort still costs O(n log n)** in introsort or
+- **Sorting a mostly-sorted list with an unstable sort still costs $O(n \log n)$** in introsort or
   pdqsort's non-detected cases. Timsort is the one that exploits it fully.
 - **`sort()` mutates, `sorted()` copies** in Python. The same distinction is `sort` vs. `to_vec` then
   sort in Rust; picking the wrong one is a silent aliasing bug.
@@ -133,5 +133,5 @@ Write `<`, never `<=`, in a comparator.
 ## Related Pages
 
 - [Sorting Algorithms — Overview](./intro.md) — the comparison table for all six algorithms.
-- [Complexity & Analysis](../complexity/intro.md) — including why O(n) sorts need assumptions about the keys.
+- [Complexity & Analysis](../complexity/intro.md) — including why $O(n)$ sorts need assumptions about the keys.
 - [Heaps & Priority Queues](../data-structures/heaps.md) — for the top-k and median cases above.

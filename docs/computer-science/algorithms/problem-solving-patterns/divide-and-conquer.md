@@ -21,8 +21,8 @@ that variation is what distinguishes [mergesort](../sorting/mergesort.md) from
 
 | Algorithm | Divide | Conquer | Combine |
 |---|---|---|---|
-| [Mergesort](../sorting/mergesort.md) | Trivial — split in half | Sort each half | **Merge — O(n)** |
-| [Quicksort](../sorting/quicksort.md) | **Partition — O(n)** | Sort each side | Trivial — nothing to do |
+| [Mergesort](../sorting/mergesort.md) | Trivial — split in half | Sort each half | **Merge — $O(n)$** |
+| [Quicksort](../sorting/quicksort.md) | **Partition — $O(n)$** | Sort each side | Trivial — nothing to do |
 | [Binary search](../searching/binary-search.md) | Compare to the midpoint | One side only | Trivial |
 | Karatsuba multiplication | Split the digits | 3 subproducts | Shift and add |
 | Strassen's matrix multiply | Split into quadrants | 7 subproducts | Add submatrices |
@@ -64,24 +64,24 @@ Result divide_and_conquer(const Problem& problem) {
 
 ### The Master Theorem
 
-For a recurrence `T(n) = a·T(n/b) + f(n)` — *a* subproblems, each of size *n/b*, plus *f(n)* work to
-divide and combine — compare `f(n)` against `n^(log_b a)`:
+For a recurrence $T(n) = a \cdot T(n/b) + f(n)$ — *a* subproblems, each of size *n/b*, plus *f(n)* work to
+divide and combine — compare `f(n)` against $n^{\log_b a}$:
 
 | Case | Condition | Result |
 |---|---|---|
-| 1 | `f(n)` grows **slower** | T(n) = Θ(n^(log_b a)) — the leaves dominate |
-| 2 | `f(n)` grows **at the same rate** | T(n) = Θ(n^(log_b a) · log n) — every level costs the same |
-| 3 | `f(n)` grows **faster** | T(n) = Θ(f(n)) — the root dominates |
+| 1 | `f(n)` grows **slower** | $T(n) = Θ(n^{\log_b a})$ — the leaves dominate |
+| 2 | `f(n)` grows **at the same rate** | $T(n) = Θ(n^{\log_b a} \cdot \log n)$ — every level costs the same |
+| 3 | `f(n)` grows **faster** | $T(n) = Θ(f(n))$ — the root dominates |
 
 Worked examples:
 
 | Recurrence | Algorithm | a, b, f(n) | Result |
 |---|---|---|---|
-| T(n) = 2T(n/2) + O(n) | Mergesort | 2, 2, n | n^1 = n, case 2 → **Θ(n log n)** |
-| T(n) = T(n/2) + O(1) | Binary search | 1, 2, 1 | n^0 = 1, case 2 → **Θ(log n)** |
-| T(n) = 2T(n/2) + O(1) | Tree traversal | 2, 2, 1 | n^1 vs 1, case 1 → **Θ(n)** |
-| T(n) = 7T(n/2) + O(n²) | Strassen's | 7, 2, n² | n^2.81, case 1 → **Θ(n^2.81)** |
-| T(n) = 3T(n/2) + O(n) | Karatsuba | 3, 2, n | n^1.58, case 1 → **Θ(n^1.58)** |
+| T(n) = 2T(n/2) + $O(n)$ | Mergesort | 2, 2, n | n^1 = n, case 2 → **$Θ(n \log n)$** |
+| T(n) = T(n/2) + $O(1)$ | Binary search | 1, 2, 1 | n^0 = 1, case 2 → **$Θ(\log n)$** |
+| T(n) = 2T(n/2) + $O(1)$ | Tree traversal | 2, 2, 1 | n^1 vs 1, case 1 → **$Θ(n)$** |
+| T(n) = 7T(n/2) + $O(n^2)$ | Strassen's | 7, 2, $n^2$ | n^2.81, case 1 → **$Θ(n^2.81)$** |
+| T(n) = 3T(n/2) + $O(n)$ | Karatsuba | 3, 2, n | n^1.58, case 1 → **$Θ(n^1.58)$** |
 
 The last two are the interesting ones: both beat the obvious algorithm purely by **reducing the
 number of subproblems** — Karatsuba does 3 multiplications where the schoolbook method does 4,
@@ -152,9 +152,9 @@ Where the pattern shows up beyond sorting:
 
 - **Parallel processing.** MapReduce is divide and conquer with the subproblems distributed across
   machines; the independence of subproblems is exactly what makes the distribution safe.
-- **Fast Fourier Transform** — O(n log n) instead of O(n²), by splitting into even and odd indices.
-- **Closest pair of points** — O(n log n) instead of the O(n²) of checking all pairs.
-- **Quickselect** — quicksort that recurses into only one side, giving O(n) average for the k-th
+- **Fast Fourier Transform** — $O(n \log n)$ instead of $O(n^2)$, by splitting into even and odd indices.
+- **Closest pair of points** — $O(n \log n)$ instead of the $O(n^2)$ of checking all pairs.
+- **Quickselect** — quicksort that recurses into only one side, giving $O(n)$ average for the k-th
   smallest element.
 - **[Binary search](../searching/binary-search.md)** and every balanced-tree operation.
 
@@ -163,7 +163,7 @@ Where the pattern shows up beyond sorting:
 :::warning[Divide and conquer requires *independent* subproblems]
 When subproblems overlap — the same sub-computation appearing in several branches — plain recursion
 recomputes it exponentially often. Naive Fibonacci is the standard demonstration: `fib(n-1)` and
-`fib(n-2)` share almost all their work, and the runtime is O(2ⁿ) for an O(n) problem.
+`fib(n-2)` share almost all their work, and the runtime is $O(2^n)$ for an $O(n)$ problem.
 
 Overlapping subproblems mean you want [dynamic programming](./dynamic-programming.md), which is
 precisely divide and conquer plus memoisation.
@@ -171,7 +171,7 @@ precisely divide and conquer plus memoisation.
 
 - **The base case must be reachable.** A "divide" that can produce an empty or full-size subproblem
   recurses forever. Quicksort's `mid + 1` and `mid - 1` exist for exactly this reason.
-- **Recursion depth is O(log n) when balanced and O(n) when not.** Unbalanced quicksort overflows the
+- **Recursion depth is $O(\log n)$ when balanced and $O(n)$ when not.** Unbalanced quicksort overflows the
   stack rather than merely running slowly.
 - **Switch to an iterative algorithm at small sizes.** Recursion overhead dominates below ~16
   elements, which is why production sorts fall back to
@@ -182,7 +182,7 @@ precisely divide and conquer plus memoisation.
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 4 — divide and conquer, the substitution and recursion-tree methods, and the Master Theorem with proof.
-- Karatsuba, A. (1962) — the multiplication algorithm that first beat the schoolbook O(n²) bound.
+- Karatsuba, A. (1962) — the multiplication algorithm that first beat the schoolbook $O(n^2)$ bound.
 - Strassen, V. (1969), "Gaussian elimination is not optimal" — the matrix-multiplication result.
 
 ### Books & Videos

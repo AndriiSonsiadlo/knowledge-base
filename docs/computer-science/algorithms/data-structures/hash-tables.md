@@ -10,7 +10,7 @@ tags: [computer-science, algorithms, data-structures, hash-table, hashing]
 
 
 A hash table turns a key into an array index by running it through a **hash function**, then reads or
-writes that slot directly. Because indexing an array is O(1), lookup by arbitrary key becomes O(1)
+writes that slot directly. Because indexing an array is $O(1)$, lookup by arbitrary key becomes $O(1)$
 too — which is a genuinely surprising result, and the reason `dict`, `HashMap`, `unordered_map` and
 `Object` are the most-used structures in programming.
 
@@ -106,7 +106,7 @@ Most modern implementations chose open addressing, and the reason is the cache c
 
 This curve is why implementations rehash. When α crosses a threshold (0.75 in Java, ~0.66 in Python,
 0.875 in Rust's hashbrown), the table allocates a larger array — usually double — and reinserts every
-entry. Rehashing is O(n), but it happens rarely enough to be **O(1) amortized**, by the same
+entry. Rehashing is $O(n)$, but it happens rarely enough to be **$O(1)$ amortized**, by the same
 doubling argument as [dynamic arrays](./arrays.md).
 
 ## Practical Usage
@@ -154,7 +154,7 @@ std::optional<std::pair<int, int>> two_sum(const std::vector<int>& nums, int tar
 </TabItem>
 </Tabs>
 
-That rewrite — replacing an O(n²) nested scan with an O(n) pass and a hash table — is the single most
+That rewrite — replacing an $O(n^2)$ nested scan with an $O(n)$ pass and a hash table — is the single most
 common application of the structure, and worth recognising on sight.
 
 ## Edge Cases & Pitfalls
@@ -172,10 +172,10 @@ leak. Use immutable keys.
 - **`equals` and `hashCode` must agree.** Two keys that compare equal must hash equally, or lookups
   fail unpredictably. Overriding one without the other is the classic Java bug; the same contract
   exists as `__eq__`/`__hash__` in Python and `Eq`/`Hash` in Rust.
-- **Worst case is O(n).** If every key collides, the table degenerates to a linear scan. Java 8+
-  converts long chains to red-black trees, capping degradation at O(log n).
+- **Worst case is $O(n)$.** If every key collides, the table degenerates to a linear scan. Java 8+
+  converts long chains to red-black trees, capping degradation at $O(\log n)$.
 - **Hash-flooding is a real attack.** An attacker who can predict your hash function can force
-  collisions deliberately and turn an O(1) endpoint into O(n) — a denial of service from ordinary
+  collisions deliberately and turn an $O(1)$ endpoint into $O(n)$ — a denial of service from ordinary
   traffic. This is why Python, Rust and others use randomly seeded hashing (SipHash) by default.
   Never use a fast non-cryptographic hash on attacker-controlled keys without a per-process seed.
 - **Iteration order is not insertion order** in general. Python's `dict` has guaranteed insertion
@@ -186,8 +186,8 @@ leak. Use immutable keys.
 
 | | Hash table | [Balanced BST](./balanced-trees.md) |
 |---|---|---|
-| Lookup | O(1) expected | O(log n) guaranteed |
-| Worst case | O(n) (O(log n) if treeified) | O(log n) |
+| Lookup | $O(1)$ expected | $O(\log n)$ guaranteed |
+| Worst case | $O(n)$ ($O(\log n)$ if treeified) | $O(\log n)$ |
 | Ordering | None | Sorted |
 | Range queries, min/max, successor | Not supported | Natural |
 | Memory | Empty slots or chain overhead | Two pointers per node |

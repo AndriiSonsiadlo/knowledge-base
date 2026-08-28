@@ -25,11 +25,11 @@ why it made that choice.
 - **[Selection Sort](./selection-sort.md)** — minimises writes, at the cost of never finishing early.
 - **[Insertion Sort](./insertion-sort.md)** — the one that is actually used, inside faster sorts.
 
-**The efficient sorts** — O(n log n), and the basis of every real implementation:
+**The efficient sorts** — $O(n \log n)$, and the basis of every real implementation:
 
-- **[Mergesort](./mergesort.md)** — stable, predictable, needs O(n) extra space.
+- **[Mergesort](./mergesort.md)** — stable, predictable, needs $O(n)$ extra space.
 - **[Quicksort](./quicksort.md)** — in place and usually fastest, with a quadratic worst case.
-- **[Heapsort](./heapsort.md)** — worst-case O(n log n) in place, but poor locality.
+- **[Heapsort](./heapsort.md)** — worst-case $O(n \log n)$ in place, but poor locality.
 
 **Then the decision itself:**
 
@@ -39,12 +39,12 @@ why it made that choice.
 
 | Algorithm | Best | Average | Worst | Space | Stable | Adaptive |
 |---|---|---|---|---|---|---|
-| [Bubble](./bubble-sort.md) | O(n) | O(n²) | O(n²) | O(1) | Yes | Yes |
-| [Selection](./selection-sort.md) | O(n²) | O(n²) | O(n²) | O(1) | No | No |
-| [Insertion](./insertion-sort.md) | O(n) | O(n²) | O(n²) | O(1) | Yes | Yes |
-| [Mergesort](./mergesort.md) | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes | No |
-| [Quicksort](./quicksort.md) | O(n log n) | O(n log n) | O(n²) | O(log n) | No | No |
-| [Heapsort](./heapsort.md) | O(n log n) | O(n log n) | O(n log n) | O(1) | No | No |
+| [Bubble](./bubble-sort.md) | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | Yes | Yes |
+| [Selection](./selection-sort.md) | $O(n^2)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | No | No |
+| [Insertion](./insertion-sort.md) | $O(n)$ | $O(n^2)$ | $O(n^2)$ | $O(1)$ | Yes | Yes |
+| [Mergesort](./mergesort.md) | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | Yes | No |
+| [Quicksort](./quicksort.md) | $O(n \log n)$ | $O(n \log n)$ | $O(n^2)$ | $O(\log n)$ | No | No |
+| [Heapsort](./heapsort.md) | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(1)$ | No | No |
 
 Two columns there matter more than most treatments admit:
 
@@ -56,12 +56,12 @@ Two columns there matter more than most treatments admit:
 
 ## The Lower Bound
 
-No comparison-based sort can beat **Ω(n log n)** in the worst case. The argument is short: there are
+No comparison-based sort can beat **$Ω(n \log n)$** in the worst case. The argument is short: there are
 `n!` possible orderings, each comparison yields one bit, and distinguishing `n!` cases needs at least
-`log₂(n!) ≈ n log₂ n` bits.
+$\log_2(n!) \approx n \log_2 n$ bits.
 
 This bounds a *model*, not the problem. Counting sort, radix sort and bucket sort look at the values
-themselves rather than only comparing them, and reach O(n) — by assuming the keys are integers in a
+themselves rather than only comparing them, and reach $O(n)$ — by assuming the keys are integers in a
 bounded range, or fixed-width. Every escape from the bound is paid for with an assumption about the
 data.
 

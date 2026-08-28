@@ -27,10 +27,10 @@ quicksort is usually the faster of the two, despite a worst case that is quadrat
 
 | Property | Value |
 |---|---|
-| Best case | O(n log n) — balanced partitions |
-| Average | O(n log n) |
-| Worst case | **O(n²)** — maximally unbalanced partitions |
-| Space | O(log n) — recursion stack only |
+| Best case | $O(n \log n)$ — balanced partitions |
+| Average | $O(n \log n)$ |
+| Worst case | **$O(n^2)$** — maximally unbalanced partitions |
+| Space | $O(\log n)$ — recursion stack only |
 | Stable | No |
 | Adaptive | No (though [pdqsort](./choosing-a-sort.md) makes it partly so) |
 | In place | **Yes** |
@@ -104,7 +104,7 @@ void quicksort(std::vector<int>& a) {
 
 ### Why it beats mergesort in practice despite equal complexity
 
-- **In place.** No O(n) buffer, and no allocation in the hot path.
+- **In place.** No $O(n)$ buffer, and no allocation in the hot path.
 - **Excellent locality.** Partitioning is two sequential scans converging on each other, which the
   [prefetcher](../../memory-hierarchy/cpu-caches.md) handles perfectly. Mergesort's merges are also
   sequential but write to a separate buffer, doubling memory traffic.
@@ -113,18 +113,18 @@ void quicksort(std::vector<int>& a) {
 ### The pivot choice is the whole game
 
 The partition is balanced only if the pivot is near the median. Choosing badly gives partitions of
-size 0 and n−1, which makes the recursion n levels deep and the cost O(n²).
+size 0 and n−1, which makes the recursion n levels deep and the cost $O(n^2)$.
 
 | Pivot strategy | Worst case triggered by | Verdict |
 |---|---|---|
 | First or last element | **Already-sorted input** | Dangerous — the most common real input |
-| Random element | Nothing predictable | Good; O(n²) becomes vanishingly unlikely |
+| Random element | Nothing predictable | Good; $O(n^2)$ becomes vanishingly unlikely |
 | Median of three (first, middle, last) | Crafted "median-of-3 killer" inputs | Standard practice; cheap and effective |
-| True median (median-of-medians) | Nothing — O(n log n) guaranteed | Too slow in practice |
+| True median (median-of-medians) | Nothing — $O(n \log n)$ guaranteed | Too slow in practice |
 
 :::danger[Naive quicksort is quadratic on sorted input]
 Picking the first or last element as pivot means an already-sorted array partitions into an empty
-side and everything else, every time — n levels of recursion, O(n²) comparisons, and O(n) stack
+side and everything else, every time — n levels of recursion, $O(n^2)$ comparisons, and $O(n)$ stack
 depth, which on a large array is a stack overflow rather than merely slow.
 
 Sorted or nearly-sorted input is extremely common. Never ship a quicksort with a fixed pivot
@@ -226,29 +226,29 @@ void introsort(std::vector<int>& a) {
 </Tabs>
 
 **Introsort** — this exact structure — is what C++'s `std::sort` uses. It keeps quicksort's speed
-while making the O(n²) worst case unreachable, because exceeding the depth budget hands the range to
+while making the $O(n^2)$ worst case unreachable, because exceeding the depth budget hands the range to
 [heapsort](./heapsort.md).
 
 Also worth knowing: **three-way partitioning** (into `< pivot`, `== pivot`, `> pivot`) turns arrays
-with many duplicate keys from a weakness into an O(n) best case. Without it, equal keys pile up on
+with many duplicate keys from a weakness into an $O(n)$ best case. Without it, equal keys pile up on
 one side.
 
 ## Edge Cases & Pitfalls
 
 - **Tail-recursion on the larger side risks stack overflow.** Recurse into the *smaller* partition
-  and loop on the larger, bounding stack depth to O(log n) even in the worst case.
+  and loop on the larger, bounding stack depth to $O(\log n)$ even in the worst case.
 - **`(lo + hi) // 2` can overflow** in fixed-width integer languages. Use `lo + (hi - lo) // 2`.
 - **Quicksort is not stable**, and cannot cheaply be made so — partitioning moves elements across
   long distances. If stability matters, use [mergesort](./mergesort.md).
-- **Many equal elements degrade two-way partitioning** to O(n²) in some schemes. Use three-way.
+- **Many equal elements degrade two-way partitioning** to $O(n^2)$ in some schemes. Use three-way.
 
 ## Comparisons
 
 | | Quicksort | [Mergesort](./mergesort.md) | [Heapsort](./heapsort.md) |
 |---|---|---|---|
 | Typical speed | **Fastest** | Good | Slowest |
-| Worst case | O(n²) | O(n log n) | O(n log n) |
-| Space | O(log n) | O(n) | **O(1)** |
+| Worst case | $O(n^2)$ | $O(n \log n)$ | $O(n \log n)$ |
+| Space | $O(\log n)$ | $O(n)$ | **$O(1)$** |
 | Stable | No | **Yes** | No |
 | Used by | C++ `std::sort`, Rust `sort_unstable` | Java objects, Python (as Timsort) | Introsort's fallback |
 
@@ -264,6 +264,6 @@ one side.
 
 ## Related Pages
 
-- [Mergesort](./mergesort.md) — the stable, guaranteed-O(n log n) counterpart.
+- [Mergesort](./mergesort.md) — the stable, guaranteed-$O(n \log n)$ counterpart.
 - [Heapsort](./heapsort.md) — introsort's escape hatch.
 - [Choosing a Sort](./choosing-a-sort.md) — what standard libraries actually ship.
