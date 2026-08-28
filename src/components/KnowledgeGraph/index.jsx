@@ -23,6 +23,18 @@ function folderLabel(folder) {
   return folder.replace(/^\d+-/, "").replace(/-/g, " ");
 }
 
+// Reading order within a folder: sidebar_position first, id as a tiebreak —
+// not alphabetical by id, which has no relation to the intended reading order.
+function byReadingOrder(a, b) {
+  return a.sidebarPosition - b.sidebarPosition || a.id.localeCompare(b.id);
+}
+
+// Mermaid flowchart node labels are quoted strings; a literal `"` in the
+// label would close the string early and break the diagram.
+function escapeLabel(label) {
+  return label.replaceAll('"', "&quot;");
+}
+
 export default function KnowledgeGraph({ folder }) {
   const graph = usePluginData("knowledge-graph-plugin");
   if (!graph || graph.nodes.length === 0) return null;
@@ -35,11 +47,13 @@ export default function KnowledgeGraph({ folder }) {
   const internal = graph.nodes.filter((node) => !node.external && node.folder);
 
   if (folder) {
-    const pages = internal.filter((node) => node.folder === folder);
+    const pages = internal
+      .filter((node) => node.folder === folder)
+      .sort(byReadingOrder);
     const ids = new Set(pages.map((node) => node.id));
     const lines = ["flowchart LR"];
     for (const page of pages) {
-      lines.push(`  ${mermaidId(page.id)}["${page.label}"]`);
+      lines.push(`  ${mermaidId(page.id)}["${escapeLabel(page.label)}"]`);
     }
     for (const edge of graph.edges) {
       if (ids.has(edge.from) && ids.has(edge.to)) {
@@ -72,7 +86,7 @@ export default function KnowledgeGraph({ folder }) {
 
   const lines = ["flowchart LR"];
   for (const name of folders) {
-    lines.push(`  ${mermaidId(name)}["${folderLabel(name)}"]`);
+    lines.push(`  ${mermaidId(name)}["${escapeLabel(folderLabel(name))}"]`);
   }
   for (const edge of folderEdges) {
     const [to, from] = edge.split("|");
@@ -86,7 +100,7 @@ export default function KnowledgeGraph({ folder }) {
         {folders.map((name) => {
           const first = internal
             .filter((node) => node.folder === name)
-            .sort((a, b) => a.id.localeCompare(b.id))[0];
+            .sort(byReadingOrder)[0];
           return (
             <li key={name}>
               <Link to={first.permalink}>{folderLabel(name)}</Link>

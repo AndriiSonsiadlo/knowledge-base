@@ -28,16 +28,18 @@ export default function Cast({ src, caption, poster = "npt:0:01" }) {
     let cancelled = false;
 
     (async () => {
-      const AsciinemaPlayer = (await import("asciinema-player")).default;
+      const { create } = await import("asciinema-player");
       if (cancelled || !containerRef.current) return;
-      player = AsciinemaPlayer.create(resolved, containerRef.current, {
+      player = create(resolved, containerRef.current, {
         autoPlay: false,
         idleTimeLimit: 2,
         fit: "width",
         theme: "asciinema",
         poster,
       });
-    })();
+    })().catch((err) => {
+      console.error("Cast: failed to load asciinema-player", err);
+    });
 
     return () => {
       cancelled = true;

@@ -10,6 +10,10 @@
 //
 // Existing .md files are never touched without --force. Re-running this after
 // pages have been written is safe and is how later phases extend the tree.
+//
+// _category_.json files are the exception: they are always regenerated from
+// the manifest on every run, regardless of --force. They are manifest-owned,
+// not author-owned — a hand-edit to one will not persist across a re-run.
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -30,8 +34,8 @@ function stub(page, folder) {
   const front = [
     "---",
     `id: ${page.id}`,
-    `title: "${page.title}"`,
-    `sidebar_label: "${page.sidebar_label}"`,
+    `title: ${JSON.stringify(page.title)}`,
+    `sidebar_label: ${JSON.stringify(page.sidebar_label)}`,
     `sidebar_position: ${page.sidebar_position}`,
     `tags: [${page.tags.join(", ")}]`,
     yamlList("prerequisites", page.prerequisites),
@@ -90,8 +94,8 @@ for (const page of manifest.external ?? []) {
   const body = [
     "---",
     `id: ${page.id}`,
-    `title: "${page.title}"`,
-    `sidebar_label: "${page.sidebar_label}"`,
+    `title: ${JSON.stringify(page.title)}`,
+    `sidebar_label: ${JSON.stringify(page.sidebar_label)}`,
     `sidebar_position: ${page.sidebar_position}`,
     `tags: [${page.tags.join(", ")}]`,
     "draft: false",

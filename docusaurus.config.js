@@ -1,6 +1,6 @@
 import { themes as prismThemes } from "prism-react-renderer";
-import remarkWavedrom from "./src/plugins/remark-wavedrom.js";
 import knowledgeGraphPlugin from "./src/plugins/knowledge-graph-plugin.js";
+import remarkWavedrom from "./src/plugins/remark-wavedrom.js";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
