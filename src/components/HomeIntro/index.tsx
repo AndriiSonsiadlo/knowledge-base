@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 export default function HomeIntro(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
   const githubUrl = siteConfig.customFields?.githubUrl as string | undefined;
-  const avatarUrl = useBaseUrl("/img/logo.png");
+  const avatarUrl = useBaseUrl("/img/photo.png");
 
   return (
     <section className="mx-auto mb-10 w-full max-w-5xl">

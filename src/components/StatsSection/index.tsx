@@ -16,12 +16,14 @@ function StatCard({ value, label }: { value: number; label: string }) {
 
 export default function StatsSection(): ReactNode | null {
   const navbarItems = useThemeConfig().navbar.items;
-  const categoryCount = navbarItems.filter(
-    (item) =>
-      item.type === "doc" ||
-      item.type === "docSidebar" ||
-      item.type === "docsVersion",
-  ).length;
+  const categoryCount = navbarItems
+    .flatMap((item) => (Array.isArray(item.items) ? item.items : [item]))
+    .filter(
+      (item) =>
+        item.type === "doc" ||
+        item.type === "docSidebar" ||
+        item.type === "docsVersion",
+    ).length;
 
   const allDocsData = useAllDocsData();
   const defaultDocsData = allDocsData.default ?? Object.values(allDocsData)[0];
