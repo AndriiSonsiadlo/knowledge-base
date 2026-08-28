@@ -103,7 +103,7 @@ const config = {
             label: "Programming",
             description:
               "Learn Python, C++, and master modern programming languages with practical examples.",
-            icon: "💻",
+            icon: "code",
           },
           {
             type: "dropdown",
@@ -116,7 +116,7 @@ const config = {
                 label: "Computer Science",
                 description:
                   "Deep dive into systems, architecture, memory, networking, and core algorithms.",
-                icon: "⚙️",
+                icon: "cpu",
               },
               {
                 type: "docSidebar",
@@ -124,7 +124,7 @@ const config = {
                 label: "GPU & Accelerators",
                 description:
                   "CUDA, GPU architecture, kernel optimization, and NPU/inference accelerators.",
-                icon: "🚀",
+                icon: "rocket",
               },
               {
                 type: "docSidebar",
@@ -132,7 +132,7 @@ const config = {
                 label: "Embedded Systems",
                 description:
                   "Bare-metal firmware, Cortex-M architecture, RTOS, embedded Linux, safety and security.",
-                icon: "🔌",
+                icon: "plug",
               },
             ],
           },
@@ -147,7 +147,7 @@ const config = {
                 label: "Machine Learning",
                 description:
                   "Master fundamentals, neural networks, NLP, and modern ML architectures.",
-                icon: "🤖",
+                icon: "bot",
               },
               {
                 type: "docSidebar",
@@ -155,7 +155,7 @@ const config = {
                 label: "Data Science",
                 description:
                   "Practical analysis, wrangling, ETL, querying, visualization, and notebook-first workflows.",
-                icon: "🔧",
+                icon: "database",
               },
             ],
           },
@@ -166,7 +166,7 @@ const config = {
             label: "Game Development",
             description:
               "Build games with Unreal Engine 5 and C++ — from engine internals to shipping.",
-            icon: "🎮",
+            icon: "gamepad",
           },
           // {
           //   to: "/blog",
