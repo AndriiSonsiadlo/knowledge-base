@@ -1236,6 +1236,16 @@ body {
 
 .menu__link {
   @apply transition-colors;
+  font-size: 0.85rem;
+}
+
+.menu__link--sublist-caret:after,
+.menu__caret:before {
+  width: 0.85rem;
+  height: 0.85rem;
+  min-width: 0.85rem;
+  background-size: 1.4rem 1.4rem;
+  opacity: 0.45;
 }
 
 [data-theme="light"] .menu__link:hover {
