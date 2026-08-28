@@ -8,19 +8,6 @@ tags: [computer-science, algorithms, complexity, recurrences, master-theorem]
 
 # Recurrences & the Master Theorem
 
-<Recall
-  invariant="T(n) = aT(n/b) + f(n) describes a subdivided a-way recursion; its closed form is decided by comparing f(n), the work done outside the recursive calls, against n^(log_b a), the cost of the leaves."
-  costs={[
-    ["mergesort, T(n) = 2T(n/2) + Θ(n) (worst)", "Θ(n log n)"],
-    ["binary search, T(n) = T(n/2) + Θ(1) (worst)", "Θ(log n)"],
-    ["Karatsuba multiplication, T(n) = 3T(n/2) + Θ(n) (worst)", "Θ(n^log₂3) ≈ Θ(n^1.585)"],
-    ["naive recursive Fibonacci, T(n) = T(n−1) + T(n−2) + Θ(1) (worst)", "Θ(φⁿ)"],
-    ["master theorem substitution check (per candidate)", "O(1) per level, O(log_b n) levels"],
-  ]}
-  reachFor="Any divide-and-conquer algorithm, or any recursive function whose cost you need in closed form rather than by tracing calls one at a time."
-  trap="Applying the master theorem when the polynomial gap between f(n) and n^(log_b a) is not strict, or when the recursion is not of the exact form aT(n/b) + f(n) — a/b non-constant, unequal subproblem sizes, or a subtractive recurrence like T(n−1) all fall outside it."
-/>
-
 A recursive algorithm's cost is itself defined recursively — mergesort's cost on n elements is twice its
 cost on n/2 elements, plus the Θ(n) merge. That self-reference is exact but not directly useful: nobody
 reads Θ(n log n) off `T(n) = 2T(n/2) + Θ(n)` by eye. Solving a recurrence means turning that
@@ -219,3 +206,16 @@ theorem does not apply.
   most often, including the comparison-sort lower bound this recurrence achieves.
 - [Cheat Sheet](./cheat-sheet.md) — a decision flow for picking loop counting, recursion tree, master
   theorem, or amortized analysis on a new problem.
+
+<Recall
+  invariant="T(n) = aT(n/b) + f(n) describes a subdivided a-way recursion; its closed form is decided by comparing f(n), the work done outside the recursive calls, against n^(log_b a), the cost of the leaves."
+  costs={[
+    ["mergesort, T(n) = 2T(n/2) + Θ(n) (worst)", "Θ(n log n)"],
+    ["binary search, T(n) = T(n/2) + Θ(1) (worst)", "Θ(log n)"],
+    ["Karatsuba multiplication, T(n) = 3T(n/2) + Θ(n) (worst)", "Θ(n^log₂3) ≈ Θ(n^1.585)"],
+    ["naive recursive Fibonacci, T(n) = T(n−1) + T(n−2) + Θ(1) (worst)", "Θ(φⁿ)"],
+    ["master theorem substitution check (per candidate)", "O(1) per level, O(log_b n) levels"],
+  ]}
+  reachFor="Any divide-and-conquer algorithm, or any recursive function whose cost you need in closed form rather than by tracing calls one at a time."
+  trap="Applying the master theorem when the polynomial gap between f(n) and n^(log_b a) is not strict, or when the recursion is not of the exact form aT(n/b) + f(n) — a/b non-constant, unequal subproblem sizes, or a subtractive recurrence like T(n−1) all fall outside it."
+/>

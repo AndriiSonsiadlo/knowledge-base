@@ -8,20 +8,6 @@ tags: [computer-science, algorithms, complexity, growth-classes]
 
 # Common Complexities
 
-<Recall
-  invariant="The growth class is a property of the problem shape, not of any single implementation — 'for each pair' is quadratic no matter which language writes the nested loop."
-  costs={[
-    ["array index / hash lookup (average)", "O(1)"],
-    ["binary search over sorted data (worst)", "O(log n)"],
-    ["single pass over the input (worst)", "O(n)"],
-    ["comparison sort — mergesort, heapsort (worst)", "O(n log n)"],
-    ["nested pass over every pair (worst)", "O(n²)"],
-    ["every subset / every ordering (worst)", "O(2ⁿ) / O(n!)"],
-  ]}
-  reachFor="Recognising the class a piece of code falls into before running it, or the problem shape ('for each pair', 'try every subset') that predicts the class before any code is written."
-  trap="Quoting a bound with no case attached — insertion sort is O(n) only on an already-sorted input; its worst case is O(n²), and the two get conflated constantly."
-/>
-
 In practice you meet perhaps eight growth classes. Recognising which one a piece of code falls into —
 and, more usefully, recognising the *problem shape* that produces each — is most of what complexity
 analysis is for day to day.
@@ -232,3 +218,17 @@ hides.
   operations, not on every single call.
 - [Space Complexity](./space-complexity.md) — the same growth classes applied to memory.
 - [Choosing a Sort](../sorting/choosing-a-sort.md) — these trade-offs applied to one concrete decision.
+
+<Recall
+  invariant="The growth class is a property of the problem shape, not of any single implementation — 'for each pair' is quadratic no matter which language writes the nested loop."
+  costs={[
+    ["array index / hash lookup (average)", "O(1)"],
+    ["binary search over sorted data (worst)", "O(log n)"],
+    ["single pass over the input (worst)", "O(n)"],
+    ["comparison sort — mergesort, heapsort (worst)", "O(n log n)"],
+    ["nested pass over every pair (worst)", "O(n²)"],
+    ["every subset / every ordering (worst)", "O(2ⁿ) / O(n!)"],
+  ]}
+  reachFor="Recognising the class a piece of code falls into before running it, or the problem shape ('for each pair', 'try every subset') that predicts the class before any code is written."
+  trap="Quoting a bound with no case attached — insertion sort is O(n) only on an already-sorted input; its worst case is O(n²), and the two get conflated constantly."
+/>

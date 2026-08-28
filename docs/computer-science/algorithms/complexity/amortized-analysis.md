@@ -8,19 +8,6 @@ tags: [computer-science, algorithms, complexity, amortized-analysis]
 
 # Amortized Analysis
 
-<Recall
-  invariant="An amortized bound is a guarantee on the *total* cost of any sequence of n operations, divided by n — never a claim about any single operation."
-  costs={[
-    ["dynamic array append, doubling (amortized)", "O(1)"],
-    ["dynamic array append, doubling (worst, single op)", "O(n)"],
-    ["union-find union/find with union-by-rank + path compression (amortized)", "O(α(n))"],
-    ["binary counter increment (amortized)", "O(1)"],
-    ["binary counter increment (worst, single op)", "O(log n)"],
-  ]}
-  reachFor="A structure where most operations are cheap and a few are expensive, and the expensive ones become rarer exactly in proportion to how much cheap work preceded them."
-  trap="Reporting the amortized bound as if it bounded every call — a single append can still be O(n), and a real-time or interactive path judged on tail latency will see that cost directly."
-/>
-
 Some structures cannot be made cheap on every single call, but can be made cheap *on average over any
 run*. A dynamic array occasionally has to grow: allocate a bigger buffer, copy everything into it. That
 one call is expensive. But if growth happens rarely enough, and the cost of each growth is proportional
@@ -241,3 +228,16 @@ potential function over subtree sizes.
   bounding recursive and iterative costs, used when the cost is not amortized but recursive.
 - [Arrays & Dynamic Arrays](../data-structures/arrays.md) — the doubling-array mechanics this page
   analyses, described as a structure rather than as a cost argument.
+
+<Recall
+  invariant="An amortized bound is a guarantee on the *total* cost of any sequence of n operations, divided by n — never a claim about any single operation."
+  costs={[
+    ["dynamic array append, doubling (amortized)", "O(1)"],
+    ["dynamic array append, doubling (worst, single op)", "O(n)"],
+    ["union-find union/find with union-by-rank + path compression (amortized)", "O(α(n))"],
+    ["binary counter increment (amortized)", "O(1)"],
+    ["binary counter increment (worst, single op)", "O(log n)"],
+  ]}
+  reachFor="A structure where most operations are cheap and a few are expensive, and the expensive ones become rarer exactly in proportion to how much cheap work preceded them."
+  trap="Reporting the amortized bound as if it bounded every call — a single append can still be O(n), and a real-time or interactive path judged on tail latency will see that cost directly."
+/>

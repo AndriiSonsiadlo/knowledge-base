@@ -8,20 +8,6 @@ tags: [computer-science, algorithms, complexity, space-complexity, recursion]
 
 # Space Complexity
 
-<Recall
-  invariant="Total space = input space + auxiliary space, and every pending recursive call holds a stack frame — a recursion of depth d costs Θ(d) auxiliary space even if each call allocates nothing itself."
-  costs={[
-    ["recursive sum of n elements, call stack (worst)", "Θ(n) auxiliary"],
-    ["iterative sum of n elements (worst)", "Θ(1) auxiliary"],
-    ["mergesort auxiliary buffer (worst)", "Θ(n) auxiliary"],
-    ["quicksort recursion stack (average/expected)", "Θ(log n) auxiliary"],
-    ["quicksort recursion stack, unbalanced/adversarial (worst)", "Θ(n) auxiliary"],
-    ["in-place insertion sort (worst)", "Θ(1) auxiliary"],
-  ]}
-  reachFor="Deciding between two algorithms of similar time complexity, or diagnosing a stack overflow that a purely time-based analysis would never predict."
-  trap="Calling an algorithm 'in-place' because it does not allocate a second array, while ignoring an O(n)-deep recursion stack that costs exactly the memory the phrase claims to avoid."
-/>
-
 Time complexity answers "how does the work grow?"; space complexity asks the same question about
 memory. It gets less attention, and that is a mistake with two different failure modes: an algorithm
 that runs out of memory long before it runs out of time budget, and a recursive algorithm that overflows
@@ -218,3 +204,17 @@ Three named time/space trades:
   heapsort applied as a concrete decision.
 - [Recurrences & the Master Theorem](./recurrences-and-master-theorem.md) — the recursion trees used
   there to sum *time* per level sum stack *depth* the same way for space.
+
+<Recall
+  invariant="Total space = input space + auxiliary space, and every pending recursive call holds a stack frame — a recursion of depth d costs Θ(d) auxiliary space even if each call allocates nothing itself."
+  costs={[
+    ["recursive sum of n elements, call stack (worst)", "Θ(n) auxiliary"],
+    ["iterative sum of n elements (worst)", "Θ(1) auxiliary"],
+    ["mergesort auxiliary buffer (worst)", "Θ(n) auxiliary"],
+    ["quicksort recursion stack (average/expected)", "Θ(log n) auxiliary"],
+    ["quicksort recursion stack, unbalanced/adversarial (worst)", "Θ(n) auxiliary"],
+    ["in-place insertion sort (worst)", "Θ(1) auxiliary"],
+  ]}
+  reachFor="Deciding between two algorithms of similar time complexity, or diagnosing a stack overflow that a purely time-based analysis would never predict."
+  trap="Calling an algorithm 'in-place' because it does not allocate a second array, while ignoring an O(n)-deep recursion stack that costs exactly the memory the phrase claims to avoid."
+/>

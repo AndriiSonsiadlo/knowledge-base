@@ -8,19 +8,6 @@ tags: [computer-science, algorithms, strings, pattern-matching]
 
 # KMP & the Z-Algorithm
 
-<Recall
-  invariant="`fail[i]` is the length of the longest proper prefix of `pattern[0..i]` that is also a suffix of it — so on a mismatch the pattern slides to that border and the text pointer never moves back."
-  costs={[
-    ["build the failure function (worst)", "O(m)"],
-    ["search after building (worst)", "O(n)"],
-    ["total, all occurrences (worst)", "O(n + m)"],
-    ["extra space (worst)", "O(m)"],
-    ["Z-array over a string (worst)", "O(n)"],
-  ]}
-  reachFor="One pattern, a long text, and a guarantee is needed — no worst case where the naive scan degrades to O(nm)."
-  trap="`fail[i]` must be a *proper* prefix: `fail[0]` is always 0, never `i+1`. Getting that wrong makes the algorithm loop forever on a run of identical characters."
-/>
-
 The naive substring scan tries the pattern at every text position and, on a mismatch, throws away
 everything it just learned. Line up `abacaba` against `abacabadabacaba`, match six characters, fail on
 the seventh — and the naive loop restarts at text index 1 with an empty memory, re-reading five
@@ -337,3 +324,16 @@ CLRS 4th ed. §32.2 for Rabin-Karp's analysis and Sedgewick & Wayne §5.3 for th
   start comparing them.
 - [Big-O Notation](../complexity/big-o-notation.md) — why O(n + m) worst case is a different promise
   from O(n + m) average.
+
+<Recall
+  invariant="`fail[i]` is the length of the longest proper prefix of `pattern[0..i]` that is also a suffix of it — so on a mismatch the pattern slides to that border and the text pointer never moves back."
+  costs={[
+    ["build the failure function (worst)", "O(m)"],
+    ["search after building (worst)", "O(n)"],
+    ["total, all occurrences (worst)", "O(n + m)"],
+    ["extra space (worst)", "O(m)"],
+    ["Z-array over a string (worst)", "O(n)"],
+  ]}
+  reachFor="One pattern, a long text, and a guarantee is needed — no worst case where the naive scan degrades to O(nm)."
+  trap="`fail[i]` must be a *proper* prefix: `fail[0]` is always 0, never `i+1`. Getting that wrong makes the algorithm loop forever on a run of identical characters."
+/>

@@ -8,17 +8,6 @@ tags: [computer-science, algorithms, complexity, big-o]
 
 # Complexity & Analysis — Overview
 
-<Recall
-  invariant="Complexity describes how work grows as input grows, not how long a specific run took on a specific machine."
-  costs={[
-    ["array index lookup (worst)", "O(1)"],
-    ["find_max, one linear scan of n elements (worst)", "O(n)"],
-    ["binary search over sorted data (worst)", "O(log n)"],
-  ]}
-  reachFor="Comparing two approaches before writing either, or explaining why one already-working piece of code is slow at scale."
-  trap="Timing one run on one machine and treating the number as the algorithm's complexity — a faster laptop or a warmer cache changes the timing without changing the growth rate."
-/>
-
 Measuring an algorithm by timing it tells you about your laptop, your compiler, your input, and the
 background processes competing with you. **Complexity analysis** asks a different question — how does
 the work grow as the input grows? — and answers it in a way that survives all four.
@@ -154,3 +143,14 @@ changes character somewhere around n = 10,000.
 - [Common Complexities](./common-complexities.md) — a named algorithm for each growth class.
 - [Sorting Algorithms](../sorting/intro.md) — the classic worked example of an $O(n^2)$ versus $O(n \log n)$ choice.
 - [Data Structures](../data-structures/intro.md) — every structure is a set of complexity trade-offs made concrete.
+
+<Recall
+  invariant="Complexity describes how work grows as input grows, not how long a specific run took on a specific machine."
+  costs={[
+    ["array index lookup (worst)", "O(1)"],
+    ["find_max, one linear scan of n elements (worst)", "O(n)"],
+    ["binary search over sorted data (worst)", "O(log n)"],
+  ]}
+  reachFor="Comparing two approaches before writing either, or explaining why one already-working piece of code is slow at scale."
+  trap="Timing one run on one machine and treating the number as the algorithm's complexity — a faster laptop or a warmer cache changes the timing without changing the growth rate."
+/>

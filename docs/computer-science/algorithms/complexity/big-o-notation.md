@@ -8,19 +8,6 @@ tags: [computer-science, algorithms, complexity, big-o]
 
 # Big-O Notation
 
-<Recall
-  invariant="f(n) = O(g(n)) holds when some constant c and threshold n₀ make f(n) ≤ c·g(n) for every n ≥ n₀ — a claim about large n only, never about all n."
-  costs={[
-    ["O(f) — upper bound", "grows no faster than f"],
-    ["Ω(f) — lower bound", "grows no slower than f"],
-    ["Θ(f) — tight bound", "bounded above and below by f"],
-    ["o(f) — strict upper bound", "grows strictly slower than f"],
-    ["ω(f) — strict lower bound", "grows strictly faster than f"],
-  ]}
-  reachFor="Stating how an algorithm's cost scales in a way that survives a change of hardware, language, or constant factor."
-  trap="Dropping constants unconditionally. At small n, or when the constant is itself huge (a 10 MB lookup table hidden inside an O(1) step), the dropped term is the one that decides the real running time."
-/>
-
 Big-O describes an **upper bound on growth**. Saying an algorithm is $O(n^2)$ claims that beyond some
 input size, its cost is at most a constant multiple of $n^2$ — never that it *is* $n^2$, and never anything
 at all about small inputs.
@@ -248,3 +235,16 @@ $O(n)$ is meaningless until you say what n counts. Two common traps:
 
 - [Common Complexities](./common-complexities.md) — a named algorithm for each growth class, and what a given n costs at realistic hardware speeds.
 - [Sorting Algorithms](../sorting/intro.md) — where these bounds get their most familiar workout.
+
+<Recall
+  invariant="f(n) = O(g(n)) holds when some constant c and threshold n₀ make f(n) ≤ c·g(n) for every n ≥ n₀ — a claim about large n only, never about all n."
+  costs={[
+    ["O(f) — upper bound", "grows no faster than f"],
+    ["Ω(f) — lower bound", "grows no slower than f"],
+    ["Θ(f) — tight bound", "bounded above and below by f"],
+    ["o(f) — strict upper bound", "grows strictly slower than f"],
+    ["ω(f) — strict lower bound", "grows strictly faster than f"],
+  ]}
+  reachFor="Stating how an algorithm's cost scales in a way that survives a change of hardware, language, or constant factor."
+  trap="Dropping constants unconditionally. At small n, or when the constant is itself huge (a 10 MB lookup table hidden inside an O(1) step), the dropped term is the one that decides the real running time."
+/>

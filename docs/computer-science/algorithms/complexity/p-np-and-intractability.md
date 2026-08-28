@@ -8,20 +8,6 @@ tags: [computer-science, algorithms, complexity, np-completeness, reductions]
 
 # P, NP & Intractability
 
-<Recall
-  invariant="P ⊆ NP is proven; whether P = NP is the open question — every NP-complete problem is simultaneously as easy as every other (all in P, or none are) because each reduces to any other in polynomial time."
-  costs={[
-    ["3-SAT, best known algorithm (worst)", "O(1.30ⁿ) — best known, not a proven lower bound"],
-    ["clique / independent set, best known (worst)", "O(1.2ⁿ) roughly — best known"],
-    ["travelling salesman, exact, best known (worst)", "O(n²·2ⁿ) (Held–Karp DP) — best known"],
-    ["subset-sum, exact, best known (worst)", "O(2^(n/2)) (meet in the middle) — best known"],
-    ["polynomial-time reduction, problem A to B", "O(poly(n)) transformation, run once"],
-    ["2-SAT (in P, despite the name)", "O(n + m)"],
-  ]}
-  reachFor="Recognising that a problem you are about to brute-force is a known NP-hard problem in disguise, before spending engineering effort chasing a polynomial algorithm that (very likely) does not exist."
-  trap="Treating 'NP' as meaning 'hard' — NP means efficiently *verifiable*, and P ⊆ NP, so every polynomial-time problem is also in NP; the interesting claim is NP-completeness, not membership in NP."
-/>
-
 Most complexity analysis on this site asks how fast a *known* algorithm runs. This page asks a
 different question: whether a fast algorithm can exist at all. Some problems — sorting, shortest path,
 matrix multiplication — have polynomial-time solutions and the only remaining question is which
@@ -202,3 +188,17 @@ What to do once a problem is confirmed intractable:
   problems, several of which this page's reduction touches directly.
 - [Cheat Sheet](./cheat-sheet.md) — where recognising intractability fits among the section's other
   analysis methods.
+
+<Recall
+  invariant="P ⊆ NP is proven; whether P = NP is the open question — every NP-complete problem is simultaneously as easy as every other (all in P, or none are) because each reduces to any other in polynomial time."
+  costs={[
+    ["3-SAT, best known algorithm (worst)", "O(1.30ⁿ) — best known, not a proven lower bound"],
+    ["clique / independent set, best known (worst)", "O(1.2ⁿ) roughly — best known"],
+    ["travelling salesman, exact, best known (worst)", "O(n²·2ⁿ) (Held–Karp DP) — best known"],
+    ["subset-sum, exact, best known (worst)", "O(2^(n/2)) (meet in the middle) — best known"],
+    ["polynomial-time reduction, problem A to B", "O(poly(n)) transformation, run once"],
+    ["2-SAT (in P, despite the name)", "O(n + m)"],
+  ]}
+  reachFor="Recognising that a problem you are about to brute-force is a known NP-hard problem in disguise, before spending engineering effort chasing a polynomial algorithm that (very likely) does not exist."
+  trap="Treating 'NP' as meaning 'hard' — NP means efficiently *verifiable*, and P ⊆ NP, so every polynomial-time problem is also in NP; the interesting claim is NP-completeness, not membership in NP."
+/>

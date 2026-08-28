@@ -1,6 +1,6 @@
 import { formatRecallText } from "@lib/recallFormat";
 
-// <Recall /> — the fixed recall card at the top of every algorithms page.
+// <Recall /> — the fixed recall card at the end of every algorithms page.
 //
 // Four rows, always the same four, always in this order, so the card can be read
 // by shape rather than by reading: what must stay true, what it costs, when to
