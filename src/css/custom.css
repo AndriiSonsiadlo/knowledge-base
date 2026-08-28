@@ -929,6 +929,10 @@ div[class^='docItemContainer_'] article img {
   font-size: 0.85rem;
   margin-top: 0;
   color: rgb(63 53 80 / 0.9);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 [data-theme='dark'] .navbar__items--center .dropdown__link {
@@ -1443,11 +1447,15 @@ body {
   @apply font-semibold;
 }
 
-.menu__link.menu__link--active {
+/* The active-item bar lives on every link (opacity 0 at rest) rather than
+   being added/removed with the --active class, so switching the active item
+   crossfades the bar instead of having it pop in on one link and vanish on
+   the other. */
+.menu__link {
   position: relative;
 }
 
-.menu__link.menu__link--active::before {
+.menu__link::before {
   content: '';
   position: absolute;
   left: 0;
@@ -1455,6 +1463,16 @@ body {
   bottom: 0;
   width: 4px;
   border-radius: 4px;
+  opacity: 0;
+  transform: scaleY(0.6);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.menu__link.menu__link--active::before {
+  opacity: 1;
+  transform: scaleY(1);
 }
 
 [data-theme="light"] .menu__link.menu__link--active {
@@ -1462,7 +1480,7 @@ body {
   color: var(--brand-primary-darkest);
 }
 
-[data-theme="light"] .menu__link.menu__link--active::before {
+[data-theme="light"] .menu__link::before {
   background: linear-gradient(
     180deg,
     var(--brand-primary-dark),
@@ -1475,12 +1493,20 @@ body {
   color: var(--brand-primary-lightest);
 }
 
-[data-theme="dark"] .menu__link.menu__link--active::before {
+[data-theme="dark"] .menu__link::before {
   background: linear-gradient(
     180deg,
     var(--brand-primary-light),
     var(--brand-accent-light)
   );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__items--center .dropdown__link,
+  .menu__link,
+  .menu__link::before {
+    transition: none;
+  }
 }
 
 /* ============ TOC (Table of Contents) ============ */
