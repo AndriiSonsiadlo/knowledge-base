@@ -6,7 +6,7 @@ Add a new top-level documentation section covering embedded software engineering
 electronics a firmware developer must read, up through bare-metal Cortex-M programming, RTOS
 work, embedded Linux, functional safety, security, and the firmware product lifecycle.
 
-The section is `docs/embedded/`: **16 numbered folders, 174 topic pages plus a section
+The section is `docs/embedded/`: **16 numbered folders, 167 topic pages plus a section
 `readme.md`**, plus 16 `_category_.json` files, plus a small amount of site wiring (a WaveDrom
 remark plugin, one new theme component, one new third-party plugin, four Prism languages).
 
@@ -644,26 +644,39 @@ time.
 
 ---
 
-### 10-embedded-linux — "Embedded Linux" (position 11) — 14 pages
+### 10-embedded-linux — "Embedded Linux" (position 11) — 7 pages
+
+:::note[Amended 2026-08-28]
+This folder originally specified **14 pages**. `docs/linux/` (see
+`2026-08-28-linux-kernel-docs-design.md`) now owns kernel architecture, modules, drivers,
+filesystems, and boot generally. Seven pages were removed from this folder and replaced by links
+into that section; the seven that remain are the ones with no equivalent there, because they are
+genuinely embedded-specific rather than Linux-general.
+
+**Removed, and where the content now lives:**
+
+| Removed page | Now owned by |
+|---|---|
+| `kernel-configuration-and-build.md` | `linux/01-lab-and-toolchain/building-a-kernel.md` — this folder's remaining pages add only the `ARCH`/`CROSS_COMPILE` cross-compilation delta, inside `when-you-need-linux.md` |
+| `kernel-modules.md` | `linux/04-kernel-architecture-and-idioms/modules-in-practice.md` |
+| `character-drivers.md` | `linux/14-device-drivers-and-hardware/character-devices.md` + `lab-a-character-driver.md` |
+| `kernel-driver-frameworks.md` | `linux/14-device-drivers-and-hardware/the-linux-device-model.md` + `platform-devices-and-description.md`. The IIO/GPIO/SPI/I2C subsystem specifics stay in this section, folded into `device-tree.md` |
+| `userspace-hardware-access.md` | `linux/14-device-drivers-and-hardware/talking-to-user-space.md` |
+| `root-filesystems-and-init.md` | `linux/01-lab-and-toolchain/a-minimal-rootfs.md` and `linux/03-boot-and-init/*`. The read-only-rootfs-with-overlay pattern is product-specific and moves into `buildroot.md` |
+| `the-boot-chain.md` | Merged into `u-boot-and-embedded-boot.md` below — the embedded chain (BootROM → SPL → U-Boot) is the part `linux/03-boot-and-init` does not cover |
+:::
 
 Verify kernel, U-Boot, and Yocto specifics via context7 at write time. Prefer Bootlin's
 CC BY-SA figures for this folder.
 
 | File | Title | Brief |
 |---|---|---|
-| `when-you-need-linux.md` | When You Need Linux | The threshold: an MMU, networking and filesystems you did not write, a display stack, multiple applications, third-party software. What it costs in boot time, determinism, BOM, and maintenance. Links to the CS virtual memory page |
-| `the-boot-chain.md` | The Boot Chain | BootROM to SPL to U-Boot to kernel to init, what each stage must do and where each lives, and where boot failures land. The single most useful diagram in this folder |
-| `u-boot.md` | U-Boot | The environment and where it is stored, boot scripts and `bootcmd`, loading a kernel and devicetree, `fdt` commands for runtime inspection, network boot for development, and the console as your first debugging tool |
-| `device-tree.md` | Device Tree | Why it exists — describing non-discoverable hardware without recompiling the kernel; nodes, properties, `compatible` strings and how a driver binds; `.dts`, `.dtsi`, and overlays; reading `/proc/device-tree` and `/sys/firmware/devicetree` on a running system |
-| `kernel-configuration-and-build.md` | Configuring and Building the Kernel | `defconfig` and `menuconfig`, cross-compiling with `ARCH` and `CROSS_COMPILE`, built-in versus module, the `Image`/`zImage`/`uImage` distinction, and keeping your configuration in version control |
-| `kernel-modules.md` | Kernel Modules | Building out-of-tree, `init` and `exit`, `insmod`/`modprobe` and dependency resolution, module parameters, exported symbols and licence tainting, and `printk` with `dmesg` |
-| `character-drivers.md` | Character Drivers | `file_operations`, registering a `cdev`, `copy_to_user` and `copy_from_user` and why direct dereference is a bug, `ioctl` and its ABI implications, blocking reads with wait queues, and `poll` support |
-| `kernel-driver-frameworks.md` | Kernel Driver Frameworks | Platform drivers and `probe` matched by devicetree, `regmap` for register access, the GPIO, IIO, SPI, and I2C subsystems, and why writing to a subsystem gives you userspace interfaces for free |
-| `userspace-hardware-access.md` | Talking to Hardware from Userspace | `sysfs`, `libgpiod` and the deprecation of the old sysfs GPIO interface, `spidev` and `i2c-dev`, UIO, `/dev/mem`, and deciding honestly whether you need a kernel driver at all |
-| `root-filesystems-and-init.md` | Root Filesystems and Init | What a minimal rootfs contains, BusyBox, init systems from BusyBox init to systemd, read-only rootfs with a writable overlay, and why read-only is the right default for a shipped device |
+| `when-you-need-linux.md` | When You Need Linux | The threshold: an MMU, networking and filesystems you did not write, a display stack, multiple applications, third-party software. What it costs in boot time, determinism, BOM, and maintenance. Includes the cross-compilation delta (`ARCH`, `CROSS_COMPILE`, `Image`/`zImage`/`uImage`) that `docs/linux/` does not cover. Links to the CS virtual memory page and to `linux/00-overview` |
+| `u-boot-and-embedded-boot.md` | U-Boot and the Embedded Boot Chain | BootROM → SPL → U-Boot → kernel → init: what each stage must do, where each lives in flash, and where boot failures land. The U-Boot environment and where it is stored, `bootcmd` and boot scripts, loading a kernel and devicetree, `fdt` commands, network boot for development. Contrasted with the UEFI/GRUB chain in `linux/03-boot-and-init` |
+| `device-tree.md` | Device Tree | Why it exists — describing non-discoverable hardware without recompiling the kernel; nodes, properties, `compatible` strings and how a driver binds; `.dts`, `.dtsi`, and overlays; reading `/proc/device-tree` on a running system. Covers the GPIO, IIO, SPI, and I2C subsystem bindings, since binding is where devicetree becomes concrete |
 | `yocto.md` | Yocto | Layers, recipes, and BitBake; `local.conf` and machine configuration; building an image and an SDK; `devtool` for iteration; the build times and disk usage nobody warns you about; and reproducibility as the reason to accept the complexity |
-| `buildroot.md` | Buildroot | The simpler alternative: menuconfig-driven, fast, comprehensible; where it beats Yocto and the point at which product requirements push you to Yocto anyway |
-| `realtime-linux.md` | Real-Time Linux | Standard kernel preemption models, what PREEMPT_RT changes, measuring latency with `cyclictest`, CPU isolation and IRQ affinity, priority assignment, and the latency figures you can realistically expect |
+| `buildroot.md` | Buildroot | The simpler alternative: menuconfig-driven, fast, comprehensible; where it beats Yocto and the point at which product requirements push you to Yocto anyway. Includes read-only rootfs with a writable overlay, and why read-only is the right default for a shipped device |
+| `realtime-linux.md` | Real-Time Linux | What PREEMPT_RT changes, measuring latency with `cyclictest`, CPU isolation and IRQ affinity, priority assignment, and the latency figures you can realistically expect. Preemption models themselves are owned by `linux/07-scheduling/preemption-models.md` |
 | `boot-time-optimization.md` | Boot Time Optimization | Measuring with `grabserial` and `systemd-analyze`, trimming each stage, deferred initialisation, and the trade-offs when a product must show something on screen in under two seconds |
 
 ---
@@ -794,7 +807,7 @@ the deploy if it did.
 |---|---|---|
 | **1 — Foundation and first light** | All site wiring (WaveDrom plugin and component, `MDXComponents` registration, image-zoom, sidebar, navbar, Prism languages, `SOURCES.md`), `readme.md`, folders 00–04 | 51 |
 | **2 — The working engineer** | Folders 05, 06, 07, 09, 11 | 55 |
-| **3 — Systems and shipping** | Folders 08, 10, 12, 13, 14, 15 | 68 |
+| **3 — Systems and shipping** | Folders 08, 10, 12, 13, 14, 15 | 61 |
 
 **Forward links between phases are the one thing to watch.** A Phase 1 page that wants to link to
 `07/why-an-rtos` cannot, until Phase 2 exists. Rule: a page may only link to pages in its own
