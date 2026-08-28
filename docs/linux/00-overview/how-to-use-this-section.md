@@ -77,3 +77,14 @@ does not render without JavaScript and the offline search cannot index it.
 $ uname -r
 6.18.0
 ```
+
+## Pages end with annotated references
+
+Two to six entries, each saying why you would click it. Never a bare URL.
+
+- [Docusaurus admonitions](https://docusaurus.io/docs/markdown-features/admonitions) — the five
+  callout types this section uses, and nothing beyond them.
+- [asciinema player](https://docs.asciinema.org/manual/player/) — options and keyboard controls for
+  the recorded terminal sessions above.
+- [Bootlin Elixir cross-referencer](https://elixir.bootlin.com/linux/v6.18/source) — where every
+  `<Src>` link in this section points, pinned to v6.18.

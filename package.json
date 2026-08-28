@@ -29,6 +29,7 @@
     "test:graph": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/build-graph.test.mjs",
     "scaffold:linux": "node tools/scaffold-linux-docs.mjs",
     "check:algo": "node tools/check-algo-docs.mjs",
+    "check:linux": "node tools/check-linux-docs.mjs",
     "lint": "biome check",
     "format": "biome format --write"
   },
