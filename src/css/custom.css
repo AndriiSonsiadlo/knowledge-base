@@ -987,19 +987,24 @@ body {
 
 /* ============ Tables ============ */
 .markdown table {
-  @apply my-4 mx-auto block max-w-full overflow-hidden rounded-lg border;
-  /* No width set: the table sizes to its content (up to max-w-full) instead
-     of always stretching edge-to-edge, so the border hugs the actual
-     content instead of leaving empty space inside full-width borders.
+  @apply my-4 mx-auto block max-w-full rounded-lg border;
+  /* width:max-content + max-width:100% (not fit-content) is what makes a
+     display:block table scroll instead of squeezing: the box grows to the
+     table's natural width, max-width clamps the *scroll port* to the column,
+     and the overflow scrolls. With fit-content the table was compressed to
+     the column width instead — and overflow:hidden then clipped whatever
+     still didn't fit, which is why wide tables were unreadable and
+     unscrollable on phones.
      mx-auto centers it when it's narrower than the container. */
   /* border-separate (not collapse), with explicit radii on the corner
-     cells below — relying solely on overflow-hidden to clip the header's
-     square corners is unreliable once the table is sized to fit-content,
-     which can leave a hairline gap where the flat cell background shows
-     through the curve. */
+     cells below — relying solely on the scroll container to clip the
+     header's square corners is unreliable once the table is sized to its
+     content, which can leave a hairline gap where the flat cell background
+     shows through the curve. */
   border-collapse: separate;
   border-spacing: 0;
-  width: fit-content;
+  width: max-content;
+  overflow-x: auto;
 }
 
 [data-theme="light"] .markdown table {
@@ -1543,4 +1548,104 @@ button {
   flex-shrink: 0;
   /* Centers when the diagram fits; resolves to 0 when it overflows. */
   margin-inline: auto;
+}
+
+/* ============ Tabs ============ */
+/* Docusaurus renders <div.tabs-container> > <ul.tabs> + <div.margin-top--md>,
+   with no box around either — the tab strip floats free of the panel it
+   switches. Style the container as one card so the active tab reads as the
+   front sheet of the panel below it. */
+.tabs-container {
+  @apply my-5 rounded-xl border;
+  border-color: rgb(var(--brand-primary-rgb) / 0.2);
+  background: var(--tabs-panel-bg);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.06);
+}
+
+[data-theme="light"] {
+  --tabs-panel-bg: #fff;
+  --tabs-strip-bg: rgb(var(--brand-primary-rgb) / 0.07);
+}
+
+[data-theme="dark"] {
+  --tabs-panel-bg: rgb(var(--brand-primary-rgb) / 0.06);
+  --tabs-strip-bg: rgb(var(--brand-primary-rgb) / 0.14);
+}
+
+[data-theme="dark"] .tabs-container {
+  border-color: rgb(var(--brand-primary-rgb) / 0.28);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.25);
+}
+
+.tabs-container > ul.tabs {
+  @apply m-0 flex-nowrap gap-1 overflow-x-auto px-2 pt-2;
+  background: var(--tabs-strip-bg);
+  border-bottom: 1px solid rgb(var(--brand-primary-rgb) / 0.2);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  /* Many tabs on a phone scroll instead of wrapping into a ragged block. */
+  scrollbar-width: none;
+}
+
+.tabs-container > ul.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tabs-container > ul.tabs > .tabs__item {
+  @apply whitespace-nowrap rounded-t-lg rounded-b-none border px-4 py-2 text-sm font-medium;
+  border-color: transparent;
+  /* Overlap the strip's bottom border so the active tab can paint over it. */
+  margin-bottom: -1px;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.tabs-container > ul.tabs > .tabs__item:hover {
+  background: rgb(var(--brand-primary-rgb) / 0.12);
+  opacity: 1;
+}
+
+.tabs-container > ul.tabs > .tabs__item--active,
+.tabs-container > ul.tabs > .tabs__item--active:hover {
+  background: var(--tabs-panel-bg);
+  border-color: rgb(var(--brand-primary-rgb) / 0.2);
+  border-bottom-color: var(--tabs-panel-bg);
+  color: var(--brand-primary);
+  opacity: 1;
+}
+
+[data-theme="dark"] .tabs-container > ul.tabs > .tabs__item--active,
+[data-theme="dark"] .tabs-container > ul.tabs > .tabs__item--active:hover {
+  border-color: rgb(var(--brand-primary-rgb) / 0.28);
+  border-bottom-color: var(--tabs-panel-bg);
+  color: var(--brand-primary-light);
+}
+
+/* The panel wrapper (.margin-top--md) — drop its detaching top margin and
+   give the content the card's inner padding. Infima sets that margin with
+   !important, so this has to shout back. */
+.tabs-container > div:last-child {
+  @apply px-4 py-3;
+  margin-top: 0 !important;
+}
+
+.tabs-container > div:last-child > [role="tabpanel"] > :first-child {
+  margin-top: 0;
+}
+
+.tabs-container > div:last-child > [role="tabpanel"] > :last-child {
+  margin-bottom: 0;
+}
+
+/* A tab whose whole body is one code block reads as a second card floating
+   inside the first. Drop the padding for that case so the code window fills
+   the card and the tab strip sits directly on top of it. */
+.tabs-container > div:last-child:has([role="tabpanel"]:not([hidden]) > [class*="codeBlockContainer_"]:only-child) {
+  padding: 0;
+}
+
+.tabs-container [role="tabpanel"] > [class*="codeBlockContainer_"]:only-child {
+  margin: 0;
+  border-top: 0;
+  border-radius: 0 0 0.7rem 0.7rem;
 }
