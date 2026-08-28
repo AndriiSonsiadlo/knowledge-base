@@ -26,6 +26,7 @@
     "gen-icons": "node scripts/gen-icons.mjs",
     "test:plugins": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/remark-wavedrom.test.mjs",
     "test:kernel-source": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/kernel-source.test.mjs",
+    "test:graph": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/build-graph.test.mjs",
     "check:algo": "node tools/check-algo-docs.mjs",
     "lint": "biome check",
     "format": "biome format --write"
