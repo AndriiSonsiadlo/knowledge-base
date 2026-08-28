@@ -1,4 +1,5 @@
 import Figure from "@site/src/components/Figure";
+import KernelFacts from "@site/src/components/KernelFacts";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 import Recall from "@site/src/components/Recall";
 import Src from "@site/src/components/Src";
@@ -36,6 +37,7 @@ export default {
   ...MDXComponents,
   Icon,
   Figure,
+  KernelFacts,
   Recall,
   Src,
   WaveDrom,
