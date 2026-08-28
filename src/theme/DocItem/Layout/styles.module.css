@@ -3,7 +3,6 @@
 	margin-top: 0;
 }
 
-.docFooterMetaHidden :global(.theme-last-updated),
 .docFooterMetaHidden :global(.theme-doc-footer-edit-meta-row > .col:last-child) {
 	display: none;
 }
