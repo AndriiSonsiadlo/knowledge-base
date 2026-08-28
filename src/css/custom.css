@@ -74,6 +74,7 @@
 
   * {
     scrollbar-width: thin;
+    scrollbar-color: rgb(0 0 0 / 0.18) transparent;
   }
 
   :root {
@@ -1998,26 +1999,81 @@ button {
   position: relative;
 }
 
+[class*="collapseSidebarButton_"]::before,
 [class*="collapseSidebarButton_"]::after,
+[class*="expandButton_"]::before,
 [class*="expandButton_"]::after {
   content: "";
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  background: var(--ifm-menu-link-sublist-icon) 50% / 16px 16px no-repeat;
+  width: 14px;
+  height: 14px;
+  background: var(--ifm-menu-link-sublist-icon) 50% / 14px 14px no-repeat;
   filter: var(--ifm-menu-link-sublist-icon-filter, none);
   opacity: 0.6;
   transition: opacity 180ms ease;
+}
+
+/* Sidebar collapses toward the left edge: point left, "«". The base icon
+   is an up chevron, so -90deg turns it left. */
+[class*="collapseSidebarButton_"]::before {
+  left: calc(50% - 4px);
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+[class*="collapseSidebarButton_"]::after {
+  left: calc(50% + 4px);
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+/* Sidebar expands back out to the right: point right, "»". */
+[class*="expandButton_"]::before {
+  left: calc(50% - 4px);
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
 [class*="expandButton_"]::after {
-  transform: translate(-50%, -50%) rotate(-90deg);
+  left: calc(50% + 4px);
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
+[class*="collapseSidebarButton_"]:hover::before,
 [class*="collapseSidebarButton_"]:hover::after,
+[class*="expandButton_"]:hover::before,
 [class*="expandButton_"]:hover::after {
   opacity: 1;
+}
+
+/* Scrollbar: light theme gets a light thumb, dark theme a dark one, so it
+   blends with the page instead of reading as a fixed mid-gray in both. */
+html[data-theme="dark"] {
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(0 0 0 / 0.18);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(0 0 0 / 0.3);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.14);
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(255 255 255 / 0.24);
 }
