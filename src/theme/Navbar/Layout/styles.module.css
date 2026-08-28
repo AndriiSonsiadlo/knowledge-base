@@ -6,7 +6,7 @@
 	transform: translate3d(0, calc(-100% - 2px), 0);
 }
 
-.navbarScrolled {
+.navbarShadow {
 	box-shadow: var(--ifm-navbar-shadow);
 }
 

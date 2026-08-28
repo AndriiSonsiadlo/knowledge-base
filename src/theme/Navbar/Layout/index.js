@@ -6,7 +6,6 @@ import {
 } from "@docusaurus/theme-common/internal";
 import NavbarMobileSidebar from "@theme/Navbar/MobileSidebar";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
 import styles from "./styles.module.css";
 
 function NavbarBackdrop(props) {
@@ -24,16 +23,6 @@ export default function NavbarLayout({ children }) {
   } = useThemeConfig();
   const mobileSidebar = useNavbarMobileSidebar();
   const { navbarRef, isNavbarVisible } = useHideableNavbar(hideOnScroll);
-  const [hasScrolled, setHasScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setHasScrolled(window.scrollY > 40);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   return (
     <nav
@@ -46,6 +35,7 @@ export default function NavbarLayout({ children }) {
         ThemeClassNames.layout.navbar.container,
         "navbar",
         "sticky top-0 z-50",
+        styles.navbarShadow,
         hideOnScroll && [
           styles.navbarHideable,
           !isNavbarVisible && styles.navbarHidden,
@@ -54,8 +44,6 @@ export default function NavbarLayout({ children }) {
           "navbar--dark": style === "dark",
           "navbar--primary": style === "primary",
           "navbar-sidebar--show": mobileSidebar.shown,
-          "shadow-none": !hasScrolled,
-          [styles.navbarScrolled]: hasScrolled,
         },
       )}
     >

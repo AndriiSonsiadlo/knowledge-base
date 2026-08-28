@@ -1984,18 +1984,40 @@ button {
   background-color: rgb(var(--brand-primary-rgb) / 0.08) !important;
 }
 
+/* Replace the bold two-path vendor arrow with the same thin chevron the
+   sidebar already uses to collapse/expand categories, for a consistent
+   look. The vendor svg stays in the DOM (a11y label, click target) but
+   goes invisible; our chevron is drawn as a background image instead. */
 [class*="collapseSidebarButtonIcon_"],
 [class*="expandButtonIcon_"] {
-  opacity: 0.4;
+  opacity: 0;
+}
+
+[class*="collapseSidebarButton_"],
+[class*="expandButton_"] {
+  position: relative;
+}
+
+[class*="collapseSidebarButton_"]::after,
+[class*="expandButton_"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--ifm-menu-link-sublist-icon) 50% / 16px 16px no-repeat;
+  filter: var(--ifm-menu-link-sublist-icon-filter, none);
+  opacity: 0.6;
   transition: opacity 180ms ease;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
-[class*="collapseSidebarButtonIcon_"] g,
-[class*="expandButtonIcon_"] g {
-  fill: rgb(var(--brand-primary-rgb) / 1) !important;
+[class*="expandButton_"]::after {
+  transform: translate(-50%, -50%) rotate(-90deg);
 }
 
-[class*="collapseSidebarButton_"]:hover [class*="collapseSidebarButtonIcon_"],
-[class*="expandButton_"]:hover [class*="expandButtonIcon_"] {
-  opacity: 0.85;
+[class*="collapseSidebarButton_"]:hover::after,
+[class*="expandButton_"]:hover::after {
+  opacity: 1;
 }
