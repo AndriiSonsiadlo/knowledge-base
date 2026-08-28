@@ -1,3 +1,4 @@
+import PrereqBlock from "@components/PrereqBlock";
 import ReadingProgress from "@components/ReadingProgress";
 import { useDoc } from "@docusaurus/plugin-content-docs/client";
 import { useWindowSize } from "@docusaurus/theme-common";
@@ -87,7 +88,9 @@ export default function DocItemLayout({ children }) {
             )}
             <DocVersionBadge />
             {docTOC.mobile}
+            <PrereqBlock variant="before" />
             <DocItemContent>{children}</DocItemContent>
+            <PrereqBlock variant="after" />
             <div className={styles.docFooterMetaHidden}>
               <DocItemFooter />
             </div>
