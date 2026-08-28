@@ -35,12 +35,16 @@ function useNavbarItems() {
 }
 
 export default function CategoryGrid(): ReactNode {
-  const rawCategories = useNavbarItems().filter(
-    (item) =>
-      item.type === "doc" ||
-      item.type === "docSidebar" ||
-      item.type === "docsVersion",
-  );
+  const rawCategories = useNavbarItems()
+    // Dropdowns group categories in the navbar; the grid still shows each
+    // one as its own card, so flatten a dropdown into its children.
+    .flatMap((item) => (Array.isArray(item.items) ? item.items : [item]))
+    .filter(
+      (item) =>
+        item.type === "doc" ||
+        item.type === "docSidebar" ||
+        item.type === "docsVersion",
+    );
   const allDocsData = useAllDocsData();
   const defaultDocsData = allDocsData.default ?? Object.values(allDocsData)[0];
   const sidebars = defaultDocsData?.versions[0]?.sidebars ?? {};

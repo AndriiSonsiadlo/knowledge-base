@@ -106,6 +106,60 @@ const config = {
             icon: "💻",
           },
           {
+            type: "dropdown",
+            position: "left",
+            label: "Systems",
+            items: [
+              {
+                type: "docSidebar",
+                sidebarId: "computerScienceSidebar",
+                label: "Computer Science",
+                description:
+                  "Deep dive into systems, architecture, memory, networking, and core algorithms.",
+                icon: "⚙️",
+              },
+              {
+                type: "docSidebar",
+                sidebarId: "gpuComputingSidebar",
+                label: "GPU & Accelerators",
+                description:
+                  "CUDA, GPU architecture, kernel optimization, and NPU/inference accelerators.",
+                icon: "🚀",
+              },
+              {
+                type: "docSidebar",
+                sidebarId: "embeddedSidebar",
+                label: "Embedded Systems",
+                description:
+                  "Bare-metal firmware, Cortex-M architecture, RTOS, embedded Linux, safety and security.",
+                icon: "🔌",
+              },
+            ],
+          },
+          {
+            type: "dropdown",
+            position: "left",
+            label: "AI & Data",
+            items: [
+              {
+                type: "docSidebar",
+                sidebarId: "machineLearningSidebar",
+                label: "Machine Learning",
+                description:
+                  "Master fundamentals, neural networks, NLP, and modern ML architectures.",
+                icon: "🤖",
+              },
+              {
+                type: "docSidebar",
+                sidebarId: "dataToolsSidebar",
+                label: "Data Science",
+                description:
+                  "Practical analysis, wrangling, ETL, querying, visualization, and notebook-first workflows.",
+                icon: "🔧",
+              },
+            ],
+          },
+          {
             type: "docSidebar",
             sidebarId: "gameDevSidebar",
             position: "left",
@@ -113,51 +167,6 @@ const config = {
             description:
               "Build games with Unreal Engine 5 and C++ — from engine internals to shipping.",
             icon: "🎮",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "computerScienceSidebar",
-            position: "left",
-            label: "Computer Science",
-            description:
-              "Deep dive into systems, architecture, memory, networking, and core algorithms.",
-            icon: "⚙️",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "dataToolsSidebar",
-            position: "left",
-            label: "Data Science",
-            description:
-              "Practical analysis, wrangling, ETL, querying, visualization, and notebook-first workflows.",
-            icon: "🔧",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "machineLearningSidebar",
-            position: "left",
-            label: "Machine Learning",
-            description:
-              "Master fundamentals, neural networks, NLP, and modern ML architectures.",
-            icon: "🤖",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "gpuComputingSidebar",
-            position: "left",
-            label: "GPU & Accelerators",
-            description:
-              "CUDA, GPU architecture, kernel optimization, and NPU/inference accelerators.",
-            icon: "🚀",
-          },
-          {
-            type: "docSidebar",
-            sidebarId: "embeddedSidebar",
-            position: "left",
-            label: "Embedded Systems",
-            description:
-              "Bare-metal firmware, Cortex-M architecture, RTOS, embedded Linux, safety and security.",
-            icon: "🔌",
           },
           // {
           //   to: "/blog",
