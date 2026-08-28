@@ -93,6 +93,11 @@ const config = {
     ({
       // Replace with your project's social card
       image: "img/social-card-v2.png",
+      docs: {
+        sidebar: {
+          hideable: true,
+        },
+      },
       navbar: {
         hideOnScroll: false,
         items: [
