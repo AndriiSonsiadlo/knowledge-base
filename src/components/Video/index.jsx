@@ -10,7 +10,9 @@
 //          caption="Grace periods, from the person who wrote RCU." />
 export default function Video({ src, title, caption }) {
   if (!title) {
-    throw new Error("<Video> requires a `title` — it is the iframe's accessible name");
+    throw new Error(
+      "<Video> requires a `title` — it is the iframe's accessible name",
+    );
   }
   return (
     <figure className="kb-video">
@@ -23,7 +25,9 @@ export default function Video({ src, title, caption }) {
           allowFullScreen
         />
       </div>
-      {caption && <figcaption className="kb-video__caption">{caption}</figcaption>}
+      {caption && (
+        <figcaption className="kb-video__caption">{caption}</figcaption>
+      )}
     </figure>
   );
 }
