@@ -796,18 +796,38 @@ div[class^='docItemContainer_'] article img {
 }
 
 .navbar__items--center .dropdown > .navbar__link::after {
-  /* Infima's caret; re-declared because the underline above used to occupy
-     ::after and cancelled it. */
-  border-color: currentColor transparent;
-  border-style: solid;
-  border-width: 0.35em 0.35em 0;
+  /* Lucide chevron-down, masked in currentColor to match the GitHub icon's
+     stroke weight — replaces Infima's filled triangle, which read as a heavier,
+     unrelated shape next to the site's stroked icons. Re-declared here at all
+     because the hover underline above used to occupy ::after and cancelled it.
+     Sits in the link's flex row, so no manual baseline nudging. */
   content: '';
-  display: inline-block;
-  margin-left: 0.35em;
-  position: relative;
-  top: 1px;
+  flex: none;
+  /* Docusaurus's own caret rule sets position: relative; top: 2px to sit the
+     triangle on the text baseline; the flex-aligned chevron doesn't want it. */
+  position: static;
+  width: 0.85rem;
+  height: 0.85rem;
+  margin-left: 0.3rem;
+  border: 0;
+  background-color: currentColor;
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  mask-position: 50%;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  opacity: 0.55;
   transform: rotate(0deg);
-  transition: transform 180ms ease;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+
+.navbar__items--center .dropdown:hover > .navbar__link::after,
+.navbar__items--center .dropdown--show > .navbar__link::after,
+.navbar__items--center
+  .dropdown:has(.dropdown__link--active)
+  > .navbar__link::after {
+  opacity: 1;
 }
 
 .navbar__items--center .dropdown:hover > .navbar__link::after,
