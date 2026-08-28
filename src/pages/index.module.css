@@ -37,6 +37,52 @@ html[data-theme="light"] .heroGradient {
   );
 }
 
+/* Slow-rotating gradient sweep behind the blobs. The blobs drift and pulse in
+   place; this rotates the whole field, so the background reads as one
+   deliberate, unhurried motion instead of a busier version of the same
+   effect. Oversized so the blurred edge never reveals a bare corner as it
+   turns. */
+.heroAurora {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180%;
+  height: 180%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgb(var(--brand-primary-rgb) / 0.16),
+    transparent 22%,
+    rgb(var(--brand-accent-rgb) / 0.14) 50%,
+    transparent 72%,
+    rgb(var(--brand-primary-rgb) / 0.16) 100%
+  );
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: auroraSpin 60s linear infinite;
+  pointer-events: none;
+}
+
+html[data-theme="light"] .heroAurora {
+  opacity: 0.3;
+}
+
+@keyframes auroraSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroAurora {
+    animation: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
 /* Animated floating orbs - Dark mode */
 .heroBlob {
   position: absolute;

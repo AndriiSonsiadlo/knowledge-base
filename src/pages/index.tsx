@@ -23,6 +23,7 @@ export default function Home(): ReactNode {
       >
         <CursorGlow />
         {/* Animated background elements */}
+        <div className={styles.heroAurora} />
         <div className={clsx(styles.heroBlob, styles.heroBlobPrimary)} />
         <div
           className={clsx(styles.heroBlob, styles.heroBlobAccent)}
