@@ -95,3 +95,6 @@ dist
 
 # python venv for tools/figures (local only)
 .venv/
+
+# worktrees for isolated feature work
+.worktrees/
