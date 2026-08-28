@@ -1,8 +1,10 @@
 import Figure from "@site/src/components/Figure";
 import KernelFacts from "@site/src/components/KernelFacts";
+import Lab from "@site/src/components/Lab";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 import Recall from "@site/src/components/Recall";
 import Src from "@site/src/components/Src";
+import Video from "@site/src/components/Video";
 import WaveDrom from "@site/src/components/WaveDrom";
 import TabItem from "@theme/TabItem";
 import Tabs from "@theme/Tabs";
@@ -38,8 +40,10 @@ export default {
   Icon,
   Figure,
   KernelFacts,
+  Lab,
   Recall,
   Src,
+  Video,
   WaveDrom,
   Tabs,
   TabItem,
