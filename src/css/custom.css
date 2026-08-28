@@ -758,18 +758,31 @@ div[class^='docItemContainer_'] article img {
   opacity: 0.92;
 }
 
+/* :has() marks a dropdown trigger active while the reader is inside one of its
+   sidebars — Docusaurus sets dropdown__link--active on the child but never
+   propagates it to the trigger. */
 .navbar__items--center .navbar__link:hover,
-.navbar__items--center .navbar__link--active {
+.navbar__items--center .navbar__link--active,
+.navbar__items--center
+  .dropdown:has(.dropdown__link--active)
+  > .navbar__link {
   color: var(--brand-primary-darkest);
 }
 
 [data-theme='dark'] .navbar__items--center .navbar__link:hover,
-[data-theme='dark'] .navbar__items--center .navbar__link--active {
+[data-theme='dark'] .navbar__items--center .navbar__link--active,
+[data-theme='dark']
+  .navbar__items--center
+  .dropdown:has(.dropdown__link--active)
+  > .navbar__link {
   color: var(--brand-primary-lightest);
 }
 
 .navbar__items--center .navbar__link:hover::before,
-.navbar__items--center .navbar__link--active::before {
+.navbar__items--center .navbar__link--active::before,
+.navbar__items--center
+  .dropdown:has(.dropdown__link--active)
+  > .navbar__link::before {
   transform: scaleX(1);
 }
 
@@ -873,6 +886,13 @@ div[class^='docItemContainer_'] article img {
 [data-theme='dark'] .navbar__items--center .dropdown__link--active {
   background: rgb(var(--brand-primary-rgb) / 0.22);
   color: var(--brand-primary-lightest);
+}
+
+/* Inset bar rather than a border, so the active item doesn't shift the text of
+   its neighbours. Distinguishes "current section" from a passing hover. */
+.navbar__items--center .dropdown__link--active {
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--brand-primary);
 }
 
 .footer,
