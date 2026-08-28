@@ -1958,3 +1958,44 @@ button {
   border-top: 0;
   border-radius: 0 0 0.7rem 0.7rem;
 }
+
+/* Sidebar collapse/expand controls default to a bold bordered bar with a
+   dark, oversized arrow. Soften to the site's low-contrast, fade-forward
+   hover language. Docusaurus doesn't expose these as swizzled components
+   with stable classNames, so target the hashed CSS-module prefixes. */
+[class*="collapseSidebarButton_"] {
+  border: none !important;
+  border-top: 1px solid rgb(var(--brand-primary-rgb) / 0.12) !important;
+  background-color: transparent !important;
+  transition: background-color 180ms ease;
+}
+
+[class*="collapseSidebarButton_"]:hover,
+[class*="collapseSidebarButton_"]:focus {
+  background-color: rgb(var(--brand-primary-rgb) / 0.08) !important;
+}
+
+[class*="expandButton_"] {
+  background-color: transparent !important;
+  transition: background-color 180ms ease;
+}
+
+[class*="expandButton_"]:hover {
+  background-color: rgb(var(--brand-primary-rgb) / 0.08) !important;
+}
+
+[class*="collapseSidebarButtonIcon_"],
+[class*="expandButtonIcon_"] {
+  opacity: 0.4;
+  transition: opacity 180ms ease;
+}
+
+[class*="collapseSidebarButtonIcon_"] g,
+[class*="expandButtonIcon_"] g {
+  fill: rgb(var(--brand-primary-rgb) / 1) !important;
+}
+
+[class*="collapseSidebarButton_"]:hover [class*="collapseSidebarButtonIcon_"],
+[class*="expandButton_"]:hover [class*="expandButtonIcon_"] {
+  opacity: 0.85;
+}
