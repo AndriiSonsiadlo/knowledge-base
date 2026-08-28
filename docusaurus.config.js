@@ -273,6 +273,7 @@ const config = {
 
   themes: [
     "@docusaurus/theme-mermaid",
+    "@docusaurus/theme-live-codeblock",
     [
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {
