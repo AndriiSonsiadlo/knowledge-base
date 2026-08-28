@@ -3,6 +3,7 @@
 	margin-top: 0;
 }
 
+.docFooterMetaHidden :global(.theme-last-updated),
 .docFooterMetaHidden :global(.theme-doc-footer-edit-meta-row > .col:last-child) {
 	display: none;
 }
@@ -13,11 +14,25 @@
 	}
 }
 
-.readingTime {
+.metaRow {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
 	margin: 0 0 0.75rem;
+}
+
+.readingTime {
+	margin: 0;
 	font-size: 0.8rem;
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.12em;
 	color: rgb(var(--brand-primary-rgb) / 0.75);
+}
+
+.lastUpdated {
+	margin: 0 0 0 auto;
+	font-size: 0.8rem;
+	color: var(--ifm-color-emphasis-600);
 }

@@ -10,6 +10,7 @@ import DocItemTOCDesktop from "@theme/DocItem/TOC/Desktop";
 import DocItemTOCMobile from "@theme/DocItem/TOC/Mobile";
 import DocVersionBadge from "@theme/DocVersionBadge";
 import DocVersionBanner from "@theme/DocVersionBanner";
+import LastUpdated from "@theme/LastUpdated";
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import styles from "./styles.module.css";
@@ -65,8 +66,17 @@ export default function DocItemLayout({ children }) {
         <div className={styles.docItemContainer}>
           <article ref={articleRef}>
             <DocBreadcrumbs />
-            {readingMinutes !== null && (
-              <p className={styles.readingTime}>{readingMinutes} min read</p>
+            {(readingMinutes !== null || metadata.lastUpdatedAt) && (
+              <div className={styles.metaRow}>
+                {readingMinutes !== null && (
+                  <p className={styles.readingTime}>{readingMinutes} min read</p>
+                )}
+                {metadata.lastUpdatedAt && (
+                  <p className={styles.lastUpdated}>
+                    <LastUpdated lastUpdatedAt={metadata.lastUpdatedAt} />
+                  </p>
+                )}
+              </div>
             )}
             <DocVersionBadge />
             {docTOC.mobile}
