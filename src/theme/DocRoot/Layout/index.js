@@ -21,12 +21,38 @@ export default function DocRootLayout({ children }) {
   const skipNextWrite = useRef(true);
 
   // Read the stored preference after mount rather than in the initializer,
-  // so the SSR/first-hydration render stays `false` on both sides.
+  // so the SSR/first-hydration render stays `false` on both sides. The
+  // pre-hydration inline script (docusaurus.config.js headTags) already
+  // paints the collapsed width instantly via the `data-sidebar-collapsed`
+  // attribute.
   useEffect(() => {
     if (readStoredCollapsed()) {
       setHiddenSidebarContainer(true);
+      // Don't drop the attribute here: setState hasn't committed yet, so
+      // removing it now would leave a gap with neither the attribute's
+      // forced width nor the React class applied - the sidebar would
+      // snap open, then animate shut again once the class lands. The
+      // effect below drops it only after `hiddenSidebarContainer` (and
+      // therefore the class) has actually committed.
+      return;
+    }
+    try {
+      document.documentElement.removeAttribute("data-sidebar-collapsed");
+    } catch {
+      // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (!hiddenSidebarContainer) {
+      return;
+    }
+    try {
+      document.documentElement.removeAttribute("data-sidebar-collapsed");
+    } catch {
+      // ignore
+    }
+  }, [hiddenSidebarContainer]);
 
   useEffect(() => {
     if (skipNextWrite.current) {

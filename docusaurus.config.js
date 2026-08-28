@@ -46,6 +46,14 @@ const config = {
     v4: true,
   },
 
+  headTags: [
+    {
+      tagName: "script",
+      attributes: {},
+      innerHTML: `(function(){try{if(localStorage.getItem("docs-sidebar-collapsed")==="true"){document.documentElement.setAttribute("data-sidebar-collapsed","true");}}catch(e){}})();`,
+    },
+  ],
+
   stylesheets: [
     {
       href: "https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css",
