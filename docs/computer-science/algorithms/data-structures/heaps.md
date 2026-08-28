@@ -41,7 +41,7 @@ to maintain and needs no pointers at all.
 Note what the heap property does *not* say: siblings are unordered, and a node deep in one subtree
 may be larger than a shallow node in another. Only the root is guaranteed to be the extreme.
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The array trick
 

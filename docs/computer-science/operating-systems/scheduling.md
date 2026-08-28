@@ -33,7 +33,7 @@ optimal single ordering of jobs is rarely a "fair" round-robin). There is no uni
 scheduler — only one best-suited to a given workload's priorities.
 :::
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart LR

@@ -25,7 +25,7 @@ when the power cuts out mid-write.
 | **Journal** | A dedicated log area where a filesystem records pending metadata changes before applying them, to survive crashes. |
 | **Copy-on-write (CoW)** | A design where changed data is written to a *new* location and the filesystem atomically swaps a pointer, instead of modifying data in place. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

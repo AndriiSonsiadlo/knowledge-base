@@ -27,7 +27,7 @@ without breaking that isolation.
 | **Socket** | A bidirectional communication endpoint, usable both between processes on one machine (Unix domain sockets) and across a network (TCP/UDP sockets). |
 | **Signal** | A short, asynchronous notification delivered to a process (e.g., `SIGTERM`, `SIGCHLD`) — carries no payload beyond its number, but can interrupt normal control flow. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart LR

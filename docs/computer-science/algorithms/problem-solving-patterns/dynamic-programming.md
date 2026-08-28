@@ -35,7 +35,7 @@ And two ways to implement it:
 | Stack | $O(depth)$ — can overflow | None |
 | Easier to | **Write**, from the recurrence | **Optimise for space** |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The same problem, three ways
 

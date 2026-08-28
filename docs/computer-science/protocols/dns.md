@@ -26,7 +26,7 @@ every Internet request: no DNS resolution, no connection.
 | **Authoritative name server** | The server that holds the actual records for a specific domain (e.g., `example.com`'s own DNS provider). |
 | **TTL (Time To Live)** | How long, in seconds, a resolver may cache a record before it must re-query. |
 
-## Architecture / Mechanism: The Resolution Chain
+## Mechanism: The Resolution Chain
 
 ```mermaid
 sequenceDiagram

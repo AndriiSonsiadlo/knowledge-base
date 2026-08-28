@@ -26,7 +26,7 @@ reduce a space of $10^{20}$ candidates to a few thousand actually explored.
 | **Pruning** | Abandoning a branch once it cannot satisfy the constraints |
 | **Undo** | Restoring state when returning from a branch — the "backtrack" |
 
-## Architecture / Mechanism
+## Mechanism
 
 Every backtracking algorithm has the same shape:
 

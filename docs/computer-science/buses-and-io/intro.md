@@ -24,7 +24,7 @@ done yet?"
 | **Interrupt** | A signal a device sends to the CPU to say "I need attention now," causing the CPU to pause its current work and run an interrupt handler. |
 | **Polling** | The alternative to interrupts: the CPU repeatedly checks a device's status register in a loop — simple, but wastes CPU cycles. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart LR

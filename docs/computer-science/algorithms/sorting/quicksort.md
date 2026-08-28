@@ -35,7 +35,7 @@ quicksort is usually the faster of the two, despite a worst case that is quadrat
 | Adaptive | No (though [pdqsort](./choosing-a-sort.md) makes it partly so) |
 | In place | **Yes** |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

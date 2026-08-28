@@ -29,7 +29,7 @@ private address space) explains almost every practical difference between "spawn
 | **Kernel thread (1:1 model)** | A thread the kernel scheduler knows about directly and can schedule onto a CPU core independently of its siblings. |
 | **Green thread / user-level thread** | A thread multiplexed onto one or more kernel threads entirely by a userspace runtime; the kernel is unaware of it individually. |
 
-## Architecture / Mechanism
+## Mechanism
 
 A process is not simply "running" or "not running" — the scheduler moves it between several states,
 and knowing which one a stuck process is in is most of diagnosing it:

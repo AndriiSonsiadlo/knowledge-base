@@ -29,7 +29,7 @@ hardware translation mechanism itself (page tables, the MMU, the TLB) is covered
 | **Swapping** | Writing a page (or a whole process's pages) out to disk to free physical memory, and reading it back on demand. |
 | **Thrashing** | A system spending most of its time paging data in and out rather than doing useful work, because the working set of active processes exceeds available physical memory. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

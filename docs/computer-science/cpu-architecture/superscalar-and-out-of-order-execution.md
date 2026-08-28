@@ -26,7 +26,7 @@ x86-64 or ARM64 core can retire 4-8 instructions per cycle despite running at "o
 | **Branch prediction** | A hardware guess about which way a conditional branch will go, made *before* the branch condition is actually known. |
 | **Speculative execution** | Executing instructions based on a predicted branch outcome, before it's confirmed correct. |
 
-## Architecture / Mechanism
+## Mechanism
 
 A scalar pipeline starts one instruction per cycle. A **superscalar** pipeline widens every stage so
 it can start several:

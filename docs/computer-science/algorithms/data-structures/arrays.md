@@ -26,7 +26,7 @@ built to reward.
 | **Capacity vs. size** | Capacity is how many elements fit before reallocating; size is how many are actually stored. |
 | **Row-major / column-major** | For 2-D arrays, whether consecutive memory holds a row or a column. C and Python are row-major; Fortran and MATLAB are column-major. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Why indexing is $O(1)$
 

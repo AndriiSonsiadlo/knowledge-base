@@ -33,7 +33,7 @@ wrong structure.
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Data_stack.svg"
         license="Public domain" />
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Implementation
 

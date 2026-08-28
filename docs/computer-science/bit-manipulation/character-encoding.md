@@ -27,7 +27,7 @@ bytes versus which encoding is used to read them back.
 | **Mojibake** | Garbled text produced by decoding bytes with the wrong encoding. |
 | **BOM (Byte Order Mark)** | An optional leading marker (`U+FEFF`) that signals encoding/endianness — mostly a UTF-16 concern. |
 
-## Architecture / Mechanism: UTF-8
+## Mechanism: UTF-8
 
 UTF-8 encodes every Unicode code point (`U+0000` to `U+10FFFF`) in **1 to 4 bytes**, chosen so
 that ASCII bytes (`0x00`-`0x7F`) are completely unchanged — this is why UTF-8 is backward

@@ -33,7 +33,7 @@ makes the idea of an invariant ("after pass k, the tail is sorted") completely v
 | Stable | Yes — only strictly out-of-order neighbours are swapped |
 | Adaptive | Yes, with the early-exit optimisation |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

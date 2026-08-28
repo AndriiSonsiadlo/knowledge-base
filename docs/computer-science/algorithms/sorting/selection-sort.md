@@ -33,7 +33,7 @@ possible for a sort that moves elements individually. Everything else about it i
 | Adaptive | No — sorted input costs exactly as much as random input |
 | Swaps | **$O(n)$** — exactly n − 1 |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

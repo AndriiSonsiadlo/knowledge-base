@@ -48,7 +48,7 @@ weak — it is also $O(n^3)$, since that is a valid upper bound too. Saying merg
 stronger, more useful claim. In practice, when someone says "quicksort is $O(n \log n)$ on average",
 read Θ.
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The formal definition, and what it is doing
 

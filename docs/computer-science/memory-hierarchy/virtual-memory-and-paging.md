@@ -27,7 +27,7 @@ the data isn't resident) on every access.
 | **TLB** (Translation Lookaside Buffer) | A small, fast hardware cache of recent virtual-to-physical translations inside the MMU, so most accesses skip the full page-table walk. |
 | **Page fault** | A trap raised when the MMU can't complete a translation (page not present, or access not permitted) — handled by the OS, not the MMU itself. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Why virtual memory exists
 

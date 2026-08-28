@@ -28,7 +28,7 @@ every SSD performance and endurance behavior you'll observe in practice.
 | **TRIM** | A command the OS sends to tell the SSD which logical blocks no longer hold live data, so the FTL can reclaim them during garbage collection instead of treating them as live. |
 | **Write amplification** | The ratio of data physically written to flash vs. data the host actually asked to write; always ≥ 1 due to erase-before-write and garbage collection. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

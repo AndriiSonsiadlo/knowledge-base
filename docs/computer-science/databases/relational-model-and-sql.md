@@ -28,7 +28,7 @@ motivation behind **normalization**.
 | **Normalization** | A set of design rules (normal forms) for structuring tables to eliminate redundant data and the update/insert/delete anomalies it causes. |
 | **Join** | An operation that combines rows from two or more tables based on a related column, typically a foreign key. |
 
-## Architecture / Mechanism
+## Mechanism
 
 The model's vocabulary maps onto a table in exactly three places:
 

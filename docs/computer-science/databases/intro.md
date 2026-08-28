@@ -24,7 +24,7 @@ understand rather than treat as a black box.
 | **ACID** | **A**tomicity, **C**onsistency, **I**solation, **D**urability — the guarantees a transactional database makes about each transaction. |
 | **CAP theorem** | In a distributed system, you can't simultaneously guarantee **C**onsistency, **A**vailability, and **P**artition tolerance — a network partition forces a choice between C and A. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

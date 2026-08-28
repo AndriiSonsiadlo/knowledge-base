@@ -25,7 +25,7 @@ instruction chains) are slower than others.
 | **Hazard** | A situation that prevents the next instruction from executing in its ideal pipeline slot. |
 | **Stall (bubble)** | An idle pipeline slot inserted to resolve a hazard, wasting a cycle. |
 
-## Architecture / Mechanism
+## Mechanism
 
 A classic 5-stage pipeline (Fetch, Decode, Execute, Memory, Write-back — the MIPS/RISC textbook
 model):

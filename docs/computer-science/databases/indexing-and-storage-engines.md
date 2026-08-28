@@ -28,7 +28,7 @@ expensive, and every indexing scheme is ultimately trying to convert random work
 | **Write amplification** | The ratio of bytes actually written to storage versus bytes the application logically wrote — higher amplification means more wear and lower sustained throughput. |
 | **Compaction** | The background process that merges LSM-tree files, discarding overwritten/deleted data and reducing the number of files a read must check. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Before/after an index
 

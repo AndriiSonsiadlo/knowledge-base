@@ -26,7 +26,7 @@ overhead that some applications can't afford.
 | **Flow control** | The *receiver* telling the sender "don't send more than I can currently buffer" — protects the receiver. |
 | **Congestion control** | The *sender* (and network) inferring how much the *network path* can currently carry without overload — protects the network. |
 
-## Architecture / Mechanism: The TCP Three-Way Handshake
+## Mechanism: The TCP Three-Way Handshake
 
 Before exchanging any application data, TCP establishes a connection so both sides agree on starting
 sequence numbers:

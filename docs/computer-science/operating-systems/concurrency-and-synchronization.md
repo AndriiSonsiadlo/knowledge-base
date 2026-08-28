@@ -26,7 +26,7 @@ threads sometimes having to wait for each other.
 | **Deadlock** | A cycle of threads each waiting on a resource held by another, so none can ever proceed. |
 | **Monitor / condition variable** | A mutex paired with a wait queue that lets a thread sleep until some condition becomes true, atomically releasing the mutex while it sleeps and reacquiring it on wake. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 sequenceDiagram

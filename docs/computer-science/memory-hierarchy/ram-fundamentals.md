@@ -27,7 +27,7 @@ dense enough to serve as multi-gigabyte main memory.
 | **Memory channel** | An independent electrical path between the memory controller and DRAM modules; more channels roughly multiply available bandwidth. |
 | **DIMM** | Dual In-line Memory Module — the physical stick of DRAM chips plugged into a motherboard. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Why SRAM vs. DRAM at different tiers
 

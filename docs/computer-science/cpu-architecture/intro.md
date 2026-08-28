@@ -34,7 +34,7 @@ chip); the microarchitecture is the implementation detail that changes every chi
 where most performance engineering happens. See [Instruction Set Architecture](./instruction-set-architecture.md).
 :::
 
-## Architecture / Mechanism
+## Mechanism
 
 <Figure src="/img/cs/cpu-architecture/von-neumann.png"
         alt="Von Neumann architecture: a control unit and arithmetic logic unit inside the CPU, connected to a single memory unit and to input and output devices"

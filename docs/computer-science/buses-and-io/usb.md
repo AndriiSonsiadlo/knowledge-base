@@ -29,7 +29,7 @@ negotiation protocol — that are easy to conflate but worth pulling apart.
 | **USB-C** | A physical connector/cable standard — independent of which USB protocol version or speed is running over it. |
 | **USB Power Delivery (USB-PD)** | A separate negotiation protocol for how much voltage/current a USB-C link supplies, layered on top of the connector. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Host-centric, tiered-star topology
 

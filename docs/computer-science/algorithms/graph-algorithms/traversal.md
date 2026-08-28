@@ -36,7 +36,7 @@ solve.
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Depth-first-tree.svg"
         license="CC BY-SA 3.0" />
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

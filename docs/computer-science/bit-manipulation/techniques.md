@@ -25,7 +25,7 @@ network protocols, bloom filters, and competitive-programming algorithms.
 | **Test a bit** | Check whether a specific bit is `1` or `0`. |
 | **Popcount** | The number of `1` bits in a value (a.k.a. Hamming weight). |
 
-## Architecture / Mechanism
+## Mechanism
 
 All four core operations follow the same shape: build a mask with a single `1` at position `i`
 (`1u << i`), then combine it with the value using the right operator.

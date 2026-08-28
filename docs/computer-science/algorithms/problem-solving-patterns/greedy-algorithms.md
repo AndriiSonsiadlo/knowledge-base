@@ -29,7 +29,7 @@ The second is shared with [dynamic programming](./dynamic-programming.md). The f
 separates them: greedy commits to one choice, DP considers all of them. If the greedy choice property
 does not hold, greedy is simply wrong and DP is the fallback.
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Where greedy works: interval scheduling
 

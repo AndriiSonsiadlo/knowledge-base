@@ -36,7 +36,7 @@ small subarrays to it.
 | Adaptive | **Yes, strongly** — $O(n + d)$ where d is the number of inversions |
 | Online | Yes — can sort a stream as elements arrive |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

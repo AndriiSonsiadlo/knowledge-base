@@ -25,7 +25,7 @@ constant-time pointer rearrangements that change the shape without changing the 
 | **B-tree / B+ tree** | All leaves at the same depth; nodes hold many keys | log_B n | Databases, filesystems |
 | **Trie** | Not a search tree — position encodes the key | Length of the key | Prefix queries, autocomplete |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Rotations
 

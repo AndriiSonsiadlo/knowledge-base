@@ -25,7 +25,7 @@ guarantees that plain, unencrypted traffic has none of.
 | **Certificate Authority (CA)** | A trusted organization that verifies identity and signs certificates. |
 | **Chain of trust** | The sequence of signatures from a server's certificate up to a root CA that the client already trusts. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### What TLS Provides, Conceptually
 

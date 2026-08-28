@@ -34,7 +34,7 @@ on every input, with no worst case to worry about.
 | Adaptive | No, in the classic form (but see [Timsort](./choosing-a-sort.md)) |
 | Parallelises | Well — the two halves are independent |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

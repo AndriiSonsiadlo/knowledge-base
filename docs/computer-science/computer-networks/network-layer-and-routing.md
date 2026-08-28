@@ -26,7 +26,7 @@ destination IP address.
 | **Default gateway** | The next hop a host sends a packet to when the destination isn't on its local subnet. |
 | **NAT (Network Address Translation)** | Rewriting source/destination addresses in transit, most commonly to let many private IPs share one public IP. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### IPv4 Addressing
 

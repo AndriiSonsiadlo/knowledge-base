@@ -28,7 +28,7 @@ into a searchable structure.
 | **Complete** | Every level full except possibly the last, filled left to right |
 | **Balanced** | Height stays $O(\log n)$ as nodes are added — see [Balanced Trees](./balanced-trees.md) |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The BST invariant
 

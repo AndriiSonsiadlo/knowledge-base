@@ -25,7 +25,7 @@ sliding window exploits **contiguity**.
 | Maintains | A candidate pair | A window and some summary of it |
 | Answers | "Find a pair/triple with…" | "Longest/shortest/best contiguous run with…" |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Two pointers on sorted data
 

@@ -25,7 +25,7 @@ what it actually buys you.
 | **Isolation** | Concurrent transactions appear to run as if executed one at a time. | Two transactions both read a counter as 5, both increment it, both write 6 — one increment is lost. |
 | **Durability** | Once a transaction commits, its effects survive a crash immediately after. | The database acknowledges a commit, the power fails, and the write is gone when it restarts. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 sequenceDiagram

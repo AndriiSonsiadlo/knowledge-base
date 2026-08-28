@@ -37,7 +37,7 @@ core request/response *semantics*.
 | 4xx | Client error | `400 Bad Request`, `401 Unauthorized`, `404 Not Found` |
 | 5xx | Server error | `500 Internal Server Error`, `503 Service Unavailable` |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Statelessness and Cookies
 

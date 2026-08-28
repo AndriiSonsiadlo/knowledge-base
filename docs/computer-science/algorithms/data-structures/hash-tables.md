@@ -30,7 +30,7 @@ too — which is a genuinely surprising result, and the reason `dict`, `HashMap`
 | **Load factor (α)** | `entries / buckets`. The single number governing performance |
 | **Rehashing** | Allocating a larger array and reinserting everything, when α grows too large |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Collisions are not an edge case
 

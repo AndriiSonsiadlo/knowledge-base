@@ -23,7 +23,7 @@ entire mechanism by which a stored-program computer "runs" software. Everything 
 | **Execute** | Perform the operation (ALU computation, memory access, or control-flow change). |
 | **Write-back** | Store the result in a register (or memory), and advance the PC to the next instruction. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 sequenceDiagram

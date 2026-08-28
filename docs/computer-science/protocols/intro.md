@@ -23,7 +23,7 @@ securing that traffic (TLS).
 | **HTTP / HTTPS** | Request/response protocol for fetching resources (web pages, APIs); HTTPS is HTTP over TLS. | TCP (HTTP/1.1, 2) or UDP-based QUIC (HTTP/3) |
 | **TLS** (Transport Layer Security) | Encrypts and authenticates a connection between client and server. | TCP (or QUIC for HTTP/3) |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 sequenceDiagram

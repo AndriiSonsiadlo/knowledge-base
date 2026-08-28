@@ -35,7 +35,7 @@ quadratic worst case; heapsort has neither problem.
 | Stable | No |
 | Adaptive | No — sorted input costs the same as random |
 
-## Architecture / Mechanism
+## Mechanism
 
 The array is used as both the heap and the output. The heap occupies a shrinking prefix; the sorted
 result grows as a suffix behind it.

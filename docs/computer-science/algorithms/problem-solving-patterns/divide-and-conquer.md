@@ -31,7 +31,7 @@ Mergesort and quicksort are exact mirrors: one does its work combining, the othe
 search is the degenerate case that discards a subproblem instead of solving it, which is why it is
 logarithmic rather than linear.
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

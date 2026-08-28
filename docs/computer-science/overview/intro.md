@@ -33,7 +33,7 @@ them by repeatedly fetching the next instruction, decoding what it means, and ex
 | Abstraction layer | A boundary that hides implementation detail behind a stable interface (e.g., "write a byte to this address" hides DRAM refresh cycles). |
 | Instruction | A single operation a CPU can execute, encoded as bits (e.g., "add register 1 and register 2"). |
 
-## Architecture / Mechanism: The Layer Stack
+## Mechanism: The Layer Stack
 
 ```mermaid
 flowchart TB

@@ -50,7 +50,7 @@ recalculation possible: it guarantees a valid order exists. A cycle in any of th
 error condition ("circular dependency"). See
 [Topological Sort](../graph-algorithms/topological-sort.md).
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The two representations
 

@@ -26,7 +26,7 @@ arithmetic — it's a fast reference for the notation and the bitwise operators 
 | **Most/Least Significant Bit (MSB/LSB)** | The highest/lowest place-value bit in a value. |
 | **Base prefix** | `0b` for binary, `0x` for hex literals in C/C++ and most languages. |
 
-## Architecture / Mechanism: Why Hex Is "Compact Binary"
+## Mechanism: Why Hex Is "Compact Binary"
 
 Because 16 = 2⁴, every group of 4 binary digits maps to exactly one hex digit — no remainder, no
 rounding, unlike converting to decimal. That 1:1 grouping is the entire reason hex is used: it's

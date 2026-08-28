@@ -25,7 +25,7 @@ how **DMA** lets a device move data in and out of RAM without the CPU copying ev
 | **DMA controller** | Hardware that can move blocks of data between a device and RAM directly, without the CPU executing a load/store per byte. |
 | **Cache coherence (I/O context)** | The problem of keeping CPU caches consistent with RAM contents that DMA changed behind the CPU's back. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Polling vs. interrupt-driven I/O
 

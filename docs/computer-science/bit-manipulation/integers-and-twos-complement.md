@@ -26,7 +26,7 @@ subtraction, and hardware design simpler than the alternatives.
 | **Overflow** | The true mathematical result doesn't fit in the available bits. |
 | **Sign extension** | Replicating the sign bit when widening a signed value to a larger type. |
 
-## Architecture / Mechanism
+## Mechanism
 
 In an *n*-bit two's complement integer, the most significant bit has a **negative** place value
 instead of a special "sign flag." For a 4-bit example:

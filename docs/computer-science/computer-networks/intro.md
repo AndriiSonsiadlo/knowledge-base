@@ -26,7 +26,7 @@ independent of how the layers below are implemented.
 | **IP address** | A numeric address identifying a machine on a network at the Network layer. |
 | **Port** | A number identifying a specific application/service on a machine at the Transport layer. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

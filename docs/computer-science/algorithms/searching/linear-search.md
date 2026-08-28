@@ -27,7 +27,7 @@ option available, for reasons that have nothing to do with complexity.
 | Requires | Nothing — not even random access |
 | Works on | Arrays, linked lists, streams, generators, any iterable |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

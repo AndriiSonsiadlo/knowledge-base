@@ -27,7 +27,7 @@ nearly every "floating point is broken" bug report.
 | **Subnormal (denormal)** | A tiny value close to zero, represented without the implicit leading `1`, trading precision for range. |
 | **NaN** | "Not a Number" — result of an undefined operation like `0.0 / 0.0`. |
 
-## Architecture / Mechanism
+## Mechanism
 
 IEEE 754 binary32 (`float`) and binary64 (`double`) split their bits as follows:
 

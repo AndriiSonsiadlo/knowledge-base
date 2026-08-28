@@ -26,7 +26,7 @@ this workload can run in parallel?"*
 | **Cache coherence** | The protocol (e.g., MESI) that keeps each core's view of shared memory consistent when multiple cores cache the same address — see [Memory Hierarchy & RAM](../memory-hierarchy/intro.md). |
 | **Amdahl's Law** | A formula for the maximum speedup from parallelizing part of a program, given the fraction that must remain serial. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

@@ -26,7 +26,7 @@ touches shared hardware.
 | **Thread** | An independent unit of execution *within* a process, sharing that process's memory with other threads in it. |
 | **Context switch** | The kernel saving one process/thread's CPU state and loading another's, so multiple things appear to run "at once" on limited CPU cores. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

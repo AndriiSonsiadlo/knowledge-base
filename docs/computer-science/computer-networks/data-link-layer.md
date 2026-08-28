@@ -25,7 +25,7 @@ routing across the wider Internet. On virtually every modern wired or Wi-Fi LAN,
 | **Broadcast domain** | A set of devices that all receive a broadcast frame — everything on one switch (or set of switches) without a router between them. |
 | **ARP (Address Resolution Protocol)** | The protocol that resolves "what MAC address does this IP address belong to?" on a local network. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### MAC Address Structure
 

@@ -26,7 +26,7 @@ and "the way this actually works in a packet capture."
 | **De-encapsulation** | The reverse process at the receiving end: each layer strips its own header and hands the remainder up to the layer above. |
 | **Peer layer** | The equivalent layer on the other end of a connection — conceptually, layer *N* on the sender "talks to" layer *N* on the receiver, even though the bits actually travel down and back up through every layer. |
 
-## Architecture / Mechanism: Mapping the Two Models
+## Mechanism: Mapping the Two Models
 
 | OSI Layer | OSI Name | TCP/IP Layer | Example protocols |
 |---|---|---|---|

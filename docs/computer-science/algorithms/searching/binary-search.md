@@ -33,7 +33,7 @@ not.
 | **Requires** | Sorted data **and** $O(1)$ random access |
 | Comparisons | ⌊log₂ n⌋ + 1 in the worst case |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">

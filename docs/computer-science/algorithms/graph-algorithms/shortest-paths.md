@@ -23,7 +23,7 @@ weighted, and can any weight be negative?
 | All pairs, dense graph | Floyd–Warshall | $O(V^3)$ |
 | Non-negative weights, one target known | A* with an admissible heuristic | Depends on the heuristic |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Dijkstra's algorithm
 

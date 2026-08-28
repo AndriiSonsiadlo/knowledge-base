@@ -58,7 +58,7 @@ trampoline/PLT (dynamic linking) stubs and syscall wrappers have scratch registe
 having to spill anything.
 :::
 
-## Architecture / Mechanism: Stack Frame Anatomy
+## Mechanism: Stack Frame Anatomy
 
 <Figure src="/img/cs/assembly/call-stack-layout.png"
         alt="A call stack drawn as a column: the frame for DrawLine on top holding its locals, return address and parameters, and below it the frame for DrawSquare with the same three parts, with the stack pointer at the top and the frame pointer partway down"

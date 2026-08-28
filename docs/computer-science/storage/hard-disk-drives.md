@@ -27,7 +27,7 @@ underneath it.
 | **Transfer time** | Time to actually read/write the data once the head is positioned over it. |
 | **RPM (Revolutions Per Minute)** | Platter spin speed — directly determines average rotational latency. |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Figure src="/img/cs/storage/hdd-anatomy.png"
         alt="Cutaway drawing of a hard disk drive labelling the platter, spindle, read/write head, actuator arm, actuator axis, actuator, jumper block, IDE connector and power connector"

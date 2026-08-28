@@ -29,7 +29,7 @@ writes are handled, and how multiple cores keep their caches coherent.
 | **Write-through / write-back** | Whether writes go to main memory immediately, or only when the modified line is evicted. |
 | **Cache coherence** | The guarantee that all cores observe a consistent view of memory even though each has its own cache copies. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Private vs. shared, and the levels
 

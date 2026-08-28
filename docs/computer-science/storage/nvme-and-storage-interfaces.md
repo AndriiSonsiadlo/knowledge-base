@@ -26,7 +26,7 @@ is exactly what NVMe was created to fix.
 | **PCIe (PCI Express)** | The high-speed general-purpose expansion bus that NVMe drives attach to directly, bypassing the SATA/AHCI stack entirely. |
 | **M.2** | A physical connector/form-factor for small expansion cards — *not* a protocol. It can carry either SATA or NVMe (PCIe) signaling. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart TB

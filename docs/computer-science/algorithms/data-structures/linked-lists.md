@@ -31,7 +31,7 @@ length, and never moves any other element.
 | **Circular** | last node points back to first | Round-robin iteration with no end case |
 | **Sentinel / dummy head** | a permanent empty node at the front | Removes the "is it the first node?" special case from every operation |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### The core operations
 

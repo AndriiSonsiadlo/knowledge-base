@@ -34,7 +34,7 @@ detection is often the more useful output: "circular dependency between A, B and
 a package manager or build tool needs to report.
 :::
 
-## Architecture / Mechanism
+## Mechanism
 
 ### Kahn's algorithm (BFS-based)
 

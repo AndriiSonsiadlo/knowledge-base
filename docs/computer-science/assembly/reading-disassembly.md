@@ -25,7 +25,7 @@ compile real C, disassemble it with `objdump`, and learn to spot the recurring p
 | **Stripped binary** | A binary with its symbol table removed — disassembly still works, but functions/variables show only as raw addresses. |
 | **Optimization level** | The `-O0`/`-O1`/`-O2`/`-O3` compiler flag controlling how aggressively source code is transformed — directly affects how recognizable the resulting disassembly is. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ```mermaid
 flowchart LR

@@ -30,7 +30,7 @@ number of physical wires.
 | **Switch** | A PCIe device that fans a link out to multiple downstream endpoints, like a network switch. |
 | **Endpoint** | A leaf PCIe device — a GPU, NVMe SSD, network card, etc. |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### From shared bus to point-to-point
 

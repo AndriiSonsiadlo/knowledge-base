@@ -27,7 +27,7 @@ that assumes you know the difference) is a routine embedded-systems and hardware
 | **Baud rate** | The agreed-upon bit rate for UART communication; both ends must be configured to the same value since there's no shared clock line. |
 | **ACK/NACK** | I2C's per-byte acknowledgment bit: the receiver pulls SDA low (ACK) to confirm receipt, or leaves it high (NACK). |
 
-## Architecture / Mechanism
+## Mechanism
 
 ### I2C — two wires, addressed, multi-master
 

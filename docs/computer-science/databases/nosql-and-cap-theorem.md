@@ -29,7 +29,7 @@ relational model isn't the best fit for every shape of data.
 | **Column-family (wide-column) store** | Data model organized as row key → column family → column, optimized for very wide rows and high-throughput writes. |
 | **Graph database** | Data model where nodes and the edges (relationships) between them are first-class, optimized for traversal queries. |
 
-## Architecture / Mechanism
+## Mechanism
 
 <Figure src="/img/cs/databases/cap-theorem.png"
         alt="Three overlapping circles labelled Consistency, Availability and Partition-Tolerance, with the pairwise overlaps marked CA, CP and AP and no region common to all three"
