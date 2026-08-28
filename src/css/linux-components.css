@@ -1,0 +1,176 @@
+/* Components used by docs/linux/. Kept out of custom.css, which is already
+   ~2100 lines. Every class here is namespaced kb-* to match the existing
+   kb-figure / kb-recall conventions. */
+
+/* --- <Src> ------------------------------------------------------------- */
+.kb-src {
+  text-decoration: none;
+  border-bottom: 1px dotted var(--ifm-color-emphasis-500);
+}
+.kb-src:hover {
+  border-bottom-style: solid;
+}
+
+/* --- <PrereqBlock> ----------------------------------------------------- */
+.kb-prereq {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: var(--ifm-color-emphasis-100);
+  font-size: 0.9rem;
+}
+.kb-prereq__label {
+  flex: 0 0 auto;
+  font-weight: 600;
+  color: var(--ifm-color-emphasis-700);
+}
+.kb-prereq__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.55rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 999px;
+  background: var(--ifm-background-color);
+  text-decoration: none;
+}
+.kb-prereq__chip:hover {
+  border-color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+.kb-prereq__badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* --- <KernelFacts> ----------------------------------------------------- */
+.kb-kernel-facts {
+  margin: 2rem 0 0;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.kb-kernel-facts__row {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+.kb-kernel-facts__row:first-child {
+  border-top: 0;
+}
+.kb-kernel-facts__label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ifm-color-emphasis-600);
+}
+.kb-kernel-facts__structure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.kb-kernel-facts__header {
+  color: var(--ifm-color-emphasis-700);
+}
+@media (max-width: 576px) {
+  .kb-kernel-facts__row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+/* --- <Lab> ------------------------------------------------------------- */
+.kb-lab {
+  margin: 1.5rem 0;
+  border: 1px solid var(--ifm-color-success-dark);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.kb-lab__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--ifm-color-success-contrast-background);
+}
+.kb-lab__title {
+  font-weight: 700;
+}
+.kb-lab__host,
+.kb-lab__time {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--ifm-color-emphasis-200);
+  color: var(--ifm-color-emphasis-800);
+}
+.kb-lab__host--qemu,
+.kb-lab__host--qemu-gdb {
+  background: var(--ifm-color-info-contrast-background);
+}
+.kb-lab__host--root-required {
+  background: var(--ifm-color-warning-contrast-background);
+}
+.kb-lab__body {
+  padding: 0.4rem 0.9rem 0.6rem;
+}
+
+/* --- <Video> ----------------------------------------------------------- */
+.kb-video {
+  margin: 1.5rem 0;
+}
+.kb-video__frame {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ifm-color-emphasis-200);
+}
+.kb-video__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.kb-video__caption,
+.kb-cast__caption {
+  margin-top: 0.5rem;
+  font-size: 0.88rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* --- <Cast> ------------------------------------------------------------ */
+.kb-cast {
+  margin: 1.5rem 0;
+}
+.kb-cast__player {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* --- <KnowledgeGraph> -------------------------------------------------- */
+.kb-graph__legend {
+  margin-top: 1rem;
+  columns: 2;
+  column-gap: 2rem;
+  font-size: 0.9rem;
+}
+@media (max-width: 768px) {
+  .kb-graph__legend {
+    columns: 1;
+  }
+}
