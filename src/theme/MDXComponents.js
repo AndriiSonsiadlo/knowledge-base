@@ -1,6 +1,7 @@
 import Figure from "@site/src/components/Figure";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 import Recall from "@site/src/components/Recall";
+import Src from "@site/src/components/Src";
 import WaveDrom from "@site/src/components/WaveDrom";
 import TabItem from "@theme/TabItem";
 import Tabs from "@theme/Tabs";
@@ -36,6 +37,7 @@ export default {
   Icon,
   Figure,
   Recall,
+  Src,
   WaveDrom,
   Tabs,
   TabItem,
