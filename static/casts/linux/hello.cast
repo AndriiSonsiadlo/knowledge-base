@@ -1,0 +1,6 @@
+{"version": 2, "width": 80, "height": 6, "timestamp": 1772236800, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}}
+[0.5, "o", "$ "]
+[1.0, "o", "uname -r\r\n"]
+[1.2, "o", "6.18.0\r\n"]
+[1.4, "o", "$ "]
+[2.2, "o", "exit\r\n"]
