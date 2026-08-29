@@ -69,6 +69,16 @@ sudo update-grub
 sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
 ```
 
+:::note
+Those two commands are not equally routine. Debian/Ubuntu still regenerates `grub.cfg` on every kernel
+install — that's what `update-grub` (wrapping `grub-mkconfig`) is for. Fedora and RHEL 8+ default to the
+**Boot Loader Specification (BLS)** instead (Fedora, since Fedora 30): `grub.cfg` becomes essentially
+static, holding little more than a `blscfg` directive, and each kernel install drops its own snippet
+under `/boot/loader/entries/*.conf` via `kernel-install`/`grubby` — no `grub.cfg` regeneration involved.
+`grub2-mkconfig` still exists on those systems, but it's closer to an emergency-repair command than
+something a normal kernel install runs.
+:::
+
 ## `systemd-boot`
 
 `systemd-boot` takes the opposite approach from GRUB: instead of carrying its own filesystem drivers, it
@@ -98,7 +108,7 @@ against "how much the loader itself has to carry":
 | | GRUB 2 | `systemd-boot` | EFI stub |
 |---|---|---|---|
 | Firmware support | legacy BIOS and UEFI | UEFI only | UEFI only |
-| Config location | `/boot/grub/grub.cfg` (generated) | `$ESP/loader/entries/*.conf` | an NVRAM boot variable |
+| Config location | `/boot/grub/grub.cfg`, regenerated per install (Debian/Ubuntu) or `/boot/loader/entries/*.conf`, static `grub.cfg` (Fedora/RHEL 8+, BLS) | `$ESP/loader/entries/*.conf` | an NVRAM boot variable |
 | Filesystem knowledge required | its own drivers for whatever `/boot` is on | none — relies on UEFI's FAT support | none — relies on UEFI's FAT support |
 | Size | large — carries drivers, a menu, a scripting language | small — one binary, no scripting | none — no loader binary at all |
 | What you give up | nothing filesystem-wise, but more surface to configure wrong | any filesystem but FAT, any firmware but UEFI | a menu, and any per-boot choice beyond what NVRAM holds |
@@ -136,9 +146,11 @@ not an assumption that everything else is fine: filesystems may still be mounted
   understands processes or system calls, and is not present in memory in any meaningful sense the moment
   after that jump. "Boots Linux" credits the loader with work the kernel does entirely on its own, once
   handed off to.
-- **"Editing `grub.cfg` fixes it."** It fixes the *next* boot only if nothing regenerates the file first
-  — and a kernel update almost always does, silently discarding a hand edit. The durable fix is
-  `/etc/default/grub` or `/etc/grub.d/`, followed by re-running `grub-mkconfig` (see
+- **"Editing `grub.cfg` fixes it."** On a system that still regenerates it per kernel install
+  (Debian/Ubuntu), the edit survives only until the next kernel update silently discards it — the
+  durable fix is `/etc/default/grub` or `/etc/grub.d/`, followed by re-running `grub-mkconfig`. On BLS
+  systems (Fedora/RHEL 8+) it's worse than temporary: `grub.cfg` is closer to a static launcher, so an
+  edit there may not even be read at all (see
   [Why you never edit `grub.cfg`](#why-you-never-edit-grubcfg) above).
 - **"You need a boot loader."** You need something to find a kernel, find an initramfs, build a command
   line, and hand over — but on UEFI, the kernel can do all four of those for itself as an EFI stub. A
