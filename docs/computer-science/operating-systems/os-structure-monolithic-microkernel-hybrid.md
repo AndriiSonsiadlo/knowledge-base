@@ -145,6 +145,24 @@ question with a settled winner.
 | **Microkernel** | User space | IPC round trip: 2 transitions + context switch | One server (restartable) | Add/replace a user-space server, no kernel change | QNX, seL4 |
 | **Hybrid** | Usually kernel space, selectively user space | Function call for in-kernel parts; IPC for the rest | Depends on what moved where | Mixed — depends which parts stayed modular | Windows NT, XNU |
 
+```mermaid
+flowchart LR
+    subgraph M["Monolithic — 1 hop"]
+        direction LR
+        A1["App"] -->|function call| K1["Kernel: driver code,\nsame address space"] --> R1["Result"]
+    end
+    subgraph U["Microkernel — 4 hops"]
+        direction LR
+        A2["App"] -->|1: trap| K2["Microkernel"]
+        K2 -->|2: IPC| S["Driver/FS server\n(user space)"]
+        S -->|3: IPC reply| K2
+        K2 -->|4: return| A2
+    end
+```
+
+*The same request served monolithically (one function call) versus through a microkernel driver
+server (a trap in, an IPC to the server, an IPC reply, and a return — four hops for the same work).*
+
 ## Modules are not isolation
 
 This is the correction most worth internalizing, because it's the belief the Linux section of this
