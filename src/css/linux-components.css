@@ -162,8 +162,16 @@
   overflow: hidden;
 }
 
-/* --- <KnowledgeGraph> -------------------------------------------------- */
-.kb-graph__trail {
+/* --- <LearningPath> ----------------------------------------------------- */
+.kb-path {
+  margin: 1.75rem 0;
+}
+.kb-path__title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.kb-path__list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -172,17 +180,17 @@
   padding: 0;
   list-style: none;
 }
-.kb-graph__trail-item {
+.kb-path__item {
   display: flex;
   align-items: center;
 }
-.kb-graph__trail-item:not(:last-child)::after {
+.kb-path__item:not(:last-child)::after {
   content: "→";
   margin: 0 0.5rem;
   color: var(--ifm-color-emphasis-400);
   font-size: 0.85rem;
 }
-.kb-graph__trail-link {
+.kb-path__link {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -193,15 +201,15 @@
   font-size: 0.88rem;
   text-decoration: none;
 }
-.kb-graph__trail-link:hover {
+.kb-path__link:hover {
   border-color: var(--ifm-color-primary);
   text-decoration: none;
 }
-.kb-graph__trail-link:hover .kb-graph__trail-index {
+.kb-path__link:hover .kb-path__index {
   background: var(--ifm-color-primary);
   color: var(--ifm-color-primary-contrast-foreground);
 }
-.kb-graph__trail-index {
+.kb-path__index {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -215,19 +223,19 @@
   flex-shrink: 0;
 }
 @media (max-width: 576px) {
-  .kb-graph__trail {
+  .kb-path__list {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
-  .kb-graph__trail-item {
+  .kb-path__item {
     width: 100%;
   }
-  .kb-graph__trail-item:not(:last-child)::after {
+  .kb-path__item:not(:last-child)::after {
     content: "";
     display: none;
   }
-  .kb-graph__trail-link {
+  .kb-path__link {
     width: 100%;
   }
 }
