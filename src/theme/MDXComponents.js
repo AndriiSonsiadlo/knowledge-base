@@ -1,8 +1,8 @@
 import Cast from "@site/src/components/Cast";
 import Figure from "@site/src/components/Figure";
 import KernelFacts from "@site/src/components/KernelFacts";
-import KnowledgeGraph from "@site/src/components/KnowledgeGraph";
 import Lab from "@site/src/components/Lab";
+import LearningPath from "@site/src/components/LearningPath";
 import lucideSubset from "@site/src/components/lucide-subset.json";
 import Recall from "@site/src/components/Recall";
 import Src from "@site/src/components/Src";
@@ -43,8 +43,8 @@ export default {
   Cast,
   Figure,
   KernelFacts,
-  KnowledgeGraph,
   Lab,
+  LearningPath,
   Recall,
   Src,
   Video,
