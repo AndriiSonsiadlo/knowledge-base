@@ -160,8 +160,11 @@ $ ps -p $PID -o pid,ppid,cmd
   22100   22099 sleep 6
 ```
 
-Its namespaces, also from the host, via `ls -l /proc/$PID/ns` — seven distinct namespace inodes, one per
-`CLONE_NEW*` flag passed above:
+Its namespaces, also from the host, via `ls -l /proc/$PID/ns` — nine entries, not seven, and the extra
+two are worth naming rather than glossing over: `pid_for_children` is a second view of the same pid
+namespace (the one new children get created in, listed separately from `pid` because the two can
+diverge), and `time` is always present as a namespace type regardless of which `CLONE_NEW*` flags were
+passed — it isn't one of the seven flags this page's `unshare` command used:
 
 ```text
 $ ls -l /proc/$PID/ns
