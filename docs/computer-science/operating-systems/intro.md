@@ -58,6 +58,9 @@ flowchart TB
   mutexes vs. semaphores, deadlock and the four Coffman conditions.
 - **[Inter-Process Communication](./interprocess-communication.md)** — pipes, message queues, shared
   memory, sockets, and signals.
+- **[OS Structure: Monolithic, Microkernel, Hybrid](./os-structure-monolithic-microkernel-hybrid.md)**
+  — the architectural taxonomy, the IPC cost trade-off, and why a loadable kernel module isn't
+  isolation.
 
 ## Why It Matters
 
