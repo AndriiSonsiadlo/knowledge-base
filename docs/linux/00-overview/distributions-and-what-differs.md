@@ -29,7 +29,7 @@ than the kernel interface — and finding where is what this page is about.
 | Package manager | APT / dpkg | DNF / RPM | pacman | apk | Package Manager Service (APK files, no general-purpose package manager) |
 | Kernel config & patch set | Debian's own `.config` + conservative patch set | Fedora's own `.config`, tracks upstream closely | Arch's own `.config`, minimal patching | Alpine's own `.config`, hardening-leaning | Vendor/OEM `.config` + vendor patches, often heavily forked |
 | Default filesystem | ext4 | Btrfs | ext4 (installer default; user-chosen) | ext4 | ext4 or F2FS, device-dependent |
-| Security module | AppArmor | SELinux (enforcing by default) | None by default | None by default | SELinux (mandatory, enforcing since Android 9) |
+| Security module | AppArmor | SELinux (enforcing by default) | None by default | None by default | SELinux (mandatory, enforcing since Android 5.0) |
 | Release model | Fixed release (stable/testing/unstable) | Fixed release, ~6 months | Rolling release | Fixed release, ~6 months, plus a rolling `edge` branch | Tied to AOSP + vendor image releases, OEM-controlled |
 
 *What five representative Linux distributions actually vary: packaging, defaults, and policy —
@@ -113,8 +113,9 @@ C library is Bionic, not glibc. There is no systemd, or any conventional Linux i
 `init` process reads its own `init.rc` configuration language and has no relationship to the init
 systems in the table above. There is no general-purpose package manager in the APT/DNF/pacman sense;
 applications install as signed APK bundles through the Package Manager Service. And its security model
-goes further than any desktop distribution's default: SELinux has been mandatory and enforcing since
-Android 9, applied per-app through a much more granular policy than a typical Linux desktop uses. Same
+goes further than any desktop distribution's default: SELinux has been mandatory and fully enforcing
+since Android 5.0, applied per-app through a much more granular policy than a typical Linux desktop
+uses. Same
 kernel; almost nothing else in common with Debian.
 
 ## Misconceptions
