@@ -11,8 +11,10 @@ import Mermaid from "@theme/Mermaid";
 //
 // Mermaid cannot be relied on for click-through navigation here (Docusaurus
 // sets mermaid's securityLevel, which can disable click directives), so the
-// nodes are accompanied by a linked legend below the diagram.
-// ponytail: legend instead of in-diagram links; switch to `click X href` if
+// diagram is followed by a numbered trail — the graph's own reading order,
+// made clickable. The number is not decoration: it's the traversal order the
+// diagram above just drew left-to-right.
+// ponytail: trail instead of in-diagram links; switch to `click X href` if
 // the site's mermaid securityLevel is ever confirmed to be "loose".
 
 function mermaidId(value) {
@@ -33,6 +35,23 @@ function byReadingOrder(a, b) {
 // label would close the string early and break the diagram.
 function escapeLabel(label) {
   return label.replaceAll('"', "&quot;");
+}
+
+// The trail below the diagram: same nodes, in the same left-to-right order,
+// as a numbered, clickable sequence — the diagram's meaning made navigable.
+function Trail({ items }) {
+  return (
+    <ol className="kb-graph__trail">
+      {items.map((item, index) => (
+        <li key={item.id} className="kb-graph__trail-item">
+          <Link className="kb-graph__trail-link" to={item.permalink}>
+            <span className="kb-graph__trail-index">{index + 1}</span>
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </ol>
+  );
 }
 
 export default function KnowledgeGraph({ folder }) {
@@ -63,13 +82,7 @@ export default function KnowledgeGraph({ folder }) {
     return (
       <>
         <Mermaid value={lines.join("\n")} />
-        <ul className="kb-graph__legend">
-          {pages.map((page) => (
-            <li key={page.id}>
-              <Link to={page.permalink}>{page.label}</Link>
-            </li>
-          ))}
-        </ul>
+        <Trail items={pages} />
       </>
     );
   }
@@ -93,21 +106,17 @@ export default function KnowledgeGraph({ folder }) {
     lines.push(`  ${mermaidId(to)} --> ${mermaidId(from)}`);
   }
 
+  const folderItems = folders.map((name) => {
+    const first = internal
+      .filter((node) => node.folder === name)
+      .sort(byReadingOrder)[0];
+    return { id: name, label: folderLabel(name), permalink: first.permalink };
+  });
+
   return (
     <>
       <Mermaid value={lines.join("\n")} />
-      <ul className="kb-graph__legend">
-        {folders.map((name) => {
-          const first = internal
-            .filter((node) => node.folder === name)
-            .sort(byReadingOrder)[0];
-          return (
-            <li key={name}>
-              <Link to={first.permalink}>{folderLabel(name)}</Link>
-            </li>
-          );
-        })}
-      </ul>
+      <Trail items={folderItems} />
     </>
   );
 }
