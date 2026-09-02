@@ -29,8 +29,9 @@ they actually appear in v6.18:
 |---|---|
 | `boot_cpu_init()` | Marks the boot CPU present, active, and online in the CPU masks — the first CPU-topology state that exists. |
 | `setup_arch(&command_line)` | Architecture-specific setup: memory map from the boot loader/firmware, early page tables finalised, command line extracted from `boot_params`. The single largest early call. |
-| `setup_command_line()` / `parse_early_param()` | The saved command line is fixed, and `early_param`-registered parameters (like `nokaslr`, which the [previous page](./early-boot-and-arch-setup.md) depends on) are parsed immediately — before most of the kernel exists to be configured. |
-| `setup_per_cpu_areas()` | Allocates the per-CPU data regions every CPU-local variable lives in — a prerequisite for essentially everything that follows. |
+| `setup_command_line()` | The command line extracted by `setup_arch()` is copied into its saved, stable form (`saved_command_line`) before anything downstream parses it. |
+| `setup_per_cpu_areas()` | Allocates the per-CPU data regions every CPU-local variable lives in — a prerequisite for essentially everything that follows. `setup_nr_cpu_ids()`, `smp_prepare_boot_cpu()`, `early_numa_node_init()`, and `boot_cpu_hotplug_init()` run in this same stretch, fixing CPU count and topology before anything CPU-indexed is allocated. |
+| `parse_early_param()` | `early_param`-registered parameters (like `nokaslr`, which the [previous page](./early-boot-and-arch-setup.md) depends on) are parsed now — deliberately *after* per-CPU areas and CPU topology exist, not before. |
 | `mm_core_init()` | Brings the page allocator itself online. Nothing that needs to allocate memory through the normal allocator can run before this. |
 | `sched_init()` | The scheduler's own data structures — run-queues, scheduling classes — are initialised, though no scheduling happens yet; interrupts are still off. |
 | `rcu_init()` | RCU (the kernel's lock-free read-side synchronisation mechanism) becomes usable; a large fraction of core kernel code depends on it. |
@@ -108,7 +109,7 @@ turning the invisible list above into something you can watch scroll by in real 
 ```text
 [    0.041203] calling  migration_init+0x0/0x20 @ 1
 [    0.041215] initcall migration_init+0x0/0x20 returned 0 after 3 usecs
-[    0.041980] entering initcall level: device
+[    0.041980] entering initcall level: subsys
 ...
 ```
 
@@ -135,7 +136,7 @@ Expect a scroll of paired lines, one `calling` and one `initcall ... returned` p
 ```text
 [    0.041203] calling  migration_init+0x0/0x20 @ 1
 [    0.041215] initcall migration_init+0x0/0x20 returned 0 after 3 usecs
-[    0.041980] entering initcall level: device
+[    0.041980] entering initcall level: subsys
 [    0.042010] calling  pci_subsys_init+0x0/0x40 @ 1
 [    0.042390] initcall pci_subsys_init+0x0/0x40 returned 0 after 380 usecs
 ```
