@@ -7,6 +7,7 @@ tags: [linux, boot]
 prerequisites:
   - linux/boot-and-init/systemd-the-model
   - linux/boot-and-init/the-kernel-command-line
+  - linux/boot-and-init/initramfs-and-early-userspace
 draft: false
 ---
 
