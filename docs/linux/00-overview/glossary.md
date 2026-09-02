@@ -108,7 +108,7 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **PID 1** — the first user-space process, distinguished from every other process only by having no parent, which is the single cause behind its special signal handling, orphan-reaping duty, and the kernel panic that follows if it ever exits. [`switch_root` and PID 1](../03-boot-and-init/switch-root-and-pid-1.md)
 
-**`pivot_root`** — the call that swaps a process's root directory for another directory already mounted in its (private) mount namespace, changing what an absolute path resolves through; distinct from `chroot`, which affects every process sharing that mount namespace rather than establishing a new root wholesale. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
+**`pivot_root`** — the call that moves a *mount namespace's* root to another directory already mounted within it, changing what an absolute path resolves through for every process sharing that namespace; distinct from `chroot`, which changes only the calling *process's* idea of `/` — a per-process attribute, not a mount-namespace-wide change. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
 
 **`PR_SET_CHILD_SUBREAPER`** — a `prctl(2)` flag letting any process opt in to reaping orphans from its own descendant tree, instead of every orphan reparenting all the way up to PID 1; it's the mechanism container supervisors like `tini` and `dumb-init` rely on. [`switch_root` and PID 1](../03-boot-and-init/switch-root-and-pid-1.md)
 
