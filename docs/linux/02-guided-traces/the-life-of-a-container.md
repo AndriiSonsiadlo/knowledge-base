@@ -68,10 +68,12 @@ That's a separate step: <Src file="fs/namespace.c" symbol="pivot_root" /> swaps 
 directory for another directory already mounted somewhere in its (now-private) mount namespace — in a
 container's case, the merged `overlayfs` view from the first section. Everything the process resolves
 through an absolute path afterward starts from there. This is why `pivot_root` needs `CLONE_NEWNS`
-first: swapping the root for *every* process on the system would be `chroot`'s job (and `chroot` really
-does exist for exactly that, more limited, purpose); swapping it for just this one process's private
-view of the mount table is what makes a container's `/bin/ls` see the image's files and nothing of the
-host's.
+first: without a private mount namespace, `pivot_root` would still work, but it would move the root of
+the *mount namespace itself* — visible to every process sharing that namespace, host included, not just
+this one. (`chroot` would be no substitute for the isolation: it changes only the calling process's own
+idea of `/`, a per-process attribute, so it never affects any other process either way.) Doing the swap
+inside a private mount namespace is what makes a container's `/bin/ls` see only the image's files and
+nothing of the host's.
 
 ## cgroups
 
