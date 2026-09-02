@@ -26,6 +26,8 @@ Every top-level directory in v6.18, in the order `ls` gives you:
 
 | Directory | What lives there |
 |---|---|
+| `Documentation/` | Kernel documentation source — the reStructuredText that builds into the published kernel docs (docs.kernel.org); prose, not code. |
+| `LICENSES/` | SPDX license texts referenced by the `SPDX-License-Identifier` tag at the top of most kernel source files. |
 | `arch/` | Architecture-specific code — one subdirectory per CPU architecture (`x86/`, `arm64/`, …), each a nearly-complete miniature port: boot code, low-level memory management, the syscall entry path. |
 | `block/` | The block layer: request queues, I/O schedulers, and the code every block device driver and every filesystem's I/O path goes through. |
 | `certs/` | Certificates and keys used to verify signed kernel modules and, on some configurations, the kernel image itself. |
@@ -49,8 +51,8 @@ Every top-level directory in v6.18, in the order `ls` gives you:
 | `usr/` | Build-time support for generating an initial ramdisk image as part of the kernel build itself. |
 | `virt/` | Architecture-independent virtualization support — most notably the core of KVM, shared across the per-architecture KVM backends in `arch/`. |
 
-`Documentation/` (prose, not code), `Kconfig`, `Makefile`, and `MAINTAINERS` sit alongside these at the
-root and are covered elsewhere on this page and in [Kconfig and Kbuild](./kconfig-and-kbuild.md).
+`Kconfig`, `Makefile`, and `MAINTAINERS` sit alongside these at the root as files rather than
+directories, and are covered in [Kconfig and Kbuild](./kconfig-and-kbuild.md).
 
 ## The four that matter most
 

@@ -162,6 +162,5 @@ as the running kernel, since a rebuild can change addresses and inlining even wi
   setup-header field, its offset, and whether the loader must read, write, or may optionally modify it.
 - [The zero-page layout](https://docs.kernel.org/arch/x86/zero-page.html) — `struct boot_params`, the
   larger structure the setup header lives inside once the kernel is running.
-- [`scripts/extract-vmlinux`](https://elixir.bootlin.com/linux/v6.18/source/scripts/extract-vmlinux) via
-  <Src file="scripts/extract-vmlinux" /> — the tool this page's "What actually happens" section uses to
-  recover an ELF `vmlinux` from an installed `bzImage`.
+- `scripts/extract-vmlinux` via <Src file="scripts/extract-vmlinux" /> — the tool this page's "What
+  actually happens" section uses to recover an ELF `vmlinux` from an installed `bzImage`.

@@ -151,7 +151,7 @@ about how the source is organised.
 
 <KernelFacts
   structure={[["struct module", "include/linux/module.h"]]}
-  path="insmod → sys_finit_module() → load_module() → module relocated, symbols resolved and linked → module_init()"
+  path="insmod → finit_module(2) → load_module() → module relocated, symbols resolved and linked → module_init()"
   observe="lsmod | head && cat /proc/modules | head -3"
   trap="A loaded module has exactly the same privileges as the rest of the kernel. `lsmod`'s `Used by` column counts references, and nothing in the module system limits what a module may touch." />
 

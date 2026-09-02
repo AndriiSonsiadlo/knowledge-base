@@ -159,15 +159,14 @@ flowchart TB
     K -->|"page fault handler maps the page, retries"| U
     U -->|"5 . openat() then getdents64()"| K
     K -->|"iterate_shared fills the dirent buffer"| U
-    U -->|"6 . statx() per entry"| K
-    K -->|"inode cache answers"| U
-    U -->|"7 . write(1, buf, n)"| K
+    U -->|"6 . write(1, buf, n)"| K
     K -->|"pty queues the bytes"| U
-    U -->|"8 . exit_group()"| K
+    U -->|"7 . exit_group()"| K
     K -->|"shell's wait4() reaps the zombie, prompt returns"| U
 ```
 
-*One `ls`, eight stages, and every crossing of the privilege boundary.*
+*One `ls`, seven stages, and every crossing of the privilege boundary. Bare `ls` needs only
+`getdents64()` — a per-entry `stat` only happens for `ls -l`, not shown here.*
 
 <KernelFacts
   structure={[["struct linux_dirent64", "include/linux/dirent.h"]]}
