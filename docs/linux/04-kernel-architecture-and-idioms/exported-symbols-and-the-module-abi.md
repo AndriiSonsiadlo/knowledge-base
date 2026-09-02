@@ -57,12 +57,15 @@ the hard way.
 
 ## Version magic
 
-Independent of modversions, every compiled module and every running kernel carry a `vermagic` string — the
-kernel version, whether it's SMP, the preemption model, and the compiler that built it — and a module's
-`vermagic` must match the running kernel's exactly (module loading can compare the two ignoring the leading
-version if the module carries CRCs; see `same_magic()`). This is a coarser check than modversions: it
-doesn't reason about any individual symbol's type, it just refuses to link a module that was plainly built
-for a different kernel configuration at all.
+Independent of modversions, every compiled module and every running kernel carry a `vermagic` string,
+built from `UTS_RELEASE` plus a handful of concatenated config tokens: the kernel release, whether it's
+SMP, the preemption model, whether module unloading is supported, whether modversions is enabled, and an
+architecture-specific token (`MODULE_ARCH_VERMAGIC`) that's empty on x86-64 — there's no per-arch variant
+to distinguish there. A module's `vermagic` must match the running kernel's exactly (module loading can
+compare the two ignoring the leading version if the module carries CRCs; see `same_magic()`). This is a
+coarser check than modversions: it doesn't reason about any individual symbol's type, and it says nothing
+about which compiler built either side — it just refuses to link a module that was plainly configured
+differently from the running kernel.
 
 ## What actually happens
 
@@ -76,7 +79,7 @@ filename:       /lib/modules/6.18.0/extra/hello.ko
 license:        GPL
 srcversion:     3F1A9C2B7E4D5A6F19203B4C
 depends:
-vermagic:       6.18.0 SMP preempt mod_unload
+vermagic:       6.18.0 SMP preempt mod_unload modversions
 ```
 
 Two distinct failures follow from two distinct checks, and they produce two distinct messages. A `vermagic`
