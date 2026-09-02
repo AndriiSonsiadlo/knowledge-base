@@ -107,6 +107,17 @@ Nothing was sent anywhere. No message was queued for another program to pick up.
 ring 3, ran different code in ring 0 for a while, and came back — the same process, the same thread,
 the same task, the entire time.
 
+:::note
+arm64 walks the same shape with different names. The trapping instruction is `SVC #0`, not `SYSCALL`;
+the privilege model is **exception levels**, not rings — user space runs at EL0, the kernel at EL1, and
+the transition raised is EL0→EL1 rather than ring 3→ring 0. There is no separate fixed "fast syscall"
+entry point the way `entry_SYSCALL_64` is on x86-64: a system call is one more synchronous exception
+category dispatched through the same vector table every trap uses, distinguished afterward by reading
+`ESR_EL1`. See [Privilege Levels and Protection](../../computer-science/cpu-architecture/privilege-levels-and-protection.md)
+and [Exceptions, Traps, and Interrupts](../../computer-science/cpu-architecture/exceptions-traps-and-interrupts.md)
+for the full model each name belongs to.
+:::
+
 ## The kernel is not a process
 
 You cannot `ps` the kernel, because the kernel is not a process — it is code, and code alone does not

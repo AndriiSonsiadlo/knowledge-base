@@ -160,5 +160,7 @@ everything above it is a distribution's choice.*
   section was taken from.
 - [`Documentation/admin-guide/abi.rst`](https://docs.kernel.org/admin-guide/abi.html) — the stability
   promise stated by the kernel project itself, and the exception categories it actually admits.
-- [Linus Torvalds, "Re: \[Regression w/ patch\] Media commit causes user space to misbahave"](https://lkml.org/lkml/2012/12/23/75)
-  — the "WE DO NOT BREAK USERSPACE!" mail itself, worth reading for the tone as much as the content.
+- [Linus Torvalds, "Re: \[Regression w/ patch\] Media commit causes user space to misbahave" (2012)](https://lkml.org/lkml/2012/12/23/75)
+  — the "WE DO NOT BREAK USERSPACE!" mail itself, worth reading for the tone as much as the content. Over
+  a decade old, but quoted as a statement of a policy the project still holds, not as a description of
+  any particular kernel's code.
