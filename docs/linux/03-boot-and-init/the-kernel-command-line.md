@@ -192,6 +192,11 @@ change only the `-append` value across three boots and watch the same kernel beh
 Confirming `/proc/cmdline` at the end of each run is the same check every time — it is the ground truth
 for what the loader actually passed, independent of what any of the three boots did with it afterward.
 
+**If it fails:** step 3 lands somewhere other than a bare `#` prompt — most often back at the normal
+initramfs shell — means `-append` was not actually replaced; QEMU only sees one `-append` per invocation,
+so a copy-paste that left the previous line in place silently wins. Re-run with only the single `-append`
+shown for that step.
+
 </Lab>
 
 <KernelFacts

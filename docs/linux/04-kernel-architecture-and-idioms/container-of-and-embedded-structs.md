@@ -225,6 +225,14 @@ the direct field access it replaces.
 
 ## The arithmetic, laid out
 
+```mermaid
+graph LR
+    A["pointer you have:<br/>&ext4_i-&gt;vfs_inode<br/>(a struct inode *)"] -->|"− offsetof(ext4_inode_info, vfs_inode)"| B["pointer you want:<br/>ext4_i<br/>(a struct ext4_inode_info *)"]
+```
+
+*The whole trick in one arrow: subtract a compile-time-constant offset from the pointer you have and you
+land on the pointer you want. The struct layout below shows exactly where that offset comes from.*
+
 ```text
 struct ext4_inode_info {
         ...                          offset 0

@@ -162,6 +162,11 @@ makes deliberately breaking a boot safe to repeat — it undoes damage a real ma
 by simply rebooting.
 :::
 
+**If it fails:** the kernel boots straight through instead of dropping to the emergency shell — the disk
+image uses `root=/dev/sdaN` or a label rather than a UUID, so a bogus UUID is simply never consulted.
+Check the working command line first (`cat /proc/cmdline` on a normal boot) and edit whichever `root=`
+form it actually uses.
+
 </Lab>
 
 <KernelFacts
