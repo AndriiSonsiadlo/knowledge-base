@@ -63,7 +63,7 @@ implementations — bracket that use explicitly with `kernel_fpu_begin()` and `k
 the current FPU state, make it safe to use SIMD for the duration, and restore it on the way out. Outside
 that bracket, floating point in kernel context is not merely unidiomatic, it's a bug.
 
-## The stack is 8 or 16 KB, and that is all
+## The stack is 16 KB (and used to be 8), and that is all
 
 A user-space thread's stack grows on demand, typically up to several megabytes, and a stack overflow is
 something most programs never think about. A kernel stack is a small, fixed-size allocation carved out once
@@ -102,6 +102,9 @@ macro needs to do more than one thing and still act like an expression:
 	typeof(b) _b = (b); \
 	_a > _b ? _a : _b; })
 ```
+
+Simplified — the real `max()`/`min()` in `include/linux/minmax.h` wrap this in the more elaborate
+`__careful_cmp` machinery, which also catches signedness mismatches between `a` and `b` at build time.
 
 **`typeof`** recovers a variable's type without naming it, which is what makes the macro above type-generic
 and is the same trick `container_of` (later on this page's sibling) depends on.

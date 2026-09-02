@@ -114,15 +114,19 @@ Every lab in this section — not just this folder's — assumes one fixed layou
 
 ```text
 ~/kernel-lab/
-├── linux/       # the kernel source tree (Getting the Source, next page)
-├── initramfs/   # the BusyBox rootfs tree you build and pack
-└── boot/        # built artefacts: bzImage, the packed initramfs, anything QEMU boots
+├── linux/               # the kernel source tree (Getting the Source, next page)
+│   └── arch/x86/boot/bzImage   # built in place — never moved out of the tree
+├── initramfs/           # the BusyBox rootfs tree you build and pack
+├── initramfs.cpio.gz    # the packed initramfs, written one level up from initramfs/
+└── boot/
+    └── modules/         # `make modules_install` output
 ```
 
 Commands throughout this section are written assuming you `cd ~/kernel-lab/linux` before running them,
-and that a built kernel or initramfs referenced later lives under `~/kernel-lab/boot/`. Using a
-different path works fine — this is a convention, not a requirement the tooling enforces — but every
-copy-pasted command in a later lab assumes this one, so deviating means translating every path by hand.
+that a built kernel stays where the build leaves it (`arch/x86/boot/bzImage`, in-tree), and that the
+packed initramfs lands one directory up, at `~/kernel-lab/initramfs.cpio.gz`. Using a different path
+works fine — this is a convention, not a requirement the tooling enforces — but every copy-pasted
+command in a later lab assumes this one, so deviating means translating every path by hand.
 
 ## Disk, memory, and time budget
 

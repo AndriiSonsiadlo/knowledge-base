@@ -144,8 +144,8 @@ flowchart TB
     PKGMGR --> DESKTOP["Desktop environment / applications"]
 ```
 
-*Where the kernel stops and the distribution starts: everything below the bracket is one project;
-everything above it is a distribution's choice.*
+*Where the kernel stops and the distribution starts: the kernel is one project; everything below it in
+this diagram is a distribution's choice.*
 
 <KernelFacts
   structure={[["struct new_utsname", "include/uapi/linux/utsname.h"]]}

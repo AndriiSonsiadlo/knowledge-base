@@ -203,7 +203,7 @@ shown for that step.
   structure={[["saved_command_line", "init/main.c — the kernel's own copy of what it was given"]]}
   path="loader fills cmd_line_ptr → parse_early_param() → parse_args() → unknown_bootoption() → leftovers stay in /proc/cmdline or reach init"
   observe="cat /proc/cmdline"
-  trap="An unrecognised parameter is not an error. A dotted key like `nokalsr` (typo for `nokaslr`) is left completely untouched by the kernel — no warning, no effect, just silently present in /proc/cmdline for nothing in particular to read." />
+  trap="An unrecognised parameter is not an error. A typo like `nokalsr` for `nokaslr` has no dot, so it does not get the systemd.*-style pass-through treatment — instead it becomes an entry in the argument/environment list handed to whatever the kernel execs as init, which almost certainly has no idea what to do with it either." />
 
 ## References
 

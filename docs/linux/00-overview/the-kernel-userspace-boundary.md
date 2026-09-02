@@ -26,7 +26,7 @@ through that door and the rules the hardware places on doing it.
 | | User space | Kernel space |
 |---|---|---|
 | Address space | Its own, private, unprivileged | The kernel's own map, plus every process's mappings it needs to reach |
-| Privilege level | Ring 3 (x86-64): unprivileged | Ring 0 (x86-64): unprivileged instructions and everything else |
+| Privilege level | Ring 3 (x86-64): unprivileged | Ring 0 (x86-64): privileged instructions and everything else |
 | What a crash costs | One process; the kernel reclaims it | Potentially the whole machine — there is no ring above 0 to catch it |
 | What it may touch | Only what its own mappings and file descriptors permit | Any physical memory, any device, any process's state |
 | How it is scheduled | As a process or thread, timesliced against every other one | Not scheduled as its own entity — kernel code runs *inside* whichever process's context called it, or in an interrupt context that pre-empts everything |
