@@ -14,6 +14,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **ABI (application binary interface)** — the binary-level contract a program compiles against; this section uses it specifically for the kernel's promise that it never breaks the *user-space* ABI (syscalls, `/proc`, ELF layout) across releases, even though it makes no such promise internally. [What Linux Actually Is](./what-linux-actually-is.md)
 
+**Bitmap** — a fixed-size set of small integers (CPU masks, IRQ masks, feature flags) stored as `unsigned long` words via `DECLARE_BITMAP`, manipulated with `set_bit()`/`clear_bit()`/`test_bit()`; the atomic variants like `test_and_set_bit()` are the default whenever more than one context might touch the same bitmap concurrently. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
+
 **Boot loader** — the software that runs after firmware and before the kernel, whose entire job is four things: find a kernel, find an initramfs, build a command line, and hand over control. [Boot Loaders](../03-boot-and-init/bootloaders-grub-and-friends.md)
 
 **Boot variable** — an NVRAM entry (`Boot0000`, `Boot0001`, …) plus a `BootOrder` list that tells UEFI firmware which `.efi` file to run and in what order; this state lives in firmware, not on disk. [Firmware: BIOS and UEFI](../03-boot-and-init/firmware-bios-and-uefi.md)
@@ -40,6 +42,10 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **GRO (Generic Receive Offload)** — merges several related small segments arriving close together (e.g. TCP segments from the same stream) into one larger `sk_buff` before the packet climbs further up the stack, trading a small merge cost for large savings in per-header processing. [The Life of a Packet](../02-guided-traces/the-life-of-a-packet.md)
 
+**`hlist`** — `hlist_head`/`hlist_node`, `list_head`'s sibling for hash tables: a single-pointer head (rather than `list_head`'s two) keeps millions of empty buckets cheap, with the node side carrying `pprev` — a pointer to the previous node's `next` field — so removal can splice a node out without walking the list. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
+
+**`idr`/`ida`** — the kernel's "give me the smallest unused integer, and let me give it back later" allocators; `idr` maps a small integer to a pointer (file descriptors, device minor numbers), while `ida` is the same machinery with no pointer attached, just an ID allocator. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
+
 **`__init`** — an annotation placing a function in a discardable code section whose memory is freed once boot completes; calling it later dereferences freed memory. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
 
 **Initcall** — a function pointer a built-in driver or subsystem registers into a named linker section at build time, which the kernel walks and calls at the appropriate point in boot rather than being invoked by name from `start_kernel()`. [`start_kernel` and the Initcall Order](../03-boot-and-init/start-kernel-and-initcalls.md)
@@ -54,7 +60,7 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **KASAN** — the Kernel Address Sanitizer, which instruments every memory access to catch use-after-free and out-of-bounds reads/writes at the exact faulting instruction, by poisoning freed and redzone memory and checking accesses against it. [What Goes Wrong in Kernel C](../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md)
 
-**KASLR** — Kernel Address Space Layout Randomization; x86-64 randomizes the kernel's load address on every boot by default, which shifts the running kernel's addresses away from those in a static `vmlinux` unless disabled with `nokaslr`, breaking naive breakpoint resolution. [Debugging the Kernel with GDB](../01-lab-and-toolchain/debugging-the-kernel-with-gdb.md)
+**KASLR** — kernel address space layout randomisation; the decompressor picks a randomised physical load address at every boot, and relocation logic in `extract_kernel()` plus fixups in the kernel's own `startup_64` make a kernel built for one address run correctly wherever it lands. Booting with `nokaslr` disables this, loading the kernel at its link-time address instead — which is also why a GDB session's symbol table only matches a running kernel with KASLR off. [Early Boot and Architecture Setup](../03-boot-and-init/early-boot-and-arch-setup.md)
 
 **Kconfig symbol** — a named configuration option declared by a `config` entry in a `Kconfig` file, with a type, dependency rules, a default, and help text, that governs whether a piece of code is compiled into the kernel at all. [Kconfig and Kbuild](../04-kernel-architecture-and-idioms/kconfig-and-kbuild.md)
 
@@ -75,6 +81,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **`list_head`** — the kernel's circular, doubly-linked intrusive list node/head type (two pointers, `next` and `prev`), embedded directly as a field inside the objects it links. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
 
 **Lockdep** — a runtime validator that builds a graph of lock acquisition ordering as the kernel actually runs and reports the first sequence that could deadlock, even before that exact sequence has actually occurred. [What Goes Wrong in Kernel C](../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md)
+
+**Lockdown** (`CONFIG_SECURITY_LOCKDOWN_LSM`) — closes the ways an already-signature-verified, running kernel could still be made to execute unsigned code or expose kernel memory; its `integrity` mode forbids modifying the running kernel, and `confidentiality` additionally forbids reading kernel memory or secrets, which is why `nokaslr` and kernel debugging stop working once it's active. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
 
 **LTS (long-term support)** — a designation given to a subset of kernel releases for which the community keeps backporting fixes for years after an ordinary release would have been abandoned. [What Linux Actually Is](./what-linux-actually-is.md)
 
@@ -102,7 +110,11 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`pivot_root`** — the call that swaps a process's root directory for another directory already mounted in its (private) mount namespace, changing what an absolute path resolves through; distinct from `chroot`, which affects every process sharing that mount namespace rather than establishing a new root wholesale. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
 
+**`PR_SET_CHILD_SUBREAPER`** — a `prctl(2)` flag letting any process opt in to reaping orphans from its own descendant tree, instead of every orphan reparenting all the way up to PID 1; it's the mechanism container supervisors like `tini` and `dumb-init` rely on. [`switch_root` and PID 1](../03-boot-and-init/switch-root-and-pid-1.md)
+
 **QEMU gdbstub** (`-s -S`) — `-s` opens a GDB stub listening on TCP port 1234 exposing the guest's virtual CPU; `-S` freezes the guest at its first instruction until GDB tells it to continue, letting GDB drive the CPU directly regardless of whether guest software is responsive. [Debugging the Kernel with GDB](../01-lab-and-toolchain/debugging-the-kernel-with-gdb.md)
+
+**Red-black tree** (`rb_node`/`rb_root`) — the kernel's balanced binary search tree, embedded intrusively like `list_head`; the kernel's rbtree code owns balancing (`rb_insert_color()`, `rb_erase()`) while the caller writes the comparison and walk logic itself, avoiding a per-comparison indirect call. The CFS scheduler's runqueue is the canonical example. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
 
 **`refcount_t`** — a dedicated reference-counting type (distinct from `atomic_t`) that saturates instead of wrapping on overflow and refuses to increment from zero, closing two failure modes a plain atomic counter has when used as an object's lifetime counter. [Reference Counting and Object Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md)
 
@@ -111,6 +123,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **Secure Boot** — a signature-verification gate that checks, at each handoff from firmware to boot loader to kernel, whether the thing about to execute is signed by a key the machine trusts; it verifies provenance only, not the safety of what runs. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
 
 **Setup header** — the fixed-layout struct inside a `bzImage` that forms the binary contract between the boot loader and the kernel, specifying which fields the loader must fill in (like `cmd_line_ptr`, `ramdisk_image`) versus only read. [Inside `bzImage`](../03-boot-and-init/the-kernel-image.md)
+
+**`shim`** — a small loader signed by Microsoft's UEFI CA that nearly every Secure-Boot-enabled PC trusts out of the box; once running, it verifies a distribution's actual boot loader against its own baked-in key instead, so only `shim` itself needs a key in every machine's `db`. It also supports MOK enrolment, letting a user add their own signing key for a locally-built kernel module. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
 
 **`sk_buff`** — the single structure that represents a packet through its entire trip up the networking stack, carrying both its bytes and the kernel's accumulating understanding of them; each layer strips a header by moving a pointer, not by copying. [The Life of a Packet](../02-guided-traces/the-life-of-a-packet.md)
 
@@ -141,3 +155,5 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **`vmlinuz`** — the conventional installed name (e.g. `/boot/vmlinuz-$(uname -r)`) a distribution gives to a copy of its `bzImage`; same file, different name and location. [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md)
 
 **Writeback** — the kernel-driven, deferred process — kthreads flushing pages once a dirty-memory or age limit is crossed — that moves dirty pages back to their filesystem; "later" is typically tens of seconds, not milliseconds. [The Life of a `write()`](../02-guided-traces/the-life-of-a-write.md)
+
+**`xarray`** — an abstract, non-intrusive associative array: arbitrary pointers stored by a plain `unsigned long` index, with the implementation managing its own internal tree nodes and RCU-aware locking; the current, more general replacement for the older `radix_tree` API, and what the page cache is built on. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
