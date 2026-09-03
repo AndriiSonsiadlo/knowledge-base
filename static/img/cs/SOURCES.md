@@ -26,6 +26,7 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 
 | file | source | author | licence |
 |---|---|---|---|
+| `algorithms/astar-progress-animation.gif` | https://commons.wikimedia.org/wiki/File:Astar_progress_animation.gif | Subh83 | CC BY 3.0 |
 | `algorithms/avl-rotation.gif` | https://commons.wikimedia.org/wiki/File:AVL_Tree_Example.gif | Bruno Schalch | CC BY-SA 4.0 |
 | `algorithms/bfs-order.png` | https://commons.wikimedia.org/wiki/File:Breadth-first-tree.svg | Alexander Drichel | CC BY 3.0 |
 | `algorithms/big-o-definition.png` | https://commons.wikimedia.org/wiki/File:Big-O-notation.png | w:it:User:Fede_Reghe | Public domain |
@@ -43,6 +44,7 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/hash-table.png` | https://commons.wikimedia.org/wiki/File:Hash_table_3_1_1_0_1_0_0_SP.svg | Jorge Stolfi | CC BY-SA 3.0 |
 | `algorithms/heapsort.gif` | https://commons.wikimedia.org/wiki/File:Sorting_heapsort_anim.gif | de:User:RolandH | CC BY-SA 3.0 |
 | `algorithms/insertion-sort.gif` | https://commons.wikimedia.org/wiki/File:Insertion-sort-example.gif | Swfung8 | CC BY-SA 3.0 |
+| `algorithms/max-flow.png` | https://commons.wikimedia.org/wiki/File:Max_flow.svg | Min_cut.png : Maksim derivative work: Cyhawk ( talk ) | CC BY-SA 3.0 |
 | `algorithms/max-heap.png` | https://commons.wikimedia.org/wiki/File:Max-Heap.svg | Ermishin | CC BY-SA 3.0 |
 | `algorithms/mergesort-diagram.png` | https://commons.wikimedia.org/wiki/File:Merge_sort_algorithm_diagram.svg | VineetKumar at English Wikipedia | Public domain |
 | `algorithms/mergesort.gif` | https://commons.wikimedia.org/wiki/File:Merge-sort-example-300px.gif | Swfung8 | CC BY-SA 3.0 |
