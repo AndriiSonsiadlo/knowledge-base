@@ -98,10 +98,9 @@ Two details separate the textbook version from the naive one:
   case. Without it, bubble sort is $O(n^2)$ even on sorted input, because it keeps making full passes
   it no longer needs.
 
-Tracing `[5, 1, 8, 3]` — five inversions to start: `(5,1)`, `(5,3)`, `(8,3)`, and the pair `(5,1)`
-plus `(1,3)` is not inverted since `1 < 3`. Listing them precisely: `(0,1)=(5,1)`, `(0,3)=(5,3)`,
-`(2,3)=(8,3)` — three inversions in total, so bubble sort makes exactly three swaps before it can
-finish:
+Tracing `[5, 1, 8, 3]` — three inversions to start: `(0,1)=(5,1)`, `(0,3)=(5,3)`, `(2,3)=(8,3)`.
+Every other pair is already in order — `(1,3)` is not inverted since `1 < 3` — so bubble sort makes
+exactly three swaps before it can finish:
 
 | Pass | Comparisons (adjacent pairs) | Swaps this pass | Result | Inversions remaining |
 |---|---|---|---|---|
