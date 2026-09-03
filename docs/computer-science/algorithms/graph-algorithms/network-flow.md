@@ -257,7 +257,7 @@ assert cut_capacity == flow
 |---|---|---|
 | Ford-Fulkerson (unspecified path) | `O(E · f*)`, `f*` the max flow value | Any path — pseudo-polynomial, capacity-dependent |
 | **Edmonds-Karp** | **O(VE²)** | Shortest path by edge count (BFS) |
-| Dinic's algorithm | O(V²E) general, O(E√V) on unit-capacity graphs | Blocking flow per phase over a level graph |
+| Dinic's algorithm | O(V²E) general, O(E · sqrt(V)) on unit-capacity graphs | Blocking flow per phase over a level graph |
 | Push-relabel | O(V²E) to O(V³) depending on variant | No augmenting-path search at all — local relabel/push operations |
 
 Edmonds-Karp is the right default because its bound holds regardless of the capacities involved.
@@ -271,7 +271,7 @@ at a time, which is why it dominates on the unit-capacity graphs that bipartite 
   costs={[
     ["Ford-Fulkerson, any path (worst)", "O(E · f*)"],
     ["Edmonds-Karp, BFS shortest path (worst)", "O(VE²)"],
-    ["Dinic's, unit-capacity graphs (worst)", "O(E√V)"],
+    ["Dinic's, unit-capacity graphs (worst)", "O(E · sqrt(V))"],
     ["single BFS augmentation (worst)", "O(E)"],
   ]}
   reachFor="A source-to-sink capacity limit to saturate, or a combinatorial problem — matching, selection under dependencies — that can be reframed as one."

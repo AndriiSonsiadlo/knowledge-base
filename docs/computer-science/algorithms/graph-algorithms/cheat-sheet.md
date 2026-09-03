@@ -105,7 +105,7 @@ single most common mistake this flow is meant to prevent — see the Dijkstra da
     ["Bellman-Ford (worst)", "O(V · E)"],
     ["Kruskal's (worst)", "O(E log E)"],
     ["Edmonds-Karp max flow (worst)", "O(VE²)"],
-    ["bipartite matching, Hopcroft-Karp (worst)", "O(E√V)"],
+    ["bipartite matching, Hopcroft-Karp (worst)", "O(E · sqrt(V))"],
   ]}
   reachFor="A quick lookup while choosing an algorithm for a new graph problem, or checking a claimed complexity, rather than a first read on any one algorithm."
   trap="Reaching for Dijkstra's out of habit on a graph that turns out to have a negative edge — it will run, and it will return a wrong answer with no error."

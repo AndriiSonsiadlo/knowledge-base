@@ -246,8 +246,8 @@ int max_bipartite_matching(const Adj& left_adj, const std::vector<std::string>& 
   Kuhn's algorithm by hand.
 - **Hopcroft–Karp.** Kuhn's algorithm above runs one BFS/DFS augmentation at a time, giving O(V · E)
   worst case (E augmentations bounded by V, each an O(E) search). **Hopcroft–Karp** finds *multiple*
-  vertex-disjoint shortest augmenting paths per phase, cutting the number of phases to O(√V) and the
-  total time to **O(E√V)** — named here with its bound, not derived; see the original paper for the
+  vertex-disjoint shortest augmenting paths per phase, cutting the number of phases to O(sqrt(V)) and the
+  total time to **O(E · sqrt(V))** — named here with its bound, not derived; see the original paper for the
   phase structure.
 - **Assignment problems** are bipartite matching with a twist: every edge has a cost or a value, and
   the goal is the *maximum-weight* matching, not merely the largest one. The unweighted case above is
@@ -312,7 +312,7 @@ left vertex and a super-sink from every right vertex, all capacities 1 — see
   costs={[
     ["2-coloring / bipartiteness test (worst)", "O(V + E)"],
     ["maximum matching, Kuhn's algorithm (worst)", "O(V · E)"],
-    ["maximum matching, Hopcroft–Karp (worst)", "O(E√V)"],
+    ["maximum matching, Hopcroft–Karp (worst)", "O(E · sqrt(V))"],
   ]}
   reachFor="Two distinguishable groups where every relationship crosses between them — assignment, scheduling onto two resources, or any 'pair these up' question with a natural two-sided structure."
   trap="Matching greedily (first-come, first-served) instead of via augmenting paths returns a maximal matching, not a maximum one — it can be strictly smaller with no warning that a better pairing existed."
@@ -325,7 +325,7 @@ left vertex and a super-sink from every right vertex, all capacities 1 — see
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §4.1 — BFS as the basis for two-coloring and connectivity
   queries.
 - J. E. Hopcroft & R. M. Karp, "An n^5/2 Algorithm for Maximum Matchings in Bipartite Graphs", *SIAM
-  J. Computing* 2(4), 1973 — the O(E√V) algorithm, named above but not derived.
+  J. Computing* 2(4), 1973 — the O(E · sqrt(V)) algorithm, named above but not derived.
 - D. König, "Gráfok és mátrixok" (1931) — the theorem equating maximum matching and minimum vertex
   cover in bipartite graphs, referenced in the pitfalls above.
 - [NetworkX bipartite algorithms documentation](https://networkx.org/documentation/stable/reference/algorithms/bipartite.html)
