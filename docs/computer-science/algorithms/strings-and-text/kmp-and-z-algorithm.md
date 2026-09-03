@@ -273,15 +273,10 @@ int main() {
   own border — then on a run of identical characters the fallback `k = fail[k-1]` never decreases and
   the search loop spins forever. `fail[0] == 0` always, and the `for` loop must start at index 1.
 - **Empty pattern.** `len(pattern) == 0` makes `pattern[k]` an index error on the first character.
-  Decide the convention explicitly: the code above returns every position (`str.find` agrees —
-  `"abc".find("")` is 0), and the C++ version returns nothing. Either is defensible; silently crashing
-  is not.
+  Decide the convention explicitly: the code above returns every position (`str.find` agrees — `"abc".find("")` is 0), and the C++ version returns nothing. Either is defensible; silently crashing is not.
 - **Pattern longer than the text.** Not a special case — the loop simply never reaches `k == m` and
   returns empty. No guard needed, and adding one usually introduces an off-by-one.
-- **Overlapping matches.** `kmp_search("aaaa", "aa")` is `[0, 1, 2]`, not `[0, 2]`. Resetting `k = 0`
-  after a match, or advancing the text index by `m`, silently drops the overlaps. Python's
-  [`str.count`](https://docs.python.org/3/library/stdtypes.html#str.count) counts *non-overlapping*
-  occurrences, so it disagrees with this function by design.
+- **Overlapping matches.** `kmp_search("aaaa", "aa")` is `[0, 1, 2]`, not `[0, 2]`. Resetting `k = 0` after a match, or advancing the text index by `m`, silently drops the overlaps. Python's [`str.count`](https://docs.python.org/3/library/stdtypes.html#str.count) counts *non-overlapping* occurrences, so it disagrees with this function by design.
 - **Signed/unsigned mixing in C++.** `k` is `int` while `pattern.size()` is `std::size_t`; comparing
   them directly is a warning at best and a wrong comparison at worst. Cast once, deliberately.
 
@@ -331,6 +326,10 @@ CLRS 4th ed. §32.2 for Rabin-Karp's analysis and Sedgewick & Wayne §5.3 for th
 
 ## Related Pages
 
+- [Strings & Text Introduction](./intro.md) — how this page's guarantee fits among the folder's other matchers.
+- [String Fundamentals](./string-fundamentals.md) — the O(m) comparison cost this algorithm is built to never pay twice.
+- [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — the O(nm) baseline this page's failure function eliminates, and the hash-based alternative for multiple patterns.
+- [Suffix Structures & Autocomplete](./suffix-structures-and-autocomplete.md) — when the pattern isn't known until query time, a structure built once from the text replaces re-running this search per query.
 - [Arrays](../data-structures/arrays.md) — the contiguous buffer both algorithms scan, and the index arithmetic they live on.
 - [Two Pointers & Sliding Window](../problem-solving-patterns/two-pointers-and-sliding-window.md) — the same "never move the left pointer backwards" discipline, in a setting without a pattern.
 - [Character Encoding](../../bit-manipulation/character-encoding.md) — what a "character" is before you start comparing them.

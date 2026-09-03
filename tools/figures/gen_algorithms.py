@@ -454,6 +454,65 @@ def predicate_step_function():
     save(f, "algorithms/predicate-step-function.png")
 
 
+def string_concat_cost():
+    """Characters copied building a string from n equal-length (k=2) parts: += loop vs str.join."""
+    k = 2
+    ns = list(range(1, 41))
+    plus_equals = [k * nn * (nn + 1) // 2 for nn in ns]     # sum_{i=1..n} (i*k + k)
+    join_cost = [k * nn for nn in ns]                        # each character written exactly once
+
+    f, ax = fig(7.6, 4.4)
+    ax.plot(ns, plus_equals, color=C.red, lw=2.4, label="'+=' in a loop: O(n²)")
+    ax.plot(ns, join_cost, color=C.blue, lw=2.4, label="str.join(parts): O(n)")
+    ax.scatter([5], [30], color=C.red, zorder=3, s=50)
+    ax.annotate("n=5: 30 chars copied", (5, 30), xytext=(11, 160), fontsize=10.5, color=C.red,
+                arrowprops=dict(arrowstyle="-", color=C.red, lw=1.2))
+    ax.scatter([5], [10], color=C.blue, zorder=3, s=50)
+    ax.annotate("n=5: 10 chars copied", (5, 10), xytext=(11, -55), fontsize=10.5, color=C.blue,
+                arrowprops=dict(arrowstyle="-", color=C.blue, lw=1.2))
+    ax.set_xlabel("number of parts concatenated (n)")
+    ax.set_ylabel("total characters copied")
+    ax.set_title("Building a string from n parts of length 2: quadratic vs linear")
+    ax.legend(loc="upper left")
+    save(f, "algorithms/string-concat-cost.png")
+
+
+def rolling_hash_window():
+    """The 7-char rolling-hash window sliding across abacabadabacaba, arithmetic annotated."""
+    text = "abacabadabacaba"
+    m = 7
+    windows = [(0, "abacaba"), (1, "bacabad"), (2, "acabada")]
+    f, axes = kbstyle.grid(3, 1, 8.0, 6.6)
+    for ax, (i, window) in zip(axes, windows):
+        clean(ax)
+        ax.set_xlim(-0.6, len(text) - 0.4)
+        ax.set_ylim(-0.9, 1.3)
+        for j, ch in enumerate(text):
+            in_window = i <= j < i + m
+            leaving = (i > 0 and j == i - 1)
+            entering = j == i + m - 1
+            face = C.sky if in_window else "white"
+            if leaving:
+                face = C.red
+            if entering and i > 0:
+                face = C.green
+            ax.add_patch(plt.Rectangle((j - 0.42, -0.42), 0.84, 0.84, facecolor=face,
+                                       edgecolor=C.black if in_window else C.grey,
+                                       lw=2.0 if in_window else 1.0, zorder=2))
+            ax.text(j, 0.0, ch, ha="center", va="center", fontsize=12, fontweight="bold", zorder=3)
+        if i == 0:
+            note = f"initial window hash computed from scratch: h(\"{window}\")"
+        else:
+            note = (f"h = ((h - text[{i - 1}]·B^(m-1)) · B + text[{i + m - 1}]) mod P  "
+                    f"— drop red, fold in green")
+        ax.text(len(text) / 2 - 0.5, 1.0, note, ha="center", va="center", fontsize=10.5,
+                color=C.black if i == 0 else C.red)
+        ax.set_title(f"window {i}: \"{window}\"", fontsize=12)
+    f.suptitle("Rolling hash: each slide drops one character's contribution and folds in the next",
+               fontsize=14.5, fontweight="bold")
+    save(f, "algorithms/rolling-hash-window.png")
+
+
 def ternary_search_narrowing():
     """A unimodal curve with the search interval narrowing over four ternary-search iterations."""
     def f_of(x):
@@ -488,6 +547,8 @@ FIGURES = {
     "search_break_even": search_break_even,
     "predicate_step_function": predicate_step_function,
     "ternary_search_narrowing": ternary_search_narrowing,
+    "string_concat_cost": string_concat_cost,
+    "rolling_hash_window": rolling_hash_window,
 }
 
 if __name__ == "__main__":
