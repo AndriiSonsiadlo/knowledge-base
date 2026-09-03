@@ -44,10 +44,10 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/heapsort.gif` | https://commons.wikimedia.org/wiki/File:Sorting_heapsort_anim.gif | de:User:RolandH | CC BY-SA 3.0 |
 | `algorithms/insertion-sort.gif` | https://commons.wikimedia.org/wiki/File:Insertion-sort-example.gif | Swfung8 | CC BY-SA 3.0 |
 | `algorithms/max-heap.png` | https://commons.wikimedia.org/wiki/File:Max-Heap.svg | Ermishin | CC BY-SA 3.0 |
-| `algorithms/mst-kruskal.gif` | https://commons.wikimedia.org/wiki/File:MST_kruskal_en.gif | Schulllz | CC BY-SA 3.0 |
-| `algorithms/mst-prim.gif` | https://commons.wikimedia.org/wiki/File:PrimAlgDemo.gif | Shiyu Ji | CC BY-SA 4.0 |
 | `algorithms/mergesort-diagram.png` | https://commons.wikimedia.org/wiki/File:Merge_sort_algorithm_diagram.svg | VineetKumar at English Wikipedia | Public domain |
 | `algorithms/mergesort.gif` | https://commons.wikimedia.org/wiki/File:Merge-sort-example-300px.gif | Swfung8 | CC BY-SA 3.0 |
+| `algorithms/mst-kruskal.gif` | https://commons.wikimedia.org/wiki/File:MST_kruskal_en.gif | Schulllz | CC BY-SA 3.0 |
+| `algorithms/mst-prim.gif` | https://commons.wikimedia.org/wiki/File:PrimAlgDemo.gif | Shiyu Ji | CC BY-SA 4.0 |
 | `algorithms/quicksort-diagram.png` | https://commons.wikimedia.org/wiki/File:Quicksort-diagram.svg | Znupi | Public domain |
 | `algorithms/quicksort.gif` | https://commons.wikimedia.org/wiki/File:Sorting_quicksort_anim.gif | Wikipedia:en:User:RolandH | CC BY-SA 3.0 |
 | `algorithms/red-black-tree.png` | https://commons.wikimedia.org/wiki/File:Red-black_tree_example.svg | Cburnett | CC BY-SA 3.0 |

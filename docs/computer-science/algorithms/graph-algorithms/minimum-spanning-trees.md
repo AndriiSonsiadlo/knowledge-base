@@ -97,6 +97,7 @@ def kruskal_mst(n, edges):
 ```cpp showLineNumbers
 #include <algorithm>
 #include <numeric>
+#include <queue>
 #include <tuple>
 #include <vector>
 
@@ -144,18 +145,18 @@ held in a [min-heap](../data-structures/heaps.md) so the cheapest is always on t
 ```text
 start = A. tree = {A}. frontier (min-heap by weight) seeded from A's edges: A-C 2, A-B 4
 
-  pop      in tree already?   action                              tree
+  pop      in tree already?   action                                          tree
   A-C 2    no                 accept, push C's edges (C-B 1, C-D 8, C-E 10)   {A,C}
   C-B 1    no                 accept, push B's edges (B-D 5)                  {A,C,B}
-  C-B 1    (B already popped once above; duplicate heap entries are just skipped)
+  A-B 4    yes -- B is already in the tree; this stale entry is just skipped
   B-D 5    no                 accept, push D's edges (D-E 2, D-F 6)           {A,C,B,D}
   D-E 2    no                 accept, push E's edges (E-F 3)                  {A,C,B,D,E}
-  D-F 6    -- skipped: F not yet reached by the cheaper E-F 3, popped next --
   E-F 3    no                 accept                                          {A,C,B,D,E,F}
 ```
 
-Total weight 2 + 1 + 5 + 2 + 3 = **13** — the same weight Kruskal found, and in fact the same five
-edges, since this graph's MST happens to be unique.
+Five edges accepted (n − 1 for 6 vertices), so the loop stops here — `C-D 8`, `C-E 10`, and `D-F 6` are
+sitting in the heap but never popped. Total weight 2 + 1 + 5 + 2 + 3 = **13** — the same weight Kruskal
+found, and in fact the same five edges, since this graph's MST happens to be unique.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -188,8 +189,6 @@ def prim_mst(n, adj, start=0):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
-#include <queue>
-
 using AdjList = std::vector<std::vector<std::pair<int, int>>>;   // adj[u] = {(v, w), ...}
 
 std::pair<std::vector<Edge>, int> prim_mst(int n, const AdjList& adj, int start = 0) {

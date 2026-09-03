@@ -101,6 +101,7 @@ def has_cycle_directed(graph):
 
 ```cpp showLineNumbers
 #include <cassert>
+#include <numeric>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -163,8 +164,6 @@ def has_cycle_undirected(n, edges):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
-#include <numeric>
-
 bool has_cycle_undirected(int n, const std::vector<std::pair<int, int>>& edges) {
     std::vector<int> parent(n);
     std::iota(parent.begin(), parent.end(), 0);
