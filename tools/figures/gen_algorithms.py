@@ -329,6 +329,75 @@ def bloom_false_positive_rate():
     save(f, "algorithms/bloom-false-positive-rate.png")
 
 
+def radix_sort_passes():
+    """LSD radix sort of [170, 45, 75, 90, 802, 24, 2, 66]: buckets after each digit pass."""
+    passes = [
+        ("pass 1 — units digit", {0: [170, 90], 2: [802, 2], 4: [24], 5: [45, 75], 6: [66]},
+         [170, 90, 802, 2, 24, 45, 75, 66]),
+        ("pass 2 — tens digit", {0: [802, 2], 2: [24], 4: [45], 6: [66], 7: [170, 75], 9: [90]},
+         [802, 2, 24, 45, 66, 170, 75, 90]),
+        ("pass 3 — hundreds digit", {0: [2, 24, 45, 66, 75, 90], 1: [170], 8: [802]},
+         [2, 24, 45, 66, 75, 90, 170, 802]),
+    ]
+    f, axes = kbstyle.grid(3, 1, 7.6, 8.4)
+    for ax, (title, buckets, output) in zip(axes, passes):
+        clean(ax)
+        ax.set_xlim(-0.6, 9.6)
+        ax.set_ylim(-1.1, 3.3)
+        ax.set_title(title, fontsize=12.5)
+        for d in range(10):
+            ax.add_patch(plt.Rectangle((d - 0.42, -0.5), 0.84, 0.5, facecolor="white",
+                                       edgecolor=C.grey, lw=1.2))
+            ax.text(d, -0.25, str(d), ha="center", va="center", fontsize=10, color=C.grey)
+            for k, v in enumerate(buckets.get(d, [])):
+                ax.add_patch(plt.Rectangle((d - 0.42, 0.05 + k * 0.62), 0.84, 0.52,
+                                           facecolor=C.sky, edgecolor=C.black, lw=1.2, zorder=2))
+                ax.text(d, 0.31 + k * 0.62, str(v), ha="center", va="center", fontsize=9.5,
+                        fontweight="bold", zorder=3)
+        ax.text(4.5, 3.05, "output (buckets 0→9, left to right within a bucket): "
+                            + ", ".join(str(v) for v in output),
+                ha="center", va="center", fontsize=10, color=C.red)
+    f.suptitle("LSD radix sort: three stable passes, least significant digit first", fontsize=15,
+               fontweight="bold")
+    save(f, "algorithms/radix-sort-passes.png")
+
+
+def _qs_panel(ax, values, active_lo, active_hi, dead, pivot_idx, found_idx, title):
+    clean(ax)
+    ax.set_xlim(-0.6, len(values) - 0.4)
+    ax.set_ylim(-0.9, 1.1)
+    ax.set_title(title, fontsize=11.5)
+    for i, v in enumerate(values):
+        if found_idx == i:
+            face = C.green
+        elif i == pivot_idx:
+            face = C.orange
+        elif dead[0] <= i <= dead[1]:
+            face = C.light
+        elif active_lo <= i <= active_hi:
+            face = "white"
+        else:
+            face = C.light
+        edge = C.blue if active_lo <= i <= active_hi else C.grey
+        ax.add_patch(plt.Rectangle((i - 0.42, -0.42), 0.84, 0.84, facecolor=face,
+                                   edgecolor=edge, lw=2.2 if active_lo <= i <= active_hi else 1.2))
+        ax.text(i, 0.0, str(v), ha="center", va="center", fontsize=12, fontweight="bold")
+
+
+def quickselect_shrink():
+    """Finding the 3rd smallest of [5, 1, 8, 3, 9, 2, 7, 4]: the searched region per level."""
+    f, axes = kbstyle.grid(3, 1, 7.4, 6.6)
+    _qs_panel(axes[0], [5, 1, 8, 3, 9, 2, 7, 4], 0, 7, (8, -1), 7, None,
+              "level 0: pivot = arr[7] = 4, whole array searched")
+    _qs_panel(axes[1], [1, 3, 2, 4, 9, 8, 7, 5], 0, 2, (3, 7), None, None,
+              "after partition: pivotIndex 3 > k=2 → recurse left, indices 0–2 only")
+    _qs_panel(axes[2], [1, 2, 3, 4, 9, 8, 7, 5], 2, 2, (0, 1), None, 2,
+              "level 1 partitions [1,3,2]→[1,2,3], pivotIndex 1 < k=2 → index 2 is the answer: 3")
+    f.suptitle("Quickselect: only the side containing k is ever recursed into", fontsize=15,
+               fontweight="bold")
+    save(f, "algorithms/quickselect-shrink.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
@@ -338,6 +407,8 @@ FIGURES = {
     "fenwick_tree": fenwick_tree,
     "ring_buffer_states": ring_buffer_states,
     "bloom_false_positive_rate": bloom_false_positive_rate,
+    "radix_sort_passes": radix_sort_passes,
+    "quickselect_shrink": quickselect_shrink,
 }
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 id: choosing-a-sort
 title: Choosing a Sort
 sidebar_label: Choosing a Sort
-sidebar_position: 7
+sidebar_position: 10
 tags: [computer-science, algorithms, sorting, timsort, introsort, pdqsort]
 ---
 
