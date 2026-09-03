@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, searching, linear-search]
 
 # Linear Search
 
-
 Linear search examines each element in turn until it finds what it is looking for or runs out. It is
 the only search that works on **any** sequence with no preconditions whatsoever — unsorted, singly
 linked, streamed, or generated lazily.
@@ -29,6 +28,28 @@ option available, for reasons that have nothing to do with complexity.
 
 ## Mechanism
 
+Scanning `[5, 1, 8, 3]` for two different targets shows both outcomes — a hit partway through, and an
+exhaustive miss:
+
+```text
+items = [5, 1, 8, 3]
+
+search for 8:
+  i=0  items[0]=5  5 != 8, continue
+  i=1  items[1]=1  1 != 8, continue
+  i=2  items[2]=8  8 == 8, return 2
+
+search for 7:
+  i=0  items[0]=5  5 != 7, continue
+  i=1  items[1]=1  1 != 7, continue
+  i=2  items[2]=8  8 != 7, continue
+  i=3  items[3]=3  3 != 7, continue
+  i=4  past the end, return -1
+```
+
+The hit terminates after 3 comparisons — it never has to look at the whole array. The miss is the true
+worst case: every element is examined exactly once before the loop can conclude the target is absent.
+
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
 
@@ -44,6 +65,10 @@ def linear_search(items, target):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <cassert>
+#include <cstddef>
+#include <vector>
+
 int linear_search(const std::vector<int>& items, int target) {
     for (std::size_t i = 0; i < items.size(); ++i)
         if (items[i] == target) return static_cast<int>(i);
@@ -61,6 +86,7 @@ assumes an ordering, the comparison can be **any predicate**, not just equality.
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 # Binary search cannot do this — there is no ordering to exploit
 first_error = next((r for r in records if r.status >= 500), None)
 ```
@@ -69,9 +95,10 @@ first_error = next((r for r in records if r.status >= 500), None)
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Binary search cannot do this — there is no ordering to exploit
 auto first_error = std::find_if(records.begin(), records.end(),
-                                [](const Record& r) { return r.status >= 500; });
+                                 [](const Record& r) { return r.status >= 500; });
 // first_error == records.end() when no record matches
 ```
 
@@ -146,6 +173,34 @@ The sentinel trick removes one comparison per iteration. It is a genuine micro-o
 C loops and a curiosity everywhere else — modern compilers and branch predictors have largely erased
 the gain, and it mutates the array, which rules it out for shared or immutable data.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+# both functions, checked on the traced input
+assert linear_search([5, 1, 8, 3], 8) == 2     # hit at index 2, 3 comparisons
+assert linear_search([5, 1, 8, 3], 7) == -1    # miss: all 4 elements examined
+assert sentinel_search([5, 1, 8, 3], 8) == 2
+assert sentinel_search([5, 1, 8, 3], 7) == -1
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    assert(linear_search({5, 1, 8, 3}, 8) == 2);
+    assert(linear_search({5, 1, 8, 3}, 7) == -1);
+    std::vector<int> a{5, 1, 8, 3};
+    assert(sentinel_search(a, 8) == 2);
+    std::vector<int> b{5, 1, 8, 3};
+    assert(sentinel_search(b, 7) == -1);
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Edge Cases & Pitfalls
 
 - **Returning `0` for "not found"** collides with a valid index. Return `-1`, `None`, or an optional
@@ -168,10 +223,24 @@ the gain, and it mutates the array, which rules it out for shared or immutable d
 | Arbitrary predicates | **Yes** | Only monotonic ones | Exact keys only |
 | Best for | Small, unsorted, or one-shot | Many lookups, static sorted data | Many lookups by exact key |
 
+## Recall
+
+<Recall
+  invariant="Linear search assumes nothing about ordering — it can run on any iterable and test any predicate, which is exactly what binary search cannot do."
+  costs={[
+    ["best case", "O(1)"],
+    ["average case", "O(n)"],
+    ["worst case", "O(n)"],
+    ["extra space", "O(1)"],
+  ]}
+  reachFor="Unsorted or one-shot data, a predicate that is not an ordering, or a sequence without random access (a linked list or a stream)."
+  trap="Running a linear search inside a loop, once per outer iteration, silently turns an O(n) algorithm into O(n^2) — the classic accidental-quadratic bug."
+/>
+
 ## References
 
-- Knuth, *The Art of Computer Programming*, Vol. 3, §6.1 — "Sequential Searching", including the sentinel variant and its analysis.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms* — linear search appears as Exercise 2.1-3, with its loop invariant.
+- Knuth, *The Art of Computer Programming*, Vol. 3, 2nd ed., §6.1 — "Sequential Searching", including the sentinel variant and its analysis.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed. — linear search appears as Exercise 2.1-3, with its loop invariant.
 
 ## Related Pages
 

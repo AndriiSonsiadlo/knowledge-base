@@ -398,6 +398,82 @@ def quickselect_shrink():
     save(f, "algorithms/quickselect-shrink.png")
 
 
+def search_break_even():
+    """Cumulative cost of sort-then-binary-search vs repeated linear search, n = 1000."""
+    import math
+
+    n = 1000
+    log2n = math.log2(n)
+    q_max = 25
+    qs = list(range(0, q_max + 1))
+    linear_total = [q * n for q in qs]
+    sorted_total = [n * log2n + q * log2n for q in qs]
+    break_even = n * log2n / (n - log2n)      # solve q*n = n*log2(n) + q*log2(n)
+
+    f, ax = fig(7.6, 4.6)
+    ax.plot(qs, linear_total, color=C.red, label="repeated linear search: q · n")
+    ax.plot(qs, sorted_total, color=C.blue, label="sort once + binary search: n log n + q log n")
+    ax.axvline(break_even, color=C.grey, ls="--", lw=1.8)
+    ax.annotate(f"break-even\nq ≈ {break_even:.1f}", (break_even, 0),
+                xytext=(break_even + 0.6, n * log2n * 1.55),
+                fontsize=11.5, color=C.grey, fontweight="bold")
+    ax.set_xlabel("number of queries q")
+    ax.set_ylabel("cumulative comparisons")
+    ax.set_title(f"n = {n}: sorting pays for itself after ~{break_even:.0f} queries")
+    ax.legend(loc="upper left")
+    save(f, "algorithms/search-break-even.png")
+
+
+def predicate_step_function():
+    """Boolean feasibility predicate over capacities 3-14 for shipping [3,1,4,1,5] in 3 days."""
+    weights, days = [3, 1, 4, 1, 5], 3
+
+    def feasible(cap):
+        needed, load = 1, 0
+        for w in weights:
+            if load + w > cap:
+                needed, load = needed + 1, 0
+            load += w
+        return needed <= days
+
+    caps = list(range(3, 15))
+    values = [feasible(c) for c in caps]
+    boundary = next(c for c, v in zip(caps, values) if v)
+
+    f, ax = fig(7.4, 3.6)
+    ax.step(caps, [1 if v else 0 for v in values], where="post", color=C.blue, lw=2.6)
+    ax.scatter(caps, [1 if v else 0 for v in values],
+               color=[C.green if v else C.red for v in values], zorder=3, s=60)
+    ax.axvline(boundary, color=C.grey, ls="--", lw=1.8)
+    ax.annotate(f"boundary: cap = {boundary}", (boundary, 0.5), xytext=(boundary + 0.4, 0.55),
+                fontsize=11.5, color=C.grey, fontweight="bold")
+    ax.set_yticks([0, 1])
+    ax.set_yticklabels(["False\n(needs > 3 days)", "True\n(fits in 3 days)"])
+    ax.set_xlabel("capacity probed")
+    ax.set_title("feasible(cap) for shipping [3, 1, 4, 1, 5] in 3 days — monotone in cap")
+    save(f, "algorithms/predicate-step-function.png")
+
+
+def ternary_search_narrowing():
+    """A unimodal curve with the search interval narrowing over four ternary-search iterations."""
+    def f_of(x):
+        return -((x - 6) ** 2) + 30
+
+    intervals = [(0.0, 10.0), (3.33, 10.0), (3.33, 7.78), (4.81, 7.78)]
+    fig_, ax = fig(7.6, 4.6)
+    xs = [i / 10 for i in range(0, 101)]
+    ax.plot(xs, [f_of(x) for x in xs], color=C.black, lw=2.4, zorder=3)
+    for idx, (lo, hi) in enumerate(intervals):
+        ax.axvspan(lo, hi, color=C.blue, alpha=0.28 - idx * 0.055, lw=0,
+                   label=f"iteration {idx + 1}: [{lo:.2f}, {hi:.2f}]")
+    ax.axvline(6.0, color=C.red, ls="--", lw=1.6)
+    ax.set_xlabel("x (candidate answer)")
+    ax.set_ylabel("f(x)  (unimodal)")
+    ax.set_title("Ternary search: each iteration discards one outer third of the range")
+    ax.legend(loc="lower center", fontsize=10)
+    save(fig_, "algorithms/ternary-search-narrowing.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
@@ -409,6 +485,9 @@ FIGURES = {
     "bloom_false_positive_rate": bloom_false_positive_rate,
     "radix_sort_passes": radix_sort_passes,
     "quickselect_shrink": quickselect_shrink,
+    "search_break_even": search_break_even,
+    "predicate_step_function": predicate_step_function,
+    "ternary_search_narrowing": ternary_search_narrowing,
 }
 
 if __name__ == "__main__":
