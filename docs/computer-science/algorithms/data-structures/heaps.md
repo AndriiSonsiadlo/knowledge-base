@@ -81,12 +81,21 @@ def pop_max(heap):
         heap[i], heap[largest] = heap[largest], heap[i]
         i = largest
     return top
+
+heap = []
+for v in (5, 1, 8, 3):
+    push(heap, v)
+assert pop_max(heap) == 8
+assert pop_max(heap) == 5
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <vector>
+#include <cstddef>
+
 void push(std::vector<int>& heap, int value) {
     heap.push_back(value);                  // place at the end — keeps the shape
     std::size_t i = heap.size() - 1;
@@ -139,6 +148,7 @@ $\sum n/2^{k+1} \cdot k$ converges to n. Use `heapq.heapify(list)` rather than p
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 import heapq
 
 # Python's heapq is a MIN-heap operating in place on a plain list
@@ -164,6 +174,7 @@ top_10 = heapq.nlargest(10, huge_list)
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // std::priority_queue is a MAX-heap by default
 std::priority_queue<int> pq;
 pq.push(2);                     // O(log n)

@@ -97,11 +97,16 @@ function checkPage(file, positions) {
 		}
 	}
 
-	const body = text.replace(/^---\n[\s\S]*?\n---\n/, "");
-	const firstH2 = body.indexOf("\n## ");
-	const recallAt = body.indexOf("<Recall");
+	const recallAt = text.indexOf("<Recall");
 	if (recallAt === -1) note(file, "no <Recall> card");
-	else if (firstH2 !== -1 && recallAt > firstH2) note(file, "<Recall> card appears after the first ##");
+	else {
+		const recallHeadingAt = text.search(/^## Recall\s*$/m);
+		const referencesAt = text.search(/^## References\s*$/m);
+		if (recallHeadingAt === -1) note(file, "<Recall> card is not under its own `## Recall` heading");
+		else if (recallHeadingAt > recallAt) note(file, "<Recall> card appears before its `## Recall` heading");
+		else if (referencesAt !== -1 && recallHeadingAt > referencesAt)
+			note(file, "`## Recall` section appears after `## References`, must come directly before it");
+	}
 
 	if (!/^## References\s*$/m.test(text)) note(file, "no `## References` section");
 	if (!/^## Related Pages\s*$/m.test(text)) note(file, "no `## Related Pages` section");
