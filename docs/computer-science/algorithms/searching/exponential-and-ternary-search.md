@@ -41,21 +41,20 @@ target or hits the end of the (unknown) data, then binary search inside the last
 it.
 
 ```text
-stream (sorted, length unknown): 1 2 4 8 16 32 64 ...   target = 8
+stream (0-indexed, sorted, length unknown): index 0=1  1=2  2=4  3=8  4=16  5=32  6=64 ...
+target = 8
 
-bound doubling:
-  probe index 1   value 1   1 < 8  -> not found yet, double the bound
-  probe index 2   value 2   2 < 8  -> not found yet, double the bound
-  probe index 4   value 4   4 < 8  -> not found yet, double the bound
-  probe index 8   value 8   8 >= 8 -> overshot (or landed on it); stop doubling
+bound doubling (stream[0]=1 != target, so start doubling from bound=1):
+  bound=1   stream[1]=2    2 < 8  -> double the bound
+  bound=2   stream[2]=4    4 < 8  -> double the bound
+  bound=4   stream[4]=16  16 >= 8 -> overshot; stop doubling
 
-binary search inside (4, 8]:
-  lo=4  hi=8  mid=6  value at 6 = 32? no -- stream[6] doesn't exist in this toy example at that index,
-                     so use the real values: stream[4]=16 > 8 -> hi = 5
-  lo=4  hi=5  mid=4  stream[4]=16 > 8 -> hi = 4
-  lo=4  hi=4  loop ends -> check stream[4]
+binary search inside [bound/2, bound) = [2, 4):
+  lo=2  hi=4  mid=3  stream[3]=8   8 >= 8 -> hi = 3
+  lo=2  hi=3  mid=2  stream[2]=4   4 < 8  -> lo = 3
+  lo=3  hi=3  loop ends -> check stream[3]
 
-  (using the actual stream values 1,2,4,8,16,32,64 indexed from 1: stream[4] = 8 -- found at index 4)
+  stream[3] == 8 -> found at index 3
 ```
 
 The doubling phase costs $O(\log i)$ probes to reach an index $i$ that brackets the answer, and the

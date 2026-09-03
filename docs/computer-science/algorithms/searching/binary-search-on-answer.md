@@ -50,10 +50,10 @@ starting a new day whenever the next package would exceed the truck's capacity. 
 weights = [3, 1, 4, 1, 5]   days = 3
 answer space: lo = max(weights) = 5, hi = sum(weights) = 14
 
-lo=5  hi=14  mid=9   feasible(9)?  loads: [3,4,8,9]->4th pkg starts day2 [5]      needed=2 <= 3  True   -> hi=9
-lo=5  hi=9   mid=7   feasible(7)?  loads: [3,4]->day2[4,5]->day3[5]              needed=3 <= 3  True   -> hi=7
-lo=5  hi=7   mid=6   feasible(6)?  loads: [3,4]->day2[4,5]->day3[5]              needed=3 <= 3  True   -> hi=6
-lo=5  hi=6   mid=5   feasible(5)?  loads: [3,4]->day2[4,5]->day3[5]              needed=3 <= 3  True   -> hi=5
+lo=5  hi=14  mid=9   feasible(9)?  day1=[3,1,4,1] (9)  day2=[5]                needed=2 <= 3  True   -> hi=9
+lo=5  hi=9   mid=7   feasible(7)?  day1=[3,1] (4)  day2=[4,1] (5)  day3=[5]    needed=3 <= 3  True   -> hi=7
+lo=5  hi=7   mid=6   feasible(6)?  day1=[3,1] (4)  day2=[4,1] (5)  day3=[5]    needed=3 <= 3  True   -> hi=6
+lo=5  hi=6   mid=5   feasible(5)?  day1=[3,1] (4)  day2=[4,1] (5)  day3=[5]    needed=3 <= 3  True   -> hi=5
 lo=5  hi=5   loop ends (lo == hi) -> answer = 5
 ```
 
