@@ -49,6 +49,7 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/quicksort-diagram.png` | https://commons.wikimedia.org/wiki/File:Quicksort-diagram.svg | Znupi | Public domain |
 | `algorithms/quicksort.gif` | https://commons.wikimedia.org/wiki/File:Sorting_quicksort_anim.gif | Wikipedia:en:User:RolandH | CC BY-SA 3.0 |
 | `algorithms/red-black-tree.png` | https://commons.wikimedia.org/wiki/File:Red-black_tree_example.svg | Cburnett | CC BY-SA 3.0 |
+| `algorithms/segment-tree.png` | https://commons.wikimedia.org/wiki/File:Segment_tree.svg | Cafce25 | CC BY-SA 4.0 |
 | `algorithms/selection-sort.gif` | https://commons.wikimedia.org/wiki/File:Selection-Sort-Animation.gif | en:Joestape89 | CC BY-SA 3.0 |
 | `algorithms/singly-linked-list.png` | https://commons.wikimedia.org/wiki/File:Singly-linked-list.svg | Vectorization: Lasindi | Public domain |
 | `algorithms/stack.png` | https://commons.wikimedia.org/wiki/File:Data_stack.svg | User:Boivie | Public domain |

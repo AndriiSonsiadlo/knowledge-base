@@ -221,12 +221,123 @@ def recursion_tree():
     save(f, "algorithms/recursion-tree.png")
 
 
+def fenwick_tree():
+    """The Fenwick/BIT responsibility ranges over 8 elements, plus one update path.
+
+    Index i (1-based) stores the sum of the range (i - lowbit(i), i]. Ranges of
+    equal length never overlap, so stacking rows by length (= lowbit(i)) draws
+    the classic pyramid with no crossing labels. The arrows trace update(3):
+    every ancestor reached by repeatedly adding lowbit(i).
+    """
+    n = 8
+
+    def lowbit(i):
+        return i & (-i)
+
+    update_path = []
+    i = 3
+    while i <= n:
+        update_path.append(i)
+        i += lowbit(i)
+
+    row_of = {1: 0, 2: 1, 4: 2, 8: 3}  # length -> row (taller ranges sit higher)
+    f, ax = fig(8.6, 5.6)
+    clean(ax)
+    ax.set_xlim(0.3, n + 0.7)
+    ax.set_ylim(-0.6, 5.1)
+
+    for i in range(1, n + 1):
+        ax.add_patch(plt.Rectangle((i - 0.4, 4.3), 0.8, 0.7, facecolor="white",
+                                   edgecolor=C.black, lw=1.8))
+        ax.text(i, 4.65, f"a[{i}]", ha="center", va="center", fontsize=11, fontweight="bold")
+
+    centers = {}
+    for i in range(1, n + 1):
+        length = lowbit(i)
+        lo = i - length + 1
+        y = 0.4 + row_of[length] * 1.15
+        on_path = i in update_path
+        color = C.orange if on_path else C.blue
+        ax.plot([lo, i], [y, y], color=color, lw=5, solid_capstyle="round",
+                 zorder=2 + on_path, alpha=1.0 if on_path else 0.85)
+        ax.plot([lo, lo], [y - 0.1, y + 0.1], color=color, lw=2)
+        ax.plot([i, i], [y - 0.1, y + 0.1], color=color, lw=2)
+        ax.text((lo + i) / 2, y + 0.28, f"tree[{i}]=sum({lo}..{i})",
+                ha="center", fontsize=9.5, color=color, fontweight="bold" if on_path else "normal")
+        centers[i] = ((lo + i) / 2, y)
+
+    for a, b in zip(update_path, update_path[1:]):
+        ax.annotate("", xy=centers[b], xytext=centers[a], zorder=4,
+                    arrowprops=dict(arrowstyle="-|>", color=C.red, lw=2.4,
+                                    connectionstyle="arc3,rad=0.15"))
+    ax.text(4.5, -0.45, "update(3): 3 → 3+lowbit(3)=4 → 4+lowbit(4)=8, stop (>8)",
+            ha="center", fontsize=12, color=C.red, fontweight="bold")
+    ax.set_title("Fenwick tree: each index owns a range fixed by its low bit", fontsize=14)
+    save(f, "algorithms/fenwick-tree.png")
+
+
+def ring_buffer_states():
+    """An 8-slot ring buffer at four points in a push/pop/push sequence."""
+    slots = 8
+    states = [
+        ("empty: head = tail = 0", [None] * 8, 0, 0),
+        ("after push ×5", [10, 20, 30, 40, 50, None, None, None], 0, 5),
+        ("after pop ×2", [None, None, 30, 40, 50, None, None, None], 2, 5),
+        ("after push ×4 (tail wraps)", [90, None, 30, 40, 50, 60, 70, 80], 2, 1),
+    ]
+    f, axes = kbstyle.grid(2, 2, 9.0, 6.0)
+    for ax, (title, values, head, tail) in zip(axes.flat, states):
+        clean(ax)
+        ax.set_xlim(-0.7, slots - 0.3)
+        ax.set_ylim(-1.3, 1.5)
+        ax.set_aspect("equal")
+        ax.set_title(title, fontsize=12.5)
+        for i in range(slots):
+            occupied = values[i] is not None
+            ax.add_patch(plt.Rectangle((i - 0.42, -0.42), 0.84, 0.84,
+                                       facecolor=C.sky if occupied else "white",
+                                       edgecolor=C.black, lw=1.6))
+            if occupied:
+                ax.text(i, 0.0, str(values[i]), ha="center", va="center",
+                        fontsize=11.5, fontweight="bold")
+            ax.text(i, -0.95, str(i), ha="center", va="center", fontsize=9.5, color=C.grey)
+        ax.annotate("head", (head, 0.55), xytext=(head, 1.15), ha="center",
+                    fontsize=10.5, color=C.blue, fontweight="bold",
+                    arrowprops=dict(arrowstyle="-|>", color=C.blue, lw=1.8))
+        ax.annotate("tail", (tail % slots, 0.55), xytext=(tail % slots, 1.15), ha="center",
+                    fontsize=10.5, color=C.red, fontweight="bold",
+                    arrowprops=dict(arrowstyle="-|>", color=C.red, lw=1.8))
+    f.suptitle("Ring buffer: tail wraps past index 7 back to index 0", fontsize=15,
+               fontweight="bold")
+    save(f, "algorithms/ring-buffer-states.png")
+
+
+def bloom_false_positive_rate():
+    """False-positive rate vs bits per element, for k = 3, 5, 7 hash functions."""
+    import math
+
+    bits_per_element = [b / 2 for b in range(2, 41)]
+    f, ax = fig(7.4, 4.4)
+    for k, color in ((3, C.blue), (5, C.orange), (7, C.red)):
+        rates = [(1 - math.exp(-k / b)) ** k for b in bits_per_element]
+        ax.plot(bits_per_element, rates, color=color, label=f"k = {k}", lw=2.4)
+    ax.set_yscale("log")
+    ax.set_xlabel("bits per element (m / n)")
+    ax.set_ylabel("false-positive rate p (log scale)")
+    ax.set_title("Bloom filter: p ≈ (1 − e^(−k/b))^k, lower is better")
+    ax.legend()
+    save(f, "algorithms/bloom-false-positive-rate.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
     "prefix_sum_bands": prefix_sum_bands,
     "kmp_failure_table": kmp_failure_table,
     "recursion_tree": recursion_tree,
+    "fenwick_tree": fenwick_tree,
+    "ring_buffer_states": ring_buffer_states,
+    "bloom_false_positive_rate": bloom_false_positive_rate,
 }
 
 if __name__ == "__main__":
