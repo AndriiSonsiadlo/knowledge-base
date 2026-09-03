@@ -58,13 +58,12 @@ graph LR
     J2((J2))
     J3((J3))
   end
-  P1 === J1
-  P1 --- J2
-  P2 --- J1
-  P3 === J2
-  P3 --- J3
-  linkStyle 0 stroke:#22c55e,stroke-width:3px
-  linkStyle 3 stroke:#22c55e,stroke-width:3px
+  P1 --- J1
+  P1 === J2
+  P2 === J1
+  P3 --- J2
+  P3 === J3
+  linkStyle 1,2,4 stroke:#22c55e,stroke-width:3px
 ```
 
 The two columns are the two color classes; the thick green edges are the maximum matching found below.
