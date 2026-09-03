@@ -73,6 +73,12 @@ def sift_down(a, i, size):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <cassert>
+#include <functional>
+#include <queue>
+#include <utility>
+#include <vector>
+
 void sift_down(std::vector<int>& a, int i, int size) {
     for (;;) {
         int largest = i;
@@ -108,6 +114,28 @@ overall.
 
 Using a **max**-heap rather than a min-heap is what makes the sort ascending: the largest element is
 swapped to the *end*, and each subsequent one lands just before it.
+
+Tracing the first extraction on `[5, 1, 8, 3]`. Phase 1 builds the max-heap first (`sift_down` runs
+on index 1, then index 0):
+
+| Step | Action | Array |
+|---|---|---|
+| start | — | `[5, 1, 8, 3]` |
+| build, i=1 | children of 1 are just index 3 (`3 > 1`); swap `a[1]` ↔ `a[3]` | `[5, 3, 8, 1]` |
+| build, i=0 | children of 0 are 1, 2 (`3, 8`); `8 > 5`, swap `a[0]` ↔ `a[2]` | `[8, 3, 5, 1]` |
+
+The array is now a valid max-heap: `[8, 3, 5, 1]`. Phase 2's **first extraction** swaps the root with
+the last live element, then sifts down over the heap shrunk by one:
+
+| Step | Action | Array | Heap size |
+|---|---|---|---|
+| extract 1 | swap `a[0]` ↔ `a[3]` (`8` ↔ `1`) | `[1, 3, 5, 8]` | 3 |
+| sift_down(0, 3) | children of 0 are 1, 2 (`3, 5`); `5 > 1`, swap `a[0]` ↔ `a[2]` | `[5, 3, 1, 8]` | 3 |
+| sift_down(2, 3) | index 2 has no children within size 3 | `[5, 3, 1, 8]` | done |
+
+One extraction, one $O(\log n)$ sift-down, and the maximum (`8`) is now fixed at the end in its final
+sorted position — exactly like [selection sort](./selection-sort.md)'s swap-to-boundary step, but
+found in $O(\log n)$ instead of a full $O(n)$ scan.
 
 ## Practical Usage
 
@@ -155,6 +183,29 @@ std::vector<int> top_k(std::vector<int> items, int k) {
 Stopping phase 2 after k extractions gives the k largest elements in $O(n + k \log n)$ — better than a
 full sort when k is small, which is the same argument behind `heapq.nlargest`.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+# checked on the traced input
+assert heapsort([5, 1, 8, 3]) == [1, 3, 5, 8]
+assert heapsort([]) == []
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    std::vector<int> a{5, 1, 8, 3};
+    heapsort(a);
+    assert((a == std::vector<int>{1, 3, 5, 8}));
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Edge Cases & Pitfalls
 
 :::warning[Heapsort is the slowest $O(n \log n)$ sort in practice]
@@ -185,10 +236,24 @@ complexity. Choose it for its guarantees, not for its speed.
 | Typical speed | Slowest of the three | **Fastest** | Good | Very slow |
 | Choose when | Guarantees + no memory | Default for arrays | Stability or external sort | Writes are costly |
 
+## Recall
+
+<Recall
+  invariant="The array is split into a shrinking heap prefix and a growing sorted suffix; each extraction moves the heap's root (the current maximum) to the front of the sorted suffix and restores the heap property over what remains."
+  costs={[
+    ["build-heap phase (worst)", "O(n)"],
+    ["one extraction + sift-down (worst)", "O(log n)"],
+    ["full sort, best/average/worst", "O(n log n)"],
+    ["extra space (worst)", "O(1)"],
+  ]}
+  reachFor="An O(n log n) worst-case guarantee is required in O(1) space — no allocation allowed, and no quadratic tail allowed either. This is exactly introsort's fallback role."
+  trap="Bounding sift_down by the array's full length instead of the current (shrinking) heap size. It then sifts back into the already-sorted suffix and corrupts elements that were already in their final position."
+/>
+
 ## References
 
 - Williams, J.W.J. (1964), "Algorithm 232: Heapsort", *Communications of the ACM* — the original, which introduced the heap along with it.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heapsort with the $O(n)$ build-heap proof.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 6 — heapsort with the $O(n)$ build-heap proof.
 - [Linux kernel `lib/sort.c`](https://github.com/torvalds/linux/blob/master/lib/sort.c) — a production heapsort, with comments on why it was chosen.
 
 ### Books & Videos

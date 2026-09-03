@@ -64,6 +64,10 @@ def merge(left, right):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
 std::vector<int> merge(const std::vector<int>& left, const std::vector<int>& right) {
     std::vector<int> out;
     out.reserve(left.size() + right.size());
@@ -92,6 +96,19 @@ std::vector<int> merge_sort(const std::vector<int>& a) {
         caption="Runs double in length at each level: 1, 2, 4, 8… The array is sorted after log₂ n merge passes."
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Merge-sort-example-300px.gif"
         license="CC BY-SA 3.0" />
+
+Tracing the single merge step on `left = [1, 5]` and `right = [3, 8]`, element by element:
+
+| Step | `i`, `j` | Compare | Take | Output so far |
+|---|---|---|---|---|
+| 1 | i=0, j=0 | `left[0]=1` vs `right[0]=3` | 1 (left) | `[1]` |
+| 2 | i=1, j=0 | `left[1]=5` vs `right[0]=3` | 3 (right) | `[1, 3]` |
+| 3 | i=1, j=1 | `left[1]=5` vs `right[1]=8` | 5 (left) | `[1, 3, 5]` |
+| 4 | i=2, j=1 | left exhausted | append remaining right (`[8]`) | `[1, 3, 5, 8]` |
+
+Four elements, at most four comparisons (three real comparisons, then one exhaustion check) — a merge
+of two runs of total length n never does more than `n − 1` comparisons, which is the entire basis for
+the $O(n)$-per-level claim below.
 
 ### Why the complexity is exactly $O(n \log n)$
 
@@ -155,6 +172,29 @@ void merge_sort_iterative(std::vector<int>& a) {
 </TabItem>
 </Tabs>
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+# checked on the traced merge and on the full sort
+assert merge([1, 5], [3, 8]) == [1, 3, 5, 8]
+assert merge_sort([5, 1, 8, 3]) == [1, 3, 5, 8]
+assert merge_sort([]) == []
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    assert((merge({1, 5}, {3, 8}) == std::vector<int>{1, 3, 5, 8}));
+    assert((merge_sort({5, 1, 8, 3}) == std::vector<int>{1, 3, 5, 8}));
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Edge Cases & Pitfalls
 
 :::warning[The $O(n)$ space is the real cost]
@@ -183,9 +223,23 @@ per merge as the readable version above does.
 | Typical speed on arrays | Good | **Fastest** | Slowest of the three |
 | Linked lists | **Ideal** | Awkward | Impractical |
 
+## Recall
+
+<Recall
+  invariant="Merging two already-sorted runs is linear — compare the two fronts and take the smaller, repeatedly — so splitting for free plus log n levels of O(n) merging gives O(n log n) on every input, with no case distinction to make."
+  costs={[
+    ["merge of two runs, total length n (worst)", "O(n)"],
+    ["best/average/worst, full sort", "O(n log n)"],
+    ["extra space (worst)", "O(n)"],
+    ["recursion depth", "O(log n)"],
+  ]}
+  reachFor="Stability is required, a worst-case guarantee is required, the data does not fit in memory (external sort), or the input is a linked list where merging costs no extra space at all."
+  trap="Writing the merge's tie-break as `<` instead of `<=`. The output is still sorted, but ties now take from the right run first, silently destroying stability."
+/>
+
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, §2.3 — mergesort, and the recurrence-tree analysis of its complexity.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §2.3 — mergesort, and the recurrence-tree analysis of its complexity.
 - Knuth, *The Art of Computer Programming*, Vol. 3, §5.2.4 — merging and external sorting, including multiway merges.
 
 ### Books & Videos

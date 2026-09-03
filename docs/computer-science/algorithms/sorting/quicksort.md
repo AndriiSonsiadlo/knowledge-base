@@ -67,6 +67,11 @@ def partition(a, lo, hi):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <bit>
+#include <cassert>
+#include <utility>
+#include <vector>
+
 // Lomuto scheme: pivot is the last element.
 int partition(std::vector<int>& a, int lo, int hi) {
     int pivot = a[hi];
@@ -101,6 +106,20 @@ void quicksort(std::vector<int>& a) {
         caption="Each pass partitions a region around one pivot. The recursion narrows until every region is a single element."
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Sorting_quicksort_anim.gif"
         license="CC BY-SA 3.0" />
+
+Tracing the Lomuto partition of `[5, 1, 8, 3]` with pivot `a[hi] = 3` (the last element):
+
+| `j` | `a[j]` | `a[j] < pivot`? | Action | Array | `i` |
+|---|---|---|---|---|---|
+| start | — | — | — | `[5, 1, 8, 3]` | 0 |
+| 0 | 5 | no | nothing | `[5, 1, 8, 3]` | 0 |
+| 1 | 1 | yes | swap `a[0]` ↔ `a[1]`, `i += 1` | `[1, 5, 8, 3]` | 1 |
+| 2 | 8 | no | nothing | `[1, 5, 8, 3]` | 1 |
+| end | — | — | swap pivot into place: `a[1]` ↔ `a[3]` | `[1, 3, 8, 5]` | returns 1 |
+
+The pivot `3` lands at index 1 — everything to its left (`1`) is smaller, everything to its right
+(`8, 5`) is larger, and it will never move again. The recursion continues on `[1]` (already trivially
+sorted) and `[8, 5]`, which the same partition process reduces to `[5, 8]` on its next call.
 
 ### Why it beats mergesort in practice despite equal complexity
 
@@ -186,6 +205,8 @@ Production quicksorts are always hybrids:
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
+# Illustrative fragment: insertion_sort_range() and heapsort_range() are not defined here.
 def introsort(a, lo, hi, depth_budget):
     if hi - lo < 16:
         insertion_sort_range(a, lo, hi)          # small ranges: insertion sort wins
@@ -203,6 +224,8 @@ def introsort(a, lo, hi, depth_budget):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
+// Illustrative fragment: insertion_sort_range() and heapsort_range() are not defined here.
 void introsort(std::vector<int>& a, int lo, int hi, int depth_budget) {
     if (hi - lo < 16) {
         insertion_sort_range(a, lo, hi);            // small ranges: insertion sort wins
@@ -233,6 +256,32 @@ Also worth knowing: **three-way partitioning** (into `< pivot`, `== pivot`, `> p
 with many duplicate keys from a weakness into an $O(n)$ best case. Without it, equal keys pile up on
 one side.
 
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+# checked on the traced input
+assert partition([5, 1, 8, 3], 0, 3) == 1
+assert quicksort([5, 1, 8, 3]) == [1, 3, 5, 8]
+assert quicksort([]) == []
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    std::vector<int> a{5, 1, 8, 3};
+    assert(partition(a, 0, 3) == 1);
+    std::vector<int> b{5, 1, 8, 3};
+    quicksort(b);
+    assert((b == std::vector<int>{1, 3, 5, 8}));
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Edge Cases & Pitfalls
 
 - **Tail-recursion on the larger side risks stack overflow.** Recurse into the *smaller* partition
@@ -252,10 +301,24 @@ one side.
 | Stable | No | **Yes** | No |
 | Used by | C++ `std::sort`, Rust `sort_unstable` | Java objects, Python (as Timsort) | Introsort's fallback |
 
+## Recall
+
+<Recall
+  invariant="After partitioning around a pivot, that pivot sits in its final sorted position and never moves again — everything to its left is smaller, everything to its right is larger."
+  costs={[
+    ["best/average case (balanced partitions)", "O(n log n)"],
+    ["worst case (maximally unbalanced partitions)", "O(n^2)"],
+    ["extra space (worst, recursion stack)", "O(log n)"],
+    ["three-way partition, many duplicate keys (best)", "O(n)"],
+  ]}
+  reachFor="In-memory array sorting where average speed matters more than a worst-case guarantee and stability is not required — the default choice behind std::sort's introsort hybrid."
+  trap="Choosing a fixed pivot position (first or last element). An already-sorted array — extremely common in practice — then partitions into an empty side and everything else, every single level, producing the full O(n^2) worst case and O(n) stack depth."
+/>
+
 ## References
 
 - Hoare, C.A.R. (1961), "Algorithm 64: Quicksort", *Communications of the ACM* — the original.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 7 — quicksort, randomised quicksort, and the average-case analysis.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 7 — quicksort, randomised quicksort, and the average-case analysis.
 - Musser, D. (1997), ["Introspective Sorting and Selection Algorithms"](https://www.cs.rpi.edu/~musser/gp/introsort.ps) — the paper introducing introsort.
 
 ### Books & Videos

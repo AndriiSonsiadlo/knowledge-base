@@ -48,14 +48,50 @@ balanced. On already-sorted input it finds one run and finishes in $O(n)$.
 | Space | $O(n)$ |
 | Stable | Yes |
 
+What Timsort actually does, per its own design document
+([CPython `listsort.txt`](https://github.com/python/cpython/blob/main/Objects/listsort.txt)):
+
+1. **Run detection.** Scan forward to find the longest run that is already non-decreasing, or the
+   longest that is strictly decreasing (which it then reverses in place — reversing a descending run
+   preserves stability because it never needs to reorder equal elements past each other). A single
+   left-to-right scan finds these runs in $O(n)$ total.
+2. **Run extension.** A run shorter than `MIN_RUN` (computed from `n` so that `n / MIN_RUN` is close to
+   a power of two, typically landing in 32–64) is extended up to that length using **binary insertion
+   sort** — see [Insertion Sort's cutoff discussion](./insertion-sort.md) for why this trade is worth
+   making at small sizes.
+3. **Merging with a size-ratio invariant.** Runs are pushed onto a stack, and merged when the stack's
+   top three runs' lengths violate an invariant (roughly, each run should be larger than the sum of the
+   next two) that keeps the merges balanced and the total merge cost $O(n \log n)$ in the worst case,
+   without needing to know all run lengths in advance.
+4. **Galloping merge.** During an ordinary merge, if one run keeps "winning" many comparisons in a row
+   (its elements keep being smaller than the other run's front), Timsort switches to **galloping
+   mode**: instead of comparing one element at a time, it binary-searches for how many consecutive
+   elements from the winning run can be bulk-copied at once. This is what makes Timsort fast — not just
+   $O(n)$-adjacent — on inputs built from a few long sorted stretches, such as two already-sorted lists
+   concatenated together, where a plain merge would still do $Θ(n)$ one-at-a-time comparisons but
+   galloping collapses long stretches into $O(\log n)$ work each.
+
 ### Introsort — quicksort that cannot degrade
 
 C++'s `std::sort`. Runs [quicksort](./quicksort.md), but:
 
-- switches to [insertion sort](./insertion-sort.md) for ranges below ~16 elements;
-- switches to [heapsort](./heapsort.md) when recursion exceeds $2 \cdot \log_2 n$ levels.
+- switches to [insertion sort](./insertion-sort.md) for ranges below ~16 elements — the same
+  small-n cutoff argument as Timsort's `MIN_RUN` extension, applied to quicksort's base case instead
+  of a merge's;
+- switches to [heapsort](./heapsort.md) when recursion depth exceeds a budget of
+  $2 \cdot \log_2 n$ partitions.
 
-The depth limit is what removes quicksort's $O(n^2)$ worst case, without slowing the common path.
+The depth limit is the entire mechanism: it caps how far quicksort is allowed to keep making bad,
+unbalanced partitioning choices before the algorithm gives up and hands the remaining range to
+heapsort's guaranteed $O(n \log n)$. This is why introsort's *worst case* is $O(n \log n)$ even though
+plain quicksort's is $O(n^2)$ — the depth budget makes the bad case unreachable rather than merely
+unlikely. [cppreference on `std::sort`](https://en.cppreference.com/w/cpp/algorithm/sort) documents
+the standard's complexity requirement as $O(N \log N)$ comparisons — a requirement the C++ standard
+places on the algorithm itself, which is exactly why an unguarded plain quicksort (worst case
+$O(n^2)$) cannot legally implement `std::sort`; the depth-limited hybrid is what makes the guarantee
+achievable. libstdc++'s actual source (`bits/stl_algo.h`) implements the depth budget as
+`std::__lg(n) * 2` recursion levels before switching to a partial heapsort, matching the
+$2 \log_2 n$ figure quoted above.
 
 ### pdqsort — pattern-defeating quicksort
 
@@ -120,11 +156,26 @@ Write `<`, never `<=`, in a comparator.
 - **Do not write your own sort for production.** The cases you will get wrong — equal keys, depth
   limits, comparator contracts — are exactly the ones these implementations spent years on.
 
+## Recall
+
+<Recall
+  invariant="Every production sort is a hybrid that picks the cheapest algorithm for the shape of data it currently has: insertion sort below a size cutoff, a fast general algorithm above it, and (for introsort and pdqsort) a guaranteed fallback when the fast algorithm's assumptions fail."
+  costs={[
+    ["Timsort, already-sorted input (best)", "O(n)"],
+    ["Timsort (worst)", "O(n log n)"],
+    ["introsort (worst, depth-budget guaranteed)", "O(n log n)"],
+    ["pdqsort, several common patterns (best)", "O(n)"],
+  ]}
+  reachFor="Almost never — the entire point of this page is that the built-in sort already made this decision correctly. Reach for a specific algorithm only for the narrow cases in the table above (external data, minimal writes, top-k)."
+  trap="Assuming an unstable sort is 'basically stable' on mostly-sorted data. Instability is a correctness property of the algorithm, not a property of the input — it shows up exactly when a secondary sort key exists, which nearly-sorted test data rarely has."
+/>
+
 ## References
 
 - Peters, T., [Timsort description](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — the original design notes, and an unusually readable engineering document.
 - Musser, D. (1997), ["Introspective Sorting and Selection Algorithms"](https://www.cs.rpi.edu/~musser/gp/introsort.ps) — introsort.
 - Peters, O. (2021), [pdqsort](https://github.com/orlp/pdqsort) — the pattern-defeating quicksort implementation and its rationale.
+- [cppreference — `std::sort`](https://en.cppreference.com/w/cpp/algorithm/sort) — the standard's complexity requirement that introsort exists to satisfy.
 
 ### Books & Videos
 

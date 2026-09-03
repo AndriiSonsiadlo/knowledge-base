@@ -58,6 +58,10 @@ def insertion_sort(a):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <cassert>
+#include <cstddef>
+#include <vector>
+
 void insertion_sort(std::vector<int>& a) {
     for (std::size_t i = 1; i < a.size(); ++i) {
         int key = a[i];
@@ -79,13 +83,13 @@ Note that the inner loop **shifts** rather than swaps — one write per displace
 three. That is roughly a 3× constant-factor win over the swap-based formulation, and it is why
 insertion sort outperforms [bubble sort](./bubble-sort.md) on the same asymptotics.
 
-Tracing `[5, 1, 4, 2]`:
+Tracing `[5, 1, 8, 3]`:
 
 | Step | Key | Action | Result |
 |---|---|---|---|
-| i=1 | 1 | shift 5 right, insert 1 | `[1, 5, 4, 2]` |
-| i=2 | 4 | shift 5 right, insert 4 | `[1, 4, 5, 2]` |
-| i=3 | 2 | shift 5 and 4 right, insert 2 | `[1, 2, 4, 5]` |
+| i=1 | 1 | shift 5 right, insert 1 at index 0 | `[1, 5, 8, 3]` |
+| i=2 | 8 | 8 > 5, no shift needed, insert 8 at index 2 | `[1, 5, 8, 3]` |
+| i=3 | 3 | shift 8 right, shift 5 right, insert 3 at index 1 | `[1, 3, 5, 8]` |
 
 ### Why "adaptive" is the important word
 
@@ -110,6 +114,8 @@ exploit.
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
+# Illustrative fragment: partition() and insertion_sort_range() are not defined here.
 # The way insertion sort is actually used: as the base case of a bigger sort
 SMALL = 16
 
@@ -126,6 +132,8 @@ def hybrid_sort(a, lo, hi):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
+// Illustrative fragment: partition() and insertion_sort_range() are not defined here.
 // The way insertion sort is actually used: as the base case of a bigger sort
 constexpr int SMALL = 16;
 
@@ -151,6 +159,59 @@ recursion cost more than the quadratic term saves at those sizes.
 insertion point — reduces comparisons to $O(n \log n)$ but leaves the shifting at $O(n^2)$. It helps only
 when comparisons are much more expensive than moves.
 
+### Why it is the cutoff inside introsort and Timsort
+
+Two real standard-library sorts fall back to insertion sort below a size threshold, for the same
+underlying reason: at small n, insertion sort's low constant factor beats the recursive structure of a
+faster asymptotic algorithm outright, and both libraries measured that trade rather than assumed it.
+
+- **Introsort — C++'s `std::sort`.** libstdc++'s implementation partitions with quicksort down to
+  ranges of 16 elements (the constant `_S_threshold` in its `<bits/stl_algo.h>`), then finishes the
+  *entire array* with one pass of insertion sort at the end rather than recursing into every small
+  range individually — insertion sort on an almost-sorted array (each element already within 16
+  positions of home) costs $O(nk)$ for small k, which is cheaper than n/16 separate small sorts once
+  data movement is fully accounted for. The C++ standard requires `std::sort`'s complexity to be
+  $O(n \log n)$ comparisons ([`[alg.sort]`](https://eel.is/c++draft/alg.sort)); the specific 16-element
+  cutoff and the insertion-sort finish are libstdc++'s implementation choice for meeting that
+  requirement, not something the standard mandates directly.
+- **Timsort — Python's `sorted()` and `list.sort()`.** Timsort's `MIN_RUN` is chosen (typically 32–64,
+  picked so that `n / MIN_RUN` is close to a power of two) so that every detected run is *extended* up
+  to at least that length using **binary insertion sort** before merging begins — using
+  [binary search](../searching/binary-search.md) to find each element's insertion point keeps the
+  comparison count at $O(n \log n)$ even though the shifting is still $O(n^2)$ in the worst case, which
+  is fine precisely because runs are kept short. This is documented directly in CPython's own design
+  notes ([`listsort.txt`](https://github.com/python/cpython/blob/main/Objects/listsort.txt)), which
+  states the binary-insertion-sort extension explicitly as the mechanism for turning short runs into
+  merge-ready ones.
+
+Both designs are making the identical bet insertion sort's adaptivity analysis predicts: below some
+small, empirically-chosen n, or on any range that is already nearly sorted, insertion sort's $O(n + d)$
+behavior beats a fast sort's constant overhead and recursion cost.
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+# checked on the traced input
+assert insertion_sort([5, 1, 8, 3]) == [1, 3, 5, 8]
+assert insertion_sort([1, 2, 3]) == [1, 2, 3]     # zero shifts needed
+assert insertion_sort([]) == []
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+int main() {
+    std::vector<int> a{5, 1, 8, 3};
+    insertion_sort(a);
+    assert((a == std::vector<int>{1, 3, 5, 8}));
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Edge Cases & Pitfalls
 
 - **Swapping instead of shifting** triples the writes for no benefit. Write the shift form.
@@ -171,10 +232,27 @@ when comparisons are much more expensive than moves.
 | Online | Yes | No | No |
 | Used in practice | **Yes — inside Timsort, introsort, pdqsort** | No | Rarely |
 
+## Recall
+
+<Recall
+  invariant="The inner loop shifts only while an element is out of order, so total work is proportional to n plus the number of inversions — d — rather than always n^2."
+  costs={[
+    ["best case (already sorted)", "O(n)"],
+    ["average case", "O(n^2)"],
+    ["worst case (reverse sorted)", "O(n^2)"],
+    ["adaptive cost, d inversions", "O(n + d)"],
+    ["extra space", "O(1)"],
+  ]}
+  reachFor="Small n (below ~16-32 elements) or data that is already nearly sorted — which is also exactly why faster sorts call this one as their base case instead of recursing all the way down."
+  trap="Using `>=` instead of `>` in the shift comparison. It still produces a sorted array, but shifts past equal elements and silently destroys stability."
+/>
+
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, §2.1 — insertion sort is the book's first algorithm, with its loop invariant proved in full.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §2.1 — insertion sort is the book's first algorithm, with its loop invariant proved in full.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §2.1 — the inversion-count analysis behind the adaptivity claim.
+- [C++ standard, `[alg.sort]`](https://eel.is/c++draft/alg.sort) — `std::sort`'s required complexity ($O(n \log n)$ comparisons); the small-range insertion-sort cutoff is an implementation choice for meeting that requirement, not part of the standard's text.
+- [CPython `listsort.txt`](https://github.com/python/cpython/blob/main/Objects/listsort.txt) — Timsort's own design notes, including the binary-insertion-sort extension of short runs up to `MIN_RUN`.
 
 ### Books & Videos
 
