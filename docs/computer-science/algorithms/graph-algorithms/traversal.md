@@ -8,11 +8,9 @@ tags: [computer-science, algorithms, graphs, bfs, dfs]
 
 # Traversal: BFS & DFS
 
-
 Breadth-first and depth-first search both visit every vertex reachable from a start point, in
 O(V + E), using the same loop. They differ in one line — whether the frontier is a queue or a stack —
-and that single difference determines the order, the memory profile, and which problems each can
-solve.
+and that single difference determines the order, the memory profile, and which problems each can solve.
 
 ## Core Concepts
 
@@ -20,8 +18,7 @@ solve.
 |---|---|---|
 | Frontier | **Queue** (FIFO) | **Stack** (LIFO), or recursion |
 | Explores | All vertices at distance k before k+1 | One branch fully, then backtracks |
-| Memory | O(width of the graph) | O(depth of the graph) |
-| Finds shortest paths | **Yes** (unweighted) | No |
+| Memory, finds shortest paths | O(width), **yes** (unweighted) | O(depth), no |
 | Natural for | Distance, levels, nearest match | Cycles, ordering, connectivity, backtracking |
 
 <Figure src="/img/cs/algorithms/bfs-order.png"
@@ -37,6 +34,45 @@ solve.
         license="CC BY-SA 3.0" />
 
 ## Mechanism
+
+### Worked trace: BFS queue vs. DFS stack, side by side
+
+Both searches run on the [shared undirected graph](./intro.md#the-shared-example-graphs) from `A`,
+with each vertex's neighbours visited in the order the edge list introduces them (`B, C` for `A`;
+`A, C, D` for `B`; and so on). BFS enqueues a neighbour the moment it is first seen; DFS pushes it
+and may push it again before ever popping it, relying on the post-pop check to discard the stale
+copy:
+
+```text
+BFS from A (queue, FIFO, mark on enqueue):
+  pop -    queue=[A]                    visited={A}
+  pop A -> queue=[B,C]                  visited={A,B,C}        enqueue B,C
+  pop B -> queue=[C,D]                  visited={A,B,C,D}      enqueue D  (A,C already visited)
+  pop C -> queue=[D,E]                  visited={A,B,C,D,E}    enqueue E  (A,B,D already visited)
+  pop D -> queue=[E,F]                  visited={A,B,C,D,E,F}  enqueue F  (B,C,E already visited)
+  pop E -> queue=[F]                    (C,D,F already visited, nothing new)
+  pop F -> queue=[]                     (D,E already visited, nothing new)
+  BFS visit order: A B C D E F
+
+DFS from A (stack, LIFO, mark on pop — stale entries are skipped):
+  pop -    stack=[A]
+  pop A -> stack=[C,B]                  visit A, push C,B
+  pop B -> stack=[C,D,C]                visit B, push D,C           (A already visited)
+  pop C -> stack=[C,D,E,D]              visit C, push E,D           (A,B already visited)
+  pop D -> stack=[C,D,E,F,E]            visit D, push F,E           (B,C already visited)
+  pop E -> stack=[C,D,E,F,F]            visit E, push F             (C,D already visited)
+  pop F -> stack=[C,D,E,F]              visit F                     (D,E already visited, nothing new)
+  pop F -> stack=[C,D,E]                stale — F already visited, skip
+  pop E -> stack=[C,D]                  stale — E already visited, skip
+  pop D -> stack=[C]                    stale — D already visited, skip
+  pop C -> stack=[]                     stale — C already visited, skip
+  DFS visit order: A B C D E F
+```
+
+Both finish at the same six vertices in the same order here — a property of this input, not a general
+fact — but the intermediate state is where they diverge: BFS's queue only ever holds unvisited
+vertices, while DFS's stack accumulates stale duplicates, each discarded for free on pop rather than
+prevented from entering in the first place.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -81,6 +117,13 @@ def dfs_recursive(graph, node, visited=None):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <deque>
+#include <optional>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+
 using Graph = std::unordered_map<int, std::vector<int>>;
 
 std::vector<int> bfs(const Graph& graph, int start) {
@@ -137,9 +180,8 @@ genuinely different bookkeeping, and copying one's structure to the other is a c
 
 ### BFS computes shortest paths; DFS does not
 
-BFS processes vertices in non-decreasing distance from the start, so the first time it reaches a
-vertex is necessarily by a path with the fewest edges. Recording distance and predecessor as you go
-gives the path itself:
+BFS reaches each vertex, for the first time, by a path with the fewest possible edges. Recording each
+vertex's predecessor as it is first reached gives the path itself:
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -195,8 +237,7 @@ std::optional<std::vector<int>> shortest_path(const Graph& graph, int start, int
 </TabItem>
 </Tabs>
 
-DFS can reach the goal by an arbitrarily long detour, because it commits to a branch before
-considering alternatives. It answers "is there a path", never "what is the shortest path".
+DFS can reach the goal by an arbitrarily long detour — it answers "is there a path", never "what is the shortest path".
 
 ## Practical Usage
 
@@ -207,8 +248,7 @@ considering alternatives. It answers "is there a path", never "what is the short
 | Cycle detection | DFS | A back edge to a vertex still on the stack is a cycle |
 | [Topological sort](./topological-sort.md) | DFS | Post-order reversed gives the ordering |
 | Connected components | Either | Loop over vertices, traverse from each unvisited one |
-| Maze solving, N-queens, sudoku | DFS | Backtracking is depth-first by nature |
-| Flood fill | Either | DFS is shorter; BFS avoids deep recursion |
+| Maze solving, N-queens, sudoku, flood fill | DFS | Backtracking is depth-first by nature |
 | Bipartiteness check | BFS | Two-colour by level |
 
 <Tabs groupId="code-lang">
@@ -224,6 +264,14 @@ def components(graph):
             seen.update(group)
             groups.append(group)
     return groups
+
+# the shared undirected graph, checked against the traced order above
+g = {"A": ["B", "C"], "B": ["A", "C", "D"], "C": ["A", "B", "D", "E"],
+     "D": ["B", "C", "E", "F"], "E": ["C", "D", "F"], "F": ["D", "E"]}
+assert list(bfs(g, "A")) == ["A", "B", "C", "D", "E", "F"]
+assert list(dfs(g, "A")) == ["A", "B", "C", "D", "E", "F"]
+assert shortest_path(g, "A", "F") == ["A", "B", "D", "F"]   # 3 edges, fewest possible
+assert components(g) == [["A", "B", "C", "D", "E", "F"]]    # one connected component
 ```
 
 </TabItem>
@@ -247,90 +295,44 @@ std::vector<std::vector<int>> components(const Graph& graph) {
 </TabItem>
 </Tabs>
 
-### Cycle detection needs three states, not two
-
-For a directed graph, "visited" is insufficient — you must distinguish a vertex still being explored
-from one already finished:
-
-<Tabs groupId="code-lang">
-<TabItem value="python" label="Python">
-
-```python showLineNumbers
-WHITE, GREY, BLACK = 0, 1, 2            # unvisited, on the stack, finished
-
-def has_cycle(graph):
-    colour = {v: WHITE for v in graph}
-
-    def visit(v):
-        colour[v] = GREY
-        for nb in graph[v]:
-            if colour[nb] == GREY:      # back edge to an ancestor → cycle
-                return True
-            if colour[nb] == WHITE and visit(nb):
-                return True
-        colour[v] = BLACK               # fully explored
-        return False
-
-    return any(colour[v] == WHITE and visit(v) for v in graph)
-```
-
-</TabItem>
-<TabItem value="cpp" label="C++">
-
-```cpp showLineNumbers
-enum Colour { WHITE, GREY, BLACK };     // unvisited, on the stack, finished
-
-bool has_cycle(const Graph& graph) {
-    std::unordered_map<int, Colour> colour;
-    for (const auto& [v, outs] : graph) colour[v] = WHITE;
-
-    auto visit = [&](int v, auto&& self) -> bool {
-        colour[v] = GREY;
-        for (int nb : graph.at(v)) {
-            if (colour[nb] == GREY) return true;            // back edge to an ancestor → cycle
-            if (colour[nb] == WHITE && self(nb, self)) return true;
-        }
-        colour[v] = BLACK;                                  // fully explored
-        return false;
-    };
-
-    for (const auto& [v, outs] : graph)
-        if (colour[v] == WHITE && visit(v, visit)) return true;
-    return false;
-}
-```
-
-</TabItem>
-</Tabs>
-
-Reaching a **BLACK** vertex is fine — it means the graph reconverges, not that it loops. Only a
-**GREY** vertex, still on the current path, indicates a cycle. Treating both as "visited" reports
-cycles in perfectly acyclic diamond-shaped graphs.
-
 ## Edge Cases & Pitfalls
 
-- **Forgetting `visited` entirely** loops forever on any cyclic graph. This is the difference between
-  graph traversal and tree traversal — trees cannot loop, graphs can.
-- **Recursive DFS overflows the stack** on deep graphs; Python's default limit is around 1000 frames.
-  Use the iterative form for untrusted or large input.
-- **DFS visit order depends on neighbour order.** Iterative DFS with `stack.pop()` visits the *last*
+- **Forgetting `visited` entirely** loops forever on any cyclic graph — the difference between graph
+  traversal and tree traversal, since trees cannot loop but graphs can.
+- **Directed-graph cycle detection needs three states, not two** — a vertex still open on the call
+  stack versus one already finished. [Cycle Detection](./cycle-detection.md) covers the resulting
+  three-colour DFS, plus the separate parent-edge trap undirected graphs need instead.
+- **Recursive DFS overflows the stack** on deep graphs (Python's default limit is ~1000 frames); use
+  the iterative form for untrusted or large input.
+- **DFS visit order depends on neighbour order** — iterative DFS with `stack.pop()` visits the *last*
   neighbour first, which is why the code above reverses the list to match the recursive version.
 - **Disconnected graphs** need the outer loop shown in `components`; a single traversal reaches one
   component only.
 - **BFS memory is the graph's width**, which on a broad graph can exceed DFS's depth substantially —
   the opposite of the usual assumption.
 
+## Recall
+
+<Recall
+  invariant="BFS's queue holds only unvisited frontier vertices, so it reaches every vertex in non-decreasing distance from the start; DFS's stack may hold several stale copies of an already-visited vertex, discarded by a check after popping rather than prevented before pushing."
+  costs={[
+    ["BFS / DFS, adjacency list (worst)", "O(V + E)"],
+    ["BFS shortest path reconstruction", "O(path length)"],
+    ["recursive DFS, call-stack depth (worst)", "O(V)"],
+  ]}
+  reachFor="Fewest edges, distance, or level-order needs BFS; ordering, backtracking, or cycle detection needs DFS. Either answers plain reachability."
+  trap="Marking a vertex visited on dequeue instead of on enqueue in BFS lets it enter the queue once per incoming edge, inflating the queue to O(E) and corrupting the distances computed from it."
+/>
+
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, §22.2–22.3 — BFS and DFS with the white/grey/black colouring and the classification of edges.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §22.2–22.3 — BFS and DFS with the white/grey/black colouring and the classification of edges.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §4.1 — undirected graphs, with both traversals implemented and applied.
-
-### Books & Videos
-
 - [VisuAlgo — Graph Traversal](https://visualgo.net/en/dfsbfs) — run both on the same graph and watch the frontier evolve.
 
 ## Related Pages
 
 - [Shortest Paths](./shortest-paths.md) — what BFS becomes once edges have weights.
 - [Topological Sort](./topological-sort.md) — DFS post-order put to work.
+- [Cycle Detection](./cycle-detection.md) — the three-colour DFS this page's traps point to.
 - [Stacks & Queues](../data-structures/stacks-and-queues.md) — the one-line difference between the two.
