@@ -298,10 +298,8 @@ path while exploring far fewer vertices; zero turns A\* back into Dijkstra's exa
 
 - **Unreachable vertices** stay at infinity — decide whether that is an error or an expected result.
 - **Reconstructing the path** needs the `prev` map, followed backwards from the goal and reversed — returning distances alone is a common oversight.
-- **Ties in the priority queue** compare the second tuple element — insert a counter if nodes are not
-  orderable, the same hazard as on the [heaps page](../data-structures/heaps.md).
-- **Dijkstra's on a dense graph** is $O(V^2)$ with a plain array, beating the heap's $O((V+E)\log V)$
-  once E approaches $V^2$.
+- **Ties in the priority queue** compare the second tuple element — insert a counter if nodes are not orderable, the same hazard as on the [heaps page](../data-structures/heaps.md).
+- **Dijkstra's on a dense graph** is $O(V^2)$ with a plain array, beating the heap's $O((V+E)\log V)$ once E approaches $V^2$.
 - **An inadmissible A\* heuristic** returns fast paths that are not necessarily shortest — fine for games, a bug for navigation.
 
 ## Comparisons
@@ -309,6 +307,8 @@ path while exploring far fewer vertices; zero turns A\* back into Dijkstra's exa
 | | BFS | Dijkstra's | Bellman–Ford | Floyd–Warshall |
 |---|---|---|---|---|
 | Weights, sources, best for | None, one, unweighted | Non-negative, one, usual case | **Any**, one, cycle check | Any, **all pairs**, small dense |
+| Complexity (worst) | $O(V + E)$ | $O((V+E)\log V)$ | $O(V \cdot E)$ | $O(V^3)$ |
+| Detects negative cycles | — | No | **Yes** | Yes |
 
 ## Recall
 

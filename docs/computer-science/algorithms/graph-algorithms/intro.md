@@ -172,11 +172,11 @@ differences between these algorithms are smaller than their reputations suggest.
 <Recall
   invariant="Almost every algorithm in this section is the shared-skeleton loop above with one container swapped for another and one bookkeeping rule added — a graph algorithm's identity is in when it marks a vertex done and what it does at that moment, not in a different overall shape."
   costs={[
-    ["BFS / DFS, adjacency list", "O(V + E)"],
-    ["Dijkstra's, binary heap", "O((V + E) log V)"],
-    ["Bellman-Ford", "O(V * E)"],
-    ["Floyd-Warshall, all pairs", "O(V^3)"],
-    ["Kruskal's / Prim's, MST", "O(E log V)"],
+    ["BFS / DFS, adjacency list (worst)", "O(V + E)"],
+    ["Dijkstra's, binary heap (worst)", "O((V + E) log V)"],
+    ["Bellman-Ford (worst)", "O(V * E)"],
+    ["Floyd-Warshall, all pairs (worst)", "O(V^3)"],
+    ["Kruskal's / Prim's, MST (worst)", "O(E log V)"],
   ]}
   reachFor="The problem is phrased in terms of vertices and edges — reachability, ordering, cost, or connectivity — rather than needing an answer computed directly."
   trap="Reaching for Dijkstra's on an unweighted graph, or for a weighted algorithm when BFS already answers the question in O(V + E) with no heap at all."
