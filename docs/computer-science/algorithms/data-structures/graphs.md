@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, graph]
 
 # Graphs
 
-
 A graph is a set of **vertices** and a set of **edges** connecting them. That is nearly no structure
 at all, which is precisely why it models so much: road networks, social connections, package
 dependencies, web links, state machines, and the call graph of the program you are reading this in.
@@ -69,13 +68,22 @@ graph = {
     6: [4],
 }
 # Weighted: store (neighbour, weight) pairs
-weighted = {1: [(2, 7), (5, 3)], ...}
+weighted = {
+    1: [(2, 7), (5, 3)],
+    2: [(1, 7), (5, 1)],
+    # ... one entry per vertex, same shape as the unweighted graph above
+}
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <array>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 std::unordered_map<int, std::vector<int>> graph{
     {1, {2, 5}},
     {2, {1, 3, 5}},
@@ -140,12 +148,104 @@ each has $10^8$ edges — an adjacency list holds that comfortably, while the ma
 wants matrix form (Floyd–Warshall, spectral methods).
 :::
 
+### One weighted graph, three representations, traced
+
+Six vertices `A B C D E F`, nine weighted undirected edges: `A–B 4, A–C 2, B–C 1, B–D 5, C–D 8, C–E 10,
+D–E 2, D–F 6, E–F 3`. Building all three representations from the same edge list, with an approximate
+byte cost for a compact fixed-width layout (1 byte per vertex id, 4 bytes per integer weight, no
+per-object/pointer overhead — real language containers add more):
+
+```text
+adjacency list (each undirected edge stored once per endpoint — 18 directed entries total)
+  A: [(B,4), (C,2)]
+  B: [(A,4), (C,1), (D,5)]
+  C: [(A,2), (B,1), (D,8), (E,10)]
+  D: [(B,5), (C,8), (E,2), (F,6)]
+  E: [(C,10), (D,2), (F,3)]
+  F: [(D,6), (E,3)]
+  cost: 18 entries x (1 byte id + 4 byte weight) = 90 bytes         — O(V + E)
+
+adjacency matrix (6x6, one 4-byte weight per cell, 0 meaning "no edge")
+      A   B   C   D   E   F
+  A [ 0,  4,  2,  0,  0,  0]
+  B [ 4,  0,  1,  5,  0,  0]
+  C [ 2,  1,  0,  8, 10,  0]
+  D [ 0,  5,  8,  0,  2,  6]
+  E [ 0,  0, 10,  2,  0,  3]
+  F [ 0,  0,  0,  6,  3,  0]
+  cost: 36 cells x 4 bytes = 144 bytes                              — O(V^2)
+
+edge list (each undirected edge stored exactly once)
+  [(A,B,4), (A,C,2), (B,C,1), (B,D,5), (C,D,8), (C,E,10), (D,E,2), (D,F,6), (E,F,3)]
+  cost: 9 entries x (2 x 1 byte id + 4 byte weight) = 54 bytes       — O(E)
+```
+
+Three representations of the same nine edges span 90, 144 and 54 bytes here — a small enough graph that
+the difference looks minor, but the matrix's $V^2$ term dominates at scale exactly as the tip above
+argues. The edge list is smallest because it is the only one of the three that never repeats a fact:
+each edge appears once, where the other two either duplicate it (undirected list) or reserve space for
+every non-edge (matrix).
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+edges = [("A","B",4), ("A","C",2), ("B","C",1), ("B","D",5), ("C","D",8),
+         ("C","E",10), ("D","E",2), ("D","F",6), ("E","F",3)]
+
+adj = {v: [] for v in "ABCDEF"}
+for u, v, w in edges:
+    adj[u].append((v, w))
+    adj[v].append((u, w))
+assert adj["A"] == [("B", 4), ("C", 2)]
+assert len(adj["C"]) == 4      # C touches A, B, D, E
+
+idx = {v: i for i, v in enumerate("ABCDEF")}
+matrix = [[0] * 6 for _ in range(6)]
+for u, v, w in edges:
+    matrix[idx[u]][idx[v]] = w
+    matrix[idx[v]][idx[u]] = w
+assert matrix[idx["A"]][idx["B"]] == 4
+assert matrix[idx["D"]][idx["F"]] == 6
+
+assert len(edges) == 9         # the edge list: exactly one entry per edge
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+struct WeightedEdge { char u, v; int w; };
+
+std::vector<WeightedEdge> edges{
+    {'A','B',4}, {'A','C',2}, {'B','C',1}, {'B','D',5}, {'C','D',8},
+    {'C','E',10}, {'D','E',2}, {'D','F',6}, {'E','F',3},
+};
+
+int index_of(char v) { return v - 'A'; }
+
+void build_representations() {
+    std::unordered_map<char, std::vector<std::pair<char, int>>> adj;
+    std::array<std::array<int, 6>, 6> matrix{};
+    for (const auto& e : edges) {
+        adj[e.u].push_back({e.v, e.w});
+        adj[e.v].push_back({e.u, e.w});
+        matrix[index_of(e.u)][index_of(e.v)] = e.w;
+        matrix[index_of(e.v)][index_of(e.u)] = e.w;
+    }
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Practical Usage
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 from collections import defaultdict
 
 # Building an undirected graph from an edge list
@@ -162,6 +262,7 @@ len(graph[v])
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Building an undirected graph from an edge list
 std::unordered_map<int, std::vector<int>> graph;
 for (auto [u, v] : edges) {
@@ -198,6 +299,21 @@ graph[v].size();
   representation permits them.
 - **Vertex identity.** Using mutable objects as vertex keys in a dict has the same hazard described
   under [hash tables](./hash-tables.md); integer or string IDs are safer.
+
+## Recall
+
+<Recall
+  invariant="A graph is only vertices plus edges; trees and linked lists are the special cases with no cycles and one child per node, respectively."
+  costs={[
+    ["build an adjacency list from E edges (worst)", "O(V + E)"],
+    ["check edge u-v, adjacency list (worst)", "O(degree(u))"],
+    ["check edge u-v, adjacency matrix (worst)", "O(1)"],
+    ["iterate all neighbours of u, adjacency matrix (worst)", "O(V)"],
+    ["space, adjacency list vs. matrix (worst)", "O(V + E) vs. O(V^2)"],
+  ]}
+  reachFor="The problem is fundamentally about relationships between entities — dependencies, connections, routes — rather than a fixed hierarchy or sequence."
+  trap="Defaulting to an adjacency matrix out of habit. Real graphs are sparse, so a matrix wastes O(V^2) space on cells that are almost all zero — use an adjacency list unless the graph is genuinely dense or an algorithm specifically wants matrix form."
+/>
 
 ## References
 

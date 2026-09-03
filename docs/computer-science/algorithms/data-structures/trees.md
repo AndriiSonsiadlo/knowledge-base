@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, tree, bst]
 
 # Trees & Binary Search Trees
 
-
 A tree is a set of nodes where each node has one parent (except the root) and no cycles. That single
 constraint is what makes trees useful: it guarantees exactly one path between any two nodes, so
 "where is X" and "how do I get to X" have unique answers.
@@ -69,6 +68,8 @@ def insert(node, key):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <vector>
+
 struct Node {
     int value;
     Node* left = nullptr;
@@ -95,6 +96,76 @@ Node* insert(Node* node, int key) {
 </Tabs>
 
 Both are $O(\text{height})$. The entire question is therefore what the height is.
+
+### Building a BST, traced
+
+Inserting `5, 1, 8, 3` in that order, one node at a time:
+
+```text
+insert 5     5 becomes the root (empty tree)
+
+insert 1     5
+            /
+           1                  1 < 5, go left, insert as 5's left child
+
+insert 8     5
+            / \
+           1   8              8 > 5, go right, insert as 5's right child
+
+insert 3     5
+            / \
+           1   8
+            \
+             3                3 > 1 (go right), 3 < 5 already decided — insert as 1's right child
+```
+
+An in-order walk (left, node, right) of the final tree visits `1, 3, 5, 8` — sorted, exactly as the
+invariant guarantees:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+root = None
+for key in (5, 1, 8, 3):
+    root = insert(root, key)
+
+assert root.value == 5 and root.left.value == 1 and root.right.value == 8
+assert root.left.right.value == 3      # 3 landed as 1's right child, not 5's
+
+def in_order(node):
+    if node:
+        yield from in_order(node.left)
+        yield node.value
+        yield from in_order(node.right)
+
+assert list(in_order(root)) == [1, 3, 5, 8]
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+#include <cassert>
+
+Node* build_traced_tree() {
+    Node* root = nullptr;
+    for (int key : {5, 1, 8, 3}) root = insert(root, key);
+
+    assert(root->value == 5 && root->left->value == 1 && root->right->value == 8);
+    assert(root->left->right->value == 3);   // 3 landed as 1's right child, not 5's
+    return root;
+}
+```
+
+</TabItem>
+</Tabs>
 
 ### Deletion, and the one case that is awkward
 
@@ -170,6 +241,8 @@ def in_order(node):
         yield from in_order(node.left)
         yield node.value                  # sorted output for a BST
         yield from in_order(node.right)
+
+assert list(in_order(root)) == [1, 3, 5, 8]     # confirms the traced tree from above
 ```
 
 </TabItem>
@@ -181,6 +254,12 @@ void in_order(Node* node, std::vector<int>& out) {
     in_order(node->left, out);
     out.push_back(node->value);          // sorted output for a BST
     in_order(node->right, out);
+}
+
+void confirm_in_order() {
+    std::vector<int> out;
+    in_order(build_traced_tree(), out);
+    assert((out == std::vector<int>{1, 3, 5, 8}));    // confirms the traced tree from above
 }
 ```
 
@@ -218,6 +297,20 @@ should almost never use a hand-rolled plain BST in production code.
 | Sorted iteration | Yes | Yes | No |
 | Range queries, min/max | Yes | Yes | No |
 | Worst case | Degenerate | Bounded | $O(n)$ |
+
+## Recall
+
+<Recall
+  invariant="At every node, everything in the left subtree is smaller and everything in the right subtree is larger."
+  costs={[
+    ["search / insert / delete (average)", "O(log n)"],
+    ["search / insert / delete (worst, degenerate)", "O(n)"],
+    ["in-order traversal, all n nodes (worst)", "O(n)"],
+    ["find min/max (worst)", "O(height)"],
+  ]}
+  reachFor="You need sorted iteration, range queries, or predecessor/successor, and can tolerate O(n) worst case without extra bookkeeping."
+  trap="Inserting already-sorted or nearly-sorted data into a plain BST — it degenerates into a linked list with O(n) height, silently losing every asymptotic advantage the structure was chosen for."
+/>
 
 ## References
 

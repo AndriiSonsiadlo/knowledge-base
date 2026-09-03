@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, hash-table, hashing]
 
 # Hash Tables
 
-
 A hash table turns a key into an array index by running it through a **hash function**, then reads or
 writes that slot directly. Because indexing an array is $O(1)$, lookup by arbitrary key becomes $O(1)$
 too — which is a genuinely surprising result, and the reason `dict`, `HashMap`, `unordered_map` and
@@ -73,9 +72,19 @@ def insert_linear_probe(table, key, value):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <cstddef>
+#include <functional>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+template <typename Key, typename Value>
 struct Slot { bool used = false; Key key; Value value; };
 
-void insert_linear_probe(std::vector<Slot>& table, const Key& key, const Value& value) {
+template <typename Key, typename Value>
+void insert_linear_probe(std::vector<Slot<Key, Value>>& table, const Key& key, const Value& value) {
     std::size_t i = std::hash<Key>{}(key) % table.size();
     while (table[i].used && table[i].key != key)
         i = (i + 1) % table.size();      // walk forward until a free slot
@@ -95,6 +104,100 @@ void insert_linear_probe(std::vector<Slot>& table, const Key& key, const Value& 
 | Used by | Java `HashMap`, older C++ `unordered_map` | Python `dict`, Rust `HashMap`, Go maps, Swift |
 
 Most modern implementations chose open addressing, and the reason is the cache column.
+
+### Four keys, eight buckets, one collision — traced
+
+Insert `"cat"`, `"dog"`, `"bird"`, `"ant"` into an 8-bucket table (indices 0–7), using a hash function
+that happens to send both `"cat"` and `"dog"` to bucket 3 — the collision the design has to handle:
+
+```text
+key      hash(key) % 8    bucket
+
+"cat"    3                3   -> empty, insert directly
+"dog"    3                3   -> occupied by "cat" — COLLISION
+"bird"   5                5   -> empty, insert directly
+"ant"    0                0   -> empty, insert directly
+
+separate chaining, after all four inserts:
+  bucket 0 -> ("ant", …)
+  bucket 3 -> ("cat", …) -> ("dog", …)      # chain of length 2 — the collision
+  bucket 5 -> ("bird", …)
+  (buckets 1, 2, 4, 6, 7 empty)
+
+open addressing (linear probing), after all four inserts:
+  bucket 0 -> ("ant", …)
+  bucket 3 -> ("cat", …)                     # got its home slot first
+  bucket 4 -> ("dog", …)                     # probed forward from 3, found 4 free
+  bucket 5 -> ("bird", …)
+  (buckets 1, 2, 6, 7 empty)
+```
+
+Both strategies store the same four entries; they disagree only about where `"dog"` ends up. Chaining
+leaves it in a 2-element list still addressed by bucket 3; open addressing physically relocates it to
+the first free slot found by the probe sequence. Looking `"dog"` up afterwards costs one extra
+comparison either way — a linked-list traversal of length 2, or one extra probe — the case that
+distinguishes $O(1)$ **average** from the $O(1)$ **best case** ("cat", "ant", "bird" all found in one
+step).
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+def insert_chained(table, key, value, bucket_of):
+    table[bucket_of(key)].append((key, value))     # append to that bucket's list
+
+def insert_linear_probe_full(table, key, value, bucket_of):
+    i = bucket_of(key)
+    while table[i] is not None:
+        i = (i + 1) % len(table)
+    table[i] = (key, value)
+
+def bucket_of(key):   # a hash function stubbed to reproduce the trace above
+    return {"cat": 3, "dog": 3, "bird": 5, "ant": 0}[key]
+
+chained = [[] for _ in range(8)]
+for k in ("cat", "dog", "bird", "ant"):
+    insert_chained(chained, k, True, bucket_of)
+assert chained[3] == [("cat", True), ("dog", True)]   # the chain the collision produced
+assert chained[0] == [("ant", True)]
+
+probed = [None] * 8
+for k in ("cat", "dog", "bird", "ant"):
+    insert_linear_probe_full(probed, k, True, bucket_of)
+assert probed[3] == ("cat", True)
+assert probed[4] == ("dog", True)      # probed forward one slot past the collision
+assert probed[5] == ("bird", True)
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+#include <array>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
+int bucket_of(const std::string& key) {
+    if (key == "cat" || key == "dog") return 3;
+    if (key == "bird") return 5;
+    return 0;   // "ant"
+}
+
+void insert_chained(std::array<std::vector<std::string>, 8>& table, const std::string& key) {
+    table[bucket_of(key)].push_back(key);
+}
+
+void insert_linear_probe(std::array<std::optional<std::string>, 8>& table, const std::string& key) {
+    int i = bucket_of(key);
+    while (table[i].has_value()) i = (i + 1) % 8;
+    table[i] = key;
+}
+```
+
+</TabItem>
+</Tabs>
 
 ### Load factor is the dial that controls everything
 
@@ -135,10 +238,13 @@ def two_sum(nums, target):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Pre-size when the count is known, to avoid repeated rehashing
 std::unordered_map<std::string, int> seen;
 seen.reserve(expected_size);        // max_load_factor defaults to 1.0
+```
 
+```cpp showLineNumbers
 // The classic use: turning a nested scan into a single pass
 std::optional<std::pair<int, int>> two_sum(const std::vector<int>& nums, int target) {
     std::unordered_map<int, int> seen;              // value -> index
@@ -192,6 +298,20 @@ leak. Use immutable keys.
 | Range queries, min/max, successor | Not supported | Natural |
 | Memory | Empty slots or chain overhead | Two pointers per node |
 | Choose it when | You look up exact keys | You need order, ranges, or worst-case bounds |
+
+## Recall
+
+<Recall
+  invariant="A hash function maps a key to a bucket index; two distinct keys mapping to the same bucket is a collision, resolved by chaining or by probing for another slot."
+  costs={[
+    ["lookup / insert / delete (expected)", "O(1)"],
+    ["lookup / insert / delete, worst case", "O(n)"],
+    ["rehash when load factor crosses the threshold (amortized)", "O(1)"],
+    ["rehash itself, one occurrence (worst)", "O(n)"],
+  ]}
+  reachFor="You look things up by an arbitrary key and never need sorted order or range queries."
+  trap="Mutating a key after it is inserted — the entry's bucket was fixed by the key's hash at insertion time, so the table now looks in the wrong bucket and the entry becomes silently unreachable."
+/>
 
 ## References
 

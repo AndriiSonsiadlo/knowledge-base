@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, linked-list]
 
 # Linked Lists
 
-
 A linked list stores each element in its own node, together with a pointer to the next one. Nothing
 is contiguous, so there is no arithmetic that finds element `i` — you follow pointers from the head
 until you arrive.
@@ -99,6 +98,90 @@ Node* get(Node* head, int n) {
 The asymmetry is the whole story. Every operation is $O(1)$ **given a reference to the right node**,
 and getting that reference is $O(n)$. A linked list only pays off when the traversal was going to
 happen anyway, or when you were handed the node by something else.
+
+### Deleting the middle node, traced
+
+Deleting the node holding 8 from the 4-node list `5 -> 1 -> 8 -> 3 -> None` requires the node
+**before** it, because a singly linked list has no way to reach backwards — the predecessor is what
+gets its `next` pointer rewritten, not the node being removed:
+
+```text
+start:        5 -> 1 -> 8 -> 3 -> None
+              (head)
+
+step 1        walk from head until node.next is the target:
+              prev = node(1)          # node(1).next is node(8), the one to remove
+              target = node(8)
+
+step 2        prev.next = target.next
+              node(1).next = node(3)  # node(8) is now unreachable from the list
+
+result:       5 -> 1 -> 3 -> None
+              node(8) still exists in memory until nothing else references it
+              (garbage collected in Python/Java; must be freed explicitly in C++)
+```
+
+Exactly one pointer write — `prev.next = target.next` — does the whole deletion, and its cost does not
+depend on which node is removed. Finding `prev` is the part that costs $O(n)$: reaching the middle of a
+4-node list already needs 2 hops, and the general case is $O(n)$ **worst case** (and average case, over
+a target position chosen uniformly at random). A **doubly** linked list would remove the need to walk
+from the head at all if a reference to the target itself is already held, since `target.prev` gives the
+predecessor directly — the reason `OrderedDict`-style caches use one:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+def delete_value(head, value):
+    """Delete the first node holding `value`. Returns the (possibly new) head."""
+    if head is None:
+        return None
+    if head.value == value:
+        return head.next                # deleting the head needs no predecessor
+    prev = head
+    while prev.next and prev.next.value != value:
+        prev = prev.next
+    if prev.next:
+        prev.next = prev.next.next      # the one pointer write that does the deletion
+    return head
+
+n4 = Node(3)
+n3 = Node(8, n4)
+n2 = Node(1, n3)
+n1 = Node(5, n2)
+new_head = delete_value(n1, 8)
+result = []
+node = new_head
+while node:
+    result.append(node.value)
+    node = node.next
+assert result == [5, 1, 3]
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+Node* delete_value(Node* head, int value) {
+    if (!head) return nullptr;
+    if (head->value == value) {
+        Node* rest = head->next;
+        delete head;                    // deleting the head needs no predecessor
+        return rest;
+    }
+    Node* prev = head;
+    while (prev->next && prev->next->value != value) prev = prev->next;
+    if (prev->next) {
+        Node* target = prev->next;
+        prev->next = target->next;      // the one pointer write that does the deletion
+        delete target;
+    }
+    return head;
+}
+```
+
+</TabItem>
+</Tabs>
 
 ### Why a sentinel node simplifies the code
 
@@ -205,6 +288,20 @@ enormous, the array wins — including on the operation the list is supposed to 
 | Insert/delete at back | $O(1)$ amortized | $O(n)$ without a tail pointer | $O(1)$ with a tail pointer |
 | Insert/delete given the node | $O(n)$ | $O(1)$ after the *previous* node | $O(1)$ |
 | Memory per element | Element only | Element + 1 pointer | Element + 2 pointers |
+
+## Recall
+
+<Recall
+  invariant="Each node knows only the next node; reaching any node costs a walk from the head, but rewriting one pointer splices or removes a node in O(1) once you are there."
+  costs={[
+    ["insert/delete given the previous node (worst)", "O(1)"],
+    ["find the nth node, or a value (worst)", "O(n)"],
+    ["insert/delete at the head (worst)", "O(1)"],
+    ["insert/delete at the tail, no tail pointer (worst)", "O(n)"],
+  ]}
+  reachFor="You already hold a reference to the node you're splicing next to, or you're building something that must never shift existing elements in memory."
+  trap="Deleting a node needs its predecessor, not the node itself, because a singly linked list cannot walk backwards — forgetting to track prev while scanning is the most common bug in list code."
+/>
 
 ## References
 

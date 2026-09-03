@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, arrays]
 
 # Arrays & Dynamic Arrays
 
-
 An array is a block of contiguous memory holding equally-sized elements. That one property gives it
 everything else: because element `i` lives at `base + i × element_size`, indexing is a single
 multiply-and-add — genuinely $O(1)$, with no search involved.
@@ -51,6 +50,7 @@ copied:
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 # Conceptually, what append does
 def append(self, value):
     if self.size == self.capacity:
@@ -66,6 +66,7 @@ def append(self, value):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Conceptually, what push_back does
 void push_back(const T& value) {
     if (size_ == capacity_) {
@@ -84,8 +85,11 @@ void push_back(const T& value) {
 </Tabs>
 
 Doubling means resizes happen at sizes 1, 2, 4, 8, …, n, copying fewer than `2n` elements in total
-across n appends — **$O(1)$ amortized**. Growing by a fixed amount instead (say +10 each time) makes
-resizes just as frequent as the array grows, giving $O(n)$ amortized per append.
+across n appends — **$O(1)$ amortized**, in the sense developed in full in
+[Amortized Analysis](../complexity/amortized-analysis.md) (the accounting-method argument there charges
+each append a constant number of prepaid "credits", enough to cover its own eventual share of a future
+copy). Growing by a fixed amount instead (say +10 each time) makes resizes just as frequent as the
+array grows, giving $O(n)$ amortized per append.
 
 | Language | Growth factor |
 |---|---|
@@ -101,12 +105,74 @@ the allocator to reuse that freed space, which is the argument for 1.5×. It is 
 trade, not a speed one.
 :::
 
+### Insert and delete: the shifting cost, traced
+
+Indexing is $O(1)$, but inserting or deleting anywhere except the end means every element after the
+gap has to move, which is $O(n)$ **worst case** (and average case, since the expected number of
+elements shifted is proportional to n regardless of where the operation lands). Traced on
+`[5, 1, 8, 3]`:
+
+```text
+start                    [5, 1, 8, 3]
+
+insert 9 at front        [9, 5, 1, 8, 3]
+  every existing element shifts one slot right to make room at index 0 — O(n) worst case
+
+insert 7 at back         [9, 5, 1, 8, 3, 7]
+  no shift needed, only a write past the last element — O(1) amortized (a resize may be due)
+
+delete at index 1 (5)    [9, 1, 8, 3, 7]
+  elements at index 2..5 (1, 8, 3, 7) each shift one slot left to close the gap — O(n) worst case
+```
+
+Only the back is cheap. Inserting or deleting at the front or in the middle always touches every
+element between the operation and the far end — there is no way to avoid the shift without changing
+representation (a [linked list](./linked-lists.md) trades this shift for pointer-chasing instead).
+
+The trace above is not just an illustration — it is exactly what the standard library does:
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+arr = [5, 1, 8, 3]
+arr.insert(0, 9)                  # insert at front — O(n) worst case: shifts every element right
+assert arr == [9, 5, 1, 8, 3]
+arr.append(7)                     # insert at back — O(1) amortized: no shift
+assert arr == [9, 5, 1, 8, 3, 7]
+del arr[1]                        # delete at index 1 — O(n) worst case: shifts elements left
+assert arr == [9, 1, 8, 3, 7]
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+#include <cassert>
+#include <cstddef>
+#include <vector>
+
+void trace_shifts() {
+    std::vector<int> arr{5, 1, 8, 3};
+    arr.insert(arr.begin(), 9);          // insert at front — O(n) worst case: shifts right
+    assert((arr == std::vector<int>{9, 5, 1, 8, 3}));
+    arr.push_back(7);                    // insert at back — O(1) amortized: no shift
+    assert((arr == std::vector<int>{9, 5, 1, 8, 3, 7}));
+    arr.erase(arr.begin() + 1);          // delete at index 1 — O(n) worst case: shifts left
+    assert((arr == std::vector<int>{9, 1, 8, 3, 7}));
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Practical Usage
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 # Reserve capacity when the final size is known — avoids repeated reallocation
 result = [None] * n          # Python: allocate once
 # C++: v.reserve(n);   Java: new ArrayList<>(n);   Go: make([]int, 0, n)
@@ -125,6 +191,7 @@ for row in range(rows):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Reserve capacity when the final size is known — avoids repeated reallocation
 std::vector<int> result;
 result.reserve(n);              // one allocation; no reallocation while filling
@@ -152,6 +219,10 @@ order does not matter, swapping the last element into the hole makes it $O(1)$:
 def remove_unordered(items, i):
     items[i] = items[-1]     # overwrite the hole with the last element
     items.pop()              # then drop the (now duplicated) tail
+
+items = [10, 20, 30, 40]
+remove_unordered(items, 1)
+assert items == [10, 40, 30]     # order changed, but O(1) instead of O(n)
 ```
 
 </TabItem>
@@ -174,6 +245,7 @@ In C++, any operation that may reallocate a `vector` — `push_back`, `insert`, 
 every pointer, reference and iterator into it. The classic bug:
 
 ```cpp showLineNumbers
+// doc:no-run
 std::vector<int> v = {1, 2, 3};
 int& first = v[0];
 v.push_back(4);        // may reallocate; `first` now dangles
@@ -202,6 +274,20 @@ survives in every language.
 | Memory per element | Element only | Element + one or two pointers |
 | Locality | Contiguous — prefetches perfectly | Scattered — a cache miss per node |
 | Realistic verdict | The default | Only when splicing dominates and you already hold the node |
+
+## Recall
+
+<Recall
+  invariant="Elements sit at base + index × element_size, so access by index is arithmetic, never search."
+  costs={[
+    ["index access (worst)", "O(1)"],
+    ["append at the end (amortized)", "O(1)"],
+    ["insert/delete at front or middle (worst)", "O(n)"],
+    ["search for an arbitrary value (worst)", "O(n)"],
+  ]}
+  reachFor="You index by position or iterate in order, and appends happen mostly at the end."
+  trap="Assuming append is O(1) worst case rather than amortized — the occasional resize is a real O(n) pause, and holding a pointer/reference across a push_back in C++ is a use-after-free the moment that resize happens."
+/>
 
 ## References
 

@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, data-structures, stack, queue, deque]
 
 # Stacks & Queues
 
-
 Stacks and queues are not new storage — they are **restrictions** on storage. Both hold a sequence,
 and both deliberately refuse to let you reach into the middle of it. That refusal is the feature: an
 interface with two operations has far fewer ways to be used incorrectly, and the restriction is
@@ -35,87 +34,109 @@ wrong structure.
 
 ## Mechanism
 
+### The same six operations, two disciplines, traced
+
+`add A, add B, add C, remove, remove, add D` — read as `push`/`pop` on a stack and as
+`enqueue`/`dequeue` on a queue, same six operations, same values:
+
+```text
+                 stack (LIFO)          queue (FIFO)
+after add A,B,C  [A, B, C]             [A, B, C]
+after 2 removes  [A]      (took C, B)  [C]      (took A, B)
+after add D      [A, D]                [C, D]
+```
+
+Same operations, same values — the end states share only D. A stack hands back what it was given most
+recently; a queue hands back what it was given longest ago.
+
+<Tabs groupId="code-lang">
+<TabItem value="python" label="Python">
+
+```python showLineNumbers
+stack = ["A", "B", "C"]
+removed = [stack.pop(), stack.pop()]
+stack.append("D")
+assert stack == ["A", "D"] and removed == ["C", "B"]
+
+from collections import deque
+queue = deque(["A", "B", "C"])
+dequeued = [queue.popleft(), queue.popleft()]
+queue.append("D")
+assert list(queue) == ["C", "D"] and dequeued == ["A", "B"]
+```
+
+</TabItem>
+<TabItem value="cpp" label="C++">
+
+```cpp showLineNumbers
+#include <cassert>
+#include <deque>
+#include <vector>
+
+void trace_stack_and_queue() {
+    std::vector<char> stack{'A', 'B', 'C'};
+    char r1 = stack.back(); stack.pop_back();
+    char r2 = stack.back(); stack.pop_back();
+    stack.push_back('D');
+    assert((stack == std::vector<char>{'A', 'D'}) && r1 == 'C' && r2 == 'B');
+
+    std::deque<char> queue{'A', 'B', 'C'};
+    char q1 = queue.front(); queue.pop_front();
+    char q2 = queue.front(); queue.pop_front();
+    queue.push_back('D');
+    assert((queue == std::deque<char>{'C', 'D'}) && q1 == 'A' && q2 == 'B');
+}
+```
+
+</TabItem>
+</Tabs>
+
 ### Implementation
 
 A stack is a dynamic array with two of its operations hidden — appending and removing at the end are
-already $O(1)$ amortized:
+already $O(1)$ amortized. A queue is where the array representation goes wrong: removing from the
+front is $O(n)$, so the naive version is quadratic. The fix is a **circular buffer** — `head` and
+`tail` indices into a fixed array, wrapped modulo capacity, so neither end ever moves data. That is
+what real deque implementations do (Python's `collections.deque` uses a doubly linked list of
+fixed-size blocks, achieving the same $O(1)$ ends while allowing unbounded growth):
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
 
 ```python showLineNumbers
+# doc:no-run
 stack = []
-stack.append(x)      # push
-top = stack[-1]      # peek
-x = stack.pop()      # pop
-```
+stack.append(x)      # push — O(1) amortized
+x = stack.pop()      # pop — O(1) amortized
 
-</TabItem>
-<TabItem value="cpp" label="C++">
+queue = []            # the naive, wrong way to build a queue
+queue.append(x)       # O(1)
+x = queue.pop(0)      # O(n) — every remaining element shifts down
 
-```cpp showLineNumbers
-std::vector<int> stack;
-stack.push_back(x);         // push
-int top = stack.back();     // peek
-stack.pop_back();           // pop — returns nothing, so read back() first
-
-std::stack<int> s;          // the adaptor, when the interface should forbid indexing
-```
-
-</TabItem>
-</Tabs>
-
-A queue is the case where the array representation goes wrong. Removing from the front of an array is
-$O(n)$, so the naive version is quadratic:
-
-<Tabs groupId="code-lang">
-<TabItem value="python" label="Python">
-
-```python showLineNumbers
-queue = []
-queue.append(x)      # O(1)
-x = queue.pop(0)     # O(n) — every remaining element shifts down
-```
-
-</TabItem>
-<TabItem value="cpp" label="C++">
-
-```cpp showLineNumbers
-std::vector<int> queue;
-queue.push_back(x);             // O(1)
-int front = queue.front();
-queue.erase(queue.begin());     // O(n) — every remaining element shifts down
-```
-
-</TabItem>
-</Tabs>
-
-The fix is a **circular buffer**: keep `head` and `tail` indices into a fixed array and wrap them
-modulo capacity, so neither end ever moves data. That is what real deque implementations do (Python's
-`collections.deque` uses a doubly linked list of fixed-size blocks, which achieves the same $O(1)$ ends
-while allowing unbounded growth).
-
-<Tabs groupId="code-lang">
-<TabItem value="python" label="Python">
-
-```python showLineNumbers
-from collections import deque
-
+from collections import deque   # the fix: a circular buffer under the hood
 q = deque()
-q.append(x)          # enqueue at the back — O(1)
-x = q.popleft()      # dequeue from the front — O(1)
+q.append(x)           # enqueue at the back — O(1)
+x = q.popleft()       # dequeue from the front — O(1)
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
-std::deque<int> q;
-q.push_back(x);         // enqueue at the back — O(1)
-int front = q.front();  // dequeue from the front — O(1)
-q.pop_front();
+// doc:no-run
+std::vector<int> stack;
+stack.push_back(x);          // push — O(1) amortized
+stack.pop_back();            // pop — O(1) amortized, returns nothing: read back() first
+std::stack<int> s;           // the adaptor, when the interface should forbid indexing
 
-std::queue<int> adaptor;   // std::queue wraps a deque with exactly this interface
+std::vector<int> queue;      // the naive, wrong way to build a queue
+queue.push_back(x);          // O(1)
+queue.erase(queue.begin());  // O(n) — every remaining element shifts down
+
+std::deque<int> q;           // the fix: a circular buffer under the hood
+q.push_back(x);               // enqueue at the back — O(1)
+q.pop_front();                 // dequeue from the front — O(1)
+std::queue<int> adaptor;      // std::queue wraps a deque with exactly this interface
 ```
 
 </TabItem>
@@ -162,6 +183,7 @@ def dfs_iterative(root):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
 // Recursive depth-first traversal — the call stack does the bookkeeping
 void dfs(Node* node) {
     if (!node) return;
@@ -221,6 +243,9 @@ def balanced(s):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <string_view>
+#include <unordered_map>
+
 bool balanced(std::string_view s) {
     static const std::unordered_map<char, char> pairs{{')', '('}, {']', '['}, {'}', '{'}};
     std::vector<char> stack;
@@ -264,6 +289,20 @@ bool balanced(std::string_view s) {
 
 Array-backed is the right default; linked-list-backed matters when a single $O(n)$ resize pause is
 unacceptable.
+
+## Recall
+
+<Recall
+  invariant="A stack always returns what was added most recently (LIFO); a queue always returns what was added longest ago (FIFO) — the restriction, not the storage, is the whole structure."
+  costs={[
+    ["push / pop, array-backed (amortized)", "O(1)"],
+    ["enqueue / dequeue, circular buffer or linked (worst)", "O(1)"],
+    ["enqueue / dequeue, naive array (worst)", "O(n)"],
+    ["search for an arbitrary value (worst)", "O(n)"],
+  ]}
+  reachFor="Nesting/backtracking/undo (stack) or fairness/arrival-order/buffering (queue) — never random access into the middle."
+  trap="Using list.pop(0) / list.insert(0, x) in Python, or std::vector for a queue in C++, for the front operation — both are O(n) and silently turn a loop quadratic; use deque instead."
+/>
 
 ## References
 

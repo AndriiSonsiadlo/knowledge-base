@@ -142,6 +142,40 @@ nodes are leaves and cost nothing, a quarter can sift at most one level, and so 
 $\sum n/2^{k+1} \cdot k$ converges to n. Use `heapq.heapify(list)` rather than pushing n times.
 :::
 
+### `heappush`, traced
+
+Python's `heapq` is a **min**-heap ([the module's own documentation is explicit about this](https://docs.python.org/3/library/heapq.html#basic-examples)),
+so this trace uses that convention. `heapq.heapify([5, 1, 8, 3])` sifts down from the last non-leaf
+node first, producing `[1, 3, 8, 5]` — then `heapq.heappush(heap, 0)` places 0 at the end and sifts it
+up:
+
+```text
+heapify([5, 1, 8, 3]) -> [1, 3, 8, 5]     (min-heap: every parent <= its children)
+
+heappush(heap, 0):
+
+  1. append 0 at the end        [1, 3, 8, 5, 0]      index 4
+  2. compare to parent (idx 1, value 3): 0 < 3, swap
+                                 [1, 0, 8, 5, 3]      0 now at index 1
+  3. compare to parent (idx 0, value 1): 0 < 1, swap
+                                 [0, 1, 8, 5, 3]      0 now at index 0 — the root, stop
+```
+
+Two swaps carried 0 from a leaf to the root — $O(\log n)$ **worst case**, one comparison-and-swap per
+level of the tree, exactly as many as the heap is tall:
+
+```python showLineNumbers
+import heapq
+
+heap = [5, 1, 8, 3]
+heapq.heapify(heap)
+assert heap == [1, 3, 8, 5]
+
+heapq.heappush(heap, 0)
+assert heap == [0, 1, 8, 5, 3]
+assert heap[0] == 0     # heappush restored the min-heap property at the root
+```
+
 ## Practical Usage
 
 <Tabs groupId="code-lang">
@@ -260,6 +294,8 @@ arbitrary lookup.
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 6 — heaps, heapsort, and the $O(n)$ build-heap analysis.
 - [CPython `heapq` source](https://github.com/python/cpython/blob/main/Lib/heapq.py) — the module's docstring is an unusually good explanation of the invariant.
+- [Python `heapq` documentation](https://docs.python.org/3/library/heapq.html) — confirms `heapq` implements a min-heap with no `reverse=` parameter, the basis for the trace above.
+- [cppreference, `std::priority_queue`](https://en.cppreference.com/w/cpp/container/priority_queue) — confirms the default comparator (`std::less`) makes it a max-heap.
 
 ### Books & Videos
 
