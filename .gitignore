@@ -98,3 +98,8 @@ dist
 
 # worktrees for isolated feature work
 .worktrees/
+
+# local tool state and python caches
+.claude/
+.serena/
+__pycache__/
