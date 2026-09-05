@@ -331,6 +331,3 @@ CLRS 4th ed. §32.2 for Rabin-Karp's analysis and Sedgewick & Wayne §5.3 for th
 - [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — the O(nm) baseline this page's failure function eliminates, and the hash-based alternative for multiple patterns.
 - [Suffix Structures & Autocomplete](./suffix-structures-and-autocomplete.md) — when the pattern isn't known until query time, a structure built once from the text replaces re-running this search per query.
 - [Arrays](../data-structures/arrays.md) — the contiguous buffer both algorithms scan, and the index arithmetic they live on.
-- [Two Pointers & Sliding Window](../problem-solving-patterns/two-pointers-and-sliding-window.md) — the same "never move the left pointer backwards" discipline, in a setting without a pattern.
-- [Character Encoding](../../bit-manipulation/character-encoding.md) — what a "character" is before you start comparing them.
-- [Big-O Notation](../complexity/big-o-notation.md) — why O(n + m) worst case is a different promise from O(n + m) average.
