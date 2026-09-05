@@ -12,7 +12,7 @@ The naive substring scan tries the pattern at every text position and, on a mism
 everything it just learned. Line up `abacaba` against `abacabadabacaba`, match six characters, fail on
 the seventh — and the naive loop restarts at text index 1 with an empty memory, re-reading five
 characters it has already seen. On a text of `aaaa…a` with pattern `aaab` that waste is the whole
-algorithm: O(nm) comparisons in the worst case, for a problem with n + m characters in it.
+algorithm: $O(nm)$ comparisons in the worst case, for a problem with n + m characters in it.
 
 But the failed attempt was informative. Those six matched characters *are* known text: the text at
 positions 0–5 is exactly `abacab`. If the pattern has a **border** — a prefix that is also a suffix of
@@ -24,7 +24,7 @@ between is provably a mismatch and never needs to be tried.
 The **failure function** is that reasoning precomputed for every prefix of the pattern, once, before
 the search begins. `fail[i]` is the length of the longest *proper* prefix of `pattern[0..i]` that is
 also a suffix of it. With it, the search pointer into the text only ever moves forward — which is what
-makes KMP O(n + m) worst case and, more practically, what makes it usable on a stream you cannot
+makes KMP $O(n + m)$ worst case and, more practically, what makes it usable on a stream you cannot
 rewind. The **Z-algorithm** computes the same information in a different shape — for each position of
 a string, how far it agrees with the string's own start — and the two are interconvertible.
 
@@ -76,7 +76,7 @@ Two things to notice. After the match at index 0 the search does **not** reset `
 `k = fail[6] = 3`, which is what lets KMP report overlapping occurrences. And at text position 7 the
 fallback runs three times (3 → 1 → 0) without the text pointer moving; each of those steps strictly
 decreases `k`, and `k` only ever increases by one per text character, so the total fallback work over
-the whole search is bounded by the total increase — the amortized argument behind the O(n) search
+the whole search is bounded by the total increase — the amortized argument behind the $O(n)$ search
 bound (CLRS 4th ed. §32.4).
 
 <Tabs groupId="code-lang">
@@ -213,7 +213,7 @@ the Z-algorithm is often the easier one to remember, since there is no second se
 wrong. Conversely, `fail` can be recovered from the pattern's own `z`: for each `i` with `z[i] > 0`,
 the prefix of length `z[i]` is a border ending at `i + z[i] − 1`, so writing
 `fail[i + z[i] − 1] = max(fail[…], z[i])` and then propagating down the border chain reconstructs the
-failure function. Both directions are O(n) worst case.
+failure function. Both directions are $O(n)$ worst case.
 
 ## Practical Usage
 
@@ -223,7 +223,7 @@ You will rarely type any of this: the standard search routines are already worst
   with a bloom-filter skip table for short needles and switches to
   [Crochemore & Perrin's two-way algorithm](https://github.com/python/cpython/blob/main/Objects/stringlib/stringlib_find_two_way_notes.txt)
   once the inputs are large enough — that note is in the CPython source and states the algorithm runs
-  in "O(len(needle) + len(haystack))" time with constant space. The practical consequence: you do not
+  in "$O(len(needle) + len(haystack))$" time with constant space. The practical consequence: you do not
   need to hand-write KMP to avoid a quadratic blow-up in Python.
 - **C++ `std::search` with `std::boyer_moore_searcher`** (`<functional>`, C++17) is the drop-in for a
   fixed pattern searched repeatedly, because the searcher object holds the preprocessed tables across
@@ -232,7 +232,7 @@ You will rarely type any of this: the standard search routines are already worst
   is fast on average, not worst-case linear.
 - **Streaming input.** The real reason to write KMP yourself. The search loop touches each text
   character exactly once and never seeks backwards, so it runs over a socket, a pipe, or a ring buffer
-  with only `k` and `fail` retained — O(m) memory in the worst case, regardless of how much text goes
+  with only `k` and `fail` retained — $O(m)$ memory in the worst case, regardless of how much text goes
   past.
 - **Fixed-size buffers.** Matching across chunk boundaries falls out for free: carry `k` from one chunk
   to the next and the match is found even when it straddles the seam.
@@ -284,11 +284,11 @@ int main() {
 
 | | Best | Average | Worst | Extra space | Notes |
 |---|---|---|---|---|---|
-| Naive scan | O(n) | O(n) on random text | O(nm) | O(1) | Fine until the alphabet is small and the pattern is periodic |
-| **KMP** | O(n + m) | O(n + m) | **O(n + m)** | O(m) | Never re-reads text; the guarantee is the product |
-| Z-algorithm | O(n + m) | O(n + m) | O(n + m) | O(n + m) | Same bound; needs the concatenated string in memory |
-| Rabin-Karp | O(n + m) | O(n + m) | O(nm) | O(1) | Hash collisions force verification; wins for *multiple* patterns |
-| Boyer-Moore | O(n / m) | Sublinear in practice | O(nm) as standardised | O(m + σ) | Skips ahead; the usual choice when the alphabet is large |
+| Naive scan | $O(n)$ | $O(n)$ on random text | $O(nm)$ | $O(1)$ | Fine until the alphabet is small and the pattern is periodic |
+| **KMP** | $O(n + m)$ | $O(n + m)$ | **$O(n + m)$** | $O(m)$ | Never re-reads text; the guarantee is the product |
+| Z-algorithm | $O(n + m)$ | $O(n + m)$ | $O(n + m)$ | $O(n + m)$ | Same bound; needs the concatenated string in memory |
+| Rabin-Karp | $O(n + m)$ | $O(n + m)$ | $O(nm)$ | $O(1)$ | Hash collisions force verification; wins for *multiple* patterns |
+| Boyer-Moore | $O(n / m)$ | Sublinear in practice | $O(nm)$ as standardised | $O(m + σ)$ | Skips ahead; the usual choice when the alphabet is large |
 
 KMP is chosen for its worst case, not its average — Boyer-Moore beats it on ordinary English text
 because it examines only a fraction of the characters. Rabin-Karp is the right answer when the
@@ -313,7 +313,7 @@ CLRS 4th ed. §32.2 for Rabin-Karp's analysis and Sedgewick & Wayne §5.3 for th
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §32.4 — the failure
-  function ("prefix function π"), its correctness proof, and the amortized argument for the O(n) search.
+  function ("prefix function π"), its correctness proof, and the amortized argument for the $O(n)$ search.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §5.3 "Substring Search" — KMP as a DFA, plus Boyer-Moore
   and Rabin-Karp measured against each other on real inputs.
 - D. E. Knuth, J. H. Morris & V. R. Pratt, "Fast Pattern Matching in Strings", *SIAM J. Computing* 6(2),
@@ -327,7 +327,7 @@ CLRS 4th ed. §32.2 for Rabin-Karp's analysis and Sedgewick & Wayne §5.3 for th
 ## Related Pages
 
 - [Strings & Text Introduction](./intro.md) — how this page's guarantee fits among the folder's other matchers.
-- [String Fundamentals](./string-fundamentals.md) — the O(m) comparison cost this algorithm is built to never pay twice.
-- [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — the O(nm) baseline this page's failure function eliminates, and the hash-based alternative for multiple patterns.
+- [String Fundamentals](./string-fundamentals.md) — the $O(m)$ comparison cost this algorithm is built to never pay twice.
+- [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — the $O(nm)$ baseline this page's failure function eliminates, and the hash-based alternative for multiple patterns.
 - [Suffix Structures & Autocomplete](./suffix-structures-and-autocomplete.md) — when the pattern isn't known until query time, a structure built once from the text replaces re-running this search per query.
 - [Arrays](../data-structures/arrays.md) — the contiguous buffer both algorithms scan, and the index arithmetic they live on.

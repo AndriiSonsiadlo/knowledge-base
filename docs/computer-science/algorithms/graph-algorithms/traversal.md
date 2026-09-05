@@ -9,7 +9,7 @@ tags: [computer-science, algorithms, graphs, bfs, dfs]
 # Traversal: BFS & DFS
 
 Breadth-first and depth-first search both visit every vertex reachable from a start point, in
-O(V + E), using the same loop. They differ in one line — whether the frontier is a queue or a stack —
+$O(V + E)$, using the same loop. They differ in one line — whether the frontier is a queue or a stack —
 and that single difference determines the order, the memory profile, and which problems each can solve.
 
 ## Core Concepts
@@ -18,7 +18,7 @@ and that single difference determines the order, the memory profile, and which p
 |---|---|---|
 | Frontier | **Queue** (FIFO) | **Stack** (LIFO), or recursion |
 | Explores | All vertices at distance k before k+1 | One branch fully, then backtracks |
-| Memory, finds shortest paths | O(width), **yes** (unweighted) | O(depth), no |
+| Memory, finds shortest paths | $O(width)$, **yes** (unweighted) | $O(depth)$, no |
 | Natural for | Distance, levels, nearest match | Cycles, ordering, connectivity, backtracking |
 
 <Figure src="/img/cs/algorithms/bfs-order.png"
@@ -170,7 +170,7 @@ void dfs_recursive(const Graph& graph, int node,
 
 :::danger[Mark vertices visited when you enqueue, not when you dequeue]
 In BFS, marking on dequeue lets a vertex enter the queue several times before it is first processed —
-once per neighbour that reaches it. On a dense graph the queue can grow to O(E), and the shortest-path
+once per neighbour that reaches it. On a dense graph the queue can grow to $O(E)$, and the shortest-path
 distances computed from it may be wrong.
 
 DFS is the opposite: because a vertex can legitimately be pushed several times before being popped,

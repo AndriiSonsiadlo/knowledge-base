@@ -23,7 +23,7 @@ They are separate problems and they need separate answers. Conflating them is wh
 | Objection | What actually happens | Does a fixed-size pool fix it? |
 |---|---|---|
 | **Fragmentation** | Free memory exists but not contiguously; a 200-byte request fails with 4 KB free | **Yes** — same-size blocks cannot fragment |
-| **Non-deterministic timing** | `malloc` walks a free list; the walk length depends on history, so worst case is unbounded | **Yes** — pop from a free list head is O(1) |
+| **Non-deterministic timing** | `malloc` walks a free list; the walk length depends on history, so worst case is unbounded | **Yes** — pop from a free list head is $O(1)$ |
 | **Silent failure** | `malloc` returns `NULL`, nobody checks, next write is to address 0, which on a Cortex-M is *valid flash* and does nothing | Partly — the pool can still be empty, but the failure is local and countable |
 | **Unanalysable footprint** | You cannot state, from the source, the peak RAM the program will use | **Yes** — the pool's size is a number in the linker map |
 

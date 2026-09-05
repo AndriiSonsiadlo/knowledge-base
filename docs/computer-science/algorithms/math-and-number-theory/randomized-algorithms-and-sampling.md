@@ -11,9 +11,9 @@ tags: [computer-science, algorithms, math, number-theory, randomization]
 A deterministic algorithm has exactly one worst case, and if that worst case is realistic — an
 adversary chooses the input, or the input just happens to be sorted, or reverse-sorted, or built from
 a small alphabet — the worst case is what actually happens. [Quicksort](../sorting/quicksort.md)
-picking the first element as its pivot is O(n log n) on random data and O(n²) on already-sorted data,
+picking the first element as its pivot is $O(n \log n)$ on random data and $O(n^{2})$ on already-sorted data,
 and "already sorted" is not an exotic input; it is a common one. A **randomized pivot** does not make
-the O(n²) case impossible — some sequence of coin flips could still produce it — it makes that
+the $O(n^{2})$ case impossible — some sequence of coin flips could still produce it — it makes that
 sequence exponentially unlikely for *any* fixed input, because the bad case now depends on the random
 choices rather than on what an adversary can arrange in advance.
 
@@ -33,8 +33,8 @@ keep.
 |---|---|
 | **Las Vegas algorithm** | Always correct; running time is a random variable (e.g. randomized quicksort) |
 | **Monte Carlo algorithm** | Fixed running time; correctness is probabilistic, with a controllable error rate (e.g. Miller-Rabin) |
-| **Fisher-Yates shuffle** | Produces a uniformly random permutation in O(n), by picking each element's final position exactly once |
-| **Reservoir sampling** | Selects `k` uniform-random items from a stream of unknown length in one pass, O(n) time, O(k) space |
+| **Fisher-Yates shuffle** | Produces a uniformly random permutation in $O(n)$, by picking each element's final position exactly once |
+| **Reservoir sampling** | Selects `k` uniform-random items from a stream of unknown length in one pass, $O(n)$ time, $O(k)$ space |
 | **Adversarial input** | An input specifically constructed to trigger a deterministic algorithm's worst case |
 
 ## Mechanism
@@ -143,10 +143,10 @@ void fisher_yates_buggy(std::vector<T>& a, std::mt19937& rng) {
   seen so far keeps a uniform `k / (i + 1)` chance of surviving, without ever storing more than `k`
   of them.
 - **Randomized pivots and hashing.** [Quicksort](../sorting/quicksort.md)'s randomized-pivot variant
-  turns the O(n²) worst case from "any sorted input" into "an exponentially unlikely sequence of
+  turns the $O(n^{2})$ worst case from "any sorted input" into "an exponentially unlikely sequence of
   draws," and [hash tables](../data-structures/hash-tables.md) seed their hash function randomly per
   process for the same reason — an attacker who can predict a deterministic hash can construct keys
-  that all collide, forcing O(n) operations that should be O(1) expected.
+  that all collide, forcing $O(n)$ operations that should be $O(1)$ expected.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -202,7 +202,7 @@ int main() {
   module is explicitly documented as **not suitable for security or cryptographic purposes** — use
   [`secrets`](https://docs.python.org/3/library/secrets.html) when unpredictability against an
   adversary, not just statistical uniformity, is required.
-- **Confusing "randomized" with "always fast".** A randomized pivot makes the O(n²) quicksort case
+- **Confusing "randomized" with "always fast".** A randomized pivot makes the $O(n^{2})$ quicksort case
   exponentially *unlikely*, not impossible — it is still theoretically possible to draw the exact
   sequence of pivots that triggers it; the guarantee is about the *expected* case over the algorithm's
   own randomness, not a worst-case bound.

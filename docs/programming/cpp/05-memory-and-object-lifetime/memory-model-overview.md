@@ -113,8 +113,8 @@ void function() {
 - **Size:** Limited (typically 1-8 MB)
 - **Lifetime:** Scope-based (automatic cleanup)
 - **Management:** Automatic (RAII)
-- **Allocation:** O(1) pointer bump
-- **Deallocation:** O(1) pointer bump
+- **Allocation:** $O(1)$ pointer bump
+- **Deallocation:** $O(1)$ pointer bump
 - **Fragmentation:** None
 - **Thread-safety:** Each thread has its own stack
 
@@ -160,7 +160,7 @@ void function() {
 - **Size:** Large (gigabytes available)
 - **Lifetime:** Explicit (new/delete)
 - **Management:** Manual
-- **Allocation:** O(1) to O(log n) depending on allocator
+- **Allocation:** $O(1)$ to $O(\log n)$ depending on allocator
 - **Deallocation:** Complex (coalescing, free lists)
 - **Fragmentation:** Possible
 - **Thread-safety:** Requires synchronization
@@ -189,8 +189,8 @@ Deallocation:
 | **Speed**          | Very fast (~1 ns)    | Slower (~50-100 ns)       |
 | **Size**           | Limited (1-8 MB)     | Large (GBs)               |
 | **Lifetime**       | Automatic (scope)    | Manual (new/delete)       |
-| **Allocation**     | O(1), trivial        | O(1) to O(log n)          |
-| **Deallocation**   | O(1), automatic      | Manual, can leak          |
+| **Allocation**     | $O(1)$, trivial        | $O(1)$ to $O(\log n)$          |
+| **Deallocation**   | $O(1)$, automatic      | Manual, can leak          |
 | **Fragmentation**  | None                 | Possible                  |
 | **Cache locality** | Excellent            | Variable                  |
 | **Thread-safe**    | Per-thread           | Requires sync             |

@@ -30,7 +30,7 @@ rolling hash's window update to a cryptographic key exchange's repeated squaring
 | **GCD** | `gcd(a, b)`: the largest integer dividing both `a` and `b` with no remainder |
 | **Extended Euclid** | Alongside `gcd(a, b)`, finds integers `x, y` such that `a*x + b*y = gcd(a, b)` (Bezout's identity) |
 | **Modular inverse** | `a⁻¹ mod m`: the value `x` with `a*x ≡ 1 (mod m)`; exists exactly when `gcd(a, m) = 1` |
-| **Fast exponentiation** | Computing `a^b mod m` in O(log b) multiplications by repeated squaring, instead of O(b) sequential ones |
+| **Fast exponentiation** | Computing `a^b mod m` in $O(\log b)$ multiplications by repeated squaring, instead of $O(b)$ sequential ones |
 | **Modular multiply identity** | `(a * b) mod m = ((a mod m) * (b mod m)) mod m` — the identity that lets every intermediate stay bounded |
 
 ## Mechanism
@@ -55,7 +55,7 @@ gcd(252, 198) = 18
 Every step replaces the pair with strictly smaller numbers, and the sequence of remainders it
 produces is at its slowest exactly when consecutive Fibonacci numbers are fed in — Lame's theorem
 (cited in CLRS 4th ed. §31.2 and Knuth's *TAOCP* Vol. 2) shows the number of division steps is
-O(log min(a, b)), with the Fibonacci pair as the adversarial input that makes every quotient equal
+$O(\log min(a, b))$, with the Fibonacci pair as the adversarial input that makes every quotient equal
 to 1 and forces the maximum number of steps for a given size.
 
 ```text
@@ -169,7 +169,7 @@ long long mod_pow(long long base, long long exp, long long mod) {
 
 - **Python's [`math.gcd`](https://docs.python.org/3/library/math.html#math.gcd)** is implemented in C
   and should be preferred over a hand-written loop in production code; the loop above exists to show
-  the O(log min(a, b)) mechanism, not to be re-implemented.
+  the $O(\log min(a, b))$ mechanism, not to be re-implemented.
 - **`pow(base, exp, mod)`** — Python's three-argument built-in `pow` performs fast modular
   exponentiation natively (see the
   [built-in functions docs](https://docs.python.org/3/library/functions.html#pow)); it is the
@@ -229,19 +229,19 @@ int main() {
   `gcd(a, m) = 1`; calling it with, say, `a = 4, m = 8` has no solution (`gcd(4, 8) = 4 != 1`) and
   the function above correctly raises rather than returning a wrong number.
 - **Sequential multiplication instead of squaring.** Computing `a^b mod m` with a loop that
-  multiplies by `a` exactly `b` times is O(b), not O(log b) -- correct, but for cryptographic-sized
+  multiplies by `a` exactly `b` times is $O(b)$, not $O(\log b)$ -- correct, but for cryptographic-sized
   exponents (hundreds of bits) the difference is the difference between instant and never finishing.
 
 ## Comparisons
 
 | | Cost | What it computes |
 |---|---|---|
-| Euclid's algorithm | O(log min(a, b)) worst | `gcd(a, b)` |
-| Extended Euclid | O(log min(a, b)) worst | `gcd(a, b)` plus Bezout coefficients `x, y` |
-| Modular inverse via extended Euclid | O(log m) worst | `a⁻¹ mod m`, when it exists |
-| Modular inverse via Fermat's little theorem | O(log m) worst | `a⁻¹ mod m`, but only when `m` is prime (`a^(m-2) mod m`) |
-| Fast exponentiation (squaring) | O(log b) worst | `a^b mod m` |
-| Sequential exponentiation | O(b) worst | `a^b mod m` |
+| Euclid's algorithm | $O(\log min(a, b))$ worst | `gcd(a, b)` |
+| Extended Euclid | $O(\log min(a, b))$ worst | `gcd(a, b)` plus Bezout coefficients `x, y` |
+| Modular inverse via extended Euclid | $O(\log m)$ worst | `a⁻¹ mod m`, when it exists |
+| Modular inverse via Fermat's little theorem | $O(\log m)$ worst | `a⁻¹ mod m`, but only when `m` is prime (`a^(m-2) mod m`) |
+| Fast exponentiation (squaring) | $O(\log b)$ worst | `a^b mod m` |
+| Sequential exponentiation | $O(b)$ worst | `a^b mod m` |
 
 Fermat's-little-theorem inverses avoid extended Euclid entirely when the modulus is prime — one call
 to `mod_pow` instead — but silently give a wrong answer if `m` is composite, since the theorem's

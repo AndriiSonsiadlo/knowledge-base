@@ -50,14 +50,14 @@ best(0, c) = 0 for every c
 for both by the "skip item 3" branch and, separately, by parts of the "take item 3" branch lower in the
 tree. Nothing remembers that `best(2, 4)` was already answered, so it is recomputed from scratch every
 time it recurs — the definition of overlapping subproblems, and the reason this form is exponential:
-`T(n) = 2·T(n-1) + O(1)`, so `O(2^n)` calls in the worst case, independent of the capacity.
+`T(n) = 2·T(n-1) + O(1)`, so $O(2^{n})$ calls in the worst case, independent of the capacity.
 
 ### Form 2 — memoized recursion
 
 Identical logic, plus a cache keyed on `(i, c)`. The first call for a given `(i, c)` does the work and
-stores the answer; every later call for the same pair returns the stored value in O(1). Since there are
+stores the answer; every later call for the same pair returns the stored value in $O(1)$. Since there are
 only `n · capacity` distinct `(i, c)` pairs and each is computed once, the cost drops to
-`O(n · capacity)` time and `O(n · capacity)` space for the cache — plus `O(n)` recursion-stack depth,
+$O(n \cdot capacity)$ time and $O(n \cdot capacity)$ space for the cache — plus $O(n)$ recursion-stack depth,
 which the next two forms remove entirely.
 
 ### Form 3 — bottom-up tabulation
@@ -65,7 +65,7 @@ which the next two forms remove entirely.
 The memoized version computes states in whatever order the recursion happens to visit them. Tabulation
 instead reads the recurrence as a dependency graph — row `i` needs only row `i-1` — and fills a 2-D
 table `dp[i][c]` explicitly in increasing `i`, increasing `c`, so every dependency is already filled
-when it is read. Same `O(n · capacity)` time, same `O(n · capacity)` space for the table, but zero
+when it is read. Same $O(n \cdot capacity)$ time, same $O(n \cdot capacity)$ space for the table, but zero
 recursion stack — this is a plain nested loop.
 
 <Figure src="/img/cs/algorithms/dp-fill-order.png"
@@ -116,7 +116,7 @@ reproduces the same table, provided the capacity loop runs **downward** for each
 direction rule as in [Dynamic Programming](./dynamic-programming.md#the-workflow-on-a-real-problem).
 Downward means `dp[c - w]` on the right of an assignment still holds *last item's* value when it is
 read, because the cell at the lower index has not been touched yet this pass. Space drops from
-`O(n · capacity)` to `O(capacity)`; time is unchanged at `O(n · capacity)`.
+$O(n \cdot capacity)$ to $O(capacity)$; time is unchanged at $O(n \cdot capacity)$.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -290,8 +290,8 @@ oracle to test form 4 against on the same inputs.
 
 | | Form 1: recursion | Form 2: memoized | Form 3: tabulated | Form 4: rolling |
 |---|---|---|---|---|
-| Time (worst) | O(2^n) | O(n · capacity) | O(n · capacity) | O(n · capacity) |
-| Extra space (worst) | O(n) stack | O(n · capacity) cache + O(n) stack | O(n · capacity) table | O(capacity) |
+| Time (worst) | $O(2^{n})$ | $O(n \cdot capacity)$ | $O(n \cdot capacity)$ | $O(n \cdot capacity)$ |
+| Extra space (worst) | $O(n)$ stack | $O(n \cdot capacity)$ cache + $O(n)$ stack | $O(n \cdot capacity)$ table | $O(capacity)$ |
 | Computes | Only reachable states | Only reachable states | Every state | Every state |
 | Easiest to verify against the recurrence | Yes | Yes (same code) | No — loop bounds can hide bugs | No — direction can hide bugs |
 | Reconstructs the chosen items | Yes, directly | Yes, directly | Yes, from the full table | No — earlier rows are gone |
@@ -312,10 +312,8 @@ oracle to test form 4 against on the same inputs.
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 15 — the general
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 14 — the general
   memoization-vs-tabulation framing, with the 0/1 knapsack developed as a worked example.
-- Sedgewick & Wayne, *Algorithms*, 4th ed., §6.4 — dynamic programming presented explicitly as
-  "top-down" versus "bottom-up" implementations of one recurrence.
 - [`functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache) —
   CPython docs; the caching behaviour and the `maxsize` parameter used for form 2.
 - [`sys.setrecursionlimit`](https://docs.python.org/3/library/sys.html#sys.setrecursionlimit) — CPython

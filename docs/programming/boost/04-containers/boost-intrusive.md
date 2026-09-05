@@ -198,7 +198,7 @@ int main() {
 ```
 
 :::note[auto_unlink disables constant-time size()]
-Containers using `auto_unlink` hooks cannot track their size in O(1) because elements may leave at
+Containers using `auto_unlink` hooks cannot track their size in $O(1)$ because elements may leave at
 any time without notifying the container's size counter. You must pass
 `constant_time_size<false>` to the container.
 :::

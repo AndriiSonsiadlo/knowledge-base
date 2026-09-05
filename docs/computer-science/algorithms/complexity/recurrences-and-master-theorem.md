@@ -9,8 +9,8 @@ tags: [computer-science, algorithms, complexity, recurrences, master-theorem]
 # Recurrences & the Master Theorem
 
 A recursive algorithm's cost is itself defined recursively — mergesort's cost on n elements is twice its
-cost on n/2 elements, plus the Θ(n) merge. That self-reference is exact but not directly useful: nobody
-reads Θ(n log n) off `T(n) = 2T(n/2) + Θ(n)` by eye. Solving a recurrence means turning that
+cost on n/2 elements, plus the $Θ(n)$ merge. That self-reference is exact but not directly useful: nobody
+reads $Θ(n \log n)$ off `T(n) = 2T(n/2) + Θ(n)` by eye. Solving a recurrence means turning that
 self-referential definition into a closed form with no T on the right-hand side.
 
 Two tools do this. A **recursion tree** makes the substitution visible: draw every recursive call as a
@@ -42,7 +42,7 @@ calls themselves. Whichever one dominates decides the total; a tie multiplies by
         alt="A recursion tree for mergesort with n = 8: root labelled n=8, splitting to two nodes n=4, four nodes n=2, eight leaves n=1, with the per-level work cn, cn, cn, cn written on the right, summing to Θ(n log n)"
         caption="Every level of the tree costs Θ(n) — half as many subproblems, each twice the size, cancels exactly. Four levels, four times Θ(n), and the level count is log₂n." />
 
-### Building the tree by hand: mergesort, T(n) = 2T(n/2) + Θ(n)
+### Building the tree by hand: mergesort, T(n) = 2T(n/2) + $Θ(n)$
 
 ```text
 level 0:  n=8                              work = c·8   = 8c
@@ -54,9 +54,9 @@ levels = log2(8) = 3  →  4 levels total (0..3)
 total work = 4 levels × 8c = Θ(n log n)
 ```
 
-Each level costs the same, Θ(n) — twice as many subproblems, each half the size, and the product
+Each level costs the same, $Θ(n)$ — twice as many subproblems, each half the size, and the product
 `(number of subproblems) × (size of each)` stays n at every level. There are `log₂n` levels below the
-root, so the total is `n` work repeated `log₂n` times: **Θ(n log n)**.
+root, so the total is `n` work repeated `log₂n` times: **$Θ(n \log n)$**.
 
 ### The three master theorem cases, exact conditions
 
@@ -80,9 +80,9 @@ matches `n^(log_b a) · log⁰n` exactly — **case 2 with k = 0** — giving `T
 the tree above.
 
 **Karatsuba multiplication**, `T(n) = 3T(n/2) + Θ(n)`: three half-size recursive multiplications instead
-of the naive four, each with Θ(n) work to combine. `a = 3`, `b = 2`, so `n^(log_b a) = n^(log₂3) ≈
-n^1.585`. `f(n) = Θ(n) = O(n^(1.585 − ε))` for, say, `ε = 0.5` — **case 1** — giving
-`T(n) = Θ(n^log₂3) ≈ Θ(n^1.585)`, beating the naive `Θ(n²)` schoolbook algorithm.
+of the naive four, each with $Θ(n)$ work to combine. `a = 3`, `b = 2`, so `n^(log_b a) = n^(log₂3) ≈
+n^1.585`. `f(n) = $Θ(n)$ = $O(n^{1.585 - ε})$` for, say, `ε = 0.5` — **case 1** — giving
+`T(n) = Θ(n^log₂3) ≈ Θ(n^1.585)`, beating the naive $Θ(n^{2})$ schoolbook algorithm.
 
 **Binary search**, `T(n) = T(n/2) + Θ(1)`: only one subproblem, so `a = 1`, `b = 2`, and
 `n^(log_b a) = n^(log₂1) = n⁰ = 1`. `f(n) = Θ(1) = Θ(n⁰ · log⁰n)` matches exactly — **case 2 with
@@ -174,7 +174,7 @@ theorem does not apply.
   without `a·f(n/b) ≤ c·f(n)`, the top-level cost is not guaranteed to dominate the total.
 - **Using the theorem on a non-matching shape.** `T(n) = T(n−1) + T(n−2) + Θ(1)` (naive Fibonacci) is
   additive-subtractive, not divisive — the master theorem gives no answer, and the correct closed form
-  (Θ(φⁿ)) comes from solving the linear recurrence directly, not from this theorem.
+  ($Θ(φ^{n})$) comes from solving the linear recurrence directly, not from this theorem.
 - **Treating `a` or `b` as non-constant.** Randomised quickselect's recurrence has a subproblem size
   that varies with the pivot, which is why its bound needs an expectation argument, not a direct
   master-theorem application.
@@ -183,7 +183,7 @@ theorem does not apply.
 
 | Method | Handles | Effort | Gives no answer when |
 |---|---|---|---|
-| Master theorem | `T(n) = aT(n/b) + f(n)`, constant a, b | O(1) comparison | Polynomial gap missing, or regularity fails |
+| Master theorem | `T(n) = aT(n/b) + f(n)`, constant a, b | $O(1)$ comparison | Polynomial gap missing, or regularity fails |
 | Recursion tree | Any recursive shape, drawn by hand | Sum a series per level | Series has no closed form (rare) |
 | Substitution (induction) | Any recursive shape | Guess + prove, most general | Never — but requires a correct guess |
 | Akra–Bazzi | Multiple terms, `T(n) = Σ aᵢT(n/bᵢ) + f(n)` | Evaluate one integral | Almost never, but is heavier machinery |
@@ -208,8 +208,8 @@ theorem does not apply.
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 4 — "Divide-and-Conquer",
   the master theorem's three cases with full proof, plus the recursion-tree and substitution methods.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §2.2 — mergesort, with the recursion-tree argument applied
-  directly to its Θ(n log n) bound.
-- Karatsuba, A. & Ofman, Y. (1962) — the original T(n) = 3T(n/2) + Θ(n) multiplication algorithm this
+  directly to its $Θ(n \log n)$ bound.
+- Karatsuba, A. & Ofman, Y. (1962) — the original T(n) = 3T(n/2) + $Θ(n)$ multiplication algorithm this
   page worked through.
 
 ## Related Pages
@@ -217,7 +217,7 @@ theorem does not apply.
 - [Amortized Analysis](./amortized-analysis.md) — the other major tool for bounding cost, used when the
   expense is spread over a sequence of calls rather than one recursive call tree.
 - [Mergesort](../sorting/mergesort.md) — the algorithm behind this page's worked recursion tree.
-- [Common Complexities](./common-complexities.md) — where Θ(n log n) sits among the growth classes met
+- [Common Complexities](./common-complexities.md) — where $Θ(n \log n)$ sits among the growth classes met
   most often, including the comparison-sort lower bound this recurrence achieves.
 - [Cheat Sheet](./cheat-sheet.md) — a decision flow for picking loop counting, recursion tree, master
   theorem, or amortized analysis on a new problem.

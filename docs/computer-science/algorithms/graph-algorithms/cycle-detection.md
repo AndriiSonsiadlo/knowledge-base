@@ -24,7 +24,7 @@ current root-to-here call stack, is different: reaching it again is the cycle.
 The same recursive shape solves a structurally different problem. A **functional graph** — one
 outgoing edge per vertex, no more, no less — is what a linked list's `next` pointer, a permutation's
 `i -> p[i]` mapping, or a PRNG's `state -> next_state` step all are. Out-degree exactly 1 turns "does
-iterating this function forever repeat" into a cycle-detection question with an O(1)-space answer.
+iterating this function forever repeat" into a cycle-detection question with an $O(1)$-space answer.
 
 :::info[Prerequisites]
 This page assumes the DFS mechanics from [Traversal: BFS & DFS](./traversal.md) — the colour states
@@ -35,7 +35,7 @@ below are a refinement of DFS's visited/unvisited split, not a new traversal.
 
 | Term | Meaning |
 |---|---|
-| **White / grey / black** | Unvisited / currently on the DFS call stack / fully finished (CLRS's own colour scheme, §22.3) |
+| **White / grey / black** | Unvisited / currently on the DFS call stack / fully finished (CLRS's own colour scheme, §20.3) |
 | **Back edge** | An edge to a **grey** vertex — an ancestor still open on the stack. This is what a directed cycle *is* |
 | **Forward / cross edge** | An edge to a **black** vertex — a merge point, not a cycle, in a directed graph |
 | **Parent edge** | The single undirected edge just used to arrive at the current vertex; must be excluded from "already visited" checks |
@@ -228,8 +228,8 @@ neighbour each, so `has_cycle_undirected_dfs` reports `False` on a graph that is
 ### Functional graphs
 
 A linked list's `next`, a permutation's index mapping, and a PRNG's state-transition function share
-one shape: every vertex has **exactly one** outgoing edge. That fact makes an O(1)-space algorithm
-possible where general graphs need O(V) of visited-marking: Floyd's tortoise-and-hare advances one
+one shape: every vertex has **exactly one** outgoing edge. That fact makes an $O(1)$-space algorithm
+possible where general graphs need $O(V)$ of visited-marking: Floyd's tortoise-and-hare advances one
 pointer by one step and another by two, and their gap shrinks by one step per iteration once both
 are inside the cycle, so they must eventually land on the same vertex.
 
@@ -248,7 +248,7 @@ def has_cycle_functional(next_of, start):
 
 The same loop, once a meeting point is found, extends to locate the cycle's *start*: reset one pointer
 to `start` and advance both one step at a time — they meet again exactly there (CLRS 4th ed., problem
-22-4). C++ translates it directly with `std::optional<int>` in place of Python's `None`.
+20-4). C++ translates it directly with `std::optional<int>` in place of Python's `None`.
 
 ## Practical Usage
 
@@ -287,7 +287,7 @@ assert not has_cycle_functional(lambda x: acyclic_map.get(x), 0)
   graph is normal (a DAG diamond, two paths converging) and must not be flagged — only **grey** does.
 - **Multigraphs and the parent check.** Covered above: verify the adjacency representation preserves
   parallel edges before trusting a "no cycle" answer from `has_cycle_undirected_dfs`.
-- **Recursion depth.** Both DFS-based checks recurse to O(V) in the worst case; switch to an iterative
+- **Recursion depth.** Both DFS-based checks recurse to $O(V)$ in the worst case; switch to an iterative
   stack once V exceeds the language's default limit (CPython's is 1000, via
   [`sys.setrecursionlimit`](https://docs.python.org/3/library/sys.html#sys.setrecursionlimit)).
 
@@ -295,14 +295,14 @@ assert not has_cycle_functional(lambda x: acyclic_map.get(x), 0)
 
 | | Handles | Extra space (worst) | Per-edge cost (worst) | Notes |
 |---|---|---|---|---|
-| Three-colour DFS | Directed | O(V) | O(1) amortized | Also yields *which* edges are the cycle |
-| Union-find | Undirected | O(V) | O(α(V)) amortized | Processes edges independently of traversal order |
-| DFS parent-check | Undirected, simple graphs | O(V) | O(1) amortized | Breaks silently if parallel edges are deduplicated away |
-| Floyd's tortoise-and-hare | Functional graphs only | **O(1)** | O(1) per step | Needs out-degree exactly 1; does not generalise |
+| Three-colour DFS | Directed | $O(V)$ | $O(1)$ amortized | Also yields *which* edges are the cycle |
+| Union-find | Undirected | $O(V)$ | $O(α(V))$ amortized | Processes edges independently of traversal order |
+| DFS parent-check | Undirected, simple graphs | $O(V)$ | $O(1)$ amortized | Breaks silently if parallel edges are deduplicated away |
+| Floyd's tortoise-and-hare | Functional graphs only | **$O(1)$** | $O(1)$ per step | Needs out-degree exactly 1; does not generalise |
 
 Union-find and the DFS parent-check cost the same asymptotically; union-find is preferred when edges
 already arrive as a flat list (as for Kruskal's algorithm), since it needs no adjacency structure at
-all. Floyd's algorithm trades generality for O(1) space — the only reason to reach for it.
+all. Floyd's algorithm trades generality for $O(1)$ space — the only reason to reach for it.
 
 ## Recall
 
@@ -320,9 +320,9 @@ all. Floyd's algorithm trades generality for O(1) space — the only reason to r
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §22.3 — DFS, the
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §20.3 — DFS, the
   white/grey/black colouring, and the classification of edges into tree, back, forward and cross.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., problem 22-4 — Floyd's
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., problem 20-4 — Floyd's
   tortoise-and-hare for linked-list cycle detection, with the correctness argument.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §4.1 "Undirected Graphs" and §1.5 "Case Study: Union-Find".
 - R. W. Floyd, "Nondeterministic Algorithms", *JACM* 14(4), 1967 — the tortoise-and-hare's origin.

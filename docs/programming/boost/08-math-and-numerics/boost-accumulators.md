@@ -14,9 +14,9 @@ min, max, count, moments, quantiles — in a single pass, without storing the en
 uses a dependency-resolution system to share intermediate results between features automatically.
 
 :::info[The problem it solves]
-Computing statistics the naive way — store all values, then iterate — requires O(n) memory and
+Computing statistics the naive way — store all values, then iterate — requires $O(n)$ memory and
 multiple passes. Streaming data (sensor readings, log events, network telemetry) may be unbounded.
-Boost.Accumulators computes statistics incrementally in O(1) memory per feature, updating on each
+Boost.Accumulators computes statistics incrementally in $O(1)$ memory per feature, updating on each
 new data point.
 :::
 

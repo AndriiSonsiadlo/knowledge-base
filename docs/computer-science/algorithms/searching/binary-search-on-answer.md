@@ -121,7 +121,7 @@ int min_capacity(const std::vector<int>& weights, int days) {
 </Tabs>
 
 For $n$ packages and an answer range of size $R = \text{sum}(weights) - \max(weights)$, each call to
-`feasible` is **O(n) worst case**, and there are $O(\log R)$ calls, for a total of **O(n log R) worst
+`feasible` is **$O(n)$ worst case**, and there are $O(\log R)$ calls, for a total of **$O(n \log R)$ worst
 case** — turning an optimisation problem into a small number of cheap simulations, rather than trying
 every capacity from `lo` to `hi` in a linear scan.
 
@@ -215,7 +215,7 @@ int main() {
   infeasible answer without any error.
 - **Comparing floats with `lo < hi`.** As above, this either loops forever or terminates on an
   arbitrary rounding accident. Use the fixed iteration count.
-- **An O(n) feasibility check inside an O(log R) outer loop is still O(n log R) total**, not O(log R) —
+- **An $O(n)$ feasibility check inside an $O(\log R)$ outer loop is still $O(n \log R)$ total**, not $O(\log R)$ —
   a common estimation mistake when the check itself does real work per element.
 
 ## Comparisons
@@ -262,5 +262,5 @@ search gets over a linear scan of an array, just paid per probe instead of per c
 - [Sorting Algorithms](../sorting/intro.md) — why the array form needs sorted data and this form does
   not need any data at all, only a predicate.
 - [Two Pointers & Sliding Window](../problem-solving-patterns/two-pointers-and-sliding-window.md) —
-  another technique that turns an O(n²) brute force into O(n) by exploiting monotonicity, in a
+  another technique that turns an $O(n^{2})$ brute force into $O(n)$ by exploiting monotonicity, in a
   different shape.

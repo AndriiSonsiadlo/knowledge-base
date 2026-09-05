@@ -251,7 +251,7 @@ assert cms.estimate("z") >= 0               # never negative, may overestimate a
 - **Reporting a HyperLogLog or count-min estimate as exact.** Both carry a stated error bound; treating
   their output as ground truth in a context that needs exactness (billing, auditing) is a
   category error, not a tuning problem.
-- **Assuming a skip list's O(log n) is a hard worst case.** It is an expectation over the random level
+- **Assuming a skip list's $O(\log n)$ is a hard worst case.** It is an expectation over the random level
   assignment. Pathologically unlucky coin flips (astronomically unlikely, but not impossible) degrade
   a search toward $O(n)$ — the same caveat that applies to randomized quicksort's pivot choice.
 

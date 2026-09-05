@@ -10,7 +10,7 @@ tags: [computer-science, algorithms, patterns, intervals, sweep-line, greedy]
 
 A calendar full of meetings, a set of `(start, end)` ranges to merge, a question like "how many
 meetings overlap at once" — all of these are asking something about ranges on a line, and the naive
-approach checks every pair of ranges against every other, an O(n²) comparison for what turns out to be
+approach checks every pair of ranges against every other, an $O(n^{2})$ comparison for what turns out to be
 a question a single sorted pass can answer.
 
 The trick is to stop thinking in intervals and start thinking in **events**. Every interval `(s, e)`
@@ -24,7 +24,7 @@ Merging is the same idea specialised to the case where only adjacency matters: s
 ends. Interval *scheduling* — pick the largest possible set of non-overlapping intervals — needs a
 different sort key entirely: by **end** time, because the interval that finishes earliest always
 leaves the most room for whatever comes after it, and no exchange argument beats that greedy choice
-(Cormen, Leiserson, Rivest & Stein, 4th ed., §16.1).
+(Cormen, Leiserson, Rivest & Stein, 4th ed., §15.1).
 
 ## Core Concepts
 
@@ -161,7 +161,7 @@ assert min_meeting_rooms(INTERVALS) == 2
   tie — which is exactly the merge-by-start order; `sorted(intervals, key=lambda iv: iv[1])` gives the
   finish-time order that interval scheduling needs. See
   [`sorted`](https://docs.python.org/3/library/functions.html#sorted).
-- **`heapq`** turns "which room frees up first" into `heap[0]`, the smallest element, in O(1) — see
+- **`heapq`** turns "which room frees up first" into `heap[0]`, the smallest element, in $O(1)$ — see
   [`heapq`](https://docs.python.org/3/library/heapq.html); C++'s `std::priority_queue` needs
   `std::greater<int>` as its comparator to get a min-heap instead of the default max-heap, per
   [`[priqueue.cons]`](https://eel.is/c++draft/priqueue.cons).
@@ -191,12 +191,12 @@ assert min_meeting_rooms(INTERVALS) == 2
 
 | | Pairwise overlap check | Merge by start | Event sweep | Min-heap (meeting rooms) |
 |---|---|---|---|---|
-| Build / sort (worst) | — | O(n log n) | O(n log n) | O(n log n) |
-| Answer overlap count (worst) | O(n²) | — | O(n) after sorting | O(n log n) total |
-| Extra space (worst) | O(1) | O(n) | O(n) | O(n) |
+| Build / sort (worst) | — | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ |
+| Answer overlap count (worst) | $O(n^{2})$ | — | $O(n)$ after sorting | $O(n \log n)$ total |
+| Extra space (worst) | $O(1)$ | $O(n)$ | $O(n)$ | $O(n)$ |
 | Answers | Yes/no per pair | The merged set | Active count at every instant | Peak concurrency only |
 
-Merging and the event sweep both cost O(n log n), dominated by the sort; the difference is what they
+Merging and the event sweep both cost $O(n \log n)$, dominated by the sort; the difference is what they
 hand back — a reduced interval set versus a full timeline of how many intervals are active at every
 point.
 
@@ -216,7 +216,7 @@ point.
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §16.1 "An
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §15.1 "An
   activity-selection problem" — the exchange argument proving sort-by-finish-time is optimal for
   interval scheduling.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §2.5 "Applications" — sorting as the first step of a

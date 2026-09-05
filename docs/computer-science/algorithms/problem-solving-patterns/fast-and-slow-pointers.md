@@ -145,7 +145,7 @@ int cycle_start(const std::vector<int>& next_of, int start = 0) {
 
 The same speed asymmetry, applied to a list with no cycle, locates the middle in one pass — useful as
 the split step of a merge sort over a [linked list](../data-structures/linked-lists.md), which has no
-O(1) random access to find the midpoint by arithmetic the way an array would.
+$O(1)$ random access to find the midpoint by arithmetic the way an array would.
 
 ```python showLineNumbers
 def middle_value(values):
@@ -189,7 +189,7 @@ assert is_happy(2) is False     # 2 -> 4 -> 16 -> ... -> 4, a cycle that never r
   written by hand, over whatever `next`-shaped structure the problem provides.
 - **C++ raw or `std::forward_list` nodes** carry no built-in cycle protection; a corrupted list with a
   cycle turns any ordinary traversal into an infinite loop rather than an exception, which is exactly
-  what makes an O(1)-space detector worth having in production code, not just in an algorithms class.
+  what makes an $O(1)$-space detector worth having in production code, not just in an algorithms class.
 - Real call sites: detecting a corrupted or maliciously-constructed linked structure, finding a
   pseudo-random generator's period without storing every state seen, and the merge-sort-on-a-linked-list
   split step mentioned above.
@@ -213,13 +213,13 @@ assert is_happy(2) is False     # 2 -> 4 -> 16 -> ... -> 4, a cycle that never r
 
 | | Floyd's tortoise-and-hare | Hash-set of visited nodes |
 |---|---|---|
-| Extra space (worst) | **O(1)** | O(n) |
-| Time to find a cycle (worst) | O(n) | O(n) |
+| Extra space (worst) | **$O(1)$** | $O(n)$ |
+| Time to find a cycle (worst) | $O(n)$ | $O(n)$ |
 | Finds the cycle's start | Yes, via the phase-2 reset | Yes — the first node seen twice |
 | Needs the nodes to be hashable | No | Yes |
 
 The hash-set approach is easier to convince yourself is correct at a glance; Floyd's algorithm is
-preferred specifically for the O(1) space, and because it works even when the nodes are not hashable
+preferred specifically for the $O(1)$ space, and because it works even when the nodes are not hashable
 (raw pointers into memory you do not control, say).
 
 ## Recall
@@ -238,7 +238,7 @@ preferred specifically for the O(1) space, and because it works even when the no
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., problem 22-4 — Floyd's
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., problem 20-4 — Floyd's
   tortoise-and-hare for linked-list cycle detection, with the correctness argument for both phases.
 - R. W. Floyd, "Nondeterministic Algorithms," *JACM* 14(4), 1967 — the tortoise-and-hare's origin.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.3 "Bags, Queues, and Stacks" — the linked-list

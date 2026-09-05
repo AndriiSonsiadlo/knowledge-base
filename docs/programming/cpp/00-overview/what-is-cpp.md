@@ -152,21 +152,20 @@ graph LR
     A --> D[Performance]
 
     B --> E[like C, Rust]
-    C --> F[like Python, Java]
+    C --> F[like Python]
     D --> G[faster than interpreted languages]
 ```
 
-| Aspect             | C++                 | Python             | Java                | Rust                      |
-|--------------------|---------------------|--------------------|---------------------|---------------------------|
-| **Speed**          | Very fast               | Slow                  | Moderate                 | Very fast                     |
-| **Memory Control** | Manual              | Automatic          | Automatic (GC)      | Ownership system          |
-| **Learning Curve** | Steep               | Gentle             | Moderate            | Very steep                |
-| **Safety**         | Manual              | Safe               | Safe                | Memory safe               |
-| **Use Case**       | Systems, games, HPC | Scripting, ML, web | Enterprise, Android | Systems, safe concurrency |
+| Aspect             | C++                 | Python             | Rust                      |
+|--------------------|---------------------|--------------------|---------------------------|
+| **Speed**          | Very fast               | Slow                  | Very fast                     |
+| **Memory Control** | Manual              | Automatic          | Ownership system          |
+| **Learning Curve** | Steep               | Gentle             | Very steep                |
+| **Safety**         | Manual              | Safe               | Memory safe               |
+| **Use Case**       | Systems, games, HPC | Scripting, ML, web | Systems, safe concurrency |
 
 Python's simplicity makes it great for rapid development, but C++ is 10-100x faster for
-compute-intensive tasks. Java's garbage collector adds overhead that C++ avoids. Rust offers memory
-safety guarantees but has a steeper learning curve.
+compute-intensive tasks. Rust offers memory safety guarantees but has a steeper learning curve.
 
 ---
 

@@ -10,22 +10,22 @@ tags: [computer-science, algorithms, strings, pattern-matching, hashing]
 
 The obvious way to find a pattern of length m inside a text of length n is to try it at every
 position: slide the pattern one character at a time, and at each position compare character by
-character until either the pattern matches or a mismatch is found. This is correct, it is O(1)
-extra space, and on ordinary text it is close to O(n) in practice because most mismatches happen on
+character until either the pattern matches or a mismatch is found. This is correct, it is $O(1)$
+extra space, and on ordinary text it is close to $O(n)$ in practice because most mismatches happen on
 the first or second character. The problem is the phrase "on ordinary text" — the naive scan has no
 mechanism that prevents an adversarial or merely repetitive input from forcing every single
-alignment to do the full m comparisons, and when that happens the bound is not O(n), it is O(nm).
+alignment to do the full m comparisons, and when that happens the bound is not $O(n)$, it is $O(nm)$.
 
 Rabin-Karp attacks the same problem from a different angle: instead of comparing characters, compare
 a **hash** of the m-character window to the hash of the pattern. Computing a hash from scratch is
-itself O(m), which would be no better than the naive scan — the trick that makes it worthwhile is a
-**rolling hash**, an arithmetic update that turns "the hash of the next window" into an O(1)
-computation from "the hash of this window", so the whole scan costs O(n) hash updates plus O(1)
+itself $O(m)$, which would be no better than the naive scan — the trick that makes it worthwhile is a
+**rolling hash**, an arithmetic update that turns "the hash of the next window" into an $O(1)$
+computation from "the hash of this window", so the whole scan costs $O(n)$ hash updates plus $O(1)$
 verification per position that actually matches.
 
 :::info[Prerequisites]
 [String Fundamentals](./string-fundamentals.md) for why a naive `==` between an m-character window
-and the pattern already costs O(m) even before any looping starts.
+and the pattern already costs $O(m)$ even before any looping starts.
 :::
 
 ## Core Concepts
@@ -33,7 +33,7 @@ and the pattern already costs O(m) even before any looping starts.
 | Term | Meaning |
 |---|---|
 | **Alignment** | One trial position of the pattern against the text; there are `n - m + 1` of them |
-| **Rolling hash** | A hash function `h` for which `h(s[i+1..i+m])` can be computed from `h(s[i..i+m-1])` in O(1), instead of recomputing from scratch |
+| **Rolling hash** | A hash function `h` for which `h(s[i+1..i+m])` can be computed from `h(s[i..i+m-1])` in $O(1)$, instead of recomputing from scratch |
 | **Polynomial hash** | `h(s) = (s[0]*B^(m-1) + s[1]*B^(m-2) + ... + s[m-1]) mod P`, for a base B and modulus P — the standard rolling hash |
 | **Spurious hit** | Two different windows whose hashes collide by chance; must be verified with a real character comparison before being reported as a match |
 | **Verify-on-hit** | The rule that a hash match is a *candidate*, never a confirmed match, until the characters themselves are compared |
@@ -91,7 +91,7 @@ h(s[i+1..i+m]) = ( (h(s[i..i+m-1]) - s[i]*B^(m-1)) * B + s[i+m] ) mod P
 ```
 
 `B^(m-1) mod P` is precomputed once before the scan starts, so each slide is one subtraction, one
-multiplication, one addition, and two modulo operations — O(1) independent of m.
+multiplication, one addition, and two modulo operations — $O(1)$ independent of m.
 
 <Figure src="/img/cs/algorithms/rolling-hash-window.png"
         alt="Three panels showing the seven-character window sliding by one position across the text abacabadabacaba, with the removed leading character and added trailing character annotated in the hash update formula"
@@ -206,7 +206,7 @@ std::vector<int> rabin_karp_search(std::string_view text, std::string_view patte
 
 - **Multi-pattern matching.** Rabin-Karp generalises to k patterns of the same length by hashing all
   k patterns once into a `set`, then sliding a single rolling hash over the text and checking set
-  membership at each position — O(n + k) expected plus verification, instead of running k separate
+  membership at each position — $O(n + k)$ expected plus verification, instead of running k separate
   single-pattern scans. This is the shape behind plagiarism detectors and duplicate-chunk detection
   in content-addressed storage.
 - **Python's `str.find` / `in`** use neither of these algorithms in general — CPython's actual
@@ -251,7 +251,7 @@ int main() {
 - **Choosing a small modulus.** A modulus that fits in 16 bits collides often enough on ordinary text
   to make verification the common case rather than the rare one, erasing the algorithm's speed
   advantage; `MOD` around 10⁹ (as used above) keeps collisions rare in practice.
-- **Recomputing `B^(m-1)` inside the loop.** This turns the O(1) roll into an O(log m) or O(m)
+- **Recomputing `B^(m-1)` inside the loop.** This turns the $O(1)$ roll into an $O(\log m)$ or $O(m)$
   operation per step depending on how it is recomputed, silently degrading the whole scan.
 - **Forgetting the modulo can go negative.** `(window - removed) % MOD` in languages whose `%` can
   return a negative result (C++, unlike Python) needs `+ MOD` before the final `% MOD`, or the hash
@@ -261,10 +261,10 @@ int main() {
 
 | | Best | Average | Worst | Extra space | Notes |
 |---|---|---|---|---|---|
-| Naive scan | O(n) | O(n) on random text | **O(nm)** | O(1) | The `"aaaa...ab"` input above realises the worst case exactly |
-| Rabin-Karp | O(n + m) | O(n + m) | O(nm) | O(1) | Worst case only if every window collides; verify-on-hit is what keeps this rare |
-| Rabin-Karp, k patterns | O(n + k) | O(n + k) | O(nmk) | O(k) | One rolling hash, k-way hash-set lookup per window |
-| KMP | O(n + m) | O(n + m) | **O(n + m)** | O(m) | See [KMP & the Z-Algorithm](./kmp-and-z-algorithm.md); no collision risk at all |
+| Naive scan | $O(n)$ | $O(n)$ on random text | **$O(nm)$** | $O(1)$ | The `"aaaa...ab"` input above realises the worst case exactly |
+| Rabin-Karp | $O(n + m)$ | $O(n + m)$ | $O(nm)$ | $O(1)$ | Worst case only if every window collides; verify-on-hit is what keeps this rare |
+| Rabin-Karp, k patterns | $O(n + k)$ | $O(n + k)$ | $O(nmk)$ | $O(k)$ | One rolling hash, k-way hash-set lookup per window |
+| KMP | $O(n + m)$ | $O(n + m)$ | **$O(n + m)$** | $O(m)$ | See [KMP & the Z-Algorithm](./kmp-and-z-algorithm.md); no collision risk at all |
 
 Rabin-Karp is chosen over KMP specifically for the multi-pattern case, where one rolling hash and a
 hash set of k pattern hashes beats running k independent KMP scans. For a single pattern where a
@@ -297,7 +297,7 @@ including the expected number of spurious hits under a random hash function.
 
 ## Related Pages
 
-- [String Fundamentals](./string-fundamentals.md) — why an O(m) window comparison is the unit of cost the naive scan multiplies by every alignment.
+- [String Fundamentals](./string-fundamentals.md) — why an $O(m)$ window comparison is the unit of cost the naive scan multiplies by every alignment.
 - [KMP & the Z-Algorithm](./kmp-and-z-algorithm.md) — the worst-case-linear alternative for a single pattern, with no collision risk.
 - [Suffix Structures & Autocomplete](./suffix-structures-and-autocomplete.md) — when the pattern isn't fixed in advance, a structure built once from the text beats re-scanning it per query.
 - [Hash Tables](../data-structures/hash-tables.md) — the structure behind the multi-pattern hash-set lookup.

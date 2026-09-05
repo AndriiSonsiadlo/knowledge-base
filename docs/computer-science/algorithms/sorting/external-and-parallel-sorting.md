@@ -262,7 +262,7 @@ bottleneck.
 
 | | I/O passes | Parallelizes | Notes |
 |---|---|---|---|
-| **External merge sort** | O(log_k(N/M)) | Run generation: yes, embarrassingly. Merge: needs key-range partitioning | The standard answer once data exceeds memory |
+| **External merge sort** | $O(log_k(N/M))$ | Run generation: yes, embarrassingly. Merge: needs key-range partitioning | The standard answer once data exceeds memory |
 | In-memory quicksort/mergesort | n/a (fits in RAM) | Depends on implementation | Not applicable once `N` exceeds memory — the comparison it's often held against is a category error |
 | Distributed shuffle sort (MapReduce/Spark) | Proportional to data volume moved across the network | Yes, by key-range partition | Network transfer, not disk seek, is usually the dominant cost here |
 | Replacement selection (run generation variant) | Produces runs ~2× memory size on average | Same as standard run generation | Fewer, longer runs mean fewer merge passes at the cost of a more complex heap-based generation step |
@@ -294,8 +294,8 @@ bottleneck.
 
 - [Mergesort](./mergesort.md) — the two-way merge this page generalizes to k runs and to disk-resident
   data.
-- [Heaps](../data-structures/heaps.md) — the priority queue that makes a k-way merge O(log k) per
-  emitted element instead of O(k).
+- [Heaps](../data-structures/heaps.md) — the priority queue that makes a k-way merge $O(\log k)$ per
+  emitted element instead of $O(k)$.
 - [Choosing a Sort](./choosing-a-sort.md) — why an in-memory sort is the right default until the data
   genuinely stops fitting in RAM.
 - [Amortized Analysis](../complexity/amortized-analysis.md) — a different setting where "count the

@@ -23,7 +23,7 @@ produces two opposite failure modes: actors that should be visible to a client n
 mark something always-relevant that needed to be), or a project's network traffic scales terribly
 because far more actors than necessary are being evaluated and sent to every connection (you didn't cull
 anything). The Replication Graph exists because the default per-actor, per-connection relevancy check is
-itself an O(actors × connections) cost that becomes the bottleneck before your gameplay does.
+itself an $O(actors × connections)$ cost that becomes the bottleneck before your gameplay does.
 
 ## Mental model
 

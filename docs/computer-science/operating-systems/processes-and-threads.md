@@ -97,7 +97,7 @@ process* is cheaper precisely because the page tables (and therefore the TLB) do
 | Model | Who schedules it | Blocking syscall behavior | Example |
 |---|---|---|---|
 | **1:1 (kernel threads)** | The OS scheduler, directly | One thread blocking (e.g., on I/O) doesn't stall its siblings | POSIX threads (`pthreads`) on Linux, Windows threads |
-| **N:1 / M:N (green threads)** | A userspace runtime, multiplexed onto one or few kernel threads | A blocking syscall can stall the whole runtime unless it's wrapped in a non-blocking/async I/O layer | Early Java "green threads", Go's goroutines (M:N onto OS threads), Erlang processes |
+| **N:1 / M:N (green threads)** | A userspace runtime, multiplexed onto one or few kernel threads | A blocking syscall can stall the whole runtime unless it's wrapped in a non-blocking/async I/O layer | Go's goroutines (M:N onto OS threads), Erlang processes |
 
 ### Thread pools: stop creating threads per unit of work
 
@@ -123,8 +123,8 @@ Sizing the pool is the part people get wrong, and the right answer depends on wh
 :::warning[Unbounded queues turn backpressure into memory exhaustion]
 A pool with a fixed thread count and an *unbounded* task queue does not reject work when overloaded —
 it accepts it and grows the queue until the process runs out of memory. Bound the queue and decide
-explicitly what happens when it is full (block the submitter, drop, or fail fast). Java's
-`Executors.newFixedThreadPool` uses an unbounded queue by default, which is exactly this trap.
+explicitly what happens when it is full (block the submitter, drop, or fail fast). Several standard
+thread-pool implementations default to an unbounded queue, which is exactly this trap.
 :::
 
 ### fork/exec (POSIX) vs. CreateProcess (Windows)

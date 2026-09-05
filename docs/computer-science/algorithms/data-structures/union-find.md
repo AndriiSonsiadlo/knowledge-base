@@ -45,7 +45,7 @@ Comfortable with [trees](./trees.md) as a parent-pointer structure, and with
 
 The two optimisations attack different halves of the same problem. Union by rank stops tall trees from
 being *built*; path compression flattens the ones that were. Either alone leaves a per-operation cost
-of O(log n) — balanced linking in the **worst case**, because a tree of rank k can still have height
+of $O(\log n)$ — balanced linking in the **worst case**, because a tree of rank k can still have height
 k (Sedgewick & Wayne, 4th ed., §1.5, Proposition H proves the lg n depth bound for union by *size*;
 union by rank gives the same bound); path compression alone **amortized**, because linking a large
 tree under a small root keeps rebuilding depth faster than compression flattens it (Tarjan & van
@@ -180,10 +180,10 @@ both are third-party dependencies.)
 Where it earns its place:
 
 - **Kruskal's minimum spanning tree.** Sort the edges by weight and take each one whose endpoints are
-  not already connected. The DSU *is* the cycle test, and it is what makes the algorithm O(E log E) worst
-  case rather than a worst-case O(VE) — see CLRS 4th ed. §21.2 and Sedgewick & Wayne §4.3.
-- **Connected components.** Union every edge, then `components` is the answer in O(1) worst case. Compare
-  with a [traversal](../graph-algorithms/traversal.md), which needs a full O(V + E) worst-case pass per batch.
+  not already connected. The DSU *is* the cycle test, and it is what makes the algorithm $O(E \log E)$ worst
+  case rather than a worst-case $O(VE)$ — see CLRS 4th ed. §21.2 and Sedgewick & Wayne §4.3.
+- **Connected components.** Union every edge, then `components` is the answer in $O(1)$ worst case. Compare
+  with a [traversal](../graph-algorithms/traversal.md), which needs a full $O(V + E)$ worst-case pass per batch.
 - **Cycle detection in an undirected graph.** `union(u, v)` returning `False` means the edge closes a
   cycle. This does *not* work for directed graphs — direction is exactly the information the structure
   discards.
@@ -268,16 +268,16 @@ long long kruskal(int n, std::vector<Edge> edges) {
 | | Union-find | [BFS/DFS flood fill](../graph-algorithms/traversal.md) | Hash map of set IDs |
 |---|---|---|---|
 | Model | Incremental — edges arrive over time | Offline — the whole graph must be known | Incremental |
-| Merge two groups | O(α(n)) amortized | n/a | O(n) worst — relabel the smaller set |
-| "Same group?" query | O(α(n)) amortized | O(V + E) worst, per traversal | O(1) average |
-| Enumerate a group's members | O(n) worst — a full scan | O(size) worst | O(size) worst |
-| Split a group | Not supported | Recompute, O(V + E) worst | O(size) worst |
+| Merge two groups | $O(α(n))$ amortized | n/a | $O(n)$ worst — relabel the smaller set |
+| "Same group?" query | $O(α(n))$ amortized | $O(V + E)$ worst, per traversal | $O(1)$ average |
+| Enumerate a group's members | $O(n)$ worst — a full scan | $O(size)$ worst | $O(size)$ worst |
+| Split a group | Not supported | Recompute, $O(V + E)$ worst | $O(size)$ worst |
 | Memory | One or two int arrays | Visited array plus a frontier | One entry per element |
 
 Union-find wins when connectivity queries are interleaved with edge insertions. A traversal wins when
 the graph is fixed and you also need to *walk* it — distances, paths, or the members of a component.
 The hash-map-of-IDs approach is only competitive with the "small-to-large" merging trick, and even
-then it is O(n log n) worst case overall, against union-find's near-linear.
+then it is $O(n \log n)$ worst case overall, against union-find's near-linear.
 
 ## Recall
 
@@ -300,7 +300,7 @@ then it is O(n log n) worst case overall, against union-find's near-linear.
   introduction, developing quick-find → quick-union → weighted quick-union with doubling-test
   measurements for each, plus the percolation application.
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 19 "Data Structures for
-  Disjoint Sets" — the forest representation in §19.3 and the amortized O(m α(n)) proof in §19.4.
+  Disjoint Sets" — the forest representation in §19.3 and the amortized $O(m α(n))$ proof in §19.4.
 - R. E. Tarjan, "Efficiency of a Good But Not Linear Set Union Algorithm", *JACM* 22(2), 1975 — where
   the inverse-Ackermann bound comes from.
 - R. E. Tarjan & J. van Leeuwen, "Worst-case Analysis of Set Union Algorithms", *JACM* 31(2), 1984 —

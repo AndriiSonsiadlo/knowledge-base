@@ -327,7 +327,7 @@ path while exploring far fewer vertices; zero turns A\* back into Dijkstra's exa
 ## References
 
 - Dijkstra, E.W. (1959), "A note on two problems in connexion with graphs", *Numerische Mathematik* — the original two-page paper.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 24–25 — single-source and all-pairs shortest paths, including Floyd-Warshall's DP formulation and correctness proof.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 22–23 — single-source and all-pairs shortest paths, including Floyd-Warshall's DP formulation and correctness proof.
 - Hart, Nilsson & Raphael (1968), "A Formal Basis for the Heuristic Determination of Minimum Cost Paths" — the A\* paper.
 - [VisuAlgo — Shortest Paths](https://visualgo.net/en/sssp) — run Dijkstra's and Bellman–Ford on the same graph, including one with negative edges.
 

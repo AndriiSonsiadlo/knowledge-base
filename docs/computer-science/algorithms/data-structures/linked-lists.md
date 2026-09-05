@@ -118,7 +118,7 @@ step 2        prev.next = target.next
 
 result:       5 -> 1 -> 3 -> None
               node(8) still exists in memory until nothing else references it
-              (garbage collected in Python/Java; must be freed explicitly in C++)
+              (garbage collected in Python; must be freed explicitly in C++)
 ```
 
 Exactly one pointer write — `prev.next = target.next` — does the whole deletion, and its cost does not

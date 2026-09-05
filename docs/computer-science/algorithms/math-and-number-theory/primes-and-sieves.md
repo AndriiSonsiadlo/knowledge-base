@@ -14,13 +14,13 @@ cannot possibly find one. That second stopping rule is the entire trick, and it 
 a number `n` that has a factor `d` greater than sqrt(n) must also have a *partner* factor `n / d` that
 is smaller than sqrt(n), because `d * (n / d) = n` and both factors cannot be on the large side at
 once. So if no divisor up to sqrt(n) has been found, none exists at all — checking further is
-provably wasted work. This turns an O(n) scan into an O(sqrt n) one, for free, just by knowing where
+provably wasted work. This turns an $O(n)$ scan into an $O(sqrt n)$ one, for free, just by knowing where
 to stop.
 
 That single-number test stops being the right tool the moment the question changes from "is this one
 number prime" to "which of these many numbers are prime" — a factorization routine called in a loop,
 a number-theoretic filter run over a whole range. Trial-dividing each of `n` numbers up to sqrt(n)
-costs O(n · sqrt n) in total, and almost all of that work is repeated: the same small primes get
+costs $O(n \cdot sqrt n)$ in total, and almost all of that work is repeated: the same small primes get
 tested against nearly every candidate. A **sieve** inverts the direction of the computation — instead
 of asking "is this number divisible by anything smaller", it starts from each small prime and crosses
 out every multiple of it in one pass, so that whatever is left unmarked at the end must be prime by
@@ -32,8 +32,8 @@ construction, not by having survived a test.
 |---|---|
 | **Trial division** | Testing `n`'s primality by dividing it by every candidate up to `sqrt(n)` |
 | **Sieve of Eratosthenes** | Cross out every multiple of each prime, starting from the prime itself, up to a bound `N` |
-| **Linear sieve** | A sieve variant in which every composite is crossed out exactly once, by its smallest prime factor, giving O(N) total work |
-| **Smallest prime factor (SPF) table** | `spf[i]` = the smallest prime dividing `i`, built alongside a sieve; repeatedly dividing by `spf[i]` factorizes `i` in O(log i) |
+| **Linear sieve** | A sieve variant in which every composite is crossed out exactly once, by its smallest prime factor, giving $O(N)$ total work |
+| **Smallest prime factor (SPF) table** | `spf[i]` = the smallest prime dividing `i`, built alongside a sieve; repeatedly dividing by `spf[i]` factorizes `i` in $O(\log i)$ |
 
 ## Mechanism
 
@@ -69,7 +69,7 @@ Nothing above 5 ever needed its own pass: every composite `<= 30` has a prime fa
 three passes above already crossed out all of them. Sedgewick & Wayne, *Algorithms* 4th ed., §1.4,
 and CLRS 4th ed. Ch. 31 both give the classic bound on the total work: each prime `p <= N` contributes
 about `N / p` crossings, and summing `N / p` over all primes `p <= N` is `N * sum(1/p) = N * ln(ln N)
-+ O(N)`, i.e. **O(N log log N)** — a function that grows barely faster than `N` for any practical `N`.
++ $O(N)$`, i.e. **O(N log log N)** — a function that grows barely faster than `N` for any practical `N`.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -137,11 +137,11 @@ The Sieve of Eratosthenes still crosses some composites more than once — 12 is
 3. The **linear sieve** fixes this by processing candidates in increasing order and, for each one,
 crossing it out using *only its smallest prime factor*, stopping the inner loop the instant a prime
 already found divides the current prime being multiplied — the exact condition that guarantees every
-composite is marked exactly once, for O(N) total work instead of O(N log log N). The same pass
+composite is marked exactly once, for $O(N)$ total work instead of $O(N \log \log N)$. The same pass
 naturally builds a **smallest-prime-factor (SPF) table**: `spf[i]` for every composite `i` is already
 known by the time the linear sieve finishes, and factorizing any `i <= N` afterwards is just
 repeatedly dividing by `spf[i]` — at most `log2(i)` divisions, since each division at least halves
-what remains, giving **O(log i)** factorization instead of O(sqrt i) trial division per query.
+what remains, giving **$O(\log i)$** factorization instead of $O(sqrt i)$ trial division per query.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -204,12 +204,12 @@ std::vector<int> factorize(int n, const std::vector<int>& spf) {
   uses trial division for small `n` and switches to Miller-Rabin plus a BPSW check for large `n` —
   neither trial division nor a sieve is the right tool once `n` exceeds a sieve's practical memory.
 - **Precompute once, query many times.** Any problem that repeatedly asks "is `k` prime" for many
-  `k <= N` should sieve `[2, N]` once, in O(N log log N), rather than trial-dividing each query in
-  O(sqrt k) — the same precompute-once trade
+  `k <= N` should sieve `[2, N]` once, in $O(N \log \log N)$, rather than trial-dividing each query in
+  $O(sqrt k)$ — the same precompute-once trade
   [Prefix Sums & Difference Arrays](../problem-solving-patterns/prefix-sums-and-difference-arrays.md)
   makes for range sums.
 - **Segmented sieving** sieves a range `[lo, hi]` using only primes up to `sqrt(hi)` (found by a small
-  sieve first), keeping memory at O(hi - lo) instead of O(hi) — the standard technique once `hi` is
+  sieve first), keeping memory at $O(hi - lo)$ instead of $O(hi)$ — the standard technique once `hi` is
   too large to hold a full sieve array.
 
 <Tabs groupId="code-lang">
@@ -251,25 +251,25 @@ int main() {
   `p*p` already has a smaller prime factor and was crossed out earlier; starting at `2*p` does not
   break correctness but wastes work that grows the effective constant factor noticeably at scale.
 - **Trial-dividing by every integer instead of stopping the loop bound at sqrt(n).** Looping to `n`
-  instead of to `sqrt(n)` is a correctness-preserving but O(n) instead of O(sqrt n) mistake — the
+  instead of to `sqrt(n)` is a correctness-preserving but $O(n)$ instead of $O(sqrt n)$ mistake — the
   kind of bug that only shows up as "why is this slow" under profiling, never as a wrong answer.
 - **Forgetting 0 and 1 are not prime.** A sieve initialized to "all true" that never clears indices 0
   and 1 reports both as prime, which corrupts any factor count or product built on top of it.
 - **Reusing a single-query trial-division check inside a loop over `N` candidates.** This is exactly
-  the O(N · sqrt N) mistake a sieve exists to avoid — see the Mechanism section above.
+  the $O(N \cdot sqrt N)$ mistake a sieve exists to avoid — see the Mechanism section above.
 
 ## Comparisons
 
 | | Per-query cost | Total for N queries | Extra space |
 |---|---|---|---|
-| Trial division, one number | O(sqrt n) worst | O(N * sqrt n) worst | O(1) |
-| Sieve of Eratosthenes, precomputed | O(1) lookup after build | O(N log log N) worst | O(N) |
-| Linear sieve, precomputed | O(1) lookup after build | O(N) worst | O(N) |
-| Factorization via SPF table | O(log n) worst | O(N log N) worst (N factorizations) | O(N) |
-| Factorization via trial division | O(sqrt n) worst | O(N * sqrt n) worst | O(1) |
+| Trial division, one number | $O(sqrt n)$ worst | $O(N * sqrt n)$ worst | $O(1)$ |
+| Sieve of Eratosthenes, precomputed | $O(1)$ lookup after build | $O(N \log \log N)$ worst | $O(N)$ |
+| Linear sieve, precomputed | $O(1)$ lookup after build | $O(N)$ worst | $O(N)$ |
+| Factorization via SPF table | $O(\log n)$ worst | $O(N \log N)$ worst (N factorizations) | $O(N)$ |
+| Factorization via trial division | $O(sqrt n)$ worst | $O(N * sqrt n)$ worst | $O(1)$ |
 
 A sieve only pays off when the range `[2, N]` is queried repeatedly; for a single one-off primality
-check on a large `n`, trial division (or, past a few million, Miller-Rabin) needs no O(N) memory at
+check on a large `n`, trial division (or, past a few million, Miller-Rabin) needs no $O(N)$ memory at
 all.
 
 ## Recall
@@ -292,7 +292,7 @@ all.
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 31 "Number-Theoretic
   Algorithms" — primality testing and the sieve's asymptotic analysis.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.4 "Analysis of Algorithms" — the sieve used as a
-  worked example of the harmonic-sum analysis behind O(N log log N).
+  worked example of the harmonic-sum analysis behind $O(N \log \log N)$.
 - [`sympy.ntheory.primetest.isprime`](https://docs.sympy.org/latest/modules/ntheory.html#sympy.ntheory.primetest.isprime) —
   the CPython-ecosystem library's own documentation of when it switches from trial division to
   probabilistic primality testing.

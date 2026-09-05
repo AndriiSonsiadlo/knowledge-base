@@ -102,6 +102,12 @@ $O(1)$ rotations, found in $O(\log n)$ **worst case** by walking back up from th
 & Wayne, 4th ed., §3.3; CLRS 4th ed. treats AVL as an exercise in Ch. 13, using red-black trees as the
 worked example instead).
 
+<Figure src="/img/cs/algorithms/avl-rotation.gif"
+        alt="Animation of an AVL tree performing rotations to restore balance as nodes are inserted"
+        caption="The same LL/RR/LR/RL fix-ups traced above, animated across a longer sequence of insertions — each rotation fires the instant a balance factor reaches ±2."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:AVL_Tree_Example.gif"
+        license="CC BY-SA 4.0" />
+
 All four traced sequences above happen to converge on the same three-node tree, which makes them a
 convenient self-check for an implementation:
 
@@ -210,12 +216,18 @@ The rotation is identical to the AVL case; what red-black adds is that a *differ
 which is why red-black trees rotate less often in practice than AVL trees, at ≤ 3 rotations per
 deletion regardless of tree size (CLRS 4th ed. §13.4, Lemma 13.4).
 
+<Figure src="/img/cs/algorithms/red-black-tree.png"
+        alt="A red-black tree with black and red nodes labeled, showing the no-red-red-parent-child invariant and equal black-height on every root-to-leaf path"
+        caption="Every root-to-leaf path passes through the same number of black nodes; red nodes never have a red child — the invariant that bounds height at 2 log₂(n+1) without AVL's stricter balance factor."
+        source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Red-black_tree_example.svg"
+        license="CC BY-SA 3.0" />
+
 | | AVL | Red-black |
 |---|---|---|
 | Height (worst case) | ≤ 1.44 log₂ n | ≤ 2 log₂(n+1) |
 | Lookup (worst case) | Faster — shorter tree | Slightly slower |
 | Insert / delete | More rotations | Fewer — ≤ 3 per delete |
-| Used by | Some in-memory indexes | C++ `std::map`/`std::set`, Java `TreeMap`, Linux CFS scheduler |
+| Used by | Some in-memory indexes | C++ `std::map`/`std::set`, Linux CFS scheduler |
 
 Red-black won the standard-library slot almost everywhere: mixed read/write workloads are the common
 case, and a small constant worst-case deletion cost beats a shorter tree that costs more to maintain.
@@ -254,7 +266,6 @@ root-down descent per key.
 | Language | Ordered map | Underlying structure |
 |---|---|---|
 | C++ | `std::map`, `std::set` | Red-black tree, in every major implementation |
-| Java | `TreeMap`, `TreeSet` | Red-black tree |
 | Python | *(none built in)* | Use `sortedcontainers`, or keep a sorted list + `bisect` |
 | Rust | `BTreeMap`, `BTreeSet` | B-tree — chosen for cache behaviour, in memory |
 | Go | *(none built in)* | Sort a slice, or use a third-party tree |
@@ -315,7 +326,7 @@ using a dict and sorting."
     ["B-tree search, insert, delete (worst)", "O(log_B n)"],
   ]}
   reachFor="You need sorted iteration, range queries, or a worst-case bound that a plain BST or hash table cannot give you."
-  trap="Assuming std::map or TreeMap being 'a red-black tree' is a language guarantee — it's an implementation detail that happens to be universal, backed only by the complexity requirement in the standard, not a named data structure."
+  trap="Assuming std::map being 'a red-black tree' is a language guarantee — it's an implementation detail that happens to be universal, backed only by the complexity requirement in the standard, not a named data structure."
 />
 
 ## References

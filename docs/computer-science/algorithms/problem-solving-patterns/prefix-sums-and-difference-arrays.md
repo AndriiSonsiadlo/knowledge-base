@@ -9,8 +9,8 @@ tags: [computer-science, algorithms, patterns, prefix-sums, arrays]
 # Prefix Sums & Difference Arrays
 
 Summing a range of an array costs time proportional to the range. Do it once and nobody notices; do it
-over each of the Θ(n²) possible ranges and an inner sum that is O(n) in the worst case makes the whole
-enumeration O(n³) worst case.
+over each of the $Θ(n^{2})$ possible ranges and an inner sum that is $O(n)$ in the worst case makes the whole
+enumeration $O(n^{3})$ worst case.
 The fix is not a cleverer summing loop. It is to sum *once*, up front, and store the running total, so
 that every later question is answered by arithmetic on two stored numbers instead of by touching the
 data at all.
@@ -24,7 +24,7 @@ for `min` or `max` — nothing undoes a maximum.
 
 A **difference array** is the same identity read backwards. If prefix-summing `D` reconstructs `a`,
 then editing `D` at two positions edits a whole range of `a`: `D[l] += v` and `D[r+1] -= v` add `v` to
-every element of `a[l..r]` in O(1) worst case, with the O(n) prefix pass paid once at the end. Prefix
+every element of `a[l..r]` in $O(1)$ worst case, with the $O(n)$ prefix pass paid once at the end. Prefix
 sums make reads cheap and writes expensive; difference arrays do the reverse — pick the side you have
 more of.
 
@@ -116,7 +116,7 @@ long long range_sum(const std::vector<long long>& p, std::size_t lo, std::size_t
 
 `P[i][j]` is the sum of the rectangle from the origin up to but excluding row `i` and column `j`.
 Building it is the same running total applied twice, with the doubly-counted overlap removed; a query
-is inclusion–exclusion over four corners. Building is O(nm) worst case, every query afterwards O(1).
+is inclusion–exclusion over four corners. Building is $O(nm)$ worst case, every query afterwards $O(1)$.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -211,7 +211,7 @@ void range_add(std::vector<long long>& diff, std::size_t lo, std::size_t hi, lon
 - **Prefix XOR.** `X[i] = a[0] ^ … ^ a[i−1]`, and `a[l] ^ … ^ a[r] = X[r+1] ^ X[l]` — XOR is its own
   inverse, so the subtraction *is* another XOR.
 - **Prefix counts.** One prefix array per symbol turns "how many `x` in `[l, r]`" into a subtraction,
-  at O(n · |alphabet|) space — hence small alphabets only.
+  at $O(n \cdot |alphabet|)$ space — hence small alphabets only.
 - **Prefix products.** Undoing multiplication needs division: safe modulo a prime, unsafe over floats.
 - **Prefix max.** Does **not** work — nothing cancels. Range minimum wants a sparse table.
 
@@ -281,7 +281,7 @@ whose reads all happen after the writes.
   `int` is arbitrary precision, so the failure mode does not exist there.
 - **The stale prefix.** Mutating `a[i]` after building `P` leaves every `P[j]` for `j > i` wrong and
   nothing complains — queries return plausible wrong numbers. Mutable data wants a Fenwick or segment
-  tree, at O(log n) worst case per update.
+  tree, at $O(\log n)$ worst case per update.
 - **Off-by-one at the right edge.** `P[r] − P[l]` is the half-open convention and silently drops `a[r]`;
   mixing it with the inclusive form in one file is the classic quiet wrong answer. The difference array
   needs `n + 1` cells for the same reason — `hi + 1` can be `n`.
@@ -296,14 +296,14 @@ whose reads all happen after the writes.
 
 | | Prefix sums | Difference array | [Fenwick / segment tree](../data-structures/trees.md) | Recompute each query |
 |---|---|---|---|---|
-| Build | O(n) worst | O(n) worst | O(n) worst | — |
-| Range query | O(1) worst | O(n) — materialise first | O(log n) worst | O(n) worst |
-| Point update | O(n) worst — rebuild | O(1) worst | O(log n) worst | O(1) worst |
-| Range update | O(n) worst | O(1) worst | O(log n) worst | O(1) worst |
-| Extra space | O(n) | O(n) | O(n) | none |
+| Build | $O(n)$ worst | $O(n)$ worst | $O(n)$ worst | — |
+| Range query | $O(1)$ worst | $O(n)$ — materialise first | $O(\log n)$ worst | $O(n)$ worst |
+| Point update | $O(n)$ worst — rebuild | $O(1)$ worst | $O(\log n)$ worst | $O(1)$ worst |
+| Range update | $O(n)$ worst | $O(1)$ worst | $O(\log n)$ worst | $O(1)$ worst |
+| Extra space | $O(n)$ | $O(n)$ | $O(n)$ | none |
 
 The decision is the read/write mix: all reads, prefix sums; all writes with one read at the end, a
-difference array; interleaved, a Fenwick tree — the O(log n) is the price of not knowing the order.
+difference array; interleaved, a Fenwick tree — the $O(\log n)$ is the price of not knowing the order.
 
 ## Recall
 
@@ -323,7 +323,7 @@ difference array; interleaved, a Fenwick tree — the O(log n) is the price of n
 ## References
 
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.4 "Analysis of Algorithms" — the cost model this pattern
-  argues with, using three-sum as the worked O(n³) enumeration made cheaper by precomputation.
+  argues with, using three-sum as the worked $O(n^{3})$ enumeration made cheaper by precomputation.
 - [`itertools.accumulate`](https://docs.python.org/3/library/itertools.html#itertools.accumulate) —
   CPython docs; note the `initial` keyword added in 3.8.
 - [`[partial.sum]`](https://eel.is/c++draft/partial.sum) and
@@ -332,8 +332,8 @@ difference array; interleaved, a Fenwick tree — the O(log n) is the price of n
 
 ## Related Pages
 
-- [Two Pointers & Sliding Window](./two-pointers-and-sliding-window.md) — the other way to kill an O(n²) range enumeration, for contiguous, monotone ranges.
+- [Two Pointers & Sliding Window](./two-pointers-and-sliding-window.md) — the other way to kill an $O(n^{2})$ range enumeration, for contiguous, monotone ranges.
 - [Problem-Solving Patterns](./intro.md) — where this pattern sits among the others.
-- [Arrays](../data-structures/arrays.md) — the contiguous layout that makes the O(n) build a single cache-friendly pass.
+- [Arrays](../data-structures/arrays.md) — the contiguous layout that makes the $O(n)$ build a single cache-friendly pass.
 - [Integers & Two's Complement](../../bit-manipulation/integers-and-twos-complement.md) — the overflow that silently corrupts a C++ prefix array.
 - [Segment Trees & Fenwick Trees](../data-structures/segment-trees-and-fenwick.md) — what to reach for once the array starts changing.

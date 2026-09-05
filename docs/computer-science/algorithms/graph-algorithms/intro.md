@@ -40,19 +40,19 @@ running the algorithm afterwards.
 
 | Question | Algorithm | Complexity |
 |---|---|---|
-| Is B reachable from A? | BFS or DFS | O(V + E) |
-| Fewest **edges** from A to B? | BFS | O(V + E) |
-| Cheapest path, non-negative weights? | Dijkstra's | O((V + E) log V) |
-| Cheapest path, negative weights allowed? | Bellman–Ford | O(V·E) |
-| Cheapest paths between *all* pairs? | Floyd–Warshall | O(V³) |
-| A valid order respecting dependencies? | Topological sort | O(V + E) |
-| Does the graph contain a cycle? | DFS, or a failed topological sort | O(V + E) |
-| Which vertices form connected groups? | BFS or DFS from each unvisited vertex | O(V + E) |
-| Least total edge weight connecting every vertex? | Kruskal's or Prim's | O(E log V) |
-| Which vertices can reach each other, both ways? | Kosaraju's or Tarjan's SCC | O(V + E) |
+| Is B reachable from A? | BFS or DFS | $O(V + E)$ |
+| Fewest **edges** from A to B? | BFS | $O(V + E)$ |
+| Cheapest path, non-negative weights? | Dijkstra's | $O((V + E) \log V)$ |
+| Cheapest path, negative weights allowed? | Bellman–Ford | $O(V \cdot E)$ |
+| Cheapest paths between *all* pairs? | Floyd–Warshall | $O(V^{3})$ |
+| A valid order respecting dependencies? | Topological sort | $O(V + E)$ |
+| Does the graph contain a cycle? | DFS, or a failed topological sort | $O(V + E)$ |
+| Which vertices form connected groups? | BFS or DFS from each unvisited vertex | $O(V + E)$ |
+| Least total edge weight connecting every vertex? | Kruskal's or Prim's | $O(E \log V)$ |
+| Which vertices can reach each other, both ways? | Kosaraju's or Tarjan's SCC | $O(V + E)$ |
 
 :::warning[Use BFS, not Dijkstra's, on unweighted graphs]
-When every edge costs the same, BFS already finds shortest paths — in O(V + E), with no priority
+When every edge costs the same, BFS already finds shortest paths — in $O(V + E)$, with no priority
 queue. Reaching for Dijkstra's adds a log factor and considerable machinery for no benefit. Treat
 "all weights equal" as a special case worth checking for.
 :::

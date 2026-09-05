@@ -42,7 +42,7 @@ auto it3 = std::find_if_not(vec.begin(), vec.end(), [](int x) {
 });
 ```
 
-**Complexity:** O(n)
+**Complexity:** $O(n)$
 
 ### std::count - Count Elements
 
@@ -266,7 +266,7 @@ std::sort(words.begin(), words.end(), [](const auto& a, const auto& b) {
 });
 ```
 
-**Complexity:** O(n log n) average  
+**Complexity:** $O(n \log n)$ average  
 **Note:** Not stable (equal elements may be reordered)
 
 ### std::stable_sort - Stable Sort
@@ -317,7 +317,7 @@ std::nth_element(vec.begin(), vec.begin() + mid, vec.end());
 int median = vec[mid];
 ```
 
-**Complexity:** O(n) average - faster than sorting!
+**Complexity:** $O(n)$ average - faster than sorting!
 
 ## Binary Search (on sorted ranges)
 
@@ -329,7 +329,7 @@ std::vector<int> vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
 bool found = std::binary_search(vec.begin(), vec.end(), 5);  // true
 ```
 
-**Complexity:** O(log n)  
+**Complexity:** $O(\log n)$  
 **Requirement:** Range must be sorted!
 
 ### std::lower_bound - First >= Value
@@ -532,7 +532,7 @@ std::transform(std::execution::par, vec.begin(), vec.end(), vec.begin(),
 **Set ops**: set_union, set_intersection, set_difference  
 **Min/Max**: min_element, max_element  
 **Numeric**: accumulate, inner_product, partial_sum  
-**Always O(n log n) or better** when sorted  
+**Always $O(n \log n)$ or better** when sorted  
 **Parallel (C++17)** = add execution policy for speedup
 :::
 

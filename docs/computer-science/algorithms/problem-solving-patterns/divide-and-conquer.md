@@ -80,7 +80,7 @@ level 0 (combine)    [1,2,3,4,5,7,8,9]
 ```
 
 Three divide levels turn 8 elements into 8 singletons (log2(8) = 3), and each of the 4 combine steps
-does O(n) work summed across its level — 3 levels of O(n) merging is the $Θ(n \log n)$ the Master
+does $O(n)$ work summed across its level — 3 levels of $O(n)$ merging is the $Θ(n \log n)$ the Master
 Theorem predicts for this recurrence; see below for the general method.
 
 ### Reading the recurrence
@@ -88,7 +88,7 @@ Theorem predicts for this recurrence; see below for the general method.
 Every divide-and-conquer algorithm has a recurrence of the shape $T(n) = a \cdot T(n/b) + f(n)$ — *a*
 subproblems, each of size *n/b*, plus *f(n)* work to divide and combine. Mergesort's is
 $T(n) = 2T(n/2) + O(n)$, which the tree above traces directly: 2 subproblems per level, halving in
-size, with O(n) total merge work at every level. Working out the closed-form result for an arbitrary
+size, with $O(n)$ total merge work at every level. Working out the closed-form result for an arbitrary
 recurrence — and the three cases that decide whether the leaves, every level, or the root dominates —
 is not repeated here; see
 [Recurrences & the Master Theorem](../complexity/recurrences-and-master-theorem.md) for the full

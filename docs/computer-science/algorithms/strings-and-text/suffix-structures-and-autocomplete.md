@@ -18,7 +18,7 @@ that query itself requires — often proportional to the pattern's length, not t
 
 The **suffix array** is the simplest such structure: the starting indices of every suffix of the
 text, sorted alphabetically. Once sorted, every occurrence of a pattern is a contiguous range in
-that sorted order — reachable by two binary searches, O(m log n) instead of O(nm). The **LCP array**
+that sorted order — reachable by two binary searches, $O(m \log n)$ instead of $O(nm)$. The **LCP array**
 (longest common prefix between adjacent suffixes in that sorted order) is the array's constant
 companion, since it turns a great deal of information that looks like it needs re-scanning suffixes
 into a single precomputed lookup.
@@ -35,8 +35,8 @@ comparing two suffixes is not a free operation, which is exactly what makes sort
 |---|---|
 | **Suffix array (SA)** | The starting indices of all n suffixes of a string, sorted so that `text[SA[i]:]` is alphabetically before `text[SA[i+1]:]` |
 | **LCP array** | `LCP[i]` = length of the longest common prefix between `text[SA[i-1]:]` and `text[SA[i]:]`, the two adjacent suffixes in sorted order |
-| **Suffix tree** | A compressed trie of every suffix, where each edge is labelled with a substring (not one character), built or searched in O(n) / O(m) |
-| **Suffix automaton** | The smallest automaton accepting exactly the substrings of a string; O(n) states, one path per distinct substring |
+| **Suffix tree** | A compressed trie of every suffix, where each edge is labelled with a substring (not one character), built or searched in $O(n)$ / $O(m)$ |
+| **Suffix automaton** | The smallest automaton accepting exactly the substrings of a string; $O(n)$ states, one path per distinct substring |
 | **Trie (prefix tree)** | A tree where each root-to-node path spells a prefix shared by every word passing through it |
 
 ## Mechanism
@@ -75,14 +75,14 @@ Two consecutive suffixes that share a long prefix (rank 1 and 2: `ana` and `anan
 to each other precisely because sorting puts every suffix starting with the pattern's characters
 into one contiguous block — this is the whole mechanism a suffix array search relies on. Searching
 for pattern `ana` is two binary searches over `SA` for the first and last rank whose suffix starts
-with `ana`, landing on ranks 1–2 (indices 3 and 1) in O(m log n) comparisons, each comparison itself
-O(m) in the worst case — O(m log n) total, not O(nm).
+with `ana`, landing on ranks 1–2 (indices 3 and 1) in $O(m \log n)$ comparisons, each comparison itself
+$O(m)$ in the worst case — $O(m \log n)$ total, not $O(nm)$.
 
 **Construction is not derived here.** Sorting suffixes with a generic comparison sort costs
-O(n² log n) (each of the O(n log n) comparisons can itself cost O(n)). The standard non-naive
+$O(n^{2} \log n)$ (each of the $O(n \log n)$ comparisons can itself cost $O(n)$). The standard non-naive
 approaches are the doubling algorithm (sort by 2^k-character prefixes, doubling k each round) at
-O(n log n) or O(n log² n) depending on the sort used per round, and linear-time algorithms —
-DC3/Skew and SA-IS — at O(n). See Gusfield (1997) Ch. 7 and Manber & Myers (1993) for the doubling
+$O(n \log n)$ or $O(n \log^{2} n)$ depending on the sort used per round, and linear-time algorithms —
+DC3/Skew and SA-IS — at $O(n)$. See Gusfield (1997) Ch. 7 and Manber & Myers (1993) for the doubling
 construction, and Kärkkäinen, Sanders & Burkhardt (2006) for the linear-time DC3 algorithm; none of
 the three are re-derived here.
 
@@ -172,11 +172,11 @@ int main() {
 
 A **suffix tree** compresses the suffix array's information into a tree whose edges are labelled by
 substrings rather than single characters, so that every suffix corresponds to exactly one root-to-leaf
-path — pattern search becomes a single O(m) walk down the tree instead of O(m log n) of binary search,
-at the cost of a more complex O(n) construction (Ukkonen's algorithm) and a larger constant in memory.
+path — pattern search becomes a single $O(m)$ walk down the tree instead of $O(m \log n)$ of binary search,
+at the cost of a more complex $O(n)$ construction (Ukkonen's algorithm) and a larger constant in memory.
 
 A **suffix automaton** goes further: it is the smallest deterministic automaton whose accepted
-language is exactly the set of substrings of the text, with O(n) states and O(n) transitions total
+language is exactly the set of substrings of the text, with $O(n)$ states and $O(n)$ transitions total
 regardless of alphabet size. Where a suffix tree has one leaf per suffix, an automaton merges states
 that have the same set of ending positions, which makes it the tool of choice for counting *distinct*
 substrings or finding the longest common substring of two texts, since both reduce to a walk or a
@@ -204,7 +204,7 @@ flowchart TD
 ```
 
 A trie over `{car, care, careful, cart, cat}` (`*` marks a complete word). Typing `car` walks the
-three highlighted edges once — O(m) in the length of what was typed — and every word in the subtree
+three highlighted edges once — $O(m)$ in the length of what was typed — and every word in the subtree
 below that node (`car`, `care`, `careful`, `cart`) is a completion candidate found by one traversal
 of the remaining subtree, not by re-scanning the whole word list.
 
@@ -212,19 +212,19 @@ Production autocomplete is this idea plus one more stage: a **ranking pass** ove
 trie (or, at larger scale, a finite-state transducer / FST, which compresses shared suffixes the way
 a trie only compresses shared prefixes) returns. Popularity, recency, and personalization signals
 are not encoded in the trie structure itself — the trie's job is to shrink "every string in the
-corpus" down to "the handful that share this prefix" in O(m) time; a separate scoring step then
+corpus" down to "the handful that share this prefix" in $O(m)$ time; a separate scoring step then
 orders that handful for display. Conflating the two — trying to make the trie itself "smart" about
 ranking — is the mistake that makes real autocomplete implementations hard to reason about.
 
 ## Practical Usage
 
-- **`ripgrep`/`grep` and text editors** rarely build a suffix array for a one-shot search — the O(n)
+- **`ripgrep`/`grep` and text editors** rarely build a suffix array for a one-shot search — the $O(n)$
   preprocessing only pays off across many queries against the same fixed text, which is why
   suffix structures show up in read-heavy indexes (bioinformatics reference genomes, full-text
   search backends) and not in a single `Ctrl+F`.
 - **Bioinformatics** (read alignment against a reference genome) is the suffix array's home
-  territory: the same several-billion-character reference is queried millions of times, so an O(n)
-  or O(n log n) one-time build is amortized over the whole run.
+  territory: the same several-billion-character reference is queried millions of times, so an $O(n)$
+  or $O(n \log n)$ one-time build is amortized over the whole run.
 - **Search-box autocomplete at scale** typically uses a trie or FST for the prefix-matching stage —
   see Lucene's
   [`AnalyzingSuggester`](https://lucene.apache.org/core/9_0_0/suggest/org/apache/lucene/search/suggest/analyzing/AnalyzingSuggester.html),
@@ -238,9 +238,9 @@ ranking — is the mistake that makes real autocomplete implementations hard to 
   the order the trie happens to store them, which is not the order a user expects — shipping the
   raw trie output without a ranking pass produces technically-correct, practically-useless results.
 - **Comparing suffixes with plain string comparison inside the sort.** The naive `sorted(..., key=
-  lambda i: s[i:])` above is O(n² log n) precisely because each comparison can itself scan O(n)
+  lambda i: s[i:])` above is $O(n^{2} \log n)$ precisely because each comparison can itself scan $O(n)$
   characters — fine for `banana`, a real bottleneck at genome scale, which is exactly what motivates
-  the O(n log n) / O(n) constructions cited above.
+  the $O(n \log n)$ / $O(n)$ constructions cited above.
 - **Rebuilding the whole structure for one query.** The entire value proposition of this page's
   structures is amortizing a one-time build over many queries; using a suffix array to answer a
   single pattern-match query is strictly worse than the earlier pages' direct matchers.
@@ -249,12 +249,12 @@ ranking — is the mistake that makes real autocomplete implementations hard to 
 
 | | Build | Query (pattern length m) | Extra space | Best for |
 |---|---|---|---|---|
-| Suffix array + LCP | O(n log n) or O(n) | O(m log n) | O(n) | Many queries, memory-constrained |
-| Suffix tree | O(n) (Ukkonen) | O(m) | O(n), larger constant | Many queries, query speed matters more than memory |
-| Suffix automaton | O(n) | O(m) to check substring; distinct-substring counting is O(n) total | O(n) | Counting/enumerating distinct substrings, longest common substring |
-| Trie / FST + ranking | O(total word length) | O(m) to reach the subtree, then ranking cost | O(total word length), FST much smaller | Autocomplete / prefix search over a fixed dictionary |
+| Suffix array + LCP | $O(n \log n)$ or $O(n)$ | $O(m \log n)$ | $O(n)$ | Many queries, memory-constrained |
+| Suffix tree | $O(n)$ (Ukkonen) | $O(m)$ | $O(n)$, larger constant | Many queries, query speed matters more than memory |
+| Suffix automaton | $O(n)$ | $O(m)$ to check substring; distinct-substring counting is $O(n)$ total | $O(n)$ | Counting/enumerating distinct substrings, longest common substring |
+| Trie / FST + ranking | $O(total word length)$ | $O(m)$ to reach the subtree, then ranking cost | $O(total word length)$, FST much smaller | Autocomplete / prefix search over a fixed dictionary |
 
-The suffix array is the right default when memory matters and O(log n) extra factor in queries is
+The suffix array is the right default when memory matters and $O(\log n)$ extra factor in queries is
 acceptable; a suffix tree or automaton earns its larger footprint when queries are frequent enough
 that shaving the log factor, or getting distinct-substring counts for free, pays for itself.
 
@@ -278,18 +278,18 @@ that shaving the log factor, or getting distinct-substring counts for free, pays
 - D. Gusfield, *Algorithms on Strings, Trees, and Sequences*, 1997, Ch. 6–7 — suffix trees, suffix
   arrays, and their equivalence.
 - U. Manber & G. Myers, "Suffix Arrays: A New Method for On-Line String Searches", *SIAM J.
-  Computing* 22(5), 1993 — the original suffix array construction and O(m log n) search.
+  Computing* 22(5), 1993 — the original suffix array construction and $O(m \log n)$ search.
 - J. Kärkkäinen, P. Sanders & S. Burkhardt, "Linear Work Suffix Array Construction", *J. ACM* 53(6),
   2006 — the DC3/Skew linear-time construction algorithm.
 - T. Kasai et al., "Linear-Time Longest-Common-Prefix Computation in Suffix Arrays and Its
-  Applications", CPM 2001 — the O(n) LCP array algorithm, versus the O(n²) worst case of the naive
+  Applications", CPM 2001 — the $O(n)$ LCP array algorithm, versus the $O(n^{2})$ worst case of the naive
   version shown here.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §5.3 — suffix arrays applied to the longest repeated
   substring problem.
 
 ## Related Pages
 
-- [String Fundamentals](./string-fundamentals.md) — the O(m) comparison cost that makes naive suffix sorting O(n^2 log n) in the first place.
+- [String Fundamentals](./string-fundamentals.md) — the $O(m)$ comparison cost that makes naive suffix sorting $O(n^{2} \log n)$ in the first place.
 - [KMP & the Z-Algorithm](./kmp-and-z-algorithm.md) — the Z-array subroutine several suffix-array construction algorithms build on.
 - [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — the single-query matchers this page's structures amortize past, once queries repeat.
 - [Tries](../data-structures/tries.md) — the prefix-tree structure behind the autocomplete diagram above.

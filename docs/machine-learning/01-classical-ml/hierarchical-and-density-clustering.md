@@ -45,7 +45,7 @@ The height of each merge represents the distance at which it occurred. Cutting t
 
 The reverse of agglomerative: start with one cluster, recursively split. Rarely used in practice — computationally more expensive than agglomerative merging.
 
-## Cost: O(n² log n), and what that rules out
+## Cost: $O(n^{2} \log n)$, and what that rules out
 
 Agglomerative clustering requires tracking pairwise distances across the whole dataset, which scales poorly — impractical much past tens of thousands of points without approximation.
 

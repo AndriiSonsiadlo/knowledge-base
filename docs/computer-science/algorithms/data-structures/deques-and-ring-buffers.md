@@ -53,7 +53,7 @@ into, so reaching logical index `i` means walking the block list from whichever 
 $O(n)$ in the worst case for a middle index — a cost `list` does not have, and the reason a `deque` is
 not a drop-in replacement for random-access code (Python documentation,
 [`collections.deque`](https://docs.python.org/3/library/collections.html#collections.deque), notes
-this explicitly: "indexed access is O(1) at both ends but slows to O(n) in the middle").
+this explicitly: "indexed access is $O(1)$ at both ends but slows to $O(n)$ in the middle").
 
 ```text
 deque with BLOCKLEN = 4 (shrunk from 64 for the diagram), after several appendleft/append calls:
@@ -248,7 +248,7 @@ assert rb.count == 7 and rb.tail == 1 and rb.head == 2   # matches the traced wr
   distinguish full from empty using only `head`/`tail` needs one of the standard fixes (reserve one
   slot, or track `count`/absolute counters) — skipping this is the classic ring-buffer bug, and it
   surfaces only once the buffer happens to wrap, which is often well after the code first ships.
-- **`list.pop(0)` mistaken for a queue's O(1) dequeue.** A plain Python `list` used as a queue via
+- **`list.pop(0)` mistaken for a queue's $O(1)$ dequeue.** A plain Python `list` used as a queue via
   `pop(0)` is $O(n)$ per call, because every remaining element shifts down one index — the entire
   reason `collections.deque` exists for FIFO workloads.
 - **Fixed capacity, unexpectedly exceeded.** A ring buffer built for expected load throws or silently

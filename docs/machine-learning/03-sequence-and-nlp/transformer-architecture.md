@@ -63,7 +63,7 @@ For a model dimension $d$, feed-forward dimension $4d$, and $h$ attention heads:
 | $h$ | number of attention heads |
 | $n$ | sequence length |
 
-## The O(n²) cost in sequence length
+## The $O(n^{2})$ cost in sequence length
 
 Self-attention computes a score between every pair of positions — $n^2$ scores for a sequence of length $n$, and correspondingly $O(n^2 d)$ compute and $O(n^2)$ memory for the attention matrix itself. This quadratic scaling is the direct reason context-window length is expensive to extend, and motivates the efficient-attention variants covered in [Self-Attention in Depth](./self-attention-in-depth.md).
 
@@ -116,5 +116,5 @@ print(f"attention params: {attn_params}, feed-forward params: {ffn_params}"
 ## See also
 
 - [Attention Mechanism](./attention-mechanism.md) — the operation this entire architecture is built from.
-- [Self-Attention in Depth](./self-attention-in-depth.md) — multi-head attention, masking, and the O(n²) cost examined closely.
+- [Self-Attention in Depth](./self-attention-in-depth.md) — multi-head attention, masking, and the $O(n^{2})$ cost examined closely.
 - [Positional Encodings](./positional-encodings.md) — how position is injected, since attention itself carries no notion of order.

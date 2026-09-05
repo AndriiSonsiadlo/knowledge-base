@@ -18,7 +18,7 @@ The mechanism is a fixed-size heap, and the part that trips people up on first c
 points: finding the k **largest** values uses a **min**-heap, not a max-heap. The heap's root is only
 ever compared against a brand-new candidate to decide "is this new item better than my current worst
 survivor" — and the current worst survivor is the *minimum* of the k values kept so far. A min-heap
-answers exactly that question in O(1), and evicts it in O(log k) if the newcomer wins. The inversion is
+answers exactly that question in $O(1)$, and evicts it in $O(\log k)$ if the newcomer wins. The inversion is
 not a trick; it falls directly out of asking "what is my weakest kept item" rather than "what is my
 strongest kept item."
 
@@ -37,7 +37,7 @@ equal chance of being the one still held at the end.
 | **Quickselect** | Partition-based selection of the k-th order statistic without heap or full sort — see [Quickselect](../sorting/quickselect.md) |
 | **Streaming / online** | Each item is seen once, in arrival order, and cannot be revisited without storing it |
 | **Reservoir sampling** | Maintaining a uniform random sample of fixed size k from a stream of unknown or unbounded length |
-| **Bounded-memory constraint** | A requirement, not a preference, that rules out algorithms needing O(n) extra storage regardless of their time complexity |
+| **Bounded-memory constraint** | A requirement, not a preference, that rules out algorithms needing $O(n)$ extra storage regardless of their time complexity |
 
 ## Mechanism
 
@@ -71,8 +71,8 @@ final heap: {7, 8, 9}  ==  the true top-3 of the stream  ✓
 ```
 
 Every comparison is against the root alone — the heap never needs to know where a rejected item would
-have ranked among the other k − 1 survivors, which is exactly why maintaining it costs O(log k) instead
-of O(k).
+have ranked among the other k − 1 survivors, which is exactly why maintaining it costs $O(\log k)$ instead
+of $O(k)$.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -130,18 +130,18 @@ std::vector<int> top_k_largest(const std::vector<int>& stream, std::size_t k) {
 
 | Approach | Time | Extra space | Streams? |
 |---|---|---|---|
-| Sort everything, take the last k | O(n log n) worst | O(n) or O(1) in place | No — needs all n first |
-| Min-heap of size k | O(n log k) worst | O(k) | Yes — one pass, O(k) memory |
-| [Quickselect](../sorting/quickselect.md) for the k-th value, then filter | O(n) average, O(n^2) worst | O(1) extra (in-place partition) | No — needs random access and multiple passes over the same array |
+| Sort everything, take the last k | $O(n \log n)$ worst | $O(n)$ or $O(1)$ in place | No — needs all n first |
+| Min-heap of size k | $O(n \log k)$ worst | $O(k)$ | Yes — one pass, $O(k)$ memory |
+| [Quickselect](../sorting/quickselect.md) for the k-th value, then filter | $O(n)$ average, $O(n^{2})$ worst | $O(1)$ extra (in-place partition) | No — needs random access and multiple passes over the same array |
 
-The crossover is k against n. A full sort pays `O(n log n)` regardless of k; the heap pays
-`O(n log k)`, which is cheaper whenever `k` is asymptotically smaller than `n` — and for the common
-case of a small fixed k (top-10 results, top-100 leaderboard) the heap's per-item cost is `O(log k)`,
-effectively constant. Quickselect is the fastest **average** case, `O(n)`, because each partition step
+The crossover is k against n. A full sort pays $O(n \log n)$ regardless of k; the heap pays
+$O(n \log k)$, which is cheaper whenever `k` is asymptotically smaller than `n` — and for the common
+case of a small fixed k (top-10 results, top-100 leaderboard) the heap's per-item cost is $O(\log k)$,
+effectively constant. Quickselect is the fastest **average** case, $O(n)$, because each partition step
 discards the side of the array that cannot contain the answer — see
 [Quickselect](../sorting/quickselect.md) for the recurrence — but it needs the whole array addressable
 and mutable in place, it does not preserve order among the k answers, and its worst case degrades to
-`O(n^2)` on an adversarial pivot sequence, the same failure mode as quicksort. The heap is the only one
+$O(n^{2})$ on an adversarial pivot sequence, the same failure mode as quicksort. The heap is the only one
 of the three that survives a stream it cannot rewind.
 
 ## Practical Usage
@@ -224,11 +224,11 @@ The proof is an induction on `i`; see the reference below rather than re-derivin
 
 ## Edge Cases & Pitfalls
 
-- **Building a max-heap for top-k largest.** A max-heap answers "what is my strongest item" for O(1)
+- **Building a max-heap for top-k largest.** A max-heap answers "what is my strongest item" for $O(1)$
   peek, which is the wrong question for eviction — you need to compare a newcomer against the *current
-  weakest survivor*, and finding the minimum of a max-heap is O(k), not O(1). This is the single most
+  weakest survivor*, and finding the minimum of a max-heap is $O(k)$, not $O(1)$. This is the single most
   common bug in this pattern; see [Heaps & Priority Queues](../data-structures/heaps.md) for why a
-  heap only gives O(1) access to the side it is built to prefer.
+  heap only gives $O(1)$ access to the side it is built to prefer.
 - **`heap[0]` peek without the size check.** Comparing against `heap[0]` before the heap has reached
   size k compares against the wrong thing — an empty or partially-filled heap has no "weakest of k"
   yet, so every item should be pushed unconditionally until the heap first reaches size k.
@@ -238,17 +238,17 @@ The proof is an induction on `i`; see the reference below rather than re-derivin
   equal-valued items survives when only one can. Neither is "more correct"; pick one and be consistent,
   and say so if determinism matters downstream.
 - **Assuming quickselect works on a stream.** Quickselect needs the whole collection materialised and
-  mutable for in-place partitioning; it is an in-memory, offline algorithm despite its O(n) average
-  time looking attractive next to the heap's O(n log k).
+  mutable for in-place partitioning; it is an in-memory, offline algorithm despite its $O(n)$ average
+  time looking attractive next to the heap's $O(n \log k)$.
 
 ## Comparisons
 
 | | Min-heap top-k | Sort everything | [Quickselect](../sorting/quickselect.md) | Reservoir sampling |
 |---|---|---|---|---|
 | Answers | k largest, unordered among themselves | k largest, fully ordered, plus everything else's rank | The k-th order statistic (or a fixed top-k with post-filtering) | A uniform random k-subset |
-| Time (worst) | O(n log k) | O(n log n) | O(n^2) | O(n) |
-| Time (typical case named) | O(n log k) worst | O(n log n) worst | O(n) average | O(n) worst |
-| Extra space | O(k) | O(1)–O(n) | O(1) extra | O(k) |
+| Time (worst) | $O(n \log k)$ | $O(n \log n)$ | $O(n^{2})$ | $O(n)$ |
+| Time (typical case named) | $O(n \log k)$ worst | $O(n \log n)$ worst | $O(n)$ average | $O(n)$ worst |
+| Extra space | $O(k)$ | $O(1)$–$O(n)$ | $O(1)$ extra | $O(k)$ |
 | Needs the full input up front | No | Yes | Yes | No |
 
 ## Recall
@@ -278,13 +278,13 @@ The proof is an induction on `i`; see the reference below rather than re-derivin
   [`heapq.heapreplace`](https://docs.python.org/3/library/heapq.html#heapq.heapreplace) — CPython
   docs; `nlargest`'s own note on when it beats `sorted()[:n]`.
 - [`[partial.sort.copy]`](https://eel.is/c++draft/partial.sort.copy) — the C++ standard's guarantee for
-  `std::partial_sort_copy`, O(n log k) in the destination range's length.
+  `std::partial_sort_copy`, $O(n \log k)$ in the destination range's length.
 
 ## Related Pages
 
 - [Heaps & Priority Queues](../data-structures/heaps.md) — the structure behind every heap-based
-  solution here, including why it gives O(1) access to only one end.
-- [Quickselect](../sorting/quickselect.md) — the O(n)-average alternative when the input is fully in
+  solution here, including why it gives $O(1)$ access to only one end.
+- [Quickselect](../sorting/quickselect.md) — the $O(n)$-average alternative when the input is fully in
   memory and only one order statistic is needed.
 - [Probabilistic Data Structures](../data-structures/probabilistic-structures.md) — other structures
   that trade exactness for bounded memory over large or streaming inputs.

@@ -299,7 +299,7 @@ int main() {
 | Worst case | $O(n^2)$ | $O(n \log n)$ | $O(n \log n)$ |
 | Space | $O(\log n)$ | $O(n)$ | **$O(1)$** |
 | Stable | No | **Yes** | No |
-| Used by | C++ `std::sort`, Rust `sort_unstable` | Java objects, Python (as Timsort) | Introsort's fallback |
+| Used by | C++ `std::sort`, Rust `sort_unstable` | Python (as Timsort) | Introsort's fallback |
 
 ## Recall
 
@@ -308,7 +308,8 @@ int main() {
   costs={[
     ["best/average case (balanced partitions)", "O(n log n)"],
     ["worst case (maximally unbalanced partitions)", "O(n^2)"],
-    ["extra space (worst, recursion stack)", "O(log n)"],
+    ["extra space (worst, recursion stack, smaller-side-first)", "O(log n)"],
+    ["extra space (worst, recursion stack, naive)", "O(n)"],
     ["three-way partition, many duplicate keys (best)", "O(n)"],
   ]}
   reachFor="In-memory array sorting where average speed matters more than a worst-case guarantee and stability is not required — the default choice behind std::sort's introsort hybrid."

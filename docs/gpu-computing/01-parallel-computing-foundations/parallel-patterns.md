@@ -44,13 +44,13 @@ Real kernels are rarely a single pattern in isolation — softmax is a reduce (f
 
 | Pattern | Work | Communication | Implemented in |
 |---|---|---|---|
-| Map | O(n) | None | [Vector Add and SAXPY](../13-applied-kernels-and-patterns/vector-add-and-saxpy.md) |
-| Reduce | O(n) | Tree-structured, O(log n) depth | [Parallel Reduction](../13-applied-kernels-and-patterns/parallel-reduction.md) |
-| Scan | O(n log n) work-inefficient, O(n) work-efficient | Two-pass tree (up-sweep, down-sweep) | [Prefix Sum](../13-applied-kernels-and-patterns/prefix-sum.md) |
-| Gather / scatter | O(n) | None (but irregular addressing) | [Sparse Matrix-Vector Multiply](../13-applied-kernels-and-patterns/sparse-matrix-vector.md) |
-| Stencil | O(n) | Local neighborhood overlap | [Stencil and Convolution](../13-applied-kernels-and-patterns/stencil-and-convolution.md) |
-| Histogram | O(n) | Contended writes into shared bins | [Histogram](../13-applied-kernels-and-patterns/histogram.md) |
-| Sort | O(n log n) | Algorithm-dependent, often all-to-all | [Sorting on the GPU](../13-applied-kernels-and-patterns/sorting-on-the-gpu.md) |
+| Map | $O(n)$ | None | [Vector Add and SAXPY](../13-applied-kernels-and-patterns/vector-add-and-saxpy.md) |
+| Reduce | $O(n)$ | Tree-structured, $O(\log n)$ depth | [Parallel Reduction](../13-applied-kernels-and-patterns/parallel-reduction.md) |
+| Scan | $O(n \log n)$ work-inefficient, $O(n)$ work-efficient | Two-pass tree (up-sweep, down-sweep) | [Prefix Sum](../13-applied-kernels-and-patterns/prefix-sum.md) |
+| Gather / scatter | $O(n)$ | None (but irregular addressing) | [Sparse Matrix-Vector Multiply](../13-applied-kernels-and-patterns/sparse-matrix-vector.md) |
+| Stencil | $O(n)$ | Local neighborhood overlap | [Stencil and Convolution](../13-applied-kernels-and-patterns/stencil-and-convolution.md) |
+| Histogram | $O(n)$ | Contended writes into shared bins | [Histogram](../13-applied-kernels-and-patterns/histogram.md) |
+| Sort | $O(n \log n)$ | Algorithm-dependent, often all-to-all | [Sorting on the GPU](../13-applied-kernels-and-patterns/sorting-on-the-gpu.md) |
 
 ## See also
 

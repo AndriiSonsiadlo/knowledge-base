@@ -41,8 +41,8 @@ using DenseGraph = boost::adjacency_matrix<boost::undirectedS>;
 
 | Container | Best for | Edge lookup | Memory |
 |-----------|----------|-------------|--------|
-| `adjacency_list` | Sparse graphs, most use cases | O(out-degree) | O(V + E) |
-| `adjacency_matrix` | Dense graphs, frequent edge-existence queries | O(1) | O(V^2) |
+| `adjacency_list` | Sparse graphs, most use cases | $O(out-degree)$ | $O(V + E)$ |
+| `adjacency_matrix` | Dense graphs, frequent edge-existence queries | $O(1)$ | $O(V^{2})$ |
 
 ## Adding vertices and edges
 

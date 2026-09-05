@@ -58,7 +58,7 @@ auto to_string(T v) {
 ## `switch`
 
 A `switch` dispatches on an **integral or enum** value. It is not just sugar for `if` chains: the
-compiler can lower a dense `switch` to a jump table (O(1)), which an `if`/`else if` ladder cannot.
+compiler can lower a dense `switch` to a jump table ($O(1)$), which an `if`/`else if` ladder cannot.
 
 ```cpp showLineNumbers
 switch (token) {

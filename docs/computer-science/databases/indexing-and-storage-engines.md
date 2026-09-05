@@ -21,7 +21,7 @@ expensive, and every indexing scheme is ultimately trying to convert random work
 
 | Term | Meaning |
 |---|---|
-| **Full table scan** | Reading every row in a table to find matches — O(n) regardless of how selective the query is. |
+| **Full table scan** | Reading every row in a table to find matches — $O(n)$ regardless of how selective the query is. |
 | **Index** | A separate, sorted or hashed structure mapping column values to row locations, enabling lookups faster than a full scan. |
 | **B-tree** | A balanced, disk-oriented tree structure where each node holds many keys, keeping the tree shallow; the default index structure in most relational databases. |
 | **LSM-tree (Log-Structured Merge-tree)** | A write-optimized structure that buffers writes in memory and flushes them as sorted, immutable files, merging (compacting) them in the background. |
