@@ -182,3 +182,9 @@ signal through checked, mutex-protected state, never rely on wakeup timing alone
 - [Scheduling](./scheduling.md) — priority inversion, a scheduling problem caused by locking.
 - [Inter-Process Communication](./interprocess-communication.md) — coordination across, rather than
   within, address spaces.
+- [Memory Ordering and Consistency](../cpu-architecture/memory-ordering-and-consistency.md),
+  [Atomic Operations in Hardware](../cpu-architecture/atomic-operations-in-hardware.md), and
+  [Cache Coherence and MESI](../memory-hierarchy/cache-coherence-and-mesi.md) — the hardware these
+  primitives ultimately rest on.
+- [`../../linux/09-concurrency-and-locking/why-kernel-concurrency-is-different.md`](../../linux/09-concurrency-and-locking/why-kernel-concurrency-is-different.md) —
+  how a kernel uses them.

@@ -155,3 +155,7 @@ TLB pressure even when the CPU cache hit rate looks fine.
 - [Memory Hierarchy & RAM — Overview](./intro.md)
 - [CPU Caches](./cpu-caches.md)
 - [Operating Systems](../operating-systems/intro.md)
+- [The TLB and Address-Translation Hardware](./tlb-and-address-translation-hardware.md) — the cache
+  that makes paying this walk's cost on every access unnecessary.
+- [`../../linux/08-memory-management/page-tables-and-the-walk.md`](../../linux/08-memory-management/page-tables-and-the-walk.md) —
+  the Linux-specific walk, building on the four/five-level structure described above.

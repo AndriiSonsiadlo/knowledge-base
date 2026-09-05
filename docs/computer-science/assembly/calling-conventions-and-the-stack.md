@@ -58,6 +58,39 @@ trampoline/PLT (dynamic linking) stubs and syscall wrappers have scratch registe
 having to spill anything.
 :::
 
+## The Linux syscall convention
+
+The System V AMD64 ABI above governs ordinary C function calls. Asking the kernel for something —
+a **syscall** — is a different, separate convention, even though it reuses several of the same
+registers:
+
+| Purpose | Register |
+|---|---|
+| Syscall number | `rax` |
+| Argument 1 | `rdi` |
+| Argument 2 | `rsi` |
+| Argument 3 | `rdx` |
+| Argument 4 | `r10` |
+| Argument 5 | `r8` |
+| Argument 6 | `r9` |
+| Return value | `rax` |
+
+:::info[`r10` takes the place of `rcx` — the one surprising detail]
+The function-call ABI's fourth argument register is `rcx`. The syscall convention's fourth
+argument register is `r10` instead. This isn't an oversight: the `SYSCALL` instruction itself
+uses `rcx` to hold the return address (and `r11` to hold `RFLAGS`) as part of entering the
+kernel, so `rcx` is unavailable for argument passing at the exact moment a syscall argument would
+need to sit in it. `r10` is used in its place for no reason other than being free.
+:::
+
+Because `SYSCALL` uses `rcx` and `r11` internally, **their prior contents are not preserved**
+across a syscall — code that has live values in `rcx` or `r11` immediately before a syscall must
+treat them as clobbered afterward, exactly like a caller-saved register across an ordinary call,
+except unconditionally rather than only when the callee happens to use them.
+
+See [`../../linux/05-syscalls-and-the-boundary/arguments-return-values-and-errno.md`](../../linux/05-syscalls-and-the-boundary/arguments-return-values-and-errno.md)
+for how argument marshaling and `errno` actually work on top of this convention.
+
 ## Mechanism: Stack Frame Anatomy
 
 <Figure src="/img/cs/assembly/call-stack-layout.png"

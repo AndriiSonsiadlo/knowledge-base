@@ -190,3 +190,7 @@ example and fix.
 - [Virtual Memory & Paging](./virtual-memory-and-paging.md)
 - [Multicore & Parallelism](../cpu-architecture/multicore-and-parallelism.md)
 - [Pipelining](../cpu-architecture/pipelining.md)
+- [Cache Coherence and MESI](./cache-coherence-and-mesi.md) — what happens when several caches hold
+  one line.
+- [The TLB and Address-Translation Hardware](./tlb-and-address-translation-hardware.md) — the
+  translation cache, structured the same way.

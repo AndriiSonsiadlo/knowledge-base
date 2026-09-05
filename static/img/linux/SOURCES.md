@@ -8,6 +8,7 @@ Images are referenced as `/img/linux/...` (no `/knowledge-base` prefix; Docusaur
 |---|---|---|---|---|
 | `kernel-architecture-and-idioms/linux-kernel-diagram.svg` | https://graphviz.org/Gallery/directed/Linux_kernel_diagram.svg | Graphviz gallery | 2026-08-29 | Whole-kernel subsystem map, rendered from the gallery's DOT source. Far too dense to read inline — used zoomable. Vector, unmodified. |
 | `overview/privilege-rings.svg` | https://upload.wikimedia.org/wikipedia/commons/2/2f/Priv_rings.svg | Wikimedia Commons | 2026-08-29 | x86 protection rings 0–3 as concentric circles. Vector, unmodified. |
+| `memory-management/x86-64-paging.png` | https://commons.wikimedia.org/wiki/File:X86_Paging_64bit.svg | Wikimedia Commons | 2026-09-11 | Four-level x86-64 page walk (PML4/PDP/PD/PT + 4K page) from CR3, with the 9-9-9-9-12 bit split. 1280px PNG rendering of the source SVG, unmodified content. |
 
 ## Policy
 

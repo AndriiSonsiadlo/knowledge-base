@@ -212,3 +212,5 @@ silently corrupt another thread's data with no kernel protection between them �
   memory between threads.
 - [Inter-Process Communication](./interprocess-communication.md) — how isolated processes talk anyway.
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md) — the TLB effects of a process context switch.
+- [`../../linux/06-processes-and-threads/threads-are-tasks.md`](../../linux/06-processes-and-threads/threads-are-tasks.md) —
+  the Linux answer, where the process/thread distinction largely dissolves.

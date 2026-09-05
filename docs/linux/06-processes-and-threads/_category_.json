@@ -1,0 +1,8 @@
+{
+  "label": "Processes and Threads",
+  "position": 7,
+  "link": {
+    "type": "generated-index",
+    "description": "What Linux actually schedules and how one comes into existence: `task_struct`, `clone()` as a menu of what to share, fork and exec, address spaces, signals, exit, and `/proc` as the window onto all of it."
+  }
+}

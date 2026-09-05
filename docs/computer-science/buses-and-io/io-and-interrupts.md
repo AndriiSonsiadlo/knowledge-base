@@ -168,3 +168,7 @@ or by switching to polling under heavy load (e.g., Linux's NAPI).
 - [System Interconnects](./system-interconnects.md)
 - [Operating Systems](../operating-systems/intro.md)
 - [Storage: HDD, SSD & NVMe](../storage/intro.md)
+- [Interrupt Controllers](./interrupt-controllers.md) — the routing hardware between a device
+  asserting a line and a CPU taking the interrupt.
+- [`../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md`](../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md) —
+  the software path once it does.

@@ -1,0 +1,8 @@
+{
+  "label": "Interrupts, Time, and Deferred Work",
+  "position": 11,
+  "link": {
+    "type": "generated-index",
+    "description": "How hardware interrupts the kernel and what the kernel does about it: the IRQ subsystem, hard-IRQ rules, softirqs, workqueues, threaded handlers, clocksources, the tick, and timers."
+  }
+}

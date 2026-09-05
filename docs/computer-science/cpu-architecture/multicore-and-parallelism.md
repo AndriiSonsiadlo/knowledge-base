@@ -141,3 +141,9 @@ PaddedCounter a, b; // now on different cache lines, no false sharing
 - [Superscalar & Out-of-Order Execution](./superscalar-and-out-of-order-execution.md)
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md) — cache coherence protocols referenced above.
 - [Operating Systems](../operating-systems/intro.md) — how the OS scheduler assigns threads to cores.
+- [Memory Ordering and Consistency](./memory-ordering-and-consistency.md) and
+  [Atomic Operations in Hardware](./atomic-operations-in-hardware.md) — what lets these cores share
+  memory safely.
+- [Cache Coherence and MESI](../memory-hierarchy/cache-coherence-and-mesi.md) and
+  [NUMA and Memory Topology](../memory-hierarchy/numa-and-memory-topology.md) — the coherence
+  protocol behind the picture above, and what happens once cores stop sharing one memory controller.
