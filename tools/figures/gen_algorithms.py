@@ -533,6 +533,126 @@ def ternary_search_narrowing():
     save(fig_, "algorithms/ternary-search-narrowing.png")
 
 
+def euclid_steps():
+    """gcd(252, 198) as shrinking rectangles: each step's remainder becomes the next side."""
+    # (width, height) of the rectangle at each step; the last is the square whose side is the GCD
+    rects = [(252, 198), (198, 54), (54, 36), (36, 18), (18, 18)]
+    titles = ["252 x 198", "198 x 54", "54 x 36", "36 x 18", "18 x 18"]
+    f, axes = kbstyle.grid(1, len(rects), 13.5, 3.6)
+    max_side = max(max(w, h) for w, h in rects)
+    for ax, (w, h), title in zip(axes, rects, titles):
+        clean(ax)
+        ax.set_xlim(-max_side * 0.06, max_side * 1.06)
+        ax.set_ylim(-max_side * 0.06, max_side * 1.06)
+        ax.set_aspect("equal")
+        is_square = w == h
+        ax.add_patch(plt.Rectangle((0, 0), w, h, facecolor=C.yellow if is_square else C.sky,
+                                   edgecolor=C.black, lw=2.0))
+        if not is_square:
+            # tile the largest possible squares (side = min(w, h)); what's left is the remainder
+            side = min(w, h)
+            count = max(w, h) // side
+            for k in range(count):
+                x, y = (k * side, 0) if w >= h else (0, k * side)
+                ax.add_patch(plt.Rectangle((x, y), side, side, facecolor="none",
+                                           edgecolor=C.blue, lw=1.6, ls="--"))
+            remainder = max(w, h) - count * side
+            note = f"remainder {remainder}" if remainder else "exact"
+            ax.set_xlabel(note, fontsize=10, color=C.blue, fontweight="bold")
+        else:
+            ax.set_xlabel("GCD found", fontsize=10, color=C.red, fontweight="bold")
+        ax.set_title(title, fontsize=12)
+    f.subplots_adjust(wspace=0.55, top=0.72)
+    f.suptitle("Euclid's algorithm, gcd(252, 198) = 18: each step tiles the largest square that fits",
+               fontsize=13.5, fontweight="bold")
+    save(f, "algorithms/euclid-steps.png")
+
+
+def pascals_triangle():
+    """First 8 rows of Pascal's triangle, with the C(5, 2) path highlighted."""
+    rows = 8
+    triangle = [[1]]
+    for n in range(1, rows):
+        prev = triangle[-1]
+        triangle.append([1] + [prev[k - 1] + prev[k] for k in range(1, n)] + [1])
+
+    # the path from C(5,2) back to the two parents that sum into it
+    highlight = {(5, 2), (4, 1), (4, 2)}
+
+    f, ax = fig(8.4, 6.0)
+    clean(ax)
+    ax.set_xlim(-rows * 0.6, rows * 0.6)
+    ax.set_ylim(-0.7, rows)
+    for n, row in enumerate(triangle):
+        y = rows - 1 - n
+        x0 = -n * 0.6
+        for k, value in enumerate(row):
+            x = x0 + k * 1.2
+            on_path = (n, k) in highlight
+            color = C.orange if on_path else "white"
+            edge = C.red if on_path else C.black
+            ax.add_patch(plt.Circle((x, y), 0.42, facecolor=color, edgecolor=edge,
+                                    lw=2.4 if on_path else 1.4, zorder=3))
+            ax.text(x, y, str(value), ha="center", va="center", fontsize=11,
+                    fontweight="bold" if on_path else "normal", zorder=4)
+    ax.annotate("", xy=(-0.6, rows - 6), xytext=(0.0, rows - 5), zorder=2,
+                arrowprops=dict(arrowstyle="-|>", color=C.red, lw=2.0))
+    ax.annotate("", xy=(0.6, rows - 6), xytext=(0.0, rows - 5), zorder=2,
+                arrowprops=dict(arrowstyle="-|>", color=C.red, lw=2.0))
+    ax.text(0.0, -0.5, "C(5,2) = C(4,1) + C(4,2) = 4 + 6 = 10", ha="center", fontsize=12,
+            color=C.red, fontweight="bold")
+    ax.set_title("Pascal's triangle, rows 0-7: C(n,k) = C(n-1,k-1) + C(n-1,k)", fontsize=13.5)
+    save(f, "algorithms/pascals-triangle.png")
+
+
+def shuffle_bias():
+    """Outcome distribution of correct Fisher-Yates vs the classic off-by-one bug, 3 elements."""
+    import itertools
+    import random
+
+    def fisher_yates(a, rng):
+        a = list(a)
+        for i in range(len(a) - 1, 0, -1):
+            j = rng.randint(0, i)
+            a[i], a[j] = a[j], a[i]
+        return tuple(a)
+
+    def fisher_yates_buggy(a, rng):
+        a = list(a)
+        n = len(a)
+        for i in range(n - 1, 0, -1):
+            j = rng.randint(0, n - 1)
+            a[i], a[j] = a[j], a[i]
+        return tuple(a)
+
+    items = ["X", "Y", "Z"]
+    perms = list(itertools.permutations(items))
+    trials = 12000
+    rng = random.Random(0)
+    correct_counts = {p: 0 for p in perms}
+    buggy_counts = {p: 0 for p in perms}
+    for _ in range(trials):
+        correct_counts[fisher_yates(items, rng)] += 1
+        buggy_counts[fisher_yates_buggy(items, rng)] += 1
+
+    labels = ["".join(p) for p in perms]
+    ideal = trials / len(perms)
+
+    f, (left, right) = kbstyle.grid(1, 2, 9.6, 4.6, sharey=True)
+    for ax, counts, title in ((left, correct_counts, "correct Fisher-Yates"),
+                              (right, buggy_counts, "buggy: j drawn from [0, n-1] every step")):
+        values = [counts[p] for p in perms]
+        ax.bar(labels, values, color=C.blue if ax is left else C.red, width=0.65)
+        ax.axhline(ideal, color=C.grey, ls="--", lw=1.6)
+        ax.set_title(title, fontsize=11.5)
+        ax.set_ylabel("occurrences" if ax is left else "")
+        ax.tick_params(axis="x", labelrotation=45)
+    f.subplots_adjust(top=0.78, wspace=0.15)
+    f.suptitle(f"Outcome distribution over {trials} trials, 3 elements: uniform vs skewed",
+               fontsize=14, fontweight="bold")
+    save(f, "algorithms/shuffle-bias.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
@@ -549,6 +669,9 @@ FIGURES = {
     "ternary_search_narrowing": ternary_search_narrowing,
     "string_concat_cost": string_concat_cost,
     "rolling_hash_window": rolling_hash_window,
+    "euclid_steps": euclid_steps,
+    "pascals_triangle": pascals_triangle,
+    "shuffle_bias": shuffle_bias,
 }
 
 if __name__ == "__main__":

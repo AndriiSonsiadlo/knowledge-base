@@ -55,6 +55,7 @@ Refetch everything with `node tools/fetch-commons.mjs <manifest.json>`.
 | `algorithms/red-black-tree.png` | https://commons.wikimedia.org/wiki/File:Red-black_tree_example.svg | Cburnett | CC BY-SA 3.0 |
 | `algorithms/segment-tree.png` | https://commons.wikimedia.org/wiki/File:Segment_tree.svg | Cafce25 | CC BY-SA 4.0 |
 | `algorithms/selection-sort.gif` | https://commons.wikimedia.org/wiki/File:Selection-Sort-Animation.gif | en:Joestape89 | CC BY-SA 3.0 |
+| `algorithms/sieve-of-eratosthenes-animation.gif` | https://commons.wikimedia.org/wiki/File:Sieve_of_Eratosthenes_animation.gif | SKopp at German Wikipedia | CC BY-SA 3.0 |
 | `algorithms/singly-linked-list.png` | https://commons.wikimedia.org/wiki/File:Singly-linked-list.svg | Vectorization: Lasindi | Public domain |
 | `algorithms/stack.png` | https://commons.wikimedia.org/wiki/File:Data_stack.svg | User:Boivie | Public domain |
 | `algorithms/topological-order.png` | https://commons.wikimedia.org/wiki/File:Topological_Ordering.svg | David Eppstein | CC0 |
