@@ -653,6 +653,82 @@ def shuffle_bias():
     save(f, "algorithms/shuffle-bias.png")
 
 
+def monotonic_stack_trace():
+    """Next-greater-element scan over [3, 1, 4, 1, 5, 9, 2, 6]: bars plus the stack at four steps."""
+    a = [3, 1, 4, 1, 5, 9, 2, 6]
+    # (i, stack indices after processing i, known answers after processing i)
+    steps = [
+        (2, [2], {0: 4, 1: 4}),
+        (4, [4], {0: 4, 1: 4, 2: 5, 3: 5}),
+        (5, [5], {0: 4, 1: 4, 2: 5, 3: 5, 4: 9}),
+        (7, [5, 7], {0: 4, 1: 4, 2: 5, 3: 5, 4: 9, 6: 6}),
+    ]
+    f, axes = kbstyle.grid(4, 1, 7.4, 10.8)
+    for ax, (i, stack, known) in zip(axes, steps):
+        clean(ax)
+        ax.set_xlim(-0.7, len(a) - 0.3)
+        ax.set_ylim(-2.4, max(a) + 2.2)
+        for j, v in enumerate(a):
+            processed = j <= i
+            on_stack = j in stack
+            color = C.orange if on_stack else (C.blue if processed else C.light)
+            ax.add_patch(plt.Rectangle((j - 0.35, 0), 0.7, v, facecolor=color,
+                                       edgecolor=C.black, lw=1.8 if processed else 1.0))
+            ax.text(j, v + 0.45, str(v), ha="center", fontsize=10.5, fontweight="bold")
+            if j in known:
+                ax.text(j, -0.6, str(known[j]), ha="center", fontsize=10, color=C.red,
+                        fontweight="bold")
+            elif j <= i:
+                ax.text(j, -0.6, "?", ha="center", fontsize=10, color=C.grey)
+        stack_str = " | ".join(f"idx{s}(v={a[s]})" for s in stack)
+        ax.text((len(a) - 1) / 2, -1.7, f"stack bottom→top: {stack_str}",
+                ha="center", fontsize=10.5, color=C.orange, fontweight="bold")
+        ax.set_title(f"after i = {i}  (value {a[i]})", fontsize=12)
+    f.suptitle("Next greater element: bars are blue once processed, orange while on the stack",
+               fontsize=14.5, fontweight="bold")
+    save(f, "algorithms/monotonic-stack-trace.png")
+
+
+def sweep_line_timeline():
+    """Intervals (1,4) (2,6) (8,10) (9,12): timeline bars and the active-count step function beneath."""
+    intervals = [(1, 4), (2, 6), (8, 10), (9, 12)]
+    events = sorted([(s, 1) for s, _ in intervals] + [(e, -1) for _, e in intervals])
+    xs, ys = [0], [0]
+    running = 0
+    for t, delta in events:
+        xs += [t, t]
+        ys += [running, running + delta]
+        running += delta
+    xs.append(13)
+    ys.append(running)
+
+    f, (top, bot) = kbstyle.grid(2, 1, 7.6, 5.2, sharex=True,
+                                 gridspec_kw={"height_ratios": [1, 1.1]})
+    clean(top)
+    top.set_xlim(0, 13)
+    top.set_ylim(-0.6, len(intervals))
+    for row, (s, e) in enumerate(intervals):
+        y = len(intervals) - 1 - row
+        top.plot([s, e], [y, y], color=C.blue, lw=9, solid_capstyle="butt", zorder=2)
+        top.plot([s, s], [y - 0.25, y + 0.25], color=C.black, lw=2)
+        top.plot([e, e], [y - 0.25, y + 0.25], color=C.black, lw=2)
+        top.text((s + e) / 2, y + 0.4, f"({s}, {e})", ha="center", fontsize=10.5,
+                 fontweight="bold")
+    top.set_title("Intervals on the timeline", fontsize=12.5)
+
+    bot.plot(xs, ys, color=C.red, lw=2.6, zorder=3)
+    for t, _ in events:
+        bot.axvline(t, color=C.light, ls="--", lw=1.2, zorder=1)
+    bot.set_xticks(sorted({t for t, _ in events}))
+    bot.set_ylim(-0.4, 2.6)
+    bot.set_xlabel("time")
+    bot.set_ylabel("active count")
+    bot.set_title("Event sweep: +1 at a start, -1 at an end", fontsize=12.5)
+    f.suptitle("Sweep line: sorting endpoints turns overlap counting into a running total",
+               fontsize=14, fontweight="bold")
+    save(f, "algorithms/sweep-line-timeline.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
@@ -672,6 +748,8 @@ FIGURES = {
     "euclid_steps": euclid_steps,
     "pascals_triangle": pascals_triangle,
     "shuffle_bias": shuffle_bias,
+    "monotonic_stack_trace": monotonic_stack_trace,
+    "sweep_line_timeline": sweep_line_timeline,
 }
 
 if __name__ == "__main__":
