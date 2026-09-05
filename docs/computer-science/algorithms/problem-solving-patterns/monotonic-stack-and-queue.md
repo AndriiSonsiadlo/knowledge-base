@@ -40,7 +40,8 @@ one careful loop.
 
 <Figure src="/img/cs/algorithms/monotonic-stack-trace.png"
         alt="Four bar-chart panels of the array 3 1 4 1 5 9 2 6, with processed bars in blue, the current top-of-stack bar in orange, and resolved next-greater answers labelled beneath each bar as they become known"
-        caption="Each panel is one snapshot after processing index i. A bar turns from grey (unprocessed) to blue the moment it is pushed, and gets its answer labelled the moment something bigger pops it off." />
+        caption="Each panel is one snapshot after processing index i. A bar turns from grey (unprocessed) to blue the moment it is pushed, and gets its answer labelled the moment something bigger pops it off."
+        source="Generated for this page" href="" license="" />
 
 ```text
 a = [3, 1, 4, 1, 5, 9, 2, 6]        indices: 0  1  2  3  4  5  6  7

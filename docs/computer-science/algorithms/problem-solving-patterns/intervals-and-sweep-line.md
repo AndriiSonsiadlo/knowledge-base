@@ -41,7 +41,8 @@ leaves the most room for whatever comes after it, and no exchange argument beats
 
 <Figure src="/img/cs/algorithms/sweep-line-timeline.png"
         alt="Four horizontal bars for the intervals (1,4), (2,6), (8,10) and (9,12) on a timeline, with a step function beneath rising to 2 where the first two intervals and the last two intervals each overlap"
-        caption="Reading the endpoints in order, not the intervals: the active count rises by one at every start and falls by one at every end." />
+        caption="Reading the endpoints in order, not the intervals: the active count rises by one at every start and falls by one at every end."
+        source="Generated for this page" href="" license="" />
 
 ```text
 intervals = [(1, 4), (2, 6), (8, 10), (9, 12)]
