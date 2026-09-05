@@ -729,6 +729,64 @@ def sweep_line_timeline():
     save(f, "algorithms/sweep-line-timeline.png")
 
 
+def dp_fill_order():
+    """0/1 knapsack DP grid for items [(1,1),(3,4),(4,5),(5,7)], capacity 7: cells shaded
+    by fill order (row-major), with the two-row rolling-array window outlined."""
+    items = [(1, 1), (3, 4), (4, 5), (5, 7)]
+    capacity = 7
+    n = len(items)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        w, v = items[i - 1]
+        for c in range(capacity + 1):
+            dp[i][c] = dp[i - 1][c]
+            if w <= c:
+                dp[i][c] = max(dp[i][c], dp[i - 1][c - w] + v)
+
+    rows, cols = n + 1, capacity + 1
+    order = {(i, c): i * cols + c for i in range(rows) for c in range(cols)}
+    max_order = max(order.values())
+
+    f, ax = fig(8.4, 5.4)
+    clean(ax)
+    ax.set_xlim(-1.6, cols - 0.3)
+    ax.set_ylim(-0.8, rows + 0.3)
+    ax.set_aspect("equal")
+
+    import matplotlib.colors as mcolors
+
+    blue_rgb = mcolors.to_rgb(C.blue)
+    window_rows = {2, 3}   # the rolling window: previous row and row being written
+    for i in range(rows):
+        y = rows - 1 - i
+        ax.text(-1.2, y, f"item {i}" if i else "base", ha="left", va="center",
+                fontsize=10, color=C.grey)
+        for c in range(cols):
+            t = order[(i, c)] / max_order
+            face = tuple(1 - t * (1 - ch) for ch in blue_rgb)  # white -> C.blue by fill order
+            edge = C.red if i in window_rows else C.black
+            lw = 2.6 if i in window_rows else 1.0
+            ax.add_patch(plt.Rectangle((c - 0.46, y - 0.46), 0.92, 0.92, facecolor=face,
+                                       edgecolor=edge, lw=lw, zorder=2))
+            ax.text(c, y, str(dp[i][c]), ha="center", va="center", fontsize=10.5,
+                    fontweight="bold", color=C.black, zorder=3)
+    for c in range(cols):
+        ax.text(c, rows + 0.05, str(c), ha="center", va="bottom", fontsize=10, color=C.grey)
+    ax.text(-1.2, rows + 0.05, "cap", ha="left", va="bottom", fontsize=10, color=C.grey,
+            fontweight="bold")
+
+    win_y_top = rows - 1 - min(window_rows) + 0.5
+    win_y_bot = rows - 1 - max(window_rows) - 0.5
+    ax.add_patch(plt.Rectangle((-0.5, win_y_bot), cols - 0.5, win_y_top - win_y_bot,
+                               facecolor="none", edgecolor=C.red, lw=2.8, ls="--", zorder=4))
+    ax.text(cols - 0.5, win_y_bot - 0.35,
+            "rolling-array window: only these two rows exist at once", ha="right",
+            fontsize=10.5, color=C.red, fontweight="bold")
+    ax.set_title("0/1 knapsack DP grid: cells shade light -> dark in fill order (row by row)",
+                 fontsize=13)
+    save(f, "algorithms/dp-fill-order.png")
+
+
 FIGURES = {
     "amortized_push_cost": amortized_push_cost,
     "dsu_forest": dsu_forest,
@@ -750,6 +808,7 @@ FIGURES = {
     "shuffle_bias": shuffle_bias,
     "monotonic_stack_trace": monotonic_stack_trace,
     "sweep_line_timeline": sweep_line_timeline,
+    "dp_fill_order": dp_fill_order,
 }
 
 if __name__ == "__main__":
