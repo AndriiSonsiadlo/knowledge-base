@@ -37,66 +37,12 @@ And two ways to implement it:
 
 ## Mechanism
 
-### The same problem, three ways
-
-<Tabs groupId="code-lang">
-<TabItem value="python" label="Python">
-
-```python showLineNumbers
-# 1. Naive recursion — O(2ⁿ). fib(n-1) and fib(n-2) recompute the same values.
-def fib_naive(n):
-    return n if n < 2 else fib_naive(n - 1) + fib_naive(n - 2)
-
-# 2. Top-down: identical logic, plus a cache — O(n)
-from functools import lru_cache
-
-@lru_cache(maxsize=None)
-def fib_memo(n):
-    return n if n < 2 else fib_memo(n - 1) + fib_memo(n - 2)
-
-# 3. Bottom-up: fill a table in dependency order — O(n) time, O(1) space
-def fib_table(n):
-    prev, cur = 0, 1
-    for _ in range(n):
-        prev, cur = cur, prev + cur
-    return prev
-```
-
-</TabItem>
-<TabItem value="cpp" label="C++">
-
-```cpp showLineNumbers
-// 1. Naive recursion — O(2ⁿ). fib(n-1) and fib(n-2) recompute the same values.
-long long fib_naive(int n) {
-    return n < 2 ? n : fib_naive(n - 1) + fib_naive(n - 2);
-}
-
-// 2. Top-down: identical logic, plus a cache — O(n)
-long long fib_memo(int n) {
-    static std::unordered_map<int, long long> cache;
-    if (n < 2) return n;
-    auto it = cache.find(n);
-    if (it != cache.end()) return it->second;
-    return cache[n] = fib_memo(n - 1) + fib_memo(n - 2);
-}
-
-// 3. Bottom-up: fill a table in dependency order — O(n) time, O(1) space
-long long fib_table(int n) {
-    long long prev = 0, cur = 1;
-    for (int i = 0; i < n; ++i) {
-        long long next = prev + cur;
-        prev = cur;
-        cur = next;
-    }
-    return prev;
-}
-```
-
-</TabItem>
-</Tabs>
-
-The third version is what the second becomes once you notice only two entries are ever needed. That
-progression — recurrence, memoise, tabulate, shrink the table — is the standard workflow.
+The mechanical journey from a first working solution to a fast one — plain recursion, then a cache
+bolted on top (memoization), then the same recurrence read as a fill order over a table
+(tabulation), then the table collapsed to the one row it needs — is walked in full, step by step, on
+one worked example, in
+[Recursion, Memoization & Tabulation](./recursion-memoization-tabulation.md). That page is the bridge
+from "I have a recurrence" to "I have a table"; it is not repeated here.
 
 ### The workflow, on a real problem
 
@@ -125,6 +71,11 @@ def knapsack(weights, values, capacity):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <string_view>
+#include <unordered_map>
+#include <vector>
+
 int knapsack(const std::vector<int>& weights, const std::vector<int>& values, int capacity) {
     int n = static_cast<int>(weights.size());
     // dp[i][c] = best value using the first i items within capacity c
@@ -144,6 +95,28 @@ int knapsack(const std::vector<int>& weights, const std::vector<int>& values, in
 
 </TabItem>
 </Tabs>
+
+Traced on items `(w=1,v=1), (w=3,v=4), (w=4,v=5), (w=5,v=7)` with capacity 7 — `dp[i][c]` is the best
+value using the first `i` items within capacity `c`:
+
+```text
+i (items so far)     c=0  1  2  3  4  5  6  7
+0 (none)              0  0  0  0  0  0  0  0
+1 (+ w1,v1)           0  1  1  1  1  1  1  1
+2 (+ w3,v4)           0  1  1  4  5  5  5  5
+3 (+ w4,v5)           0  1  1  4  5  6  6  9
+4 (+ w5,v7)           0  1  1  4  5  7  8  9
+
+dp[4][7] = 9   (take item 2 and item 3: weight 3+4=7, value 4+5=9)
+```
+
+Row `i` only ever reads row `i - 1`, which is what lets it collapse to one row — see the linked page
+for exactly how that collapse is derived.
+
+```python showLineNumbers
+WEIGHTS, VALUES, CAP = [1, 3, 4, 5], [1, 4, 5, 7], 7
+assert knapsack(WEIGHTS, VALUES, CAP) == 9
+```
 
 Each cell depends only on the previous row, so one row suffices — provided you iterate capacity
 **downward**, so that each item is used at most once:
@@ -295,6 +268,21 @@ stall.
 | Guarantees optimum | Yes | Only with a proof | Yes | Yes |
 | Typical cost | Polynomial | $O(n \log n)$ | $O(n \log n)$ | Exponential |
 
+## Recall
+
+<Recall
+  invariant="A state is solved once and its answer reused everywhere it recurs — overlapping subproblems plus optimal substructure is what makes that reuse both possible and sufficient for correctness."
+  costs={[
+    ["top-down, memoized state lookup (average)", "O(1)"],
+    ["0/1 knapsack, n items x capacity states (worst)", "O(n * capacity)"],
+    ["longest common subsequence, n x m states (worst)", "O(n * m)"],
+    ["edit distance, n x m states (worst)", "O(n * m)"],
+    ["knapsack collapsed to one row (worst)", "O(capacity) space"],
+  ]}
+  reachFor="The same subproblem recurs across different branches of a recursion, and each subproblem's optimal answer builds from optimal answers to smaller subproblems."
+  trap="Iterating the capacity loop upward instead of downward in the 1-D knapsack table. Upward lets `dp[c - w]` already include the current item, silently turning 0/1 knapsack into unbounded knapsack."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 15 — dynamic programming, with rod-cutting, matrix chains and LCS developed in full.
@@ -307,6 +295,8 @@ stall.
 
 ## Related Pages
 
+- [Recursion, Memoization & Tabulation](./recursion-memoization-tabulation.md) — the mechanical
+  bridge from a first recurrence to a fast table, walked step by step.
 - [Greedy Algorithms](./greedy-algorithms.md) — the cheaper approach, when its extra condition holds.
 - [Divide & Conquer](./divide-and-conquer.md) — the same recursion without the overlap.
 - [Backtracking](./backtracking.md) — for when the state space is too large to tabulate.

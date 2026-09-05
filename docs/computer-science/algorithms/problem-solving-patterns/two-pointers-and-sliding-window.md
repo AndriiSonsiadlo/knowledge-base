@@ -51,6 +51,15 @@ def pair_with_sum(a, target):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <numeric>
+#include <limits>
+#include <optional>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 // a is sorted. Find indices of two values summing to target.
 std::optional<std::pair<int, int>> pair_with_sum(const std::vector<int>& a, int target) {
     int lo = 0, hi = static_cast<int>(a.size()) - 1;
@@ -84,6 +93,27 @@ nested loops:
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
 
+Traced on `s = "abacaba"`, tracking the window `[left, right]` and `seen` (character -> most recent
+index) after each step:
+
+```text
+right  ch   seen[ch] before   contract?          left   window     seen after step        best
+-----  --   ---------------   ----------------   ----   --------   ---------------------  ----
+0      a    —                 no                 0      [0,0]      {a:0}                  1
+1      b    —                 no                 0      [0,1]      {a:0, b:1}             2
+2      a    0 (>= left 0)     left = 0+1 = 1      1      [1,2]      {a:2, b:1}             2
+3      c    —                 no                 1      [1,3]      {a:2, b:1, c:3}        3
+4      a    2 (>= left 1)     left = 2+1 = 3      3      [3,4]      {a:4, b:1, c:3}        3
+5      b    1 (< left 3)      no                 3      [3,5]      {a:4, b:5, c:3}        3
+6      a    4 (>= left 3)     left = 4+1 = 5      5      [5,6]      {a:6, b:5, c:3}        3
+
+final answer: best = 3  (the windows "bac" at [1,3] and "cab" at [3,5] both witness it)
+```
+
+`seen[ch] >= left` at row 5 (`b`, last seen at index 1, but `left` has already moved to 3) is the
+detail that trips people up: an old occurrence outside the current window must **not** trigger a
+contraction, or `left` would walk backward.
+
 ```python showLineNumbers
 def longest_unique_substring(s):
     seen = {}                       # character -> most recent index
@@ -94,6 +124,10 @@ def longest_unique_substring(s):
         seen[ch] = right
         best = max(best, right - left + 1)
     return best
+
+
+assert longest_unique_substring("abacaba") == 3
+
 
 def min_window_with_sum(a, target):
     """Shortest contiguous run of positive numbers summing to >= target."""
@@ -196,6 +230,7 @@ std::size_t remove_duplicates(std::vector<int>& a) {
 | Longest substring without repeating characters | Sliding window, variable size |
 | Maximum sum of any k consecutive elements | Sliding window, fixed size |
 | Smallest subarray with sum ≥ target | Sliding window, variable size |
+| **Maximum (or minimum) of every window of size k** | A sliding window bounds *which* elements are in play, but finding the max inside it by scanning is $O(k)$ per window; see [Monotonic Stack & Queue](./monotonic-stack-and-queue.md) for the O(1)-amortized version |
 | Merging two sorted sequences | Two pointers advancing together |
 | Removing or partitioning in place | Fast/slow (read/write) pointers |
 | Palindrome check | Two pointers converging |
@@ -248,6 +283,21 @@ int max_sum_of_k(const std::vector<int>& a, int k) {
 - **Off-by-one in window length.** With an inclusive `right`, the size is `right - left + 1`; with a
   half-open window it is `right - left`. Pick one convention per function.
 
+## Recall
+
+<Recall
+  invariant="Two pointers/window indices only ever move forward, and each position is examined a bounded number of times — the total work stays O(n) even when the code contains a nested loop."
+  costs={[
+    ["two pointers, converging (worst)", "O(n)"],
+    ["sliding window, amortized total across the whole pass (worst)", "O(n)"],
+    ["fast/slow pointers, cycle detection or midpoint (worst)", "O(n) time, O(1) space"],
+    ["sort first, then two pointers (worst)", "O(n log n)"],
+    ["window maximum via linear rescan per window (worst)", "O(n * k)"],
+  ]}
+  reachFor="The data is sorted (or can be), or the question is about a contiguous run — and a nested loop's inner boundary only ever moves in one direction."
+  trap="Assuming the inner `while` of a sliding window makes it O(n^2). `left` never decreases and never exceeds n, so the inner loop's total work across the whole outer loop is bounded by n — the same amortized argument as a dynamic array's resizing."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms* — the merge step of [mergesort](../sorting/mergesort.md) (§2.3) is the canonical two-pointer procedure.
@@ -262,3 +312,5 @@ int max_sum_of_k(const std::vector<int>& a, int k) {
 - [Linked Lists](../data-structures/linked-lists.md) — where fast/slow pointers are indispensable.
 - [Binary Search](../searching/binary-search.md) — another way of discarding half the candidates each step.
 - [Hash Tables](../data-structures/hash-tables.md) — the fallback when the data is not sorted.
+- [Monotonic Stack & Queue](./monotonic-stack-and-queue.md) — the structure that answers "maximum of
+  every window" without rescanning the window each time.

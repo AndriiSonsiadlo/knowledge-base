@@ -49,6 +49,8 @@ def divide_and_conquer(problem):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
+// illustrative skeleton — Result/Problem are placeholders, not real types
 Result divide_and_conquer(const Problem& problem) {
     if (is_small_enough(problem))
         return solve_directly(problem);          // base case
@@ -62,31 +64,36 @@ Result divide_and_conquer(const Problem& problem) {
 </TabItem>
 </Tabs>
 
-### The Master Theorem
+Traced on the shared sorting input `[5, 1, 8, 3, 9, 2, 7, 4]`, mergesort's recursion tree — divide
+splits every array in half down to single elements, then combine merges pairs back up in sorted
+order, level by level:
 
-For a recurrence $T(n) = a \cdot T(n/b) + f(n)$ — *a* subproblems, each of size *n/b*, plus *f(n)* work to
-divide and combine — compare `f(n)` against $n^{\log_b a}$:
+```text
+level 0 (divide)     [5,1,8,3,9,2,7,4]
+level 1 (divide)     [5,1,8,3]              [9,2,7,4]
+level 2 (divide)     [5,1]    [8,3]         [9,2]    [7,4]
+level 3 (base case)  [5][1]   [8][3]        [9][2]   [7][4]
 
-| Case | Condition | Result |
-|---|---|---|
-| 1 | `f(n)` grows **slower** | $T(n) = Θ(n^{\log_b a})$ — the leaves dominate |
-| 2 | `f(n)` grows **at the same rate** | $T(n) = Θ(n^{\log_b a} \cdot \log n)$ — every level costs the same |
-| 3 | `f(n)` grows **faster** | $T(n) = Θ(f(n))$ — the root dominates |
+level 2 (combine)    [1,5]    [3,8]         [2,9]    [4,7]
+level 1 (combine)    [1,3,5,8]              [2,4,7,9]
+level 0 (combine)    [1,2,3,4,5,7,8,9]
+```
 
-Worked examples:
+Three divide levels turn 8 elements into 8 singletons (log2(8) = 3), and each of the 4 combine steps
+does O(n) work summed across its level — 3 levels of O(n) merging is the $Θ(n \log n)$ the Master
+Theorem predicts for this recurrence; see below for the general method.
 
-| Recurrence | Algorithm | a, b, f(n) | Result |
-|---|---|---|---|
-| T(n) = 2T(n/2) + $O(n)$ | Mergesort | 2, 2, n | n^1 = n, case 2 → **$Θ(n \log n)$** |
-| T(n) = T(n/2) + $O(1)$ | Binary search | 1, 2, 1 | n^0 = 1, case 2 → **$Θ(\log n)$** |
-| T(n) = 2T(n/2) + $O(1)$ | Tree traversal | 2, 2, 1 | n^1 vs 1, case 1 → **$Θ(n)$** |
-| T(n) = 7T(n/2) + $O(n^2)$ | Strassen's | 7, 2, $n^2$ | n^2.81, case 1 → **$Θ(n^2.81)$** |
-| T(n) = 3T(n/2) + $O(n)$ | Karatsuba | 3, 2, n | n^1.58, case 1 → **$Θ(n^1.58)$** |
+### Reading the recurrence
 
-The last two are the interesting ones: both beat the obvious algorithm purely by **reducing the
-number of subproblems** — Karatsuba does 3 multiplications where the schoolbook method does 4,
-Strassen 7 where the naive method does 8. Neither changes the subproblem size; the win is entirely in
-*a*.
+Every divide-and-conquer algorithm has a recurrence of the shape $T(n) = a \cdot T(n/b) + f(n)$ — *a*
+subproblems, each of size *n/b*, plus *f(n)* work to divide and combine. Mergesort's is
+$T(n) = 2T(n/2) + O(n)$, which the tree above traces directly: 2 subproblems per level, halving in
+size, with O(n) total merge work at every level. Working out the closed-form result for an arbitrary
+recurrence — and the three cases that decide whether the leaves, every level, or the root dominates —
+is not repeated here; see
+[Recurrences & the Master Theorem](../complexity/recurrences-and-master-theorem.md) for the full
+method and worked examples including Karatsuba and Strassen's, both of which win by reducing *a*
+rather than shrinking the subproblem.
 
 ## Practical Usage
 
@@ -114,12 +121,20 @@ def max_subarray(a, lo, hi):
         best_right = max(best_right, total)
 
     return max(left, right, best_left + best_right)
+
+
+A = [5, 1, 8, 3, 9, 2, 7, 4]
+assert max_subarray(A, 0, len(A) - 1) == 39        # the whole array — no negative numbers to avoid
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <limits>
+#include <vector>
+
 // Maximum subarray, divide and conquer — O(n log n)
 // (Kadane's algorithm solves this in O(n); this version shows the pattern.)
 int max_subarray(const std::vector<int>& a, int lo, int hi) {
@@ -179,6 +194,21 @@ precisely divide and conquer plus memoisation.
 - **The Master Theorem does not cover everything** — it requires subproblems of equal size and
   well-behaved `f(n)`. Unequal splits need the Akra–Bazzi method or a recursion tree.
 
+## Recall
+
+<Recall
+  invariant="Divide and conquer only pays off when the subproblems are independent — no shared state between them — which is exactly what lets divide, conquer, and combine be reasoned about (and often parallelised) separately."
+  costs={[
+    ["mergesort: 2T(n/2) + O(n) (worst)", "O(n log n)"],
+    ["binary search: T(n/2) + O(1) (worst)", "O(log n)"],
+    ["balanced binary tree traversal: 2T(n/2) + O(1) (worst)", "O(n)"],
+    ["Karatsuba multiplication: 3T(n/2) + O(n) (worst)", "O(n^1.58)"],
+    ["Strassen's matrix multiply: 7T(n/2) + O(n^2) (worst)", "O(n^2.81)"],
+  ]}
+  reachFor="The problem splits cleanly into independent subproblems of the same kind, small enough that a base case is reachable."
+  trap="Applying divide and conquer to subproblems that overlap. Naive Fibonacci recomputes the same calls exponentially often — that is dynamic programming's problem to solve, not this pattern's."
+/>
+
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, Ch. 4 — divide and conquer, the substitution and recursion-tree methods, and the Master Theorem with proof.
@@ -193,4 +223,5 @@ precisely divide and conquer plus memoisation.
 
 - [Mergesort](../sorting/mergesort.md) and [Quicksort](../sorting/quicksort.md) — the two canonical instances.
 - [Dynamic Programming](./dynamic-programming.md) — what to use when subproblems overlap.
-- [Complexity & Analysis](../complexity/intro.md) — for reading the recurrences above.
+- [Recurrences & the Master Theorem](../complexity/recurrences-and-master-theorem.md) — the general
+  method for solving the recurrence a divide-and-conquer algorithm produces.

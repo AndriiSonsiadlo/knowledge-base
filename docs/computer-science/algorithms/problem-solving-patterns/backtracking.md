@@ -8,7 +8,6 @@ tags: [computer-science, algorithms, patterns, backtracking, recursion]
 
 # Backtracking
 
-
 Backtracking searches a space of candidate solutions by building them one choice at a time, and
 abandoning a partial candidate the moment it cannot possibly lead to a valid one. It is
 [depth-first search](../graph-algorithms/traversal.md) over an implicit tree of choices, with pruning.
@@ -50,6 +49,8 @@ def backtrack(state, choices):
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+// doc:no-run
+// illustrative skeleton — State/Choices are placeholders, not real types
 void backtrack(State& state, const Choices& choices) {
     if (is_goal(state)) {
         record(state);
@@ -101,12 +102,18 @@ def solve_n_queens(n):
 
     place(0)
     return solutions
+
+
+assert len(solve_n_queens(4)) == 2
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <unordered_set>
+#include <vector>
+
 std::vector<std::vector<int>> solve_n_queens(int n) {
     std::vector<std::vector<int>> solutions;
     std::unordered_set<int> cols, diag, anti;
@@ -139,13 +146,39 @@ std::vector<std::vector<int>> solve_n_queens(int n) {
 </TabItem>
 </Tabs>
 
-The three sets are what make this fast. Checking conflicts in $O(1)$ rather than rescanning the board
-turns an impractical search into one that solves n = 8 instantly. **The quality of the pruning check
-determines whether backtracking is usable at all.**
+Traced for n = 4, one row at a time, columns tried left to right — `x` marks a column pruned before a
+queen is ever placed there, i.e. before any recursive call happens:
 
-Placing one queen per row is itself a form of pruning — it removes every arrangement with two queens
-in a row from consideration without ever generating one, cutting the space from C(64, 8) ≈ 4.4
-billion to $8^8$ ≈ 16.7 million before any constraint check runs.
+```text
+row0: col0 ok -> [0]
+row1: col0 x(col) col1 x(diag) col2 ok -> [0,2]
+row2: col0 x(col) col1 x(anti) col2 x(col) col3 x(diag) -- dead end, BACKTRACK to row1
+
+row1: col3 ok -> [0,3]
+row2: col0 x(col) col1 ok -> [0,3,1]
+row3: col0 x(col) col1 x(col) col2 x(diag) col3 x(col) -- dead end, BACKTRACK to row2
+row2: no more columns -- BACKTRACK to row1
+row1: no more columns -- BACKTRACK to row0
+
+row0: col1 ok -> [1]
+row1: col0 x(anti) col1 x(col) col2 x(diag) col3 ok -> [1,3]
+row2: col0 ok -> [1,3,0]
+row3: col0 x(col) col1 x(col) col2 ok -> [1,3,0,2]   row == 4: SOLUTION
+
+columns [1, 3, 0, 2]:
+. Q . .
+. . . Q
+Q . . .
+. . Q .
+```
+
+Two backtracks — undoing row1 once and row2 once — are all it costs to find this solution. Every `x`
+is a branch pruning removed *before* recursing into it, which is the entire difference from brute
+force: brute force would generate all $4^4 = 256$ row/column combinations and validate each completed
+board, where backtracking rejects a partial board the instant it conflicts. The three sets keep each
+check $O(1)$ instead of a full board rescan, which is what makes even n = 8 instant — strip the
+pruning check out and `place` degenerates into generating and validating every arrangement, brute
+force wearing recursion as a costume.
 
 ### Permutations and subsets
 
@@ -211,23 +244,9 @@ std::vector<std::vector<int>> permutations(const std::vector<int>& items) {
     return result;
 }
 
-std::vector<std::vector<int>> subsets(const std::vector<int>& items) {
-    std::vector<std::vector<int>> result;
-    std::vector<int> current;
-
-    auto build = [&](std::size_t i, auto&& self) -> void {
-        if (i == items.size()) {
-            result.push_back(current);
-            return;
-        }
-        self(i + 1, self);                      // exclude items[i]
-        current.push_back(items[i]);
-        self(i + 1, self);                      // include items[i]
-        current.pop_back();                     // undo
-    };
-    build(0, build);
-    return result;
-}
+// subsets() follows the same shape as permutations() above, with the loop over
+// remaining items replaced by one binary choice per item — include, or don't —
+// so it is left in Python only; see the Python tab for the full body.
 ```
 
 </TabItem>
@@ -251,34 +270,31 @@ pruning removes most branches.
 | Constraint solvers, SAT | Variable assignment | No clause falsified |
 
 :::tip[Order your choices to prune early]
-Trying the most constrained option first prunes far more of the tree. In Sudoku, filling the cell
-with the fewest legal digits (rather than the next cell in reading order) is the difference between
-milliseconds and minutes.
-
-This is the **most-constrained-variable heuristic**, and it is the single highest-value improvement
-to almost any backtracking search.
+Trying the most constrained option first prunes far more of the tree — filling the Sudoku cell with
+the fewest legal digits, rather than the next cell in reading order, is the difference between
+milliseconds and minutes. This is the **most-constrained-variable heuristic**, the single
+highest-value improvement to almost any backtracking search.
 :::
 
 ## Edge Cases & Pitfalls
 
 :::danger[Forgetting to undo corrupts every later branch]
-The `undo` step must reverse *everything* the branch changed. A missed `pop()`, an unreleased set
-entry, or a mutated field leaks into sibling branches, and the result is missing or duplicated
-solutions rather than a crash.
-
-Two defences: keep the mutation and its undo adjacent in the source so the pairing is visible, or
-pass immutable state down instead of mutating shared state — simpler and much harder to get wrong,
-at the cost of copying.
+The `undo` step must reverse *everything* the branch changed — a missed `pop()`, an unreleased set
+entry, or a mutated field leaks into sibling branches and produces missing or duplicated solutions
+rather than a crash. Keep the mutation and its undo adjacent in the source so the pairing stays
+visible, or pass immutable state down instead of mutating shared state — simpler, at the cost of
+copying.
 :::
 
 - **Appending the working state instead of a copy.** `result.append(current)` stores a reference that
   keeps mutating; every entry ends up identical (usually empty). Always `list(current)`.
-- **No pruning means brute force.** If `is_valid` always returns true, you are enumerating the whole
-  space. Check that the constraint actually eliminates branches.
-- **Recursion depth.** Depth equals solution length; deep searches need an explicit stack.
-- **Exponential worst case is inherent.** Backtracking finds optimal answers to NP-hard problems, but
-  no pruning makes the worst case polynomial. Beyond a certain size you need approximation,
-  [dynamic programming](./dynamic-programming.md) if subproblems overlap, or a dedicated solver.
+- **No pruning means brute force.** If `is_valid` always returns true, every branch is generated and
+  only rejected afterward — the exact shape traced above, minus the `x` marks. Check that the
+  constraint actually eliminates branches before recursing, not after.
+- **Recursion depth equals solution length, and the exponential worst case is inherent.** Deep
+  searches need an explicit stack; no pruning makes an NP-hard search polynomial. Beyond a certain
+  size, reach for approximation, [dynamic programming](./dynamic-programming.md) if subproblems
+  overlap, or a dedicated solver.
 - **Finding *one* solution vs. *all*.** Return early for one; the difference is often orders of
   magnitude.
 
@@ -291,6 +307,21 @@ at the cost of copying.
 | Complexity | Exponential, pruned | Polynomial | $O(n \log n)$ |
 | Use when | The state space is too large to tabulate | Subproblems overlap | The greedy choice is provably safe |
 | Returns | All solutions, or the best | The optimal value | One answer |
+
+## Recall
+
+<Recall
+  invariant="A branch is abandoned the moment it cannot possibly reach a valid solution, before recursing into it — the pruning check, not the recursion, is what separates this from brute force enumeration."
+  costs={[
+    ["4-queens, pruned (worst, this trace)", "24 column checks"],
+    ["n-queens, unpruned brute force (worst)", "O(n^n)"],
+    ["permutations of n items (worst)", "O(n!)"],
+    ["subsets of n items (worst)", "O(2^n)"],
+    ["undo per branch (worst)", "O(1) amortized per mutated field"],
+  ]}
+  reachFor="The problem asks for all (or one) valid configuration built from a sequence of choices, and a partial choice can be checked for validity before the whole configuration is built."
+  trap="Writing `is_valid` but never actually calling it before recursing — that turns backtracking into generate-then-filter, which explores the entire space brute force would and validates it only at the leaves."
+/>
 
 ## References
 

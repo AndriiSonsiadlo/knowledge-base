@@ -47,12 +47,21 @@ def max_non_overlapping(intervals):
             count += 1
             last_end = end
     return count
+
+
+assert max_non_overlapping([(1, 4), (2, 6), (8, 10), (9, 12)]) == 2
 ```
 
 </TabItem>
 <TabItem value="cpp" label="C++">
 
 ```cpp showLineNumbers
+#include <algorithm>
+#include <limits>
+#include <optional>
+#include <utility>
+#include <vector>
+
 int max_non_overlapping(std::vector<std::pair<int, int>>& intervals) {
     std::sort(intervals.begin(), intervals.end(),
               [](const auto& a, const auto& b) { return a.second < b.second; });  // EARLIEST END TIME
@@ -70,6 +79,24 @@ int max_non_overlapping(std::vector<std::pair<int, int>>& intervals) {
 
 </TabItem>
 </Tabs>
+
+Traced on `[(1,4), (2,6), (8,10), (9,12)]`, already sorted by end time — accept whenever the next
+interval starts no earlier than the last accepted one ended:
+
+```text
+interval   start >= last_end?        decision   last_end after
+--------   -----------------------   --------   --------------
+(1, 4)     1 >= -inf                 accept     4
+(2, 6)     2 >= 4? no                reject     4
+(8, 10)    8 >= 4? yes               accept     10
+(9, 12)    9 >= 10? no               reject     10
+
+selected: (1, 4), (8, 10)   ->   count = 2
+```
+
+`(2, 6)` looks tempting — it ends later, covering more ground — but accepting it would have blocked
+`(8, 10)` no more than the alternative did, while leaving `last_end` at 6 instead of 4 gains nothing:
+the next surviving interval starts at 8 either way. This is the exchange argument working in miniature.
 
 **Why this is correct**, argued properly: let *g* be the interval with the earliest end time, and let
 *O* be any optimal solution. If *O* contains *g*, done. If not, let *f* be the first interval in *O*.
@@ -179,6 +206,21 @@ is slower but does not require the proof.
 | Guarantees optimum | Only with a proof | Yes | Yes |
 | Memory | $O(1)$ | $O(states)$ | $O(depth)$ |
 | Fails by | Returning a wrong answer silently | Being slow or memory-hungry | Taking too long |
+
+## Recall
+
+<Recall
+  invariant="A greedy algorithm commits to the locally best choice and never reconsiders it — safe only when an exchange argument shows that choice can always be swapped into some optimal solution at no cost."
+  costs={[
+    ["interval scheduling, sort by end time (worst)", "O(n log n)"],
+    ["fractional knapsack, sort by value/weight (worst)", "O(n log n)"],
+    ["Huffman coding, merge two least frequent (worst)", "O(n log n)"],
+    ["Dijkstra's, greedy vertex finalisation (worst)", "O((V + E) log V)"],
+    ["making change, largest coin first (worst)", "O(n) — not always optimal, see trap"],
+  ]}
+  reachFor="The problem asks for a maximum/minimum count or value, and one sort key looks obviously best — before trusting it, find the exchange argument or a counterexample."
+  trap="Believing a greedy solution because it passed every example tried. Coin change with denominations [1, 3, 4] and target 6 takes 3 coins greedily (4+1+1) against an optimum of 2 (3+3) — the same code, silently wrong on a different input set."
+/>
 
 ## References
 

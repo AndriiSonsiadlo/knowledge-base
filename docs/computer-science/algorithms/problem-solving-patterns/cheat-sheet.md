@@ -57,7 +57,7 @@ named below rather than at the top of `## Mechanism` itself.
 | Two Pointers & Sliding Window | [`### Two pointers on sorted data`](./two-pointers-and-sliding-window.md#two-pointers-on-sorted-data) and [`### Sliding window`](./two-pointers-and-sliding-window.md#sliding-window) |
 | Divide & Conquer | [`## Mechanism`](./divide-and-conquer.md#mechanism) |
 | Greedy Algorithms | [`### Where greedy works: interval scheduling`](./greedy-algorithms.md#where-greedy-works-interval-scheduling) |
-| Dynamic Programming | [`### The same problem, three ways`](./dynamic-programming.md#the-same-problem-three-ways) |
+| Dynamic Programming | [`### The workflow, on a real problem`](./dynamic-programming.md#the-workflow-on-a-real-problem) |
 | Recursion, Memoization & Tabulation | [`## Mechanism`](./recursion-memoization-tabulation.md#mechanism) — all four forms, in one place |
 | Backtracking | [`### N-queens`](./backtracking.md#n-queens) |
 | Prefix Sums & Difference Arrays | [`## Mechanism`](./prefix-sums-and-difference-arrays.md#mechanism) |
