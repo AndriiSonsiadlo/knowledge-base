@@ -259,3 +259,5 @@ can least afford.
   an adversary applied to hashing instead of sorting.
 - [Combinatorics & Counting](./combinatorics-and-counting.md) — the counting arguments (like the
   24 equally likely permutations traced above) that justify a randomized algorithm's guarantees.
+- [Top-K & Streaming](../problem-solving-patterns/top-k-and-streaming.md) — reservoir sampling in its
+  natural setting.

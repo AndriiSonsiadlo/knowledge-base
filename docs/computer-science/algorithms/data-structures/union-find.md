@@ -311,4 +311,5 @@ then it is O(n log n) worst case overall, against union-find's near-linear.
 - [Trees](./trees.md) — the parent-pointer representation, used here without any of the ordering.
 - [Graphs](./graphs.md) — where the edges being unioned come from.
 - [Graph Traversal](../graph-algorithms/traversal.md) — the offline alternative for connectivity.
-- [Big-O Notation](../complexity/big-o-notation.md) — what "amortized α(n)" is claiming, and what it is not.
+- [Amortized Analysis](../complexity/amortized-analysis.md) — where the α(n) bound comes from.
+- [Minimum Spanning Trees](../graph-algorithms/minimum-spanning-trees.md) — Kruskal's is union-find with a sort in front of it.

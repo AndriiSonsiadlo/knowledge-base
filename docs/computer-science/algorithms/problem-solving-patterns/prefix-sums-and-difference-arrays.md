@@ -332,8 +332,8 @@ difference array; interleaved, a Fenwick tree — the O(log n) is the price of n
 
 ## Related Pages
 
-- [Two Pointers & Sliding Window](./two-pointers-and-sliding-window.md) — the other way to kill an
-  O(n²) range enumeration, for when the ranges are contiguous and monotone.
+- [Two Pointers & Sliding Window](./two-pointers-and-sliding-window.md) — the other way to kill an O(n²) range enumeration, for contiguous, monotone ranges.
 - [Problem-Solving Patterns](./intro.md) — where this pattern sits among the others.
 - [Arrays](../data-structures/arrays.md) — the contiguous layout that makes the O(n) build a single cache-friendly pass.
 - [Integers & Two's Complement](../../bit-manipulation/integers-and-twos-complement.md) — the overflow that silently corrupts a C++ prefix array.
+- [Segment Trees & Fenwick Trees](../data-structures/segment-trees-and-fenwick.md) — what to reach for once the array starts changing.

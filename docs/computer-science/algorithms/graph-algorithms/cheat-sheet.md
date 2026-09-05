@@ -126,4 +126,4 @@ single most common mistake this flow is meant to prevent — see the Dijkstra da
 - [Traversal: BFS & DFS](./traversal.md) — the primitive every other algorithm on this page builds on.
 - [Shortest Paths](./shortest-paths.md) — Dijkstra's, Bellman-Ford, and Floyd-Warshall, compared directly.
 - [Network Flow](./network-flow.md) — the max-flow row, and the modelling trick behind the last two rows of the question table.
-- [Complexity Cheat Sheet](../complexity/cheat-sheet.md) — the growth-rate table this page's Big-O notation assumes.
+- [Problem-Solving Patterns Cheat Sheet](../problem-solving-patterns/cheat-sheet.md) — the pattern-level view of the same decisions.
