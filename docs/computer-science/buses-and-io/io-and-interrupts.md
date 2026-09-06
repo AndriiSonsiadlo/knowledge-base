@@ -172,3 +172,7 @@ or by switching to polling under heavy load (e.g., Linux's NAPI).
   asserting a line and a CPU taking the interrupt.
 - [`../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md`](../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md) —
   the software path once it does.
+- [DMA and the IOMMU](./dma-and-iommu.md) — the DMA side in depth: scatter-gather, cache coherency,
+  and the IOMMU.
+- [`../../linux/14-device-drivers-and-hardware/interrupts-in-drivers.md`](../../linux/14-device-drivers-and-hardware/interrupts-in-drivers.md) —
+  how a driver requests and handles these interrupts.

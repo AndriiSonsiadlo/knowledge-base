@@ -160,6 +160,8 @@ number.*
   hardware sits underneath.
 - [Exceptions, Traps, and Interrupts](../cpu-architecture/exceptions-traps-and-interrupts.md) — what
   the CPU itself does once a vector actually arrives.
+- [PCIe in Depth](./pcie-in-depth.md) — the device side of MSI/MSI-X: the capability structures
+  and the MSI-X table that hold the address/data pairs.
 - [`../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md`](../../linux/10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md) —
   the software side of the same path.
 

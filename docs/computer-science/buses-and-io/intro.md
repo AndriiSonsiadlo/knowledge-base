@@ -49,6 +49,10 @@ complex" — much higher aggregate bandwidth, at the cost of more complex topolo
   protocols found on nearly every circuit board, and when to use each.
 - [USB](./usb.md) — host-centric topology, endpoints and transfer types, USB speed classes, and how
   USB-C relates (or doesn't) to USB the protocol.
+- [PCIe in Depth](./pcie-in-depth.md) — configuration space, BARs, enumeration, and MSI/MSI-X as
+  memory writes: the model an OS sees when it discovers PCIe devices.
+- [DMA and the IOMMU](./dma-and-iommu.md) — bus-master DMA, scatter-gather, cache coherency with
+  devices, and the IOMMU as translation and isolation for device memory accesses.
 
 ## Why It Matters
 

@@ -175,3 +175,5 @@ allocation diagram before assuming every slot runs at its labeled maximum simult
 - [I/O & Interrupts](./io-and-interrupts.md)
 - [Storage: HDD, SSD & NVMe](../storage/intro.md)
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md)
+- [PCIe in Depth](./pcie-in-depth.md) — the enumeration model behind the topology above:
+  configuration space, BARs, and how software discovers the tree.
