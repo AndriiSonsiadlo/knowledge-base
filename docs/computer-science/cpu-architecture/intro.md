@@ -59,6 +59,7 @@ page.
 3. **[Pipelining](./pipelining.md)** — overlapping instructions to increase throughput, and the hazards that get in the way.
 4. **[Superscalar & Out-of-Order Execution](./superscalar-and-out-of-order-execution.md)** — modern CPUs execute far more than "one instruction at a time."
 5. **[Multicore & Parallelism](./multicore-and-parallelism.md)** — why chips stopped getting faster per-core and started adding cores instead.
+6. **[Hardware Virtualization](./hardware-virtualization.md)** — VT-x/AMD-V root and non-root modes, VM entry and exit, and nested paging.
 
 ## Edge Cases & Pitfalls
 

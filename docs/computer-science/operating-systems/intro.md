@@ -61,6 +61,9 @@ flowchart TB
 - **[OS Structure: Monolithic, Microkernel, Hybrid](./os-structure-monolithic-microkernel-hybrid.md)**
   — the architectural taxonomy, the IPC cost trade-off, and why a loadable kernel module isn't
   isolation.
+- **[Virtualization and Isolation](./virtualization-and-isolation.md)** — VMs, containers, and
+  sandboxes as isolation designs: what each shares, where each boundary is enforced, and attack
+  surface.
 
 ## Why It Matters
 

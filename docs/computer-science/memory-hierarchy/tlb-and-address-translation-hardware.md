@@ -154,6 +154,8 @@ only requires invalidating in the direction that could let something through tha
   result is what the TLB caches.
 - [`../../linux/08-memory-management/tlb-and-address-space-switching.md`](../../linux/08-memory-management/tlb-and-address-space-switching.md) —
   Linux's shootdown implementation and its use of PCID.
+- [Hardware Virtualization](../cpu-architecture/hardware-virtualization.md) — EPT/NPT make every TLB
+  miss a two-dimensional walk of up to 24 memory references.
 - [DMA and the IOMMU](../buses-and-io/dma-and-iommu.md) — the IOMMU is a TLB for devices, with the
   same invalidation cost problem.
 
