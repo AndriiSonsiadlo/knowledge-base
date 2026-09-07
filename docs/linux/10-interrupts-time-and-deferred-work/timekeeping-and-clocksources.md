@@ -6,6 +6,8 @@ sidebar_position: 9
 tags: [linux, kernel, interrupts]
 prerequisites:
   - linux/interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel
+related:
+  - linux/concurrency-and-locking/seqlocks
 draft: false
 ---
 

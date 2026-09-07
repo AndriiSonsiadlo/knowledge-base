@@ -6,6 +6,9 @@ sidebar_position: 1
 tags: [linux, kernel, interrupts]
 prerequisites:
   - linux/syscalls-and-the-boundary/the-entry-path
+related:
+  - computer-science/buses-and-io/interrupt-controllers
+  - computer-science/cpu-architecture/exceptions-traps-and-interrupts
 draft: false
 ---
 
