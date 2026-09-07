@@ -32,7 +32,7 @@ const note = (file, message) => findings.push(`${file}: ${message}`);
 
 function markdownFiles(dir) {
   return readdirSync(dir, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && /\.mdx?$/.test(entry.name))
+    .filter((entry) => entry.isFile() && /\.mdx?$/.test(entry.name) && entry.name !== "CLAUDE.md")
     .map((entry) => join(entry.parentPath ?? entry.path, entry.name))
     .sort();
 }

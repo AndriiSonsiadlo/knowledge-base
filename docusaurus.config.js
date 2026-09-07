@@ -87,6 +87,8 @@ const config = {
             "**/*.test.{js,jsx,ts,tsx}",
             "**/__tests__/**",
             "superpowers/**",
+            // Per-section agent notes, not site content.
+            "**/CLAUDE.md",
           ],
           showLastUpdateTime: true,
           editUrl:
