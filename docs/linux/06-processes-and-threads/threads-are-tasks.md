@@ -203,8 +203,12 @@ Every bit position above was read directly from `include/uapi/linux/sched.h` at 
 copied from memory: `CSIGNAL` is `0x000000ff` (bits 0–7), and from there `CLONE_VM` through `CLONE_THREAD`
 are consecutive single bits at `0x100` through `0x10000` — bits 8, 9, 10, 11, 12, 13, 14, 15, and 16
 respectively (`CLONE_VM`=8, `CLONE_FS`=9, `CLONE_FILES`=10, `CLONE_SIGHAND`=11, `CLONE_PIDFD`=12,
-`CLONE_PTRACE`=13, `CLONE_VFORK`=14, `CLONE_PARENT`=15, `CLONE_THREAD`=16). Bits 17–31 hold the namespace
-flags this page named but did not explain, plus `CLONE_IO` at bit 31; `CLONE_NEWTIME` is the one exception
+`CLONE_PTRACE`=13, `CLONE_VFORK`=14, `CLONE_PARENT`=15, `CLONE_THREAD`=16). Bits 17–31 are a mix: the
+namespace flags this page named but did not explain (`CLONE_NEWNS`=17, `CLONE_NEWCGROUP`=25,
+`CLONE_NEWUTS`=26, `CLONE_NEWIPC`=27, `CLONE_NEWUSER`=28, `CLONE_NEWPID`=29, `CLONE_NEWNET`=30), the
+`CLONE_SYSVSEM` and `CLONE_SETTLS` flags already covered above plus `CLONE_PARENT_SETTID`,
+`CLONE_CHILD_CLEARTID`, `CLONE_DETACHED`, `CLONE_UNTRACED`, and `CLONE_CHILD_SETTID`, and `CLONE_IO` at bit
+31; `CLONE_NEWTIME` is the one exception
 that does *not* live up in that range — it was assigned bit 7, inside the `CSIGNAL` byte, specifically
 because bits 17–31 were the ones already spoken for by the time it was added, which is the concrete
 reason [`clone3`](#clone3-and-why-it-exists) exists at all.

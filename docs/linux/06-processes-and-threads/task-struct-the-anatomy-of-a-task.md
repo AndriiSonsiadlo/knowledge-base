@@ -106,14 +106,14 @@ classDiagram
     class fs_struct {
         root, pwd
     }
-    class signal_struct {
-        shared per thread group
+    class sighand_struct {
+        installed handler table
     }
 
     task_struct --> mm_struct : mm / active_mm
     task_struct --> files_struct : files
     task_struct --> fs_struct : fs
-    task_struct --> signal_struct : signal
+    task_struct --> sighand_struct : sighand
 ```
 
 *The dozen `task_struct` fields worth holding in your head, and the four that are pointers to objects a
