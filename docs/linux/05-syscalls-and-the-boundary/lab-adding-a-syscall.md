@@ -126,6 +126,24 @@ modern multi-core machine for the incremental parts, not the ten-to-forty-minute
 [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md#running-the-build) quotes for a clean
 tree, because only the syscall table's dependents and the one new file actually need recompiling.
 
+```mermaid
+flowchart LR
+    TBL["syscall_64.tbl<br/>470 hello_kernel entry"] --> HDR["generated syscall headers<br/>(dispatch table references<br/>__x64_sys_hello_kernel)"]
+    SRC["kernel/hello_syscall.c<br/>SYSCALL_DEFINE1(hello_kernel, ...)"] -- "obj-y += hello_syscall.o" --> OBJ["hello_syscall.o"]
+    HDR --> LINK["vmlinux link"]
+    OBJ --> LINK
+    LINK --> IMG["bzImage"]
+```
+
+*Four edits, and where each one lands in the build.*
+
+Notice the `obj-y` line is not a detail off to the side — it is the only thing that turns
+`kernel/hello_syscall.c` into `hello_syscall.o` at all. Skip it and Kbuild never compiles the file, so
+`vmlinux`'s link step is left holding the generated headers' reference to `__x64_sys_hello_kernel` with
+no object file that defines it. That is why forgetting `obj-y` fails while **linking** in step 3, as an
+undefined-reference error, rather than at boot in step 4 — boot never happens, because there is no
+`bzImage` to boot.
+
 ### 4. Boot in QEMU
 
 The canonical invocation from [Booting Your Kernel in
