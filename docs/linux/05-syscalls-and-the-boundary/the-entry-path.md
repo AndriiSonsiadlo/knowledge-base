@@ -95,12 +95,17 @@ itself mid-syscall to deliver a signal or preempt a task; it waits for a safe, w
 
 ## KPTI, in one paragraph
 
-With kernel page-table isolation active, the entry path also switches `CR3` — the register that points
-at the current page-table root — because the user-mode and kernel-mode page tables are kept separate to
-prevent user code from using speculative execution to read kernel memory it cannot legitimately access.
-Switching `CR3` mid-instruction-stream needs code and a stack that are mapped in *both* page tables,
-which is exactly what the trampoline stack exists for: a minimal, always-mapped landing pad the CPU can
-run on for the few instructions before the "real" kernel stack (from the section above) becomes usable.
+With kernel page-table isolation active, `CR3` — the register that points at the current page-table
+root — gets flipped on both sides of a syscall, because the user-mode and kernel-mode page tables are
+kept separate to prevent user code from using speculative execution to read kernel memory it cannot
+legitimately access. The two directions aren't symmetric. On entry, `SWITCH_TO_KERNEL_CR3` (right after
+`swapgs`, before the kernel stack switch above) flips `CR3` inline using a scratch register — no separate
+stack is needed yet, because the handful of instructions doing the flip are still running on the
+old, still-mapped user stack. It's on the way *out* that a trampoline stack earns its name: just before
+`sysretq`/`iret`, the CPU is about to switch back to the user page tables, so the *kernel* stack would no
+longer be mapped once that happens. The exit path saves the real stack pointer, switches to a minimal,
+always-mapped trampoline stack, flips `CR3` back to user tables from there, and only then restores the
+real `rsp` and executes `sysretq`.
 
 :::note[Version- and hardware-scoped]
 Whether KPTI is active, and what else is active alongside it, depends on the CPU model and on boot
