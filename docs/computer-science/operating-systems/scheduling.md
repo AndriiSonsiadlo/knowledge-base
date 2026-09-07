@@ -149,3 +149,5 @@ temporarily boost the lock holder to the waiter's priority. See [Priority Invers
   multiple cores.
 - [Concurrency & Synchronization](./concurrency-and-synchronization.md) — how threads coordinate once
   scheduled.
+- [`../../linux/07-scheduling/what-the-scheduler-must-decide.md`](../../linux/07-scheduling/what-the-scheduler-must-decide.md) —
+  a real implementation of the algorithms above.
