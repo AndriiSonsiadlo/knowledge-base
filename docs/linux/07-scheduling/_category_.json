@@ -1,0 +1,8 @@
+{
+  "label": "Scheduling",
+  "position": 8,
+  "link": {
+    "type": "generated-index",
+    "description": "Who runs next, for how long, and on which CPU — runqueues and scheduling classes, EEVDF, preemption models, the context switch, load balancing, and how to find the cause of scheduling latency."
+  }
+}

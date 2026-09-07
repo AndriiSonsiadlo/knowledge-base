@@ -1,0 +1,8 @@
+{
+  "label": "Concurrency and Locking",
+  "position": 10,
+  "link": {
+    "type": "generated-index",
+    "description": "Four independent sources of concurrency, the contexts that may not sleep, and every synchronisation primitive the kernel offers — from memory barriers and spinlocks through RCU to per-CPU data."
+  }
+}
