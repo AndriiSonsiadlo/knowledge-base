@@ -3,6 +3,8 @@
  * chardrv: a 4 KiB scratch buffer behind /dev/chardrv.
  * read/write/llseek on the buffer, plus two ioctls: clear it, and get its length.
  */
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt	/* prefix pr_*() output with "chardrv: " */
+
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
 #include <linux/module.h>

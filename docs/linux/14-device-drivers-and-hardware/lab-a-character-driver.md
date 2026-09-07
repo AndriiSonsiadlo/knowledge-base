@@ -74,6 +74,8 @@ The module itself:
  * chardrv: a 4 KiB scratch buffer behind /dev/chardrv.
  * read/write/llseek on the buffer, plus two ioctls: clear it, and get its length.
  */
+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt	/* prefix pr_*() output with "chardrv: " */
+
 #include <linux/fs.h>
 #include <linux/miscdevice.h>
 #include <linux/module.h>
@@ -202,8 +204,11 @@ What each part does, in order:
 8. **`module_misc_device()`** generates the module's init and exit functions, which only call
    `misc_register()` and `misc_deregister()`.
 
-The `pr_debug()` calls compile to nothing unless dynamic debug turns them on.
-[Debugging Drivers](./debugging-drivers.md) uses them.
+The `pr_debug()` calls print nothing by default. On a kernel with `CONFIG_DYNAMIC_DEBUG`, each one
+is a call site that can be switched on at run time; without it (and without `DEBUG` defined), they
+compile away entirely. [Debugging Drivers](./debugging-drivers.md) turns them on. The `pr_fmt`
+define on the module's first line makes every `pr_*()` message start with `chardrv: `. Without it,
+`pr_debug()` output carries no module name, and grepping the log for the driver finds nothing.
 
 The ioctl numbers are not arbitrary. `_IOR('c', 2, __u32)` packs four fields into 32 bits, and
 `CHARDRV_GET_LEN` comes out as `0x80046302`:
@@ -318,9 +323,9 @@ Measured (the colour codes BusyBox's `ls` emits are stripped):
 + uname -r
 6.18.0
 + insmod /chardrv.ko
-[    3.955630] chardrv: loading out-of-tree module taints kernel.
+[    3.514705] chardrv: loading out-of-tree module taints kernel.
 + ls -l /dev/chardrv
-crw-rw-rw-    1 0        0          10, 258 Oct 26 21:43 /dev/chardrv
+crw-rw-rw-    1 0        0          10, 258 Oct 26 22:18 /dev/chardrv
 + cat /sys/class/misc/chardrv/dev
 10:258
 + /test_chardrv
@@ -366,10 +371,10 @@ Measured:
 #
 # CPU  DURATION                  FUNCTION CALLS
 # |     |   |                     |   |   |   |
- 0) # 1126.501 us |  chardrv_ioctl [chardrv]();
- 0) + 34.187 us   |  chardrv_write [chardrv]();
- 1) + 36.544 us   |  chardrv_read [chardrv]();
- 1) + 10.980 us   |  chardrv_read [chardrv]();
+ 1) ! 900.437 us  |  chardrv_ioctl [chardrv]();
+ 1) + 27.044 us   |  chardrv_write [chardrv]();
+ 0) + 39.745 us   |  chardrv_read [chardrv]();
+ 0) + 13.472 us   |  chardrv_read [chardrv]();
 ```
 
 - **The first line is an `ioctl` nobody in the script asked for.** A kprobe on `chardrv_ioctl`
@@ -377,10 +382,10 @@ Measured:
   shows it comes from the shell itself, running the `printf` builtin, with
   `cmd=0x802c542a`. That is `TCGETS2`, `_IOR('T', 0x2A, struct termios2)`: the C library asking
   whether the new output descriptor is a terminal. The driver's `-ENOTTY` is exactly the answer
-  that query expects, so output proceeds normally. The `#` marks a duration over 1 ms, inflated here
+  that query expects, so output proceeds normally. The `!` marks a duration over 100 µs, inflated here
   because the VM runs without KVM acceleration.
 - `cat` calls `read` twice: once to get the three bytes, once to get the 0 that means end of file.
-- The two reads ran on CPU 1 and the write on CPU 0. The scheduler placed the two processes
+- The two reads ran on CPU 0 and the write on CPU 1. The scheduler placed the two processes
   differently, and nothing in the driver cares.
 
 Folder 01's [Debugging the Kernel with GDB](../01-lab-and-toolchain/debugging-the-kernel-with-gdb.md)
