@@ -165,8 +165,8 @@ for how.
 
 ## References
 
-- Intel SDM Vol. 3A, ch. 9.1 (originally 8.1 in some manual revisions) "Locked Atomic Operations" —
-  the authority on what `LOCK` guarantees and on which instructions are implicitly locked.
+- Intel SDM Vol. 3A, ch. 8.1 "Locked Atomic Operations" — the authority on what `LOCK` guarantees
+  and on which instructions are implicitly locked.
 - Arm Architecture Reference Manual, "Synchronization and semaphores" — `LDXR`/`STXR` and the
   exclusive monitor, i.e. what a store-conditional actually checks.
 - Herlihy, *"Wait-Free Synchronization"*, TOPLAS 1991 — why compare-and-swap is universal and
