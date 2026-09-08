@@ -103,9 +103,32 @@ Crash and oops reading lands with folder 17.
     ["Reference counting and lifetime", "../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md"],
     ["kobjects, sysfs, and the object model", "../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md"],
     ["Memory safety in kernel C", "../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md"],
+    ["The Linux device model", "../14-device-drivers-and-hardware/the-linux-device-model.md"],
+    ["Character devices", "../14-device-drivers-and-hardware/character-devices.md"],
+    ["Lab: write a character driver", "../14-device-drivers-and-hardware/lab-a-character-driver.md"],
+    ["Debugging drivers", "../14-device-drivers-and-hardware/debugging-drivers.md"],
   ]} />
 
-A real character driver is built in [folder 14's lab](../14-device-drivers-and-hardware/lab-a-character-driver.md).
+The driver path assumes the "I want to write a module" path above and the
+[interrupts folder](../10-interrupts-time-and-deferred-work/the-irq-subsystem.md).
+
+<LearningPath
+  title="I want to write a driver"
+  steps={[
+    ["PCIe in depth", "../../computer-science/buses-and-io/pcie-in-depth.md"],
+    ["The Linux device model", "../14-device-drivers-and-hardware/the-linux-device-model.md"],
+    ["Platform devices, device tree, and ACPI", "../14-device-drivers-and-hardware/platform-devices-and-description.md"],
+    ["PCI and PCIe drivers", "../14-device-drivers-and-hardware/pci-and-pcie-drivers.md"],
+    ["MMIO, ioremap, and accessors", "../14-device-drivers-and-hardware/mmio-and-port-io.md"],
+    ["DMA and the IOMMU", "../../computer-science/buses-and-io/dma-and-iommu.md"],
+    ["The DMA API", "../14-device-drivers-and-hardware/the-dma-api.md"],
+    ["Interrupts in a driver", "../14-device-drivers-and-hardware/interrupts-in-drivers.md"],
+    ["Character devices", "../14-device-drivers-and-hardware/character-devices.md"],
+    ["Lab: write a character driver", "../14-device-drivers-and-hardware/lab-a-character-driver.md"],
+    ["Talking to user space", "../14-device-drivers-and-hardware/talking-to-user-space.md"],
+    ["Power management", "../14-device-drivers-and-hardware/power-management.md"],
+    ["Debugging drivers", "../14-device-drivers-and-hardware/debugging-drivers.md"],
+  ]} />
 
 <LearningPath
   title="My server is slow"
@@ -195,7 +218,44 @@ Computer Networks.
     ["Diagnosing network problems", "../13-networking-stack/diagnosing-network-problems.md"],
   ]} />
 
+The containers path assumes two pages outside it:
+[network namespaces and virtual devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
+and [overlayfs](../11-vfs-and-filesystems/overlayfs.md).
+
+<LearningPath
+  title="I want to work on containers"
+  steps={[
+    ["Virtualization and isolation", "../../computer-science/operating-systems/virtualization-and-isolation.md"],
+    ["What a container actually is", "../15-containers-and-virtualization/what-a-container-actually-is.md"],
+    ["Namespaces", "../15-containers-and-virtualization/namespaces-overview.md"],
+    ["Mount and PID namespaces", "../15-containers-and-virtualization/mount-and-pid-namespaces.md"],
+    ["User namespaces", "../15-containers-and-virtualization/user-namespaces.md"],
+    ["cgroup v2", "../15-containers-and-virtualization/cgroup-v2-architecture.md"],
+    ["cgroup controllers in practice", "../15-containers-and-virtualization/cgroup-controllers-in-practice.md"],
+    ["Capabilities", "../16-security/capabilities.md"],
+    ["Capabilities and container privilege", "../15-containers-and-virtualization/capabilities-in-containers.md"],
+    ["seccomp and syscall filtering", "../16-security/seccomp.md"],
+    ["Lab: build a container from scratch", "../15-containers-and-virtualization/building-a-container-from-scratch.md"],
+    ["Images, layers, and the OCI runtime", "../15-containers-and-virtualization/images-layers-and-oci.md"],
+    ["Container networking", "../15-containers-and-virtualization/container-networking.md"],
+  ]} />
+
+<LearningPath
+  title="I want to understand Linux security"
+  steps={[
+    ["The UNIX permission model", "../16-security/the-unix-permission-model.md"],
+    ["Credentials in the kernel", "../16-security/credentials-in-the-kernel.md"],
+    ["Capabilities", "../16-security/capabilities.md"],
+    ["The LSM framework", "../16-security/the-lsm-framework.md"],
+    ["SELinux", "../16-security/selinux.md"],
+    ["AppArmor", "../16-security/apparmor.md"],
+    ["seccomp and syscall filtering", "../16-security/seccomp.md"],
+    ["Kernel hardening", "../16-security/kernel-hardening.md"],
+    ["Vulnerability classes in the kernel", "../16-security/vulnerability-classes.md"],
+    ["Auditing and security observability", "../16-security/auditing-and-security-observability.md"],
+  ]} />
+
 ## Where the rest is
 
-Folders 14 through 19 remain specified and not yet scaffolded, covering drivers, containers,
-security, observability, eBPF, and contributing.
+Folders 17 through 19 remain specified and not yet scaffolded, covering observability, eBPF, and
+contributing.
