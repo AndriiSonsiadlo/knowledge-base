@@ -68,7 +68,7 @@ where it must be.
 | Order | Size | Typical requester |
 |---|---|---|
 | 0 | 4 KiB (one page) | Almost everything — ordinary `alloc_pages(order=0)`, most slab-page backing. |
-| 1–3 | 8–32 KiB | Kernel stacks (order 2 on x86-64, i.e. 16 KiB across two pages, historically order 1), some slab caches whose object size makes a multi-page slab worthwhile. |
+| 1–3 | 8–32 KiB | Kernel stacks (order 2 on x86-64, i.e. 16 KiB across four pages, historically order 1), some slab caches whose object size makes a multi-page slab worthwhile. |
 | 9 | 2 MiB | A transparent huge page — the point at which "order" and "huge page" become the same number on x86-64. |
 
 `MAX_ORDER` bounds how high the buddy system goes (`NR_PAGE_ORDERS` orders, 0 through the configured

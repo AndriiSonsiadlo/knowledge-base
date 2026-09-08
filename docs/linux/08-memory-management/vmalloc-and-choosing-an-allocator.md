@@ -119,7 +119,7 @@ full: size picks a row in the table above, but context decides whether that row 
 
 <KernelFacts
   structure={[["struct vm_struct", "include/linux/vmalloc.h"]]}
-  path="vmalloc() [alloc_hooks(vmalloc_noprof(...))] → __vmalloc_node_range() [alloc_hooks(__vmalloc_node_range_noprof(...))] → alloc_pages() per page → map_kernel_range() → contiguous virtual range"
+  path="vmalloc() [alloc_hooks(vmalloc_noprof(...))] → __vmalloc_node_range() [alloc_hooks(__vmalloc_node_range_noprof(...))] → alloc_pages() per page → vmap_pages_range() → contiguous virtual range"
   observe="cat /proc/vmallocinfo | head && grep -E 'VmallocTotal|VmallocUsed' /proc/meminfo"
   trap="vmalloc memory is not usable for DMA even though it looks like one buffer. The device sees physical addresses, and the physical pages behind a vmalloc range are scattered — passing one to a DMA API without a scatter-gather list corrupts memory." />
 
@@ -127,8 +127,9 @@ full: size picks a row in the table above, but context decides whether that row 
 
 - <Src file="mm/vmalloc.c" symbol="__vmalloc_node_range" /> — the allocation path; at v6.18 the public
   `vmalloc()`/`__vmalloc_node_range()` are macros (`alloc_hooks(..._noprof(...))`) wrapping `_noprof`
-  implementations, the same allocation-tagging pattern `alloc_pages()` uses — the per-page allocation and
-  the mapping step are both visible in `__vmalloc_node_range_noprof()`.
+  implementations, the same allocation-tagging pattern `alloc_pages()` uses — the per-page allocation
+  (inside `__vmalloc_area_node()`) and the mapping step (`vmap_pages_range()`) are both visible in
+  `__vmalloc_node_range_noprof()`.
 - `https://docs.kernel.org/core-api/memory-allocation.html` — the kernel's own "which allocator should I
   use" guidance; the decision table above was checked against it directly, row by row.
 - `https://docs.kernel.org/core-api/mm-api.html` — the API reference for every function named in the
