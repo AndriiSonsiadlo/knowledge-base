@@ -80,17 +80,18 @@ That policy is set in `/sys/kernel/mm/transparent_hugepage/enabled`. **Verified 
 
 | Value | Meaning (from the v6.18 documentation) |
 |---|---|
-| `always` | An application requesting THP-eligible memory will stall on allocation failure and directly reclaim pages and compact memory in an effort to allocate a THP immediately. |
-| `madvise` | Enters direct reclaim like `always`, but only for regions that have used `madvise(MADV_HUGEPAGE)`. **This is the default behaviour** per the v6.18 documentation. |
-| `never` | Self-explanatory — THP is not used for regular faults. `madvise(..., MADV_COLLAPSE)` can still cause huge pages to be obtained even with `never` set everywhere. |
-| `inherit` | (Per-size setting only, under `hugepages-<size>kB/enabled`.) Adopts the top-level `enabled` value instead of setting its own. |
+| `never` | THP is disabled — mostly for debugging purposes. No anonymous memory is promoted to a huge page through this knob. |
+| `madvise` | THP is only enabled inside regions that have used `madvise(MADV_HUGEPAGE)`, to avoid the risk of consuming more memory resources than an application asked for. |
+| `always` | THP is enabled system wide, for all eligible anonymous memory, not just `MADV_HUGEPAGE`-marked regions. |
+| `inherit` | Per-size setting only, under `hugepages-<size>kB/enabled` — adopts the top-level `enabled` value instead of setting its own. This is the default for PMD-sized (2 MiB) THP; every other huge page size defaults to `never`. |
 
-`madvise` being the documented default is exactly the position most distributions ship, and the reasoning
-follows directly from the "two mechanisms" framing above: it gives the benefit to applications that
-explicitly ask for it (`MADV_HUGEPAGE`) without imposing the cost — direct reclaim/compaction on an
-ordinary fault — on applications that never asked and may be latency-sensitive in ways they never tuned
-for THP at all. `khugepaged` at v6.18 collapses only to PMD-sized (2 MiB) THP; no other huge size is a
-collapse target.
+The v6.18 documentation doesn't pin a single default for the top-level `enabled` knob itself — that's a
+function of boot-time kernel configuration. `madvise` is nonetheless the value most distributions ship in
+practice, and the reasoning follows directly from the "two mechanisms" framing above: it confines THP to
+applications that explicitly ask for it (`MADV_HUGEPAGE`) rather than applying it — and any fault-path cost
+that comes with it, covered in the next section — to applications that never asked and may be
+latency-sensitive in ways they never tuned for THP at all. `khugepaged` at v6.18 collapses only to
+PMD-sized (2 MiB) THP; no other huge size is a collapse target.
 
 ## What actually happens
 
