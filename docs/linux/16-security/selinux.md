@@ -143,6 +143,8 @@ In order of preference:
    access. Run blindly on a label problem, it grants `httpd_t` read on `var_t` (all of `/var` that
    is generically labelled) instead of fixing one directory's label.
 
+## What actually happens
+
 <Lab host="qemu" title="Enable SELinux on Debian, cause an AVC, fix it with a label" time="45 min">
 
 :::danger

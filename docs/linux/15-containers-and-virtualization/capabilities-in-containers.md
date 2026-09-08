@@ -153,6 +153,8 @@ namespace, but not loading a module or touching the host's network. Rootless Pod
 `--privileged`-shaped inside and unprivileged outside. The cost is the extra kernel surface a user
 namespace exposes to unprivileged code (see [User Namespaces](./user-namespaces.md)).
 
+## What actually happens
+
 <Lab host="qemu" title="Decode a container's capabilities, default and privileged" time="5 min">
 
 On the folder-01 Debian VM with rootful Podman 5.4.2 (`sudo apt install podman libcap2-bin`):

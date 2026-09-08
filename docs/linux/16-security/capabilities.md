@@ -132,8 +132,12 @@ processes that the holder can obtain every other capability:
 | `CAP_NET_ADMIN` | Close to root on a host network: firewall, routing, and interface control |
 
 The same list, from the container side, is in
-[Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md). The point
+[Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md). There, a
+container granted `CAP_SYS_ADMIN` has been granted most of root, and `--privileged` (every capability
+plus no seccomp, no LSM profile and all devices) is root on the host in everything but name. The point
 of capabilities isn't that each one is safe. It's that a program holding only the narrow ones is.
+
+## What actually happens
 
 <Lab host="qemu" title="Bind port 80 as a user with one file capability" time="10 min">
 

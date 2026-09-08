@@ -109,8 +109,13 @@ Crash and oops reading lands with folder 17.
     ["Debugging drivers", "../14-device-drivers-and-hardware/debugging-drivers.md"],
   ]} />
 
-The driver path assumes the "I want to write a module" path above and the
-[interrupts folder](../10-interrupts-time-and-deferred-work/the-irq-subsystem.md).
+The module path's last four steps, and the driver path, also lean on
+[copying data across the boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md),
+[the four VFS objects](../11-vfs-and-filesystems/the-four-objects.md) and
+[booting your kernel in QEMU](../01-lab-and-toolchain/booting-your-kernel-in-qemu.md). The driver path
+assumes the "I want to write a module" path above, the
+[interrupts folder](../10-interrupts-time-and-deferred-work/the-irq-subsystem.md) (threaded IRQs in
+particular), and the page allocator and memory ordering from folders 08 and 09.
 
 <LearningPath
   title="I want to write a driver"
@@ -218,9 +223,11 @@ Computer Networks.
     ["Diagnosing network problems", "../13-networking-stack/diagnosing-network-problems.md"],
   ]} />
 
-The containers path assumes two pages outside it:
+The containers path assumes two pages outside it above all:
 [network namespaces and virtual devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
-and [overlayfs](../11-vfs-and-filesystems/overlayfs.md).
+and [overlayfs](../11-vfs-and-filesystems/overlayfs.md). Its pages also build on the process pages of
+folder 06 (tasks, threads, credentials, exit), mounts and procfs from folder 11, connection tracking
+from folder 13, and cgroup CPU control from folder 07.
 
 <LearningPath
   title="I want to work on containers"
@@ -232,6 +239,8 @@ and [overlayfs](../11-vfs-and-filesystems/overlayfs.md).
     ["User namespaces", "../15-containers-and-virtualization/user-namespaces.md"],
     ["cgroup v2", "../15-containers-and-virtualization/cgroup-v2-architecture.md"],
     ["cgroup controllers in practice", "../15-containers-and-virtualization/cgroup-controllers-in-practice.md"],
+    ["The UNIX permission model", "../16-security/the-unix-permission-model.md"],
+    ["Credentials in the kernel", "../16-security/credentials-in-the-kernel.md"],
     ["Capabilities", "../16-security/capabilities.md"],
     ["Capabilities and container privilege", "../15-containers-and-virtualization/capabilities-in-containers.md"],
     ["seccomp and syscall filtering", "../16-security/seccomp.md"],
@@ -239,6 +248,11 @@ and [overlayfs](../11-vfs-and-filesystems/overlayfs.md).
     ["Images, layers, and the OCI runtime", "../15-containers-and-virtualization/images-layers-and-oci.md"],
     ["Container networking", "../15-containers-and-virtualization/container-networking.md"],
   ]} />
+
+The security path assumes [credentials and identity](../06-processes-and-threads/credentials-and-identity.md),
+[copying data across the boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
+and [memory safety in kernel C](../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md), plus
+RCU from the concurrency path.
 
 <LearningPath
   title="I want to understand Linux security"
