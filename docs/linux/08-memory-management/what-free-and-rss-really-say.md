@@ -96,12 +96,12 @@ size," and no, a `Buffers` value much smaller than `Cached` is not a sign anythi
 Four numbers, each answering a different question about one process, with sharply different
 double-counting behavior:
 
-| Metric | Includes | Double-counts | Question it answers |
-|---|---|---|---|
-| **VSZ** (virtual size) | Every mapped region in the address space, whether backed by memory or not | N/A — not a memory-consumption number at all | Nearly meaningless for memory use; includes reserved-but-unfaulted address space, memory-mapped files, guard pages |
-| **RSS** (resident set size) | Physical pages currently resident for this process | Yes — a page shared with N other processes counts fully in every one of their RSS | "How many resident pages does this process's page table currently point at" |
-| **PSS** (proportional set size) | Resident pages, each divided by its number of sharers | No — this is the point of PSS | The only per-process number that sums correctly across processes into a true total |
-| **USS** (unique set size) | Private pages only — resident and not shared with anything | No — by construction, nothing here is shared | "What would be freed if I killed this process right now" |
+| Metric | Includes | Double-counts | Question it answers | Worked example (this lab) |
+|---|---|---|---|---|
+| **VSZ** (virtual size) | Every mapped region in the address space, whether backed by memory or not | N/A — not a memory-consumption number at all | Nearly meaningless for memory use; includes reserved-but-unfaulted address space, memory-mapped files, guard pages | 528,244 kB per process (parent and every child alike — the mapping is the same size whether or not it's resident) |
+| **RSS** (resident set size) | Physical pages currently resident for this process | Yes — a page shared with N other processes counts fully in every one of their RSS | "How many resident pages does this process's page table currently point at" | Summed across the parent + 8 idle children: 4,666,184 kB ≈ 4557 MB — roughly 9x the ~500 MB actually allocated |
+| **PSS** (proportional set size) | Resident pages, each divided by its number of sharers | No — this is the point of PSS | The only per-process number that sums correctly across processes into a true total | Summed across the same 9 processes via `smaps_rollup`: 521,335 kB ≈ 509 MB — matches the real ~500 MB allocation and the ~0.5 GiB `free` delta |
+| **USS** (unique set size) | Private pages only — resident and not shared with anything | No — by construction, nothing here is shared | "What would be freed if I killed this process right now" | Not captured separately in this run — approximated by each child's `Pss` minus its share of the parent's touched pages, since the children never wrote to the buffer |
 
 ## What actually happens
 
