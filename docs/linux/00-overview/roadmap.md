@@ -105,7 +105,7 @@ Crash and oops reading lands with folder 17.
     ["Memory safety in kernel C", "../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md"],
   ]} />
 
-A real character driver is built in folder 14.
+A real character driver is built in [folder 14's lab](../14-device-drivers-and-hardware/lab-a-character-driver.md).
 
 <LearningPath
   title="My server is slow"

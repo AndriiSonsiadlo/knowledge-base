@@ -233,7 +233,7 @@ TCP state: 60 s in `SYN_RECV`, **432000 s** — five days — once `ESTABLISHED`
 
 The container's log shows the client as `10.0.2.1`, not `10.0.1.2`: masquerade hid the real client. That
 is why Docker's published ports can lose the client address unless the masquerade rule is scoped more
-narrowly — a recurring problem the containers folder returns to.
+narrowly — a recurring problem [Container Networking](../15-containers-and-virtualization/container-networking.md) returns to.
 
 ## Misconceptions
 

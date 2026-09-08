@@ -65,7 +65,7 @@ Two cases where "virtually contiguous" genuinely is not good enough:
 
 With an IOMMU in the path, the first case often disappears: the IOMMU can present a device with its own
 contiguous *device-visible* address space mapped onto scattered physical pages, the same trick `vmalloc`
-plays for the CPU's own MMU. Folder 14 develops this point properly when it covers DMA and IOMMUs
+plays for the CPU's own MMU. Folder 14 develops this point properly when it covers [DMA and IOMMUs](../14-device-drivers-and-hardware/the-dma-api.md)
 directly; here it is enough to know the requirement is conditional on the hardware path, not an absolute
 property of "using a device."
 
@@ -117,7 +117,7 @@ that page might otherwise disagree:
 Device-managed (`devm_*`) allocation attaches an allocation's lifetime to the owning `struct device`
 instead of to manual bookkeeping: memory obtained through `devm_kzalloc()` and its relatives is freed
 automatically when the device unbinds, so a driver's error-unwind and `remove()` paths do not each need
-their own matching `kfree()`. Folder 14 owns this properly — driver code meets `devm_*` constantly, and
+their own matching `kfree()`. [Folder 14](../14-device-drivers-and-hardware/the-linux-device-model.md) owns this properly — driver code meets `devm_*` constantly, and
 two sentences here is enough to place it in the table above.
 
 ## Context decides more than size

@@ -89,7 +89,7 @@ to exist). A file's presence in `/sys` says nothing about which tier it's in —
 does, and the "What actually happens" section below finds a real, long-lived sysfs file that is still
 filed under `testing`, not `stable`. Deciding which of these four filesystems a new driver should expose
 its interface through — sysfs attribute, debugfs dump, or configfs object — is exactly the kind of call
-the drivers material later in this series works through in full; the ABI contract above is the frame that
+[Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md) works through in full; the ABI contract above is the frame that
 decision happens inside.
 
 ```mermaid

@@ -83,7 +83,7 @@ was, in a shared read-only lower layer that this container's delete was never ab
 
 ## Where you meet it
 
-**Container image layers** are the dominant use (named here in prose only — the containers material
+**Container image layers** are the dominant use ([Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
 covers the image-layer mechanics in full). Each image layer is a lower directory; the container's
 writable state is the upper layer; many containers can share the same set of lower layers as long as
 none of them writes into it, because none of them can. **Live-CD and immutable-root systems** use the

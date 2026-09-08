@@ -99,8 +99,8 @@ victim task inside the cgroup by `oom_badness()`, setting it to `1` kills **ever
 atomically** when that cgroup OOMs. This is what container platforms usually want — a container is meant
 to live or die as a unit, and leaving some of its processes running after killing only the biggest one
 tends to produce a half-alive, confusing failure rather than a clean restart. The mechanics of cgroup
-memory limits, `memory.max`, and `memory.oom.group` in practice belong to the containers and virtualization
-material later in this series — this page only establishes that the OOM path forks into a
+memory limits, `memory.max`, and `memory.oom.group` in practice belong to
+[cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md#memory) — this page only establishes that the OOM path forks into a
 cgroup-scoped variant with its own, narrower blast radius.
 
 ## What actually happens

@@ -18,7 +18,8 @@ A network namespace is a complete, independent copy of the network stack: its ow
 routing tables and rules, neighbour cache, netfilter rules and conntrack table, sockets, and
 `/proc/sys/net`. A new one contains nothing but a loopback device, and that device is down. To connect it
 to anything, you need virtual devices — veth pairs, bridges, macvlans, tunnels. That combination is the
-whole mechanism container runtimes automate. This page builds it by hand.
+whole mechanism container runtimes automate. This page builds it by hand;
+[Container Networking](../15-containers-and-virtualization/container-networking.md) puts it together the way a runtime does.
 
 ## A whole stack per namespace
 

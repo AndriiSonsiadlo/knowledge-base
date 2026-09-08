@@ -19,7 +19,8 @@ seccomp — that a userspace tool applies together, in a particular order, at th
 process. `docker run`, `podman run`, and `runc` are all, at the bottom, doing the same handful of things
 to the same handful of kernel interfaces. Nothing about the result is a lightweight virtual machine;
 there is no guest kernel, no hypervisor, no second copy of Linux running underneath. It is a process on
-this host, and `ps -ef` on this host will show it to you.
+this host, and `ps -ef` on this host will show it to you. Folder 15 takes each mechanism in turn,
+starting from [What a Container Actually Is](../15-containers-and-virtualization/what-a-container-actually-is.md).
 
 ## The image is a stack of directories
 
@@ -43,7 +44,7 @@ Creating the container's first process is not a special call — it's the same
 <Src file="kernel/fork.c" symbol="kernel_clone" /> path (via <Src file="kernel/fork.c" symbol="copy_process" />)
 that creates every process and every thread on the system, `fork()` included. What makes it a
 *container's* process is which flags go in. `clone()`'s flags argument doubles as a menu of
-namespaces to create fresh, rather than share with the parent:
+[namespaces](../15-containers-and-virtualization/namespaces-overview.md) to create fresh, rather than share with the parent:
 
 - `CLONE_NEWPID` — a new PID namespace; the child becomes PID 1 inside it.
 - `CLONE_NEWNS` — a new mount namespace; the child gets its own mount table.
@@ -83,7 +84,7 @@ distinction on this page. A process can be fully namespaced and still starve the
 un-namespaced (seeing the whole host process tree) and still be capped to a sliver of memory. They're
 orthogonal knobs, not two views of the same thing.
 
-Mechanically, a cgroup is a directory in the cgroupfs virtual filesystem (mounted at `/sys/fs/cgroup` on
+Mechanically, a [cgroup](../15-containers-and-virtualization/cgroup-v2-architecture.md) is a directory in the cgroupfs virtual filesystem (mounted at `/sys/fs/cgroup` on
 a cgroup v2 system). Creating one is `mkdir`; the files that appear inside it automatically are the
 resource controls — `cpu.weight` (proportional CPU share), `cpu.max` (a hard bandwidth cap), `memory.max`
 (a hard memory ceiling), `io.max` (per-device I/O throttling), `pids.max` (a cap on the number of tasks).
@@ -99,12 +100,12 @@ above.
 A container process usually starts with capabilities and ends the setup phase with fewer of them, on
 purpose. Three mechanisms stack here:
 
-- **Capabilities dropped from the bounding set.** `prctl(PR_CAPBSET_DROP, cap, …)`, handled in the
+- **[Capabilities](../16-security/capabilities.md) dropped from the bounding set.** `prctl(PR_CAPBSET_DROP, cap, …)`, handled in the
   kernel by <Src file="security/commoncap.c" symbol="cap_prctl_drop" />, permanently removes a
   capability (say, `CAP_SYS_ADMIN`) from the ceiling this process — and anything it later `execve`s —
   can ever hold again for the rest of its life, even if some other privileged mechanism would otherwise
   have granted it.
-- **A seccomp filter installed.** The `seccomp(2)` syscall dispatches, for its `SECCOMP_SET_MODE_FILTER`
+- **A [seccomp](../16-security/seccomp.md) filter installed.** The `seccomp(2)` syscall dispatches, for its `SECCOMP_SET_MODE_FILTER`
   operation, to <Src file="kernel/seccomp.c" symbol="seccomp_set_mode_filter" />, which attaches a BPF
   program the kernel runs on every subsequent syscall this process (and its descendants) makes, before
   the syscall's own logic runs at all. A syscall the filter doesn't allow — classically anything
