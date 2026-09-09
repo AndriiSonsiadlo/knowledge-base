@@ -138,7 +138,7 @@ flowchart TB
 
 <KernelFacts
   structure={[["struct mutex", "include/linux/mutex_types.h"], ["struct completion", "include/linux/completion.h"]]}
-  path="mutex_lock() → __mutex_trylock_fast() cmpxchg → __mutex_lock_slowpath() → mutex_optimistic_spin() (MCS queue) → schedule()"
+  path="mutex_lock() → __mutex_trylock_fast() cmpxchg → __mutex_lock_slowpath() → mutex_optimistic_spin() (MCS queue) → schedule_preempt_disabled()"
   observe="grep -E 'CONFIG_DEBUG_MUTEXES|CONFIG_MUTEX_SPIN_ON_OWNER' /boot/config-$(uname -r)"
   trap="A mutex is not the slow option. It spins before it sleeps, so for short critical sections it costs about what a spinlock costs — while remaining safe to hold across a sleep, which a spinlock never is." />
 
