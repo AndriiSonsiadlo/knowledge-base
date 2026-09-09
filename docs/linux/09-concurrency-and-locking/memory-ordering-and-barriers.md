@@ -102,12 +102,12 @@ hardware genuinely needs help.
 
 | Barrier | What it orders | x86-64 cost | Typical use |
 |---|---|---|---|
-| `smp_mb()` | All prior loads/stores against all subsequent loads/stores (full barrier) | A real instruction — `lock addl $0,-4(%rsp)` (or `mfence`) | Ordering a store against a later load in the same CPU when nothing else (a lock, an atomic RMW) already implies it |
+| `smp_mb()` | All prior loads/stores against all subsequent loads/stores (full barrier) | A real instruction — unconditionally `lock addl $0,-4(%rsp)` | Ordering a store against a later load in the same CPU when nothing else (a lock, an atomic RMW) already implies it |
 | `smp_rmb()` | Prior loads against subsequent loads only | Compiles to a plain compiler barrier — x86-64 does not reorder loads with loads | Reading a data structure after reading a flag that says it is ready, paired with a writer's `smp_wmb()` |
 | `smp_wmb()` | Prior stores against subsequent stores only | Compiles to a plain compiler barrier — x86-64 does not reorder stores with stores | Publishing a data structure's contents before publishing the flag/pointer that makes it visible |
 | `smp_store_release(p, v)` | This store happens after every earlier access in program order (release) | A plain `MOV` — x86-64's store ordering already provides this | Publishing a pointer or flag once initialization is complete |
 | `smp_load_acquire(p)` | This load happens before every later access in program order (acquire) | A plain `MOV` — x86-64's load ordering already provides this | Consuming a published pointer or flag before touching what it points at |
-| `smp_mb__before_atomic()` / `smp_mb__after_atomic()` | A full barrier specifically around a non-value-returning atomic op (`atomic_inc()`, `atomic_set()`), which otherwise carries no ordering guarantee of its own | A real instruction on x86-64, same as `smp_mb()` | Wrapping `atomic_inc()`/`atomic_dec()`/`atomic_set()` when the surrounding code needs a full fence and the atomic op alone does not provide one |
+| `smp_mb__before_atomic()` / `smp_mb__after_atomic()` | A full barrier specifically around a non-value-returning atomic op (`atomic_inc()`, `atomic_set()`), which otherwise carries no ordering guarantee of its own | Compiles to nothing on x86-64 — LOCK-prefixed atomic RMW instructions are already fully serializing, so no separate barrier instruction is needed | Wrapping `atomic_inc()`/`atomic_dec()`/`atomic_set()` when the surrounding code needs a full fence and the atomic op alone does not provide one |
 
 ## Acquire and release, which is what you should reach for
 
