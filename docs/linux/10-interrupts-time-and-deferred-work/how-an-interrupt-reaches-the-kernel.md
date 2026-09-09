@@ -47,7 +47,7 @@ One interrupt, from wire to handler, crosses several separately-owned pieces:
 4. **The vector table** (the IDT on x86-64) supplies the address of the kernel's entry stub for that
    vector.
 5. **The entry stub** builds `pt_regs` and calls into the generic entry code, which calls
-   `irq_enter_rcu()` before the handler runs and, on the way out, `irq_exit_rcu()` — see below.
+   `irqentry_enter()` before the handler runs and, on the way out, `irqentry_exit()` — see below.
 6. **The handler** — `handle_irq_event()` and the driver's registered function — finally runs, and only
    at this point does anything resembling "the driver's code" execute.
 
@@ -66,12 +66,12 @@ sequenceDiagram
     IC->>CPU: deliver hardware vector N
     Note over CPU: vector N is an IDT index —<br/>hardware's number
     CPU->>Entry: push frame, clear IF, jump to IDT[N]
-    Entry->>Entry: irq_enter_rcu()
+    Entry->>Entry: irqentry_enter() → ct_irq_enter()
     Entry->>Entry: vector_irq[N] → struct irq_desc → Linux IRQ number
     Note over Entry: the Linux IRQ number is a<br/>different number, assigned by an irq domain
     Entry->>H: handle_irq_event(desc)
     H-->>Entry: IRQ_HANDLED / IRQ_NONE
-    Entry->>Entry: irq_exit_rcu() — run pending softirqs
+    Entry->>Entry: irqentry_exit() → run pending softirqs
 ```
 
 *One interrupt from the wire to the handler, with the two different numbers it is known by on the way.*
@@ -118,22 +118,35 @@ the Linux IRQ number, then dispatches through that descriptor. A driver never se
 it only ever sees the Linux IRQ number it was handed by `request_irq()`. Conflating the two is a common
 point of confusion precisely because both are called "the interrupt number" in casual conversation.
 
-## `irq_enter_rcu()` and `irq_exit_rcu()`
+## `irqentry_enter()` and `ct_irq_enter()`
 
 Being "in interrupt context" is not a fact the CPU records anywhere; it is a fact the kernel's own
-bookkeeping constructs, and `irq_enter_rcu()`/`irq_exit_rcu()` are where that construction happens (the
-functions were named `irq_enter()`/`irq_exit()` in older kernels; v6.18 splits the RCU-facing half into
-these `_rcu`-suffixed entry points, called from within the generic `irqentry_enter()`/`irqentry_exit()`
-wrapper that every IDT entry point goes through). On entry: the hardirq bits of `preempt_count` are
-added, which is the entire mechanism behind `in_interrupt()` returning true for the rest of the handler's
-run; RCU is told this CPU is now definitely not in a quiescent state, so a grace period cannot complete
-while a handler holds a reference read under `rcu_read_lock()` that started before the interrupt; and, if
-this is a `NOHZ_FULL` CPU or an idle CPU waking up, the tick subsystem is poked. On exit, the hardirq bits
-come back off `preempt_count`, and — the detail that connects this page to the rest of the folder — if
-nothing else has left the CPU still "in interrupt" (no nested count remaining) and a softirq is pending,
-`invoke_softirq()` runs it right there, before the interrupted context resumes. This is the hinge into
-[Softirqs](./softirqs.md): every softirq that runs "right after the hardware handler" runs at exactly
-this point, on the way out of `irq_exit_rcu()`, not asynchronously at some later scheduling opportunity.
+bookkeeping constructs. On x86-64's actual device-interrupt path — `DEFINE_IDTENTRY_IRQ(common_interrupt)`
+→ `call_irq_handler()` → `handle_irq()` → `generic_handle_irq_desc()` — that construction happens inside
+`irqentry_enter()`/`irqentry_exit()` (`kernel/entry/common.c`), the wrapper every `DEFINE_IDTENTRY_IRQ`
+site runs before and after the handler. `irqentry_enter()` calls `ct_irq_enter()`, the context-tracking
+primitive that tells RCU this CPU is now definitely not in a quiescent state, so a grace period cannot
+complete while a handler holds a reference read under `rcu_read_lock()` that started before the interrupt;
+`irqentry_exit()` calls `ct_irq_exit()` to undo that on the way out. Alongside this, the hardirq bits of
+`preempt_count` are added on entry and removed on exit — the entire mechanism behind `in_interrupt()`
+returning true for the rest of the handler's run — and, if this is a `NOHZ_FULL` CPU or an idle CPU
+waking up, the tick subsystem is poked as part of the same entry/exit bookkeeping. On exit — the detail
+that connects this page to the rest of the folder — if nothing else has left the CPU still "in interrupt"
+(no nested count remaining) and a softirq is pending, `invoke_softirq()` runs it right there, before the
+interrupted context resumes. This is the hinge into [Softirqs](./softirqs.md): every softirq that runs
+"right after the hardware handler" runs at exactly this point, on the way out of `irqentry_exit()`, not
+asynchronously at some later scheduling opportunity.
+
+A word of caution about names, because this area is an easy place to get the call chain wrong.
+`irq_enter()`/`irq_exit()` (`kernel/softirq.c`) were never renamed away — they still exist today as their
+own functions, doing much the same `preempt_count`/RCU/softirq bookkeeping described above, and they are
+what `generic_handle_arch_irq()` (`kernel/irq/handle.c`) calls directly. That function is the generic entry
+point used by architectures — arm64 among them — that route into the IRQ subsystem without an x86-style
+idtentry mechanism of their own. `irq_enter_rcu()`/`irq_exit_rcu()` also exist in v6.18, but they are not
+part of x86-64's `common_interrupt()` chain the way an older draft of this page claimed: the RCU-watching
+duty on that path is done by `irqentry_enter()`'s call to `ct_irq_enter()`, not by a separate
+`irq_enter_rcu()` call. Three different pairs of functions, doing overlapping bookkeeping for different
+entry paths — conflating them is exactly the kind of mistake this page used to make.
 
 ## Whose stack, and whose time
 
@@ -181,7 +194,7 @@ in the controller protocol, not just a numbering convention.
 
 <KernelFacts
   structure={[["struct pt_regs", "arch/x86/include/asm/ptrace.h"], ["struct irq_desc", "include/linux/irqdesc.h"]]}
-  path="device → APIC/GIC → IDT vector → common_interrupt() → irq_enter_rcu() → handle_irq_event() → handler → irq_exit_rcu()"
+  path="device → APIC/GIC → IDT vector → common_interrupt() → irqentry_enter()/ct_irq_enter() → handle_irq_event() → handler → irqentry_exit()"
   observe="cat /proc/interrupts | head -20 && grep -E '^(intr|softirq)' /proc/stat"
   trap="An interrupt handler runs in the context of whatever task was unlucky enough to be on that CPU. Its CPU time is charged to `hi`, not to that task and not to the device's driver — which is why interrupt cost is invisible to every per-process profiler." />
 
