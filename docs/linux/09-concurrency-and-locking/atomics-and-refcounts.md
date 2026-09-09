@@ -211,8 +211,8 @@ are a minor topic.
 - <Src file="include/linux/refcount.h" /> — the header comment explains the saturation semantics
   (`REFCOUNT_SATURATED`, positioned so a runaway increment or decrement cannot wrap back through a live
   range) and the threat model better than any secondary source.
-- LWN, [*Rethinking reference counting with
-  refcount_t*](https://lwn.net/Articles/728202/) — why the type was introduced and the exploit class
+- LWN, [*Two approaches to reference count
+  hardening*](https://lwn.net/Articles/693038/) — why the type was introduced and the exploit class
   (use-after-free via a reference-count overflow or an increment-from-zero race) it closes.
 - context7 (`/websites/kernel_doc_html`, `core-api/refcount-vs-atomic.rst`) — checked 2026-09-09 for
   current `refcount_t`/`atomic_t` guidance; confirms the ordering differences this page states
