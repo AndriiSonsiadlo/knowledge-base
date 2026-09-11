@@ -37,6 +37,12 @@ Each 9-bit index selects one of 512 entries in that level's table, and each tabl
 page (512 entries × 8 bytes/entry = 4096 bytes) — which is why the split is 9 bits at a time: it's sized
 to make every table level fit in one physical page.
 
+<Figure src="/img/linux/memory-management/x86-64-paging.png"
+        alt="A 48-bit linear address split into four 9-bit indices and a 12-bit offset, each index feeding one level of the PML4/PDP/PD/PT walk from CR3 down to a 4 KiB page"
+        caption="The four-level x86-64 page walk this section works through with real numbers, drawn as the hardware sees it: CR3 to PML4 to PDP to PD to PT to the final page."
+        source="Wikimedia Commons"
+        href="https://commons.wikimedia.org/wiki/File:X86_Paging_64bit.svg" />
+
 A concrete address, taken from a real `mmap()` region in this page's own sandbox environment (a 4 KiB
 anonymous mapping obtained with `mmap(-1, ...)`, address read back with `ctypes.addressof`):
 
