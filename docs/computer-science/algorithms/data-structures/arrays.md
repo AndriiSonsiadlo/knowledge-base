@@ -20,8 +20,8 @@ built to reward.
 
 | Term | Meaning |
 |---|---|
-| **Static array** | Fixed capacity, decided at creation. C's `int a[100]`, Java's `new int[100]`. |
-| **Dynamic array** | Grows as needed by reallocating. Python `list`, C++ `std::vector`, Java `ArrayList`, Go slice. |
+| **Static array** | Fixed capacity, decided at creation. C's `int a[100]`. |
+| **Dynamic array** | Grows as needed by reallocating. Python `list`, C++ `std::vector`, Go slice. |
 | **Capacity vs. size** | Capacity is how many elements fit before reallocating; size is how many are actually stored. |
 | **Row-major / column-major** | For 2-D arrays, whether consecutive memory holds a row or a column. C and Python are row-major; Fortran and MATLAB are column-major. |
 
@@ -94,7 +94,6 @@ array grows, giving $O(n)$ amortized per append.
 | Language | Growth factor |
 |---|---|
 | C++ `std::vector` (libstdc++, libc++) | 2× |
-| Java `ArrayList` | 1.5× |
 | Python `list` | ~1.125× plus a constant (a gentler curve, tuned for memory) |
 | Go slices | 2× while small, tapering toward 1.25× for large slices |
 
@@ -175,7 +174,7 @@ void trace_shifts() {
 # doc:no-run
 # Reserve capacity when the final size is known — avoids repeated reallocation
 result = [None] * n          # Python: allocate once
-# C++: v.reserve(n);   Java: new ArrayList<>(n);   Go: make([]int, 0, n)
+# C++: v.reserve(n);   Go: make([]int, 0, n)
 
 # Iterate in memory order. This nesting is right for row-major languages:
 for row in range(rows):
@@ -252,7 +251,7 @@ v.push_back(4);        // may reallocate; `first` now dangles
 first = 99;            // undefined behaviour
 ```
 
-Python and Java are safe from this specific fault because their elements are references and the GC
+Python is safe from this specific fault because its elements are references and the GC
 tracks them, but the equivalent logical bug — caching an index that a later removal invalidates —
 survives in every language.
 :::

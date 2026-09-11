@@ -137,10 +137,10 @@ What to do once a problem is confirmed intractable:
 - **Heuristics.** Simulated annealing, genetic algorithms, and local search give no guarantee but
   perform well in practice on typical instances, which is often all that is needed.
 - **Parameterised tractability.** Some NP-hard problems are polynomial once a specific parameter is
-  bounded — vertex cover is solvable in O(2^k · n) where `k` is the cover size, fast whenever `k` is
+  bounded — vertex cover is solvable in $O(2^{k} \cdot n)$ where `k` is the cover size, fast whenever `k` is
   small even if `n` is large. This is fixed-parameter tractability.
 - **Exponential-but-small-n.** When the instance itself is small (n ≤ 20–30), an exponential algorithm
-  such as Held–Karp's O(n²·2ⁿ) dynamic program for TSP is entirely practical, and simpler to trust than
+  such as Held–Karp's $O(n^{2} \cdot 2^{n})$ dynamic program for TSP is entirely practical, and simpler to trust than
   a heuristic with no correctness guarantee.
 
 ## Edge Cases & Pitfalls
@@ -196,7 +196,7 @@ What to do once a problem is confirmed intractable:
 
 ## Related Pages
 
-- [Common Complexities](./common-complexities.md) — where O(2ⁿ) and O(n!) sit among the growth classes
+- [Common Complexities](./common-complexities.md) — where $O(2^{n})$ and $O(n!)$ sit among the growth classes
   intractable problems fall into.
 - [Recurrences & the Master Theorem](./recurrences-and-master-theorem.md) — for bounding the algorithms
   used *within* an exponential-but-small-n or fixed-parameter approach.

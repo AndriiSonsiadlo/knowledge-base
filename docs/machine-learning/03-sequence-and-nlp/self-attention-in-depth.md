@@ -58,7 +58,7 @@ When batching sequences of different lengths, shorter sequences are padded to a 
 
 Self-attention can be viewed as computing, for every pair of positions, an edge weight in a fully-connected graph over the sequence — unlike a CNN's fixed local connectivity or an RNN's fixed sequential connectivity, attention's connectivity pattern is entirely learned and can, in principle, connect any two positions directly regardless of their distance in the sequence.
 
-## The O(n²) memory problem
+## The $O(n^{2})$ memory problem
 
 <Figure
   src="/img/ml/nlp/attention-quadratic-cost.png"

@@ -291,15 +291,15 @@ assert {frozenset(c) for c in kosaraju_scc(dag)} == {frozenset("A"), frozenset("
 - **`low[u] == disc[u]` is a strict identity check.** Swapping `disc[v]`/`low[v]` between the back- and tree-edge update breaks root detection for the whole subtree.
 - **The condensation is a DAG only after collapsing every SCC** — an intermediate, partially-collapsed
   graph can still contain cycles between not-yet-merged components.
-- **Recursion depth** is O(V) for both on a long chain; Tarjan's explicit stack complicates an
+- **Recursion depth** is $O(V)$ for both on a long chain; Tarjan's explicit stack complicates an
   iterative rewrite more than Kosaraju's two plain DFS passes.
 
 ## Comparisons
 
 | | Passes | Extra structure | Time (worst) | Notes |
 |---|---|---|---|---|
-| **Kosaraju** | 2 (+ 1 graph reversal) | Finish-order list, reversed adjacency | O(V + E) | Easier to prove correct; needs the graph twice |
-| **Tarjan** | 1 | Disc/low arrays, an explicit stack | O(V + E) | No reversal; components emerge as the DFS unwinds |
+| **Kosaraju** | 2 (+ 1 graph reversal) | Finish-order list, reversed adjacency | $O(V + E)$ | Easier to prove correct; needs the graph twice |
+| **Tarjan** | 1 | Disc/low arrays, an explicit stack | $O(V + E)$ | No reversal; components emerge as the DFS unwinds |
 
 Both are worst-case linear; the choice is about implementation shape. Kosaraju reuses an existing DFS
 with no new bookkeeping; Tarjan suits a single affordable traversal, or incremental discovery.
@@ -320,7 +320,7 @@ with no new bookkeeping; Tarjan suits a single affordable traversal, or incremen
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §22.5 — Kosaraju's
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §20.5 — Kosaraju's
   algorithm via the finish-time theorem, full correctness proof.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §4.2 "Directed Graphs" — Kosaraju-Sharir with the
   condensation-DAG framing.

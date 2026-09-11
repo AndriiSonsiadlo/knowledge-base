@@ -152,7 +152,7 @@ std::vector<std::vector<long long>> pascals_triangle(int rows) {
   factorials overflow long before `n!` fits any fixed-width integer — the standard fix precomputes
   factorials and their modular inverses mod `p` using
   [fast exponentiation](./gcd-and-modular-arithmetic.md), turning each `C(n, k) mod p` query into
-  O(1) after an O(n) precompute.
+  $O(1)$ after an $O(n)$ precompute.
 - **Inclusion-exclusion in practice.** Counting integers up to `N` divisible by 2 or 3 is
   `N/2 + N/3 - N/6` (the last term removes double-counting multiples of 6) — the same pattern scales
   to any fixed number of divisibility conditions.
@@ -217,10 +217,10 @@ int main() {
 
 | | Cost | When it applies |
 |---|---|---|
-| Closed-form `C(n, k)` / `P(n, k)` | O(k) worst | One or a few queries, `n` small enough that intermediates do not overflow |
-| Pascal's triangle DP, full table | O(rows^2) worst | Every `C(n, k)` up to a bound needed at once |
-| Modular `C(n, k)` via precomputed factorial inverses | O(n) precompute, O(1) per query | Large `n`, results needed modulo a prime |
-| Brute-force enumeration | O(exponential) worst | Never, once a formula or recurrence exists — useful only to sanity-check one by hand |
+| Closed-form `C(n, k)` / `P(n, k)` | $O(k)$ worst | One or a few queries, `n` small enough that intermediates do not overflow |
+| Pascal's triangle DP, full table | $O(rows^{2})$ worst | Every `C(n, k)` up to a bound needed at once |
+| Modular `C(n, k)` via precomputed factorial inverses | $O(n)$ precompute, $O(1)$ per query | Large `n`, results needed modulo a prime |
+| Brute-force enumeration | $O(exponential)$ worst | Never, once a formula or recurrence exists — useful only to sanity-check one by hand |
 
 The choice is almost always "closed form for a single query, DP table for many queries over a
 bounded range" — the same precompute-once trade this folder's sieve page makes for primality.
@@ -244,8 +244,6 @@ bounded range" — the same precompute-once trade this folder's sieve page makes
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Appendix C "Counting and
   Probability" — permutations, combinations, and the binomial coefficient's properties.
-- Sedgewick & Wayne, *Algorithms*, 4th ed., §2.5 (dynamic programming context) — Pascal's triangle as
-  a canonical small DP table, generalizable to larger counting recurrences.
 - [`math.comb`, `math.perm`](https://docs.python.org/3/library/math.html#math.comb) — CPython's own
   documentation for the closed-form counts, including the 3.8 version note.
 

@@ -231,7 +231,7 @@ std::priority_queue<Entry, std::vector<Entry>, std::greater<>> tasks;
 tasks.push({priority, counter++, task});
 
 // Top-k without sorting everything: O(n log k), not O(n log n)
-std::partial_sort(v.begin(), v.begin() + 10, v.end(), std::greater<>{});
+std::partial_sort(heap.begin(), heap.begin() + 10, heap.end(), std::greater<>{});
 ```
 
 </TabItem>

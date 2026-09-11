@@ -30,8 +30,8 @@ complexity claim on this site is qualified with a **case**:
 | **Worst** | The most expensive input of size n | Linear search never finds the target — scans everything |
 
 Quoting a bound without its case is the single most common error in this material: "insertion sort is
-O(n)" is true only in the best case (an already-sorted array) and false in general — its worst case is
-O(n²). A bare "O(n)" with no case attached should be read as suspicious, not authoritative.
+$O(n)$" is true only in the best case (an already-sorted array) and false in general — its worst case is
+$O(n^{2})$. A bare "$O(n)$" with no case attached should be read as suspicious, not authoritative.
 
 ## In This Section
 
@@ -72,7 +72,7 @@ or a different loop construct, even though the algorithm is unchanged.
 remaining element, `n - 1` comparisons total, regardless of how those comparisons are written in source
 code. This is more portable than counting statements, but still an exact number.
 
-**Counting asymptotically**: `n - 1` comparisons is `O(n)` — worst case, and in fact best and average
+**Counting asymptotically**: `n - 1` comparisons is $O(n)$ — worst case, and in fact best and average
 case too, since every element must be examined at least once to be sure none is larger. The exact
 constant (`n - 1` versus `n` versus `3n - 2`) stops mattering; what survives is that the cost is
 linear in the input size.
@@ -101,7 +101,7 @@ n        time (s)    ratio to previous
 8,000    0.76        4.0
 ```
 
-A ratio that settles near `2^b` as n doubles is evidence of `O(n^b)` — a steady ratio of 4 here points
+A ratio that settles near `2^b` as n doubles is evidence of $O(n^{b})$ — a steady ratio of 4 here points
 at quadratic, of 2 at linear, of roughly 1 at logarithmic. This is only a diagnostic, not a proof: it
 can be fooled by an algorithm whose behaviour changes past the sizes tested, and it says nothing about
 best or worst case unless the inputs driving each run are chosen to hit that case deliberately. It is,

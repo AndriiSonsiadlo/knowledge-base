@@ -101,7 +101,7 @@ procedure above actually proves constructively: if BFS ever detects two same-col
 an edge, the tree-path from their nearest common ancestor to each of them, plus that edge, forms a
 cycle whose length is forced odd (both tree-paths have matching parity to the ancestor, since they are
 BFS levels, so the two paths plus the closing edge sum to an odd total) — so a same-color conflict
-*is* an odd cycle, exhibited on the spot, not merely inferred to exist (CLRS 4th ed., Ch. 22 exercises
+*is* an odd cycle, exhibited on the spot, not merely inferred to exist (CLRS 4th ed., Ch. 20 exercises
 develop this as the standard bipartiteness test).
 
 ### Maximum matching by augmenting paths
@@ -243,10 +243,10 @@ int max_bipartite_matching(const Adj& left_adj, const std::vector<std::string>& 
   [NetworkX bipartite module documentation](https://networkx.org/documentation/stable/reference/algorithms/bipartite.html).
   It is the practical answer to "does this problem even reduce to bipartite matching" before writing
   Kuhn's algorithm by hand.
-- **Hopcroft–Karp.** Kuhn's algorithm above runs one BFS/DFS augmentation at a time, giving O(V · E)
-  worst case (E augmentations bounded by V, each an O(E) search). **Hopcroft–Karp** finds *multiple*
-  vertex-disjoint shortest augmenting paths per phase, cutting the number of phases to O(sqrt(V)) and the
-  total time to **O(E · sqrt(V))** — named here with its bound, not derived; see the original paper for the
+- **Hopcroft–Karp.** Kuhn's algorithm above runs one BFS/DFS augmentation at a time, giving $O(V \cdot E)$
+  worst case (E augmentations bounded by V, each an $O(E)$ search). **Hopcroft–Karp** finds *multiple*
+  vertex-disjoint shortest augmenting paths per phase, cutting the number of phases to $O(sqrt(V))$ and the
+  total time to **$O(E \cdot sqrt(V))$** — named here with its bound, not derived; see the original paper for the
   phase structure.
 - **Assignment problems** are bipartite matching with a twist: every edge has a cost or a value, and
   the goal is the *maximum-weight* matching, not merely the largest one. The unweighted case above is
@@ -319,12 +319,12 @@ left vertex and a super-sink from every right vertex, all capacities 1 — see
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 22 (BFS and the
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 20 (BFS and the
   2-coloring bipartiteness test) and §26.3 (maximum bipartite matching via network flow).
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §4.1 — BFS as the basis for two-coloring and connectivity
   queries.
 - J. E. Hopcroft & R. M. Karp, "An n^5/2 Algorithm for Maximum Matchings in Bipartite Graphs", *SIAM
-  J. Computing* 2(4), 1973 — the O(E · sqrt(V)) algorithm, named above but not derived.
+  J. Computing* 2(4), 1973 — the $O(E \cdot sqrt(V))$ algorithm, named above but not derived.
 - D. König, "Gráfok és mátrixok" (1931) — the theorem equating maximum matching and minimum vertex
   cover in bipartite graphs, referenced in the pitfalls above.
 - [NetworkX bipartite algorithms documentation](https://networkx.org/documentation/stable/reference/algorithms/bipartite.html)

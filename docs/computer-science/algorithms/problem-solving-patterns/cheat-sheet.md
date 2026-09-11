@@ -26,25 +26,25 @@ full argument for each lives on that pattern's own page, alongside its worked tr
 | Many range-sum queries over data that does not change, or many range updates read once at the end | Prefix Sums / Difference Arrays | [Prefix Sums & Difference Arrays](./prefix-sums-and-difference-arrays.md) |
 | "Next greater/smaller element", or "largest rectangle/window extreme" | Monotonic Stack / Queue | [Monotonic Stack & Queue](./monotonic-stack-and-queue.md) |
 | A list of `(start, end)` ranges: overlap count, merging, or free-room scheduling | Intervals & Sweep Line | [Intervals & Sweep Line](./intervals-and-sweep-line.md) |
-| A linked list or `state -> next_state` function, cycle detection or midpoint with O(1) space | Fast & Slow Pointers | [Fast & Slow Pointers](./fast-and-slow-pointers.md) |
+| A linked list or `state -> next_state` function, cycle detection or midpoint with $O(1)$ space | Fast & Slow Pointers | [Fast & Slow Pointers](./fast-and-slow-pointers.md) |
 | "Top/bottom k of…", or the input is a stream too large or too long to hold in full | Top-K & Streaming | [Top-K & Streaming](./top-k-and-streaming.md) |
 
 ## Complexity per pattern
 
 | Pattern | Typical time | Extra space | Case named |
 |---|---|---|---|
-| Two Pointers | O(n) | O(1) | worst |
-| Sliding Window | O(n) | O(1) or O(k) with a window structure | amortized |
-| Divide & Conquer | O(n log n) typical (Master Theorem case-dependent) | O(log n) call stack | worst |
-| Greedy | O(n log n), dominated by a sort | O(1) beyond the sort | worst |
-| Dynamic Programming | O(states x transitions) | O(states), or O(1 row) rolling | worst |
-| Recursion → Memoization → Tabulation | O(2^n) naive -> O(states) memoized/tabulated | O(states) -> O(1 row) rolling | worst, see the page's four-form table |
-| Backtracking | Exponential, pruned in practice | O(depth) call stack | worst |
-| Prefix Sums / Difference Arrays | O(n) build, O(1) query | O(n) | worst |
-| Monotonic Stack / Queue | O(n) amortized (each element pushed/popped once) | O(n) | amortized |
-| Intervals & Sweep Line | O(n log n), dominated by sorting endpoints | O(n) | worst |
-| Fast & Slow Pointers | O(n) | O(1) | worst |
-| Top-K & Streaming | O(n log k) heap, O(n) reservoir sampling | O(k) | worst |
+| Two Pointers | $O(n)$ | $O(1)$ | worst |
+| Sliding Window | $O(n)$ | $O(1)$ or $O(k)$ with a window structure | amortized |
+| Divide & Conquer | $O(n \log n)$ typical (Master Theorem case-dependent) | $O(\log n)$ call stack | worst |
+| Greedy | $O(n \log n)$, dominated by a sort | $O(1)$ beyond the sort | worst |
+| Dynamic Programming | $O(states x transitions)$ | $O(states)$, or $O(1 row)$ rolling | worst |
+| Recursion → Memoization → Tabulation | $O(2^{n})$ naive -> $O(states)$ memoized/tabulated | $O(states)$ -> $O(1 row)$ rolling | worst, see the page's four-form table |
+| Backtracking | Exponential, pruned in practice | $O(depth)$ call stack | worst |
+| Prefix Sums / Difference Arrays | $O(n)$ build, $O(1)$ query | $O(n)$ | worst |
+| Monotonic Stack / Queue | $O(n)$ amortized (each element pushed/popped once) | $O(n)$ | amortized |
+| Intervals & Sweep Line | $O(n \log n)$, dominated by sorting endpoints | $O(n)$ | worst |
+| Fast & Slow Pointers | $O(n)$ | $O(1)$ | worst |
+| Top-K & Streaming | $O(n \log k)$ heap, $O(n)$ reservoir sampling | $O(k)$ | worst |
 
 ## Template-code index
 
@@ -118,9 +118,7 @@ plausible-looking greedy choice is provably wrong.
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 4 (divide and
-  conquer), Ch. 15 (dynamic programming), Ch. 16 (greedy) — the chapters this page's table summarises.
-- Sedgewick & Wayne, *Algorithms*, 4th ed., §6.4 (dynamic programming, top-down vs. bottom-up) — the
-  same recursion-to-tabulation progression this cheat sheet's index points into.
+  conquer), Ch. 14 (dynamic programming), Ch. 15 (greedy) — the chapters this page's table summarises.
 
 ## Related Pages
 

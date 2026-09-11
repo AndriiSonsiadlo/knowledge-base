@@ -15,36 +15,36 @@ behind the table it summarises here.
 
 | Class | Name | Typical source |
 |---|---|---|
-| O(1) | Constant | Direct addressing, a fixed amount of work |
-| O(log n) | Logarithmic | Halving the search space each step |
-| O(n) | Linear | One pass over the input |
-| O(n log n) | Linearithmic | Divide-and-conquer with a linear combine step |
-| O(n²) | Quadratic | Every pair; nested passes |
-| O(n³) | Cubic | Every triple |
-| O(2ⁿ) | Exponential | Every subset |
-| O(n!) | Factorial | Every ordering |
+| $O(1)$ | Constant | Direct addressing, a fixed amount of work |
+| $O(\log n)$ | Logarithmic | Halving the search space each step |
+| $O(n)$ | Linear | One pass over the input |
+| $O(n \log n)$ | Linearithmic | Divide-and-conquer with a linear combine step |
+| $O(n^{2})$ | Quadratic | Every pair; nested passes |
+| $O(n^{3})$ | Cubic | Every triple |
+| $O(2^{n})$ | Exponential | Every subset |
+| $O(n!)$ | Factorial | Every ordering |
 
 ## "n = 10⁶ takes…" — at roughly 10⁸–10⁹ simple operations per second
 
 | Complexity | Operations at n = 10⁶ | Roughly |
 |---|---|---|
-| O(log n) | ~20 | Instant |
-| O(n) | 10⁶ | Under a millisecond to a few milliseconds |
-| O(n log n) | ~2×10⁷ | Milliseconds |
-| O(n²) | 10¹² | Minutes to tens of minutes |
-| O(n³) | 10¹⁸ | Decades — not viable at this n |
-| O(2ⁿ) | astronomically larger than atoms in the observable universe | Never |
+| $O(\log n)$ | ~20 | Instant |
+| $O(n)$ | 10⁶ | Under a millisecond to a few milliseconds |
+| $O(n \log n)$ | ~2×10⁷ | Milliseconds |
+| $O(n^{2})$ | 10¹² | Minutes to tens of minutes |
+| $O(n^{3})$ | 10¹⁸ | Decades — not viable at this n |
+| $O(2^{n})$ | astronomically larger than atoms in the observable universe | Never |
 
 The same table read the other way, "how large an n is affordable":
 
 | Complexity | Comfortable n |
 |---|---|
-| O(n!) | ≤ 10 |
-| O(2ⁿ) | ≤ 25 |
-| O(n³) | ≤ 500 |
-| O(n²) | ≤ 10,000 |
-| O(n log n) | ≤ 10,000,000 |
-| O(n) | limited by memory bandwidth, not CPU |
+| $O(n!)$ | ≤ 10 |
+| $O(2^{n})$ | ≤ 25 |
+| $O(n^{3})$ | ≤ 500 |
+| $O(n^{2})$ | ≤ 10,000 |
+| $O(n \log n)$ | ≤ 10,000,000 |
+| $O(n)$ | limited by memory bandwidth, not CPU |
 
 ## Choosing an analysis method
 
@@ -65,7 +65,7 @@ flowchart TD
 Loop counting handles the common case directly. Recursive code that shares one structure across many
 calls — not one recursive tree per call, but state that persists between top-level calls — is an
 amortized-analysis question, not a recursion-tree one. Recursive code with the exact divide-and-conquer
-shape gets the master theorem's O(1) shortcut; anything the theorem's conditions do not cover falls back
+shape gets the master theorem's $O(1)$ shortcut; anything the theorem's conditions do not cover falls back
 to a recursion tree, drawn by hand, or full substitution with induction.
 
 ## Recall

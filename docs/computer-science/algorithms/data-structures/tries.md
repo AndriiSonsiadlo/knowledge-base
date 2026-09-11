@@ -11,7 +11,7 @@ tags: [computer-science, algorithms, data-structures, tries, strings]
 A hash set answers "is this exact string in the set?" and nothing else. It cannot answer "what strings
 start with `ca`?" without scanning every entry, because hashing deliberately destroys any relationship
 between a string and its prefixes — that is the whole point of a good hash function. A trie is the
-structure built for the opposite trade: it throws away the O(1) whole-string lookup and gets, in
+structure built for the opposite trade: it throws away the $O(1)$ whole-string lookup and gets, in
 return, every prefix operation for free.
 
 The idea is to stop storing *strings* and start storing *paths*. Every node is one character position;
@@ -324,7 +324,7 @@ slower for pure exact-match workloads with little shared structure between keys.
   *Journal of the ACM* 15(4), 1968 — the original compressed (radix) trie.
 - Python documentation, [`dict`](https://docs.python.org/3/library/stdtypes.html#dict) and
   [`collections.defaultdict`](https://docs.python.org/3/library/collections.html#collections.defaultdict) —
-  the amortized-O(1) hash map used for the child-map layout above.
+  the amortized-$O(1)$ hash map used for the child-map layout above.
 
 ## Related Pages
 

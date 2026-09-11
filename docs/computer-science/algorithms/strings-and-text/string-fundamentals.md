@@ -15,9 +15,9 @@ languages — but each has a shape (linear, or accidentally quadratic) that dete
 matching algorithm built on top of them keeps its advertised bound or silently loses it.
 
 The root cause of all three is the same fact from [the folder introduction](./intro.md): strings
-are immutable in Python, Java, C#, and most managed languages (`std::string` is a deliberate
+are immutable in Python, C#, and most managed languages (`std::string` is a deliberate
 exception — see below). "Modifying" an immutable string is not a modification at all, it is
-building a brand-new string and discarding the old one. Whether that costs O(1) amortized or O(n)
+building a brand-new string and discarding the old one. Whether that costs $O(1)$ amortized or $O(n)$
 per step depends entirely on how many characters get copied into that new string, which is a
 question about *how* the code builds it, not about the string type itself.
 
@@ -34,8 +34,8 @@ concern from the cost model here and is not repeated on this page.
 |---|---|
 | **Immutable string** | A string value that cannot change in place; every apparent edit allocates a new string |
 | **String builder** | A pattern that accumulates pieces in a mutable container (a list, a buffer) and produces the immutable final string exactly once |
-| **Amortized O(1) resize** | The general guarantee behind a dynamic array's `append` — see [Amortized Analysis](../complexity/amortized-analysis.md); it does **not** automatically apply to string concatenation, because a new string is a new object, not a resized one |
-| **Slicing** | Producing a new string from a contiguous range of an existing one; costs O(k) for a slice of length k, since the characters must be copied into the new string |
+| **Amortized $O(1)$ resize** | The general guarantee behind a dynamic array's `append` — see [Amortized Analysis](../complexity/amortized-analysis.md); it does **not** automatically apply to string concatenation, because a new string is a new object, not a resized one |
+| **Slicing** | Producing a new string from a contiguous range of an existing one; costs $O(k)$ for a slice of length k, since the characters must be copied into the new string |
 | **Normalisation (NFC / NFD)** | Rewriting a Unicode string into one canonical sequence of code points, so that two visually identical strings compare equal |
 
 ## Mechanism
@@ -64,9 +64,9 @@ total characters copied: 30                   total characters copied: 10
 
 With n equal-length parts of length k each, the naive loop's i-th step copies `i*k + k` characters
 (everything accumulated so far, plus the new piece), so the total is
-`k(1 + 2 + ... + n) = k*n(n+1)/2` — **O(n²)** in the number of parts, for an output that is only
-O(n) characters long. `join` computes the total length once, allocates one buffer, and writes each
-part into it exactly once: **O(n)** total, matching the size of what it produces.
+`k(1 + 2 + ... + n) = k*n(n+1)/2` — **$O(n^{2})$** in the number of parts, for an output that is only
+$O(n)$ characters long. `join` computes the total length once, allocates one buffer, and writes each
+part into it exactly once: **$O(n)$** total, matching the size of what it produces.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -157,7 +157,7 @@ which introduced it, and the CPython source's own
 [`unicode_concat`](https://github.com/python/cpython/blob/main/Objects/unicodeobject.c) path, which
 checks the refcount before taking the fast path. Any of these break it: the string being referenced
 elsewhere (`other = s; s += t`), running under PyPy or another implementation, or a future CPython
-release changing the heuristic. `"".join(parts)` has no such dependency — its O(n) bound is a
+release changing the heuristic. `"".join(parts)` has no such dependency — its $O(n)$ bound is a
 property of the algorithm, not an accident of one interpreter's memory management.
 
 ## Practical Usage
@@ -169,13 +169,13 @@ property of the algorithm, not an accident of one interpreter's memory managemen
   see the [`io` module docs](https://docs.python.org/3/library/io.html#io.StringIO) — useful when
   the pieces are produced by many small `write()` calls rather than collected into a list first.
 - **C++ `std::string`** is mutable and contiguous, so `+=`/`append()` in a loop is idiomatic there —
-  but without `reserve()` first, repeated `append()` still pays amortized O(1) *per character*
+  but without `reserve()` first, repeated `append()` still pays amortized $O(1)$ *per character*
   reallocation cost identical to `std::vector::push_back`
-  ([`[string.capacity]`](https://eel.is/c++draft/string.capacity)), not the O(n²) total of Python's
+  ([`[string.capacity]`](https://eel.is/c++draft/string.capacity)), not the $O(n^{2})$ total of Python's
   naive loop, since each append only copies the characters it is currently holding, not a
   freshly-copied whole string each time.
 - **Slicing:** `s[a:b]` in Python and `s.substr(a, len)` in C++ both allocate a new string of length
-  `b - a`, copying that many characters — O(k) for a slice of length k, never O(1), and never
+  `b - a`, copying that many characters — $O(k)$ for a slice of length k, never $O(1)$, and never
   "shares" the original buffer.
 
 ## Edge Cases & Pitfalls
@@ -195,16 +195,16 @@ property of the algorithm, not an accident of one interpreter's memory managemen
   for the call that fixes it: normalise both sides to the same form (NFC is the common choice) before
   comparing.
 - **Normalising once and comparing many times, vs normalising on every comparison.** The cost is the
-  same shape as hashing: pay the O(m) normalisation once per string, not once per comparison.
+  same shape as hashing: pay the $O(m)$ normalisation once per string, not once per comparison.
 
 ## Comparisons
 
 | | Cost to build n parts, total length m | Cost to compare two strings | Notes |
 |---|---|---|---|
-| `+=` in a loop (naive, no special case) | O(n·m) worst case | — | Each step re-copies everything accumulated so far |
-| `str.join` | O(m) | — | One allocation, one pass |
-| `s1 == s2`, no normalisation | — | O(m) worst case, O(1) best case | Stops at the first mismatch |
-| `s1 == s2` after `unicodedata.normalize` | — | O(m) to normalise, plus O(m) to compare | Correct for visually-identical text; the naive version is not |
+| `+=` in a loop (naive, no special case) | $O(n \cdot m)$ worst case | — | Each step re-copies everything accumulated so far |
+| `str.join` | $O(m)$ | — | One allocation, one pass |
+| `s1 == s2`, no normalisation | — | $O(m)$ worst case, $O(1)$ best case | Stops at the first mismatch |
+| `s1 == s2` after `unicodedata.normalize` | — | $O(m)$ to normalise, plus $O(m)$ to compare | Correct for visually-identical text; the naive version is not |
 
 ## Recall
 
@@ -237,7 +237,7 @@ property of the algorithm, not an accident of one interpreter's memory managemen
 ## Related Pages
 
 - [Strings & Text Introduction](./intro.md) — why alphabet size, immutability, and comparison cost define this whole folder.
-- [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — where an O(m) comparison, done once per alignment, becomes the O(nm) baseline this folder improves on.
+- [Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md) — where an $O(m)$ comparison, done once per alignment, becomes the $O(nm)$ baseline this folder improves on.
 - [KMP & the Z-Algorithm](./kmp-and-z-algorithm.md) — a matcher that gets its worst-case bound precisely by never re-comparing a character it has already seen.
 - [Character Encoding](../../bit-manipulation/character-encoding.md) — what a "character" is, a separate question from what it costs to build or compare one.
 - [Amortized Analysis](../complexity/amortized-analysis.md) — the general technique behind dynamic-array growth, and why it does not rescue a naive string-concatenation loop.

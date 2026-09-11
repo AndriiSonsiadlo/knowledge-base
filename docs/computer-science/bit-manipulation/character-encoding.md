@@ -117,7 +117,7 @@ charset>` tag, or an explicit encoding parameter when opening a file — rather 
 |---|---|---|---|
 | ASCII | 1 (7-bit) | N/A — its own base case | Legacy, protocol control bytes |
 | UTF-8 | 1-4, variable | Yes — identical for `U+0000`-`U+007F` | Web, files, most modern systems (default almost everywhere) |
-| UTF-16 | 2 or 4 (surrogate pairs) | No | Windows APIs, Java/JavaScript internal string storage |
+| UTF-16 | 2 or 4 (surrogate pairs) | No | Windows APIs, JavaScript internal string storage |
 | UTF-32 | 4, fixed | No | Simplicity of one code point = one unit; rarely used for storage (space-inefficient) |
 
 ## References

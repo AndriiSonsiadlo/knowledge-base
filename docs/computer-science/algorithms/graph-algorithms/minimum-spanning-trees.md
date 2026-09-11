@@ -272,9 +272,9 @@ assert prim_total == 13                             # same weight as Kruskal, as
 
 | | Best for | Time (worst) | Structure needed | Notes |
 |---|---|---|---|---|
-| **Kruskal** | Sparse graphs, edges already listed | O(E log E) | Flat edge list + union-find | Dominated by the one sort |
-| **Prim (binary heap)** | Dense graphs, adjacency already built | O(E log V) | Adjacency list + heap | Never sorts the whole edge set |
-| Prim (array, no heap) | Very dense graphs | O(V²) | Adjacency matrix | Beats the heap version when E is close to V² |
+| **Kruskal** | Sparse graphs, edges already listed | $O(E \log E)$ | Flat edge list + union-find | Dominated by the one sort |
+| **Prim (binary heap)** | Dense graphs, adjacency already built | $O(E \log V)$ | Adjacency list + heap | Never sorts the whole edge set |
+| Prim (array, no heap) | Very dense graphs | $O(V^{2})$ | Adjacency matrix | Beats the heap version when E is close to V² |
 
 Kruskal wins when the graph arrives as a flat edge list and is sparse — the sort dominates, and E log
 E is small. Prim wins when the graph is already an adjacency list and dense, since it never needs the

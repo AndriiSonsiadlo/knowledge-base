@@ -61,16 +61,16 @@ the tail's key in $O(1)$, removes it from both the map and the list, and inserts
 head. Every step is a pointer operation on a node already located by the hash map — nothing here ever
 scans the list.
 
-### The O(1) argument, per operation
+### The $O(1)$ argument, per operation
 
-- **`get(key)` — O(1).** Hash map lookup is $O(1)$ average (amortized rehashing per the language's own
+- **`get(key)` — $O(1)$.** Hash map lookup is $O(1)$ average (amortized rehashing per the language's own
   hash-table guarantee). Once the node pointer is in hand, moving it to the head of a doubly linked
   list needs only its two neighbours' pointers rewritten — no traversal, because unlinking a node you
   already hold a pointer to never requires walking from the head to find it.
-- **`put(key, value)` — O(1).** Same map lookup or insert, same $O(1)$ splice into a doubly linked
+- **`put(key, value)` — $O(1)$.** Same map lookup or insert, same $O(1)$ splice into a doubly linked
   list. Eviction (when at capacity) reads the tail neighbour's pointer directly — sentinel nodes (below)
   make this branch-free.
-- **Eviction — O(1).** The tail sentinel's real neighbour *is* the least-recently-used node by
+- **Eviction — $O(1)$.** The tail sentinel's real neighbour *is* the least-recently-used node by
   construction — no search is needed to find what to evict, only to remove it.
 
 The doubly linked list is load-bearing specifically because removal-given-a-node-pointer is $O(1)$ —
@@ -289,7 +289,7 @@ admission filter) rather than picking one in isolation.
 ## References
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §10.2 "Linked lists" —
-  the doubly linked list operations (splice, O(1) removal given a node pointer) this page's O(1)
+  the doubly linked list operations (splice, $O(1)$ removal given a node pointer) this page's $O(1)$
   argument depends on.
 - Python documentation, [`functools.lru_cache`](https://docs.python.org/3/library/functools.html#functools.lru_cache) —
   the `maxsize=None` unbounded-cache behaviour and per-call thread-safety notes cited above.
@@ -301,10 +301,10 @@ admission filter) rather than picking one in isolation.
 
 ## Related Pages
 
-- [Hash Tables](./hash-tables.md) — the O(1)-average lookup structure both policies build on.
+- [Hash Tables](./hash-tables.md) — the $O(1)$-average lookup structure both policies build on.
 - [Linked Lists](./linked-lists.md) — the doubly linked list and sentinel-node technique used directly
   above.
-- [Deques & Ring Buffers](./deques-and-ring-buffers.md) — another structure that needs O(1) operations
+- [Deques & Ring Buffers](./deques-and-ring-buffers.md) — another structure that needs $O(1)$ operations
   at both ends, solved with a related but distinct block/index design.
 - [Cheat Sheet](./cheat-sheet.md) — the full operation-cost matrix across every structure in this
   folder.

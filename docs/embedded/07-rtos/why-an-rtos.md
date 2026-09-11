@@ -96,7 +96,7 @@ Both words are doing work, and the first is a stronger claim than most projects 
 - **Strict priority order with no fairness heuristics.** A general-purpose scheduler will boost a starved low-priority task to keep the system responsive. A real-time scheduler must not: if the low-priority task is starved, that is the design telling you something, and hiding it makes the system unanalysable. This is the sharpest difference from the policies in [Scheduling](../../computer-science/operating-systems/scheduling.md), which are largely about throughput and fairness.
 - **A bounded answer to priority inversion.** Priority inheritance on mutexes, or a ceiling protocol, so that a low-priority task holding a lock cannot delay a high-priority task indefinitely.
 
-"Deterministic" is the word vendors use and it is worth translating: it means the worst case is bounded and stated, not that every operation takes the same time. A kernel that is O(1) in the number of tasks is deterministic; so is one that is O(n) with a documented and small n.
+"Deterministic" is the word vendors use and it is worth translating: it means the worst case is bounded and stated, not that every operation takes the same time. A kernel that is $O(1)$ in the number of tasks is deterministic; so is one that is $O(n)$ with a documented and small n.
 
 :::warning[The migration that broke a subsystem nobody edited]
 The characteristic first-RTOS bug is not in the RTOS. It is in code that was correct for years and stopped being correct the moment it could be pre-empted.

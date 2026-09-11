@@ -21,7 +21,7 @@ overestimates the true remaining cost is called **admissible**, and admissibilit
 condition under which A\* is guaranteed to return an optimal path. Get the estimate wrong in the
 optimistic direction — underestimate — and the search merely explores more nodes than necessary before
 still finding the right answer. Get it wrong in the other direction — overestimate — and A\* can commit
-to a real target before ever considering a cheaper route, returning a path that is wrong, not just slow.
+to a worse path before ever considering a cheaper route, returning a path that is wrong, not just slow.
 
 :::info[Prerequisites]
 [Shortest Paths](./shortest-paths.md) for Dijkstra's algorithm, which A\* is a direct modification of —
@@ -278,7 +278,7 @@ cost already paid.
   Cost Paths", *IEEE Trans. SSC* 4(2), 1968 — the original A\* paper and its admissibility-implies-optimality proof.
 - S. Russell & P. Norvig, *Artificial Intelligence: A Modern Approach*, 4th ed., §3.5–3.6 — consistency,
   the closed-list argument for never reopening a consistent-heuristic search, and weighted A\*.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 24 — Dijkstra's
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 22 — Dijkstra's
   algorithm and its $O((V+E)\log V)$ bound, which A\* inherits unchanged in the worst case.
 - [NetworkX `astar_path` documentation](https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.shortest_paths.astar.astar_path.html)
   — the library call, with an explicit note on the admissibility requirement.

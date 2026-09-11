@@ -14,21 +14,21 @@ effectively unbounded alphabet, but a DNA string has four symbols and an English
 26 to 100 depending on case and punctuation. Algorithms that build a table indexed by "the next
 character" (Boyer-Moore's bad-character rule, a trie's child array) pay for that table in terms of
 alphabet size Σ, and a small Σ makes some structures cheap that would be wasteful on `int`s. Second,
-strings in most languages are **immutable** — Python's `str`, Java's `String`, C++'s
+strings in most languages are **immutable** — Python's `str` — C++'s
 `std::string` is the odd one out here — so "modify a string" is really "build a new one", and how
 you build it changes an algorithm's complexity by a full order. Third, and easy to forget:
-comparing two strings is not O(1). Two `int`s compare in one machine instruction; two strings of
-length m compare in **O(m)** in the worst case, because equality can only be ruled out by looking
+comparing two strings is not $O(1)$. Two `int`s compare in one machine instruction; two strings of
+length m compare in **$O(m)$** in the worst case, because equality can only be ruled out by looking
 at where they first differ, and that first difference might be the last character.
 
 That last point is the one bug every language hides well enough to make people forget it. `s1 == s2`
 *looks* like a single operation — it returns one boolean, it takes one line — but if `s1` and `s2`
 share the first 999 characters of a 1,000-character string and differ only at the last, the runtime
 compared 1,000 characters to say so. An algorithm that compares strings inside a loop without
-accounting for this is not O(n) in the number of strings, it is O(n·m) in the number of strings
+accounting for this is not $O(n)$ in the number of strings, it is $O(n \cdot m)$ in the number of strings
 times their length — the same trap as calling `list.insert(0, x)` inside a loop and being surprised
 the whole thing is quadratic. Every page in this folder is, in one way or another, about not
-re-paying that O(m) cost more times than the problem requires.
+re-paying that $O(m)$ cost more times than the problem requires.
 
 ```mermaid
 flowchart TD
@@ -49,7 +49,7 @@ the reading order, since each page assumes the cost model or the matcher the pre
 | **Alphabet (Σ)** | The set of distinct symbols a string can contain. A parameter to string algorithms the way `n` is a parameter to sorting |
 | **Immutability** | The guarantee that an existing string value never changes in place; every "modification" produces a new string |
 | **String builder** | A structure (a list of parts, a mutable buffer) that defers the final immutable string until all pieces are known, to avoid repeated full copies |
-| **Comparison cost** | Two strings of length m compare in O(m) worst case — not O(1) — because equality requires ruling out every prefix match up to the first difference |
+| **Comparison cost** | Two strings of length m compare in $O(m)$ worst case — not $O(1)$ — because equality requires ruling out every prefix match up to the first difference |
 | **Pattern matching** | Finding where a short string (the pattern) occurs inside a long one (the text); the subject of two of this folder's five pages |
 
 ## Mechanism
@@ -59,11 +59,11 @@ The map above names the shape of each problem; the folder answers them in this o
 1. **[String Fundamentals](./string-fundamentals.md)** — before matching anything, the cost model:
    what immutability costs when building strings, what slicing costs, and why two strings that look
    identical on screen can fail `==`.
-2. **[Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md)** — the O(nm) baseline matcher,
+2. **[Naive Matching & Rabin-Karp](./naive-matching-and-rabin-karp.md)** — the $O(nm)$ baseline matcher,
    the input that actually makes it slow, and the rolling-hash trick that gets expected-case linear
    time out of arithmetic instead of comparisons.
 3. **[KMP & the Z-Algorithm](./kmp-and-z-algorithm.md)** — the same matching problem solved with a
-   worst-case O(n + m) guarantee, by never re-reading a text character once it has been seen.
+   worst-case $O(n + m)$ guarantee, by never re-reading a text character once it has been seen.
 4. **[Suffix Structures & Autocomplete](./suffix-structures-and-autocomplete.md)** — when the pattern
    is not known in advance, or there are many of them: structures built once from the text, queried
    many times.
@@ -90,7 +90,7 @@ compare(s1, s2):
 Same two 1,000-character strings, same `==` operator, a 1,000x difference in work — because string
 comparison is not a fixed-cost operation, it is a **linear scan that stops early on the first
 mismatch**. The worst case (last-character difference, or no difference at all — full equality)
-still costs O(m); the best case (first-character difference) costs O(1). Both are real: hashing two
+still costs $O(m)$; the best case (first-character difference) costs $O(1)$. Both are real: hashing two
 random passwords hits the worst case almost every failed attempt, since a wrong password rarely
 shares a long common prefix with the right one by chance, but comparing sorted, near-duplicate log
 lines can hit it on purpose.
@@ -106,15 +106,15 @@ lines can hit it on purpose.
   short-circuit on length before scanning content — but the standard only requires the *result*,
   not the short-circuit, so do not rely on the constant-time length check being the only work done.
 - **Hashing before comparing** (a hash table, a `set` of strings) turns repeated equality checks
-  into one O(m) hash computation per string plus O(1) expected comparisons of hash values — the
+  into one $O(m)$ hash computation per string plus $O(1)$ expected comparisons of hash values — the
   hash can be cached (Python interns and caches `str.__hash__` results) so it is computed once even
   across many lookups of the same string object.
 
 ## Edge Cases & Pitfalls
 
-- **Treating string equality as O(1) inside a loop.** Deduplicating a list of strings with a nested
-  `for` loop and `==` is not O(n) comparisons, it is O(n²·m) character comparisons — use a `set` or
-  `dict` to pay the O(m) hashing cost once per string instead of once per pair.
+- **Treating string equality as $O(1)$ inside a loop.** Deduplicating a list of strings with a nested
+  `for` loop and `==` is not $O(n)$ comparisons, it is $O(n^{2} \cdot m)$ character comparisons — use a `set` or
+  `dict` to pay the $O(m)$ hashing cost once per string instead of once per pair.
 - **Alphabet size ignored when choosing a structure.** A 256-entry child array per trie node is
   cheap for lowercase ASCII and wasteful for Unicode text, where the same array either needs a hash
   map per node or a much larger, mostly-empty array.

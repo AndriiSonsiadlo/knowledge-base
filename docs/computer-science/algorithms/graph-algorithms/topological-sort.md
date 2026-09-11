@@ -211,7 +211,7 @@ Post-order: `C, F, E, D, B, A`. Reversed: `A, B, D, E, F, C` — different from 
 
 | | Kahn's | DFS-based |
 |---|---|---|
-| Traversal, recursion | Breadth-first, none | Depth-first, O(V) stack |
+| Traversal, recursion | Breadth-first, none | Depth-first, $O(V)$ stack |
 | Cycle detection | Output shorter than vertex count | A GREY vertex revisited |
 | Ordering control | Swap the queue for a [heap](../data-structures/heaps.md) for a deterministic order | Fixed by the traversal |
 
@@ -308,7 +308,7 @@ many cores you add, the same argument as [Amdahl's law](../../cpu-architecture/m
 - **Vertices appearing only as targets** may be missing from `graph`'s keys (`KeyError`); build the
   vertex set from both endpoints of every edge.
 - **The result is not unique** — assert the *constraints*, not one specific order, or use a heap for
-  a deterministic tiebreak. DFS recursion depth is O(V); use Kahn's for large graphs.
+  a deterministic tiebreak. DFS recursion depth is $O(V)$; use Kahn's for large graphs.
 
 ## Recall
 
@@ -327,7 +327,7 @@ many cores you add, the same argument as [Amdahl's law](../../cpu-architecture/m
 ## References
 
 - Kahn, A.B. (1962), "Topological sorting of large networks", *Communications of the ACM* — the original.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §22.4 — DFS-based topological sort, with the proof that reverse finishing order is valid.
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §20.4 — DFS-based topological sort, with the proof that reverse finishing order is valid.
 - [VisuAlgo — Topological Sort](https://visualgo.net/en/dfsbfs) — both algorithms, on an editable graph.
 
 ## Related Pages

@@ -24,7 +24,7 @@ Adjacency lists win whenever the graph is sparse ($E \ll V^2$), which is the com
 algorithms on this page's table assume one. Matrices win only when edge-existence queries dominate and
 the graph is dense enough that $O(V^2)$ space is not itself the problem (Kruskal's sort or an edge-list
 input format is the exception that wants an edge list directly, to avoid rebuilding one). See CLRS 4th
-ed., §22.1, for the same comparison stated formally.
+ed., §20.1, for the same comparison stated formally.
 
 ## "The question is X" → run Y
 
@@ -113,7 +113,7 @@ single most common mistake this flow is meant to prevent — see the Dijkstra da
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §22.1 (representations),
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §20.1 (representations),
   Ch. 20-22 (traversal, topological sort), Ch. 24-26 (shortest paths, MST, flow) — the chapters this
   page's matrices summarise.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., Ch. 4 — the same algorithms with an empirical,

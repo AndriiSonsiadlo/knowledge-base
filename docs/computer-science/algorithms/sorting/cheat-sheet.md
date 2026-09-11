@@ -29,7 +29,7 @@ that algorithm's own page, alongside its worked trace.
 `k` is the counting-sort key range, `d` the number of digits, and `r` the radix (buckets per digit) in
 the radix-sort row — see [Counting, Radix & Bucket Sort](./counting-radix-bucket-sort.md) for where
 those variables come from. Every row above is a *comparison-based* claim except the last three, which
-sidestep the Ω(n log n) comparison-sort lower bound entirely by assuming something about the keys
+sidestep the $Ω(n \log n)$ comparison-sort lower bound entirely by assuming something about the keys
 beyond "they support `<`" — a bounded range, a fixed digit width, or a known distribution.
 
 ## "What do you know about the input?" → reach for…
@@ -62,10 +62,10 @@ falling back to a comparison sort for a free-text one, in the same query.
 
 ## When the comparison-sort floor does not apply
 
-Every algorithm in the matrix down through Heapsort is bound below by Ω(n log n) comparisons in the
+Every algorithm in the matrix down through Heapsort is bound below by $Ω(n \log n)$ comparisons in the
 worst case — a consequence of the decision-tree argument: any comparison sort correct on all `n!`
 orderings of `n` distinct elements must have at least `n!` leaves in its decision tree, and a binary
-tree needs height ≥ log₂(n!) = Ω(n log n) to have that many leaves (CLRS 4th ed. §8.1). Counting sort,
+tree needs height ≥ log₂(n!) = $Ω(n \log n)$ to have that many leaves (CLRS 4th ed. §8.1). Counting sort,
 radix sort, and bucket sort are not exceptions to that bound — they simply do not decide order by
 comparison at all, so the bound never applies to them in the first place. That is also exactly why they
 each require an assumption the comparison sorts do not: a bounded key range, a fixed digit count, or a
@@ -102,7 +102,7 @@ or degrades, as detailed on [Counting, Radix & Bucket Sort](./counting-radix-buc
   matrix above in nearly every real program, and what those library sorts actually are.
 - [Counting, Radix & Bucket Sort](./counting-radix-bucket-sort.md) — the three non-comparison rows,
   their assumptions, and what happens when an assumption is violated.
-- [Quickselect](./quickselect.md) — the O(n) answer when the question is one order statistic, not a
+- [Quickselect](./quickselect.md) — the $O(n)$ answer when the question is one order statistic, not a
   full ordering.
 - [Complexity Cheat Sheet](../complexity/cheat-sheet.md) — the growth-rate table this page's Big-O
   notation assumes.

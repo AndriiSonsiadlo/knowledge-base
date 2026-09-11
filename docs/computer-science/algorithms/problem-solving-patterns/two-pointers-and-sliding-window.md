@@ -230,7 +230,7 @@ std::size_t remove_duplicates(std::vector<int>& a) {
 | Longest substring without repeating characters | Sliding window, variable size |
 | Maximum sum of any k consecutive elements | Sliding window, fixed size |
 | Smallest subarray with sum ≥ target | Sliding window, variable size |
-| **Maximum (or minimum) of every window of size k** | A sliding window bounds *which* elements are in play, but finding the max inside it by scanning is $O(k)$ per window; see [Monotonic Stack & Queue](./monotonic-stack-and-queue.md) for the O(1)-amortized version |
+| **Maximum (or minimum) of every window of size k** | A sliding window bounds *which* elements are in play, but finding the max inside it by scanning is $O(k)$ per window; see [Monotonic Stack & Queue](./monotonic-stack-and-queue.md) for the $O(1)$-amortized version |
 | Merging two sorted sequences | Two pointers advancing together |
 | Removing or partitioning in place | Fast/slow (read/write) pointers |
 | Palindrome check | Two pointers converging |

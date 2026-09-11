@@ -101,7 +101,7 @@ void insert_linear_probe(std::vector<Slot<Key, Value>>& table, const Key& key, c
 | Memory | Pointer per entry, plus nodes | No per-entry overhead, but empty slots |
 | Cache behaviour | Poor — chains chase pointers | Excellent — probes are sequential |
 | Deletion | Simple: unlink | Awkward: needs tombstones |
-| Used by | Java `HashMap`, older C++ `unordered_map` | Python `dict`, Rust `HashMap`, Go maps, Swift |
+| Used by | Older C++ `unordered_map` | Python `dict`, Rust `HashMap`, Go maps, Swift |
 
 Most modern implementations chose open addressing, and the reason is the cache column.
 
@@ -207,7 +207,7 @@ void insert_linear_probe(std::array<std::optional<std::string>, 8>& table, const
         source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Hash_table_average_insertion_time.png"
         license="Public domain" />
 
-This curve is why implementations rehash. When α crosses a threshold (0.75 in Java, ~0.66 in Python,
+This curve is why implementations rehash. When α crosses a threshold (~0.66 in Python,
 0.875 in Rust's hashbrown), the table allocates a larger array — usually double — and reinserts every
 entry. Rehashing is $O(n)$, but it happens rarely enough to be **$O(1)$ amortized**, by the same
 doubling argument as [dynamic arrays](./arrays.md).
@@ -220,7 +220,6 @@ doubling argument as [dynamic arrays](./arrays.md).
 ```python showLineNumbers
 # Pre-size when the count is known, to avoid repeated rehashing
 seen = dict()                      # Python: no capacity argument
-# Java:  new HashMap<>(expectedSize / 0.75f + 1)
 # C++:   m.reserve(expectedSize)
 # Go:    make(map[string]int, expectedSize)
 
@@ -270,16 +269,14 @@ An entry's bucket is determined by the key's hash at insertion time. Mutate the 
 changes, but the entry does not move — so the table now looks in the wrong bucket, and the entry is
 unreachable while still consuming space.
 
-Python and Rust prevent this structurally by requiring keys to be immutable/hashable. Java does not:
-a mutable object used as a `HashMap` key, mutated afterwards, is a silent and genuinely hard-to-find
-leak. Use immutable keys.
+Python and Rust prevent this structurally by requiring keys to be immutable/hashable. Languages that
+don't enforce this are exposed: a mutable object used as a hash-table key, mutated afterwards, is a
+silent and genuinely hard-to-find leak. Use immutable keys.
 :::
 
-- **`equals` and `hashCode` must agree.** Two keys that compare equal must hash equally, or lookups
-  fail unpredictably. Overriding one without the other is the classic Java bug; the same contract
-  exists as `__eq__`/`__hash__` in Python and `Eq`/`Hash` in Rust.
-- **Worst case is $O(n)$.** If every key collides, the table degenerates to a linear scan. Java 8+
-  converts long chains to red-black trees, capping degradation at $O(\log n)$.
+- **Hash and equality must agree.** Two keys that compare equal must hash equally, or lookups
+  fail unpredictably — the contract exists as `__eq__`/`__hash__` in Python and `Eq`/`Hash` in Rust.
+- **Worst case is $O(n)$.** If every key collides, the table degenerates to a linear scan.
 - **Hash-flooding is a real attack.** An attacker who can predict your hash function can force
   collisions deliberately and turn an $O(1)$ endpoint into $O(n)$ — a denial of service from ordinary
   traffic. This is why Python, Rust and others use randomly seeded hashing (SipHash) by default.

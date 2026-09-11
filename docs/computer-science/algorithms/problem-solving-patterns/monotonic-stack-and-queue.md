@@ -9,7 +9,7 @@ tags: [computer-science, algorithms, patterns, monotonic-stack, sliding-window]
 # Monotonic Stack & Queue
 
 "For each element, find the nearest element to the right that is bigger" looks like it needs a nested
-loop — for every index, scan forward until something bigger turns up. That is Θ(n²) worst case, and
+loop — for every index, scan forward until something bigger turns up. That is $Θ(n^{2})$ worst case, and
 most of the work is wasted: once index `j` has been scanned past while looking for index `i`'s answer,
 scanning past it again for index `i+1` learns nothing new.
 
@@ -32,7 +32,7 @@ one careful loop.
 | **Monotonic stack** | A stack whose values, read bottom to top, are always increasing or always decreasing |
 | **Next greater element (NGE)** | For each index, the value of the nearest later index with a strictly greater value, or none |
 | **Resolved / unresolved** | An index is unresolved while it sits on the stack; popping it *is* answering it |
-| **Amortized O(n)** | Each index is pushed once and popped at most once — the total work across all pops is bounded by n, not by the number of comparisons |
+| **Amortized $O(n)$** | Each index is pushed once and popped at most once — the total work across all pops is bounded by n, not by the number of comparisons |
 | **Monotonic deque** | Same idea as the stack, but evicted from both ends: back for a worse candidate, front for one that fell out of the window |
 | **Sentinel** | A synthetic value (often 0) appended so the final pass flushes every remaining stack entry |
 
@@ -65,9 +65,9 @@ answer = [4, 4, 5, 5, 9, -1, 6, -1]
 
 Every index is pushed exactly once. Summed over the whole pass, the *pops* also number at most n — the
 stack cannot pop more than it has ever pushed — so the loop-inside-a-loop shape (an outer scan, an
-inner `while` that pops) is still O(n) total. That is the amortized argument in full: it is not that
+inner `while` that pops) is still $O(n)$ total. That is the amortized argument in full: it is not that
 each individual step is cheap, it is that the expensive steps are rare and pay for themselves elsewhere
-(Cormen, Leiserson, Rivest & Stein, 4th ed., §17.1, the aggregate method).
+(Cormen, Leiserson, Rivest & Stein, 4th ed., §16.1, the aggregate method).
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -170,13 +170,13 @@ assert sliding_window_max(A, 3) == [4, 4, 5, 9, 9, 9]
 ## Practical Usage
 
 - **Python's `list` as a stack** needs nothing extra — `append`/`pop` from the end are both amortized
-  O(1) (a CPython implementation detail; see the
+  $O(1)$ (a CPython implementation detail; see the
   [Time Complexity](https://wiki.python.org/moin/TimeComplexity) wiki page). A monotonic queue wants
   [`collections.deque`](https://docs.python.org/3/library/collections.html#collections.deque), whose
-  docs guarantee `append`/`pop` from *either* end in O(1) — a plain `list` is O(n) worst case to pop
+  docs guarantee `append`/`pop` from *either* end in $O(1)$ — a plain `list` is $O(n)$ worst case to pop
   from the front.
-- **C++ `std::vector`** as the stack (`push_back`/`pop_back`, both amortized O(1)) and `std::deque` as
-  the monotonic queue — `push_front`/`pop_front` are O(1) worst case per
+- **C++ `std::vector`** as the stack (`push_back`/`pop_back`, both amortized $O(1)$) and `std::deque` as
+  the monotonic queue — `push_front`/`pop_front` are $O(1)$ worst case per
   [`[deque.overview]`](https://eel.is/c++draft/deque.overview), unlike `std::vector`'s front operations.
 - Real call sites: the "daily temperatures" and "trapping rain water" families, largest rectangle in a
   histogram (also the core subroutine of the maximal-rectangle-in-a-binary-matrix problem, applied row
@@ -201,13 +201,13 @@ assert sliding_window_max(A, 3) == [4, 4, 5, 9, 9, 9]
 
 | | Naive nested scan | Monotonic stack/deque | Heap of (value, index) |
 |---|---|---|---|
-| Next greater element (worst) | O(n²) | **O(n) amortized** | O(n log n) |
-| Largest rectangle in histogram (worst) | O(n²) | **O(n)** | — |
-| Sliding window maximum (worst) | O(n·k) | **O(n) amortized** | O(n log k) |
-| Extra space (worst) | O(1) | O(n) | O(k) |
+| Next greater element (worst) | $O(n^{2})$ | **$O(n)$ amortized** | $O(n \log n)$ |
+| Largest rectangle in histogram (worst) | $O(n^{2})$ | **$O(n)$** | — |
+| Sliding window maximum (worst) | $O(n \cdot k)$ | **$O(n)$ amortized** | $O(n \log k)$ |
+| Extra space (worst) | $O(1)$ | $O(n)$ | $O(k)$ |
 
 A heap answers "what is the current maximum" too, but it cannot cheaply evict an element that fell out
-of the window on the left — it has no O(1) way to remove an arbitrary entry — so it pays an extra log
+of the window on the left — it has no $O(1)$ way to remove an arbitrary entry — so it pays an extra log
 factor a monotonic deque avoids entirely.
 
 ## Recall
@@ -226,13 +226,13 @@ factor a monotonic deque avoids entirely.
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §17.1 "Aggregate analysis"
-  — the amortized argument that a stack pushed and popped at most n times each is O(n) total, even
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §16.1 "Aggregate analysis"
+  — the amortized argument that a stack pushed and popped at most n times each is $O(n)$ total, even
   though a single step's inner loop looks unbounded.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §1.3 "Bags, Queues, and Stacks" — the stack/queue API this
   pattern is built on.
 - [`collections.deque`](https://docs.python.org/3/library/collections.html#collections.deque) — CPython
-  docs; O(1) appends and pops from both ends is what makes the monotonic queue efficient.
+  docs; $O(1)$ appends and pops from both ends is what makes the monotonic queue efficient.
 - [`[deque.overview]`](https://eel.is/c++draft/deque.overview) — the C++ standard's complexity
   guarantee for `std::deque`'s front and back operations.
 

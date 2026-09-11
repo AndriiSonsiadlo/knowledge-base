@@ -112,13 +112,13 @@ under the hood more often than not.
 
 Two things on this page (and on every page below it) are not meant to be read first: the Recall card
 at the bottom of each page is a five-line summary for someone who has already read the page once
-and wants to jog their memory before an interview, a code review, or a design discussion — it is not a
+and wants to jog their memory before a code review or a design discussion — it is not a
 substitute for the mental model in the body, and reading it cold will not teach you the algorithm. The
 five cheat sheets listed above serve a different, narrower purpose: fast lookup of a decision
 ("which sort do I reach for here?", "which graph algorithm handles negative weights?") when you already
-understand the trade-offs and just need the table. Strings & Text and Math & Number Theory do not have
-cheat sheets — each folder is small enough, and each page specific enough, that a summary table would
-duplicate the page rather than compress it.
+understand the trade-offs and just need the table. Searching, Strings & Text, and Math & Number Theory do
+not have cheat sheets — each folder is small enough, and each page specific enough, that a summary table
+would duplicate the page rather than compress it.
 
 ## Recall
 

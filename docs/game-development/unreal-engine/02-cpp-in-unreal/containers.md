@@ -25,7 +25,7 @@ you'll read — uses them everywhere, including in code that never touches Bluep
 ## Mental model
 
 - **`TArray<T>`** — a contiguous, dynamically-growing array. Same mental model as `std::vector`:
-  amortized O(1) append, O(n) insert/remove in the middle, random access by index.
+  amortized $O(1)$ append, $O(n)$ insert/remove in the middle, random access by index.
 - **`TMap<K, V>`** — a hash-keyed associative container, key to value. Comparable to
   `std::unordered_map`, but unordered *and* the iteration order is not contractually stable across
   insert/remove.

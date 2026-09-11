@@ -32,7 +32,7 @@ triangle inequality.
 | **Residual capacity** | `capacity(u,v) − flow(u,v)` — how much more can still go forward on this edge, plus a reverse edge of capacity `flow(u,v)` representing "undo" |
 | **Augmenting path** | A path from `s` to `t` in the residual graph along which every edge has positive residual capacity |
 | **Cut** | A partition of vertices into `S` (containing `s`) and `T` (containing `t`); its capacity is the sum of capacities of edges from `S` to `T` |
-| **Max-flow min-cut theorem** | The maximum flow value equals the minimum cut capacity, always (CLRS 4th ed., Thm 26.6) |
+| **Max-flow min-cut theorem** | The maximum flow value equals the minimum cut capacity, always (CLRS 4th ed., Thm 24.6) |
 
 ## Mechanism
 
@@ -184,18 +184,18 @@ int edmonds_karp(Capacity residual, const std::string& s, const std::string& t) 
 </TabItem>
 </Tabs>
 
-### Edmonds-Karp: why BFS gives O(VE²)
+### Edmonds-Karp: why BFS gives $O(VE^{2})$
 
 Ford-Fulkerson as stated leaves "find any augmenting path" unspecified — with a careless choice (say,
 DFS to whichever neighbor comes first) on integer capacities, it still terminates, but the number of
 augmentations can be proportional to the *capacity values themselves*, not the graph size: a famous
 worst case takes as many rounds as the largest capacity, no matter how small the graph. **Edmonds-Karp**
 is Ford-Fulkerson with one specific rule — always augment along a **shortest** path (fewest edges,
-found by BFS) — and that rule alone bounds the number of augmentations by `O(V·E)`, each BFS costing
-`O(E)`, for a total of **O(VE²)** (CLRS 4th ed., Thm 26.8). The argument: every augmentation saturates
+found by BFS) — and that rule alone bounds the number of augmentations by $O(V \cdot E)$, each BFS costing
+$O(E)$, for a total of **$O(VE^{2})$** (CLRS 4th ed., Thm 24.8). The argument: every augmentation saturates
 at least one edge on its path (a "critical" edge), and it can be shown that the shortest-path distance
 from `s` to any fixed vertex only ever increases across augmentations, never decreases, over the whole
-run — a monotonicity that limits each edge to being critical at most `O(V)` times, giving `O(VE)` total
+run — a monotonicity that limits each edge to being critical at most $O(V)$ times, giving $O(VE)$ total
 augmentations.
 
 ## Practical Usage
@@ -216,7 +216,7 @@ augmentations.
 - **Project selection.** Given projects with profits (possibly negative) and prerequisite dependencies,
   build a source connected to profitable projects, a sink connected from unprofitable ones, infinite
   capacity along dependency edges, and the min cut identifies exactly which projects to fund for
-  maximum net profit — a classical reduction (CLRS 4th ed., §26.4, "the maximum-flow problem" set of
+  maximum net profit — a classical reduction (CLRS 4th ed., §24.4, "the maximum-flow problem" set of
   applications; the specific project-selection framing is a common exercise built on the same
   min-cut argument).
 
@@ -243,7 +243,7 @@ assert cut_capacity == flow
   be undone, and the algorithm can terminate below the true maximum flow.
 - **Floating-point capacities.** Ford-Fulkerson's convergence proof assumes capacities that decrease by
   a fixed positive amount each augmentation; irrational or poorly-rounded floating-point capacities can
-  make the classic (non-BFS) version fail to terminate in the worst case. Edmonds-Karp's `O(VE)`
+  make the classic (non-BFS) version fail to terminate in the worst case. Edmonds-Karp's $O(VE)$
   augmentation bound does not depend on capacity values, which is one more reason to prefer it.
 - **Multiple sources or sinks.** Add a single super-source connected to every real source (and a single
   super-sink from every real sink) with infinite capacity — do not try to run the algorithm with more
@@ -255,10 +255,10 @@ assert cut_capacity == flow
 
 | | Time (worst) | Augmenting path rule |
 |---|---|---|
-| Ford-Fulkerson (unspecified path) | `O(E · f*)`, `f*` the max flow value | Any path — pseudo-polynomial, capacity-dependent |
-| **Edmonds-Karp** | **O(VE²)** | Shortest path by edge count (BFS) |
-| Dinic's algorithm | O(V²E) general, O(E · sqrt(V)) on unit-capacity graphs | Blocking flow per phase over a level graph |
-| Push-relabel | O(V²E) to O(V³) depending on variant | No augmenting-path search at all — local relabel/push operations |
+| Ford-Fulkerson (unspecified path) | $O(E \cdot f*)$, `f*` the max flow value | Any path — pseudo-polynomial, capacity-dependent |
+| **Edmonds-Karp** | **$O(VE^{2})$** | Shortest path by edge count (BFS) |
+| Dinic's algorithm | $O(V^{2}E)$ general, $O(E \cdot sqrt(V))$ on unit-capacity graphs | Blocking flow per phase over a level graph |
+| Push-relabel | $O(V^{2}E)$ to $O(V^{3})$ depending on variant | No augmenting-path search at all — local relabel/push operations |
 
 Edmonds-Karp is the right default because its bound holds regardless of the capacities involved.
 Dinic's algorithm improves on it by finding an entire *blocking flow* per BFS phase instead of one path
@@ -280,8 +280,8 @@ at a time, which is why it dominates on the unit-capacity graphs that bipartite 
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 26 — the max-flow
-  min-cut theorem (Thm 26.6), Ford-Fulkerson, and the Edmonds-Karp analysis (Thm 26.8).
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 24 — the max-flow
+  min-cut theorem (Thm 24.6), Ford-Fulkerson, and the Edmonds-Karp analysis (Thm 24.8).
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §6.4 "Maximum Flow" — the same algorithms with a
   residual-graph-first presentation and worked examples.
 - L. R. Ford Jr. & D. R. Fulkerson, "Maximal Flow Through a Network", *Canadian J. Mathematics* 8,

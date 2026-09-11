@@ -271,8 +271,7 @@ a.insert(std::lower_bound(a.begin(), a.end(), x), x);      // insert, keeping it
 </TabItem>
 </Tabs>
 
-Equivalents elsewhere: C++ `std::lower_bound`/`upper_bound`/`equal_range`, Java
-`Arrays.binarySearch` (which returns `-(insertion point) - 1` when absent), Rust
+Equivalents elsewhere: C++ `std::lower_bound`/`upper_bound`/`equal_range`, Rust
 `slice::binary_search` (returning `Result<usize, usize>` — the cleanest of these designs).
 
 ## Edge Cases & Pitfalls
@@ -283,7 +282,7 @@ present, and the bug survives testing because it is data-dependent. If a sort wa
 earlier and did not, this is where it surfaces — as a wrong answer, far from the cause.
 :::
 
-- **`(lo + hi) // 2` overflow** — real in C, C++, Java and Rust. Python's unbounded integers make it
+- **`(lo + hi) // 2` overflow** — real in C, C++ and Rust. Python's unbounded integers make it
   safe there, which is why the habit does not transfer.
 - **Which duplicate you get is unspecified** for exact-match search. Use `lower_bound`/`upper_bound`
   when it matters.

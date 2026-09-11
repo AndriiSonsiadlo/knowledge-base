@@ -20,7 +20,7 @@ exactly what makes the operations $O(1)$.
 | **Discipline** | LIFO — last in, first out | FIFO — first in, first out | Both ends |
 | **Add** | `push` (to the top) | `enqueue` (to the back) | `push_front` / `push_back` |
 | **Remove** | `pop` (from the top) | `dequeue` (from the front) | `pop_front` / `pop_back` |
-| **Inspect** | `peek` / `top` | `front` | `front` / `back` |
+| **Inspect** | `top` | `front` | `front` / `back` |
 | **Models** | Nesting, backtracking, undo | Fairness, buffering, arrival order | Both, plus sliding windows |
 
 All operations are $O(1)$. `search` is not part of either interface; if you need it, you have chosen the
@@ -144,8 +144,8 @@ std::queue<int> adaptor;      // std::queue wraps a deque with exactly this inte
 
 :::warning[Use the right type, or the complexity silently changes]
 `list.pop(0)` and `list.insert(0, x)` are $O(n)$ in Python; `deque.popleft()` and `deque.appendleft()`
-are $O(1)$. The same trap exists as `ArrayList` versus `ArrayDeque` in Java, and `std::vector` versus
-`std::deque` in C++. Nothing warns you — the loop simply becomes quadratic.
+are $O(1)$. The same trap exists as `std::vector` versus `std::deque` in C++. Nothing warns you — the
+loop simply becomes quadratic.
 :::
 
 ### Where stacks are the machine, not a choice

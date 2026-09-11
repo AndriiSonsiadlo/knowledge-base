@@ -91,13 +91,13 @@ At roughly one billion simple operations per second, fixing n = 10⁶ across the
 
 | Class | Operations at n = 10⁶ | Wall-clock time |
 |---|---|---|
-| O(1) | 1 | negligible |
-| O(log n) | ~20 | negligible |
-| O(n) | 1,000,000 | ~1 ms |
-| O(n log n) | ~20,000,000 | ~20 ms |
-| O(n²) | 10¹² | ~17 minutes |
-| O(n³) | 10¹⁸ | ~32 years |
-| O(2ⁿ) | 2¹,⁰⁰⁰,⁰⁰⁰ | unreachable — more operations than atoms in the observable universe |
+| $O(1)$ | 1 | negligible |
+| $O(\log n)$ | ~20 | negligible |
+| $O(n)$ | 1,000,000 | ~1 ms |
+| $O(n \log n)$ | ~20,000,000 | ~20 ms |
+| $O(n^{2})$ | 10¹² | ~17 minutes |
+| $O(n^{3})$ | 10¹⁸ | ~32 years |
+| $O(2^{n})$ | 2¹,⁰⁰⁰,⁰⁰⁰ | unreachable — more operations than atoms in the observable universe |
 
 The $O(n \log n)$ row worked out, so the rest of the table can be redone by hand:
 
@@ -114,7 +114,7 @@ time ≈ operations / (10⁹ operations per second)
      ≈ 0.02 s  =  20 ms
 ```
 
-The same recipe gives every other row: for O(n²), `operations = n² = 10¹²`, divided by 10⁹ gives 1,000
+The same recipe gives every other row: for $O(n^{2})$, `operations = n² = 10¹²`, divided by 10⁹ gives 1,000
 seconds, which is where the ~17-minute figure comes from.
 
 <Tabs groupId="code-lang">
@@ -172,8 +172,8 @@ unless noted:
 | n > 10,000,000 | $O(n)$ or $O(\log n)$ — and start caring about memory bandwidth |
 
 Two growth classes get their own page, because there is more to say about each than fits a single
-table row: [Amortized Analysis](./amortized-analysis.md) covers operations that are usually O(1) and
-occasionally O(n), such as a dynamic array's `append`; [Space Complexity](./space-complexity.md) covers
+table row: [Amortized Analysis](./amortized-analysis.md) covers operations that are usually $O(1)$ and
+occasionally $O(n)$, such as a dynamic array's `append`; [Space Complexity](./space-complexity.md) covers
 the same asymptotic language applied to memory rather than time, including the stack cost recursion
 hides.
 
@@ -190,17 +190,17 @@ hides.
   magnitude in latency, which is why a "worse" algorithm with sequential access often wins at n where
   the table above says it should lose.
 - **The named algorithm is not the only route to its class.** Several unrelated algorithms share a
-  growth class for different reasons — mergesort and heapsort are both Θ(n log n) worst case, but
+  growth class for different reasons — mergesort and heapsort are both $Θ(n \log n)$ worst case, but
   their mechanisms (recursive merge versus heap extraction) share nothing. The class predicts cost,
   not implementation.
 
 ## Comparisons
 
-| Class | Beats O(n²) when | Loses to O(n²) when |
+| Class | Beats $O(n^{2})$ when | Loses to $O(n^{2})$ when |
 |---|---|---|
-| O(n log n) | n is large enough that the log factor is cheap next to a full quadratic sweep | n is tiny and the constant behind O(n log n) (recursion, merging) outweighs a simple double loop |
-| O(n) (counting/radix sort) | The keys are bounded-range integers, so comparisons can be skipped entirely | The key range k is itself large — cost is O(n + k), and a huge k defeats the point |
-| O(2ⁿ) (exact, exponential) | n is small enough that exactness matters more than speed (n ≤ ~25) | n grows past a few dozen — an O(n²) approximation usually beats an exact exponential algorithm that never finishes |
+| $O(n \log n)$ | n is large enough that the log factor is cheap next to a full quadratic sweep | n is tiny and the constant behind $O(n \log n)$ (recursion, merging) outweighs a simple double loop |
+| $O(n)$ (counting/radix sort) | The keys are bounded-range integers, so comparisons can be skipped entirely | The key range k is itself large — cost is $O(n + k)$, and a huge k defeats the point |
+| $O(2^{n})$ (exact, exponential) | n is small enough that exactness matters more than speed (n ≤ ~25) | n grows past a few dozen — an $O(n^{2})$ approximation usually beats an exact exponential algorithm that never finishes |
 
 ## Recall
 

@@ -149,7 +149,7 @@ iter 4: m1=5.80  m2=6.79   f(m1)=29.96  f(m2)=29.38   f(m1) > f(m2) -> peak is l
 ```
 
 Each iteration discards one third of the remaining range, so after $k$ iterations the range has shrunk
-by $(2/3)^k$ — **O(log(range / ε)) iterations to reach precision ε**, a worse constant than binary
+by $(2/3)^k$ — **$O(\log(range / ε))$ iterations to reach precision ε**, a worse constant than binary
 search's $(1/2)^k$ despite the similar shape, because ternary search needs *two* function evaluations
 per iteration against binary search's one.
 

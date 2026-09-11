@@ -82,7 +82,7 @@ by reading the just-deleted node's own (now-invalid) pointers.
 `hlist_head`/`hlist_node` are `list_head`'s sibling, built for a different constraint: a hash table has one
 bucket head per slot, potentially millions of them, and a plain `list_head`'s two pointers per empty head
 double a hash table's footprint for no benefit — an empty bucket never needs a `prev` pointer to itself. An
-`hlist_head` is a single pointer. The list is still doubly linked for O(1) removal, but the trick moves to
+`hlist_head` is a single pointer. The list is still doubly linked for $O(1)$ removal, but the trick moves to
 the node side: instead of a `prev` pointer, `hlist_node` carries `pprev`, a pointer *to the previous node's
 `next` field* (or to the bucket head's single pointer, if this is the first node) — which is exactly what
 removal needs to splice a node out without walking the list to find what points at it, at the cost of that
@@ -147,8 +147,8 @@ it first appears.
 |---|---|---|---|---|
 | A queue, stack, or membership list | Insertion order | No | Sequential, both directions | `list_head` |
 | A hash table bucket | No | By hash, then linear scan of the bucket | Sequential within a bucket | `hlist` |
-| A sorted set with fast insert/search/range queries | Fully ordered by key | Yes, `O(log n)` | In-order walk | `rb_node` |
-| A sparse array indexed by a large or unsigned-long key, non-intrusive | By index | Yes, `O(log n)`-ish | Range/iterate | `xarray` |
+| A sorted set with fast insert/search/range queries | Fully ordered by key | Yes, $O(\log n)$ | In-order walk | `rb_node` |
+| A sparse array indexed by a large or unsigned-long key, non-intrusive | By index | Yes, $O(\log n)$-ish | Range/iterate | `xarray` |
 | "Give me a small unique integer" (with or without an attached pointer) | N/A | By the ID itself | Rare | `idr`/`ida` |
 | A fixed, small set of flags/masks | N/A | By bit position | Whole-word scans | Bitmap |
 

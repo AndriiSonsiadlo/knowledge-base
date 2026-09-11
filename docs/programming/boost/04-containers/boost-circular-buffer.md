@@ -8,7 +8,7 @@ tags: [c++, boost, containers, circular-buffer, ring-buffer]
 
 # Boost.CircularBuffer
 
-`boost::circular_buffer<T>` is a **fixed-capacity ring buffer** that provides O(1) insertion and
+`boost::circular_buffer<T>` is a **fixed-capacity ring buffer** that provides $O(1)$ insertion and
 removal at both ends. When the buffer is full, pushing a new element **overwrites the oldest** — no
 reallocation, no shifting, just a modular index advance. This makes it the natural container for
 sliding windows, bounded logs, streaming data, and any scenario where you want "the last N items."
@@ -17,7 +17,7 @@ sliding windows, bounded logs, streaming data, and any scenario where you want "
 A `std::deque` grows without bound. A `std::vector` with manual index wrapping is error-prone and
 re-invents a known data structure. `circular_buffer` encapsulates the ring logic behind a
 standard-container interface: random access, iterators, `push_back`, `push_front`, `pop_back`,
-`pop_front` — all O(1), all correct, and the capacity is fixed at construction.
+`pop_front` — all $O(1)$, all correct, and the capacity is fixed at construction.
 :::
 
 ## Basic usage
@@ -181,9 +181,9 @@ single-producer / single-consumer queue, see
 
 | Container | Capacity | Overwrites oldest | Random access | Push/pop both ends |
 |-----------|----------|-------------------|---------------|-------------------|
-| `circular_buffer` | fixed | yes | O(1) | O(1) |
-| `std::deque` | unbounded | no | O(1) | O(1) amortised |
-| `std::vector` + manual wrap | manual | manual | O(1) | manual |
+| `circular_buffer` | fixed | yes | $O(1)$ | $O(1)$ |
+| `std::deque` | unbounded | no | $O(1)$ | $O(1)$ amortised |
+| `std::vector` + manual wrap | manual | manual | $O(1)$ | manual |
 | `std::queue` | unbounded | no | no | push back / pop front |
 
 ## See also

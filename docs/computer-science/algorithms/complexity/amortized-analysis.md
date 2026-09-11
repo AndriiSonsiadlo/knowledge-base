@@ -64,7 +64,7 @@ append #    resize?      copy cost      running total    running total / n
 Total cost through append 16: each append itself costs 1 (writing the element) plus the occasional
 copy. Copies across all 16 appends sum to `1 + 2 + 4 + 8 = 15` — always less than `2n` because
 `1 + 2 + 4 + … + n < 2n` for a geometric series. Sixteen appends, at most `16 + 15 = 31` total units of
-work, or **under 2 per append** — O(1) amortized, even though append 9 alone cost 8 units.
+work, or **under 2 per append** — $O(1)$ amortized, even though append 9 alone cost 8 units.
 
 ### Accounting: charge 3, bank the rest
 
@@ -72,7 +72,7 @@ Charge every append a fixed fee of 3 "coins", spend 1 immediately (writing the n
 When a resize of size k fires, it must move all k existing elements — pay for that move entirely out of
 banked coins. Because the array last resized at size k/2, exactly k/2 appends have happened since, each
 banking 2 coins: `k/2 × 2 = k` coins available, exactly enough to move k elements. The balance never goes
-negative, which is the accounting method's proof obligation — so a flat charge of O(1) per append is a
+negative, which is the accounting method's proof obligation — so a flat charge of $O(1)$ per append is a
 valid amortized bound.
 
 ### Potential: Φ = 2·(size − capacity/2)
@@ -80,7 +80,7 @@ valid amortized bound.
 Define Φ as twice the gap between the array's current size and half its capacity — zero right after a
 resize, maximal right before the next one. A cheap append raises size by 1, raising Φ by 2, so amortized
 cost = actual cost (1) + ΔΦ (2) = 3. A resize's actual cost is proportional to the array's size, but Φ
-drops by exactly that much (the gap resets to zero), cancelling the spike — so amortized cost is O(1)
+drops by exactly that much (the gap resets to zero), cancelling the spike — so amortized cost is $O(1)$
 there too. All three methods land on the same constant; they differ only in how the bookkeeping is
 carried out.
 
@@ -106,13 +106,13 @@ counter   flips this increment    running total flips
 Aggregate: bit 0 flips every increment (8 times in 8 increments), bit 1 flips every other increment (4
 times), bit 2 every fourth (2 times), bit 3 every eighth (1 time) — total `8 + 4 + 2 + 1 = 15`, matching
 the trace, and bounded above by `2n` for n increments, since it is a geometric series identical in shape
-to the dynamic array's copy count. **O(1) amortized per increment**, even though flipping `0111→1000`
+to the dynamic array's copy count. **$O(1)$ amortized per increment**, even though flipping `0111→1000`
 alone costs 4 — the same "rare expensive operation paid for by prior cheap ones" pattern as doubling,
 proven by the same aggregate argument.
 
 ### Union-find's α(n): stated, not derived
 
-Union-find with union-by-rank and path compression gives O(α(n)) amortized per operation, where α is the
+Union-find with union-by-rank and path compression gives $O(α(n))$ amortized per operation, where α is the
 inverse Ackermann function — it grows so slowly that α(n) < 5 for any n representable in this universe.
 The proof is a separate, lengthy potential-function argument over the rank forest and is stated here
 rather than derived; see [Union-Find](../data-structures/union-find.md) for the structure itself and
@@ -177,18 +177,18 @@ exposes a way to force pre-growth in the general case; C++'s `vector::reserve` d
 when p99 latency, not just throughput, matters.
 
 The same reasoning applies wherever a rare expensive step is proportional to the cheap work since the
-last one: table-doubling hash maps, a binary counter's carry chain (incrementing n times flips O(n)
-bits total, not O(n log n)), and splay trees, whose O(log n) amortized bound per operation comes from a
+last one: table-doubling hash maps, a binary counter's carry chain (incrementing n times flips $O(n)$
+bits total, not $O(n \log n)$), and splay trees, whose $O(\log n)$ amortized bound per operation comes from a
 potential function over subtree sizes.
 
 ## Edge Cases & Pitfalls
 
-- **Quoting amortized O(1) as a per-call latency guarantee.** It is not one. A single `append` can
+- **Quoting amortized $O(1)$ as a per-call latency guarantee.** It is not one. A single `append` can
   still trigger a full copy; a real-time path that cannot tolerate that spike wants `reserve` or a
   structure with a genuine worst-case bound, not an amortized one.
 - **Growing by a fixed amount instead of a fixed factor.** Growing capacity by +1 each time (rather
-  than ×2) makes total copying cost `1 + 2 + … + n = Θ(n²)`, i.e. **O(n) amortized per append**, not
-  O(1) — resizes never get rarer relative to the work already banked.
+  than ×2) makes total copying cost `1 + 2 + … + n = Θ(n²)`, i.e. **$O(n)$ amortized per append**, not
+  $O(1)$ — resizes never get rarer relative to the work already banked.
 - **Confusing amortized with average case.** Average case is a claim about a distribution of inputs and
   an adversary can construct a bad one. Amortized is a claim about worst-case totals across any
   sequence — there is no adversarial input that breaks it.
@@ -202,7 +202,7 @@ potential function over subtree sizes.
 |---|---|---|---|
 | What it bounds | Any sequence's *total*, divided by n | Every single operation | A distribution over inputs |
 | Defeated by | Nothing — holds for all sequences | Nothing — holds always | An adversarial input |
-| Example | Dynamic array append: O(1) | Balanced-tree lookup: O(log n) | Randomised quicksort: O(n log n) |
+| Example | Dynamic array append: $O(1)$ | Balanced-tree lookup: $O(\log n)$ | Randomised quicksort: $O(n \log n)$ |
 | Latency-sensitive systems | Risky — one call can spike | Safe | Risky — same reason |
 
 ## Recall
@@ -222,20 +222,20 @@ potential function over subtree sizes.
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 17 — "Amortized
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 16 — "Amortized
   Analysis", covering all three methods (aggregate, accounting, potential) with the dynamic-table and
   binary-counter examples used here.
 - Tarjan, R. E., "Amortized Computational Complexity" (1985) — the original potential-function proof
-  that union-find with union-by-rank and path compression is O(α(n)) amortized per operation.
+  that union-find with union-by-rank and path compression is $O(α(n))$ amortized per operation.
 - [`[vector.modifiers]`](https://eel.is/c++draft/vector.modifiers) — the C++ standard's own wording for
   `push_back`'s amortized constant complexity.
 - [CPython listobject.c](https://github.com/python/cpython/blob/main/Objects/listobject.c) — the
-  over-allocation growth pattern behind `list.append`'s amortized O(1), an implementation detail rather
+  over-allocation growth pattern behind `list.append`'s amortized $O(1)$, an implementation detail rather
   than a language guarantee.
 
 ## Related Pages
 
-- [Union-Find](../data-structures/union-find.md) — the structure whose O(α(n)) amortized bound this
+- [Union-Find](../data-structures/union-find.md) — the structure whose $O(α(n))$ amortized bound this
   page states rather than proves.
 - [Common Complexities](./common-complexities.md) — where amortized cost sits among the other growth
   classes met day to day.

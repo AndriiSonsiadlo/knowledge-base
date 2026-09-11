@@ -73,10 +73,10 @@ nothing about the range you might actually be operating in.
 There are two situations where dropping the constant genuinely misleads:
 
 - **Small n.** The table above shows it directly — up to n ≈ 500 the constant term `90000` outweighs
-  the quadratic term, so an "O(n²)" label predicts nothing useful about behaviour in that range.
-- **A huge constant hidden inside a low-order term.** An `O(1)` step that is implemented as a lookup
+  the quadratic term, so an "$O(n^{2})$" label predicts nothing useful about behaviour in that range.
+- **A huge constant hidden inside a low-order term.** An $O(1)$ step that is implemented as a lookup
   into a 10 MB table pays for a cache miss on essentially every call — the asymptotic class says
-  "constant", but the constant is a full round trip to main memory, not a register read. Two O(1)
+  "constant", but the constant is a full round trip to main memory, not a register read. Two $O(1)$
   algorithms with wildly different real constants are not interchangeable just because the notation
   puts them in the same class.
 

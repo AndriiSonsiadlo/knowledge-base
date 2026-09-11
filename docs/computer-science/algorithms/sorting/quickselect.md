@@ -15,7 +15,7 @@ that question, using [quicksort](./quicksort.md)'s partition step but throwing a
 partition that cannot contain the answer, instead of recursing into both.
 
 The result is an algorithm with the same worst-case pathology as quicksort — a bad pivot sequence
-still degrades it to O(n²) — but an average case that is not O(n log n), it is **O(n)**. That
+still degrades it to $O(n^{2})$ — but an average case that is not $O(n \log n)$, it is **$O(n)$**. That
 difference is not a rounding error: quicksort must still recurse into both halves to place every
 element, while quickselect only ever recurses into the one half that contains the k-th element, and
 each level of that recursion does geometrically less work than the one before.
@@ -32,7 +32,7 @@ it. Comfortable with recurrence relations helps for the average-case argument be
 | **k-th smallest** | The element that would sit at index `k` (0-indexed) if the array were sorted |
 | **Partition** | Rearranges the array around a pivot so everything ≤ pivot is left of it, everything > pivot is right — same operation as quicksort's |
 | **Selection** | The general problem name: finding an order statistic without fully sorting |
-| **Median of medians** | A pivot-selection scheme that guarantees O(n) worst case, at a large constant-factor cost |
+| **Median of medians** | A pivot-selection scheme that guarantees $O(n)$ worst case, at a large constant-factor cost |
 | **`nth_element`** | C++'s standard-library selection algorithm — a partial ordering around one position, not a full sort |
 
 ## Mechanism
@@ -156,7 +156,7 @@ int main() {
 </TabItem>
 </Tabs>
 
-### Why the average case is O(n), not O(n log n)
+### Why the average case is $O(n)$, not $O(n \log n)$
 
 Quicksort's recurrence is `T(n) = T(left) + T(right) + O(n)` — both sides are paid for. Quickselect's
 recurrence is `T(n) = T(max(left, right)) + O(n)` — only one side is ever paid for, because the other
@@ -186,9 +186,9 @@ for its randomized `SELECT`.
   [Choosing a Sort](./choosing-a-sort.md).
 - **Python has no `nth_element`.** `heapq.nsmallest(k, iterable)` and `heapq.nlargest` solve a related
   but different problem — the k smallest/largest values *in order* — using a heap, in
-  O(n log k) ([Python docs](https://docs.python.org/3/library/heapq.html#heapq.nsmallest)), not
-  O(n). For a single unordered k-th value, `sorted(a)[k]` is the simple correct answer at O(n log n);
-  hand-rolled quickselect only pays off when the O(n) vs O(n log n) gap matters at your data size.
+  $O(n \log k)$ ([Python docs](https://docs.python.org/3/library/heapq.html#heapq.nsmallest)), not
+  $O(n)$. For a single unordered k-th value, `sorted(a)[k]` is the simple correct answer at $O(n \log n)$;
+  hand-rolled quickselect only pays off when the $O(n)$ vs $O(n \log n)$ gap matters at your data size.
 - **Streaming or unknown-size input.** Neither quickselect nor `nth_element` applies without the whole
   array in memory; a running k-th-order-statistic over a stream is a different problem (reservoir
   sampling or a bounded heap), not covered here.
@@ -200,7 +200,7 @@ for its randomized `SELECT`.
   per call.
 - **Adversarial input against a fixed pivot rule.** Exactly like quicksort: choosing `a[hi]` as the
   pivot on an already-sorted or reverse-sorted array makes every partition maximally unbalanced,
-  degrading to **O(n²) worst case**. A random pivot (swap a random element into `a[hi]` before
+  degrading to **$O(n^{2})$ worst case**. A random pivot (swap a random element into `a[hi]` before
   partitioning) defeats an adversary that only sees the algorithm, not its random seed.
 - **Recursing into both sides "to be safe".** This silently turns quickselect back into a selection via
   quicksort — correct, but throws away the entire performance argument. The one-sided recursion is not
@@ -214,13 +214,13 @@ for its randomized `SELECT`.
 
 | | Best | Average | Worst | Space | Notes |
 |---|---|---|---|---|---|
-| **Quickselect** | O(n) | O(n) | O(n²) | O(1) auxiliary (in-place partition) | The default answer; worst case needs an adversarial pivot sequence |
-| Median of medians (deterministic pivot) | O(n) | O(n) | **O(n)** | O(n) auxiliary for the grouping | Guaranteed worst case, at 4-10× quickselect's real-world constant |
-| Sort then index (`sorted(a)[k]`) | O(n log n) | O(n log n) | O(n log n) | O(n) | Simplest correct answer; wins when several different `k` are needed from the same array |
-| Heap of size k (`heapq.nsmallest`) | O(n) | O(n log k) | O(n log k) | O(k) | Wins when `k` is small and fixed, or the input is a stream |
+| **Quickselect** | $O(n)$ | $O(n)$ | $O(n^{2})$ | $O(1)$ auxiliary (in-place partition) | The default answer; worst case needs an adversarial pivot sequence |
+| Median of medians (deterministic pivot) | $O(n)$ | $O(n)$ | **$O(n)$** | $O(n)$ auxiliary for the grouping | Guaranteed worst case, at 4-10× quickselect's real-world constant |
+| Sort then index (`sorted(a)[k]`) | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | Simplest correct answer; wins when several different `k` are needed from the same array |
+| Heap of size k (`heapq.nsmallest`) | $O(n)$ | $O(n \log k)$ | $O(n \log k)$ | $O(k)$ | Wins when `k` is small and fixed, or the input is a stream |
 
-**Median of medians** guarantees O(n) worst case by choosing a pivot that is provably "good enough":
-split the array into groups of 5, find each group's median (a fixed O(1) operation per group), then
+**Median of medians** guarantees $O(n)$ worst case by choosing a pivot that is provably "good enough":
+split the array into groups of 5, find each group's median (a fixed $O(1)$ operation per group), then
 recursively find the median *of those medians* and use it as the pivot. That pivot is guaranteed to be
 greater than at least 30% and less than at least 30% of all elements, which bounds the recursion depth
 and gives the recurrence `T(n) ≤ T(n/5) + T(7n/10) + O(n)` — CLRS 4th ed. §9.3 works through why the
@@ -230,7 +230,7 @@ work.
 **Nobody uses it in practice** because the constant factor is large — grouping into fives, finding
 each group's median, and recursing on the medians costs several times what a random-pivot quickselect
 costs on ordinary data, for a worst-case guarantee that ordinary data essentially never triggers.
-Randomized quickselect combined with introselect's depth-limited fallback (switch to a guaranteed-O(n)
+Randomized quickselect combined with introselect's depth-limited fallback (switch to a guaranteed-$O(n)$
 method only if the recursion goes suspiciously deep) gets the same worst-case safety at a cost paid
 only on the inputs that need it.
 
@@ -260,7 +260,7 @@ only on the inputs that need it.
 - [`[alg.nth.element]`, ISO C++ working draft](https://eel.is/c++draft/alg.nth.element) — the
   standard's own complexity wording for `nth_element`.
 - [`heapq.nsmallest` — Python docs](https://docs.python.org/3/library/heapq.html#heapq.nsmallest) —
-  the heap-based k-smallest-in-order routine and its O(n log k) note.
+  the heap-based k-smallest-in-order routine and its $O(n \log k)$ note.
 
 ## Related Pages
 
@@ -268,7 +268,7 @@ only on the inputs that need it.
   weakness both algorithms share.
 - [Choosing a Sort](./choosing-a-sort.md) — introselect's depth-limited fallback, the same defensive
   trick introsort applies to quicksort itself.
-- [Heaps](../data-structures/heaps.md) — the structure behind `heapq.nsmallest`'s O(n log k) alternative
+- [Heaps](../data-structures/heaps.md) — the structure behind `heapq.nsmallest`'s $O(n \log k)$ alternative
   when only a small, ordered top-k is needed.
 - [Recurrences & the Master Theorem](../complexity/recurrences-and-master-theorem.md) — the general
   tool the geometric-series argument above is a specific instance of.

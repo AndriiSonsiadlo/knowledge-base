@@ -35,13 +35,13 @@ pattern within it is comparatively mechanical.
   the answers.
 - **[Backtracking](./backtracking.md)** — search systematically, abandoning branches that cannot work.
 - **[Prefix Sums & Difference Arrays](./prefix-sums-and-difference-arrays.md)** — trade one linear
-  pass now for O(1) range answers later.
+  pass now for $O(1)$ range answers later.
 - **[Monotonic Stack & Queue](./monotonic-stack-and-queue.md)** — keep only the candidates that could
   still be the answer, in sorted order, for free.
 - **[Intervals & Sweep Line](./intervals-and-sweep-line.md)** — turn overlapping ranges into a single
   ordered pass over their endpoints.
 - **[Fast & Slow Pointers](./fast-and-slow-pointers.md)** — detect cycles and find midpoints in one
-  pass and O(1) space.
+  pass and $O(1)$ space.
 - **[Recursion, Memoization & Tabulation](./recursion-memoization-tabulation.md)** — the bridge from a
   plain recurrence to a dynamic-programming table.
 - **[Top-K & Streaming](./top-k-and-streaming.md)** — bound the working set to exactly the answer's
@@ -67,7 +67,7 @@ are the same pattern wearing different clothes.
 | "Next greater/smaller element", "largest rectangle in…" | [Monotonic stack](./monotonic-stack-and-queue.md) |
 | "Maximum of every window of size k" | [Monotonic queue](./monotonic-stack-and-queue.md) |
 | "Merge overlapping intervals", "meeting rooms needed" | [Intervals & sweep line](./intervals-and-sweep-line.md) |
-| "Detect a cycle", "find the middle", one pass, O(1) space | [Fast & slow pointers](./fast-and-slow-pointers.md) |
+| "Detect a cycle", "find the middle", one pass, $O(1)$ space | [Fast & slow pointers](./fast-and-slow-pointers.md) |
 | A recurrence that recomputes the same call many times | [Memoization / tabulation](./recursion-memoization-tabulation.md) |
 | "Top k", "k-th largest", a stream with no fixed length | [Top-k & streaming](./top-k-and-streaming.md) |
 | "Shortest path", "reachable", "order of dependencies" | [Graph algorithms](../graph-algorithms/intro.md) |
@@ -80,11 +80,11 @@ knowing by name, because each one is really "pattern A, with pattern B handling 
 
 | Combination | What each half does |
 |---|---|
-| Sliding window + hash map | The window tracks *which* elements are inside; the hash map tracks *how many* of each, so membership and counting are both O(1) |
+| Sliding window + hash map | The window tracks *which* elements are inside; the hash map tracks *how many* of each, so membership and counting are both $O(1)$ |
 | Backtracking + memoization | Backtracking explores the choice tree; memoizing repeated states turns it into dynamic programming — see [Recursion, Memoization & Tabulation](./recursion-memoization-tabulation.md) |
-| Prefix sums + binary search | The prefix array answers "sum up to here" in O(1); binary search over it answers "smallest range whose sum reaches k" in O(log n) |
-| Sliding window maximum + monotonic queue | The window defines *which* elements are in play; the [monotonic queue](./monotonic-stack-and-queue.md) keeps them in a shape where the maximum is always O(1) to read |
-| Greedy + a heap | The greedy choice is "take the best available option now"; a heap is what makes finding that option O(log n) instead of O(n) — Dijkstra's and Huffman coding both work this way |
+| Prefix sums + binary search | The prefix array answers "sum up to here" in $O(1)$; binary search over it answers "smallest range whose sum reaches k" in $O(\log n)$ |
+| Sliding window maximum + monotonic queue | The window defines *which* elements are in play; the [monotonic queue](./monotonic-stack-and-queue.md) keeps them in a shape where the maximum is always $O(1)$ to read |
+| Greedy + a heap | The greedy choice is "take the best available option now"; a heap is what makes finding that option $O(\log n)$ instead of $O(n)$ — Dijkstra's and Huffman coding both work this way |
 
 None of these are new patterns — they are two patterns from the table above, each solving the part it
 is already good at.
@@ -135,7 +135,7 @@ examples. See [Greedy Algorithms](./greedy-algorithms.md) for what such an argum
 
 ## References
 
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 15–16 — dynamic
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., Ch. 14–15 — dynamic
   programming and greedy algorithms as a matched pair, developed from the same optimal-substructure
   property.
 - Kleinberg & Tardos, *Algorithm Design*, Ch. 4–6 — greedy, divide and conquer, and dynamic

@@ -103,14 +103,14 @@ folder reading order (each page assumes nothing from a later one):
   [Prefix Sums & Difference Arrays](../problem-solving-patterns/prefix-sums-and-difference-arrays.md)
   warns about for range sums — see `primes-and-sieves.md`.
 - **Enumerating outcomes to count them.** Generating every permutation to report how many there are
-  is correct and needlessly exponential when a formula answers the same question in O(1).
+  is correct and needlessly exponential when a formula answers the same question in $O(1)$.
 
 ## Comparisons
 
 | | What it precomputes | What it defends against | Owning page |
 |---|---|---|---|
 | Sieve of Eratosthenes | Primality up to N | Repeated trial division per query | `primes-and-sieves.md` |
-| Fast exponentiation | Nothing — restructures the multiply loop | O(exponent) sequential multiplication | `gcd-and-modular-arithmetic.md` |
+| Fast exponentiation | Nothing — restructures the multiply loop | $O(exponent)$ sequential multiplication | `gcd-and-modular-arithmetic.md` |
 | Pascal's triangle DP | Every `C(n, k)` up to some bound | Recomputing factorials per query | `combinatorics-and-counting.md` |
 | Randomized pivot / hash seed | Nothing — restructures the input assumption | An adversary who knows the deterministic choice | `randomized-algorithms-and-sampling.md` |
 

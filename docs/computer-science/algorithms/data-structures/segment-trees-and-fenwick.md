@@ -82,7 +82,7 @@ sum(2, 5) again: [2,3]=14 and [4,5]=14 → 28  (was 19, +9 matches the value cha
 
 `sum(2, 5)` touches exactly the two nodes whose ranges tile `[2, 5]` with no overlap and no gaps — that
 tiling into $O(\log n)$ pieces, never more, is the structural guarantee a segment tree gives for *any*
-query range (CLRS 4th ed., §14.3 covers the closely related interval trees; the range-decomposition
+query range (CLRS 4th ed., §17.3 covers the closely related interval trees; the range-decomposition
 argument here follows the standard competitive-programming construction, e.g. Halim & Halim,
 *Competitive Programming*, 4th ed., §2.5).
 
@@ -92,8 +92,9 @@ A Fenwick tree stores the same information with no explicit tree and no pointers
 1-indexed, where `tree[i]` covers the range `(i - lowbit(i), i]`. `lowbit(i) = i & -i` isolates the
 lowest set bit: in two's-complement, `-i` is `~i + 1`, so every bit of `i` below its lowest set bit is
 flipped from 0 to 1 in `~i` and then carried back to 0 by the `+1`, while the lowest set bit itself and
-everything above it survive the flip — `i & -i` keeps exactly that one bit. For `i = 12 = 0b1100`,
-`-12 = 0b...110100`, and `12 & -12 = 0b0100 = 4`.
+everything above it survive the flip — `i & -i` keeps exactly that one bit (see
+[Integers & Two's Complement](../../bit-manipulation/integers-and-twos-complement.md) for the full
+two's-complement derivation). For `i = 12 = 0b1100`, `-12 = 0b...110100`, and `12 & -12 = 0b0100 = 4`.
 
 <Figure src="/img/cs/algorithms/fenwick-tree.png"
         alt="A Fenwick tree over 8 elements: eight range bars stacked by length, tree[1] through tree[7] covering short ranges at the bottom and tree[8] covering the whole array at top, with an arrow tracing update(3) climbing from tree[3] to tree[4] to tree[8]"
@@ -320,7 +321,7 @@ needs more than a single number back (e.g. "the index of the minimum," not just 
 - Halim, S. & Halim, F., *Competitive Programming*, 4th ed., §2.5 "Segment Tree" and §2.5 "Fenwick
   Tree" — the standard competitive-programming construction this page's implementations follow,
   including the iterative (pointerless) segment tree layout.
-- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §14.3 "Interval trees" —
+- Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §17.3 "Interval trees" —
   the closest CLRS analogue: an augmented balanced tree answering range-overlap queries in
   $O(\log n)$, via the same "decompose into a small number of precomputed pieces" idea.
 

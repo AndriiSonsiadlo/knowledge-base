@@ -65,10 +65,10 @@ for (int val : vec) {
 - Memory efficiency important
 
 **Performance:**
-- Random access: O(1)
-- End insertion: O(1) amortized
-- Middle insertion: O(n)
-- Search: O(n) unsorted, O(log n) if sorted
+- Random access: $O(1)$
+- End insertion: $O(1)$ amortized
+- Middle insertion: $O(n)$
+- Search: $O(n)$ unsorted, $O(\log n)$ if sorted
 
 ## std::array - Fixed-Size Array
 
@@ -153,9 +153,9 @@ int x = deq[0];
 - Random access still needed
 
 **Performance:**
-- Front/back insertion: O(1)
-- Random access: O(1) but slower than vector
-- Middle insertion: O(n)
+- Front/back insertion: $O(1)$
+- Random access: $O(1)$ but slower than vector
+- Middle insertion: $O(n)$
 
 ## std::list - Doubly Linked List
 
@@ -191,8 +191,8 @@ lst.unique();
 - Iterator stability (iterators not invalidated)
 
 **Performance:**
-- Insertion/removal at position: O(1)
-- Access element: O(n)
+- Insertion/removal at position: $O(1)$
+- Access element: $O(n)$
 - Higher memory overhead (2 pointers per element)
 
 ## std::forward_list - Singly Linked List
@@ -257,9 +257,9 @@ for (int val : s) {
 - Need range queries
 
 **Performance:**
-- Search: O(log n)
-- Insert: O(log n)
-- Remove: O(log n)
+- Search: $O(\log n)$
+- Insert: $O(\log n)$
+- Remove: $O(\log n)$
 - Iteration: sorted order
 
 ## std::multiset - Ordered Multiset
@@ -324,9 +324,9 @@ ages.erase("Alice");
 - Frequent lookups by key
 
 **Performance:**
-- Lookup: O(log n)
-- Insert: O(log n)
-- Delete: O(log n)
+- Lookup: $O(\log n)$
+- Insert: $O(\log n)$
+- Delete: $O(\log n)$
 
 ## std::multimap - Multiple Values Per Key
 
@@ -386,8 +386,8 @@ std::unordered_set<Point, PointHash> points;
 - Have good hash function
 
 **Performance:**
-- Lookup: O(1) average, O(n) worst
-- Insert: O(1) average
+- Lookup: $O(1)$ average, $O(n)$ worst
+- Insert: $O(1)$ average
 - More memory than set
 
 ## std::unordered_map - Hash Map
@@ -536,9 +536,9 @@ c.count(key);
 **array** = fixed size, stack allocated  
 **deque** = fast both ends  
 **list** = linked, fast insert/remove anywhere  
-**set** = sorted unique, O(log n) operations  
-**map** = sorted key-value, O(log n) operations  
-**unordered_set/map** = hash-based, O(1) average  
+**set** = sorted unique, $O(\log n)$ operations  
+**map** = sorted key-value, $O(\log n)$ operations  
+**unordered_set/map** = hash-based, $O(1)$ average  
 **stack/queue** = adapters for specific patterns  
 **priority_queue** = heap for priority operations
 :::

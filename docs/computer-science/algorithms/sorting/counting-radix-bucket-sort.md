@@ -8,7 +8,7 @@ tags: [computer-science, algorithms, sorting, counting-sort, radix-sort, bucket-
 
 # Counting Sort, Radix Sort & Bucket Sort
 
-Every comparison sort on this page's siblings is bound below by Ω(n log n) — a fact proved by a
+Every comparison sort on this page's siblings is bound below by $Ω(n \log n)$ — a fact proved by a
 decision tree argument (see [Choosing a Sort](./choosing-a-sort.md)), not by cleverness anyone has
 failed to find. That bound only applies to algorithms that decide order by *comparing* elements. If
 something is known about the keys beyond "they support `<`" — that they are integers in a bounded
@@ -23,7 +23,7 @@ continuous interval — and turns that assumption into buckets small enough to f
 
 :::info[Prerequisites]
 Comfortable with [arrays](../data-structures/arrays.md) and with why comparison sorts are bounded
-below by Ω(n log n) — see [Choosing a Sort](./choosing-a-sort.md) for that argument. This page assumes
+below by $Ω(n \log n)$ — see [Choosing a Sort](./choosing-a-sort.md) for that argument. This page assumes
 it rather than re-deriving it.
 :::
 
@@ -89,7 +89,7 @@ std::vector<int> counting_sort(const std::vector<int>& a, int k) {
 </TabItem>
 </Tabs>
 
-Counting sort's cost is O(n + k), not O(n log n) — no comparisons happen at all. That is only a win
+Counting sort's cost is $O(n + k)$, not $O(n \log n)$ — no comparisons happen at all. That is only a win
 when `k = O(n)`; sorting 32-bit integers directly with `k = 2^32` allocates 4 billion counters to sort
 a handful of values.
 
@@ -174,9 +174,9 @@ std::vector<int> lsd_radix_sort(std::vector<int> a, int base = 10) {
 </TabItem>
 </Tabs>
 
-For `n` keys of `d` digits each in base `r`, LSD radix sort runs `d` counting-sort passes at O(n + r)
-each: **O(d(n + r)) worst case**. Treating `d` and `r` as constants (fixed-width integers, base 256)
-gives O(n) — the reason a bounded-key-domain sort can beat the comparison-sort floor.
+For `n` keys of `d` digits each in base `r`, LSD radix sort runs `d` counting-sort passes at $O(n + r)$
+each: **$O(d(n + r))$ worst case**. Treating `d` and `r` as constants (fixed-width integers, base 256)
+gives $O(n)$ — the reason a bounded-key-domain sort can beat the comparison-sort floor.
 
 <Tabs groupId="code-lang">
 <TabItem value="python" label="Python">
@@ -209,18 +209,18 @@ buckets independently, the same shape as quicksort's partition-then-recurse. Thi
 variable-length keys such as strings — an MSD pass past a string's last character defines it as
 smaller than any string it shares a prefix with, and the recursion naturally stops on
 single-element or empty buckets. Sedgewick & Wayne 4th ed. §5.1 covers this string-sorting form
-(American flag sort / MSD string sort) in detail and gives it O(n) average time for keys with
+(American flag sort / MSD string sort) in detail and gives it $O(n)$ average time for keys with
 independent random characters — worse in the worst case, since a group of keys sharing a long common
 prefix recurses to the prefix's full depth before any digit distinguishes them.
 
 Bucket sort makes a different assumption: keys are real numbers roughly uniformly distributed over a
 known interval, say `[0, 1)`. It allocates `n` buckets, drops each key `v` into bucket `⌊v · n⌋`,
 sorts each bucket with insertion sort (buckets are expected to be tiny), and concatenates. Under the
-uniformity assumption each bucket holds O(1) elements in expectation, so total work is **O(n)
+uniformity assumption each bucket holds $O(1)$ elements in expectation, so total work is **$O(n)$
 expected**, not worst case — CLRS 4th ed. §8.4 proves this via linearity of expectation over the
 bucket sizes. A skewed distribution (all keys near 0.999) defeats the assumption and degrades to one
 bucket holding everything, at which point bucket sort is just insertion sort on the whole array:
-**O(n²) worst case**.
+**$O(n^{2})$ worst case**.
 
 ## Practical Usage
 
@@ -254,21 +254,21 @@ bucket holding everything, at which point bucket sort is just insertion sort on 
   bias offset (`v - min(a)`) or a separate sign pass is required before the loop above applies —
   omitting it makes `(v // exp) % base` behave inconsistently across languages, since Python's `//`
   floors toward negative infinity while C++'s integer division truncates toward zero.
-- **Bucket sort on a skewed distribution.** The O(n) expected bound assumes uniformity; a real dataset
+- **Bucket sort on a skewed distribution.** The $O(n)$ expected bound assumes uniformity; a real dataset
   that is skewed (timestamps clustered at the top of the hour, prices clustered at round numbers) can
-  collapse most elements into one bucket and degrade toward O(n²).
+  collapse most elements into one bucket and degrade toward $O(n^{2})$.
 
 ## Comparisons
 
 | | Best | Average | Worst | Space | Stable | In-place |
 |---|---|---|---|---|---|---|
-| Counting sort | O(n + k) | O(n + k) | O(n + k) | O(n + k) | Yes | No |
-| LSD radix sort | O(d(n + r)) | O(d(n + r)) | O(d(n + r)) | O(n + r) | Yes | No |
-| MSD radix sort | O(n) | O(n) average (independent random keys, Sedgewick & Wayne 4th ed. §5.1) | O(n · d) | O(n + r) | Yes (stable variant) | No |
-| Bucket sort | O(n) | O(n) expected (CLRS 4th ed. §8.4, uniform keys) | O(n²) | O(n) | Depends on the per-bucket sort | No |
-| Mergesort (for reference) | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes | No |
+| Counting sort | $O(n + k)$ | $O(n + k)$ | $O(n + k)$ | $O(n + k)$ | Yes | No |
+| LSD radix sort | $O(d(n + r))$ | $O(d(n + r))$ | $O(d(n + r))$ | $O(n + r)$ | Yes | No |
+| MSD radix sort | $O(n)$ | $O(n)$ average (independent random keys, Sedgewick & Wayne 4th ed. §5.1) | $O(n \cdot d)$ | $O(n + r)$ | Yes (stable variant) | No |
+| Bucket sort | $O(n)$ | $O(n)$ expected (CLRS 4th ed. §8.4, uniform keys) | $O(n^{2})$ | $O(n)$ | Depends on the per-bucket sort | No |
+| Mergesort (for reference) | $O(n \log n)$ | $O(n \log n)$ | $O(n \log n)$ | $O(n)$ | Yes | No |
 
-Every row above beats mergesort's O(n log n) worst case in its favourable regime, and every row's win
+Every row above beats mergesort's $O(n \log n)$ worst case in its favourable regime, and every row's win
 comes from an assumption the comparison-sort proof doesn't get to make: a bounded range, a fixed digit
 count, or a known distribution. Violate the assumption and the row's bound stops holding — bucket sort
 in particular is the only one of the four whose *worst* case is quadratic, because unlike counting or
@@ -293,7 +293,7 @@ radix sort it has no way to force the assumption to hold.
 
 - Cormen, Leiserson, Rivest & Stein, *Introduction to Algorithms*, 4th ed., §8.2 (counting sort),
   §8.3 (radix sort), §8.4 (bucket sort) — the linear-time sorts, their invariants, and the proof that
-  bucket sort's O(n) bound is an expectation over a uniformity assumption.
+  bucket sort's $O(n)$ bound is an expectation over a uniformity assumption.
 - Sedgewick & Wayne, *Algorithms*, 4th ed., §5.1 "String Sorts" — LSD and MSD string sort (key-indexed
   counting applied per character), including three-way radix quicksort as a hybrid.
 - [NumPy `argsort` documentation](https://numpy.org/doc/stable/reference/generated/numpy.argsort.html)
@@ -301,7 +301,7 @@ radix sort it has no way to force the assumption to hold.
 
 ## Related Pages
 
-- [Choosing a Sort](./choosing-a-sort.md) — the Ω(n log n) comparison-sort lower bound these three
+- [Choosing a Sort](./choosing-a-sort.md) — the $Ω(n \log n)$ comparison-sort lower bound these three
   algorithms sidestep, and why a bounded-key assumption is what makes that legal.
 - [Mergesort](./mergesort.md) — the comparison-sort baseline every row in the table above is measured
   against.

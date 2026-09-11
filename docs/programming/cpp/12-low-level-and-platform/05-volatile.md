@@ -274,7 +274,7 @@ void uart_receive(char* buffer, size_t size) {
 ## C++ Memory Model Position
 ```cpp showLineNumbers
 // C++ standard: volatile has no thread synchronization semantics
-// Java/C#: volatile has memory barrier semantics (different!)
+// C#: volatile has memory barrier semantics (different!)
 
 // C++: Don't use for threading
 volatile bool flag;

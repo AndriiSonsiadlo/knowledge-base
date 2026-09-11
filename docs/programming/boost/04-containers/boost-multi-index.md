@@ -97,7 +97,7 @@ int main() {
 | `hashed_unique` | `std::unordered_set` | fast exact lookup by unique key |
 | `hashed_non_unique` | `std::unordered_multiset` | fast exact lookup, duplicates allowed |
 | `sequenced` | `std::list` | preserves insertion order |
-| `random_access` | `std::vector` | O(1) positional access by index |
+| `random_access` | `std::vector` | $O(1)$ positional access by index |
 
 ## Modifying elements
 

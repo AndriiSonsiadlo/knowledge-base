@@ -19,8 +19,6 @@ default is wrong.
 | Language | Function | Algorithm | Stable |
 |---|---|---|---|
 | Python | `sorted`, `list.sort` | **Timsort** | Yes |
-| Java | `Arrays.sort` (objects), `Collections.sort` | Timsort | Yes |
-| Java | `Arrays.sort` (primitives) | Dual-pivot quicksort | No |
 | C++ | `std::sort` | **Introsort** | No |
 | C++ | `std::stable_sort` | Mergesort (or in-place mergesort if memory is tight) | Yes |
 | Rust | `sort` | Timsort-derived | Yes |
@@ -33,7 +31,7 @@ Three designs cover almost all of that table.
 
 ### Timsort — adaptive mergesort
 
-Invented by Tim Peters for Python in 2002, and since adopted by Java, Android, Rust and V8. The
+Invented by Tim Peters for Python in 2002, and since adopted by Android, Rust and V8. The
 premise is that **real data is rarely random**: it arrives partly ordered, appended to, or
 concatenated from sorted pieces.
 
@@ -140,9 +138,8 @@ this, computing each key once instead of on every comparison.
 Comparison sorts require a **strict weak ordering**: if `a < b` then not `b < a`, comparison must be
 transitive, and equivalence must be transitive too. Violating it — `return a.score >= b.score`
 instead of `>`, or a comparator using a mutable field — does not merely produce a wrongly-ordered
-list. In C++ it is undefined behaviour and routinely reads out of bounds; Java throws
-`IllegalArgumentException: Comparison method violates its general contract!`, but only sometimes,
-depending on input size.
+list. In C++ it is undefined behaviour and routinely reads out of bounds — some languages detect the
+violation at runtime and throw, but only sometimes, depending on input size.
 
 Write `<`, never `<=`, in a comparator.
 :::

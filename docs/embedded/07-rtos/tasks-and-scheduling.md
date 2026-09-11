@@ -70,7 +70,7 @@ One overlap worth knowing about, because it shows up when you read `tasks.c`: a 
 1. Find the highest index with a non-empty list.
 2. Advance that list's index pointer one place (this is what makes equal-priority tasks round-robin) and take the task it now points at.
 
-Step 1 is where the ports differ, and it is the difference between an O(n) scheduler and an O(1) one. The generic implementation walks down from `uxTopReadyPriority` until it finds a non-empty list. The Cortex-M ports instead use `configUSE_PORT_OPTIMISED_TASK_SELECTION`, which keeps a bitmap of which priorities have ready tasks and finds the top one with a single **`CLZ`** instruction — count leading zeros, one cycle on Armv7-M. Selection becomes constant-time regardless of how many priorities exist.
+Step 1 is where the ports differ, and it is the difference between an $O(n)$ scheduler and an $O(1)$ one. The generic implementation walks down from `uxTopReadyPriority` until it finds a non-empty list. The Cortex-M ports instead use `configUSE_PORT_OPTIMISED_TASK_SELECTION`, which keeps a bitmap of which priorities have ready tasks and finds the top one with a single **`CLZ`** instruction — count leading zeros, one cycle on Armv7-M. Selection becomes constant-time regardless of how many priorities exist.
 
 Two consequences fall straight out of that mechanism:
 
@@ -89,7 +89,7 @@ Assigning the numbers is not this page's job. Order tasks by period, shortest pe
 2. Moves every task whose wake time has arrived from the delayed list to its ready list.
 3. Returns whether a context switch is needed — because it unblocked something more urgent than the running task, or because a time slice ended.
 
-The delayed-list arrangement is worth understanding, because it is what keeps the tick O(1) in the common case. Blocked-with-timeout tasks are held in a list *sorted by wake time*, and the kernel caches the earliest of those in `xNextTaskUnblockTime`. Most ticks therefore compare one word and do nothing else — no scan of the task set. Because a 32-bit tick count wraps, there are two delayed lists, current and overflow, and the pointers swap when `xTickCount` wraps; a task whose computed wake time is numerically less than the current tick goes on the overflow list. This is the same wrap problem the superloop solves with `time_after()`, solved once inside the kernel instead of at every call site — see [The Superloop and Cooperative Scheduling](../04-bare-metal-programming/the-superloop.md).
+The delayed-list arrangement is worth understanding, because it is what keeps the tick $O(1)$ in the common case. Blocked-with-timeout tasks are held in a list *sorted by wake time*, and the kernel caches the earliest of those in `xNextTaskUnblockTime`. Most ticks therefore compare one word and do nothing else — no scan of the task set. Because a 32-bit tick count wraps, there are two delayed lists, current and overflow, and the pointers swap when `xTickCount` wraps; a task whose computed wake time is numerically less than the current tick goes on the overflow list. This is the same wrap problem the superloop solves with `time_after()`, solved once inside the kernel instead of at every call site — see [The Superloop and Cooperative Scheduling](../04-bare-metal-programming/the-superloop.md).
 
 Choosing the rate is a real trade-off and 1000 Hz is a default, not an answer:
 
