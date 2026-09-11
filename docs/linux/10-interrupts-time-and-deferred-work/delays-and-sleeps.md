@@ -64,7 +64,7 @@ anyway for some other reason, avoiding a dedicated wakeup (and the CPU-idle exit
 altogether. Passing an identical min and max — `usleep_range(1000, 1000)` — collapses the window to zero
 and defeats this entirely: it forbids coalescing with anything, for no gain in accuracy, since the
 function was never promising exact delivery in the first place. The kernel's own documentation
-([*Timers Howto*](https://docs.kernel.org/timers/timers-howto.html)) says the same thing in its own words:
+([*Delay and sleep mechanisms*](https://docs.kernel.org/timers/delay_sleep_functions.html)) says the same thing in its own words:
 give `usleep_range` a real range unless there is a specific, stated reason not to.
 
 ## `msleep`, and its actual granularity
@@ -182,7 +182,7 @@ rounded-up-to-the-tick.*
 
 ## The selection table
 
-Mirrors the kernel's own [*Timers Howto*](https://docs.kernel.org/timers/timers-howto.html) guidance:
+Mirrors the kernel's own [*Delay and sleep mechanisms*](https://docs.kernel.org/timers/delay_sleep_functions.html) guidance:
 
 | Wait duration | Context | Call | Why |
 |---|---|---|---|
@@ -239,7 +239,7 @@ sometimes gotten wrong — at every call site that polls a register.
 
 ## References
 
-- [*Timers Howto*](https://docs.kernel.org/timers/timers-howto.html) — the kernel's own decision
+- [*Delay and sleep mechanisms*](https://docs.kernel.org/timers/delay_sleep_functions.html) — the kernel's own decision
   guidance; this page's selection table agrees with it directly.
 - <Src file="kernel/time/sleep_timeout.c" symbol="msleep" /> — the jiffy rounding, in three lines, which
   settles the granularity argument. (At v6.18 `msleep` lives in `kernel/time/sleep_timeout.c`, not

@@ -184,10 +184,10 @@ expiry.*
 
 ## References
 
-- [*Timers Howto*](https://docs.kernel.org/timers/timers-howto.html) — the in-tree guidance on which
+- [*Delay and sleep mechanisms*](https://docs.kernel.org/timers/delay_sleep_functions.html) — the in-tree guidance on which
   timer or delay to use; the authority for this page's decision table and
   [Delays and Sleeps](./delays-and-sleeps.md)'s.
-- [*hrtimers and beyond: Transformation of the Linux time(r) system*](https://docs.kernel.org/timers/hrtimers.html)
+- [*hrtimers - subsystem for high-resolution kernel timers*](https://docs.kernel.org/timers/hrtimers.html)
   — the design rationale for a separate high-resolution subsystem alongside the wheel.
 - <Src file="kernel/time/timer.c" symbol="mod_timer" /> — the wheel insertion path, where the
   bucket-granularity scheme is implemented.
