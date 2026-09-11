@@ -130,7 +130,7 @@ Three mechanisms, at a glance, are what `PREEMPT_RT` adds on top of whichever ba
   be preempted, closing off the largest source of unbounded latency identified above.
 - **Threaded interrupt handlers.** Most interrupt handlers run as preemptible kernel threads rather than
   in true hardirq context, so they compete for the CPU under the ordinary scheduler instead of running to
-  completion unconditionally. Folder 10's threaded-IRQs material (named here in prose; not yet linked)
+  completion unconditionally. [Threaded IRQs](../10-interrupts-time-and-deferred-work/threaded-irqs.md)
   owns this mechanism in depth.
 - **Priority inheritance.** When a high-priority task blocks on a lock held by a lower-priority one, the
   holder is temporarily boosted to the waiter's priority, bounding priority inversion instead of leaving a
