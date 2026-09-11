@@ -275,7 +275,7 @@ workqueue.*
   function.
 - <Src file="include/linux/workqueue.h" symbol="cancel_work_sync" /> — the cancellation semantics, stated
   precisely in the header/source comment this page quotes.
-- LWN, [*Concurrency-managed workqueues*](https://lwn.net/Articles/403891/), Jonathan Corbet, October 2010
+- LWN, [*Working on workqueues*](https://lwn.net/Articles/403891/), Jonathan Corbet, September 7, 2010 — the concurrency-managed-workqueue design rationale
   — the design rationale for cmwq; the shared-pool, on-demand-worker model it describes is still what
   v6.18 runs, though the system queue names themselves (`system_percpu_wq`/`system_dfl_wq` alongside the
   older `system_wq`/`system_unbound_wq` aliases) have been renamed since this article was written.

@@ -185,7 +185,7 @@ can see.*
   `sched_set_fifo(current)` is called, the primitive this page's priority claim is verified against.
 - [*Core-api: Genirq*](https://docs.kernel.org/core-api/genericirq.html), the threaded-handler section —
   the contract between the primary handler and the thread function, in the kernel's own words.
-- LWN, [*Threaded interrupt handlers*](https://lwn.net/Articles/302043/), Jonathan Corbet, September 2008
+- LWN, [*Moving interrupts to threads*](https://lwn.net/Articles/302043/), Jake Edge, October 8, 2008 — the original rationale from the RT tree
   — the original rationale from the `PREEMPT_RT` tree, from before the mechanism merged into mainline; the
   design is unchanged since.
 - [Real-Time Scheduling](../07-scheduling/real-time-scheduling.md) and [Preemption
