@@ -133,6 +133,19 @@ thread just existing against the rare case of cgroup membership actually changin
 *Reader-writer choice is a granularity and frequency question, not a "pick the fanciest lock" question —
 this table also anchors [Choosing a Lock](./choosing-a-lock.md).*
 
+```mermaid
+flowchart TB
+    A[Is the read-side critical<br/>section short?] -->|Yes| B[Skip the read/write split —<br/>plain spinlock_t]
+    A -->|No| C[Can the read side<br/>ever sleep?]
+    C -->|No| D[rwlock_t —<br/>narrow middle case]
+    C -->|Yes| E[Is the write side<br/>rare and latency-tolerant?]
+    E -->|No| F[rw_semaphore —<br/>the default choice]
+    E -->|"Yes, and reads are\nextremely hot"| G[percpu_rw_semaphore<br/>or RCU]
+```
+
+*Which reader-writer primitive fits, decided by read/write frequency and whether the read side may sleep —
+the same decision the table above lays out row by row.*
+
 <KernelFacts
   structure={[["struct rw_semaphore", "include/linux/rwsem.h"], ["rwlock_t", "include/linux/rwlock_types.h"]]}
   path="down_read() → rwsem_read_trylock() fast path → contended → rwsem_down_read_slowpath() → schedule()"

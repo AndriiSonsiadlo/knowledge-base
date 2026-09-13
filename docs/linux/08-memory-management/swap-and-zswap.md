@@ -196,14 +196,15 @@ you were about to use.*
 
 ## References
 
-- `https://docs.kernel.org/admin-guide/mm/zswap.html` and the zram documentation — the definitive
+- [zswap](https://docs.kernel.org/admin-guide/mm/zswap.html) and the
+  [zram](https://docs.kernel.org/admin-guide/blockdev/zram.html) documentation — the definitive
   descriptions of both, and the difference between them.
-- Chris Down, *"In defence of swap"* (`https://chrisdown.name/2018/01/02/in-defence-of-swap.html`) — the
+- Chris Down, [*"In defence of swap"*](https://chrisdown.name/2018/01/02/in-defence-of-swap.html) — the
   clearest argument for why a swapless system has fewer options; a blog post by a kernel and systemd
   contributor, and correct.
 - <Src file="mm/page_io.c" symbol="swap_writepage" /> — the write side; at v6.18 the public entry point is
   `__swap_writepage()`, dispatching to a filesystem-backed, synchronous-bdev, or async-bdev path
   depending on the swap device.
 - `man 5 proc` and `man 8 swapon` — the counters and the interface for the observation commands.
-- `https://docs.kernel.org/admin-guide/sysctl/vm.rst` — swappiness range and semantics, verified for this
-  page against `Documentation/admin-guide/sysctl/vm.rst` at v6.18.
+- [`vm` sysctls](https://docs.kernel.org/admin-guide/sysctl/vm.html) — swappiness range and semantics,
+  verified for this page against `Documentation/admin-guide/sysctl/vm.rst` at v6.18.

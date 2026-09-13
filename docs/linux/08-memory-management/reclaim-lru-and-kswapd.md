@@ -199,11 +199,11 @@ longer fits.*
 
 ## References
 
-- `https://docs.kernel.org/admin-guide/mm/multigen_lru.html` — the MGLRU administration guide; confirmed
-  present and current against `Documentation/admin-guide/mm/multigen_lru.rst` at v6.18, checked
-  2026-09-08.
-- `https://docs.kernel.org/accounting/psi.html` — memory pressure as the operational signal, and the
-  difference between `some` and `full`.
+- [Multi-Gen LRU](https://docs.kernel.org/admin-guide/mm/multigen_lru.html) — the MGLRU administration
+  guide; confirmed present and current against `Documentation/admin-guide/mm/multigen_lru.rst` at v6.18,
+  checked 2026-09-08.
+- [Pressure Stall Information (PSI)](https://docs.kernel.org/accounting/psi.html) — memory pressure as the
+  operational signal, and the difference between `some` and `full`.
 - <Src file="mm/vmscan.c" symbol="shrink_folio_list" /> — where a page's fate is actually decided, one
   page at a time; present at v6.18 (`static unsigned int shrink_folio_list(...)`).
 - `man 5 proc`, the `/proc/vmstat` fields — the counters this page tells the reader to watch.

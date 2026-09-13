@@ -205,11 +205,13 @@ in reverse — one XOR-computed buddy check per level — on free.*
   macro (`alloc_hooks(alloc_pages_noprof(...))`) wrapping a `_noprof` implementation; allocation-tagging
   infrastructure added the `_noprof`/`alloc_hooks()` layer, so the symbol a debugger actually stops in is
   `alloc_pages_noprof`, not `alloc_pages` itself.
-- `https://docs.kernel.org/mm/page_frags.html` and the mm documentation index — for the surrounding
-  allocator documentation at v6.18.
-- `https://docs.kernel.org/admin-guide/mm/concepts.html` — zones and watermarks explained by the kernel
-  for administrators, which is the right level for this page's zone section.
-- Mel Gorman, *Understanding the Linux Virtual Memory Manager* — `https://www.kernel.org/doc/gorman/`.
-  Free, and the clearest long-form treatment of the buddy allocator; written against 2.4/2.6, so
-  structural claims (zone list, exact field names) must be checked against v6.18 while the algorithm it
-  describes is unchanged.
+- [Page Fragment Allocator](https://docs.kernel.org/mm/page_frags.html) and the
+  [mm documentation index](https://docs.kernel.org/mm/index.html) — for the surrounding allocator
+  documentation at v6.18.
+- [Memory Management Concepts Overview](https://docs.kernel.org/admin-guide/mm/concepts.html) — zones and
+  watermarks explained by the kernel for administrators, which is the right level for this page's zone
+  section.
+- Mel Gorman, [*Understanding the Linux Virtual Memory Manager*](https://www.kernel.org/doc/gorman/) — free,
+  and the clearest long-form treatment of the buddy allocator; **written against 2.4/2.6, so** structural
+  claims (zone list, exact field names) must be checked against v6.18 while the algorithm it describes is
+  unchanged.

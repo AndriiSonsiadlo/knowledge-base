@@ -124,6 +124,20 @@ or tightening a behavior that was itself a security hole significant enough that
 worse outcome than the (rare, and usually announced well in advance) compatibility risk of removing it.
 These are treated as exceptional, argued individually, and are not a loophole anyone reaches for casually.
 
+```mermaid
+flowchart LR
+    A[32-bit binary calls syscall N] --> B{Which ABI table?}
+    B -->|Native 64-bit process| C[64-bit syscall table<br/>N → 64-bit handler]
+    B -->|Compat / 32-bit process| D[compat syscall table<br/>N → compat_ handler]
+    D --> E[compat_ layer translates<br/>32-bit struct layout]
+    E --> F[Native 64-bit implementation]
+    C --> F
+```
+
+*Two parallel syscall tables, not one table plus a special case: the same number `N` can resolve to a
+different handler — or nothing at all — depending on which table the caller's ABI selects, which is
+exactly what a seccomp filter must pin `arch` against before trusting `nr`.*
+
 ## The three extension techniques, compared
 
 |  | Real example | Old kernel, new caller | New kernel, old caller |

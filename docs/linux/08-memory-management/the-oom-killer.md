@@ -257,9 +257,10 @@ memcg-scoped branch drawn separately from the global path.*
 - <Src file="mm/oom_kill.c" symbol="oom_badness" /> — the scoring function; verified at v6.18 to compute
   `get_mm_rss() + MM_SWAPENTS + mm_pgtables_bytes()/PAGE_SIZE`, then shift by `oom_score_adj * totalpages /
   1000`.
-- `https://docs.kernel.org/admin-guide/mm/concepts.html` and the cgroup v2 memory-controller documentation
-  — for memcg OOM and `memory.oom.group`.
+- [Memory Management Concepts Overview](https://docs.kernel.org/admin-guide/mm/concepts.html) and the
+  [cgroup v2](https://docs.kernel.org/admin-guide/cgroup-v2.html) memory-controller documentation — for
+  memcg OOM and `memory.oom.group`.
 - `man 5 proc`, the `oom_score` and `oom_score_adj` sections — the user-space interface and its
   `[-1000, 1000]` range.
-- `https://www.freedesktop.org/software/systemd/man/latest/systemd-oomd.service.html` — the PSI-based
-  alternative and its configuration.
+- [`systemd-oomd.service`](https://www.freedesktop.org/software/systemd/man/latest/systemd-oomd.service.html)
+  — the PSI-based alternative and its configuration.

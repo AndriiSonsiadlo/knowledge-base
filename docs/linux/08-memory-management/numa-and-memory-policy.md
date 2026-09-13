@@ -195,13 +195,13 @@ applies after all of them, not instead of any of them.*
 
 ## References
 
-- `https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html` — the definitive policy semantics,
-  including the precedence rules between scopes; cross-checked against
+- [NUMA Memory Policy](https://docs.kernel.org/admin-guide/mm/numa_memory_policy.html) — the definitive
+  policy semantics, including the precedence rules between scopes; cross-checked against
   `Documentation/admin-guide/mm/numa_memory_policy.rst` at v6.18, checked 2026-09-08, which is where
   `MPOL_WEIGHTED_INTERLEAVE` and `MPOL_PREFERRED_MANY` were confirmed present.
 - `man 2 mbind` and `man 2 set_mempolicy` — the interfaces, with the flag combinations that actually
   migrate existing pages versus only affecting future allocations.
 - `man 8 numactl` and `man 8 numastat` — the tools and the counters, which is what a reader will
   actually run.
-- `https://docs.kernel.org/admin-guide/sysctl/kernel.html`, `numa_balancing` — the automatic-balancing
-  switch and what it costs.
+- [`kernel` sysctls: `numa_balancing`](https://docs.kernel.org/admin-guide/sysctl/kernel.html) — the
+  automatic-balancing switch and what it costs.

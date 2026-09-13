@@ -286,8 +286,9 @@ folio.*
   `filemap_read()` calls `filemap_get_pages()` for each folio, which finds a cached folio or, on a miss,
   reaches `filemap_create_folio()`/`filemap_update_page()` → `filemap_read_folio()` →
   `mapping->a_ops->read_folio()` to fill it before copying out.
-- `https://docs.kernel.org/admin-guide/mm/concepts.html` — the kernel's own description of the page cache
-  and its reclaimability, at the right level for the closing section above; checked 2026-09-08.
+- [Memory Management Concepts Overview](https://docs.kernel.org/admin-guide/mm/concepts.html) — the
+  kernel's own description of the page cache and its reclaimability, at the right level for the closing
+  section above; checked 2026-09-08.
 - `man 2 posix_fadvise` and `man 2 madvise` — the explicit readahead and eviction controls, including the
   exact semantics of `POSIX_FADV_DONTNEED`.
 - `man 5 proc`, the `/proc/meminfo` entry — the definitions of `Cached`, `Buffers`, and `MemAvailable` this

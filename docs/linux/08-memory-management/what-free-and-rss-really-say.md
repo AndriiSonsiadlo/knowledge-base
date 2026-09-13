@@ -103,6 +103,23 @@ double-counting behavior:
 | **PSS** (proportional set size) | Resident pages, each divided by its number of sharers | No — this is the point of PSS | The only per-process number that sums correctly across processes into a true total | Summed across the same 9 processes via `smaps_rollup`: 521,335 kB ≈ 509 MB — matches the real ~500 MB allocation and the ~0.5 GiB `free` delta |
 | **USS** (unique set size) | Private pages only — resident and not shared with anything | No — by construction, nothing here is shared | "What would be freed if I killed this process right now" | Not captured separately in this run — approximated by each child's `Pss` minus its share of the parent's touched pages, since the children never wrote to the buffer |
 
+```mermaid
+flowchart LR
+    subgraph Physical["One physical page, mapped by 9 processes"]
+        P[Physical page]
+    end
+    Parent[Parent] -->|maps| P
+    C1[Child 1] -->|maps| P
+    C2[Child 2] -->|maps| P
+    Cn[... 6 more children] -->|maps| P
+    P -->|"RSS counts this page\nonce per mapper = 9x"| RSS[RSS sum: 9x the real page]
+    P -->|"PSS divides by\nsharer count = 1x"| PSS[PSS sum: 1x the real page]
+```
+
+*Why RSS overstates shared memory and PSS does not: nine processes mapping the same copy-on-write page
+each report it in full for RSS, while PSS divides it by the number of sharers before summing — the
+mechanism behind the 9x discrepancy measured below.*
+
 ## What actually happens
 
 The demonstration that makes the RSS double-counting concrete rather than theoretical: measure the
@@ -281,9 +298,10 @@ terms:
   only authority worth citing for this page; every field name used above was cross-checked against a
   real `/proc/meminfo` on this machine, checked 2026-09-08.
 - `man 1 free` — the column definitions and the `available` estimate's basis.
-- `https://docs.kernel.org/filesystems/proc.html` — the kernel's own account of `smaps` and
-  `smaps_rollup`, including which fields require matching credentials or root for another process.
-- `https://docs.kernel.org/admin-guide/cgroup-v2.html`, the memory controller's `memory.stat` — field
-  list (`anon`, `file`, `kernel`, `kernel_stack`, `pagetables`, `percpu`, `sock`, `shmem`, `slab`,
-  `file_mapped`, `file_dirty`, `anon_thp`, `file_thp`) verified current against this document, checked
-  2026-09-08.
+- [The `/proc` Filesystem](https://docs.kernel.org/filesystems/proc.html) — the kernel's own account of
+  `smaps` and `smaps_rollup`, including which fields require matching credentials or root for another
+  process.
+- [Control Group v2](https://docs.kernel.org/admin-guide/cgroup-v2.html), the memory controller's
+  `memory.stat` — field list (`anon`, `file`, `kernel`, `kernel_stack`, `pagetables`, `percpu`, `sock`,
+  `shmem`, `slab`, `file_mapped`, `file_dirty`, `anon_thp`, `file_thp`) verified current against this
+  document, checked 2026-09-08.

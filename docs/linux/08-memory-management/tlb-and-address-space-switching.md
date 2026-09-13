@@ -79,11 +79,11 @@ cheap, unmapping is not — is why `munmap` shows up in profiles of multi-thread
 
 ## PCID, and how Linux uses it
 
-x86-64 offers **PCID** (Process-Context Identifier): the TLB can tag entries with a small ID so that
-entries from more than one address space can coexist without a full flush on every switch. Linux uses
-PCID as a small pool of hardware ASIDs recycled across recently-used `mm`s per CPU — switching back to an
-`mm` that still owns a live PCID slot on this CPU can skip the flush a plain `CR3` reload would otherwise
-force.
+[Address-space tags: ASID and PCID](../../computer-science/memory-hierarchy/tlb-and-address-translation-hardware.md#address-space-tags-asid-and-pcid)
+covers what the tag is and why it exists in hardware terms; this section is only about what Linux does
+with it. The kernel treats its narrow PCID space as a small pool of hardware slots recycled across
+recently-used `mm`s per CPU — switching back to an `mm` that still owns a live PCID slot on this CPU can
+skip the flush a plain `CR3` reload would otherwise force.
 
 It is a smaller win than it first sounds, for two reasons the kernel has to account for:
 
@@ -141,13 +141,12 @@ over.
 ## arm64
 
 :::note
-arm64 solves the shootdown problem in hardware. Its `TLBI` instructions broadcast within the
-inner-shareable domain — issuing one invalidation instruction on one CPU invalidates the matching entries
-on every other CPU in that domain, with no interrupt, no acknowledgment protocol, and no waiting on other
-cores' schedulers to get around to servicing an IPI. This is a genuine architectural advantage over
-x86-64, not just a different way of writing the same mechanism, and it is why arm64's `flush_tlb_*`
-implementations read so much simpler than the x86-64 shootdown path: there is no cross-CPU coordination
-left to write, because the hardware already did it.
+arm64 solves the shootdown problem in hardware — see [Invalidation, and why it is
+expensive](../../computer-science/memory-hierarchy/tlb-and-address-translation-hardware.md#invalidation-and-why-it-is-expensive)
+for arm64's broadcast `TLBI` mechanism itself. The consequence for this page's subject: arm64's `flush_tlb_*` implementations
+read so much simpler than the x86-64 shootdown path above precisely because there is no cross-CPU
+coordination left for software to write — no IPI, no `mm_cpumask` targeting, no acknowledgment wait —
+because the hardware already did it.
 :::
 
 ```mermaid

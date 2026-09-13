@@ -215,11 +215,11 @@ translation, and the region a single TLB entry now covers is 512× larger.*
 
 ## References
 
-- `https://docs.kernel.org/admin-guide/mm/transhuge.html` — the definitive description of every `enabled`
-  and `defrag` value; the authority for this page's values, checked directly against
-  `Documentation/admin-guide/mm/transhuge.rst` at v6.18, 2026-09-08.
-- `https://docs.kernel.org/admin-guide/mm/hugetlbpage.html` — the explicit-reservation mechanism and its
-  interfaces (`nr_hugepages`, `hugetlbfs`, `MAP_HUGETLB`).
+- [Transparent Hugepage Support](https://docs.kernel.org/admin-guide/mm/transhuge.html) — the definitive
+  description of every `enabled` and `defrag` value; the authority for this page's values, checked directly
+  against `Documentation/admin-guide/mm/transhuge.rst` at v6.18, 2026-09-08.
+- [HugeTLB Pages](https://docs.kernel.org/admin-guide/mm/hugetlbpage.html) — the explicit-reservation
+  mechanism and its interfaces (`nr_hugepages`, `hugetlbfs`, `MAP_HUGETLB`).
 - Intel SDM Vol. 3A, ch. 4 — the page-size bit in a PMD/PUD entry, the hardware mechanism this whole
   feature is built on.
 - MongoDB Production Notes, "Disable Transparent Huge Pages (THP)" — a current database-vendor position on

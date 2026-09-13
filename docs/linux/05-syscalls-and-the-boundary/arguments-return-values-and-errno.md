@@ -125,6 +125,17 @@ This is why some blocking calls appear to transparently survive a signal, and ot
 not a property of the syscall being called. The same blocked `read()` can do either, depending entirely
 on how the signal that interrupted it was installed.
 
+```mermaid
+flowchart TB
+    A[Task blocked in a syscall] --> B[Signal arrives]
+    B --> C{Handler installed<br/>with SA_RESTART?}
+    C -->|Yes| D[Rewind pt_regs->ip to the\nSYSCALL instruction — re-executes\ntransparently after the handler returns]
+    C -->|No| E[Convert internal restart code\nto -EINTR — user space sees the failure]
+```
+
+*What happens to a blocking syscall interrupted by a signal — a property of how the handler was
+installed, not of the syscall itself, decided in the same exit path described below.*
+
 ## The exit path is where this is decided
 
 The negative-errno conversion, the restart-versus-`-EINTR` decision, and the actual delivery of a

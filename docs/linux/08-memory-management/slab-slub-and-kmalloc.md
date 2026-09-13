@@ -223,8 +223,8 @@ maintain.*
 
 ## References
 
-- `https://docs.kernel.org/mm/slub.html` — the in-tree SLUB documentation, including every `slub_debug`
-  option and its single-letter code.
+- [SLUB Allocator](https://docs.kernel.org/mm/slub.html) — the in-tree SLUB documentation, including every
+  `slub_debug` option and its single-letter code.
 - <Src file="mm/slub.c" symbol="kmem_cache_alloc" /> — the fast path, short enough to read in one sitting,
   and it shows the per-CPU freelist check directly.
 - `man 5 slabinfo` and `man 1 slabtop` — the field definitions used to decode the lab's `/proc/slabinfo`

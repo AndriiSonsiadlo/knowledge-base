@@ -184,10 +184,10 @@ classDiagram
 
 ## References
 
-- `https://docs.kernel.org/mm/folio.html` — **checked 2026-09-08: returns HTTP 404, does not exist at
-  v6.18.** The mm documentation index (`https://docs.kernel.org/mm/index.html`, same check date) has no
-  dedicated folio page either; folio material is distributed across the page-cache, slab, and core-api
-  (`mm-api.html`) documentation pages instead of collected in one place.
+- [`docs.kernel.org/mm/folio.html`](https://docs.kernel.org/mm/folio.html) — **checked 2026-09-08: returns
+  HTTP 404, does not exist at v6.18.** The [mm documentation index](https://docs.kernel.org/mm/index.html)
+  (same check date) has no dedicated folio page either; folio material is distributed across the
+  page-cache, slab, and core-api (`mm-api.html`) documentation pages instead of collected in one place.
 - Matthew Wilcox's folio talks, and LWN's ["Clarifying memory management with
   folios"](https://lwn.net/Articles/849538/) — the rationale in the proposal author's own framing. This
   article is from the *proposal* period; the API names it discusses were not all final, and code today

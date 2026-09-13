@@ -82,6 +82,20 @@ underlying allocator actually served the request, and treating the result as phy
 `kvmalloc` silently fell back to `vmalloc` corrupts memory exactly as passing a `vmalloc` buffer to DMA
 directly would.
 
+```mermaid
+flowchart TB
+    A[Need memory] --> B{May this code sleep?}
+    B -->|No — irq/softirq/lock held| C[GFP_ATOMIC path only —<br/>kmalloc/alloc_pages/kmem_cache_alloc]
+    B -->|Yes| D{Must it be physically<br/>contiguous? DMA, page tables}
+    D -->|Yes| E[kmalloc / alloc_pages /<br/>kmem_cache_alloc]
+    D -->|No| F{Usually small,<br/>occasionally large?}
+    F -->|Yes| G[kvmalloc — falls back<br/>to vmalloc when large]
+    F -->|No, always large| H[vmalloc]
+```
+
+*Context — can this call sleep — decides before size does; only once sleeping is allowed does physical
+contiguity split the remaining choices, per the decision table below.*
+
 ## The decision table
 
 Checked against the kernel's own guidance at
@@ -130,10 +144,11 @@ full: size picks a row in the table above, but context decides whether that row 
   implementations, the same allocation-tagging pattern `alloc_pages()` uses — the per-page allocation
   (inside `__vmalloc_area_node()`) and the mapping step (`vmap_pages_range()`) are both visible in
   `__vmalloc_node_range_noprof()`.
-- `https://docs.kernel.org/core-api/memory-allocation.html` — the kernel's own "which allocator should I
-  use" guidance; the decision table above was checked against it directly, row by row.
-- `https://docs.kernel.org/core-api/mm-api.html` — the API reference for every function named in the
-  table.
+- [Memory Allocation Guide](https://docs.kernel.org/core-api/memory-allocation.html) — the kernel's own
+  "which allocator should I use" guidance; the decision table above was checked against it directly, row by
+  row.
+- [Memory Management APIs](https://docs.kernel.org/core-api/mm-api.html) — the API reference for every
+  function named in the table.
 - `man 5 proc`, the `/proc/meminfo` `Vmalloc*` fields — for the observation command; confirmed
   world-readable and present on this machine (`VmallocTotal`/`VmallocUsed` both read successfully),
   unlike `/proc/vmallocinfo`, which is root-only.

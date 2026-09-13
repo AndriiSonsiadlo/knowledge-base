@@ -230,9 +230,10 @@ sequenceDiagram
 ## References
 
 - `man 2 fsync` and `man 2 fdatasync` — the guarantees as specified, including the directory-entry caveat.
-- `https://docs.kernel.org/admin-guide/sysctl/vm.html` — the definitive description of the four dirty-page
-  sysctls; verified at v6.18 against `Documentation/admin-guide/sysctl/vm.rst` for this page.
-- PostgreSQL's "fsyncgate" summary (`https://wiki.postgresql.org/wiki/Fsync_Errors`) — the incident that
+- [`vm` sysctls](https://docs.kernel.org/admin-guide/sysctl/vm.html) — the definitive description of the
+  four dirty-page sysctls; verified at v6.18 against `Documentation/admin-guide/sysctl/vm.rst` for this
+  page.
+- PostgreSQL's ["fsyncgate" summary](https://wiki.postgresql.org/wiki/Fsync_Errors) — the incident that
   clarified error semantics for the whole industry; essential reading for [the error
   section](#the-fsync-error-problem).
 - Rebello et al., *"Can Applications Recover from fsync Failures?"*, USENIX ATC 2020 — the systematic

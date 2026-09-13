@@ -117,6 +117,22 @@ result — a workqueue can serialise its own work items with an ordered or singl
 property is actually needed, without paying the global-serialisation cost against *every* CPU
 unconditionally.
 
+```mermaid
+sequenceDiagram
+    participant CPU0
+    participant CPU1
+    participant Tasklet as Tasklet instance
+    CPU0->>Tasklet: tasklet_schedule() — starts running
+    CPU1->>Tasklet: tasklet_schedule() (same instance)
+    Note over Tasklet: CPU1 waits — the same tasklet<br/>never runs on two CPUs at once
+    Tasklet-->>CPU0: callback finishes
+    Tasklet-->>CPU1: re-queued run starts
+```
+
+*The serialisation guarantee that is a tasklet's entire appeal, and the global bottleneck reason 1 above
+blames for its deprecation: a second CPU scheduling the same tasklet waits for the first, no matter how
+many CPUs are otherwise idle.*
+
 ## Reading tasklet code you did not write
 
 Two questions to ask when a tasklet turns up in code under review or under debugging:

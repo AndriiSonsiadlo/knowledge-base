@@ -134,6 +134,18 @@ not of "interrupt handling" as a concept, and `PREEMPT_RT` can afford to force n
 a thread by default precisely because process-context rules are so much easier to reason about and compose
 than hard-IRQ ones.
 
+```mermaid
+flowchart TB
+    A[Hard-IRQ handler runs —<br/>no task identity of its own] --> B[Acknowledge the device,<br/>pull out must-read data]
+    B --> C{Does the rest of the work<br/>need to sleep or take a mutex?}
+    C -->|No, but it can wait a little| D[raise_softirq / tasklet_schedule]
+    C -->|Yes — GFP_KERNEL, mutex, I/O| E[Queue a work item —<br/>process context, may sleep]
+    C -->|No, and it must happen now| F[Do it inline with<br/>GFP_ATOMIC / spinlock_irqsave]
+```
+
+*What a hard-IRQ handler does with work it cannot finish inline — pick a deferral mechanism by whether the
+work can sleep and how soon it must run, the same decision the table below spells out.*
+
 ## The three deferral mechanisms
 
 Given that a handler must get off the CPU quickly, the rest of this folder is the map of *where* the

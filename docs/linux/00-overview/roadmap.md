@@ -126,6 +126,7 @@ folder 17.
     ["The page fault handler", "../08-memory-management/the-page-fault-handler.md"],
     ["Demand paging and copy-on-write", "../08-memory-management/demand-paging-and-cow.md"],
     ["The page allocator", "../08-memory-management/the-page-allocator.md"],
+    ["Folios and compound pages", "../08-memory-management/folios-and-compound-pages.md"],
     ["The page cache", "../08-memory-management/the-page-cache.md"],
     ["Reclaim, LRU, and kswapd", "../08-memory-management/reclaim-lru-and-kswapd.md"],
     ["What `free` and RSS really tell you", "../08-memory-management/what-free-and-rss-really-say.md"],
@@ -139,8 +140,10 @@ folder 17.
     ["Atomic operations", "../09-concurrency-and-locking/atomics-and-refcounts.md"],
     ["Spinlocks", "../09-concurrency-and-locking/spinlocks.md"],
     ["Mutexes and semaphores", "../09-concurrency-and-locking/mutexes-and-semaphores.md"],
+    ["Seqlocks", "../09-concurrency-and-locking/seqlocks.md"],
     ["RCU: the idea", "../09-concurrency-and-locking/rcu-the-idea.md"],
     ["RCU in practice", "../09-concurrency-and-locking/rcu-in-practice.md"],
+    ["Reader-writer locks", "../09-concurrency-and-locking/rwlocks-and-rwsems.md"],
     ["Choosing a lock", "../09-concurrency-and-locking/choosing-a-lock.md"],
     ["Finding locking bugs", "../09-concurrency-and-locking/finding-locking-bugs.md"],
   ]} />

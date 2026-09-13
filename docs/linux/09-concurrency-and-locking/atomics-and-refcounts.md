@@ -153,6 +153,21 @@ wrong rather than a security boundary. [Reference Counting and Object
 Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md) owns the broader
 lifetime patterns (`kref`, the get/put convention) that `refcount_t` is the primitive underneath.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Alive: refcount_set(1)
+    Alive --> Alive: refcount_inc()
+    Alive --> Alive: refcount_dec() (count > 0)
+    Alive --> Freed: refcount_dec_and_test() (count hits 0)
+    Alive --> Saturated: overflow — refcount_inc() past the ceiling
+    Freed --> [*]
+    Saturated --> Saturated: further inc/dec — warns, does not wrap
+```
+
+*`refcount_t`'s two safety properties over a plain `atomic_t`: it cannot wrap back through zero on
+overflow (it saturates and warns instead), and `refcount_inc_not_zero()` refuses to resurrect an object
+already on its way to `Freed`.*
+
 ## `refcount_inc_not_zero` and the lookup race
 
 The pattern that connects atomics to RCU: code finds an object by walking a lock-free or RCU-protected

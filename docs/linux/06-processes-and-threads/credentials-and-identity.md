@@ -150,6 +150,19 @@ documented transition rules above (not run — see the caption).
 | The same program after a **temporary** drop (`seteuid(1000)`) | 1000 | 1000 | 0 (unchanged — this is the point) | 1000 (tracks `euid` again) |
 | The same program after a **permanent** drop (`setresuid(1000, 1000, 1000)`, groups and GID already dropped first) | 1000 | 1000 | 1000 | 1000 |
 
+```mermaid
+stateDiagram-v2
+    [*] --> JustExeced: exec() a setuid-root binary\neuid=0, suid=0, real uid unchanged
+    JustExeced --> TemporaryDrop: seteuid(1000)\neuid=1000, suid still 0
+    TemporaryDrop --> JustExeced: seteuid(0)\none call — suid still held it
+    TemporaryDrop --> PermanentDrop: setresuid(1000,1000,1000)\n(groups, then gid, then uid)
+    PermanentDrop --> [*]: euid=suid=uid=1000 — no way back
+```
+
+*The saved UID is what makes `seteuid(0)` a one-call return to full privilege after a temporary drop —
+and why a permanent drop must clear all three IDs, in the group-then-gid-then-uid order, to actually
+close that door.*
+
 The real reading above came from this environment's own `/proc/self/status`:
 
 ```text

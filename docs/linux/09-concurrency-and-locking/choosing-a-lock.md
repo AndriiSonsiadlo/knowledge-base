@@ -46,6 +46,19 @@ uncontended anyway.
 The first two questions eliminate most of the option space outright. The last three are optimization,
 not correctness, and should be answered with data, not intuition.
 
+```mermaid
+flowchart TB
+    A[Which contexts touch this data?] -->|Reachable from hard IRQ / NMI| B[Spinning family only —<br/>spinlock_t / raw_spinlock_t / RCU / per-CPU]
+    A -->|Process context only| C{May the critical<br/>section sleep?}
+    C -->|Yes| D[Sleeping family —<br/>mutex / rw_semaphore]
+    C -->|No| E{Read/write ratio<br/>and hold time}
+    E -->|Read-mostly, short data| F[seqlock_t or RCU]
+    E -->|Roughly even, short| G[spinlock_t]
+```
+
+*The first two questions — which contexts, and may it sleep — foreclose most of the decision table below
+before read/write ratio or contention ever enters the picture.*
+
 ## The decision table
 
 <div style={{overflowX: "auto"}}>
