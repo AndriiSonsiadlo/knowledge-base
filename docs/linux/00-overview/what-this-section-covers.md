@@ -68,12 +68,12 @@ their scope is fixed, their pages are not yet written.
 | `02-guided-traces` | Six familiar operations — a command, a write, a fault, a boot — followed all the way down | This phase |
 | `03-boot-and-init` | Firmware to login prompt: UEFI, GRUB, the kernel image, initramfs, PID 1, systemd | This phase |
 | `04-kernel-architecture-and-idioms` | Kernel structure and the C idioms it is written in | This phase |
-| `05` | Syscalls | Specified |
-| `06` | Processes | Specified |
-| `07` | Scheduling | Specified |
-| `08` | Memory | Specified |
-| `09` | Locking | Specified |
-| `10` | Interrupts | Specified |
+| `05` | Syscalls | This phase |
+| `06` | Processes | This phase |
+| `07` | Scheduling | This phase |
+| `08` | Memory | This phase |
+| `09` | Locking | This phase |
+| `10` | Interrupts | This phase |
 | `11` | The VFS | Specified |
 | `12` | Block I/O | Specified |
 | `13` | Networking | Specified |

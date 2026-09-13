@@ -19,7 +19,7 @@ raw dependency graph.
 
 ## Learning paths
 
-Paths are filled in as the folders they cross are written. Folders 00 through 04 exist now; the
+Paths are filled in as the folders they cross are written. Folders 00 through 10 exist now; the
 rest of the section is specified but not yet scaffolded.
 
 <LearningPath
@@ -31,6 +31,9 @@ rest of the section is specified but not yet scaffolded.
     ["The life of a write()", "../02-guided-traces/the-life-of-a-write.md"],
     ["From power-on to login prompt", "../02-guided-traces/from-power-on-to-login-prompt.md"],
     ["Distributions and what actually differs", "./distributions-and-what-differs.md"],
+    ["`/proc` as the process interface", "../06-processes-and-threads/proc-as-the-process-interface.md"],
+    ["What `free` and RSS really tell you", "../08-memory-management/what-free-and-rss-really-say.md"],
+    ["Priorities, nice, and weights", "../07-scheduling/priorities-nice-and-weights.md"],
   ]} />
 
 <LearningPath
@@ -43,9 +46,11 @@ rest of the section is specified but not yet scaffolded.
     ["Kernel data structures", "../04-kernel-architecture-and-idioms/kernel-data-structures.md"],
     ["container_of and embedded structs", "../04-kernel-architecture-and-idioms/container-of-and-embedded-structs.md"],
     ["Error-handling idioms", "../04-kernel-architecture-and-idioms/error-handling-idioms.md"],
+    ["The entry path", "../05-syscalls-and-the-boundary/the-entry-path.md"],
+    ["`task_struct`: the anatomy of a task", "../06-processes-and-threads/task-struct-the-anatomy-of-a-task.md"],
+    ["`mm_struct` and VMAs", "../08-memory-management/mm-struct-and-vmas.md"],
+    ["Why kernel concurrency is different", "../09-concurrency-and-locking/why-kernel-concurrency-is-different.md"],
   ]} />
-
-Reading real subsystem code starts with the syscall boundary, which lands with folder 05.
 
 <LearningPath
   title="I want to build and debug a kernel"
@@ -99,8 +104,48 @@ Crash and oops reading lands with folder 17.
 
 A real character driver is built in folder 14.
 
+<LearningPath
+  title="My server is slow"
+  steps={[
+    ["Diagnosing scheduling latency", "../07-scheduling/diagnosing-scheduling-latency.md"],
+    ["What `free` and RSS really tell you", "../08-memory-management/what-free-and-rss-really-say.md"],
+    ["Reclaim, LRU, and kswapd", "../08-memory-management/reclaim-lru-and-kswapd.md"],
+    ["Interrupt affinity", "../10-interrupts-time-and-deferred-work/interrupt-affinity-and-balancing.md"],
+    ["cgroup CPU control", "../07-scheduling/cgroup-cpu-control.md"],
+  ]} />
+
+I/O and network diagnosis land with folders 12 and 13; the tooling to go with all of this lands with
+folder 17.
+
+<LearningPath
+  title="I want to understand memory"
+  steps={[
+    ["The virtual address space", "../08-memory-management/the-virtual-address-space.md"],
+    ["Page tables and the walk", "../08-memory-management/page-tables-and-the-walk.md"],
+    ["`mm_struct` and VMAs", "../08-memory-management/mm-struct-and-vmas.md"],
+    ["The page fault handler", "../08-memory-management/the-page-fault-handler.md"],
+    ["Demand paging and copy-on-write", "../08-memory-management/demand-paging-and-cow.md"],
+    ["The page allocator", "../08-memory-management/the-page-allocator.md"],
+    ["The page cache", "../08-memory-management/the-page-cache.md"],
+    ["Reclaim, LRU, and kswapd", "../08-memory-management/reclaim-lru-and-kswapd.md"],
+    ["What `free` and RSS really tell you", "../08-memory-management/what-free-and-rss-really-say.md"],
+  ]} />
+
+<LearningPath
+  title="I want to write correct concurrent kernel code"
+  steps={[
+    ["Why kernel concurrency is different", "../09-concurrency-and-locking/why-kernel-concurrency-is-different.md"],
+    ["Memory ordering and barriers", "../09-concurrency-and-locking/memory-ordering-and-barriers.md"],
+    ["Atomic operations", "../09-concurrency-and-locking/atomics-and-refcounts.md"],
+    ["Spinlocks", "../09-concurrency-and-locking/spinlocks.md"],
+    ["Mutexes and semaphores", "../09-concurrency-and-locking/mutexes-and-semaphores.md"],
+    ["RCU: the idea", "../09-concurrency-and-locking/rcu-the-idea.md"],
+    ["RCU in practice", "../09-concurrency-and-locking/rcu-in-practice.md"],
+    ["Choosing a lock", "../09-concurrency-and-locking/choosing-a-lock.md"],
+    ["Finding locking bugs", "../09-concurrency-and-locking/finding-locking-bugs.md"],
+  ]} />
+
 ## Where the rest is
 
-Folders 05 through 19 are specified and not yet scaffolded, covering syscalls, processes,
-scheduling, memory, locking, interrupts, the VFS, block I/O, networking, drivers, containers,
-security, observability, eBPF, and contributing.
+Folders 11 through 19 remain specified and not yet scaffolded, covering the VFS, block I/O,
+networking, drivers, containers, security, observability, eBPF, and contributing.

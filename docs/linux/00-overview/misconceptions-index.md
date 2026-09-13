@@ -242,6 +242,338 @@ didn't declare a GPL-compatible license.
 opposite of portability: it is precisely what stops an incompatible module from loading at all.
 [Exported Symbols and the Non-Stable ABI](../04-kernel-architecture-and-idioms/exported-symbols-and-the-module-abi.md)
 
+## 05 — Syscalls and the Boundary
+
+**"ABI stability means the kernel's interfaces never change."** They change constantly — new
+syscalls, new flags, new fields. The promise is specifically that *existing* meanings never change,
+not that the surface is frozen.
+[ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
+
+**"A 64-bit kernel just runs 32-bit binaries, no special-casing needed."** It requires an entire
+parallel syscall table and a set of `compat_` translation layers for every structure whose layout
+differs by word width — real, maintained code, not an emergent property of the CPU supporting both
+modes.
+[ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
+
+**"Checking the syscall number is enough for a security filter."** It isn't, if the filter doesn't
+also pin the calling ABI — a 32-bit compat call can reach a syscall number that means something
+different than it does natively.
+[ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
+
+**"Syscalls return -1 and set errno."** That's libc's behaviour, applied uniformly across its
+wrappers. The kernel returns a negative errno value directly; there is no `-1` and no `errno` on the
+kernel side of the boundary.
+[Arguments, Returns, and errno](../05-syscalls-and-the-boundary/arguments-return-values-and-errno.md)
+
+**"`EINTR` means the call failed."** It means the call was interrupted by a signal before it could
+complete, not that anything is wrong. For most blocking calls the correct response to `-EINTR` is
+simply to call it again.
+[Arguments, Returns, and errno](../05-syscalls-and-the-boundary/arguments-return-values-and-errno.md)
+
+**"You can pass extra syscall arguments on the stack."** The syscall ABI has no stack arguments at
+all. Six registers is the entire budget — there is no seventh slot anywhere, on the stack or
+otherwise.
+[Arguments, Returns, and errno](../05-syscalls-and-the-boundary/arguments-return-values-and-errno.md)
+
+**"`fork()` is a syscall."** On Linux it is a glibc wrapper over `clone`, called with a specific flag
+combination. There has never been a bare `fork` syscall entry on modern x86-64 Linux in the way people
+picture it.
+[libc Is Not the Kernel](../05-syscalls-and-the-boundary/libc-is-not-the-kernel.md)
+
+**"musl is glibc with fewer features."** It's a different implementation with different design
+defaults, not a stripped-down glibc. Some of the differences — DNS resolution, stdio buffering —
+change what a program actually *does*, not merely how fast it does it.
+[libc Is Not the Kernel](../05-syscalls-and-the-boundary/libc-is-not-the-kernel.md)
+
+**"Static linking removes the libc dependency."** It removes the *runtime* dependency — no `ld.so`
+needed at startup — but not the behavioural one. Statically-linked glibc binaries still load NSS
+modules dynamically at runtime for name resolution.
+[libc Is Not the Kernel](../05-syscalls-and-the-boundary/libc-is-not-the-kernel.md)
+
+**"A syscall is slow because the kernel is slow."** Most of the measured cost is the transition and
+its cache and branch-predictor effects, not the work the kernel does once it gets there — a trivial
+`getpid()` and a syscall that does real I/O pay nearly the same fixed overhead before either one
+starts working.
+[What a System Call Actually Is](../05-syscalls-and-the-boundary/what-a-system-call-actually-is.md)
+
+**"Syscalls are how programs talk to the kernel."** Some of the most frequent kernel interactions a
+running program has involve no syscall at all: page faults on first touch of a mapped page, and vDSO
+reads that never leave userspace.
+[What a System Call Actually Is](../05-syscalls-and-the-boundary/what-a-system-call-actually-is.md)
+
+**"The kernel runs on my behalf in a separate thread."** It does not. The kernel code servicing your
+syscall runs *in your task's context*, on *your task's kernel stack*, and the time it spends is
+charged to *your task's* `sys` time.
+[What a System Call Actually Is](../05-syscalls-and-the-boundary/what-a-system-call-actually-is.md)
+
+## 06 — Processes and Threads
+
+**"`exec()` creates a new process."** It replaces the program running inside the *existing* process —
+the PID is unchanged. The common `fork()` + `exec()` pattern creates the new process with `fork()`;
+`exec()`'s own job is pure replacement.
+[`exec()` and Binary Formats](../06-processes-and-threads/exec-and-binary-formats.md)
+
+**"The kernel runs the dynamic linker."** The kernel *maps* the dynamic linker into memory and jumps
+to its entry point. Everything the dynamic linker then does — reading `.dynamic`, mapping libraries,
+resolving relocations — is ordinary user-space code that happens to run before the program you asked
+for.
+[`exec()` and Binary Formats](../06-processes-and-threads/exec-and-binary-formats.md)
+
+**"`#!/usr/bin/env python` is a shell feature."** It's a kernel binary-format handler
+(`binfmt_script`), which is exactly why it works identically no matter what launches the script — the
+shell never gets a chance to interpret the line, the kernel does.
+[`exec()` and Binary Formats](../06-processes-and-threads/exec-and-binary-formats.md)
+
+**"Zombies leak memory."** A zombie holds a PID slot and a small `task_struct` remnant — its memory
+was already released before it became a zombie at all. The real resource pressure is PID exhaustion,
+not memory.
+[Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
+
+**"You can `kill -9` a zombie."** There is nothing left to signal — a zombie is not executing and
+never will again. The correct target for a signal is the *parent*, to make it call `wait()`.
+[Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
+
+**"Orphans become zombies."** The opposite: orphans are reparented (to a subreaper or PID 1) and, by
+convention, promptly reaped by whatever process takes them on.
+[Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
+
+**"`/proc` files are zero bytes, so they must be empty."** The size a `stat()` reports is meaningless
+for a generated file, because the content doesn't exist until a `read()` triggers the callback that
+produces it.
+[`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
+
+**"Reading `/proc` is free."** Some entries do real, non-trivial work per read: `smaps` walks every
+page table entry backing every VMA in the target process, and running it in a tight loop across every
+process on a busy host is a real way to add CPU load, not a free observability query.
+[`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
+
+**"`/proc/PID/environ` shows the process's current environment."** It shows the environment block as
+it stood at `exec()` time. A program that calls `setenv()`/`putenv()` afterward changes its own view
+of the environment without moving what `/proc/PID/environ` reads from.
+[`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
+
+**"`TASK_RUNNING` means the task is on a CPU."** It means runnable — eligible to run. Whether it's
+actually receiving cycles right now is a separate question the scheduler answers, not a fact `__state`
+records.
+[Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
+
+**"A `D`-state process is stuck in the kernel and hung."** It's *waiting*, and in the overwhelming
+majority of cases waiting correctly. The actionable question is never "why is it hung," it's "what is
+it waiting on."
+[Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
+
+**"Load average measures CPU usage."** It counts runnable tasks *and* uninterruptible tasks together.
+A machine can be at 0% CPU utilization with a load average of 40.
+[Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
+
+**"A signal interrupts the process immediately."** It's delivered when the target next returns to
+user space — which may be a few instructions away, or may be never, if the target never returns.
+[Signals](../06-processes-and-threads/signals.md)
+
+**"Signals queue."** Standard signals do not — a second occurrence while one is already pending is
+simply lost. Only real-time signals queue.
+[Signals](../06-processes-and-threads/signals.md)
+
+**"`kill -9` always works instantly."** `SIGKILL` cannot be blocked or caught, but that isn't the same
+as "cannot be delayed" — it still cannot act on a task that hasn't returned to user space.
+[Signals](../06-processes-and-threads/signals.md)
+
+**"Threads are lighter than processes on Linux."** Creating one is cheaper, and switching between two
+threads of the same process skips a page-table switch — but the object the scheduler picks up and
+runs is identical in both cases, and the scheduler does the identical amount of work either way.
+[Threads Are Tasks](../06-processes-and-threads/threads-are-tasks.md)
+
+**"A process has one `task_struct`."** It has one *per thread* — there is no separate "process"
+object; there is just a thread group with one or more members.
+[Threads Are Tasks](../06-processes-and-threads/threads-are-tasks.md)
+
+**"`getpid()` returns this thread's own kernel identifier."** It returns the **thread group** id
+(`tgid`). The task's own id is what `gettid()` returns — the reverse of what the function names
+suggest.
+[Threads Are Tasks](../06-processes-and-threads/threads-are-tasks.md)
+
+## 07 — Scheduling
+
+**"A 0.5 CPU limit makes the app run at half speed."** It runs at full speed for half of every period
+and is stopped completely for the other half — a request that straddles the throttle boundary stalls
+for the rest of the period, which a smoothly halved clock speed would never do.
+[cgroup CPU Control](../07-scheduling/cgroup-cpu-control.md)
+
+**"More threads help under a quota."** They do the opposite: more parallel threads burn the same
+fixed quota faster, exhausting it sooner and increasing the fraction of the period spent throttled.
+[cgroup CPU Control](../07-scheduling/cgroup-cpu-control.md)
+
+**"`cpu.weight` limits a container."** It doesn't limit anything by itself. It only changes the
+outcome when the CPU is *contended* — an idle machine gives a low-weight container the whole CPU too.
+[cgroup CPU Control](../07-scheduling/cgroup-cpu-control.md)
+
+**"nice 19 means the process only runs when the system is idle."** It means a small weight, not
+zero. `SCHED_IDLE` is the actual policy for "only run when nothing else wants the CPU."
+[Priorities, nice, and Weights](../07-scheduling/priorities-nice-and-weights.md)
+
+**"nice affects I/O priority too."** It doesn't. Disk I/O scheduling is a separate mechanism —
+`ionice` and the I/O scheduler's own priority classes — against a completely different queue.
+[Priorities, nice, and Weights](../07-scheduling/priorities-nice-and-weights.md)
+
+**"A lower nice number is lower priority."** The opposite: nice -20 is the *highest*-share setting,
+nice 19 the lowest. The name describes how considerate the process is being to its competitors, not
+its rank.
+[Priorities, nice, and Weights](../07-scheduling/priorities-nice-and-weights.md)
+
+**"Context switches are expensive because saving registers is slow."** The register save/restore in
+`__switch_to()` is the cheap, nameable part. The expense is almost entirely the *indirect* cost paid
+afterward by cold caches and a cold TLB.
+[The Context Switch](../07-scheduling/the-context-switch.md)
+
+**"A thread switch is free."** It skips the address-space switch, which is real savings — but
+`switch_to()` still runs unconditionally and caches, branch predictor, and FPU state may still need
+saving and restoring. Cheaper than a process switch, not free.
+[The Context Switch](../07-scheduling/the-context-switch.md)
+
+**"High context-switch counts are bad."** A high *voluntary* count usually means a workload that's
+correctly I/O-bound or event-driven. The number worth watching with suspicion is a high or rising
+*involuntary* count.
+[The Context Switch](../07-scheduling/the-context-switch.md)
+
+## 08 — Memory Management
+
+**"`malloc` allocates memory."** It reserves address space. First touch is what actually allocates a
+physical page, one page at a time, on the first write.
+[Demand Paging and Copy-on-Write](../08-memory-management/demand-paging-and-cow.md)
+
+**"If `malloc` succeeded, the memory is mine."** Under the default overcommit policy, a successful
+`malloc()` is a promise the kernel may not be able to keep — the failure can arrive later as a page
+fault the kernel cannot satisfy, and then as the OOM killer choosing a process to kill.
+[Demand Paging and Copy-on-Write](../08-memory-management/demand-paging-and-cow.md)
+
+**"COW means `fork()` is free."** It defers the cost, it doesn't eliminate it. COW marks pages
+read-only and shares them cheaply, but the first write to each shared page still costs exactly what an
+ordinary first-touch write costs.
+[Demand Paging and Copy-on-Write](../08-memory-management/demand-paging-and-cow.md)
+
+**"Huge pages help because there are fewer page-table levels to walk."** The walk depth *above* the
+terminating level is unchanged. The actual benefit is TLB reach — far more address space covered per
+cached entry, so far fewer walks happen at all.
+[Huge Pages and THP](../08-memory-management/hugepages-and-thp.md)
+
+**"THP should always be disabled."** That advice reflects a specific configuration from a specific
+era; `defrag=defer`-family settings decouple allocation from fault-path compaction, so blanket-disabling
+THP forfeits a benefit a different `defrag` setting may no longer cost.
+[Huge Pages and THP](../08-memory-management/hugepages-and-thp.md)
+
+**"hugetlbfs and THP are the same feature with different names."** They have opposite reliability
+models: hugetlbfs is an explicit reservation, never reclaimed and never a surprise; THP is
+opportunistic and kernel-driven, present or absent depending on fragmentation at the moment of the
+fault.
+[Huge Pages and THP](../08-memory-management/hugepages-and-thp.md)
+
+**"Swap is used only when RAM is full."** The kernel may swap out genuinely idle anonymous pages to
+make room for page cache while RAM still has room — correct, deliberate behavior, not a sign of
+trouble.
+[Swap, zswap, and zram](../08-memory-management/swap-and-zswap.md)
+
+**"`swappiness=0` disables swap."** It strongly biases the kernel against initiating swap on a
+runnable process's pages, but swapping can still happen.
+[Swap, zswap, and zram](../08-memory-management/swap-and-zswap.md)
+
+**"Swap makes things slow."** Thrashing makes things slow. Swap is what the kernel does *before*
+thrashing becomes unrecoverable.
+[Swap, zswap, and zram](../08-memory-management/swap-and-zswap.md)
+
+**"The OOM killer kills the process that caused the problem."** It doesn't evaluate cause at all — it
+kills the task whose death is scored to free the most memory. A process that leaks slowly for hours
+can survive an OOM that kills a large, well-behaved process instead.
+[The OOM Killer](../08-memory-management/the-oom-killer.md)
+
+**"An OOM kill means the machine ran out of RAM."** It means a specific allocation request couldn't
+be satisfied after reclaim was exhausted — that can happen with free memory sitting unused in the
+wrong zone, or with plenty of free 4 KiB pages but no free run long enough for a high-order request.
+[The OOM Killer](../08-memory-management/the-oom-killer.md)
+
+**"You can prevent OOM by disabling overcommit."** Setting `vm.overcommit_memory=2` doesn't remove
+the underlying scarcity — it moves the failure earlier, to `malloc()`/`mmap()` returning `ENOMEM`
+instead of a kernel-chosen kill.
+[The OOM Killer](../08-memory-management/the-oom-killer.md)
+
+**"Low free memory means the machine is short of memory."** Page cache is memory doing useful work,
+not memory sitting idle — a `MemFree` near zero with a large `buff/cache` is normal and healthy. Read
+`available`, not `free`.
+[What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
+
+**"Summing RSS across processes gives total memory usage."** It double-counts every shared page —
+badly for forked worker pools and for anything linking common shared libraries. PSS is the number
+built to sum correctly.
+[What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
+
+**"A container using its full memory limit is about to be OOM-killed."** Most of that usage may be
+reclaimable page cache charged to the cgroup, and the kernel will reclaim it under pressure before it
+starts killing.
+[What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
+
+**"`write()` returning means the data is written."** It means the data is in RAM, in a dirty
+page-cache folio. Whether and when it reaches the device is up to the writeback machinery, unless the
+caller forces it with `fsync`.
+[Writeback, Dirty Pages, and `fsync`](../08-memory-management/writeback-and-fsync.md)
+
+**"Closing the file flushes it."** `close()` does not imply `fsync` and never has, on Linux or any
+POSIX system. A file descriptor can be closed with dirty data still sitting unwritten in the page
+cache.
+[Writeback, Dirty Pages, and `fsync`](../08-memory-management/writeback-and-fsync.md)
+
+**"`fsync` on the file is enough for a new file."** It durably writes the file's data and metadata,
+but says nothing about the directory entry that makes the file findable by name — that needs its own
+`fsync`, on the directory.
+[Writeback, Dirty Pages, and `fsync`](../08-memory-management/writeback-and-fsync.md)
+
+## 09 — Concurrency and Locking
+
+**"Spinlocks waste CPU, so mutexes are always better."** For a short critical section this is
+backwards: a mutex's sleep/wake path costs two context switches, far more expensive than whatever
+cycles a short spin actually took.
+[Spinlocks](../09-concurrency-and-locking/spinlocks.md)
+
+**"`spin_lock_irqsave()` disables interrupts on all CPUs."** It disables interrupts only on the CPU
+executing the call — the only CPU it needs to protect, since the deadlock it prevents is a CPU racing
+against its *own* interrupt handler.
+[Spinlocks](../09-concurrency-and-locking/spinlocks.md)
+
+**"A spinlock protects data from other CPUs."** It protects data from anything that takes the same
+lock — which includes this CPU's own interrupt handlers and softirqs only if the code took a variant
+that also excludes them (`_irqsave`, `_bh`).
+[Spinlocks](../09-concurrency-and-locking/spinlocks.md)
+
+## 10 — Interrupts, Time, and Deferred Work
+
+**"`msleep(1)` sleeps for one millisecond."** It sleeps for at least one jiffy — never less — plus
+whatever wheel slack applies on top. Assuming millisecond-granularity timing from `msleep(1)` is a bug
+that only shows up as flaky timing under a different `HZ`.
+[Delays and Sleeps: What They Really Do](../10-interrupts-time-and-deferred-work/delays-and-sleeps.md)
+
+**"`udelay` is more accurate, so use it for short waits generally."** It is accurate, and it also
+burns a CPU core doing nothing else for the whole duration — a trade only acceptable in atomic
+context.
+[Delays and Sleeps: What They Really Do](../10-interrupts-time-and-deferred-work/delays-and-sleeps.md)
+
+**"A range in `usleep_range` means the kernel is being vague about it."** The range is the entire
+mechanism, not an apology for imprecision — it's what lets the kernel coalesce your wakeup with
+someone else's and avoid a dedicated interrupt.
+[Delays and Sleeps: What They Really Do](../10-interrupts-time-and-deferred-work/delays-and-sleeps.md)
+
+**"Softirqs are threads."** They usually are not. A softirq normally runs on the interrupt-exit path,
+inline — no thread, no scheduling decision. Only when the budget is exceeded does the remainder move
+to `ksoftirqd`.
+[Softirqs](../10-interrupts-time-and-deferred-work/softirqs.md)
+
+**"High `si` means a kernel problem."** It usually means a high rate of packets or I/O completions —
+`si` climbing under a genuine traffic spike is the softirq mechanism doing its job, not evidence the
+job is broken.
+[Softirqs](../10-interrupts-time-and-deferred-work/softirqs.md)
+
+**"A softirq runs on one CPU at a time."** False — the *same* softirq type can be raised and run on
+several CPUs at once, each processing its own CPU's work independently, which is exactly why softirq
+handlers need locking around any data they share across CPUs.
+[Softirqs](../10-interrupts-time-and-deferred-work/softirqs.md)
+
 ---
 
 This index grows with the section — folders 05 through 19 add their own misconceptions here as they
