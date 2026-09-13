@@ -48,9 +48,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`clone()` flags** — the single set of bits (`CLONE_VM`, `CLONE_FS`, `CLONE_FILES`, `CLONE_SIGHAND`, `CLONE_THREAD`, and more) that decide, one `task_struct` pointer at a time, whether a new task shares or copies its parent's address space, filesystem context, file table, and signal handlers; `fork()`, `vfork()`, and `pthread_create()` are just three different flag words passed to the same `clone()`. [Threads Are Tasks](../06-processes-and-threads/threads-are-tasks.md)
 
-**Compat syscall** — a syscall reached through a second, architecture-specific syscall table (e.g. the 32-bit `syscall_32.tbl` a 64-bit kernel also carries) plus `compat_` translation functions and structs, needed because pointers, `long`s, and struct layouts differ in width between a 32-bit caller and the kernel's native 64-bit types. [ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
-
 **Compaction** — active defragmentation: migrating movable pages out of a region to consolidate scattered free order-0 pages into the higher-order contiguous blocks a THP or other high-order allocation needs, the mirror image of what the buddy allocator does on free. [The Page Allocator](../08-memory-management/the-page-allocator.md)
+
+**Compat syscall** — a syscall reached through a second, architecture-specific syscall table (e.g. the 32-bit `syscall_32.tbl` a 64-bit kernel also carries) plus `compat_` translation functions and structs, needed because pointers, `long`s, and struct layouts differ in width between a 32-bit caller and the kernel's native 64-bit types. [ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
 
 **Compound page** — the pre-folio name for a multi-page allocation from the buddy allocator: an order-*n* block with a **head** page carrying the real metadata and every **tail** page pointing back at it via `compound_head`, an arrangement that left every function taking a `struct page *` responsible for checking which kind it had. [Folios and Compound Pages](../08-memory-management/folios-and-compound-pages.md)
 
@@ -64,7 +64,7 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`cpu.weight`** — the cgroup v2 proportional CPU control (replacing v1's `cpu.shares`), a value in [1, 10000], default 100; it only changes the outcome when the CPU is contended — a low-weight group still gets the whole CPU to itself if nothing else wants it, because the mechanism is work-conserving. [cgroup CPU Control](../07-scheduling/cgroup-cpu-control.md)
 
-**`struct cred`** — the separately allocated, refcounted, and immutable-once-published object holding a task's user/group IDs and capability sets; `task_struct` holds two pointers to it (`cred`, `real_cred`) rather than the fields themselves, and changing credentials means installing a whole new object, never editing one in place. [Credentials and Identity](../06-processes-and-threads/credentials-and-identity.md)
+**Credentials (`struct cred`)** — the separately allocated, refcounted, and immutable-once-published object holding a task's user/group IDs and capability sets; `task_struct` holds two pointers to it (`cred`, `real_cred`) rather than the fields themselves, and changing credentials means installing a whole new object, never editing one in place. [Credentials and Identity](../06-processes-and-threads/credentials-and-identity.md)
 
 **`current`** — the currently running task on a given CPU, resolved via a per-CPU variable populated by `current_task`, not (on x86-64) by masking the stack pointer as older documentation describes. [`task_struct`: The Anatomy of a Task](../06-processes-and-threads/task-struct-the-anatomy-of-a-task.md)
 
@@ -180,9 +180,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`ksoftirqd`** — a per-CPU kernel thread, one per online CPU, that runs softirq work the interrupt-exit path's budget could not finish; seeing it at the top of `top` means a CPU's deferred-work load exceeds what one pass can absorb, not that the softirq mechanism is broken. [Softirqs](../10-interrupts-time-and-deferred-work/softirqs.md)
 
-**`ktype` (`kobj_type`)** — the behavior attached to a `kobject` — its release function and its attribute (`show`/`store`) operations — shared by every `kobject` of a given kind. [kobjects, ksets, and sysfs](../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md)
-
 **`kswapd`** — a per-node kernel thread woken when a zone drops below its **low** watermark, reclaiming memory in the background while allocations continue to be satisfied from whatever's still available; the healthy counterpart to direct reclaim. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
+
+**`ktype` (`kobj_type`)** — the behavior attached to a `kobject` — its release function and its attribute (`show`/`store`) operations — shared by every `kobject` of a given kind. [kobjects, ksets, and sysfs](../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md)
 
 **Lag** — under EEVDF, the gap between the CPU service a task should have received under ideal weighted-fair sharing and what it actually has: `weight × (V − vruntime)`. Positive lag means the task is owed time and is eligible to run; negative lag means it has run ahead of its share and must wait for `V` to catch up. [EEVDF](../07-scheduling/eevdf.md)
 
@@ -210,7 +210,7 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **MGLRU (multi-generational LRU)** — an alternative reclaim implementation organizing pages into generations aged by scanning page-table accessed bits directly rather than the classic two-list scheme's reference-on-fault/reference-on-scan signal; it is a compile-time option (`CONFIG_LRU_GEN`) with no `default y`, not something every kernel ships active. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
 
-**`mmap_lock`** — the per-`mm` reader-writer semaphore serializing structural changes to the VMA collection (insert/remove/split/merge); at v6.18 per-VMA locking (`CONFIG_PER_VMA_LOCK`, default on) lets the page-fault fast path take a lock on just the faulted VMA instead, falling back to `mmap_lock` only when that path can't proceed. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
+**`mmap_lock`** — the per-`mm` reader-writer semaphore serializing structural changes to the VMA collection (insert/remove/split/merge); at v6.18 per-VMA locking (`CONFIG_PER_VMA_LOCK`, enabled in most configurations since 6.4/6.5) lets the page-fault fast path take a lock on just the faulted VMA instead, falling back to `mmap_lock` only when that path can't proceed. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
 **`mm_struct`** — the one-per-address-space structure every thread of a multi-threaded process shares, carrying the VMA collection, the top-level page-table pointer, and layout fields; its lifetime is split across two reference counts, `mm_users` (userspace/semantic references) and `mm_count` (the allocation itself), specifically so a lazy-TLB kernel thread can hold the struct without keeping the address space alive. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
@@ -246,15 +246,15 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Ordering versus requirement** — in systemd, `Requires=` and `After=` are independent axes: `Requires=` says what else must start as a dependency, `After=` says only which of two already-starting units goes first; declaring one does not imply the other. [systemd: The Model](../03-boot-and-init/systemd-the-model.md)
 
-**overlayfs** — the filesystem that merges a stack of read-only layers plus one writable layer into what looks like a single ordinary filesystem; a read resolves top-down through the layers, and writing a file that only exists in a lower layer copies it into the writable layer first. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
-
 **Overcommit** — the kernel's policy for how strictly it enforces "can I back everything I've promised" at allocation time rather than fault time, controlled by `vm.overcommit_memory` (0 heuristic, 1 always, 2 strict against `swap + RAM × overcommit_ratio`); a successful `malloc()` under modes 0/1 is a promise the kernel may not be able to keep in full. [Demand Paging and Copy-on-Write](../08-memory-management/demand-paging-and-cow.md)
 
-**Page table level** — one of the fixed stages a virtual-address walk passes through (PGD, PUD, PMD, PTE on x86-64, with a generic `p4d_t` level that folds away to a no-op on a 4-level configuration), each level a 9-bit index into one 4 KiB table of 512 entries. [Page Tables and the Walk](../08-memory-management/page-tables-and-the-walk.md)
+**overlayfs** — the filesystem that merges a stack of read-only layers plus one writable layer into what looks like a single ordinary filesystem; a read resolves top-down through the layers, and writing a file that only exists in a lower layer copies it into the writable layer first. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
 
 **Page cache** — the in-RAM cache of file-backed pages that ordinary buffered I/O goes through; a `write()` copies bytes into page-cache pages and marks them dirty rather than touching the device immediately, so the data can exist only in RAM at the moment the call returns. [The Page Cache](../08-memory-management/the-page-cache.md)
 
 **Page fault** (minor/major) — a CPU exception raised when an instruction touches a virtual address with no valid page-table entry; "minor" means the kernel resolved it without I/O (zero page, page-cache hit, copy-on-write copy), "major" means it had to block on a device (disk read or swap-in). [The Page Fault Handler](../08-memory-management/the-page-fault-handler.md)
+
+**Page table level** — one of the fixed stages a virtual-address walk passes through (PGD, PUD, PMD, PTE on x86-64, with a generic `p4d_t` level that folds away to a no-op on a 4-level configuration), each level a 9-bit index into one 4 KiB table of 512 entries. [Page Tables and the Walk](../08-memory-management/page-tables-and-the-walk.md)
 
 **PCID (Process-Context Identifier)** — a hardware TLB tag letting entries from more than one address space coexist without a full flush on every switch; Linux recycles a small pool of PCIDs as ASIDs across recently-used `mm`s per CPU, and it is the concrete reason KPTI's per-syscall cost varies so much between machines with and without PCID support. [The TLB and Address-Space Switching](../08-memory-management/tlb-and-address-space-switching.md)
 
@@ -278,9 +278,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **PSS (proportional set size)** — resident pages divided by their number of sharers, summed per process; the only one of the four per-process memory metrics (VSZ, RSS, PSS, USS) that sums correctly across processes into a true total, which RSS explicitly does not. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
 
-**`pt_regs`** — the fixed-layout struct the syscall entry stub builds on the kernel stack from the registers `SYSCALL` didn't save itself (`ss`, old `rsp`, `rflags`, `cs`, old `rip`, syscall number, then the general-purpose registers), giving every syscall handler, tracer, and oops dump the same byte-for-byte way to find a caller's register state. [The Entry Path](../05-syscalls-and-the-boundary/the-entry-path.md)
-
 **`PT_INTERP`** — the ELF program header naming the dynamic linker's path; when present, `load_elf_binary()` maps that second binary into the new address space and jumps to *its* entry point first, not the program's own. [`exec()` and Binary Formats](../06-processes-and-threads/exec-and-binary-formats.md)
+
+**`pt_regs`** — the fixed-layout struct the syscall entry stub builds on the kernel stack from the registers `SYSCALL` didn't save itself (`ss`, old `rsp`, `rflags`, `cs`, old `rip`, syscall number, then the general-purpose registers), giving every syscall handler, tracer, and oops dump the same byte-for-byte way to find a caller's register state. [The Entry Path](../05-syscalls-and-the-boundary/the-entry-path.md)
 
 **PTE** — the leaf page-table entry; its present, read/write, user/supervisor, accessed, dirty, and NX bits are what copy-on-write, permission faults, the approximate-LRU accessed-bit scheme, and W^X hardening are each built directly out of. [Page Tables and the Walk](../08-memory-management/page-tables-and-the-walk.md)
 
@@ -304,9 +304,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Red-black tree** (`rb_node`/`rb_root`) — the kernel's balanced binary search tree, embedded intrusively like `list_head`; the kernel's rbtree code owns balancing (`rb_insert_color()`, `rb_erase()`) while the caller writes the comparison and walk logic itself, avoiding a per-comparison indirect call. The CFS scheduler's runqueue is the canonical example. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
 
-**`refcount_t`** — a dedicated reference-counting type (distinct from `atomic_t`) that saturates instead of wrapping on overflow and refuses to increment from zero, closing two failure modes a plain atomic counter has when used as an object's lifetime counter. [Reference Counting and Object Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md)
-
 **Refault** — a page reclaimed and then read back almost immediately, costing the reclaim work for zero net memory saved; it is the direct, measurable signal (`workingset_refault_file`/`_anon`) that the working set no longer fits available memory, distinguishing healthy reclaim from thrashing. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
+
+**`refcount_t`** — a dedicated reference-counting type (distinct from `atomic_t`) that saturates instead of wrapping on overflow and refuses to increment from zero, closing two failure modes a plain atomic counter has when used as an object's lifetime counter. [Reference Counting and Object Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md)
 
 **Reparenting** — what happens to a task's children when it dies first: `forget_original_parent()` hands each one to the nearest subreaper ancestor, or to PID 1 of its PID namespace if none exists. [Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
 
@@ -340,9 +340,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Seqlock** — a scheme that lets readers proceed with no lock and no wait at all, and instead detects after the fact whether a writer interfered, via a sequence counter that's odd while a write is in progress and a reader retry loop; the kernel's timekeeper is the canonical user. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
 
-**Sequence counter** — the bare counter half of a seqlock (`seqcount_t`), with no lock embedded, for use when the caller already holds some other lock that serializes writers and only needs the counter for readers' retry-detection benefit; `seqlock_t` is this counter bundled with its own spinlock instead. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
-
 **`seq_file`** — the kernel interface (`include/linux/seq_file.h`) behind most non-trivial `/proc` entries: rather than a stored buffer, it invokes a `show` callback that formats live kernel state into a transient buffer at the moment of the read. [`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
+
+**Sequence counter** — the bare counter half of a seqlock (`seqcount_t`), with no lock embedded, for use when the caller already holds some other lock that serializes writers and only needs the counter for readers' retry-detection benefit; `seqlock_t` is this counter bundled with its own spinlock instead. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
 
 **Setup header** — the fixed-layout struct inside a `bzImage` that forms the binary contract between the boot loader and the kernel, specifying which fields the loader must fill in (like `cmd_line_ptr`, `ramdisk_image`) versus only read. [Inside `bzImage`](../03-boot-and-init/the-kernel-image.md)
 
@@ -392,9 +392,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Target** — a systemd synchronization point with no process or executable of its own, just a name other units order themselves around, unlike a numbered SysV runlevel. [systemd: The Model](../03-boot-and-init/systemd-the-model.md)
 
-**`task_struct`** — the kernel's single, unified per-thread structure (there is no separate process or thread object); everything the kernel knows about a schedulable entity is a field of it, or reachable from it by one pointer. [`task_struct`: The Anatomy of a Task](../06-processes-and-threads/task-struct-the-anatomy-of-a-task.md)
-
 **`TASK_INTERRUPTIBLE`** — a sleeping state (`ps` shows `S`) whose wake function also reacts to a pending signal, unwinding the task back to user space to handle it rather than waiting only for the awaited event. [Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
+
+**`task_struct`** — the kernel's single, unified per-thread structure (there is no separate process or thread object); everything the kernel knows about a schedulable entity is a field of it, or reachable from it by one pointer. [`task_struct`: The Anatomy of a Task](../06-processes-and-threads/task-struct-the-anatomy-of-a-task.md)
 
 **`TASK_UNINTERRUPTIBLE`** — a sleeping state (`ps` shows `D`) whose wake function does not check for signals at all, used when a driver or filesystem has no safe way to abandon a multi-step operation partway through. [Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
 
@@ -428,9 +428,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Unit** — anything systemd manages; its filename suffix (`.service`, `.socket`, `.target`, `.mount`, `.timer`, `.path`, `.slice`) says what kind of thing it represents. [systemd: The Model](../03-boot-and-init/systemd-the-model.md)
 
-**USS (unique set size)** — private, unshared resident pages only; the number that answers "what would be freed if I killed this process right now," since by construction nothing in it is shared with anything else. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
-
 **`__user`** — an annotation marking a pointer as pointing into user-space address space, which must never be dereferenced directly in kernel context; enforced only by sparse, not the compiler itself. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
+
+**USS (unique set size)** — private, unshared resident pages only; the number that answers "what would be freed if I killed this process right now," since by construction nothing in it is shared with anything else. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
 
 **User space** — code the machine does not trust with the hardware directly (shells, browsers, ordinary programs); it has its own address space and can only touch what its mappings and file descriptors permit. [The Kernel/User-Space Boundary](./the-kernel-userspace-boundary.md)
 
