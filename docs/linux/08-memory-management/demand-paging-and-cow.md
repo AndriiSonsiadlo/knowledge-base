@@ -104,8 +104,8 @@ Requesting malloc of 107374182400 bytes (100 GiB)
 malloc FAILED (returned NULL)
 ```
 
-It fails — and this is itself the honest, real result, not the brief's illustrative "succeeds on 8 GB"
-scenario. Under overcommit mode 0, the kernel's `__vm_enough_memory()` heuristic refuses an "obvious"
+It fails — and this is itself the honest, real result on a machine with ≈29.5 GiB of RAM+swap, not a
+manufactured "succeeds on 8 GB" scenario. Under overcommit mode 0, the kernel's `__vm_enough_memory()` heuristic refuses an "obvious"
 overcommit — roughly, a request too large relative to total RAM+swap — and 100 GiB against ≈29.5 GiB of
 combined RAM+swap trips that refusal. Binary-searching the actual boundary on this machine:
 

@@ -81,8 +81,8 @@ The thread runs `SCHED_FIFO`, and its default priority is **50**, verified direc
 rather than assumed: `irq_thread()` in `kernel/irq/manage.c` calls `sched_set_fifo(current)` before
 entering its wait loop, and `sched_set_fifo()` (`kernel/sched/syscalls.c`) sets
 `sched_priority = MAX_RT_PRIO / 2`. `MAX_RT_PRIO` is `100` (`include/linux/sched/prio.h`), so the resulting
-priority is `100 / 2 = 50` — the brief guess this page was written against turns out to be exactly right,
-confirmed from the primitive the kernel actually calls rather than from secondary material.
+priority is `100 / 2 = 50`, confirmed from the primitive the kernel actually calls rather than from
+secondary material.
 
 Fifty places an IRQ thread **above every `SCHED_NORMAL`/EEVDF task** — `SCHED_FIFO`/`SCHED_RR` priorities
 1–99 always preempt `SCHED_NORMAL` unconditionally, as [Real-Time
@@ -185,7 +185,7 @@ can see.*
   `sched_set_fifo(current)` is called, the primitive this page's priority claim is verified against.
 - [*Core-api: Genirq*](https://docs.kernel.org/core-api/genericirq.html), the threaded-handler section —
   the contract between the primary handler and the thread function, in the kernel's own words.
-- LWN, [*Moving interrupts to threads*](https://lwn.net/Articles/302043/), Jake Edge, October 8, 2008 — the original rationale from the RT tree
+- LWN, [*Moving interrupts to threads*](https://lwn.net/Articles/302043/), Jake Edge, October 8, 2008
   — the original rationale from the `PREEMPT_RT` tree, from before the mechanism merged into mainline; the
   design is unchanged since.
 - [Real-Time Scheduling](../07-scheduling/real-time-scheduling.md) and [Preemption

@@ -186,7 +186,7 @@ directly (`sudo -n true` → "interactive authentication is required"; `echo 3 >
 `permission denied`, and `/proc/sys/vm/drop_caches` is mode `--w-------` owned by `root`). Step 4 could not
 be run for real, and no `drop_caches` output is invented in its place. `vmtouch` is not installed in this
 sandbox either (`which vmtouch` → not found), and there is no package manager access to install it, so step
-5 used a short C program against `mincore(2)` instead, exactly as the brief allows as a fallback.
+5 used a short C program against `mincore(2)` instead, a documented fallback for exactly this case.
 
 Steps 1–3 and the `mincore` residency check **did** run for real, against a genuine ext4 filesystem
 (`/dev/sdd` mounted at `/`, not a `tmpfs`), and produced the timings already shown in

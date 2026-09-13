@@ -114,8 +114,7 @@ still directly visible, rather than at a scheduler-internal event further inside
 
 **In this environment:** `perf` is not installed, and there is no package-manager access to add it
 (confirmed: `which perf` finds nothing). Cross-checking the tracepoint names in step 1 against
-`perf list 'sched:*'`, which the brief for this lab specifically calls for, could not be done for the
-same reason. `sched_process_fork` and `sched_process_exec` were instead confirmed directly against
+`perf list 'sched:*'` could not be done for the same reason. `sched_process_fork` and `sched_process_exec` were instead confirmed directly against
 `include/trace/events/sched.h` at the pinned v6.18 tag — both are still present, unrenamed, at that tag.
 
 ### 3. GDB in the QEMU lab

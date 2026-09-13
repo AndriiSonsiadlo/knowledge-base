@@ -19,7 +19,7 @@ If you protect a piece of data with a lock, the lock already handles ordering fo
 this page is something `spin_lock()`/`spin_unlock()` and `mutex_lock()`/`mutex_unlock()` already imply,
 and you can stop reading here. This page matters the moment you write lock-free code, touch a variable
 another CPU writes without holding a lock, or read RCU-protected data (see [RCU: The
-Idea](./rcu-the-idea.md), once written): from that point on, ordering is your problem, and getting it
+Idea](./rcu-the-idea.md)): from that point on, ordering is your problem, and getting it
 wrong produces bugs that reproduce once a month, on one machine, under load — not on the developer's
 desk.
 

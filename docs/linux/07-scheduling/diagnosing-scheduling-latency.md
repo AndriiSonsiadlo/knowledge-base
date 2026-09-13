@@ -286,4 +286,4 @@ flowchart TB
   follows: measure the right thing first, and let a falsifying measurement — not intuition — eliminate a
   hypothesis.
 - <Src file="include/linux/sched.h" symbol="sched_statistics" /> — verified directly against Elixir at
-  v6.18: `struct sched_statistics` is defined under this exact name in this file, as the brief assumed.
+  v6.18: `struct sched_statistics` is defined under this exact name in this file.

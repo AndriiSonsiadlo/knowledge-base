@@ -184,7 +184,7 @@ the next task's guarantee.*
   reason `chrt` needs a version recent enough to expose it.
 - <Src file="include/linux/sched.h" symbol="sched_dl_entity" /> and
   <Src file="include/uapi/linux/sched/types.h" symbol="sched_attr" /> — verified directly against Elixir at
-  v6.18: both structs exist under these exact names, in these exact files, as the brief assumed.
+  v6.18: both structs exist under these exact names, in these exact files.
   `kernel/sched/rt.c` at v6.18 was also checked directly and still registers `sched_rt_period_us` and
   `sched_rt_runtime_us` as live `procname` entries — neither sysctl has moved to a `/sys/fs/cgroup` interface
   at this version.

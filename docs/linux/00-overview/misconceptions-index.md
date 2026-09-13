@@ -576,5 +576,5 @@ handlers need locking around any data they share across CPUs.
 
 ---
 
-This index grows with the section — folders 05 through 19 add their own misconceptions here as they
+This index grows with the section — folders 11 through 19 add their own misconceptions here as they
 land.

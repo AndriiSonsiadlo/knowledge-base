@@ -130,7 +130,7 @@ presented as a transcript:
 | Per-task table | One row per eligible task: pid, UID, `tgid`, total VM size, RSS, page-table size, `oom_score_adj`, and name | The candidate pool `select_bad_process()` actually scored — this is where you can often work out `oom_badness()`'s outcome yourself before reading the next line. |
 | Victim line | `Out of memory: Killed process <pid> (<name>) total-vm:..., anon-rss:..., file-rss:..., shmem-rss:..., UID:..., pgtables:..., oom_score_adj:...` | The chosen victim and the exact numbers `oom_badness()` scored it on — this is **who got killed**, and the presence/absence of a `memcg` field distinguishes global from cgroup-scoped. |
 
-A reader who has internalized this table can answer the three questions the brief poses for any real
+A reader who has internalized this table can answer the three questions worth asking of any real
 report: **who asked** for memory (the invocation line), **who got killed** (the victim line, with its RSS
 breakdown), and **whether it was global or cgroup-scoped** (whether the memory-state dump and victim line
 carry `memcg` context, versus a whole-machine zone dump).

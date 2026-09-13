@@ -210,9 +210,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **MGLRU (multi-generational LRU)** — an alternative reclaim implementation organizing pages into generations aged by scanning page-table accessed bits directly rather than the classic two-list scheme's reference-on-fault/reference-on-scan signal; it is a compile-time option (`CONFIG_LRU_GEN`) with no `default y`, not something every kernel ships active. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
 
-**`mmap_lock`** — the per-`mm` reader-writer semaphore serializing structural changes to the VMA collection (insert/remove/split/merge); at v6.18 per-VMA locking (`CONFIG_PER_VMA_LOCK`, enabled in most configurations since 6.4/6.5) lets the page-fault fast path take a lock on just the faulted VMA instead, falling back to `mmap_lock` only when that path can't proceed. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
-
 **`mm_struct`** — the one-per-address-space structure every thread of a multi-threaded process shares, carrying the VMA collection, the top-level page-table pointer, and layout fields; its lifetime is split across two reference counts, `mm_users` (userspace/semantic references) and `mm_count` (the allocation itself), specifically so a lazy-TLB kernel thread can hold the struct without keeping the address space alive. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
+
+**`mmap_lock`** — the per-`mm` reader-writer semaphore serializing structural changes to the VMA collection (insert/remove/split/merge); at v6.18 per-VMA locking (`CONFIG_PER_VMA_LOCK`, enabled in most configurations since 6.4/6.5) lets the page-fault fast path take a lock on just the faulted VMA instead, falling back to `mmap_lock` only when that path can't proceed. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
 **Module** — relocatable object code linked into an already-running kernel at load time instead of build time, running with exactly the same privileges as code compiled into `vmlinux`. [Monolithic, With Modules](../04-kernel-architecture-and-idioms/monolithic-with-modules.md)
 
@@ -338,9 +338,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Secure Boot** — a signature-verification gate that checks, at each handoff from firmware to boot loader to kernel, whether the thing about to execute is signed by a key the machine trusts; it verifies provenance only, not the safety of what runs. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
 
-**Seqlock** — a scheme that lets readers proceed with no lock and no wait at all, and instead detects after the fact whether a writer interfered, via a sequence counter that's odd while a write is in progress and a reader retry loop; the kernel's timekeeper is the canonical user. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
-
 **`seq_file`** — the kernel interface (`include/linux/seq_file.h`) behind most non-trivial `/proc` entries: rather than a stored buffer, it invokes a `show` callback that formats live kernel state into a transient buffer at the moment of the read. [`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
+
+**Seqlock** — a scheme that lets readers proceed with no lock and no wait at all, and instead detects after the fact whether a writer interfered, via a sequence counter that's odd while a write is in progress and a reader retry loop; the kernel's timekeeper is the canonical user. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
 
 **Sequence counter** — the bare counter half of a seqlock (`seqcount_t`), with no lock embedded, for use when the caller already holds some other lock that serializes writers and only needs the counter for readers' retry-detection benefit; `seqlock_t` is this counter bundled with its own spinlock instead. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
 
@@ -430,9 +430,9 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`__user`** — an annotation marking a pointer as pointing into user-space address space, which must never be dereferenced directly in kernel context; enforced only by sparse, not the compiler itself. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
 
-**USS (unique set size)** — private, unshared resident pages only; the number that answers "what would be freed if I killed this process right now," since by construction nothing in it is shared with anything else. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
-
 **User space** — code the machine does not trust with the hardware directly (shells, browsers, ordinary programs); it has its own address space and can only touch what its mappings and file descriptors permit. [The Kernel/User-Space Boundary](./the-kernel-userspace-boundary.md)
+
+**USS (unique set size)** — private, unshared resident pages only; the number that answers "what would be freed if I killed this process right now," since by construction nothing in it is shared with anything else. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
 
 **vDSO** (virtual dynamic shared object) — a small ELF shared object built into the kernel image and mapped into every process at exec time, exporting a short list of functions (`clock_gettime`, `gettimeofday`, `time`, `getcpu`, `clock_getres` on x86-64) that can be answered entirely in user space, so most calls to them never enter the kernel at all. [The vDSO](../05-syscalls-and-the-boundary/the-vdso.md)
 

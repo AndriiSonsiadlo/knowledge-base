@@ -122,7 +122,7 @@ The caveat every retry loop built on compare-and-swap inherits is ABA: if the va
 to `B` and back to `A` between the read and the compare, `cmpxchg` sees `A` again and happily succeeds,
 even though the object it names may no longer be the same object — freed and reallocated at the same
 address, for instance. Value-based compare-and-swap cannot see that round trip. This is exactly the
-failure mode that hands the problem to RCU (see the folder's RCU pages, once written): RCU's
+failure mode that hands the problem to RCU (see the folder's RCU pages): RCU's
 grace-period guarantee is what lets code reason about "has this object genuinely not been freed and
 reused" rather than merely "does this value read back the same."
 

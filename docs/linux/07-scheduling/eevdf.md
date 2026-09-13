@@ -108,8 +108,8 @@ disagreed with for the facts below.
   though not quite as a plain new field in `vlag`'s case: it shares storage with `vprot` inside a union
   (`union { s64 vlag; u64 vprot; }`). This is a source-level implementation detail rather than a tuning
   knob, but it is worth knowing before searching for `vlag` and finding a union instead of a bare field.
-- **No context7-indexed tunable name could not be verified against source.** Everything context7's copy
-  of the EEVDF design document (`docs.kernel.org/scheduler/sched-eevdf.html`) described — lag, eligibility,
+- **Every tunable name checked against the EEVDF design document was verified against source.** Everything
+  the design document (`docs.kernel.org/scheduler/sched-eevdf.html`) described — lag, eligibility,
   virtual deadline selection, deferred dequeue for sleeping tasks, and `sched_setattr()` for request
   sizing — matched what the source at v6.18 does. Nothing in this section is a refusal-to-name case; every
   identifier above was confirmed present under the exact name given.
@@ -125,7 +125,7 @@ relative to the others. Group scheduling still applies: `struct cfs_rq` at v6.18
 `CONFIG_FAIR_GROUP_SCHED` fields (`sched_entity *parent`, per-group `cfs_rq`), so cgroup CPU shares still
 work by giving a task group's own scheduling entity a weight and letting it compete inside its parent's
 runqueue exactly as it did under CFS — the mechanics of that are
-[cgroup CPU Control](./cgroup-cpu-control.md)'s subject, once written.
+[cgroup CPU Control](./cgroup-cpu-control.md)'s subject.
 
 ## Which articles are now wrong
 
@@ -194,7 +194,7 @@ flowchart TB
 
 <KernelFacts
   structure={[["struct sched_entity", "include/linux/sched.h"], ["struct sched_attr", "include/uapi/linux/sched/types.h"]]}
-  path="pick_next_task_fair() → pick_next_entity() → pick_eevdf() → __pick_eevdf(): eligible tasks (lag ≥ 0) → earliest virtual deadline (verified directly against kernel/sched/fair.c at v6.18: pick_next_entity() at line 5511 calls pick_eevdf(), which wraps __pick_eevdf(); the brief's assumed pick_next_entity() → pick_eevdf() chain is correct as written, unlike several other names checked for this page)"
+  path="pick_next_task_fair() → pick_next_entity() → pick_eevdf() → __pick_eevdf(): eligible tasks (lag ≥ 0) → earliest virtual deadline"
   observe="ls /sys/kernel/debug/sched/ && cat /proc/self/sched | grep -E 'vlag|slice|deadline|vruntime'   # requires CONFIG_SCHED_DEBUG and debugfs mounted; not inspected live for this page, see 'What changed for tuning' above for why"
   trap="EEVDF did not make Linux 'more fair'. It made *latency* separately expressible from *share*, which means a tuning approach built on nice values alone was already the wrong tool and is now visibly so." />
 

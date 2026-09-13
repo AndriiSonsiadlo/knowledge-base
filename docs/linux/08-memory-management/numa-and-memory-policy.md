@@ -46,7 +46,7 @@ Every policy below answers the same question — "given a fault needing a frame,
 come from, and in what order?" — differently. **Verified against `Documentation/admin-guide/mm/numa_memory_policy.rst`
 at v6.18 (fetched from `raw.githubusercontent.com/torvalds/linux/v6.18/...`, checked 2026-09-08):**
 the document defines `MPOL_DEFAULT`, `MPOL_BIND`, `MPOL_PREFERRED`, `MPOL_INTERLEAVE`,
-`MPOL_PREFERRED_MANY`, and — the one the brief for this page asked to verify rather than assume —
+`MPOL_PREFERRED_MANY`, and — a genuinely newer addition worth confirming rather than assuming —
 **`MPOL_WEIGHTED_INTERLEAVE` does exist at v6.18.** The document's own words: "This mode operates the
 same as `MPOL_INTERLEAVE`, except that interleaving behavior is executed based on weights set in
 `/sys/kernel/mm/mempolicy/weighted_interleave/`." A node weighted 5 against a node weighted 2 receives
@@ -54,7 +54,7 @@ pages in roughly that 5:2 ratio rather than strict round-robin — the fix for a
 have different memory bandwidth or capacity, where flat interleaving would spread load evenly across
 unequal resources.
 
-`MPOL_PREFERRED_MANY` is also present at v6.18 and is not in the brief's original list: it generalizes
+`MPOL_PREFERRED_MANY` is also present at v6.18: it generalizes
 `MPOL_PREFERRED` from one node to a set, preferring that set but falling back to any node under
 pressure rather than failing.
 

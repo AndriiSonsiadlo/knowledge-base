@@ -197,7 +197,7 @@ crosses.*
 
 <KernelFacts
   structure={[["struct sched_domain", "include/linux/sched/topology.h"], ["struct sched_group", "kernel/sched/sched.h"]]}
-  path="scheduler_tick() → sched_balance_trigger() → raise_softirq(SCHED_SOFTIRQ) → sched_balance_softirq() → sched_balance_domains() → sched_balance_rq()   (verified against kernel/sched/core.c and kernel/sched/fair.c at v6.18: both trigger_load_balance and run_rebalance_domains from older kernels are gone, renamed to sched_balance_trigger and sched_balance_softirq respectively; sched_balance_rq is correct as the brief assumed, but it is not called directly from the softirq handler — sched_balance_domains sits between them)"
+  path="scheduler_tick() → sched_balance_trigger() → raise_softirq(SCHED_SOFTIRQ) → sched_balance_softirq() → sched_balance_domains() → sched_balance_rq()"
   observe="perf stat -e migrations,context-switches -- ./workload && cat /sys/devices/system/cpu/cpu0/topology/thread_siblings_list"
   trap="An idle CPU is not free capacity. Pulling a task onto it costs the task its warm caches, and on a two-socket machine it can cost the task its local memory too — which is why the balancer deliberately leaves CPUs idle." />
 
@@ -207,9 +207,9 @@ crosses.*
   of the domain hierarchy and the flags at each level.
 - <Src file="kernel/sched/fair.c" symbol="sched_balance_rq" /> — the balancing pass itself. Verified
   against Elixir at v6.18: defined at `kernel/sched/fair.c`, called from both
-  `sched_balance_domains()` (the periodic path) and `sched_balance_newidle()` (the newidle path). The
-  brief's assumed name for this function was correct; the two functions above it in the call chain
-  (`trigger_load_balance`, `run_rebalance_domains`) were not — see the `path` note above.
+  `sched_balance_domains()` (the periodic path) and `sched_balance_newidle()` (the newidle path). Note
+  that older material still names the two functions above it in the call chain as `trigger_load_balance`
+  and `run_rebalance_domains` — both have since been renamed, per the `path` card above.
 - Lozi et al., ["The Linux Scheduler: a Decade of Wasted Cores"](https://people.ece.ubc.ca/sasha/papers/eurosys16-final29.pdf),
   EuroSys 2016 — four real load-balancing bugs found by building the right tooling; predates the pinned
   kernel by close to a decade, and the function names it discusses are stale, but the *method* — build

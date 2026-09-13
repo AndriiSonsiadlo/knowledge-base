@@ -42,8 +42,8 @@ RES:       6347       6213       6485       5719       5413       5993       619
 CAL:     109448      89581     103275      87796     105632      93312     100610     111362     101769     102441   Function call interrupts
 ```
 
-Even this minimal virtio setup already demonstrates the pattern the brief's fuller machine would show more
-dramatically. Line `28` — `virtio1-requests.0`, the block device's request queue — is a **queue-numbered
+Even this minimal virtio setup already demonstrates the pattern a multi-queue NIC or NVMe drive would show
+more dramatically. Line `28` — `virtio1-requests.0`, the block device's request queue — is a **queue-numbered
 interrupt** (`.0` is the queue index) delivered over MSI-X, and its count (`10`) is concentrated
 **entirely on CPU9** and nowhere else: this is one queue, one vector, one CPU, exactly the shape a
 multi-queue device produces, just with a single queue instead of many. Line `25` shows the same pattern for
