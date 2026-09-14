@@ -129,3 +129,4 @@ bandwidth-limited well below what a newer-generation NVMe drive achieves, even t
 - [Hard Disk Drives](./hard-disk-drives.md)
 - [Buses & I/O](../buses-and-io/intro.md)
 - [Storage: HDD, SSD & NVMe — Overview](./intro.md)
+- [NVMe in the Kernel](../../linux/12-block-layer-and-storage/nvme-in-the-kernel.md) — how Linux maps NVMe queues onto its block layer.

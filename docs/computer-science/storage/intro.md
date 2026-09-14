@@ -46,6 +46,10 @@ and why NVMe exists.
   evolution, and why M.2 is a connector, not a protocol.
 - [Filesystems Basics](./filesystems-basics.md) — inodes vs. FAT-style layouts, journaling, and
   copy-on-write filesystems.
+- [RAID and Redundancy](./raid-and-redundancy.md) — striping, mirroring, parity, the write hole, and
+  rebuild risk.
+- [Crash Consistency and Journaling](./crash-consistency-and-journaling.md) — why a crash can corrupt
+  a disk, and the four designs that prevent it.
 
 ## Why It Matters
 

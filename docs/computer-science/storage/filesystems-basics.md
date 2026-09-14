@@ -137,3 +137,5 @@ repair it automatically.
 - [Storage: HDD, SSD & NVMe — Overview](./intro.md)
 - [Operating Systems](../operating-systems/intro.md)
 - [Databases](../databases/intro.md)
+- [Crash Consistency and Journaling](./crash-consistency-and-journaling.md) — the full design space behind the journaling section above.
+- [Why the VFS Exists](../../linux/11-vfs-and-filesystems/why-vfs-exists.md) — how Linux puts one interface over many filesystems.
