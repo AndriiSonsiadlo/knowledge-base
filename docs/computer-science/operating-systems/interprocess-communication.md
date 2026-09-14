@@ -155,3 +155,5 @@ somehow, this is a real, practical source of deadlock, not just an efficiency pr
 - [Concurrency & Synchronization](./concurrency-and-synchronization.md) — synchronizing access to
   shared memory once it's mapped.
 - [Computer Networks](../computer-networks/intro.md) — sockets as network-transparent IPC.
+- [`../../linux/06-processes-and-threads/pipes-fifos-and-unix-sockets.md`](../../linux/06-processes-and-threads/pipes-fifos-and-unix-sockets.md) —
+  the kernel-side implementation of pipes, FIFOs, and Unix sockets.

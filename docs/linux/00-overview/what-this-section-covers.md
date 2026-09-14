@@ -58,7 +58,7 @@ collected in one place: [The Hardware the Kernel Assumes](./hardware-the-kernel-
 
 ## How it is organised
 
-Folder position on disk is reading order. The first five folders exist now; the rest are specified —
+Folder position on disk is reading order. Folders `00` through `10` exist now; folders `11` through `19` are specified —
 their scope is fixed, their pages are not yet written.
 
 | Folder | Covers | Status |
@@ -68,12 +68,12 @@ their scope is fixed, their pages are not yet written.
 | `02-guided-traces` | Six familiar operations — a command, a write, a fault, a boot — followed all the way down | This phase |
 | `03-boot-and-init` | Firmware to login prompt: UEFI, GRUB, the kernel image, initramfs, PID 1, systemd | This phase |
 | `04-kernel-architecture-and-idioms` | Kernel structure and the C idioms it is written in | This phase |
-| `05` | Syscalls | Specified |
-| `06` | Processes | Specified |
-| `07` | Scheduling | Specified |
-| `08` | Memory | Specified |
-| `09` | Locking | Specified |
-| `10` | Interrupts | Specified |
+| `05` | Syscalls | This phase |
+| `06` | Processes | This phase |
+| `07` | Scheduling | This phase |
+| `08` | Memory | This phase |
+| `09` | Locking | This phase |
+| `10` | Interrupts | This phase |
 | `11` | The VFS | Specified |
 | `12` | Block I/O | Specified |
 | `13` | Networking | Specified |
@@ -84,8 +84,8 @@ their scope is fixed, their pages are not yet written.
 | `18` | eBPF | Specified |
 | `19` | Contributing | Specified |
 
-*The folder ladder: position on disk is reading order, and only the first five folders have pages
-behind them yet.*
+*The folder ladder: position on disk is reading order, and folders `00` through `10` have pages
+behind them; folders `11` through `19` are specified but not yet written.*
 
 For the routes people actually want to take through this ladder — "I just want to understand my
 machine," "I want to build and debug a kernel," and others — see [the roadmap](./roadmap.md). For the

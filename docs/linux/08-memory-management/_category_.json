@@ -1,0 +1,8 @@
+{
+  "label": "Virtual Memory and Memory Management",
+  "position": 9,
+  "link": {
+    "type": "generated-index",
+    "description": "How Linux turns physical memory into the address space every process believes it owns: page tables, faults, allocators, the page cache, writeback, reclaim, swap, huge pages, and what the memory numbers actually mean."
+  }
+}

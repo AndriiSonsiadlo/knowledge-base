@@ -134,4 +134,8 @@ smaller working sets) rather than to tune the replacement algorithm further.
   there once published).
 - [Processes & Threads](./processes-and-threads.md) — each process's private address space.
 - [Storage](../storage/intro.md) — where swapped-out pages ultimately live.
+- [`../../linux/08-memory-management/the-page-fault-handler.md`](../../linux/08-memory-management/the-page-fault-handler.md)
+  and
+  [`../../linux/08-memory-management/the-page-allocator.md`](../../linux/08-memory-management/the-page-allocator.md) —
+  how Linux actually implements fault handling and physical-page allocation.
 
