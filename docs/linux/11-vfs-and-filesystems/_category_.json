@@ -1,0 +1,8 @@
+{
+  "label": "VFS and Filesystems",
+  "position": 12,
+  "link": {
+    "type": "generated-index",
+    "description": "How one `read()` works across thirty different filesystems: the four VFS objects, path lookup and the dentry cache, mounts, ext4, XFS and Btrfs, journaling, the pseudo-filesystems, overlayfs, and FUSE."
+  }
+}

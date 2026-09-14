@@ -1,0 +1,8 @@
+{
+  "label": "The Networking Stack",
+  "position": 14,
+  "link": {
+    "type": "generated-index",
+    "description": "The kernel's datapath and control plane: `sk_buff`, sockets, the receive and transmit paths, TCP as implemented, netfilter and connection tracking, routing, network namespaces, traffic control, and diagnosing network problems."
+  }
+}

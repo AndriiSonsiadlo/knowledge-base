@@ -1,0 +1,8 @@
+{
+  "label": "The Block Layer and I/O",
+  "position": 13,
+  "link": {
+    "type": "generated-index",
+    "description": "Everything between a filesystem asking for a block and a device completing it: `bio`s, blk-mq, I/O schedulers, `O_DIRECT`, `io_uring`, device mapper, software RAID, NVMe, and how to find out why a disk is slow."
+  }
+}
