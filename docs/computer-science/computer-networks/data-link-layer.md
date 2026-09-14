@@ -160,3 +160,5 @@ Inspection** exist on managed switches.
 - [Computer Networks — Overview](./intro.md)
 - [OSI & TCP/IP Models](./osi-and-tcp-ip-models.md)
 - [Network Layer & Routing](./network-layer-and-routing.md)
+- [ARP, ICMP, and Neighbour Discovery](./arp-icmp-and-neighbour-discovery.md) — ARP's lifecycle and
+  failure modes, and IPv6's replacement for it.

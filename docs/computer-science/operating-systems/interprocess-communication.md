@@ -157,3 +157,5 @@ somehow, this is a real, practical source of deadlock, not just an efficiency pr
 - [Computer Networks](../computer-networks/intro.md) — sockets as network-transparent IPC.
 - [`../../linux/06-processes-and-threads/pipes-fifos-and-unix-sockets.md`](../../linux/06-processes-and-threads/pipes-fifos-and-unix-sockets.md) —
   the kernel-side implementation of pipes, FIFOs, and Unix sockets.
+- [Sockets and the Application Boundary](../computer-networks/sockets-and-the-application-boundary.md) —
+  sockets as IPC that works the same across a network.

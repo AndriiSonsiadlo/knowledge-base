@@ -52,6 +52,12 @@ frame, before it ever becomes electrical signals on a wire.
   what routers do, and why NAT exists.
 - **[Transport Layer: TCP & UDP](./transport-layer-tcp-udp.md)** — the three-way handshake,
   reliability, flow control vs. congestion control, and when UDP is the right choice.
+- **[Sockets and the Application Boundary](./sockets-and-the-application-boundary.md)** — the API
+  every networked program uses, and what it never tells you.
+- **[ARP, ICMP, and Neighbour Discovery](./arp-icmp-and-neighbour-discovery.md)** — next-hop
+  resolution, IP's error channel, and why blocking ICMP breaks things.
+- **[NAT and Connection Tracking](./nat-and-connection-tracking.md)** — address translation and the
+  per-flow state it forces.
 
 ## Why It Matters
 
