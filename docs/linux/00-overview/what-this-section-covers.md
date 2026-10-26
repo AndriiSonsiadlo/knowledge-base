@@ -58,7 +58,7 @@ collected in one place: [The Hardware the Kernel Assumes](./hardware-the-kernel-
 
 ## How it is organised
 
-Folder position on disk is reading order. Folders `00` through `10` exist now; folders `11` through `19` are specified —
+Folder position on disk is reading order. Folders `00` through `13` exist now; folders `14` through `19` are specified —
 their scope is fixed, their pages are not yet written.
 
 | Folder | Covers | Status |
@@ -74,9 +74,9 @@ their scope is fixed, their pages are not yet written.
 | `08` | Memory | This phase |
 | `09` | Locking | This phase |
 | `10` | Interrupts | This phase |
-| `11` | The VFS | Specified |
-| `12` | Block I/O | Specified |
-| `13` | Networking | Specified |
+| `11` | The VFS | This phase |
+| `12` | Block I/O | This phase |
+| `13` | Networking | This phase |
 | `14` | Drivers | Specified |
 | `15` | Containers | Specified |
 | `16` | Security | Specified |
@@ -84,8 +84,8 @@ their scope is fixed, their pages are not yet written.
 | `18` | eBPF | Specified |
 | `19` | Contributing | Specified |
 
-*The folder ladder: position on disk is reading order, and folders `00` through `10` have pages
-behind them; folders `11` through `19` are specified but not yet written.*
+*The folder ladder: position on disk is reading order, and folders `00` through `13` have pages
+behind them; folders `14` through `19` are specified but not yet written.*
 
 For the routes people actually want to take through this ladder — "I just want to understand my
 machine," "I want to build and debug a kernel," and others — see [the roadmap](./roadmap.md). For the

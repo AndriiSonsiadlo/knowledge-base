@@ -574,7 +574,200 @@ several CPUs at once, each processing its own CPU's work independently, which is
 handlers need locking around any data they share across CPUs.
 [Softirqs](../10-interrupts-time-and-deferred-work/softirqs.md)
 
+
+## 11 — VFS and Filesystems
+
+**"The VFS is a filesystem."** It stores nothing and defines no on-disk format. It is a dispatch layer — a set of generic objects and operations tables — that every real filesystem plugs into.
+[Why the VFS Exists](../11-vfs-and-filesystems/why-vfs-exists.md)
+
+**"Everything in Linux is a file."** Everything is a *descriptor*. A socket has no path, cannot be `open()`ed by name, and does not appear in any directory listing; it only shares the file-descriptor interface, via `anon_inode_getfile()` above.
+[Why the VFS Exists](../11-vfs-and-filesystems/why-vfs-exists.md)
+
+**"`/proc` files take up space."** They have no storage at all. `ls -l /proc/meminfo` reports a size because `stat()` has to return something, but nothing is allocated on any device or in the page cache — the content is produced fresh, in `proc_reg_read_iter()`, on each read.
+[Why the VFS Exists](../11-vfs-and-filesystems/why-vfs-exists.md)
+
+**"`drop_caches` frees memory the kernel was wasting."** It doesn't free anything the kernel didn't already know how to reclaim on its own under pressure — it discards cache, unconditionally, that was about to make the next lookup fast. It's a debugging and benchmarking tool for producing a reproducible cold state, not a way to give a system more usable memory; a kernel under real memory pressure reclaims exactly this cache on its own, no manual trigger needed (see [Reclaim, the LRU Lists, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)).
+[Path Lookup and the Dentry Cache](../11-vfs-and-filesystems/path-lookup-and-the-dcache.md)
+
+**"A lot of negative dentries is a leak."** A large negative-dentry count is, most of the time, a cache doing exactly its job — the accumulated record of every `$PATH` and shared-library probe that came up empty. It's bounded the same way positive dentries are: reclaim trims it under memory pressure, and `/proc/sys/fs/dentry-state`'s `nr_negative` field (verified at v6.18 in `fs/dcache.c`'s `dentry_stat_t`) is the number to watch if it's ever in doubt, not a number that only ever grows.
+[Path Lookup and the Dentry Cache](../11-vfs-and-filesystems/path-lookup-and-the-dcache.md)
+
+**"Path lookup reads directories from disk every time."** For a warm dcache — which, on a running system, is nearly always — it usually never reaches the filesystem at all. The measurement above is the difference directly: a filesystem call happens only on a genuine miss, not on every lookup.
+[Path Lookup and the Dentry Cache](../11-vfs-and-filesystems/path-lookup-and-the-dcache.md)
+
+**"A file descriptor is a pointer to the file."** It's an index into a per-process table of pointers to `struct file`, and two different indexes — in the same process or different ones — can point at the very same `struct file`, sharing its offset and flags.
+[`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)
+
+**"`write()` returning means the data is on disk."** It means the data is in the page cache and marked dirty. Getting it onto stable storage is writeback's job, on its own schedule, unless the caller explicitly asks for `fsync()`/`O_SYNC`/`O_DIRECT` to wait for or bypass that.
+[`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)
+
+**"`O_APPEND` makes all appends atomic everywhere."** It does, for a single write that completes in one call, on local filesystems. It does not on NFS, and it does not help a write the caller itself split into multiple calls — each call gets its own atomic seek-to-end, not the whole sequence.
+[`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)
+
+**"A bind mount is a kind of symlink."** It is a second mount of the same subtree, pointing directly at the target's dentry and superblock with no path string involved. It survives `chroot`, which a symlink to something outside the new root does not, and it can carry mount flags — `ro` in particular — independently of the mount it was bound from, which a symlink cannot do at all.
+[Mounts and Mount Namespaces](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md)
+
+**"Mounting over a directory deletes what was there."** It hides it. The old contents are still on disk, unreachable through that path only because the new mount's root dentry now answers lookups there instead; `umount` makes them reappear exactly as they were.
+[Mounts and Mount Namespaces](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md)
+
+**"A new mount namespace is isolated from the host's mounts."** Only if propagation says so. `CLONE_NEWNS` copies the mount tree at that instant, but a namespace cloned while `/` was shared keeps receiving every mount the host makes afterward — isolation is a propagation setting a container runtime applies deliberately (`rslave` or `rprivate`), not a side effect of having a separate namespace. Step 4 above shows the same fact from the other side: a *private* subtree stops receiving updates even though the namespace holding it was cloned from a namespace that does.
+[Mounts and Mount Namespaces](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md)
+
+**"A journaling filesystem protects my data."** It protects its own metadata. Ext4 mounting cleanly and passing `fsck` after a crash says nothing about whether the bytes an application wrote a moment before the crash survived — that is a `fsync` question, not a journaling question, and the trace above shows a widely-used real editor whose crash-safety for the *file content itself* depends entirely on its own `fsync` call landing before the power cuts, exactly like any other program.
+[Journaling and Crash Consistency](../11-vfs-and-filesystems/journaling-and-crash-consistency.md)
+
+**"If `fsync` fails I can retry it."** A retried `fsync` can report success without the original data ever having reached disk — the pages behind the failed write may already be gone from the cache. Treat an `fsync` failure as the write being lost, full stop.
+[Journaling and Crash Consistency](../11-vfs-and-filesystems/journaling-and-crash-consistency.md)
+
+**"`fsync` on the file is enough for a new file."** It durably writes the file's own data and metadata. It says nothing about the directory entry that makes the file findable by that name — that entry is its own piece of metadata, and needs its own `fsync`, on the directory, as step 4 of the recipe above spells out.
+[Journaling and Crash Consistency](../11-vfs-and-filesystems/journaling-and-crash-consistency.md)
+
+**"tmpfs is always in RAM."** Only while there's enough RAM to hold it. Under memory pressure, tmpfs folios move to swap exactly like anonymous memory does — an idle tmpfs file can genuinely be sitting on the swap device, not in physical memory at all, until something reads it back.
+[tmpfs and Memory-Backed Filesystems](../11-vfs-and-filesystems/tmpfs-and-memory-filesystems.md)
+
+**"tmpfs uses memory only for what you store, so a big `size=` is free."** `size=` is a ceiling, not a reservation — setting it costs nothing by itself. But every byte actually written *is* memory the kernel cannot simply drop the way it drops clean page-cache from a disk-backed file; the only way to reclaim it is to swap it out, and on a swapless machine it cannot be reclaimed at all.
+[tmpfs and Memory-Backed Filesystems](../11-vfs-and-filesystems/tmpfs-and-memory-filesystems.md)
+
+**"`free` shows tmpfs usage as used memory."** It shows up under `shared` (and folded into `buff/cache`), not under the plain "used" column — which is exactly why a system can show large, stubborn `buff/cache` that reclaim never seems to shrink: unlike ordinary page cache, tmpfs pages in that number are real data, not a clean cache of something recoverable from disk, so kswapd's cheapest option (just drop it) isn't available for them.
+[tmpfs and Memory-Backed Filesystems](../11-vfs-and-filesystems/tmpfs-and-memory-filesystems.md)
+
+**"Everything under `/proc` and `/sys` is a stable API."** Only what `Documentation/ABI/stable` lists carries that promise — and as the `mtu` example above shows, a file can be old, widely depended on, and still formally `testing`. debugfs promises nothing at all, regardless of age.
+[procfs, sysfs, debugfs, configfs](../11-vfs-and-filesystems/procfs-sysfs-debugfs-configfs.md)
+
+**"Writing to `/proc/sys` is permanent."** A `sysctl -w` or a direct write to `/proc/sys/...` changes live kernel state immediately, but only until reboot — it is not persisted anywhere by the write itself. Making a change survive a reboot means putting it in a `sysctl.d` config file, which is reapplied at boot; the live write and the persistent config are two different actions that happen to use the same underlying tunable.
+[procfs, sysfs, debugfs, configfs](../11-vfs-and-filesystems/procfs-sysfs-debugfs-configfs.md)
+
+**"sysfs files are regular files with a size."** `stat` reports 4096 bytes (`PAGE_SIZE`) for essentially every sysfs attribute file, regardless of what it actually contains — the content is generated fresh on each `read()`, not stored. This is why `cp` (which may size a buffer or seek based on reported size) and `tail -f` (which waits for the file to grow past its old size) both misbehave on sysfs files in ways they don't on a real file.
+[procfs, sysfs, debugfs, configfs](../11-vfs-and-filesystems/procfs-sysfs-debugfs-configfs.md)
+
+**"Changing a file in a container copies only the changed blocks."** Copy-up copies the whole file, every time, regardless of how small the change is. `metacopy=on` softens this only for pure metadata changes, not content changes.
+[overlayfs](../11-vfs-and-filesystems/overlayfs.md)
+
+**"Deleting a file in a layer frees space."** It adds a whiteout — a few bytes — to the upper layer. The lower layer's data is untouched and still occupies exactly the space it always did.
+[overlayfs](../11-vfs-and-filesystems/overlayfs.md)
+
+**"overlayfs is a container technology."** It is a general-purpose filesystem that container runtimes happen to be the most common user of. Live-CDs, immutable-root distributions, and read-only-root embedded systems use the identical mechanism for reasons that have nothing to do with containers.
+[overlayfs](../11-vfs-and-filesystems/overlayfs.md)
+
+**"FUSE is slow, full stop."** Cached reads and writes are close to native speed — the cost is real but concentrated in uncached, metadata-heavy access, not spread evenly across everything the filesystem does.
+[FUSE](../11-vfs-and-filesystems/fuse-and-userspace-filesystems.md)
+
+**"Passthrough and io_uring make FUSE as fast as a kernel filesystem."** They narrow specific gaps (bulk data-path crossings, per-request syscall overhead) without removing the daemon from metadata and lookup handling, where much of the metadata-heavy cost above still lives.
+[FUSE](../11-vfs-and-filesystems/fuse-and-userspace-filesystems.md)
+
+## 12 — The Block Layer and I/O
+
+**"`none` means no queueing."** Requests still queue — in the software and hardware queues blk-mq itself maintains. `none` only means the scheduler layer between them does no reordering; it dispatches in arrival order and nothing more.
+[I/O Schedulers](../12-block-layer-and-storage/io-schedulers.md)
+
+**"BFQ is the best scheduler because it is the most sophisticated."** Sophistication here is a cost, not a benefit by default — BFQ's fairness accounting is real CPU work a fast device notices, and on hardware that doesn't need per-process fairness, that work buys nothing back.
+[I/O Schedulers](../12-block-layer-and-storage/io-schedulers.md)
+
+**"Changing the scheduler fixes a slow disk."** A scheduler reorders the queue in front of the device; it has no way to make the device itself faster. If the device is the bottleneck, every scheduler eventually hits the same ceiling.
+[I/O Schedulers](../12-block-layer-and-storage/io-schedulers.md)
+
+**"`O_DIRECT` means synchronous and durable."** It only bypasses the page cache. Durability past the device's own volatile cache still needs `O_DSYNC` (at open) or an explicit `fdatasync()` — see [What `O_DIRECT` does not give you](../12-block-layer-and-storage/buffered-direct-and-alignment.md#what-o_direct-does-not-give-you).
+[Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
+
+**"Direct I/O is always faster."** It removes cache hits and readahead along with the copy. An application without its own buffer pool doing small, repeated, or re-read-heavy I/O is usually *slower* under `O_DIRECT`, not faster — the speed only shows up for applications (databases, chiefly) that already manage their own cache and want to stop paying for a second one.
+[Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
+
+**"`mmap` is zero-copy, so it is always the fastest way to read a file."** Page faults and the TLB pressure of touching many mapped pages can exceed the cost of a `read()`'s single copy, especially for sequential, read-once access where there is no reuse to amortize the fault overhead against.
+[Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
+
+**"`io_uring` makes every workload faster."** It removes syscall crossings. A workload that already does few, large I/O operations has few crossings to remove, and gains little; the win is concentrated in workloads issuing many small operations.
+[`io_uring`](../12-block-layer-and-storage/io-uring.md)
+
+**"`io_uring` is only for storage."** Storage was the original motivating case, but networking (`accept`, `connect`, `send`/`recv`), timeouts, and a growing list of other opcodes are all just as much `io_uring` operations as a file read is — see [Compared](../12-block-layer-and-storage/io-uring.md#compared).
+[`io_uring`](../12-block-layer-and-storage/io-uring.md)
+
+**"`SQPOLL` is free performance."** It trades syscalls for a dedicated kernel thread spinning on a CPU core, polling for work whether or not any exists (bounded by `sq_thread_idle` before it sleeps). That CPU is not available for anything else while it's polling — free of syscalls, not free of cost.
+[`io_uring`](../12-block-layer-and-storage/io-uring.md)
+
+**"RAID is a backup."** It replicates deletions and corruption instantly and everywhere the redundancy lives — a file removed from a mirrored or parity array is removed from every copy at once, just as fast as on a single disk. RAID protects against a *device* failing, not against a *decision* or a *bit flip* propagating.
+[Software RAID (md)](../12-block-layer-and-storage/software-raid.md)
+
+**"A resync after a crash means a disk failed."** It doesn't — it means md cannot prove the array's parity (or mirror copies) are consistent after an unclean shutdown, and is checking, not that any hardware is at fault. A clean shutdown never triggers a resync; a crash always risks one.
+[Software RAID (md)](../12-block-layer-and-storage/software-raid.md)
+
+**`"mismatch_cnt > 0` means corruption."** On RAID 1 and RAID 10 specifically, a nonzero count can be entirely harmless — swap space on the array, for instance, is never read back consistently across mirrors in a way that guarantees identical bytes, since swap doesn't promise the two copies were ever both fully written before either was read. It's meaningful only in context: on RAID 5/6, where parity should always be deterministically derivable from data, a nonzero count is a much stronger signal than the same count on a mirrored level.
+[Software RAID (md)](../12-block-layer-and-storage/software-raid.md)
+
+**"High `iowait` means the disk is the bottleneck."** `iowait` is idle CPU time during which some task on that CPU happened to be blocked in I/O — it falls the moment the CPU gets busier with anything else, even if the device's own latency is unchanged or worse, as this page's own stress-ng run showed directly: `iowait` read 0.00 while `w_await` rose to 149.64 ms.
+[Diagnosing I/O Problems](../12-block-layer-and-storage/diagnosing-io-problems.md)
+
+**"`%util` at 100% means the device is saturated."** It means the device was never idle. On any device that serves requests in parallel — essentially all of them since NVMe and modern SATA/SAS queuing — a device running at a fraction of its real capacity can report `%util=100%` for the entire sample.
+[Diagnosing I/O Problems](../12-block-layer-and-storage/diagnosing-io-problems.md)
+
+**"Slow writes mean a slow disk."** Dirty-page throttling and cgroup I/O throttling both produce identical application-visible symptoms — elevated write latency, reduced effective throughput — on a fast, completely idle device. This page's own worked investigation is exactly that case: a device reporting single-digit-millisecond `w_await` the entire time, while the application's effective throughput swung 6× because the kernel was deliberately pausing the writer, not because the disk struggled.
+[Diagnosing I/O Problems](../12-block-layer-and-storage/diagnosing-io-problems.md)
+
+## 13 — The Networking Stack
+
+**"The `listen` backlog is the maximum number of connections."** It bounds connections that have finished the handshake and are waiting to be *accepted*. Accepted connections don't count against it, and the value is capped by `net.core.somaxconn` without an error, as the 100000 → 4096 capture above shows.
+[Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
+
+**"A socket and a connection are the same object."** A listening socket never becomes a connection. Each accepted connection is a new `file`/`socket`/`sock` with its own descriptor (fd 4 next to fd 3 above), and the listener keeps listening.
+[Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
+
+**"`Recv-Q` in `ss` is always unread bytes."** For an established socket it is. For a listening socket it is the number of connections waiting in the accept queue, and `Send-Q` is that queue's limit.
+[Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
+
+**"One packet, one interrupt."** Under load it is one interrupt per poll cycle. After `napi_schedule` the queue's interrupt stays masked while `net_rx_action` drains up to `netdev_budget` packets, and on loopback there is no device interrupt at all.
+[The Receive Path](../13-networking-stack/the-receive-path.md)
+
+**"`tcpdump` shows what my application received."** `tcpdump` taps in `__netif_receive_skb_core`, before netfilter and before any socket. It shows packets the firewall then dropped, and packets a full receive buffer then discarded.
+[The Receive Path](../13-networking-stack/the-receive-path.md)
+
+**"Receive processing runs on my application's CPU."** It runs where the interrupt (RSS), RPS, or — on loopback — the sender put it. The capture above shows receive work on all eight CPUs while the server used four. Only RFS steers it towards the reader.
+[The Receive Path](../13-networking-stack/the-receive-path.md)
+
+**"`send()` returning means the data was sent."** It means the data was copied into the socket's send buffer. On [traffic control](../13-networking-stack/traffic-control.md#classful-qdiscs-and-filters) a sender rate-limited to 10 Mbit/s counted 15.7 Mbit/s of successful `send()` calls, because the first megabytes went into its buffer, not onto the link.
+[The Transmit Path](../13-networking-stack/the-transmit-path.md)
+
+**"Bigger transmit queues (`txqueuelen`) improve throughput."** Once the link is busy, a longer queue only adds delay for every flow sharing it. BQL, TSQ and `fq_codel` exist because shorter queues behave better.
+[The Transmit Path](../13-networking-stack/the-transmit-path.md)
+
+**"TSO means the NIC implements TCP."** The NIC only cuts already-built segments and fills in their headers. All TCP state — sequence numbers, windows, retransmission, congestion control — stays in the kernel.
+[The Transmit Path](../13-networking-stack/the-transmit-path.md)
+
+**"`tcp_fin_timeout` shortens `TIME_WAIT`."** It limits how long an orphaned socket waits in `FIN_WAIT_2`. `TIME_WAIT` is `TCP_TIMEWAIT_LEN`, a fixed 60 seconds with no sysctl.
+[TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
+
+**"Many sockets in `TIME_WAIT` is a problem to tune away."** Each one is a small `inet_timewait_sock`, not a full socket, and they exist to protect new connections from old segments. They're only a problem for a client making very many outgoing connections to *one* destination, where they can exhaust local ports. `tcp_tw_reuse` and connection reuse address that case.
+[TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
+
+**"Setting a large `SO_RCVBUF` improves throughput."** Setting it switches off autotuning for that socket. The download above grew its receive space to 10 MB on its own; an application that set 4 MB by hand would have capped it there, and one that set 64 KB would have throttled it.
+[TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
+
+**"iptables is the Linux firewall."** It's one front end to netfilter. On most current distributions it's `iptables-nft`, which translates its rules into nftables objects, as shown above.
+[netfilter and nftables](../13-networking-stack/netfilter-and-nftables.md)
+
+**"A rule in the INPUT chain filters forwarded traffic."** Forwarded packets never reach LOCAL_IN. A router's or container host's forwarded traffic goes through FORWARD, and needs rules there.
+[netfilter and nftables](../13-networking-stack/netfilter-and-nftables.md)
+
+**"Rule order within a table is all that matters."** At one hook, chain *priority* decides first: every chain at priority -100 runs before any chain at priority 0, whichever table they're in. And an `accept` only ends the current chain — a later chain at the same hook can still drop the packet.
+[netfilter and nftables](../13-networking-stack/netfilter-and-nftables.md)
+
+**"Conntrack is only used when you configure NAT."** Any stateful rule loads and uses it, including the `ct state established,related accept` line in nearly every default firewall. In the [netfilter page's trace](../13-networking-stack/netfilter-and-nftables.md#reading-a-live-ruleset), a filter-only ruleset still shows `conntrack: ct direction original ct state new`.
+[Connection Tracking and NAT](../13-networking-stack/connection-tracking-and-nat.md)
+
+**"NAT rules are evaluated for every packet."** Only for the first packet of a flow. The capture above is six packets' worth of events from one rule evaluation.
+[Connection Tracking and NAT](../13-networking-stack/connection-tracking-and-nat.md)
+
+**"Raising `nf_conntrack_max` is always safe."** Each entry costs a few hundred bytes of kernel memory, and raising the maximum without raising `nf_conntrack_buckets` makes hash chains longer, so every packet's lookup gets slower.
+[Connection Tracking and NAT](../13-networking-stack/connection-tracking-and-nat.md)
+
+**"If `tcpdump` shows the packet arrived, the kernel accepted it."** The receive tap is before netfilter, the accept queue and the socket buffer. In both cases above the capture showed SYNs arriving that were then dropped.
+[Diagnosing Network Problems](../13-networking-stack/diagnosing-network-problems.md)
+
+**"Connection timeouts mean the network is dropping packets."** A full accept queue produces exactly the same client symptom on a perfect network — the first case above ran entirely on loopback.
+[Diagnosing Network Problems](../13-networking-stack/diagnosing-network-problems.md)
+
+**"Raising `somaxconn` fixes listen overflows."** It makes the queue longer, so a stalled accept loop takes slightly longer to overflow it. The fix is whatever stopped the application accepting.
+[Diagnosing Network Problems](../13-networking-stack/diagnosing-network-problems.md)
+
 ---
 
-This index grows with the section — folders 11 through 19 add their own misconceptions here as they
+This index grows with the section — folders 14 through 19 add their own misconceptions here as they
 land.
