@@ -130,4 +130,5 @@ used" drives.
 - [SSDs & NAND Flash](./ssd-and-nand-flash.md)
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md)
 - [Databases](../databases/intro.md)
+- [RAID and Redundancy](./raid-and-redundancy.md) — why growing drive capacity makes rebuilds the risky part.
 

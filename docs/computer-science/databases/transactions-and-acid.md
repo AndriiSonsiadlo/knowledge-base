@@ -150,3 +150,4 @@ reads the value into application code at all.
 - [Indexing & Storage Engines](./indexing-and-storage-engines.md)
 - [NoSQL & the CAP Theorem](./nosql-and-cap-theorem.md)
 - [Relational Model & SQL](./relational-model-and-sql.md)
+- [Crash Consistency and Journaling](../storage/crash-consistency-and-journaling.md) — what durability requires from the storage underneath.

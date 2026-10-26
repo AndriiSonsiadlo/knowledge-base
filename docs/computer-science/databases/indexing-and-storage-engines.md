@@ -149,3 +149,5 @@ columns, left to right. An index on `(last_name, first_name)` cannot be used to 
 - [Storage: HDD, SSD & NVMe](../storage/intro.md)
 - [Relational Model & SQL](./relational-model-and-sql.md)
 - [Transactions & ACID](./transactions-and-acid.md)
+- [Crash Consistency and Journaling](../storage/crash-consistency-and-journaling.md) — write-ahead logs and copy-on-write, from the filesystem side.
+- [Buffered I/O, O_DIRECT, and Alignment](../../linux/12-block-layer-and-storage/buffered-direct-and-alignment.md) — why storage engines often bypass the page cache.

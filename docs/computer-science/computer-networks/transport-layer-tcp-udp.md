@@ -183,4 +183,8 @@ guarantees without TCP's specific head-of-line-blocking behavior.
 - [OSI & TCP/IP Models](./osi-and-tcp-ip-models.md)
 - [HTTP & HTTPS](../protocols/http-and-https.md) — HTTP/1.1 and HTTP/2 run over TCP; HTTP/3 runs over UDP-based QUIC.
 - [DNS](../protocols/dns.md) — primarily UDP-based.
+- [Sockets and the Application Boundary](./sockets-and-the-application-boundary.md) — the API that
+  applications use to reach TCP and UDP.
+- [TCP in the Kernel](../../linux/13-networking-stack/tcp-in-the-kernel.md) — how Linux implements
+  TCP's state machine and congestion control.
 

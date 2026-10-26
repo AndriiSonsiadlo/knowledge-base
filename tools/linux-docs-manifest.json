@@ -221,6 +221,69 @@
         { "file": "timers-and-hrtimers.md", "id": "timers-and-hrtimers", "title": "Timers and High-Resolution Timers", "sidebar_label": "Timers", "sidebar_position": 11, "tags": ["linux", "kernel", "interrupts"], "prerequisites": ["linux/interrupts-time-and-deferred-work/the-tick-and-nohz"], "summary": "The timer wheel's deliberate imprecision, hrtimers with real deadlines, and which one a driver should choose." },
         { "file": "delays-and-sleeps.md", "id": "delays-and-sleeps", "title": "Delays and Sleeps: What They Really Do", "sidebar_label": "Delays and sleeps", "sidebar_position": 12, "tags": ["linux", "kernel", "interrupts"], "prerequisites": ["linux/interrupts-time-and-deferred-work/timers-and-hrtimers"], "summary": "Busy-wait delays, sleeping delays, and the guarantee every one of them lacks." }
       ]
+    },
+    {
+      "dir": "11-vfs-and-filesystems",
+      "label": "VFS and Filesystems",
+      "position": 12,
+      "description": "How one `read()` works across thirty different filesystems: the four VFS objects, path lookup and the dentry cache, mounts, ext4, XFS and Btrfs, journaling, the pseudo-filesystems, overlayfs, and FUSE.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "why-vfs-exists.md", "id": "why-vfs-exists", "title": "Why the VFS Exists", "sidebar_label": "Why the VFS exists", "sidebar_position": 1, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/kernel-architecture-and-idioms/container-of-and-embedded-structs"], "related": ["computer-science/storage/filesystems-basics", "linux/guided-traces/what-happens-when-you-type-ls"], "summary": "One `read()` over thirty filesystems, and the object-oriented C indirection layer that makes that possible." },
+        { "file": "the-four-objects.md", "id": "the-four-objects", "title": "Superblock, Inode, Dentry, File", "sidebar_label": "The four objects", "sidebar_position": 2, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/why-vfs-exists"], "summary": "The four core VFS objects, what each caches and pins, and the operations tables that make them polymorphic." },
+        { "file": "path-lookup-and-the-dcache.md", "id": "path-lookup-and-the-dcache", "title": "Path Lookup and the Dentry Cache", "sidebar_label": "Path lookup", "sidebar_position": 3, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/the-four-objects", "linux/concurrency-and-locking/rcu-in-practice"], "related": ["linux/concurrency-and-locking/rcu-the-idea"], "summary": "Resolving a path component by component, RCU-walk versus ref-walk, and why negative dentries are a feature." },
+        { "file": "open-read-write-in-the-kernel.md", "id": "open-read-write-in-the-kernel", "title": "`open`, `read`, `write` in the Kernel", "sidebar_label": "open, read, write", "sidebar_position": 4, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/the-four-objects", "linux/memory-management/the-page-cache"], "summary": "From a file descriptor to a filesystem and back: what an fd actually is, and where `O_DIRECT` leaves the path." },
+        { "file": "mounts-and-mount-namespaces.md", "id": "mounts-and-mount-namespaces", "title": "Mounts and Mount Namespaces", "sidebar_label": "Mounts", "sidebar_position": 5, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/path-lookup-and-the-dcache"], "summary": "The mount tree as distinct from the directory tree, bind mounts, and the propagation rules containers depend on." },
+        { "file": "ext4.md", "id": "ext4", "title": "ext4", "sidebar_label": "ext4", "sidebar_position": 6, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/journaling-and-crash-consistency", "linux/vfs-and-filesystems/the-four-objects"], "summary": "The default filesystem read from the on-disk layout upward: block groups, extents, htree directories, delayed allocation, jbd2." },
+        { "file": "xfs-and-btrfs.md", "id": "xfs-and-btrfs", "title": "XFS and Btrfs", "sidebar_label": "XFS and Btrfs", "sidebar_position": 7, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/ext4"], "summary": "Two different bets — parallel allocation groups versus copy-on-write with snapshots — and when each is right." },
+        { "file": "journaling-and-crash-consistency.md", "id": "journaling-and-crash-consistency", "title": "Journaling and Crash Consistency", "sidebar_label": "Journaling", "sidebar_position": 8, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/open-read-write-in-the-kernel", "linux/memory-management/writeback-and-fsync", "computer-science/storage/crash-consistency-and-journaling"], "summary": "What survives a power cut on Linux, what does not, and the durability contract an application actually gets." },
+        { "file": "tmpfs-and-memory-filesystems.md", "id": "tmpfs-and-memory-filesystems", "title": "tmpfs and Memory-Backed Filesystems", "sidebar_label": "tmpfs", "sidebar_position": 9, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/the-four-objects", "linux/memory-management/the-page-cache"], "related": ["linux/memory-management/swap-and-zswap"], "summary": "A filesystem that is page cache with no backing store: swappable, size-limited, and behind `/tmp`, `/dev/shm`, and `/run`." },
+        { "file": "procfs-sysfs-debugfs-configfs.md", "id": "procfs-sysfs-debugfs-configfs", "title": "procfs, sysfs, debugfs, configfs", "sidebar_label": "Pseudo-filesystems", "sidebar_position": 10, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/the-four-objects", "linux/kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model"], "related": ["linux/processes-and-threads/proc-as-the-process-interface"], "summary": "Four pseudo-filesystems with four different contracts, and the ABI rules for each." },
+        { "file": "overlayfs.md", "id": "overlayfs", "title": "overlayfs", "sidebar_label": "overlayfs", "sidebar_position": 11, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/mounts-and-mount-namespaces", "linux/vfs-and-filesystems/path-lookup-and-the-dcache"], "summary": "Lower, upper, and work directories, copy-up on write, whiteouts, and why this is what a container image layer is." },
+        { "file": "fuse-and-userspace-filesystems.md", "id": "fuse-and-userspace-filesystems", "title": "FUSE", "sidebar_label": "FUSE", "sidebar_position": 12, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/open-read-write-in-the-kernel"], "summary": "Moving a filesystem to user space, what the extra boundary crossings cost, and when that cost is worth paying." },
+        { "file": "lab-a-minimal-filesystem.md", "id": "lab-a-minimal-filesystem", "title": "Lab: A Filesystem in 200 Lines", "sidebar_label": "Lab: a filesystem", "sidebar_position": 13, "tags": ["linux", "kernel", "vfs"], "prerequisites": ["linux/vfs-and-filesystems/the-four-objects", "linux/vfs-and-filesystems/open-read-write-in-the-kernel", "linux/kernel-architecture-and-idioms/modules-in-practice"], "summary": "An in-memory filesystem module registered with the VFS and mounted in the QEMU lab." }
+      ]
+    },
+    {
+      "dir": "12-block-layer-and-storage",
+      "label": "The Block Layer and I/O",
+      "position": 13,
+      "description": "Everything between a filesystem asking for a block and a device completing it: `bio`s, blk-mq, I/O schedulers, `O_DIRECT`, `io_uring`, device mapper, software RAID, NVMe, and how to find out why a disk is slow.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "the-block-layer-map.md", "id": "the-block-layer-map", "title": "The Storage Stack, Mapped", "sidebar_label": "The storage stack", "sidebar_position": 1, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/vfs-and-filesystems/open-read-write-in-the-kernel"], "related": ["computer-science/storage/nvme-and-storage-interfaces", "linux/guided-traces/the-life-of-a-write"], "summary": "The whole path from `write()` to a flash die as one reference diagram, and the map for the rest of the folder." },
+        { "file": "block-devices-and-gendisk.md", "id": "block-devices-and-gendisk", "title": "Block Devices and `gendisk`", "sidebar_label": "Block devices", "sidebar_position": 2, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/the-block-layer-map"], "summary": "What makes a device a block device, partitions and device numbers, and the `/sys/block` attributes worth knowing." },
+        { "file": "the-bio.md", "id": "the-bio", "title": "The `bio`", "sidebar_label": "The bio", "sidebar_position": 3, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/block-devices-and-gendisk", "linux/memory-management/writeback-and-fsync"], "summary": "The unit of block I/O: segments of pages, a direction, a sector, a completion callback — and how writeback produces one." },
+        { "file": "blk-mq.md", "id": "blk-mq", "title": "blk-mq: Multi-Queue Block I/O", "sidebar_label": "blk-mq", "sidebar_position": 4, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/the-bio", "linux/interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel"], "summary": "Why one request queue collapsed on NVMe, per-CPU software queues, tags, and the completion path back to the waiting task." },
+        { "file": "io-schedulers.md", "id": "io-schedulers", "title": "I/O Schedulers", "sidebar_label": "I/O schedulers", "sidebar_position": 5, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/blk-mq"], "summary": "`none`, `mq-deadline`, `bfq`, and `kyber` — what each optimises and why `none` is right for NVMe and wrong for a shared disk." },
+        { "file": "buffered-direct-and-alignment.md", "id": "buffered-direct-and-alignment", "title": "Buffered I/O, `O_DIRECT`, and Alignment", "sidebar_label": "Buffered and direct I/O", "sidebar_position": 6, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/the-bio", "linux/memory-management/the-page-cache"], "summary": "Three paths to a device — through the page cache, around it, and mapped — and why databases choose what they choose." },
+        { "file": "io-uring.md", "id": "io-uring", "title": "`io_uring`", "sidebar_label": "io_uring", "sidebar_position": 7, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/buffered-direct-and-alignment", "linux/syscalls-and-the-boundary/what-a-system-call-actually-is"], "summary": "Shared submission and completion rings that batch syscalls to nearly zero, and the security history that made them controversial." },
+        { "file": "device-mapper-and-lvm.md", "id": "device-mapper-and-lvm", "title": "Device Mapper and LVM", "sidebar_label": "Device mapper", "sidebar_position": 8, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/the-bio"], "summary": "Stacking virtual block devices — linear, snapshot, thin, crypt — with LVM as a user-space manager over them." },
+        { "file": "software-raid.md", "id": "software-raid", "title": "Software RAID (md)", "sidebar_label": "Software RAID", "sidebar_position": 9, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/the-bio", "computer-science/storage/raid-and-redundancy"], "summary": "md personalities, resync and rebuild, the write hole in practice, and monitoring a degraded array." },
+        { "file": "nvme-in-the-kernel.md", "id": "nvme-in-the-kernel", "title": "NVMe in the Kernel", "sidebar_label": "NVMe", "sidebar_position": 10, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/blk-mq"], "related": ["computer-science/storage/nvme-and-storage-interfaces", "computer-science/buses-and-io/interrupt-controllers"], "summary": "Submission and completion queues mapped onto blk-mq, doorbells, per-queue interrupts, and polled I/O." },
+        { "file": "diagnosing-io-problems.md", "id": "diagnosing-io-problems", "title": "Diagnosing I/O Problems", "sidebar_label": "Diagnosing I/O", "sidebar_position": 11, "tags": ["linux", "kernel", "block-io"], "prerequisites": ["linux/block-layer-and-storage/blk-mq", "linux/block-layer-and-storage/io-schedulers", "linux/block-layer-and-storage/buffered-direct-and-alignment"], "related": ["linux/scheduling/diagnosing-scheduling-latency", "computer-science/databases/transactions-and-acid"], "summary": "A worked investigation from \"the disk is slow\" to a named cause, and why `iowait` and `%util` mislead." }
+      ]
+    },
+    {
+      "dir": "13-networking-stack",
+      "label": "The Networking Stack",
+      "position": 14,
+      "description": "The kernel's datapath and control plane: `sk_buff`, sockets, the receive and transmit paths, TCP as implemented, netfilter and connection tracking, routing, network namespaces, traffic control, and diagnosing network problems.",
+      "roadmapLink": "../00-overview/roadmap.md",
+      "pages": [
+        { "file": "the-network-stack-map.md", "id": "the-network-stack-map", "title": "The Network Stack, Mapped", "sidebar_label": "The network stack", "sidebar_position": 1, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel"], "related": ["computer-science/computer-networks/osi-and-tcp-ip-models", "linux/guided-traces/the-life-of-a-packet"], "summary": "Socket to protocol to IP to netfilter to routing to device to NIC, in both directions — the reference map for the folder." },
+        { "file": "sk-buff.md", "id": "sk-buff", "title": "`sk_buff`: The Packet Container", "sidebar_label": "sk_buff", "sidebar_position": 2, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/the-network-stack-map", "linux/memory-management/slab-slub-and-kmalloc"], "summary": "The structure every packet lives in, the headroom that makes header pushing cheap, and cloning versus copying." },
+        { "file": "sockets-in-the-kernel.md", "id": "sockets-in-the-kernel", "title": "Sockets in the Kernel", "sidebar_label": "Sockets", "sidebar_position": 3, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/sk-buff", "linux/vfs-and-filesystems/the-four-objects", "computer-science/computer-networks/sockets-and-the-application-boundary"], "summary": "`struct socket` versus `struct sock`, the dispatch tables, buffer accounting, and the wakeup path `epoll` hooks into." },
+        { "file": "the-receive-path.md", "id": "the-receive-path", "title": "The Receive Path", "sidebar_label": "Receive path", "sidebar_position": 4, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/sk-buff", "linux/interrupts-time-and-deferred-work/softirqs", "linux/interrupts-time-and-deferred-work/interrupt-affinity-and-balancing"], "summary": "From DMA into a ring to a woken reader: NAPI, GRO, steering, and every place a packet can be dropped." },
+        { "file": "the-transmit-path.md", "id": "the-transmit-path", "title": "The Transmit Path", "sidebar_label": "Transmit path", "sidebar_position": 5, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/sk-buff", "linux/networking-stack/sockets-in-the-kernel"], "summary": "From `send()` to a completion interrupt: segmentation offload, the routing decision, the qdisc, and byte queue limits." },
+        { "file": "tcp-in-the-kernel.md", "id": "tcp-in-the-kernel", "title": "TCP in the Kernel", "sidebar_label": "TCP", "sidebar_position": 6, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/sockets-in-the-kernel", "linux/networking-stack/the-receive-path", "linux/networking-stack/the-transmit-path"], "related": ["computer-science/computer-networks/transport-layer-tcp-udp"], "summary": "The state machine as implemented, buffer autotuning, retransmission, pluggable congestion control, and the options that matter." },
+        { "file": "netfilter-and-nftables.md", "id": "netfilter-and-nftables", "title": "netfilter and nftables", "sidebar_label": "netfilter", "sidebar_position": 7, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/the-receive-path", "linux/networking-stack/the-transmit-path"], "summary": "The hooks and a packet's path through them, and iptables versus nftables over the same machinery." },
+        { "file": "connection-tracking-and-nat.md", "id": "connection-tracking-and-nat", "title": "Connection Tracking and NAT", "sidebar_label": "Conntrack and NAT", "sidebar_position": 8, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/netfilter-and-nftables", "computer-science/computer-networks/nat-and-connection-tracking"], "summary": "The per-flow state that makes stateful firewalls and NAT possible, and the table-full failure everyone meets once." },
+        { "file": "routing-and-neighbours.md", "id": "routing-and-neighbours", "title": "Routing and Neighbours", "sidebar_label": "Routing", "sidebar_position": 9, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/the-transmit-path", "computer-science/computer-networks/arp-icmp-and-neighbour-discovery"], "related": ["computer-science/computer-networks/network-layer-and-routing"], "summary": "The FIB, policy routing, the neighbour table's states, and `ip route get` as a debugging tool." },
+        { "file": "network-namespaces-and-virtual-devices.md", "id": "network-namespaces-and-virtual-devices", "title": "Network Namespaces and Virtual Devices", "sidebar_label": "Namespaces and veth", "sidebar_position": 10, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/routing-and-neighbours", "linux/processes-and-threads/threads-are-tasks"], "related": ["linux/networking-stack/connection-tracking-and-nat"], "summary": "A complete independent stack per namespace, veth pairs and bridges, and a two-namespace network built by hand." },
+        { "file": "traffic-control.md", "id": "traffic-control", "title": "Traffic Control and qdiscs", "sidebar_label": "Traffic control", "sidebar_position": 11, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/the-transmit-path"], "summary": "The qdisc layer, fq_codel and cake versus htb, shaping versus policing, and the ingress hook." },
+        { "file": "diagnosing-network-problems.md", "id": "diagnosing-network-problems", "title": "Diagnosing Network Problems", "sidebar_label": "Diagnosing networks", "sidebar_position": 12, "tags": ["linux", "kernel", "networking"], "prerequisites": ["linux/networking-stack/tcp-in-the-kernel", "linux/networking-stack/the-receive-path", "linux/networking-stack/netfilter-and-nftables", "linux/networking-stack/routing-and-neighbours"], "related": ["linux/block-layer-and-storage/diagnosing-io-problems", "linux/scheduling/diagnosing-scheduling-latency"], "summary": "A worked investigation from \"connections hang\" to a named cause, and what `tcpdump` can and cannot see." }
+      ]
     }
   ],
   "external": [
@@ -304,6 +367,51 @@
       "sidebar_position": 6,
       "tags": ["computer-science", "buses-and-io", "interrupts"],
       "summary": "The hardware between a device asserting a line and a CPU taking an interrupt: PIC, APIC, MSI, and Arm's GIC."
+    },
+    {
+      "path": "docs/computer-science/storage/raid-and-redundancy.md",
+      "id": "raid-and-redundancy",
+      "title": "RAID and Redundancy",
+      "sidebar_label": "RAID",
+      "sidebar_position": 6,
+      "tags": ["computer-science", "storage", "raid"],
+      "summary": "Striping, mirroring, and parity as three different answers to disk failure, the write hole, and why the rebuild is the dangerous part."
+    },
+    {
+      "path": "docs/computer-science/storage/crash-consistency-and-journaling.md",
+      "id": "crash-consistency-and-journaling",
+      "title": "Crash Consistency and Journaling",
+      "sidebar_label": "Crash consistency",
+      "sidebar_position": 7,
+      "tags": ["computer-science", "storage", "durability"],
+      "summary": "Why one logical update is many block writes, and how fsck, journaling, copy-on-write, and log structure each keep a crash from leaving nonsense on disk."
+    },
+    {
+      "path": "docs/computer-science/computer-networks/sockets-and-the-application-boundary.md",
+      "id": "sockets-and-the-application-boundary",
+      "title": "Sockets and the Application Boundary",
+      "sidebar_label": "Sockets API",
+      "sidebar_position": 6,
+      "tags": ["computer-science", "computer-networks", "sockets"],
+      "summary": "The socket API as the one networking interface a program actually sees: descriptors, the call lifecycle, blocking and readiness, and what `send` does not promise."
+    },
+    {
+      "path": "docs/computer-science/computer-networks/arp-icmp-and-neighbour-discovery.md",
+      "id": "arp-icmp-and-neighbour-discovery",
+      "title": "ARP, ICMP, and Neighbour Discovery",
+      "sidebar_label": "ARP and ICMP",
+      "sidebar_position": 7,
+      "tags": ["computer-science", "computer-networks", "arp", "icmp"],
+      "summary": "How IP finds a next hop's link-layer address and how ICMP reports trouble — the protocols behind `ping`, `traceroute`, and path-MTU discovery."
+    },
+    {
+      "path": "docs/computer-science/computer-networks/nat-and-connection-tracking.md",
+      "id": "nat-and-connection-tracking",
+      "title": "NAT and Connection Tracking",
+      "sidebar_label": "NAT",
+      "sidebar_position": 8,
+      "tags": ["computer-science", "computer-networks", "nat"],
+      "summary": "Rewriting addresses in flight, why that forces a device to remember every flow, and the mapping behaviours that decide whether peer-to-peer traffic works."
     }
   ]
 }

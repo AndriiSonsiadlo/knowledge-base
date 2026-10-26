@@ -176,4 +176,9 @@ a gateway they weren't expecting to need. Always double check host count math: a
 - [Data Link Layer](./data-link-layer.md)
 - [Transport Layer: TCP & UDP](./transport-layer-tcp-udp.md)
 - [DNS](../protocols/dns.md) — resolves names to the IP addresses this layer routes on.
+- [ARP, ICMP, and Neighbour Discovery](./arp-icmp-and-neighbour-discovery.md) — how a router reaches
+  its next hop, and how IP reports failures.
+- [NAT and Connection Tracking](./nat-and-connection-tracking.md) — the NAT section above, in depth.
+- [Routing and Neighbours](../../linux/13-networking-stack/routing-and-neighbours.md) — the Linux
+  kernel's routing table and neighbour cache.
 
