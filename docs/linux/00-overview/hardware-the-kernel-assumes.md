@@ -84,9 +84,8 @@ The machine must provide a clock that only ever moves forward and a way to ask i
 interrupt at a future point. Preemption depends on it — the scheduler cannot take the CPU back from
 a running task without a timer tick to interrupt on — and so do timeouts throughout the kernel and
 the guarantee behind `CLOCK_MONOTONIC` in user space: a clock the kernel trusts never to run
-backward. This capability is owned by a later folder in this section, once timekeeping gets its own
-treatment; for now, treat "a clock the kernel trusts" as a placeholder for a chapter that has not
-landed yet.
+backward. [Timekeeping and Clocksources](../10-interrupts-time-and-deferred-work/timekeeping-and-clocksources.md)
+is where this section covers how the kernel builds that clock from the hardware it finds.
 
 ### 7. DMA-capable devices
 
@@ -133,7 +132,7 @@ later page in this section, check whether it is already owned here.
 | Precise exceptions | [Exceptions, Traps, and Interrupts](../../computer-science/cpu-architecture/exceptions-traps-and-interrupts.md) |
 | Interrupts and a controller | [I/O and Interrupts](../../computer-science/buses-and-io/io-and-interrupts.md) |
 | Atomic read-modify-write | [Multicore and Parallelism](../../computer-science/cpu-architecture/multicore-and-parallelism.md) |
-| Monotonic timer | Owned by a later folder in this section (not yet written) |
+| Monotonic timer | [Timekeeping and Clocksources](../10-interrupts-time-and-deferred-work/timekeeping-and-clocksources.md) |
 | DMA-capable devices | [System Interconnects](../../computer-science/buses-and-io/system-interconnects.md) |
 
 <Figure src="/img/linux/overview/privilege-rings.svg" alt="Concentric rings 0 through 3, with the kernel at ring 0 and applications at ring 3" caption="x86 protection rings. Linux uses two of the four: ring 0 for the kernel, ring 3 for everything else." source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Priv_rings.svg" />

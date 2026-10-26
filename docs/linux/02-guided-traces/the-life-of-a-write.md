@@ -31,7 +31,8 @@ pointers supplied by whichever filesystem owns it. `write()` reaches the filesys
 one indirect call — <Src file="fs/read_write.c" symbol="vfs_write" /> resolves to
 `file->f_op->write_iter` — and that single indirection is the entire reason a filesystem can be a
 loadable module: ext4, xfs, and a FUSE filesystem all satisfy the same call differently, and `write()`
-never needs to know which one it's talking to.
+never needs to know which one it's talking to. [`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)
+follows that dispatch all the way down.
 
 ## Into the page cache
 
@@ -49,14 +50,14 @@ involved here — **writeback, dirty pages, and `fsync`** — are their own page
 
 ## The block layer
 
-When a dirty page is finally written back, the filesystem hands it to the block layer as a `bio`: a
-description of which pages go where on which device. **The block layer** takes it from there — an
-I/O scheduler orders and merges requests, and blk-mq fans them out across per-CPU submission queues so
+When a dirty page is finally written back, the filesystem hands it to the block layer as a [`bio`](../12-block-layer-and-storage/the-bio.md): a
+description of which pages go where on which device. **[The block layer](../12-block-layer-and-storage/the-block-layer-map.md)** takes it from there — an
+I/O scheduler orders and merges requests, and [blk-mq](../12-block-layer-and-storage/blk-mq.md) fans them out across per-CPU submission queues so
 that many CPUs can issue I/O without fighting over one lock.
 
 ## The device
 
-The request lands in an NVMe submission queue. From there the device itself drives the transfer —
+The request lands in an [NVMe submission queue](../12-block-layer-and-storage/nvme-in-the-kernel.md). From there the device itself drives the transfer —
 it DMAs the data directly out of your pages, without the CPU copying a single byte — and reports
 completion with an interrupt (an MSI-X vector, on any machine built this decade). See
 [The Hardware the Kernel Assumes](../00-overview/hardware-the-kernel-assumes.md) for why **DMA** is
@@ -132,7 +133,7 @@ cache reproducible for a benchmark.
 1. **"`write()` returning means the data is on disk."** No — it means the data is in the page cache
    and the kernel has accepted responsibility for it. Nothing about a successful `write()` says the
    bytes have left RAM.
-2. **"`O_DIRECT` means synchronous."** No — `O_DIRECT` bypasses the page cache and writes (or DMAs)
+2. **"`O_DIRECT` means synchronous."** No — [`O_DIRECT`](../12-block-layer-and-storage/buffered-direct-and-alignment.md) bypasses the page cache and writes (or DMAs)
    straight from your buffer, but it still needs a flush to guarantee the device's own cache has
    committed the data; skipping the page cache is not the same promise as durability.
 3. **"`fsync` on the file is enough."** Usually, but not always: if the write created a new file, the

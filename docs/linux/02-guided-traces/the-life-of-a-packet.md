@@ -18,6 +18,8 @@ it doesn't even look at the packet. Nearly all of the real processing happens la
 execution context, on purpose. Understanding why explains most of the shape of the networking stack:
 why there's a poll loop instead of an interrupt per packet, why one structure carries a packet through
 every layer, and why the numbers `ping` reports are not quite what they look like.
+[The Network Stack, Mapped](../13-networking-stack/the-network-stack-map.md) is the reference map for
+every stage below, and each stage links to the page that covers it in depth.
 
 ## Before the kernel knows
 
@@ -38,7 +40,7 @@ packet happens at interrupt level. `napi_schedule()` queues the device's `napi_s
 <Src file="net/core/dev.c" symbol="net_rx_action" /> (registered once, at boot, via
 `open_softirq(NET_RX_SOFTIRQ, net_rx_action)`).
 
-This is NAPI — "New API," despite the name being decades old now — and it's the reason the receive
+This is [NAPI](../13-networking-stack/the-receive-path.md#napi-interrupt-once-then-poll) — "New API," despite the name being decades old now — and it's the reason the receive
 path scales the way it does. Under light load, one packet still costs roughly one interrupt. Under
 heavy load, the NIC's queue is disabled from interrupting entirely, and
 <Src file="net/core/dev.c" symbol="napi_poll" /> is called repeatedly from the softirq instead, driven
@@ -48,7 +50,7 @@ turns into a bounded poll loop, by design.
 ## `sk_buff`
 
 Every packet flowing through the kernel is represented by one <Src file="include/linux/skbuff.h" symbol="sk_buff" />
-— the structure that carries both the packet's bytes and the kernel's growing understanding of them as
+— the [structure](../13-networking-stack/sk-buff.md) that carries both the packet's bytes and the kernel's growing understanding of them as
 it climbs the stack. Each layer that peels off a header (Ethernet, then IP, then TCP or UDP) does so by
 moving a pointer into the buffer forward, not by copying the remaining bytes into a new location. The
 same `sk_buff` that arrived from the NIC is still the one handed to the application, headers stripped
@@ -62,26 +64,26 @@ Before packets climb any further, <Src file="include/linux/netdevice.h" symbol="
 (dispatching to <Src file="net/core/gro.c" symbol="dev_gro_receive" />) gets a chance to merge related
 small segments — several TCP segments from the same stream, arrived close together — into one larger
 `sk_buff` before handing it upward. Generic Receive Offload trades a small amount of merging work for a
-much larger saving: the rest of the stack, and the application reading from the socket, processes one
+much larger saving ([GRO](../13-networking-stack/the-receive-path.md#gro) has the details): the rest of the stack, and the application reading from the socket, processes one
 large packet's worth of headers and locking instead of forty small ones.
 
 ## netfilter and routing
 
-The merged packet passes through netfilter's hook points — the places where `iptables`/`nftables`
+The merged packet passes through [netfilter's hook points](../13-networking-stack/netfilter-and-nftables.md) — the places where `iptables`/`nftables`
 rules, connection tracking, and NAT get their chance to inspect or rewrite it — before the kernel makes
-its routing decision: is this packet addressed to a local socket, or does it need to be forwarded back
+its [routing decision](../13-networking-stack/routing-and-neighbours.md): is this packet addressed to a local socket, or does it need to be forwarded back
 out? For a packet destined here, <Src file="net/ipv4/ip_input.c" symbol="ip_rcv" /> and the functions
-downstream of it are where these hooks fire and the routing lookup happens. Connection tracking, in
+downstream of it are where these hooks fire and the routing lookup happens. [Connection tracking](../13-networking-stack/connection-tracking-and-nat.md), in
 one sentence, is the kernel remembering that this packet belongs to an existing flow so that netfilter
 rules and NAT can be applied consistently to every packet in that flow, not just the first one.
 
 ## Transport
 
 For TCP, <Src file="net/ipv4/tcp_ipv4.c" symbol="tcp_v4_rcv" /> is where the packet meets the
-connection's actual state machine: sequence numbers are checked against what's expected, out-of-order
+connection's actual state machine ([TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)): sequence numbers are checked against what's expected, out-of-order
 segments are held rather than delivered, and acknowledged data is appended to the socket's receive
 queue. If a process is blocked in `recv()` waiting for exactly this, the socket's data-ready callback —
-<Src file="net/core/sock.c" symbol="sock_def_readable" /> by default — wakes it. None of this involves
+<Src file="net/core/sock.c" symbol="sock_def_readable" /> by default — [wakes it](../13-networking-stack/sockets-in-the-kernel.md#blocking-and-waking). None of this involves
 copying data out to user space yet; the bytes are still sitting in kernel buffers, just now reachable
 from the socket the application is holding.
 
@@ -94,7 +96,7 @@ between arrival and this moment moved a pointer, not the data itself.
 
 ## Transmit, briefly
 
-Sending runs the same shape in reverse, without an interrupt to kick it off: the application's
+Sending runs the same shape in reverse ([The Transmit Path](../13-networking-stack/the-transmit-path.md)), without an interrupt to kick it off: the application's
 `write()`/`send()` builds an `sk_buff`, TCP attaches sequencing and header data, and
 <Src file="include/linux/netdevice.h" symbol="dev_queue_xmit" /> hands it to the queueing discipline —
 the `qdisc` — which orders and possibly shapes or drops it before it reaches the driver. The driver's
