@@ -87,9 +87,12 @@ flowchart LR
 *The five IPv4 netfilter hooks around the routing decision, with the order in which conntrack, NAT, and
 filtering run at each.*
 
-{/* Task 22: the Wikimedia Commons "Netfilter-packet-flow" figure goes here, beside the Mermaid
-    simplification above, credited with <Figure source= href= /> and a static/img/linux/SOURCES.md row.
-    The page is written to stand alone without it. */}
+<Figure src="/img/linux/networking-stack/netfilter-packet-flow.svg"
+        alt="Netfilter packet flow through the raw, mangle, nat, filter and security tables at each hook, for both routed and bridged traffic, with the routing decisions marked"
+        caption="Every netfilter hook and legacy table a packet can traverse, including the bridge path. nftables uses the same hooks, with chains you name and place yourself."
+        source="Wikimedia Commons (Jan Engelhardt)"
+        href="https://commons.wikimedia.org/wiki/File:Netfilter-packet-flow.svg"
+        license="CC BY-SA 3.0" />
 
 ## nftables: a VM in the kernel
 
