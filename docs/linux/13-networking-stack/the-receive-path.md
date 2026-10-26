@@ -125,9 +125,12 @@ which delivers the packet in a fixed order:
 1. **Taps first.** Every handler registered on `ptype_all` gets the packet — that's where an `AF_PACKET`
    socket, and therefore `tcpdump`, sees it. This is *before* netfilter and before any socket. `tcpdump`
    shows you what reached the host, not what reached the application.
-2. **VLAN untagging**, then the device's **rx handler**, if it has one. A port enslaved to a bridge, bond
-   or macvlan has one, and that handler can consume the packet into the virtual device.
-3. **The protocol handler** for the packet's ethertype — `ip_rcv` for IPv4.
+2. **The tc ingress hook**, if the device has an `ingress` or `clsact` qdisc — filters, policers and
+   eBPF programs from [traffic control](./traffic-control.md#ingress-and-clsact) run here and can drop or
+   redirect the packet.
+3. **The device's rx handler**, if it has one. A port enslaved to a bridge, bond or macvlan has one, and
+   that handler can consume the packet into the virtual device.
+4. **The protocol handler** for the packet's ethertype — `ip_rcv` for IPv4.
 
 Loopback traffic enters here by a different door. It has no ring and no device interrupt:
 `loopback_xmit` calls `__netif_rx`, which puts the `sk_buff` on the *sending* CPU's per-CPU backlog
