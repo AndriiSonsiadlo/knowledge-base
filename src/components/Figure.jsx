@@ -13,35 +13,42 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 //           source="Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Fivestagespipeline.png"
 //           license="CC BY-SA 3.0" />
 export default function Figure({
-	src,
-	alt,
-	caption,
-	source,
-	href,
-	license,
-	photo = false,
-	width,
+  src,
+  alt,
+  caption,
+  source,
+  href,
+  license,
+  photo = false,
+  width,
 }) {
-	const resolved = useBaseUrl(src);
-	return (
-		<figure className="kb-figure">
-			<div className={`kb-figure__plate${photo ? " kb-figure__plate--photo" : ""}`}>
-				<img src={resolved} alt={alt} loading="lazy" style={width ? { maxWidth: width } : undefined} />
-			</div>
-			{(caption || source) && (
-				<figcaption className="kb-figure__caption">
-					{caption}
-					{source && (
-						<span className="kb-figure__credit">
-							{caption ? " " : ""}
-							<a href={href} target="_blank" rel="noopener noreferrer">
-								{source}
-							</a>
-							{license ? `, ${license}` : ""}
-						</span>
-					)}
-				</figcaption>
-			)}
-		</figure>
-	);
+  const resolved = useBaseUrl(src);
+  return (
+    <figure className="kb-figure">
+      <div
+        className={`kb-figure__plate${photo ? " kb-figure__plate--photo" : ""}`}
+      >
+        <img
+          src={resolved}
+          alt={alt}
+          loading="lazy"
+          style={width ? { maxWidth: width } : undefined}
+        />
+      </div>
+      {(caption || source) && (
+        <figcaption className="kb-figure__caption">
+          {caption}
+          {source && (
+            <span className="kb-figure__credit">
+              {caption ? " " : ""}
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {source}
+              </a>
+              {license ? `, ${license}` : ""}
+            </span>
+          )}
+        </figcaption>
+      )}
+    </figure>
+  );
 }

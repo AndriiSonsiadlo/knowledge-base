@@ -538,6 +538,7 @@ const CodeBlockFallback = ({ children, ...props }: CodeBlockFallbackProps) => (
           ?.toString()
           .split("\n")
           .map((line, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: lines of a static snippet have no identity beyond their position
             <span className="line" key={i}>
               {line}
             </span>

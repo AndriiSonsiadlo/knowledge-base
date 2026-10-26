@@ -76,7 +76,9 @@ export default function DocItemLayout({ children }) {
             {(readingMinutes !== null || metadata.lastUpdatedAt) && (
               <div className={styles.metaRow}>
                 {readingMinutes !== null && (
-                  <p className={styles.readingTime}>{readingMinutes} min read</p>
+                  <p className={styles.readingTime}>
+                    {readingMinutes} min read
+                  </p>
                 )}
                 {metadata.lastUpdatedAt && (
                   <p className={clsx(styles.readingTime, styles.lastUpdated)}>
