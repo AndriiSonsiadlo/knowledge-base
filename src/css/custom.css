@@ -1299,6 +1299,17 @@ body {
   @apply underline decoration-dotted underline-offset-2;
 }
 
+/* Zoomed images (docusaurus-plugin-image-zoom) sit above the sticky navbar, and keep
+   the light plate so transparent diagrams stay readable over the dark-theme overlay. */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+  z-index: calc(var(--ifm-z-index-fixed) + 1);
+}
+
+.medium-zoom-image--opened {
+  @apply bg-white;
+}
+
 /* --- <Recall /> --------------------------------------------------------- */
 /* The recall card at the top of every algorithms page. Colour never carries
    meaning on its own, so it stays legible in print and in both themes. */
