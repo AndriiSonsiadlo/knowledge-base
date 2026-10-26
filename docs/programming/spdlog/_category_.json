@@ -1,7 +1,7 @@
 {
-	"label": "spdlog",
-	"position": 7,
-	"link": {
-		"type": "generated-index"
-	}
+  "label": "spdlog",
+  "position": 7,
+  "link": {
+    "type": "generated-index"
+  }
 }

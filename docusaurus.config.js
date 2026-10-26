@@ -107,6 +107,14 @@ const config = {
     ({
       // Replace with your project's social card
       image: "img/social-card-v2.png",
+      // docusaurus-plugin-image-zoom reads its options here, not from the plugin entry
+      zoom: {
+        selector: ".markdown img, .kb-figure__plate img",
+        background: {
+          light: "oklch(1 0 0)",
+          dark: "oklch(20.8% 0.042 265.755)",
+        },
+      },
       docs: {
         sidebar: {
           hideable: true,
@@ -324,10 +332,7 @@ const config = {
         disableInDev: true,
       }),
     ],
-    [
-      "docusaurus-plugin-image-zoom",
-      { selector: ".markdown img, .kb-figure__plate img" },
-    ],
+    "docusaurus-plugin-image-zoom",
     [
       "./src/plugins/blog-plugin",
       {

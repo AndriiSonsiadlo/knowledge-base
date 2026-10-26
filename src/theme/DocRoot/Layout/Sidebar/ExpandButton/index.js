@@ -4,6 +4,7 @@ import React from "react";
 import styles from "./styles.module.css";
 export default function DocRootLayoutSidebarExpandButton({ toggleSidebar }) {
   return (
+    // biome-ignore lint/a11y/useSemanticElements: kept as the div Docusaurus ships, so the swizzled sidebar styling still applies
     <div
       className={styles.expandButton}
       title={translate({
