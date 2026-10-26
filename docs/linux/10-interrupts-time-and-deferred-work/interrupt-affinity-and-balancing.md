@@ -158,8 +158,8 @@ completion, continuously. This is exactly why network performance tuning materia
 (hardware spreading flows across queues), **RPS** (software-level spreading when RSS isn't enough or isn't
 available), and **IRQ pinning** in the same breath — they are three layers of the same one alignment
 argument, applied at the hardware queue level, the software steering level, and the interrupt-placement
-level respectively. The network-specific mechanics of RSS/RPS belong to folder 13's networking material
-(not yet written, named here in prose only); this page owns the interrupt-placement layer of that argument.
+level respectively. The network-specific mechanics of RSS/RPS belong to
+[The Receive Path](../13-networking-stack/the-receive-path.md#steering-rss-rps-rfs); this page owns the interrupt-placement layer of that argument.
 
 ## When pinning hurts
 

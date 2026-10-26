@@ -29,7 +29,7 @@ might be a minimal userland, the next layer adds a package, the next adds applic
 those layers are mutable once built — they're addressed by content hash and shared read-only across
 every container that uses them, which is why running the same image twice doesn't cost twice the disk.
 
-`overlayfs` is what turns a stack of read-only layers plus one writable layer into something that looks
+[`overlayfs`](../11-vfs-and-filesystems/overlayfs.md) is what turns a stack of read-only layers plus one writable layer into something that looks
 like an ordinary single filesystem. Mounted as <Src file="fs/overlayfs/super.c" symbol="ovl_fs_type" />
 with a `lowerdir` (the read-only layers, in order) and an `upperdir` (the one writable layer), it
 presents a merged view: a read looks up a file top-down through the layers and returns the first hit; a
@@ -65,7 +65,7 @@ gets handled slightly differently from the other six inside the kernel).
 
 Namespaces change what the process can enumerate; they don't, by themselves, change what `/` means.
 That's a separate step: <Src file="fs/namespace.c" symbol="pivot_root" /> swaps the process's root
-directory for another directory already mounted somewhere in its (now-private) mount namespace — in a
+directory for another directory already mounted somewhere in its (now-private) [mount namespace](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md) — in a
 container's case, the merged `overlayfs` view from the first section. Everything the process resolves
 through an absolute path afterward starts from there. This is why `pivot_root` needs `CLONE_NEWNS`
 first: without a private mount namespace, `pivot_root` would still work, but it would move the root of
@@ -120,12 +120,12 @@ purpose. Three mechanisms stack here:
 ## Networking
 
 By default a fresh network namespace has nothing in it — not even a loopback interface that's up. Giving
-a container the ability to talk to anything means creating a `veth` pair: two virtual Ethernet
+a container the ability to talk to anything means creating a [`veth` pair](../13-networking-stack/network-namespaces-and-virtual-devices.md#veth-pairs): two virtual Ethernet
 interfaces, permanently linked, where anything sent in one comes out the other. The kernel creates the
 pair through <Src file="drivers/net/veth.c" symbol="veth_newlink" />, and the runtime moves one end into
 the container's network namespace (it becomes `eth0` in there) while leaving the other end in the host's
 default namespace, where it's attached to a bridge alongside the other containers' host-side veth ends
-and given a NAT rule so outbound traffic looks like it came from the host. From here, a packet leaving
+and given a [NAT rule](../13-networking-stack/connection-tracking-and-nat.md) so outbound traffic looks like it came from the host. From here, a packet leaving
 the container follows exactly the receive and transmit path described in
 [the life of a packet](./the-life-of-a-packet.md) — twice, once on each side of the veth pair — with the
 `bridge` device standing in for a physical switch.

@@ -105,8 +105,8 @@ does not consult `preempt_count` before delivering an interrupt. What the preemp
 narrower: once the kernel is *back* from handling that interrupt, or once some other event sets
 `TIF_NEED_RESCHED`, may `__schedule()` actually run and switch to a different task right now, or must
 current execution continue until a later checked point. This distinction — interrupts always arrive,
-scheduling decisions are gated — is what folder 10's hardirq-context material (named here in prose, not
-yet linked) builds directly on top of.
+scheduling decisions are gated — is what [Hardirq Context](../10-interrupts-time-and-deferred-work/hardirq-context.md)
+builds directly on top of.
 
 ## Where the kernel is never preemptible
 

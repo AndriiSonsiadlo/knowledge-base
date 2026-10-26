@@ -141,9 +141,8 @@ Threading is not free, and two categories of handler are better off not paying f
 
 - **Very high interrupt-rate devices**, where the wakeup-and-context-switch cost per interrupt, multiplied
   across the interrupt rate, becomes real overhead in its own right. A fast NIC is the canonical example —
-  rather than threading the per-packet interrupt path, it switches to **NAPI polling** once traffic is
-  heavy enough (folder 13's networking material owns this mechanism; not yet written, named here only in
-  prose), which amortizes many packets over one scheduling decision instead of one wakeup per packet.
+  rather than threading the per-packet interrupt path, it switches to **[NAPI polling](../13-networking-stack/the-receive-path.md#napi-interrupt-once-then-poll)**
+  once traffic is heavy enough, which amortizes many packets over one scheduling decision instead of one wakeup per packet.
 - **Genuinely trivial handlers**, where the entire body of work is a register read and an acknowledgment —
   the wakeup and the thread's own scheduling overhead can exceed the cost of just doing the (tiny) work in
   hard-IRQ context directly. `IRQF_NO_THREAD` exists for exactly this case under forced-threading

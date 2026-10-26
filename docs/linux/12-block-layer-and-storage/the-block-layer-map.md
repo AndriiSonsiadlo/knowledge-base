@@ -92,12 +92,12 @@ The driver *model* — how a driver is bound to a device, `struct device`, buses
 that turns a probed device into sysfs and `/dev` entries — belongs to a later folder in this section, not
 yet written; it is named here only so the boundary is clear.
 
-:::info
-A full zoomable copy of the Thomas-Krenn "Linux Storage Stack Diagram" — the community-maintained
-reference this page's own diagram is a deliberately simplified version of — belongs here, alongside the
-Mermaid diagram below. It is not yet sourced into this repository; a later task adds it. This page stands
-on its own without it.
-:::
+<Figure src="/img/linux/block-layer-and-storage/linux-storage-stack-v6.18.png"
+        alt="The Linux storage stack for kernel 6.18, from applications and system calls through the VFS, page cache, filesystems, device mapper, the block layer and its I/O schedulers, to SCSI, NVMe and other drivers and the physical devices"
+        caption="The whole storage stack for Linux 6.18 — the community reference the Mermaid diagram below simplifies. Zoom in; it's dense on purpose."
+        source="Thomas-Krenn wiki (Werner Fischer)"
+        href="https://www.thomas-krenn.com/en/wiki/Linux_Storage_Stack_Diagram"
+        license="CC BY-SA 4.0" />
 
 ```mermaid
 flowchart TB

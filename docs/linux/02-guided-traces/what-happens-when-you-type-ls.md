@@ -14,8 +14,8 @@ Twenty mechanisms, named and linked, between a keystroke and a directory listing
 
 :::note
 Folder 02 is a set of maps, not a set of destinations. Every mechanism named here in **bold**
-gets its own page once the folders that own it (05 onward) are written — the link appears then.
-Until it does, treat the bold name as a promise: this thing is real, it matters, and it is coming.
+links to the page that owns it. Folders 05 through 13 are written; mechanisms that belong to folders 14
+onward are named in prose until those folders land.
 :::
 
 One command, roughly twenty mechanisms, most of which will never get mentioned again on this page
@@ -35,8 +35,8 @@ only releases the whole line to the shell's `read()` once Enter arrives, which i
 
 `ls` is not a shell builtin, so bash walks `$PATH` looking for an executable file named `ls` — a
 handful of `stat`-family calls against each directory in the list until one hits. Having found it,
-bash does what every shell does to run an external command: **`fork()` and copy-on-write**, then
-**`exec()` and binary formats** to replace the child's image with the `ls` binary.
+bash does what every shell does to run an external command: **[`fork()` and copy-on-write](../06-processes-and-threads/fork-and-copy-on-write.md)**, then
+**[`exec()` and binary formats](../06-processes-and-threads/exec-and-binary-formats.md)** to replace the child's image with the `ls` binary.
 
 ## Loading the binary
 
@@ -57,12 +57,12 @@ run). The mechanics of that fault are their own page: [The Life of a Page Fault]
 ## Reading the directory
 
 `ls` does not `open()` the directory and `read()` bytes from it — Linux does not let you read a
-directory as a byte stream. It calls `openat()` to get a file descriptor, then `getdents64()`
-repeatedly until the kernel reports zero entries left. Dispatch happens through the VFS: the
+directory as a byte stream. It calls `openat()` to get a file descriptor ([`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)), then `getdents64()`
+repeatedly until the kernel reports zero entries left. Dispatch happens through the [VFS](../11-vfs-and-filesystems/why-vfs-exists.md): the
 directory's `struct file` has an `f_op` table, and `getdents64()` walks it via
 <Src file="fs/readdir.c" symbol="iterate_dir" />, which calls the filesystem's own `iterate_shared`
 operation to actually produce entries. Run the same `ls` again right after and it's faster — the
-dentry cache already has the answers.
+[dentry cache](../11-vfs-and-filesystems/path-lookup-and-the-dcache.md) already has the answers.
 
 ## `stat` for every entry
 
@@ -181,5 +181,6 @@ flowchart TB
 - [`man 1 strace`](https://man7.org/linux/man-pages/man1/strace.1.html) — the tool this page's
   evidence comes from, including the `-c` summary flag used above.
 - [The Linux kernel's VFS documentation](https://docs.kernel.org/filesystems/vfs.html) — the
-  dispatch layer every stage from "Reading the directory" onward goes through; skim it now, own it
-  when folder 11 covers the VFS in depth.
+  dispatch layer every stage from "Reading the directory" onward goes through; skim it now —
+  [Why the VFS Exists](../11-vfs-and-filesystems/why-vfs-exists.md) is where this section covers it in
+  depth.

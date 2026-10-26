@@ -155,7 +155,8 @@ favors when the application's access pattern is nothing like the general case th
 for — and to get precise, synchronous control over when data actually reaches the device. What is given up
 is everything this page describes: no free readahead, no write-behind buffering, and strict alignment
 requirements on buffer address, offset, and length that ordinary buffered I/O never had to think about.
-Folder 12 (block I/O) owns the mechanism in full; it is named here only so the trade-off this page has been
+[Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
+covers the mechanism in full; it is named here so the trade-off this page has been
 describing has its counterpoint on the record.
 
 ## Cache is not "used" memory

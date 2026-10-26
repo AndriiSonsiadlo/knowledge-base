@@ -19,7 +19,7 @@ raw dependency graph.
 
 ## Learning paths
 
-Paths are filled in as the folders they cross are written. Folders 00 through 10 exist now; the
+Paths are filled in as the folders they cross are written. Folders 00 through 13 exist now; the
 rest of the section is specified but not yet scaffolded.
 
 <LearningPath
@@ -34,6 +34,9 @@ rest of the section is specified but not yet scaffolded.
     ["`/proc` as the process interface", "../06-processes-and-threads/proc-as-the-process-interface.md"],
     ["What `free` and RSS really tell you", "../08-memory-management/what-free-and-rss-really-say.md"],
     ["Priorities, nice, and weights", "../07-scheduling/priorities-nice-and-weights.md"],
+    ["Why the VFS exists", "../11-vfs-and-filesystems/why-vfs-exists.md"],
+    ["The storage stack, mapped", "../12-block-layer-and-storage/the-block-layer-map.md"],
+    ["The network stack, mapped", "../13-networking-stack/the-network-stack-map.md"],
   ]} />
 
 <LearningPath
@@ -112,10 +115,11 @@ A real character driver is built in folder 14.
     ["Reclaim, LRU, and kswapd", "../08-memory-management/reclaim-lru-and-kswapd.md"],
     ["Interrupt affinity", "../10-interrupts-time-and-deferred-work/interrupt-affinity-and-balancing.md"],
     ["cgroup CPU control", "../07-scheduling/cgroup-cpu-control.md"],
+    ["Diagnosing I/O problems", "../12-block-layer-and-storage/diagnosing-io-problems.md"],
+    ["Diagnosing network problems", "../13-networking-stack/diagnosing-network-problems.md"],
   ]} />
 
-I/O and network diagnosis land with folders 12 and 13; the tooling to go with all of this lands with
-folder 17.
+The tooling to go with all of this lands with folder 17.
 
 <LearningPath
   title="I want to understand memory"
@@ -148,7 +152,50 @@ folder 17.
     ["Finding locking bugs", "../09-concurrency-and-locking/finding-locking-bugs.md"],
   ]} />
 
+The storage path assumes the "I want to understand memory" path above, and its path-lookup step leans
+on RCU from the concurrency path.
+
+<LearningPath
+  title="I want to understand storage"
+  steps={[
+    ["Why the VFS exists", "../11-vfs-and-filesystems/why-vfs-exists.md"],
+    ["The four VFS objects", "../11-vfs-and-filesystems/the-four-objects.md"],
+    ["Path lookup and the dcache", "../11-vfs-and-filesystems/path-lookup-and-the-dcache.md"],
+    ["`open`, `read`, `write` in the kernel", "../11-vfs-and-filesystems/open-read-write-in-the-kernel.md"],
+    ["Journaling and crash consistency", "../11-vfs-and-filesystems/journaling-and-crash-consistency.md"],
+    ["ext4", "../11-vfs-and-filesystems/ext4.md"],
+    ["The storage stack, mapped", "../12-block-layer-and-storage/the-block-layer-map.md"],
+    ["Block devices and `gendisk`", "../12-block-layer-and-storage/block-devices-and-gendisk.md"],
+    ["The `bio`", "../12-block-layer-and-storage/the-bio.md"],
+    ["blk-mq", "../12-block-layer-and-storage/blk-mq.md"],
+    ["I/O schedulers", "../12-block-layer-and-storage/io-schedulers.md"],
+    ["Buffered I/O, `O_DIRECT`, and alignment", "../12-block-layer-and-storage/buffered-direct-and-alignment.md"],
+    ["`io_uring`", "../12-block-layer-and-storage/io-uring.md"],
+    ["Diagnosing I/O problems", "../12-block-layer-and-storage/diagnosing-io-problems.md"],
+  ]} />
+
+The networking path assumes three pages outside it: [softirqs](../10-interrupts-time-and-deferred-work/softirqs.md),
+[the four VFS objects](../11-vfs-and-filesystems/the-four-objects.md) (a socket is a file), and the
+[sockets API](../../computer-science/computer-networks/sockets-and-the-application-boundary.md) from
+Computer Networks.
+
+<LearningPath
+  title="I want to understand networking"
+  steps={[
+    ["The network stack, mapped", "../13-networking-stack/the-network-stack-map.md"],
+    ["`sk_buff`: the packet container", "../13-networking-stack/sk-buff.md"],
+    ["Sockets in the kernel", "../13-networking-stack/sockets-in-the-kernel.md"],
+    ["The receive path", "../13-networking-stack/the-receive-path.md"],
+    ["The transmit path", "../13-networking-stack/the-transmit-path.md"],
+    ["TCP in the kernel", "../13-networking-stack/tcp-in-the-kernel.md"],
+    ["netfilter and nftables", "../13-networking-stack/netfilter-and-nftables.md"],
+    ["Connection tracking and NAT", "../13-networking-stack/connection-tracking-and-nat.md"],
+    ["Routing and neighbours", "../13-networking-stack/routing-and-neighbours.md"],
+    ["Network namespaces and virtual devices", "../13-networking-stack/network-namespaces-and-virtual-devices.md"],
+    ["Diagnosing network problems", "../13-networking-stack/diagnosing-network-problems.md"],
+  ]} />
+
 ## Where the rest is
 
-Folders 11 through 19 remain specified and not yet scaffolded, covering the VFS, block I/O,
-networking, drivers, containers, security, observability, eBPF, and contributing.
+Folders 14 through 19 remain specified and not yet scaffolded, covering drivers, containers,
+security, observability, eBPF, and contributing.

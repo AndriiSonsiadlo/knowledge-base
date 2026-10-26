@@ -164,8 +164,9 @@ absorb bursts and reorder for throughput — is not the last place your data can
 if a device claims to support a flush and doesn't actually honor it (rare, but it has happened with some
 consumer hardware and misconfigured virtual disks), no amount of kernel-side care changes anything: the
 kernel's guarantee ends at the request it issues, not at what the hardware actually does with it. The
-block layer's side of this — how a flush request is represented and scheduled — belongs to folder 12,
-not here.
+block layer's side of this — [how a flush request is represented](../12-block-layer-and-storage/the-bio.md)
+and scheduled — belongs to the block-layer folder, and what the filesystem does with it to keep its own
+metadata consistent is [Journaling and Crash Consistency](../11-vfs-and-filesystems/journaling-and-crash-consistency.md).
 
 ## Tuning, honestly
 

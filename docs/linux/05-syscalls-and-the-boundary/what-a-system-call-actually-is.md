@@ -94,13 +94,10 @@ is aimed at reducing how often a program crosses it, not at making any one cross
 | Mechanism | The crossing it removes |
 |---|---|
 | [The vDSO](./the-vdso.md) | Avoids the crossing entirely for calls whose answer can be computed in userspace (`gettimeofday`, `clock_gettime`, `getcpu`). |
-| `io_uring` | Batches many operations behind one (or zero, in polling mode) crossings, via shared submission and completion rings. |
-| `mmap` | Pays one crossing to establish a mapping, then services every subsequent access with no crossing at all. |
+| [`io_uring`](../12-block-layer-and-storage/io-uring.md) | Batches many operations behind one (or zero, in polling mode) crossings, via shared submission and completion rings. |
+| [`mmap`](../08-memory-management/the-page-fault-handler.md) | Pays one crossing to establish a mapping, then services every subsequent access with no crossing at all. |
 | `readv`/`writev` | One crossing moves data through many buffers instead of one crossing per buffer. |
-| `epoll` | One crossing returns readiness for many file descriptors instead of one crossing per descriptor polled. |
-
-Only the vDSO is linked above; `io_uring`, `mmap`'s fault path, and `epoll`'s internals live in folders
-not yet written.
+| [`epoll`](../13-networking-stack/sockets-in-the-kernel.md#how-epoll-hooks-in) | One crossing returns readiness for many file descriptors instead of one crossing per descriptor polled. |
 
 ## Not every trap is a syscall
 
