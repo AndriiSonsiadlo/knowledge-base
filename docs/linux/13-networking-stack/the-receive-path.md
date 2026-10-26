@@ -42,7 +42,7 @@ flowchart TB
     SIRQ -.-> D2["budget spent, work left<br/>softnet_stat col 3 time_squeeze"]
     CORE -.-> D3["per-CPU backlog full<br/>softnet_stat col 2"]
     PRE -.-> D4["netfilter drop<br/>rule counters"]
-    RT -.-> D5["no route<br/>IpInNoRoutes"]
+    RT -.-> D5["no route<br/>IpExtInNoRoutes"]
     TCP -.-> D6["receive buffer full<br/>TcpExtTCPRcvQDrop"]
     TCP -.-> D7["accept queue full<br/>TcpExtListenOverflows"]
 
@@ -149,7 +149,7 @@ symbol="ip_rcv_finish" /> then makes the routing decision:
   runs `NF_INET_LOCAL_IN`, and hands the packet to the transport protocol — `tcp_v4_rcv`.
 - **For someone else:** <Src file="net/ipv4/ip_forward.c" symbol="ip_forward" />, through the `FORWARD`
   hook, and out [the transmit path](./the-transmit-path.md).
-- **For nowhere:** dropped and counted as `IpInNoRoutes`.
+- **For nowhere:** dropped and counted as `IpExtInNoRoutes`.
 
 The hooks are the subject of [netfilter and nftables](./netfilter-and-nftables.md); the routing decision
 is [routing and neighbours](./routing-and-neighbours.md).
@@ -199,7 +199,7 @@ this table is the network-specific steering above it.
 | Per-CPU backlog full (RPS, loopback, non-NAPI drivers) | softirq | `/proc/net/softnet_stat` column 2 |
 | Budget exhausted with work left — *deferred, not dropped* | softirq | `/proc/net/softnet_stat` column 3, `time_squeeze` |
 | Netfilter `drop` verdict | softirq | the rule's own counter (`nft list ruleset` with `counter`) |
-| No route | softirq | `IpInNoRoutes` |
+| No route | softirq | `IpExtInNoRoutes` |
 | Socket receive buffer full | softirq | `TcpExtTCPRcvQDrop`, `UdpRcvbufErrors` |
 | Socket backlog full (lock held by user) | softirq | `TcpExtTCPBacklogDrop` |
 | Accept queue full | softirq | `TcpExtListenOverflows` (and `TcpExtListenDrops`) |
