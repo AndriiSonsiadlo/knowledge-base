@@ -1,0 +1,8 @@
+{
+  "label": "Containers and Virtualization",
+  "position": 16,
+  "link": {
+    "type": "generated-index",
+    "description": "There is no container object in the kernel: namespaces, cgroup v2, capabilities, and a root filesystem assembled by user space — built by hand, then compared with what runc does. Plus KVM and virtio, the kernel as a hypervisor."
+  }
+}

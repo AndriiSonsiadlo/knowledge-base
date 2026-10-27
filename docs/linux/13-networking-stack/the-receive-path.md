@@ -60,7 +60,7 @@ Before any packet arrives, the driver *pre-posts* empty buffers into a receive d
 array in memory the NIC can read, where each descriptor holds the DMA address of one empty buffer. When a
 frame arrives, the NIC writes it directly into the next posted buffer, marks that descriptor done, and
 moves on, without involving the CPU. The DMA API that makes those addresses safe belongs to the
-device-drivers material in a later folder. What matters here is that a ring has a fixed number of slots.
+[device-drivers folder](../14-device-drivers-and-hardware/the-dma-api.md). What matters here is that a ring has a fixed number of slots.
 If the CPU doesn't take frames out and post fresh buffers fast enough, the NIC has nowhere to put the next
 frame and drops it in hardware. That drop is visible only in the driver's own counters (`ethtool -S`), and
 their names vary by driver.

@@ -63,7 +63,7 @@ previous page's emphasis on those fields being pointers matters here:
   up with its own, distinct TLS area despite sharing everything else.
 - **The namespace flags** (`CLONE_NEWNS`, `CLONE_NEWUTS`, `CLONE_NEWIPC`, `CLONE_NEWUSER`, `CLONE_NEWPID`,
   `CLONE_NEWNET`, `CLONE_NEWCGROUP`, `CLONE_NEWTIME`) are named here and left unexplained — they are
-  folder 15's subject, not this page's, and this page does not link ahead to unwritten pages.
+  [folder 15's subject](../15-containers-and-virtualization/namespaces-overview.md), not this page's.
 
 ## `tgid` versus `pid`
 

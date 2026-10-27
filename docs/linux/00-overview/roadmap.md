@@ -103,9 +103,37 @@ Crash and oops reading lands with folder 17.
     ["Reference counting and lifetime", "../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md"],
     ["kobjects, sysfs, and the object model", "../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md"],
     ["Memory safety in kernel C", "../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md"],
+    ["The Linux device model", "../14-device-drivers-and-hardware/the-linux-device-model.md"],
+    ["Character devices", "../14-device-drivers-and-hardware/character-devices.md"],
+    ["Lab: write a character driver", "../14-device-drivers-and-hardware/lab-a-character-driver.md"],
+    ["Debugging drivers", "../14-device-drivers-and-hardware/debugging-drivers.md"],
   ]} />
 
-A real character driver is built in folder 14.
+The module path's last four steps, and the driver path, also lean on
+[copying data across the boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md),
+[the four VFS objects](../11-vfs-and-filesystems/the-four-objects.md) and
+[booting your kernel in QEMU](../01-lab-and-toolchain/booting-your-kernel-in-qemu.md). The driver path
+assumes the "I want to write a module" path above, the
+[interrupts folder](../10-interrupts-time-and-deferred-work/the-irq-subsystem.md) (threaded IRQs in
+particular), and the page allocator and memory ordering from folders 08 and 09.
+
+<LearningPath
+  title="I want to write a driver"
+  steps={[
+    ["PCIe in depth", "../../computer-science/buses-and-io/pcie-in-depth.md"],
+    ["The Linux device model", "../14-device-drivers-and-hardware/the-linux-device-model.md"],
+    ["Platform devices, device tree, and ACPI", "../14-device-drivers-and-hardware/platform-devices-and-description.md"],
+    ["PCI and PCIe drivers", "../14-device-drivers-and-hardware/pci-and-pcie-drivers.md"],
+    ["MMIO, ioremap, and accessors", "../14-device-drivers-and-hardware/mmio-and-port-io.md"],
+    ["DMA and the IOMMU", "../../computer-science/buses-and-io/dma-and-iommu.md"],
+    ["The DMA API", "../14-device-drivers-and-hardware/the-dma-api.md"],
+    ["Interrupts in a driver", "../14-device-drivers-and-hardware/interrupts-in-drivers.md"],
+    ["Character devices", "../14-device-drivers-and-hardware/character-devices.md"],
+    ["Lab: write a character driver", "../14-device-drivers-and-hardware/lab-a-character-driver.md"],
+    ["Talking to user space", "../14-device-drivers-and-hardware/talking-to-user-space.md"],
+    ["Power management", "../14-device-drivers-and-hardware/power-management.md"],
+    ["Debugging drivers", "../14-device-drivers-and-hardware/debugging-drivers.md"],
+  ]} />
 
 <LearningPath
   title="My server is slow"
@@ -195,7 +223,53 @@ Computer Networks.
     ["Diagnosing network problems", "../13-networking-stack/diagnosing-network-problems.md"],
   ]} />
 
+The containers path assumes two pages outside it above all:
+[network namespaces and virtual devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
+and [overlayfs](../11-vfs-and-filesystems/overlayfs.md). Its pages also build on the process pages of
+folder 06 (tasks, threads, credentials, exit), mounts and procfs from folder 11, connection tracking
+from folder 13, and cgroup CPU control from folder 07.
+
+<LearningPath
+  title="I want to work on containers"
+  steps={[
+    ["Virtualization and isolation", "../../computer-science/operating-systems/virtualization-and-isolation.md"],
+    ["What a container actually is", "../15-containers-and-virtualization/what-a-container-actually-is.md"],
+    ["Namespaces", "../15-containers-and-virtualization/namespaces-overview.md"],
+    ["Mount and PID namespaces", "../15-containers-and-virtualization/mount-and-pid-namespaces.md"],
+    ["User namespaces", "../15-containers-and-virtualization/user-namespaces.md"],
+    ["cgroup v2", "../15-containers-and-virtualization/cgroup-v2-architecture.md"],
+    ["cgroup controllers in practice", "../15-containers-and-virtualization/cgroup-controllers-in-practice.md"],
+    ["The UNIX permission model", "../16-security/the-unix-permission-model.md"],
+    ["Credentials in the kernel", "../16-security/credentials-in-the-kernel.md"],
+    ["Capabilities", "../16-security/capabilities.md"],
+    ["Capabilities and container privilege", "../15-containers-and-virtualization/capabilities-in-containers.md"],
+    ["seccomp and syscall filtering", "../16-security/seccomp.md"],
+    ["Lab: build a container from scratch", "../15-containers-and-virtualization/building-a-container-from-scratch.md"],
+    ["Images, layers, and the OCI runtime", "../15-containers-and-virtualization/images-layers-and-oci.md"],
+    ["Container networking", "../15-containers-and-virtualization/container-networking.md"],
+  ]} />
+
+The security path assumes [credentials and identity](../06-processes-and-threads/credentials-and-identity.md),
+[copying data across the boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
+and [memory safety in kernel C](../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md), plus
+RCU from the concurrency path.
+
+<LearningPath
+  title="I want to understand Linux security"
+  steps={[
+    ["The UNIX permission model", "../16-security/the-unix-permission-model.md"],
+    ["Credentials in the kernel", "../16-security/credentials-in-the-kernel.md"],
+    ["Capabilities", "../16-security/capabilities.md"],
+    ["The LSM framework", "../16-security/the-lsm-framework.md"],
+    ["SELinux", "../16-security/selinux.md"],
+    ["AppArmor", "../16-security/apparmor.md"],
+    ["seccomp and syscall filtering", "../16-security/seccomp.md"],
+    ["Kernel hardening", "../16-security/kernel-hardening.md"],
+    ["Vulnerability classes in the kernel", "../16-security/vulnerability-classes.md"],
+    ["Auditing and security observability", "../16-security/auditing-and-security-observability.md"],
+  ]} />
+
 ## Where the rest is
 
-Folders 14 through 19 remain specified and not yet scaffolded, covering drivers, containers,
-security, observability, eBPF, and contributing.
+Folders 17 through 19 remain specified and not yet scaffolded, covering observability, eBPF, and
+contributing.

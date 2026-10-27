@@ -147,7 +147,7 @@ was actually on the path that determined how long boot took."
   synchronisation label multiple units can reference, several of which may be reached in parallel. The
   runlevel-named aliases exist for compatibility, not because targets work the same way.
 - **"systemd is PID 1 doing everything."** The manager process is PID 1, but it delegates actual work to
-  a forked, `exec`ed process per unit, placed in its own cgroup for tracking — folder 15 covers how that
+  a forked, `exec`ed process per unit, placed in its own cgroup for tracking — [folder 15](../15-containers-and-virtualization/cgroup-v2-architecture.md) covers how that
   cgroup is what lets `systemctl status` account for every descendant process a unit spawns, even after a
   double-fork tries to escape its parent.
 

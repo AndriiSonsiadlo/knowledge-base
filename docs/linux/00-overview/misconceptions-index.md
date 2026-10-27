@@ -771,3 +771,264 @@ handlers need locking around any data they share across CPUs.
 
 This index grows with the section — folders 14 through 19 add their own misconceptions here as they
 land.
+
+## 14 — Device Drivers
+
+**"Drivers scan for their hardware."** Drivers declare which devices they support and wait. The bus discovers devices, and the core does the matching; a driver's code runs only when it is handed a matched device in `probe`.
+[The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
+**"Loading a module means its device is in use."** A module can load, register its driver, and bind nothing, because no matching device exists or another driver already bound it. `lsmod` shows it loaded either way. The `drivers/<name>/` directory in sysfs shows what it actually bound.
+[The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
+**"`-EPROBE_DEFER` in the log is an error."** It is the normal way to say "retry me later". It is a problem only if the device is *still* listed in `/sys/kernel/debug/devices_deferred` after boot has finished.
+[The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
+**"`volatile` is enough."** `volatile` stops the compiler eliding or reordering the volatile accesses themselves. It does nothing about CPU reordering against normal memory, byte order, or tearing on every architecture, and it does not satisfy sparse. The accessors are the interface.
+[MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
+**"`writel` returning means the device saw it."** PCI writes are posted. Only a read from the same device, or a non-posted access, guarantees the write has arrived.
+[MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
+**"Relaxed accessors are a micro-optimisation with no correctness impact."** They remove the ordering against normal memory that DMA depends on. On arm64 that is a missing barrier instruction; on x86-64 it is a missing compiler barrier. Either can produce a device that reads a half-written descriptor.
+[MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
+**"`virt_to_phys()` gives the address to program into the device."** It gives the CPU's physical address. With an IOMMU, a bounce buffer or a bus offset, that is not what the device needs. Only the DMA API returns a valid `dma_addr_t`.
+[The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**"Coherent memory is always the better choice."** On non-coherent systems it is uncached for the CPU, which makes packet-sized data processing slow, and the pools are limited. Use it for shared control structures and stream the data.
+[The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**"Without an IOMMU, the DMA API is just bookkeeping."** It still bounces buffers a device cannot reach, does cache maintenance on non-coherent hardware, and bounces everything in confidential-computing guests. Bypassing it works only on the machine it was tested on.
+[The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**"Returning `IRQ_HANDLED` always is harmless."** On a shared line it hides another device's storm, and it defeats the spurious-interrupt detector that would otherwise disable a stuck line. Return `IRQ_NONE` when the status register says the interrupt wasn't yours.
+[Interrupts in a Driver](../14-device-drivers-and-hardware/interrupts-in-drivers.md)
+
+**"`disable_irq()` from inside the handler is fine."** It waits for the handler to complete, and the handler is the caller. Use `disable_irq_nosync()` there.
+[Interrupts in a Driver](../14-device-drivers-and-hardware/interrupts-in-drivers.md)
+
+**"debugfs is fine for a tool, since it is always mounted."** It may be compiled out, is often disabled or locked down in production, is root-only, and has no stability guarantee. A tool that reads it breaks across kernel versions, legitimately.
+[Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
+**"One sysfs file can return a table."** The convention is one value per file, and reviewers enforce it. Tables belong in netlink, an ioctl, or (for debugging) debugfs.
+[Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
+**"`ioctl` is deprecated."** It is discouraged as a dumping ground for unrelated commands and badly designed structures. Well-designed ioctls remain normal, and new ones are merged constantly.
+[Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
+**"Suspend and runtime PM are the same thing at different scales."** They are separate systems with separate callbacks (`suspend`/`resume` versus `runtime_suspend`/`runtime_resume`), triggered differently: by a request for the whole system, or by a device's usage count reaching zero. Drivers must handle a device that is runtime-suspended when system suspend begins.
+[Power Management](../14-device-drivers-and-hardware/power-management.md)
+
+**"`pm_runtime_get()` means the device is powered when it returns."** Plain `pm_runtime_get()` only *queues* a resume. The `_sync` form, or `pm_runtime_resume_and_get()`, waits for it.
+[Power Management](../14-device-drivers-and-hardware/power-management.md)
+
+**"S3 is always available."** Many current laptops implement only s2idle, so `deep` is missing from `/sys/power/mem_sleep`, and the firmware may have no S3 support at all.
+[Power Management](../14-device-drivers-and-hardware/power-management.md)
+
+**"`printk` debugging is primitive."** With dynamic debug, the messages are already in the code, cost almost nothing when off, can be turned on per function without a rebuild, and work in interrupt context and during boot, where a debugger struggles. Many kernel developers reach for them first.
+[Debugging Drivers](../14-device-drivers-and-hardware/debugging-drivers.md)
+
+**"If `probe` failed, there would be an error in `dmesg`."** A probe that returns `-EPROBE_DEFER`, `-ENODEV`, or most other errors is under no obligation to log, and the driver core logs failures only at debug level. A device can stay unbound silently.
+[Debugging Drivers](../14-device-drivers-and-hardware/debugging-drivers.md)
+
+## 15 — Containers and Virtualization
+
+**"A container is a lightweight VM."** A VM has its own kernel on virtual hardware. A container is a host process with a restricted view of the host kernel, so its isolation is only as strong as that kernel's checks.
+[What a Container Actually Is](../15-containers-and-virtualization/what-a-container-actually-is.md)
+
+**"Containers are a kernel feature."** The kernel provides namespaces, cgroups, capabilities and seccomp. "Container" is a user-space convention for combining them, and the combination differs between runtimes.
+[What a Container Actually Is](../15-containers-and-virtualization/what-a-container-actually-is.md)
+
+**"Processes in a container are invisible to the host."** The PID namespace hides the *host* from the container, not the other way round. From the host, every containerised process appears in `ps` with a host PID, and all its state is readable under `/proc/<pid>`.
+[What a Container Actually Is](../15-containers-and-virtualization/what-a-container-actually-is.md)
+
+**"`chroot` is a security boundary."** It changes where path lookup starts, nothing more. The real root is still mounted and reachable, and a process with `CAP_SYS_CHROOT` can leave. Containers use `pivot_root` in a private mount namespace, then unmount the old root.
+[Mount and PID Namespaces](../15-containers-and-virtualization/mount-and-pid-namespaces.md)
+
+**"`kill -9 1` inside a container kills it."** From inside the namespace, init receives only signals it has installed a handler for, and `SIGKILL` cannot have a handler, so it is ignored. Only `SIGKILL` from an ancestor namespace, such as the host or the runtime, is forcibly delivered.
+[Mount and PID Namespaces](../15-containers-and-virtualization/mount-and-pid-namespaces.md)
+
+**"Zombies in containers are a Docker bug."** They are the ordinary Unix rule that a parent must `wait()` for its children, applied to a PID 1 that was never written to be an init. `--init` or an `exec`-correct entrypoint fixes it.
+[Mount and PID Namespaces](../15-containers-and-virtualization/mount-and-pid-namespaces.md)
+
+**"Rootless containers are simply safer than rootful ones."** They are safer *against host-root compromise*, because an escape lands as an ordinary user. They also require unprivileged user namespaces, which expose more kernel code to every local user. Which matters more depends on the threat.
+[User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
+
+**"Root inside a user namespace can load modules."** Module loading, setting the clock, rebooting and raw device access check `capable()` against the *initial* user namespace, which a namespaced root never has.
+[User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
+
+**"The UID map can be changed later."** Each map is written once; a second write fails with `EPERM`. Changing the mapping means a new user namespace.
+[User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
+
+**"Docker manages cgroups."** On a systemd host, Docker, Podman and containerd normally ask systemd to create a scope for each container (the `systemd` cgroup driver), and set limits as unit properties. Only inside a delegated subtree do they write files themselves.
+[cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**"A process can be in a parent and a child cgroup at once."** A process is in exactly one cgroup. Limits on ancestors still constrain it, because a controller's limits apply to the whole subtree, not because the process is "also" in the ancestor.
+[cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**"cgroup v1 is gone."** It is still in the kernel and still mountable. What is going away is the legacy implementation of individual controllers (`CONFIG_MEMCG_V1` and `CONFIG_CPUSETS_V1` are now optional, and off in Debian's kernel) and support in the user-space tools that manage it.
+[cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**"`memory.high` is a soft limit that can be exceeded freely."** It can be exceeded, as in the lab, but not freely. Every allocation over it triggers reclaim and throttling, which can slow a workload to a crawl. That slowdown is the mechanism working, not a failure.
+[cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
+**"High CPU utilisation means the cgroup is overloaded."** Utilisation measures busyness, not waiting. A fully used CPU with low `cpu.pressure` is doing its job. Look at pressure, and at `nr_throttled` in `cpu.stat`.
+[cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
+**"`io.max` is the right tool for protecting a latency-sensitive service."** It caps the neighbour all the time, even when the device is idle, and doesn't respond to the service's actual latency. `io.latency` on the protected service throttles neighbours only while the target is being missed.
+[cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
+**"`--privileged` just grants extra capabilities."** It also removes the seccomp filter and the LSM profile, exposes every host device, and mounts `/sys` and the cgroup tree read-write. The capabilities are the smallest part of it.
+[Capabilities and Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md)
+
+**"Dropping `CAP_SYS_ADMIN` is enough."** Several other capabilities are root by another name (`CAP_SYS_MODULE`, `CAP_SYS_PTRACE`, `CAP_DAC_READ_SEARCH`, `CAP_BPF`). And capabilities are only one layer: seccomp and the LSM are what stop a kernel bug from being reached at all.
+[Capabilities and Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md)
+
+**"Capabilities inside a user namespace are real capabilities."** They are checked against the namespace that owns the resource. `CAP_NET_ADMIN` in a rootless container administers that container's network namespace and nothing of the host's.
+[Capabilities and Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md)
+
+**"An image is a filesystem snapshot."** It is an ordered list of tar diffs plus a config. The filesystem only exists once a snapshotter stacks the layers, and a deletion is a whiteout entry, not a removal.
+[Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
+**"Docker runs containers."** Docker asks containerd, which asks a shim, which runs runc. runc exits once the container has started; the container's parent is the shim.
+[Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
+**"Pinning a tag pins the image."** Tags are mutable pointers. Only a digest (`python@sha256:…`) names exactly one manifest, and with it exactly one set of layers.
+[Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
+**"Containers get their own network stack, so a host firewall protects them."** Published ports are DNATed in `prerouting` and then forwarded, so `input` rules never see them. Filtering has to be done in `forward`, or in Docker's `DOCKER-USER` chain.
+[Container Networking](../15-containers-and-virtualization/container-networking.md)
+
+**"`-p` opens a port with a proxy."** The data path is a DNAT rule plus conntrack. `docker-proxy` exists only for cases NAT can't handle cleanly, such as connections to `localhost`, and can be disabled.
+[Container Networking](../15-containers-and-virtualization/container-networking.md)
+
+**"Container IPs are reachable from other hosts."** They are private to the host's bridge. Reaching them from elsewhere needs a published port, an overlay or routes advertised for them.
+[Container Networking](../15-containers-and-virtualization/container-networking.md)
+
+**"KVM is a type-2 hypervisor because it runs inside Linux."** The type-1/type-2 taxonomy fits poorly. KVM is part of the kernel running directly on the hardware, which is type-1 in shape. But that kernel also runs ordinary processes, and the VMs are among them, which is type-2 in shape. The useful questions are which component handles each exit, and what runs in the most privileged mode.
+[KVM](../15-containers-and-virtualization/kvm-and-hardware-virtualization.md)
+
+**"QEMU is slow emulation."** With KVM, QEMU doesn't execute guest instructions at all. It runs device models and handles the exits that reach user space. TCG, its emulator, is slow, and that is the mode this lab's VM uses.
+[KVM](../15-containers-and-virtualization/kvm-and-hardware-virtualization.md)
+
+**"Every guest instruction is trapped."** Guest code runs natively, ring 3 and ring 0 alike. Only the instructions and events configured as intercepts cause exits, and with EPT/NPT even page-table updates don't.
+[KVM](../15-containers-and-virtualization/kvm-and-hardware-virtualization.md)
+
+**"virtio is a QEMU feature."** It is an OASIS standard with drivers in Linux, Windows and the BSDs. Its devices are implemented by QEMU, crosvm, Firecracker, cloud hypervisors and real hardware (vDPA).
+[virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
+**"Paravirtualization means a modified guest kernel."** Under Xen's original PV it did. virtio needs only a driver, like any other device. The CPU itself is fully hardware-virtualized.
+[virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
+**"The ring is copied between guest and host."** It lives in guest memory, which is the hypervisor process's own memory. The host reads and writes it in place. Only notifications cross the boundary.
+[virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
+## 16 — The Security Model
+
+**"The owner gets the union of the owner, group and other bits."** The owner gets the owner bits and nothing else, as `0007` shows. The same goes for group members and the group bits.
+[The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**"Deleting a file needs write permission on the file."** It needs write and search permission on the *directory*. A read-only file in your own directory is yours to delete (`rm` only asks first).
+[The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**"Root can execute any file."** `CAP_DAC_OVERRIDE` grants execute only if at least one `x` bit is set. A `0644` script can't be run as `./script`, even by root.
+[The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**"`setuid(getuid())` always drops privilege permanently."** Only for a caller that still has `CAP_SETUID`. Without it, only the effective UID changes and the saved UID keeps root.
+[Credentials in the Kernel](../16-security/credentials-in-the-kernel.md)
+
+**"A task has one credential."** It has two pointers, objective and subjective, which differ whenever the kernel is acting on someone's behalf through `override_creds()`.
+[Credentials in the Kernel](../16-security/credentials-in-the-kernel.md)
+
+**"Credentials can be edited in place under a lock."** A published `cred` is immutable. Readers take no lock, so an in-place edit could show them a half-changed identity. Every change is a new object.
+[Credentials in the Kernel](../16-security/credentials-in-the-kernel.md)
+
+**"Fine-grained capabilities like `CAP_NET_BIND_SERVICE` make root unnecessary everywhere."** They do for narrow needs. But a third of the capabilities are root-equivalent (the table above), and a service needing one of those is root, whatever its UID says.
+[Capabilities](../16-security/capabilities.md)
+
+**"Inheritable means children inherit it."** Every set is inherited across `fork()`. "Inheritable" is about `execve()`, and even then only into programs whose file inheritable set matches. Ambient is the set that behaves the way "inheritable" sounds.
+[Capabilities](../16-security/capabilities.md)
+
+**"Removing a capability from the effective set is permanent."** It's still permitted, and one `capset()` raises it again. Permanent means dropping it from permitted, or from bounding for future `execve()`s.
+[Capabilities](../16-security/capabilities.md)
+
+**"An LSM can grant access the permission bits deny."** Every hook runs after the DAC check passed, and can only deny. Even `CAP_DAC_OVERRIDE` is checked through `security_capable()`, so an LSM can deny the override, but it can't create one.
+[The LSM Framework](../16-security/the-lsm-framework.md)
+
+**"Linux has one security module."** A typical distribution kernel runs eight or more at once, as the VM's list shows. Only one of SELinux, AppArmor and Smack can be active at a time.
+[The LSM Framework](../16-security/the-lsm-framework.md)
+
+**"With no SELinux or AppArmor, the LSM framework does nothing."** Capabilities, Yama, Lockdown and Landlock are LSMs, and any of them may be enforcing.
+[The LSM Framework](../16-security/the-lsm-framework.md)
+
+**"The fix for an AVC denial is `setenforce 0`."** That turns off SELinux for every process to fix one label. Relabel, set a boolean, or as a last resort make one domain permissive.
+[SELinux](../16-security/selinux.md)
+
+**"SELinux is about users."** Day-to-day policy is about types. The SELinux user field barely figures, and UNIX UIDs don't figure at all: `root` in `httpd_t` is just as confined.
+[SELinux](../16-security/selinux.md)
+
+**"`audit2allow` output is safe to load."** It writes the rule that would have allowed exactly what was denied, however broad. For a mislabelled file that's the wrong fix, and it widens the policy for every file with that label.
+[SELinux](../16-security/selinux.md)
+
+**"AppArmor and SELinux can't both protect a system, so the choice doesn't matter."** They are exclusive with each other today, but they protect different things. SELinux confines everything by label. AppArmor confines what has a profile, and nothing else.
+[AppArmor](../16-security/apparmor.md)
+
+**"An unconfined process under AppArmor is unrestricted."** It isn't confined by AppArmor. DAC, capabilities and the other stacked LSMs still apply.
+[AppArmor](../16-security/apparmor.md)
+
+**"Complain mode is a safe production setting."** It denies nothing. It's a tool for writing profiles.
+[AppArmor](../16-security/apparmor.md)
+
+**"seccomp can block access to a file path."** It sees only the pointer to the path. Filtering paths needs an LSM, which checks after the kernel has copied and resolved the name.
+[seccomp and Syscall Filtering](../16-security/seccomp.md)
+
+**"A denylist is as good as an allowlist."** A denylist allows every syscall it doesn't name, including those added in later kernels and older equivalents of the ones it does name (`open` next to `openat`). Runtimes ship allowlists.
+[seccomp and Syscall Filtering](../16-security/seccomp.md)
+
+**"seccomp filters are eBPF."** They are classic BPF: no maps, no helpers, no loops, a limited instruction set, and the kernel translates them internally. An eBPF-based seccomp has been proposed and not merged.
+[seccomp and Syscall Filtering](../16-security/seccomp.md)
+
+**"Keys in the kernel keyring are safe from root."** Root can read any readable key, as measured above. Only `logon`, `trusted` and `encrypted` keys keep their plaintext out of user space, and even then root can *use* them.
+[Keyrings](../16-security/keyrings.md)
+
+**"Unlinking a key destroys it immediately."** It is garbage-collected once no keyring links it and no one holds a reference. `keyctl revoke` and `keyctl invalidate` make it unusable at once.
+[Keyrings](../16-security/keyrings.md)
+
+**"Each container gets its own keyrings."** Only with a user namespace, and only the user keyring. Blocking the syscalls is the runtimes' answer.
+[Keyrings](../16-security/keyrings.md)
+
+**"Secure Boot protects the running system."** It verifies what boots. After that, protection depends on module signing, Lockdown and, for files, IMA appraisal. Without them, root can change anything.
+[Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
+**"IMA measurement prevents tampering."** It records tampering. Only appraisal refuses it, and only for the files the policy covers.
+[Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
+**"A signed module is a safe module."** The signature says who built it, not that it's free of bugs. A signed but vulnerable driver is a well-known way into a locked-down kernel.
+[Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
+**"KASLR stops exploitation."** It adds a step. Any pointer leak, from an uninitialised-memory bug or a side channel, removes it.
+[Kernel Hardening](../16-security/kernel-hardening.md)
+
+**"`mitigations=off` is a free speedup."** It turns off the transient-execution mitigations, so any process (including JavaScript in a browser, or a guest VM) may read memory across the boundaries they protect. The gain is workload-dependent and often small on recent CPUs that need fewer mitigations.
+[Kernel Hardening](../16-security/kernel-hardening.md)
+
+**"Hardening options are all on by default."** Each distribution chooses. Debian 13 leaves `init_on_free` and `RANDOM_KMALLOC_CACHES` off and Lockdown at `none` without Secure Boot, as measured above. The KSPP recommendations list what a hardened configuration turns on.
+[Kernel Hardening](../16-security/kernel-hardening.md)
+
+**"Most kernel CVEs need local root to exploit."** Most need only local code execution as an ordinary user, or a container. Some (network stack, USB, filesystem parsing) need less. Root is usually the goal, not the starting point.
+[Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
+
+**"Rust in the kernel removes these classes."** In safe Rust, the compiler rules out use-after-free, double frees, data races and uninitialised reads, and with `CONFIG_RUST_OVERFLOW_CHECKS` integer overflow panics instead of wrapping. It does nothing for C code, for `unsafe` blocks, for logic bugs such as a missing permission check, or for transient execution. Today almost all of the kernel is C.
+[Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
+
+**"A crash is not a vulnerability."** A null dereference or `BUG()` reachable from user space is at least a denial of service. A KASAN report of an out-of-bounds or use-after-free access means the memory was touched, whether or not anything crashed.
+[Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
+
+**"Audit logs show what root did as root."** They show `auid` too, the original login, which survives `su` and `sudo`. That's what makes them useful for attribution. A process started before login (a daemon) has `auid=unset`.
+[Auditing and Security Observability](../16-security/auditing-and-security-observability.md)
+
+**"More audit rules mean more security."** Rules on hot syscalls slow the system and can fill the backlog, which loses records or, with `-f 2`, panics. Narrow rules on what matters are both cheaper and more useful.
+[Auditing and Security Observability](../16-security/auditing-and-security-observability.md)
+
+**"BPF-LSM programs only observe."** They can deny at any hook, like a built-in LSM. That power is why loading them needs `CAP_BPF` and `CAP_PERFMON`.
+[Auditing and Security Observability](../16-security/auditing-and-security-observability.md)

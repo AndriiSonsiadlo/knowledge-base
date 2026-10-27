@@ -80,7 +80,7 @@ the uevent. This is exactly why `/dev/sda` names are not stable across boots or 
 are assigned in probe order, which depends on bus enumeration timing — while `by-uuid` and `by-id` are
 stable, because they are derived from data that doesn't change: the filesystem's own UUID, or the
 device's model and serial number. The uevent machinery itself — how `udev` listens for and processes
-these events — belongs to a later folder in this section, not yet written.
+these events — belongs to [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md) in folder 14.
 
 ## `/sys/block`, the attributes worth knowing
 

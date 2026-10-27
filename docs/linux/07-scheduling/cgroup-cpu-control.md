@@ -124,7 +124,7 @@ this group spend runnable but waiting for CPU they wanted," reported as `some` (
 (all tasks waiting simultaneously) percentages over 10/60/300-second windows. This is a materially better
 overload signal than utilisation, because a group can show low average CPU utilisation while still stalling
 badly — a bursty workload that is idle 90% of the time and throttled hard during its bursts looks fine on a
-utilisation graph and terrible on `cpu.pressure`. Folder 15 owns cgroup v2 as a whole; this is enough to use
+utilisation graph and terrible on `cpu.pressure`. [Folder 15](../15-containers-and-virtualization/cgroup-v2-architecture.md) owns cgroup v2 as a whole; this is enough to use
 the CPU-specific file, not the full picture.
 
 ## The hierarchy, and who owns it

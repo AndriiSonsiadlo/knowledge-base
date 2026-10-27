@@ -10,11 +10,15 @@ draft: false
 
 # Glossary
 
-Every term below links to the one page that owns and genuinely defines it, so "where did this come from" always has an answer. The list covers folders 00–13 so far and grows as later folders land — a term you expect but can't find here probably belongs to a page that hasn't been written yet.
+Every term below links to the one page that owns and genuinely defines it, so "where did this come from" always has an answer. The list covers folders 00–16 so far and grows as later folders land — a term you expect but can't find here probably belongs to a page that hasn't been written yet.
+
+**`--privileged`** — The runtime flag that grants every capability and also removes seccomp, the LSM profile, device restrictions and read-only `/sys`. [Capabilities and Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md)
 
 **ABI (application binary interface)** — the binary-level contract a program compiles against; this section uses it specifically for the kernel's promise that it never breaks the *user-space* ABI (syscalls, `/proc`, ELF layout) across releases, even though it makes no such promise internally. [What Linux Actually Is](./what-linux-actually-is.md)
 
 **Accept queue** — the queue of fully established connections waiting for a listening socket's `accept()`; its limit is the `listen()` backlog, silently capped by `net.core.somaxconn`. [Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
+
+**ACPI `_HID`** — An ACPI device's hardware ID, the ACPI counterpart of a `compatible` string, matched against a driver's `acpi_match_table`. [Platform Devices, Device Tree, and ACPI](../14-device-drivers-and-hardware/platform-devices-and-description.md)
 
 **Acquire and release** — the kernel's spelling of publish/subscribe ordering: `smp_store_release()` guarantees a store is visible only after every earlier access in program order, `smp_load_acquire()` guarantees a load happens before every later access; reach for this pair before a bare `smp_mb()` because it states exactly the ordering needed rather than a full fence in both directions. [Memory Ordering and Barriers](../09-concurrency-and-locking/memory-ordering-and-barriers.md)
 
@@ -22,15 +26,35 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Allocation group** — one of the independent regions an XFS filesystem is split into, each with its own free-space and inode B+ trees, so many threads can allocate at once without contending on one structure. [XFS and Btrfs](../11-vfs-and-filesystems/xfs-and-btrfs.md)
 
+**Ambient capability set** — Capabilities kept across `execve()` of ordinary, non-privileged programs; each must also be permitted and inheritable. [Capabilities](../16-security/capabilities.md)
+
+**AppArmor profile** — A per-program list of allowed paths, capabilities and network access, attached to the program by its executable path. [AppArmor](../16-security/apparmor.md)
+
 **ARP (Address Resolution Protocol)** — the IPv4 protocol that maps an IP address on the local link to its MAC address by broadcasting a request and caching the reply. [ARP, ICMP, and Neighbour Discovery](../../computer-science/computer-networks/arp-icmp-and-neighbour-discovery.md)
+
+**Attack surface** — The set of interfaces an attacker can reach and use; for an isolation boundary, how much code sits behind it. [Virtualization and Isolation](../../computer-science/operating-systems/virtualization-and-isolation.md)
+
+**Audit rule** — A kernel filter (`auditctl -a`, `-w`) selecting which syscalls or file accesses produce audit records. [Auditing and Security Observability](../16-security/auditing-and-security-observability.md)
+
+**`auditd`** — The user-space daemon that receives audit records from the kernel over netlink and writes them to `/var/log/audit/audit.log`. [Auditing and Security Observability](../16-security/auditing-and-security-observability.md)
 
 **Autogroup** — a per-session grouping (on by default via `kernel.sched_autogroup_enabled`) that nests every task's fair-class scheduling entity inside its session's group rather than competing directly against every other task system-wide; the group, not the individual task, competes for CPU share, which is why renicing one process inside a crowded autogroup can appear to do nothing against unrelated work in another session. [Priorities, nice, and Weights](../07-scheduling/priorities-nice-and-weights.md)
 
+**Autosuspend** — Runtime PM's delay before suspending an idle device, so a burst of accesses doesn't cause a suspend–resume cycle each time. [Power Management](../14-device-drivers-and-hardware/power-management.md)
+
 **Autotuning (TCP buffers)** — the kernel growing a connection's receive and send buffers as the path proves it needs them, up to the `tcp_rmem`/`tcp_wmem` maximum; setting `SO_RCVBUF` switches it off. [TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
+
+**AVC (access vector cache)** — SELinux's cache of policy decisions; also the name of the audit record logging a denial. [SELinux](../16-security/selinux.md)
+
+**BAR (base address register)** — A configuration-space register through which a device declares an MMIO or I/O region and the OS assigns its address. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
 
 **Barrier** — two independent reorderers exist and a fix for one is not a fix for the other: `barrier()` is a pure compiler directive with no emitted instruction, while `smp_mb()`/`smp_rmb()`/`smp_wmb()` constrain the CPU's own reordering and imply a compiler barrier too; on `CONFIG_SMP=n` every `smp_`-prefixed barrier degrades to a plain compiler barrier. [Memory Ordering and Barriers](../09-concurrency-and-locking/memory-ordering-and-barriers.md)
 
 **BBR** — a model-based TCP congestion control that estimates bottleneck bandwidth and minimum RTT and paces at that rate instead of reacting to loss; mainline v6.18 ships version 1. [TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
+
+**BDF (bus:device.function)** — The address of a PCI function, such as `00:03.0`. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
+
+**Bind and unbind** — Attaching a driver to a device (a successful `probe`) and detaching it (`remove`); also writable by hand through `/sys/bus/*/drivers/*/bind` and `unbind`. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
 
 **Bind mount** — a second mount of an existing directory tree at another place, with its own mount flags, so the same data can appear read-only in one location and writable in another. [Mounts and Mount Namespaces](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md)
 
@@ -52,23 +76,41 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Boot variable** — an NVRAM entry (`Boot0000`, `Boot0001`, …) plus a `BootOrder` list that tells UEFI firmware which `.efi` file to run and in what order; this state lives in firmware, not on disk. [Firmware: BIOS and UEFI](../03-boot-and-init/firmware-bios-and-uefi.md)
 
+**Bounding set** — The limit on what `execve()` can add to the permitted set; it can only shrink, and container runtimes cut it. [Capabilities](../16-security/capabilities.md)
+
+**BPF-LSM** — eBPF programs attached to LSM hooks, which can observe the hook's arguments or deny the operation. [Auditing and Security Observability](../16-security/auditing-and-security-observability.md)
+
 **BQL (Byte Queue Limits)** — a dynamic limit on how many bytes may sit in a driver's transmit ring — enough to keep the NIC busy, no more — moving queueing up into the qdisc; the driver must implement it. [The Transmit Path](../13-networking-stack/the-transmit-path.md)
 
 **Bridge** — a software Ethernet switch in the kernel that learns which MAC address is behind each port (its FDB) and forwards frames only where they need to go. [Network Namespaces and Virtual Devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
 
 **Buddy allocator** — the page allocator's free-list structure within a zone, one list per order of 2ⁿ contiguous pages; splitting an order-*k*+1 block on allocation and coalescing two buddies (found by `buddy_pfn = pfn ^ (1 << order)`, no search needed) back together on free are its two governing operations. [The Page Allocator](../08-memory-management/the-page-allocator.md)
 
+**Bundle** — A directory holding a `config.json` and a root filesystem: the unit an OCI runtime is given to run. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
+**Bus mastering** — Permission for a PCI device to start its own memory transactions (DMA); a driver turns it on with `pci_set_master()`. [PCI and PCIe Drivers](../14-device-drivers-and-hardware/pci-and-pcie-drivers.md)
+
+**Bus type (`struct bus_type`)** — The kernel object for one kind of bus (PCI, USB, platform): it owns the list of devices and drivers on that bus and the `match()` that pairs them. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
 **`bzImage`** — the actual bootable kernel file: real-mode setup code, a setup header, and a compressed payload that self-extracts on first run. "bz" stands for "big zImage," unrelated to the bzip2 algorithm. [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md)
 
 **Canonical address** — an x86-64 virtual address whose unimplemented high bits are a sign-extension of the top implemented bit (47, or 56 with 5-level paging); a non-canonical address is rejected by the CPU with `#GP` before translation even starts, which is why some bad pointers oops differently than others. [The Virtual Address Space](../08-memory-management/the-virtual-address-space.md)
 
+**Capability sets** — A thread's five capability sets: permitted, effective, inheritable, bounding and ambient, each a 64-bit mask in `struct cred`. [Capabilities](../16-security/capabilities.md)
+
 **CBS (Constant Bandwidth Server)** — the live enforcement mechanism behind `SCHED_DEADLINE`: it tracks each deadline task's runtime budget as it consumes it and throttles the task the moment it overruns its declared runtime within the current period, containing a runaway deadline task with the same machinery that guarantees well-behaved ones their share. [Real-Time Scheduling](../07-scheduling/real-time-scheduling.md)
+
+**`cdev`** — The kernel object connecting a range of character-device numbers to a `file_operations` table. [Character Devices](../14-device-drivers-and-hardware/character-devices.md)
 
 **CFS (Completely Fair Scheduler)** — the fair-class algorithm that ran Linux from 2.6.23 (2007) until EEVDF began replacing it in 6.6; at the pinned v6.18 it is not the running scheduler, but its vocabulary (vruntime, the red-black tree, nice-to-weight) is preserved as the historical model EEVDF is a direct response to. [CFS and Virtual Runtime](../07-scheduling/cfs-and-vruntime.md)
 
 **CGNAT (carrier-grade NAT)** — NAT performed by an ISP across many customers at once, so a subscriber's "public" address is itself behind another layer of translation. [NAT and Connection Tracking](../../computer-science/computer-networks/nat-and-connection-tracking.md)
 
-**cgroup** — a directory in the cgroupfs virtual filesystem whose auto-populated files (`cpu.weight`, `memory.max`, `io.max`, `pids.max`, …) express resource limits; it answers "what can this process *use*," a question orthogonal to namespaces. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
+**cgroup** — a directory in the cgroupfs virtual filesystem whose auto-populated files (`cpu.weight`, `memory.max`, `io.max`, `pids.max`, …) express resource limits; it answers "what can this process *use*," a question orthogonal to namespaces. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**cgroup delegation** — Handing ownership of a cgroup subtree to an unprivileged user or a container, which may then manage it without affecting anything outside. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**`cgroup.subtree_control`** — The file that enables controllers for a cgroup's children; a controller must be enabled in the parent before a child's interface files appear. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
 
 **Clock event device** — a programmable timer the kernel arms for a specific future moment and that then raises an interrupt at approximately that time, driving both the periodic tick and every one-shot timer; unlike a clocksource, it interrupts rather than merely being read. [Timekeeping and Clocksources](../10-interrupts-time-and-deferred-work/timekeeping-and-clocksources.md)
 
@@ -78,15 +120,27 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **clsact** — a pseudo-qdisc providing ingress and egress attach points for tc filters and eBPF programs, without queueing anything. [Traffic Control and qdiscs](../13-networking-stack/traffic-control.md)
 
+**CNI (Container Network Interface)** — The plugin protocol for container networking: a runtime executes plugin binaries with a namespace path and JSON config, and they set up its interfaces. [Container Networking](../15-containers-and-virtualization/container-networking.md)
+
 **CoDel** — active queue management that drops based on how long packets have *waited* (sojourn time) rather than how many are queued, removing standing queues while leaving bursts alone. [Traffic Control and qdiscs](../13-networking-stack/traffic-control.md)
+
+**Coherent DMA mapping** — A long-lived buffer from `dma_alloc_coherent()` that CPU and device can both access at any time without explicit syncs. [The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**Coldplug** — Replaying uevents for devices that appeared before udev started (`udevadm trigger`), so they get the same treatment as hotplugged ones. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
 
 **Compaction** — active defragmentation: migrating movable pages out of a region to consolidate scattered free order-0 pages into the higher-order contiguous blocks a THP or other high-order allocation needs, the mirror image of what the buddy allocator does on free. [The Page Allocator](../08-memory-management/the-page-allocator.md)
 
 **Compat syscall** — a syscall reached through a second, architecture-specific syscall table (e.g. the 32-bit `syscall_32.tbl` a 64-bit kernel also carries) plus `compat_` translation functions and structs, needed because pointers, `long`s, and struct layouts differ in width between a 32-bit caller and the kernel's native 64-bit types. [ABI Stability and Compat](../05-syscalls-and-the-boundary/abi-stability-and-compat.md)
 
+**`compatible`** — The device-tree property naming what a node is, most specific first; a driver's `of_match_table` lists the strings it handles. [Platform Devices, Device Tree, and ACPI](../14-device-drivers-and-hardware/platform-devices-and-description.md)
+
+**Complain mode** — AppArmor's mode in which a profile's denials are logged but not enforced, used while writing the profile. [AppArmor](../16-security/apparmor.md)
+
 **Compound page** — the pre-folio name for a multi-page allocation from the buddy allocator: an order-*n* block with a **head** page carrying the real metadata and every **tail** page pointing back at it via `compound_head`, an arrangement that left every function taking a `struct page *` responsible for checking which kind it had. [Folios and Compound Pages](../08-memory-management/folios-and-compound-pages.md)
 
 **configfs** — a pseudo-filesystem where user space *creates* kernel objects by making directories and writing attributes, the inverse of sysfs, which only shows objects the kernel already made. [procfs, sysfs, debugfs, configfs](../11-vfs-and-filesystems/procfs-sysfs-debugfs-configfs.md)
+
+**Configuration space** — A PCI function's standard register block (256 bytes, 4 KiB on PCIe) holding its IDs, BARs and capability lists. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
 
 **Congestion control module** — a `tcp_congestion_ops` implementation that decides how fast a TCP connection sends; CUBIC is the default, BBR an alternative, selectable per socket with `TCP_CONGESTION`. [TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
 
@@ -94,7 +148,11 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Conntrack helper** — a module that parses a protocol's payload (FTP, SIP) to find the connections it announces and creates expectations for them; since Linux 6.0 helpers must be assigned explicitly with a `ct helper` rule. [Connection Tracking and NAT](../13-networking-stack/connection-tracking-and-nat.md)
 
+**Container** — An ordinary process started in its own namespaces, under a cgroup, with reduced capabilities and a seccomp filter; there is no container object in the kernel. [What a Container Actually Is](../15-containers-and-virtualization/what-a-container-actually-is.md)
+
 **`container_of`** — a macro that recovers a pointer to a containing struct from a pointer to one of its embedded fields, by subtracting that field's compile-time offset and casting the result to the containing type. [`container_of` and Embedded Structs](../04-kernel-architecture-and-idioms/container-of-and-embedded-structs.md)
+
+**containerd** — The daemon below Docker and Kubernetes that pulls and stores images, prepares bundles and runs containers through shims. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
 
 **Context switch** — the three-stage handoff between tasks: `__schedule` picks the next task (cheap bookkeeping), `context_switch` swaps the address space only if it changed, and `switch_to` swaps register state unconditionally; the nameable direct cost is small, and the real expense is the unnamed indirect cost paid afterward by the incoming task's cold caches and TLB. [The Context Switch](../07-scheduling/the-context-switch.md)
 
@@ -124,13 +182,23 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`defconfig`** — the `make defconfig` target that produces a sane, complete `.config` close to what a real distribution ships; the usual starting point before hand-tuning debug options. [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md)
 
+**Deferred probe** — A `probe()` returning `-EPROBE_DEFER` because something it needs (a clock, a regulator, a GPIO) isn't ready yet; the core retries it later instead of failing it. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
 **Delayed allocation** — ext4 choosing physical blocks for written data only at writeback time rather than at `write()`, so a whole batch of dirty pages gets one contiguous allocation. [ext4](../11-vfs-and-filesystems/ext4.md)
 
 **Demand paging** — the policy that `mmap()` creates a VMA and maps no physical pages at all; only a fault — a first read (the zero page) or first write (a fresh zeroed frame) — actually costs physical memory, so address space is issued freely on the promise most of it is never touched. [Demand Paging and Copy-on-Write](../08-memory-management/demand-paging-and-cow.md)
 
 **Dentry (`struct dentry`)** — the VFS object binding one name in one directory to an inode; dentries are what path lookup walks and what the dcache caches. [Superblock, Inode, Dentry, File](../11-vfs-and-filesystems/the-four-objects.md)
 
+**Device class** — A grouping of devices by what they do rather than how they're connected (`net`, `block`, `input`), visible as `/sys/class/<name>`. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
+
+**Device ID table** — A driver's list of the devices it handles (`pci_device_id`, `of_device_id`, …), used by the bus `match()` and exported for module autoloading. [PCI and PCIe Drivers](../14-device-drivers-and-hardware/pci-and-pcie-drivers.md)
+
 **Device mapper** — the kernel framework that builds a virtual block device from others by loading a table mapping sector ranges to targets — linear, crypt, thin, snapshot, and more. [Device Mapper and LVM](../12-block-layer-and-storage/device-mapper-and-lvm.md)
+
+**Device tree** — A data structure the bootloader hands the kernel that describes non-discoverable hardware: nodes, addresses, interrupts and `compatible` strings. [Platform Devices, Device Tree, and ACPI](../14-device-drivers-and-hardware/platform-devices-and-description.md)
+
+**devres (`devm_*`)** — Device-managed resources: allocations and mappings made with `devm_*` helpers are released automatically when the driver unbinds, so error paths and `remove()` need no matching frees. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
 
 **Direct map** — the kernel address-space region holding a permanent virtual address for every physical page of installed RAM, at a fixed offset from its physical address; this linear-by-construction mapping is what makes `virt_to_phys()`/`phys_to_virt()` plain arithmetic instead of a page-table walk. [The Virtual Address Space](../08-memory-management/the-virtual-address-space.md)
 
@@ -142,17 +210,31 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **dm-crypt** — the device-mapper target that encrypts and decrypts every `bio` passing through it; LUKS is the on-disk format usually layered on top. [Device Mapper and LVM](../12-block-layer-and-storage/device-mapper-and-lvm.md)
 
+**DMA mask** — The range of addresses a device can generate, declared with `dma_set_mask_and_coherent()`, so the DMA API never gives it a buffer it can't reach. [The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**`dma_addr_t`** — An address as the device sees it, which may differ from the CPU's physical address because of an IOMMU or bus offsets; what the DMA API hands a driver to program into hardware. [The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
+**`Documentation/ABI`** — The kernel tree's directory documenting user-visible sysfs and other interfaces, sorted into `stable`, `testing`, `obsolete` and `removed`. [Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
 **Doorbell** — a device register the driver writes to say "new commands are in the submission queue"; NVMe has one per queue. [NVMe in the Kernel](../12-block-layer-and-storage/nvme-in-the-kernel.md)
+
+**Double fetch** — Reading the same user-space value twice, once to check and once to use, so another thread can change it in between. [Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
 
 **Drop reason** — the `enum skb_drop_reason` value passed to `kfree_skb_reason()` wherever the stack drops a packet, reported by the `skb:kfree_skb` tracepoint so every drop names its cause. [The Receive Path](../13-networking-stack/the-receive-path.md)
 
+**Dynamic debug** — Turning individual `pr_debug()`/`dev_dbg()` call sites on and off at run time through `/proc/dynamic_debug/control`. [Debugging Drivers](../14-device-drivers-and-hardware/debugging-drivers.md)
+
 **Dynticks** (`CONFIG_NO_HZ_IDLE`) — stops the periodic tick on a CPU that has gone idle with nothing due soon, reprogramming the clock event device as a one-shot event for the actual next expiry instead of polling at a fixed rate; `nohz_full` extends the same idea to a busy CPU with exactly one runnable task. [The Tick, and Living Without It](../10-interrupts-time-and-deferred-work/the-tick-and-nohz.md)
+
+**ECAM** — Enhanced Configuration Access Mechanism: PCIe configuration space mapped into physical memory, one 4 KiB window per function. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
 
 **EEVDF (Earliest Eligible Virtual Deadline First)** — the fair-class scheduler actually running at v6.18, replacing CFS beginning in kernel 6.6 and becoming the default in 6.12. It separates the two questions CFS's single `nice` knob conflated — how much CPU a task deserves (still weight, from nice) and how promptly it should run (a per-task request size) — selecting among eligible tasks by earliest virtual deadline instead of comparing vruntime directly. [EEVDF](../07-scheduling/eevdf.md)
 
 **`EFAULT`** — the negative-errno value a copy routine's caller returns when `copy_from_user`/`copy_to_user` reports a nonzero, uncopied remainder, produced when the exception table's fixup redirects execution away from a user-memory access that faulted rather than letting it become a kernel oops. [Copying Data Across the Boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
 
 **Eligibility** — under EEVDF, a task is eligible exactly when its lag is non-negative (its vruntime is at or behind the runqueue's average virtual time `V`); only eligible tasks are candidates for selection at all, regardless of how early their virtual deadline would otherwise be. [EEVDF](../07-scheduling/eevdf.md)
+
+**EPT and NPT** — Intel's and AMD's second-level page tables, translating guest physical addresses to host physical addresses in hardware. [Hardware Virtualization](../../computer-science/cpu-architecture/hardware-virtualization.md)
 
 **`ERESTARTSYS`** — an internal-only return value a blocking syscall hands back when a signal interrupts it, never seen by user space: the kernel either rewinds `pt_regs->ip` to re-execute the `SYSCALL` instruction (if the handler was installed with `SA_RESTART`) or converts it to the `-EINTR` user space actually observes. [Arguments, Returns, and errno](../05-syscalls-and-the-boundary/arguments-return-values-and-errno.md)
 
@@ -162,6 +244,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **ESP (EFI System Partition)** — a FAT32 partition that UEFI firmware can read directly, holding `.efi` boot loader files; it replaces the MBR's chainloading trick that legacy BIOS relies on. [Firmware: BIOS and UEFI](../03-boot-and-init/firmware-bios-and-uefi.md)
 
+**EVM (Extended Verification Module)** — The subsystem protecting security xattrs and inode metadata with an HMAC or signature in `security.evm`, so IMA's stored values can be trusted. [Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
 **Exception table** — a table of `(instruction, fixup)` offset pairs (`struct exception_table_entry`) that lets a page fault on a deliberate `copy_from_user`/`copy_to_user` access be redirected to fixup code returning an error, instead of being treated as the kernel bug an unprotected fault normally is. [Copying Data Across the Boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
 
 **`EXPORT_SYMBOL_GPL`** — the macro placed after a kernel function's definition that makes it callable from a module whose declared license the kernel recognizes as GPL-compatible; the plain `EXPORT_SYMBOL` allows any module regardless of license. [Exported Symbols and the Non-Stable ABI](../04-kernel-architecture-and-idioms/exported-symbols-and-the-module-abi.md)
@@ -169,6 +253,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **Extent** — a run of contiguous physical blocks described by one record (start, length), replacing a list of per-block pointers; ext4, XFS, and Btrfs all map file data with extents. [ext4](../11-vfs-and-filesystems/ext4.md)
 
 **FIB (forwarding information base)** — a routing table as the kernel stores it — an LC-trie searched by longest-prefix match; Linux has had no routing cache in front of it since 3.6. [Routing and Neighbours](../13-networking-stack/routing-and-neighbours.md)
+
+**File capability** — Capabilities attached to an executable in its `security.capability` xattr, granted at `execve()`; the fine-grained replacement for setuid-root. [Capabilities](../16-security/capabilities.md)
 
 **File descriptor table (`files_struct`)** — the per-process table behind `current->files` that maps each small integer fd to a `struct file`; threads share one, and `fork()` copies it. [`open`, `read`, `write` in the Kernel](../11-vfs-and-filesystems/open-read-write-in-the-kernel.md)
 
@@ -178,9 +264,13 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Folio (`struct folio`)** — a type guaranteed to be a head page (or a trivially-its-own-head order-0 page), overlaying the same `struct page` array memory rather than adding a second structure; the guarantee is enforced by the type system, not by a runtime check every caller used to have to redo. [Folios and Compound Pages](../08-memory-management/folios-and-compound-pages.md)
 
+**`FORTIFY_SOURCE`** — Size-checked versions of string and memory functions, which fail at build time or run time when a copy would overflow a buffer of known size. [Kernel Hardening](../16-security/kernel-hardening.md)
+
 **fq_codel** — a qdisc that gives each flow its own queue and drops or marks packets once their queueing delay stays above 5 ms over a 100 ms interval; systemd's default. [Traffic Control and qdiscs](../13-networking-stack/traffic-control.md)
 
 **Freestanding C** — a C implementation with no operating system underneath it to supply a standard library, a `main()` entry point, or a heap; the kernel supplies its own equivalents of everything (`printk`, `kmalloc`, its own boot entry) because it *is* the OS. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
+
+**fsuid** — The UID the VFS uses for permission checks; it follows `euid` automatically and exists so a server can act on files as another user. [Credentials in the Kernel](../16-security/credentials-in-the-kernel.md)
 
 **`fsync`** — a call guaranteeing that, on success, a file's data and the metadata needed to find it have been handed to the device with a cache-flush/`FUA` request; it says nothing about the containing directory's own entry, which needs its own `fsync` on the directory file descriptor. [Writeback, Dirty Pages, and `fsync`](../08-memory-management/writeback-and-fsync.md)
 
@@ -189,6 +279,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **FUSE (Filesystem in Userspace)** — the kernel interface that forwards VFS operations as requests over `/dev/fuse` to an ordinary process, which implements the filesystem's logic. [FUSE](../11-vfs-and-filesystems/fuse-and-userspace-filesystems.md)
 
 **FUSE passthrough** — a FUSE mode in which the daemon hands the kernel a backing file and reads and writes then go straight to it, skipping the round trip through the daemon for data. [FUSE](../11-vfs-and-filesystems/fuse-and-userspace-filesystems.md)
+
+**fw_devlink** — Links between devices inferred from firmware descriptions (device-tree phandles, ACPI dependencies), used to order probing so suppliers probe before consumers. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
 
 **`gendisk`** — the structure describing one whole disk to the block layer — its name, its request queue, its partitions — from which most of `/dev` and `/sys/block` is generated. [Block Devices and `gendisk`](../12-block-layer-and-storage/block-devices-and-gendisk.md)
 
@@ -220,6 +312,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`idr`/`ida`** — the kernel's "give me the smallest unused integer, and let me give it back later" allocators; `idr` maps a small integer to a pointer (file descriptors, device minor numbers), while `ida` is the same machinery with no pointer attached, just an ID allocator. [Kernel Data Structures](../04-kernel-architecture-and-idioms/kernel-data-structures.md)
 
+**IMA (Integrity Measurement Architecture)** — The subsystem that hashes files on access under a policy, logs the hashes and extends a TPM PCR, and optionally appraises them against `security.ima`. [Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
 **`__init`** — an annotation placing a function in a discardable code section whose memory is freed once boot completes; calling it later dereferences freed memory. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
 
 **Initcall** — a function pointer a built-in driver or subsystem registers into a named linker section at build time, which the kernel walks and calls at the appropriate point in boot rather than being invoked by name from `start_kernel()`. [`start_kernel` and the Initcall Order](../03-boot-and-init/start-kernel-and-initcalls.md)
@@ -234,7 +328,21 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **I/O scheduler** — an optional blk-mq stage that reorders and merges requests before dispatch — `none`, `mq-deadline`, `bfq`, or `kyber` — chosen per device in `/sys/block/<dev>/queue/scheduler`. [I/O Schedulers](../12-block-layer-and-storage/io-schedulers.md)
 
+**`io.latency`** — A cgroup I/O latency target: when it is missed, siblings with looser targets are throttled until it recovers. [cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
 **`io_uring`** — an asynchronous I/O interface built on two rings shared between the application and the kernel — submissions in, completions out — so many operations cost one syscall, or none. [`io_uring`](../12-block-layer-and-storage/io-uring.md)
+
+**ioctl number** — The 32-bit command passed to `ioctl()`, built with `_IO`/`_IOR`/`_IOW`/`_IOWR` from a type, a number, a direction and an argument size. [Character Devices](../14-device-drivers-and-hardware/character-devices.md)
+
+**`__iomem`** — A sparse annotation marking a pointer as device memory, so only the MMIO accessors may dereference it. [MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
+**IOMMU** — The unit translating device-generated addresses through per-device page tables, so a device can reach only the memory mapped for it. [DMA and the IOMMU](../../computer-science/buses-and-io/dma-and-iommu.md)
+
+**`ioremap`** — Maps a physical MMIO range into kernel virtual address space with device-appropriate (uncached) attributes and returns an `__iomem` pointer. [MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
+**IOTLB** — The IOMMU's cache of address translations, which must be invalidated when a mapping is removed. [DMA and the IOMMU](../../computer-science/buses-and-io/dma-and-iommu.md)
+
+**IOVA** — An I/O virtual address: a device-side address an IOMMU translates to a physical one. [DMA and the IOMMU](../../computer-science/buses-and-io/dma-and-iommu.md)
 
 **`iowait`** — CPU time spent idle while some task on that CPU waits for I/O — a property of idle time, not a measure of how busy or slow a device is. [Diagnosing I/O Problems](../12-block-layer-and-storage/diagnosing-io-problems.md)
 
@@ -250,6 +358,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **IRQ number versus vector** — two different numbers for the same event: the hardware vector is the IDT index the interrupt controller told the CPU to use, while the Linux IRQ number is the software identifier assigned by an irq domain that `/proc/interrupts`, `request_irq()`, and every driver actually deal in. [How an Interrupt Reaches the Kernel](../10-interrupts-time-and-deferred-work/how-an-interrupt-reaches-the-kernel.md)
 
+**`IRQ_NONE`** — The return value telling the IRQ core "this interrupt wasn't from my device"; essential on shared lines, and counted to detect stuck interrupts. [Interrupts in a Driver](../14-device-drivers-and-hardware/interrupts-in-drivers.md)
+
 **`IRQF_ONESHOT`** — the `request_threaded_irq()` flag that keeps a level-triggered line masked until the thread function itself finishes, not just until the primary handler returns; omitting it on a threaded handler for a level-triggered line produces an interrupt storm. [Threaded IRQs](../10-interrupts-time-and-deferred-work/threaded-irqs.md)
 
 **`irqsave`** — the `spin_lock_irqsave()`/`spin_unlock_irqrestore()` pair, which saves the CPU's current interrupt-enabled state and restores exactly that on unlock rather than assuming interrupts were on; the safe default whenever a caller can't prove the prior interrupt state, since an unconditional `spin_lock_irq()` would wrongly re-enable interrupts that were already off. [Spinlocks](../09-concurrency-and-locking/spinlocks.md)
@@ -262,7 +372,7 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **KASAN** — the Kernel Address Sanitizer, which instruments every memory access to catch use-after-free and out-of-bounds reads/writes at the exact faulting instruction, by poisoning freed and redzone memory and checking accesses against it. [What Goes Wrong in Kernel C](../04-kernel-architecture-and-idioms/memory-safety-in-kernel-c.md)
 
-**KASLR** — kernel address space layout randomisation; the decompressor picks a randomised physical load address at every boot, and relocation logic in `extract_kernel()` plus fixups in the kernel's own `startup_64` make a kernel built for one address run correctly wherever it lands. Booting with `nokaslr` disables this, loading the kernel at its link-time address instead — which is also why a GDB session's symbol table only matches a running kernel with KASLR off. [Early Boot and Architecture Setup](../03-boot-and-init/early-boot-and-arch-setup.md)
+**KASLR** — kernel address space layout randomisation; the decompressor picks a randomised physical load address at every boot, and relocation logic in `extract_kernel()` plus fixups in the kernel's own `startup_64` make a kernel built for one address run correctly wherever it lands. Booting with `nokaslr` disables this, loading the kernel at its link-time address instead — which is also why a GDB session's symbol table only matches a running kernel with KASLR off. [Kernel Hardening](../16-security/kernel-hardening.md)
 
 **Kconfig symbol** — a named configuration option declared by a `config` entry in a `Kconfig` file, with a type, dependency rules, a default, and help text, that governs whether a piece of code is compiled into the kernel at all. [Kconfig and Kbuild](../04-kernel-architecture-and-idioms/kconfig-and-kbuild.md)
 
@@ -276,9 +386,15 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **kernfs** — the generic in-memory filesystem framework sysfs (and cgroupfs) are built on, generating directories and files from kernel objects. [procfs, sysfs, debugfs, configfs](../11-vfs-and-filesystems/procfs-sysfs-debugfs-configfs.md)
 
+**Key type** — The `struct key_type` that defines how a key's payload is created, read and destroyed: `user`, `logon`, `keyring`, `asymmetric`, `trusted`, … [Keyrings](../16-security/keyrings.md)
+
+**Keyring** — A key that holds links to other keys; per-thread, per-process, per-session and per-user keyrings form the search path for `request_key()`. [Keyrings](../16-security/keyrings.md)
+
 **`kfifo`** — the kernel's ready-made single-producer/single-consumer lock-free ring buffer; its own header documentation is explicit that it is lockless only in the strict SPSC case, and a second producer or consumer requires an explicit spinlock (`kfifo_in_spinlocked()`/`kfifo_out_spinlocked()`). [Lock-Free Patterns](../09-concurrency-and-locking/lock-free-and-ring-buffers.md)
 
 **`kobject`** — the generic, embeddable unit that participates in the kernel's object graph: a name, a reference count, a parent pointer, and a pointer to its type; never allocated standalone, always embedded inside a larger structure. [kobjects, ksets, and sysfs](../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md)
+
+**KPTI (kernel page-table isolation)** — Separate page tables for user mode that map almost none of the kernel, defending against Meltdown at the cost of a `CR3` switch per kernel entry. [Kernel Hardening](../16-security/kernel-hardening.md)
 
 **`kref`** — a thin standard wrapper around a `refcount_t` plus the convention of pairing it with a release callback; `kref_put` invokes the release function exactly once, when the count it decrements reaches zero. [Reference Counting and Object Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md)
 
@@ -289,6 +405,10 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **`kswapd`** — a per-node kernel thread woken when a zone drops below its **low** watermark, reclaiming memory in the background while allocations continue to be satisfied from whatever's still available; the healthy counterpart to direct reclaim. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
 
 **`ktype` (`kobj_type`)** — the behavior attached to a `kobject` — its release function and its attribute (`show`/`store`) operations — shared by every `kobject` of a given kind. [kobjects, ksets, and sysfs](../04-kernel-architecture-and-idioms/kobjects-sysfs-and-the-object-model.md)
+
+**KVM** — The kernel's hypervisor: a VM is a process, each vCPU a thread, and the interface is `ioctl`s on file descriptors from `/dev/kvm`. [KVM](../15-containers-and-virtualization/kvm-and-hardware-virtualization.md)
+
+**`kvm_run`** — The page shared between KVM and user space for each vCPU, through which `KVM_RUN` reports why it returned. [KVM](../15-containers-and-virtualization/kvm-and-hardware-virtualization.md)
 
 **Lag** — under EEVDF, the gap between the CPU service a task should have received under ideal weighted-fair sharing and what it actually has: `weight × (V − vruntime)`. Positive lag means the task is owed time and is eligible to run; negative lag means it has run ahead of its share and must wait for `V` to catch up. [EEVDF](../07-scheduling/eevdf.md)
 
@@ -302,9 +422,15 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Lockdep** — a runtime validator that builds a graph of lock acquisition ordering as the kernel actually runs and reports the first sequence that could deadlock, even before that exact sequence has actually occurred. [Finding Locking Bugs](../09-concurrency-and-locking/finding-locking-bugs.md)
 
-**Lockdown** (`CONFIG_SECURITY_LOCKDOWN_LSM`) — closes the ways an already-signature-verified, running kernel could still be made to execute unsigned code or expose kernel memory; its `integrity` mode forbids modifying the running kernel, and `confidentiality` additionally forbids reading kernel memory or secrets, which is why `nokaslr` and kernel debugging stop working once it's active. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
+**Lockdown** (`CONFIG_SECURITY_LOCKDOWN_LSM`) — closes the ways an already-signature-verified, running kernel could still be made to execute unsigned code or expose kernel memory; its `integrity` mode forbids modifying the running kernel, and `confidentiality` additionally forbids reading kernel memory or secrets, which is why `nokaslr` and kernel debugging stop working once it's active. [Kernel Hardening](../16-security/kernel-hardening.md)
 
 **LRU (lists)** — the classic reclaim scheme: per-`lruvec` active and inactive lists, split further by anonymous versus file-backed (five `lru_list` types in total), where a page found re-referenced while on the inactive list gets a second chance onto the active list instead of being evicted outright. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
+
+**LSM (Linux Security Module)** — A module that registers functions on the kernel's security hooks; it can deny accesses the base checks allowed, never allow ones they denied. [The LSM Framework](../16-security/the-lsm-framework.md)
+
+**LSM hook** — A call (`security_*()`) at a security-relevant point in the kernel that runs every registered module's handler. [The LSM Framework](../16-security/the-lsm-framework.md)
+
+**LSM stacking** — Running several LSMs at once, in the order from `lsm=`; SELinux, AppArmor and Smack are exclusive with each other, the rest stack freely. [The LSM Framework](../16-security/the-lsm-framework.md)
 
 **LTS (long-term support)** — a designation given to a subset of kernel releases for which the community keeps backporting fixes for years after an ordinary release would have been abandoned. [What Linux Actually Is](./what-linux-actually-is.md)
 
@@ -312,25 +438,43 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **macvlan and ipvlan** — virtual sub-interfaces of a physical NIC that appear on its network directly — with their own MAC addresses (macvlan) or sharing the parent's (ipvlan). [Network Namespaces and Virtual Devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
 
+**Major and minor numbers** — The two halves of a device number: the major selects the driver, the minor selects which device of that driver. [Character Devices](../14-device-drivers-and-hardware/character-devices.md)
+
 **Maple tree** — the B-tree-like structure (`mm_mt`) an `mm_struct` uses to index its VMAs at v6.18, replacing the older rbtree-plus-linked-list scheme; it supports RCU-safe, lock-free lookups, and `vma->vm_next` no longer exists as a field. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
 **Masquerade** — source NAT that uses the outgoing interface's current address as the new source, and forgets its mappings when that address goes away. [Connection Tracking and NAT](../13-networking-stack/connection-tracking-and-nat.md)
 
 **md personality** — the per-RAID-level module (`raid0`, `raid1`, `raid456`, `raid10`) that the `md` driver uses to turn several block devices into one array. [Software RAID (md)](../12-block-layer-and-storage/software-raid.md)
 
+**Measurement versus appraisal** — IMA's two modes: measurement records a file's hash for someone else to check; appraisal compares it locally and denies access on a mismatch. [Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
+
 **`MemAvailable`** — `/proc/meminfo`'s estimate of memory a new process could actually get without swapping: free memory plus the portion of cache that's cheaply reclaimable; the number to read instead of `MemFree`, which counts none of the reclaimable cache. [What `free` and RSS Really Tell You](../08-memory-management/what-free-and-rss-really-say.md)
 
 **Memory ordering** — a plain, unadorned access gives the compiler license to merge, split, invent, or hoist it, and the CPU separately reorders at run time through its store-buffer and speculation machinery; `READ_ONCE()`/`WRITE_ONCE()` close the compiler half and the `smp_*` barrier family closes the CPU half, and the two must be reasoned about separately. [Memory Ordering and Barriers](../09-concurrency-and-locking/memory-ordering-and-barriers.md)
+
+**`memory.high`** — The cgroup memory throttle threshold: tasks over it are forced into reclaim and slowed, but never OOM-killed for it. [cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
+**`memory.max`** — The cgroup memory hard limit: allocation beyond it triggers reclaim within the cgroup, then the OOM killer inside the cgroup. [cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
 
 **mempolicy (`struct mempolicy`)** — the kernel structure recording which policy (default, bind, preferred, interleave, or weighted interleave) governs which node(s) a fault may draw a frame from, settable per-task (`set_mempolicy`), per-VMA (`mbind`), and bounded underneath both by a cpuset's node set. [NUMA and Memory Policy](../08-memory-management/numa-and-memory-policy.md)
 
 **MGLRU (multi-generational LRU)** — an alternative reclaim implementation organizing pages into generations aged by scanning page-table accessed bits directly rather than the classic two-list scheme's reference-on-fault/reference-on-scan signal; it is a compile-time option (`CONFIG_LRU_GEN`) with no `default y`, not something every kernel ships active. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
 
+**microVM** — A minimal virtual machine (Firecracker, Cloud Hypervisor) with a tiny device model, used to give container-like workloads VM isolation. [Virtualization and Isolation](../../computer-science/operating-systems/virtualization-and-isolation.md)
+
+**Misc device** — A character device registered with `misc_register()`, sharing major 10 and getting a dynamic minor and a `/dev` node with one call. [Character Devices](../14-device-drivers-and-hardware/character-devices.md)
+
 **`mm_struct`** — the one-per-address-space structure every thread of a multi-threaded process shares, carrying the VMA collection, the top-level page-table pointer, and layout fields; its lifetime is split across two reference counts, `mm_users` (userspace/semantic references) and `mm_count` (the allocation itself), specifically so a lazy-TLB kernel thread can hold the struct without keeping the address space alive. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
 **`mmap_lock`** — the per-`mm` reader-writer semaphore serializing structural changes to the VMA collection (insert/remove/split/merge); at v6.18 per-VMA locking (`CONFIG_PER_VMA_LOCK`, enabled in most configurations since 6.4/6.5) lets the page-fault fast path take a lock on just the faulted VMA instead, falling back to `mmap_lock` only when that path can't proceed. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
+**Modalias** — A string describing a device in the form its bus's ID tables use; udev hands it to `modprobe`, which loads whichever module's aliases match. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
+
+**Mode bits** — The 12 permission bits of `st_mode`: setuid, setgid, sticky, and read/write/execute for owner, group and other. [The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
 **Module** — relocatable object code linked into an already-running kernel at load time instead of build time, running with exactly the same privileges as code compiled into `vmlinux`. [Monolithic, With Modules](../04-kernel-architecture-and-idioms/monolithic-with-modules.md)
+
+**Module signing** — Verification of a PKCS#7 signature appended to each `.ko` against the kernel's trusted keyrings at load time; enforced with `module.sig_enforce`. [Integrity: IMA, EVM, and Module Signing](../16-security/integrity-and-signing.md)
 
 **Modversions** — a build-time mechanism (`CONFIG_MODVERSIONS`) that computes a CRC over each exported symbol's type signature and checks it at module-load time, refusing to load a module whose recorded CRC no longer matches the running kernel's. [Exported Symbols and the Non-Stable ABI](../04-kernel-architecture-and-idioms/exported-symbols-and-the-module-abi.md)
 
@@ -348,11 +492,13 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Nagle's algorithm** — holding a small TCP segment back while earlier data is unacknowledged; combined with delayed ACKs it stalls request/response traffic, which `TCP_NODELAY` disables. [TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
 
-**Namespace** — a kernel mechanism that changes what a process can *see* (which processes, network devices, hostname, IPC objects, etc. are visible or enumerable) without affecting what resources it's allowed to *use*; created via `CLONE_NEW*` flags to `clone()`. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
+**Namespace** — a kernel mechanism that changes what a process can *see* (which processes, network devices, hostname, IPC objects, etc. are visible or enumerable) without affecting what resources it's allowed to *use*; created via `CLONE_NEW*` flags to `clone()`. [Namespaces](../15-containers-and-virtualization/namespaces-overview.md)
 
 **NAPI** — the receive-path model where a hardware interrupt only schedules polling rather than processing the packet itself; under light load it behaves like one interrupt per packet, but under heavy load the queue's interrupts are disabled and a poll loop drains it instead, bounding interrupt cost. [The Life of a Packet](../02-guided-traces/the-life-of-a-packet.md); in depth: [The Receive Path](../13-networking-stack/the-receive-path.md)
 
 **NAPT (port address translation)** — NAT that rewrites ports as well as addresses, so many private hosts can share one public address; what home routers and `masquerade` do. [NAT and Connection Tracking](../../computer-science/computer-networks/nat-and-connection-tracking.md)
+
+**`ndo_start_xmit`** — The network-driver callback that hands one `sk_buff` to the hardware for transmission. [Block and Network Driver Shapes](../14-device-drivers-and-hardware/block-and-network-driver-shapes.md)
 
 **`need_resched`** — at v6.18, `TIF_NEED_RESCHED`, a per-task bit in `struct thread_info::flags` set when a higher-priority task becomes runnable; a reschedule happens only once this flag is set *and* `preempt_count` is zero, at a point the kernel actually checks. x86-64 adds a second, weaker `TIF_NEED_RESCHED_LAZY` for `PREEMPT_LAZY`. [Preemption Models](../07-scheduling/preemption-models.md)
 
@@ -378,7 +524,17 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Nice weight** — the value `nice` actually changes: `sched_prio_to_weight[]` maps a nice level to a weight (`sched_entity.load.weight`) that scales how fast a task's vruntime advances and how its EEVDF virtual deadline is projected. Each nice step is a fixed ~1.25× geometric ratio, so a nice difference buys a constant *percentage* change in CPU share, not a fixed amount. [Priorities, nice, and Weights](../07-scheduling/priorities-nice-and-weights.md)
 
+**No-internal-process rule** — cgroup v2's rule that a non-root cgroup with controllers enabled for its children may not itself contain processes. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
+**`no_new_privs`** — A per-task, irreversible, inherited flag under which `execve()` can't gain privilege from setuid bits or file capabilities; required for unprivileged seccomp. [Capabilities and Container Privilege](../15-containers-and-virtualization/capabilities-in-containers.md)
+
 **`nohz_full`** — the boot parameter marking specific CPUs as adaptive-tick, stopping the periodic tick on a busy CPU once it has exactly one runnable task; it requires at least one housekeeping CPU and RCU callback offloading (`rcu_nocbs`), and is one part of a CPU-isolation configuration, not a standalone flag. [The Tick, and Living Without It](../10-interrupts-time-and-deferred-work/the-tick-and-nohz.md)
+
+**`ns_capable`** — The kernel's capability check against a specific user namespace, so a capability held in a child namespace counts only for resources that namespace owns. [User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
+
+**`NSpid`** — The `/proc/<pid>/status` line listing a process's PID in each nested PID namespace, outermost first. [Mount and PID Namespaces](../15-containers-and-virtualization/mount-and-pid-namespaces.md)
+
+**`nsproxy`** — The per-task structure pointing at the task's namespaces (all except the user namespace, which lives in its credentials). [Namespaces](../15-containers-and-virtualization/namespaces-overview.md)
 
 **`nstat`** — the tool that reads the kernel's SNMP and netstat counters from `/proc/net/snmp` and `/proc/net/netstat`, showing what changed since its last run. [Diagnosing Network Problems](../13-networking-stack/diagnosing-network-problems.md)
 
@@ -389,6 +545,10 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **`O_DIRECT`** — an open flag that moves data between the user's buffer and the device without the page cache, at the price of alignment rules and no readahead or write-behind — and with no durability promise of its own. [Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
 
 **`O_DSYNC`** — an open flag making each `write()` return only once its data, and the metadata needed to read it back, has reached stable storage — as if followed by `fdatasync()`. [Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
+
+**OCI image** — A container image in the Open Container Initiative format: an index, a manifest, a config and content-addressed layer tarballs. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
+**OCI runtime spec** — The standard for what a runtime does with a bundle: the `config.json` fields and the create/start/kill/delete lifecycle. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
 
 **`offsetof`** — a compile-time constant giving the byte offset of a named field within its struct type, with no runtime cost; it is the arithmetic building block `container_of` is built on. [`container_of` and Embedded Structs](../04-kernel-architecture-and-idioms/container-of-and-embedded-structs.md)
 
@@ -414,27 +574,47 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **PCID (Process-Context Identifier)** — a hardware TLB tag letting entries from more than one address space coexist without a full flush on every switch; Linux recycles a small pool of PCIDs as ASIDs across recently-used `mm`s per CPU, and it is the concrete reason KPTI's per-syscall cost varies so much between machines with and without PCID support. [The TLB and Address-Space Switching](../08-memory-management/tlb-and-address-space-switching.md)
 
+**PCIe link and lane** — A lane is one pair of differential signal pairs; a link is one or more lanes (x1 to x16) between two PCIe ports. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
+
 **Peer group** — the set of mounts that propagate mount and unmount events to one another; a mount's propagation type is defined relative to its peer group. [Mounts and Mount Namespaces](../11-vfs-and-filesystems/mounts-and-mount-namespaces.md)
 
 **Pending signal** — the state between a signal's generation (a bit set in `struct sigpending`) and its delivery at the next return to user space; a signal can be pending indefinitely if the target never reaches that checkpoint. [Signals](../06-processes-and-threads/signals.md)
 
 **Per-CPU data** — the strategy that beats every lock by eliminating sharing rather than protecting it: give each CPU its own copy via `this_cpu_*`/`per_cpu()`, so there is no cache-line bouncing and nothing to combine except when a caller actually needs the aggregate total. [Per-CPU Data](../09-concurrency-and-locking/per-cpu-data.md)
 
+**Permissive mode** — SELinux mode in which denials are logged but not enforced, for the whole system or for one domain. [SELinux](../16-security/selinux.md)
+
 **`pick_next_task`** — the function (`kernel/sched/core.c`) that walks the scheduling classes from highest to lowest priority and takes the first task offered, with a fast path that skips straight to `pick_next_task_fair()` whenever every runnable task on the runqueue already belongs to the fair class. [Runqueues and Scheduling Classes](../07-scheduling/runqueues-and-scheduling-classes.md)
 
 **PID 1** — the first user-space process, distinguished from every other process only by having no parent, which is the single cause behind its special signal handling, orphan-reaping duty, and the kernel panic that follows if it ever exits. [`switch_root` and PID 1](../03-boot-and-init/switch-root-and-pid-1.md)
 
-**`pivot_root`** — the call that moves a *mount namespace's* root to another directory already mounted within it, changing what an absolute path resolves through for every process sharing that namespace; distinct from `chroot`, which changes only the calling *process's* idea of `/` — a per-process attribute, not a mount-namespace-wide change. [The Life of a Container](../02-guided-traces/the-life-of-a-container.md)
+**`pids.max`** — The cap on tasks in a cgroup subtree; `fork()` beyond it fails with `EAGAIN`. [cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md)
+
+**`pivot_root`** — the call that moves a *mount namespace's* root to another directory already mounted within it, changing what an absolute path resolves through for every process sharing that namespace; distinct from `chroot`, which changes only the calling *process's* idea of `/` — a per-process attribute, not a mount-namespace-wide change. [Mount and PID Namespaces](../15-containers-and-virtualization/mount-and-pid-namespaces.md)
+
+**Platform device** — A device that isn't discoverable on its bus, so firmware (device tree or ACPI) or board code has to declare it; matched to a `platform_driver`. [Platform Devices, Device Tree, and ACPI](../14-device-drivers-and-hardware/platform-devices-and-description.md)
 
 **Plugging** — a batching window opened with `blk_start_plug()` in which adjacent `bio`s can merge into one larger request before any is dispatched. [The `bio`](../12-block-layer-and-storage/the-bio.md)
 
 **Policy routing rule** — an `ip rule` entry that selects which routing table to consult based on source, mark, interface, UID, or protocol, evaluated in priority order before any route lookup. [Routing and Neighbours](../13-networking-stack/routing-and-neighbours.md)
 
+**Popek–Goldberg requirements** — The 1974 conditions for a virtualizable architecture: every sensitive instruction must be privileged, so it traps when run in a VM. [Hardware Virtualization](../../computer-science/cpu-architecture/hardware-virtualization.md)
+
+**Port publishing** — Making a container port reachable on a host port, implemented as a DNAT rule plus conntrack. [Container Networking](../15-containers-and-virtualization/container-networking.md)
+
+**POSIX ACL** — Additional named-user and named-group permission entries on a file, capped by a mask entry, stored in the `system.posix_acl_access` xattr. [The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**Posted write** — A PCIe memory write that completes for the CPU before it reaches the device; reading back a register on the device forces earlier writes to arrive. [MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
+
 **`PR_SET_CHILD_SUBREAPER`** — a `prctl(2)` flag letting any process opt in to reaping orphans from its own descendant tree, instead of every orphan reparenting all the way up to PID 1; it's the mechanism container supervisors like `tini` and `dumb-init` rely on. [Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
+
+**Predictable interface name** — A network interface name derived from hardware location or firmware data (`enp0s3`, `ens3`) instead of probe order, set by udev. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
 
 **`preempt_count`** — a per-CPU counter incremented by taking a spinlock, entering interrupt or softirq context, or an explicit `preempt_disable()`; a reschedule is legal only when it is exactly zero, regardless of what `need_resched` says. [Preemption Models](../07-scheduling/preemption-models.md)
 
 **Preemption model** — the kernel-wide policy for whether kernel-mode execution may be interrupted for scheduling before it finishes voluntarily; v6.18 offers four (`PREEMPT_NONE`, `PREEMPT_VOLUNTARY`, `PREEMPT`, `PREEMPT_LAZY`) plus `PREEMPT_RT` layered independently on top, trading worst-case latency against throughput. [Preemption Models](../07-scheduling/preemption-models.md)
+
+**Probe** — A driver's `probe()` callback, called when the bus matches it to a device: it claims resources and makes the device usable, or returns an error and the device stays unbound. [The Linux Device Model](../14-device-drivers-and-hardware/the-linux-device-model.md)
 
 **`proto_ops`** — the table of socket-API operations (`bind`, `connect`, `accept`, `poll`, ...) for one address family and socket type, such as `inet_stream_ops` for IPv4 TCP. [Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
 
@@ -451,6 +631,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **qdisc (queueing discipline)** — the scheduler in front of each transmit queue that decides which packet goes next, how long packets wait, and which are dropped. [Traffic Control and qdiscs](../13-networking-stack/traffic-control.md)
 
 **QEMU gdbstub** (`-s -S`) — `-s` opens a GDB stub listening on TCP port 1234 exposing the guest's virtual CPU; `-S` freezes the guest at its first instruction until GDB tells it to continue, letting GDB drive the CPU directly regardless of whether guest software is responsive. [Debugging the Kernel with GDB](../01-lab-and-toolchain/debugging-the-kernel-with-gdb.md)
+
+**`queue_rq`** — The blk-mq callback a block driver implements to start one request on the hardware. [Block and Network Driver Shapes](../14-device-drivers-and-hardware/block-and-network-driver-shapes.md)
 
 **Queued spinlock** — the kernel's actual `spinlock_t` implementation (`struct qspinlock`, MCS-lock-derived): each waiter beyond the first queues on its own per-CPU node instead of the shared lock word, turning contention into a fair FIFO instead of a cache-line-bouncing free-for-all. [Spinlocks](../09-concurrency-and-locking/spinlocks.md)
 
@@ -480,9 +662,13 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Refault** — a page reclaimed and then read back almost immediately, costing the reclaim work for zero net memory saved; it is the direct, measurable signal (`workingset_refault_file`/`_anon`) that the working set no longer fits available memory, distinguishing healthy reclaim from thrashing. [Reclaim, LRU, and kswapd](../08-memory-management/reclaim-lru-and-kswapd.md)
 
+**Refcount saturation** — `refcount_t`'s behaviour on overflow: it sticks at a saturated value and warns, leaking the object instead of freeing it while in use. [Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
+
 **`refcount_t`** — a dedicated reference-counting type (distinct from `atomic_t`) that saturates instead of wrapping on overflow and refuses to increment from zero, closing two failure modes a plain atomic counter has when used as an object's lifetime counter. [Reference Counting and Object Lifetime](../04-kernel-architecture-and-idioms/reference-counting-and-lifetime.md)
 
 **Reflink** — a copy-on-write clone of a file's extents (`FICLONE`): both files share the same blocks until one of them writes, so a "copy" of any size is instant. [XFS and Btrfs](../11-vfs-and-filesystems/xfs-and-btrfs.md)
+
+**Relaxed accessor** — `readl_relaxed()`/`writel_relaxed()`: MMIO accesses without the barriers the ordinary accessors include, for hot paths that order DMA themselves. [MMIO, ioremap, and Accessors](../14-device-drivers-and-hardware/mmio-and-port-io.md)
 
 **Reparenting** — what happens to a task's children when it dies first: `forget_original_parent()` hands each one to the nearest subreaper ancestor, or to PID 1 of its PID namespace if none exists. [Exit, Zombies, and Orphans](../06-processes-and-threads/exit-zombies-and-orphans.md)
 
@@ -490,11 +676,15 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Request size (slice)** — a task's declared amount of CPU per turn under EEVDF (`sched_entity.slice`), defaulting to `sysctl_sched_base_slice` (0.7ms) but settable per-task via `sched_setattr()`'s `sched_runtime` field (clamped to 0.1–100ms). A smaller request size earns an earlier virtual deadline and therefore more prompt scheduling, entirely independent of the task's weight or aggregate CPU share. [EEVDF](../07-scheduling/eevdf.md)
 
+**`request_firmware`** — The call a driver uses to load a firmware blob, which the kernel looks up in `/lib/firmware` and hands back as a buffer. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
+
 **`RESOLVE_*` flags** — `openat2(2)` options that constrain path resolution itself — `RESOLVE_BENEATH`, `RESOLVE_IN_ROOT`, `RESOLVE_NO_SYMLINKS` and others — so a program can open a path inside a directory without `..` or symlinks escaping it. [Path Lookup and the Dentry Cache](../11-vfs-and-filesystems/path-lookup-and-the-dcache.md)
 
 **Resync** — `md` re-checking an array's redundancy after an unclean shutdown, because a stripe in flight at the crash may have data and parity that disagree. [Software RAID (md)](../12-block-layer-and-storage/software-raid.md)
 
 **rootfs** — the always-present `tmpfs`-family filesystem the kernel mounts at `/` before anything else exists, whether or not an initramfs archive is ever unpacked into it. [initramfs and Early User Space](../03-boot-and-init/initramfs-and-early-userspace.md)
+
+**Rootless container** — A container whose runtime runs as an ordinary user, using a user namespace to be root inside without being root on the host. [User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
 
 **`rp_filter`** — reverse-path filtering: dropping a received packet if a reply to its source would not leave by the interface it arrived on (strict, `1`) or by any interface (loose, `2`). [Routing and Neighbours](../13-networking-stack/routing-and-neighbours.md)
 
@@ -506,11 +696,19 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **RTO (retransmission timeout)** — how long TCP waits for an ACK before retransmitting, computed from the smoothed RTT and its variance and never below `TCP_RTO_MIN` (200 ms). [TCP in the Kernel](../13-networking-stack/tcp-in-the-kernel.md)
 
+**runc** — The reference OCI runtime, which turns a bundle into a running container by making the namespace, cgroup, mount, capability and seccomp calls. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
+
 **Runqueue** — `struct rq`, one per CPU, the lock-protected container holding a sub-runqueue per scheduling class (`cfs`, `rt`, `dl`, and `scx` when enabled) plus cross-class bookkeeping (`nr_running`, `clock`, `curr`); waking a task that last ran on a different CPU means touching that CPU's runqueue lock and cache lines, which is why cross-CPU wakeup and migration are expensive relative to a local reschedule. [Runqueues and Scheduling Classes](../07-scheduling/runqueues-and-scheduling-classes.md)
+
+**Runtime PM** — Per-device power management while the system runs: a device is suspended when idle and resumed on use, tracked by a usage count. [Power Management](../14-device-drivers-and-hardware/power-management.md)
 
 **`rw_semaphore`** — the sleeping reader-writer lock, FIFO-fair by default via a handoff flag that prevents a stream of new readers from starving a waiting writer; it earns its keep specifically for long, sleeping read-side sections (`mmap_lock` is the canonical example), not for short critical sections where a plain lock is usually faster. [Reader-Writer Locks](../09-concurrency-and-locking/rwlocks-and-rwsems.md)
 
+**s2idle** — Suspend-to-idle: system sleep implemented by freezing tasks, suspending devices and idling all CPUs, without platform firmware support. [Power Management](../14-device-drivers-and-hardware/power-management.md)
+
 **Saved set-user-ID** — the copy of a task's effective UID taken at `exec()` time, which lets a setuid-root program drop privilege temporarily and later regain it with one `seteuid()` call, even as an unprivileged real UID. [Credentials and Identity](../06-processes-and-threads/credentials-and-identity.md)
+
+**Scatter-gather** — DMA over a list of separate memory segments in one operation, so a buffer needn't be physically contiguous. [DMA and the IOMMU](../../computer-science/buses-and-io/dma-and-iommu.md)
 
 **`SCHED_DEADLINE`** — the policy under which a task declares a runtime, deadline, and period instead of a priority; the kernel runs a schedulability (admission) test at `sched_setattr()` time and refuses the task outright if accepting it would leave the system unschedulable — the only Linux scheduling policy that makes a guarantee rather than a promise. [Real-Time Scheduling](../07-scheduling/real-time-scheduling.md)
 
@@ -522,9 +720,17 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **`SCM_RIGHTS`** — ancillary data sent over a UNIX-domain socket that transfers an open file descriptor to another, unrelated process, installing a new descriptor in the receiver that points at the identical underlying `struct file`. [Pipes, FIFOs, and UNIX Sockets](../06-processes-and-threads/pipes-fifos-and-unix-sockets.md)
 
-**Seccomp user notification** (`SECCOMP_RET_USER_NOTIF`) — the mechanism actually built to intervene in a syscall rather than merely observe it: a matching filter suspends the calling task and hands a supervisor process a file descriptor carrying a race-free `struct seccomp_notif` snapshot, letting the supervisor allow, fail, or (carefully) continue the call. [Tracing and Intercepting Syscalls](../05-syscalls-and-the-boundary/tracing-and-intercepting-syscalls.md)
+**seccomp filter** — A classic BPF program run on every syscall of a thread and its descendants, returning allow, errno, trap, kill, trace, log or user-notify. [seccomp and Syscall Filtering](../16-security/seccomp.md)
+
+**Seccomp user notification** (`SECCOMP_RET_USER_NOTIF`) — the mechanism actually built to intervene in a syscall rather than merely observe it: a matching filter suspends the calling task and hands a supervisor process a file descriptor carrying a race-free `struct seccomp_notif` snapshot, letting the supervisor allow, fail, or (carefully) continue the call. [seccomp and Syscall Filtering](../16-security/seccomp.md)
 
 **Secure Boot** — a signature-verification gate that checks, at each handoff from firmware to boot loader to kernel, whether the thing about to execute is signed by a key the machine trusts; it verifies provenance only, not the safety of what runs. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
+
+**Securebits** — Per-credential flags that turn off root's special treatment in the capability rules, each with a lock bit making it permanent. [Capabilities](../16-security/capabilities.md)
+
+**Security context** — An SELinux label, `user:role:type:level`, on every process and object; the type is what most rules use. [SELinux](../16-security/selinux.md)
+
+**SELinux boolean** — A run-time switch that turns a group of conditional policy rules on or off without recompiling the policy. [SELinux](../16-security/selinux.md)
 
 **`seq_file`** — the kernel interface (`include/linux/seq_file.h`) behind most non-trivial `/proc` entries: rather than a stored buffer, it invokes a `show` callback that formats live kernel state into a transient buffer at the moment of the read. [`/proc` as the Process Interface](../06-processes-and-threads/proc-as-the-process-interface.md)
 
@@ -532,11 +738,15 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Sequence counter** — the bare counter half of a seqlock (`seqcount_t`), with no lock embedded, for use when the caller already holds some other lock that serializes writers and only needs the counter for readers' retry-detection benefit; `seqlock_t` is this counter bundled with its own spinlock instead. [Seqlocks](../09-concurrency-and-locking/seqlocks.md)
 
+**`setns`** — The syscall that joins an existing namespace, given a file descriptor for it from `/proc/<pid>/ns/` or a pidfd. [Namespaces](../15-containers-and-virtualization/namespaces-overview.md)
+
 **Setup header** — the fixed-layout struct inside a `bzImage` that forms the binary contract between the boot loader and the kernel, specifying which fields the loader must fill in (like `cmd_line_ptr`, `ramdisk_image`) versus only read. [Inside `bzImage`](../03-boot-and-init/the-kernel-image.md)
 
 **Shaping and policing** — two ways to enforce a rate: shaping delays excess egress traffic in a queue, policing drops excess traffic as it arrives — the only option on ingress. [Traffic Control and qdiscs](../13-networking-stack/traffic-control.md)
 
 **`shim`** — a small loader signed by Microsoft's UEFI CA that nearly every Secure-Boot-enabled PC trusts out of the box; once running, it verifies a distribution's actual boot loader against its own baked-in key instead, so only `shim` itself needs a key in every machine's `db`. It also supports MOK enrolment, letting a user add their own signing key for a locally-built kernel module. [Secure Boot and Signed Kernels](../03-boot-and-init/secure-boot-and-signed-kernels.md)
+
+**Shim** — The small per-container process (`containerd-shim-runc-v2`, or Podman's `conmon`) that stays as the container's parent, holding its stdio and exit status. [Images, Layers, and the OCI Runtime](../15-containers-and-virtualization/images-layers-and-oci.md)
 
 **shmem** — the one subsystem (`mm/shmem.c`) behind tmpfs, POSIX shared memory, `memfd_create`, and System V shared memory — they differ only in how a name gets attached to a shmem inode. [tmpfs and Memory-Backed Filesystems](../11-vfs-and-filesystems/tmpfs-and-memory-filesystems.md)
 
@@ -550,11 +760,13 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **Slab (cache)** — a pool dedicated to one object type or size, carved from pages the page allocator supplied, with a freelist threading unused slots together so `alloc`/`free` push and pop that list instead of touching the page allocator on every call. [Slab, SLUB, and `kmalloc`](../08-memory-management/slab-slub-and-kmalloc.md)
 
+**Slice and scope** — systemd's cgroup units: a slice is a node for grouping (`user.slice`), a scope holds processes started elsewhere, alongside services that systemd starts itself. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
 **SLUB** — the only slab allocator left in the tree at v6.18 (SLAB and SLOB were both removed), built on a per-CPU active slab per cache, a freelist threaded through the free objects' own memory rather than a separate bookkeeping array, and per-node partial lists consulted before a fresh page allocation. [Slab, SLUB, and `kmalloc`](../08-memory-management/slab-slub-and-kmalloc.md)
 
-**SMAP** (Supervisor Mode Access Prevention) — hardware that stops the kernel from accessing user pages at all except inside a window explicitly opened with `stac` and closed with `clac`, the window the user-copy routines run inside; it turns an unprotected user dereference into an immediate, reproducible fault instead of a bug that might silently work for years. [Copying Data Across the Boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
+**SMAP** (Supervisor Mode Access Prevention) — hardware that stops the kernel from accessing user pages at all except inside a window explicitly opened with `stac` and closed with `clac`, the window the user-copy routines run inside; it turns an unprotected user dereference into an immediate, reproducible fault instead of a bug that might silently work for years. [Kernel Hardening](../16-security/kernel-hardening.md)
 
-**SMEP** (Supervisor Mode Execution Prevention) — hardware that stops the kernel from ever executing instructions living on a user page, closing off jumping into attacker-controlled code regardless of what confused kernel-mode state set `RIP` there. [Copying Data Across the Boundary](../05-syscalls-and-the-boundary/copying-data-across-the-boundary.md)
+**SMEP** (Supervisor Mode Execution Prevention) — hardware that stops the kernel from ever executing instructions living on a user page, closing off jumping into attacker-controlled code regardless of what confused kernel-mode state set `RIP` there. [Kernel Hardening](../16-security/kernel-hardening.md)
 
 **`sock_diag`** — the netlink interface `ss` uses to ask the kernel for socket state, with filtering done in the kernel, instead of parsing `/proc/net/tcp` as text. [Diagnosing Network Problems](../13-networking-stack/diagnosing-network-problems.md)
 
@@ -572,9 +784,17 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **SRCU** — sleepable RCU: relaxes the classic-RCU rule against sleeping in a read-side section by tracking each `srcu_struct` domain's grace periods independently, at the cost of a read side that does real per-CPU bookkeeping instead of being nearly free. [RCU in Practice](../09-concurrency-and-locking/rcu-in-practice.md)
 
+**Stack protector** — A compiler-inserted canary between local buffers and the return address, checked on function return. [Kernel Hardening](../16-security/kernel-hardening.md)
+
 **`STATX_DIOALIGN`** — the `statx(2)` mask (since Linux 6.1) that reports a file's actual `O_DIRECT` alignment requirements for the buffer address and the file offset. [Buffered I/O, `O_DIRECT`, and Alignment](../12-block-layer-and-storage/buffered-direct-and-alignment.md)
 
+**Sticky bit** — On a directory, the bit restricting deletion and renaming of entries to their owner, the directory's owner, or `CAP_FOWNER`; why `/tmp` is `1777`. [The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**Streaming DMA mapping** — A per-transfer mapping of an existing buffer (`dma_map_single()`, `dma_map_sg()`), owned by the device until it is unmapped or synced back to the CPU. [The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
+
 **`struct file`** — the VFS object for one *open* of a file: the current offset, the open flags, and the `f_op` table; two `open()` calls on the same path produce two of them over one inode. [Superblock, Inode, Dentry, File](../11-vfs-and-filesystems/the-four-objects.md)
+
+**`struct pci_dev`** — The kernel's object for one PCI function, holding its IDs, BAR resources, IRQ and DMA settings; what a PCI driver's `probe()` receives. [PCI and PCIe Drivers](../14-device-drivers-and-hardware/pci-and-pcie-drivers.md)
 
 **`struct socket` and `struct sock`** — the two halves of a socket in the kernel: `struct socket` faces the VFS and the syscall layer; `struct sock` holds the protocol's queues, buffers, state, and wait queue. [Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
 
@@ -587,6 +807,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **Swap entry (`swp_entry_t`)** — what a PTE is rewritten to hold once its page is swapped out: cleared of its present bit and repurposed to encode a swap type (device) and offset in the bits hardware ignores when not-present, which is why a swapped page is found by a page fault rather than a separate lookup table. [Swap, zswap, and zram](../08-memory-management/swap-and-zswap.md)
 
 **Swappiness** — `vm.swappiness`, the relative I/O cost the kernel assigns to reclaiming anonymous pages versus file-backed pages (range 0–200 at v6.18, not the older 0–100), not a probability dial; values above 100 are meaningful specifically for fast in-memory swap backends like zram/zswap. [Swap, zswap, and zram](../08-memory-management/swap-and-zswap.md)
+
+**swiotlb (bounce buffer)** — A pool of low memory the DMA API copies through when a device can't reach the real buffer, or when memory must be shared with an untrusted host. [The DMA API](../14-device-drivers-and-hardware/the-dma-api.md)
 
 **SYN cookies** — a fallback for a full SYN queue in which the handshake state is encoded into the SYN-ACK's sequence number, so the kernel stores nothing until the client's ACK proves it is real. [Sockets in the Kernel](../13-networking-stack/sockets-in-the-kernel.md)
 
@@ -640,7 +862,11 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **TLB shootdown** — the protocol for invalidating a stale translation on every other CPU that might have cached it: find candidate CPUs via `mm_cpumask(mm)`, IPI each one, wait for every acknowledgment before the memory can be reused — the software workaround x86-64 needs because it has no instruction that broadcasts invalidation on its own. [The TLB and Address-Space Switching](../08-memory-management/tlb-and-address-space-switching.md)
 
+**TLP (transaction layer packet)** — The packet PCIe uses for memory reads and writes, configuration accesses, messages and completions. [PCIe in Depth](../../computer-science/buses-and-io/pcie-in-depth.md)
+
 **tmpfs** — a filesystem made of page-cache pages with nothing underneath, implemented by shmem; it can swap, has a `size=` limit (half of RAM by default), and is gone on reboot. [tmpfs and Memory-Backed Filesystems](../11-vfs-and-filesystems/tmpfs-and-memory-filesystems.md)
+
+**Transient execution** — CPU speculation past a branch or check whose discarded results still leave traces in caches; the class behind Spectre, Meltdown and MDS. [Vulnerability Classes in the Kernel](../16-security/vulnerability-classes.md)
 
 **Tristate** — a Kconfig symbol type with three legal values — `n` (absent), `y` (built into `vmlinux`), or `m` (built as a separate loadable module) — as opposed to `bool`'s two. [Kconfig and Kbuild](../04-kernel-architecture-and-idioms/kconfig-and-kbuild.md)
 
@@ -648,9 +874,25 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **TSO and GSO** — segmentation offload: TCP builds super-packets of up to 64 KB, and the NIC (TSO) or the kernel just before the driver (GSO) cuts them into MTU-sized frames. [The Transmit Path](../13-networking-stack/the-transmit-path.md)
 
+**Type enforcement** — SELinux's model: access is allowed only if a rule permits the subject's type to perform the permission on the object's type and class. [SELinux](../16-security/selinux.md)
+
+**udev rule** — A line in `/etc/udev/rules.d` or `/usr/lib/udev/rules.d` matching uevent properties and acting on them: naming, permissions, symlinks, running a program. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
+
 **UEFI** — the modern firmware model that behaves like a small OS: it reads a normal FAT32 partition, loads `.efi` executables, and exposes boot-services/runtime-services APIs, in contrast to legacy BIOS's real-mode, interrupt-driven model. [Firmware: BIOS and UEFI](../03-boot-and-init/firmware-bios-and-uefi.md)
 
+**Uevent** — A message the kernel sends user space (over netlink) when a device is added, removed or changed, carrying its sysfs path and properties. [Firmware, udev, and Hotplug](../14-device-drivers-and-hardware/firmware-udev-and-hotplug.md)
+
+**UID map** — The `/proc/<pid>/uid_map` table translating UIDs inside a user namespace to UIDs outside it; written once, by a suitably privileged process. [User Namespaces](../15-containers-and-virtualization/user-namespaces.md)
+
+**UIO (Userspace I/O)** — A minimal framework exposing a device's memory and interrupts to user space through `/dev/uioN`, with no IOMMU protection for DMA. [Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
+**umask** — The per-process mask of permission bits cleared from the mode of every newly created file and directory. [The UNIX Permission Model](../16-security/the-unix-permission-model.md)
+
+**Unified hierarchy** — cgroup v2's single tree, in which every controller follows the same hierarchy, unlike v1's separate tree per controller. [cgroup v2](../15-containers-and-virtualization/cgroup-v2-architecture.md)
+
 **Unit** — anything systemd manages; its filename suffix (`.service`, `.socket`, `.target`, `.mount`, `.timer`, `.path`, `.slice`) says what kind of thing it represents. [systemd: The Model](../03-boot-and-init/systemd-the-model.md)
+
+**`unshare`** — The syscall that moves the calling process into new namespaces of the given types without creating a new process. [Namespaces](../15-containers-and-virtualization/namespaces-overview.md)
 
 **`__user`** — an annotation marking a pointer as pointing into user-space address space, which must never be dereferenced directly in kernel context; enforced only by sparse, not the compiler itself. [The Kernel Is Not C You Know](../04-kernel-architecture-and-idioms/the-kernel-c-dialect.md)
 
@@ -666,17 +908,31 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 
 **veth pair** — two virtual Ethernet devices joined back to back, so a frame sent on one is received on the other; one end in a namespace and one on the host is the basic container link. [Network Namespaces and Virtual Devices](../13-networking-stack/network-namespaces-and-virtual-devices.md)
 
+**VFIO** — A framework that gives a user-space program (or a VM) safe, IOMMU-isolated access to a whole device: its BARs, interrupts and DMA. [Talking to User Space](../14-device-drivers-and-hardware/talking-to-user-space.md)
+
 **VFS (Virtual File System)** — the kernel layer that gives every filesystem — on-disk, network, in-memory, or generated like `/proc` — the same object model and the same syscalls, so `read()` never needs to know what is underneath. [Why the VFS Exists](../11-vfs-and-filesystems/why-vfs-exists.md)
 
+**vhost** — A host-kernel implementation of a virtio device's datapath, woken through `ioeventfd` and signalling through `irqfd`, so I/O doesn't pass through QEMU. [virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
+**virtio** — The standard for paravirtual devices: the guest knows it is virtualized and exchanges buffers with the host through virtqueues. [virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
 **virtiofs** — FUSE carried over a `virtio` transport instead of `/dev/fuse`, used to share a host directory into a virtual machine. [FUSE](../11-vfs-and-filesystems/fuse-and-userspace-filesystems.md)
+
+**Virtqueue** — virtio's shared-memory ring of buffer descriptors between guest driver and device, with available and used rings and suppressible notifications. [virtio and Paravirtual Devices](../15-containers-and-virtualization/virtio-and-paravirtualization.md)
+
+**VM exit** — A transfer from a guest to the hypervisor caused by an intercepted instruction or event, with the reason recorded for the hypervisor to handle. [Hardware Virtualization](../../computer-science/cpu-architecture/hardware-virtualization.md)
 
 **VMA (`vm_area_struct`)** — one contiguous range of a process's address space with uniform properties (permissions, a backing file and offset if any), describing what the process is *entitled* to have mapped; almost every memory operation a process performs is first an operation on the VMA collection, with the page tables catching up lazily afterward. [`mm_struct` and VMAs](../08-memory-management/mm-struct-and-vmas.md)
 
 **`vmalloc`** — allocates scattered physical pages and builds new page-table entries mapping them consecutively into one virtual range, for callers that need virtual contiguity but not physical; it costs page-table setup and TLB pressure a `kmalloc` allocation in the already-mapped direct map does not pay. [`vmalloc` and Choosing an Allocator](../08-memory-management/vmalloc-and-choosing-an-allocator.md)
 
+**VMCS (virtual machine control structure)** — Intel's in-memory structure holding a vCPU's guest and host state and the controls deciding which events exit. [Hardware Virtualization](../../computer-science/cpu-architecture/hardware-virtualization.md)
+
 **`vmlinux`** — the uncompressed ELF kernel image carrying full DWARF debug symbols when `CONFIG_DEBUG_INFO` is on; it is not bootable itself and exists to be read by tools like GDB. [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md)
 
 **`vmlinuz`** — the conventional installed name (e.g. `/boot/vmlinuz-$(uname -r)`) a distribution gives to a copy of its `bzImage`; same file, different name and location. [Building a Kernel](../01-lab-and-toolchain/building-a-kernel.md)
+
+**VMX root and non-root** — Intel VT-x's two modes: the hypervisor runs in root mode, guests in non-root, and sensitive events in non-root cause a VM exit. [Hardware Virtualization](../../computer-science/cpu-architecture/hardware-virtualization.md)
 
 **Vruntime** — a task's real execution time divided by its scheduling weight, originally used by CFS to pick directly the task furthest behind (the leftmost node of a red-black tree ordered by vruntime); at v6.18 it is still accumulated the same way, but EEVDF no longer compares it directly to choose who runs — it instead feeds lag (eligibility) and the virtual-deadline calculation. [CFS and Virtual Runtime](../07-scheduling/cfs-and-vruntime.md)
 
@@ -687,6 +943,8 @@ Every term below links to the one page that owns and genuinely defines it, so "w
 **Wait queue** — `struct wait_queue_head`, a list of tasks waiting on some event, each entry carrying its own wake function so a wakeup can mean "just one waiter" or "everyone," at no per-waiter polling cost while asleep. [Process States and Wait Queues](../06-processes-and-threads/process-states-and-wait-queues.md)
 
 **Wake affinity** — the set of heuristics deciding which CPU a waking task lands on, among the waker's CPU, the task's own previous CPU, or an idle CPU found by scanning the LLC domain; `WF_SYNC` biases placement toward the waker's CPU when the caller is about to sleep right after waking it. [SMP and Load Balancing](../07-scheduling/smp-load-balancing.md)
+
+**Wakeup source** — An object recording that a device or event may wake the system or must keep it awake; visible in `/sys/kernel/debug/wakeup_sources`. [Power Management](../14-device-drivers-and-hardware/power-management.md)
 
 **Watermark** — one of three per-zone thresholds (`min`, `low`, `high`) that turn remaining free memory into allocator behavior: above `high` nothing happens, crossing `low` wakes `kswapd`, and hitting `min` forces the allocating task into direct reclaim itself. [The Page Allocator](../08-memory-management/the-page-allocator.md)
 

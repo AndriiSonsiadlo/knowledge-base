@@ -214,3 +214,5 @@ silently corrupt another thread's data with no kernel protection between them �
 - [Memory Hierarchy & RAM](../memory-hierarchy/intro.md) — the TLB effects of a process context switch.
 - [`../../linux/06-processes-and-threads/threads-are-tasks.md`](../../linux/06-processes-and-threads/threads-are-tasks.md) —
   the Linux answer, where the process/thread distinction largely dissolves.
+- [`../../linux/15-containers-and-virtualization/what-a-container-actually-is.md`](../../linux/15-containers-and-virtualization/what-a-container-actually-is.md) —
+  a container is an ordinary process with a different view of the system.

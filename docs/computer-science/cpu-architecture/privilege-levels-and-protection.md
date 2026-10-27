@@ -152,7 +152,8 @@ How Linux specifically builds the kernel/user-space boundary on top of this hard
 covered in [The Kernel/User-Space Boundary](../../linux/00-overview/the-kernel-userspace-boundary.md);
 the full taxonomy of what can trigger a ring 3 → ring 0 crossing — faults, traps, aborts, and
 asynchronous interrupts — is covered in
-[Exceptions, Traps, and Interrupts](./exceptions-traps-and-interrupts.md).
+[Exceptions, Traps, and Interrupts](./exceptions-traps-and-interrupts.md). The root/non-root axis that VT-x and
+AMD-V add alongside the rings is covered in [Hardware Virtualization](./hardware-virtualization.md).
 
 ## References
 

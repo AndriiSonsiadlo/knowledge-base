@@ -57,7 +57,7 @@ Every service systemd starts is placed in its own cgroup, not merely tracked by 
 `systemctl status` can list every process belonging to a unit even after that process has forked and the
 child has forked again — a double-fork that would escape a naive "track the one PID I started" supervisor
 doesn't escape a cgroup, because membership is inherited by every descendant regardless of how many times
-it re-parents. Folder 15 covers cgroups themselves; the fact worth carrying forward here is narrower: a
+it re-parents. [Folder 15](../15-containers-and-virtualization/cgroup-v2-architecture.md) covers cgroups themselves; the fact worth carrying forward here is narrower: a
 unit's process accounting is exact because it's cgroup-based, not because systemd is watching PIDs.
 
 ## The playbook

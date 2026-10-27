@@ -122,7 +122,7 @@ host mounts, don't leak back) or fully `rprivate` (see nothing, leak nothing) pr
 container mounting something should not be a host-visible event, and a namespace that never overrode
 `shared` would make it one. The same propagation machinery that makes a desktop's automount "just work"
 is what a container runtime has to explicitly turn off to get isolation. This propagation control is also
-the exact primitive the containers material — coming later in this series — builds container filesystem
+the exact primitive the [containers material](../15-containers-and-virtualization/mount-and-pid-namespaces.md) builds container filesystem
 isolation on top of; the mechanism is the whole of it, not a container-specific concept underneath.
 
 ## The new mount API

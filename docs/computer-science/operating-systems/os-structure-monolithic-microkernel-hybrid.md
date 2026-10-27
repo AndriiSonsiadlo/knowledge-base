@@ -181,7 +181,9 @@ more kernel.
 ---
 
 Where Linux specifically sits on this axis, and the honest cost of that specific choice, is covered in
-[Monolithic, With Modules](../../linux/04-kernel-architecture-and-idioms/monolithic-with-modules.md).
+[Monolithic, With Modules](../../linux/04-kernel-architecture-and-idioms/monolithic-with-modules.md). The same
+"how much code is trusted" argument applied *between* workloads rather than inside one kernel is
+[Virtualization and Isolation](./virtualization-and-isolation.md).
 
 ## References
 

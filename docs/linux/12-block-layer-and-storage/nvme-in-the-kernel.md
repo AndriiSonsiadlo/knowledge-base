@@ -38,8 +38,8 @@ find the request again when the completion queue mentions it.
 callback — the point at which a tagged blk-mq request becomes an NVMe command, verified at v6.18. It
 calls `<Src file="drivers/nvme/host/core.c" symbol="nvme_setup_cmd" />` first — transport-independent
 code, shared with the fabrics transports, that fills in opcode, namespace ID, and the command-specific
-fields from the block request — then maps the request's data for DMA (the DMA API that makes that
-possible belongs to a later folder, named here only in prose). With the 64-byte command fully built,
+fields from the block request — then maps the request's data for DMA (the [DMA API](../14-device-drivers-and-hardware/the-dma-api.md) that makes that
+possible belongs to folder 14). With the 64-byte command fully built,
 `<Src file="drivers/nvme/host/pci.c" symbol="nvme_sq_copy_cmd" />` copies it into the submission queue's
 ring in host memory, and the driver writes the **tail doorbell** — a device register telling the
 controller a new command (or commands) is waiting. That doorbell write is genuinely batched, not just in

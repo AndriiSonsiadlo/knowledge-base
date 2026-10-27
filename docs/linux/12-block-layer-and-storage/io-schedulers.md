@@ -100,8 +100,7 @@ between cgroups the same way its plain per-process weighting works between proce
 per-cgroup I/O limits) and `io.latency` (per-cgroup latency targets) are not scheduler features at all;
 they're enforced by separate rq-qos policies that sit in the request path independently of whichever
 scheduler is attached, so they work the same way under `none` as under `bfq`. Full cgroup I/O control —
-including how `io.max` and `io.latency` are actually configured — belongs to this section's containers
-folder, not yet written.
+including how `io.max` and `io.latency` are actually configured — belongs to [cgroup Controllers in Practice](../15-containers-and-virtualization/cgroup-controllers-in-practice.md#io).
 
 <Lab host="qemu" title="Switch schedulers and measure the difference" time="25 min">
 

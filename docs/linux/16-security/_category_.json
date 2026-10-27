@@ -1,0 +1,8 @@
+{
+  "label": "The Security Model",
+  "position": 17,
+  "link": {
+    "type": "generated-index",
+    "description": "Every layer between \"may this process do that?\" and the answer: permission bits, credentials, capabilities, the LSM framework, SELinux and AppArmor, seccomp, keyrings, integrity, kernel hardening, the recurring vulnerability classes, and auditing. Defensive throughout."
+  }
+}

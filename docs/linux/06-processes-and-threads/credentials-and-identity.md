@@ -100,7 +100,7 @@ software still requests — each independently grantable to a non-root process a
 by a process that has it, through the effective/permitted/inheritable/bounding/ambient sets `struct cred`
 carries. The full mechanics of that split — which set means what, how capabilities survive or don't
 survive an `exec()`, and how a program can drop capabilities it no longer needs without becoming fully
-unprivileged — belong to the security folder later in this section (folder 16) and are only named here.
+unprivileged — belong to [Capabilities](../16-security/capabilities.md) in the security folder (folder 16) and are only named here.
 
 ## RCU-protected credentials
 
@@ -131,7 +131,7 @@ Take `open()` on a file as the concrete case. The kernel's path-walking code eve
    entirely.
 2. **The LSM hook** — `security_inode_permission()`, called after the DAC check passes, giving whatever
    Linux Security Module is active (SELinux, AppArmor, or nothing) a chance to say no even when the
-   traditional bits say yes. This is a second, independent layer of policy, and folder 16 is where it is
+   traditional bits say yes. This is a second, independent layer of policy, and [folder 16](../16-security/the-lsm-framework.md) is where it is
    actually described; the point to take from this page is only that there are two layers, checked in
    this order, and that the first one runs against the filesystem UID specifically — the reason that ID
    exists at all.
