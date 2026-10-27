@@ -1,4 +1,11 @@
 import Cast from "@site/src/components/Cast";
+import {
+  Diagram,
+  DiagramArrow,
+  DiagramGroup,
+  DiagramNode,
+  DiagramRow,
+} from "@site/src/components/Diagram";
 import Figure from "@site/src/components/Figure";
 import KernelFacts from "@site/src/components/KernelFacts";
 import Lab from "@site/src/components/Lab";
@@ -41,6 +48,11 @@ export default {
   ...MDXComponents,
   Icon,
   Cast,
+  Diagram,
+  DiagramArrow,
+  DiagramGroup,
+  DiagramNode,
+  DiagramRow,
   Figure,
   KernelFacts,
   Lab,
