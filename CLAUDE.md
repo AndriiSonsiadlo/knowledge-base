@@ -59,22 +59,24 @@ Detail and rationale live in `AUTHORING.md`; these are the non-negotiables.
 
 1. **Search before writing.** `grep -ril '<term>' docs/` for the topic and its key terms. If a page already covers it, extend or link to that page — do not write a second explanation.
 2. **One canonical home per concept.** Other pages give a one-sentence recap and link to it. When you change a fact, grep for other statements of it and update or link them in the same change.
-3. **Prerequisites come first.** A page may rely only on concepts that are explained earlier in its path or linked as prerequisites. Never forward-reference a page that doesn't exist (the build will catch dead links; it won't catch "covered later" promises).
+3. **Prerequisites come first.** A page may rely only on concepts explained earlier in its path or linked as prerequisites.
 4. **Never invent facts.** APIs, flags, versions, numbers, and benchmarks must come from the implementation, official docs (use context7 MCP for library docs), or a cited source. If you can't verify something, leave it out or mark it explicitly as unverified.
 5. **Code must be correct.** Snippets compile/run as shown or are clearly marked as fragments. Pin versions where behavior is version-dependent.
-6. **No filler pages.** A page exists because a reader needs it. Stub pages (`This page has not been written yet.` / `:::info[Not yet written]`) are only allowed where a section spec plans them.
+6. **Create link targets first.** Before writing pages that link to a topic with no page yet, create that page as a stub (full frontmatter, correct folder and `sidebar_position`, body `This page has not been written yet.` — `:::info[Not yet written]` in `docs/linux/`). Links then resolve and the build stays green; the stub is filled in later.
+7. **No filler.** A page exists because a reader needs it; stubs exist only as link targets for planned topics.
 
-## Images and figures
+## Diagrams and images
 
-- Prefer a real, properly-sourced figure (vendor diagram, hardware photo, profiler screenshot) over Mermaid when it shows the thing better; use Mermaid for genuinely structural content (pipelines, state machines, call graphs, decision flows) or when no well-sourced figure exists. A schematic beside a real figure is often best.
-- Use `<Figure src alt caption source href license />` (global MDX component; `photo` for photos/screenshots so they skip the light plate). `alt` describes what the image shows, not its filename.
-- **Provenance is mandatory** for third-party images: a row in the section's `static/img/<section>/SOURCES.md` (source URL, publisher, retrieval date, license, notes — say if it's a crop or an extracted animation frame) plus the on-page `source`/`href` credit. Prefer the vendor's own docs; never a blog or image host.
-- **Size budget:** this ships to GitHub Pages. Keep each image under ~300 KB (downscale, crop, or extract a frame; no multi-MB GIFs). `static/img/cs` and `static/img/ml` are already ~7 MB each — don't grow them carelessly.
+- **Diagrams: use `<Diagram>`** (global MDX component, `src/components/Diagram/`) for architecture, layers, groupings, and flows — clean cards, dotted group frames, labelled arrows, one accent colour. Mermaid renders as dated, cramped blocks; use it only for what `<Diagram>` can't lay out (sequence diagrams, state machines, dense graphs). If a recurring picture needs a shape `<Diagram>` lacks, extend the component rather than falling back to Mermaid. Icons (`icon="name"`) come from the bundled lucide subset — add new names to `WANT` in `scripts/gen-icons.mjs` and run `npm run gen-icons`.
+- **Real images** (hardware photos, vendor diagrams, profiler screenshots) via `<Figure src alt caption />` when they show the thing better than a drawing; `photo` for photos/screenshots. `alt` describes what the image shows.
+- **Licenses:** don't check or record them; all assets in use are fine.
+- **Credit:** add `source`/`href` on `<Figure>` only for **official** sources (vendor docs, spec bodies, project documentation). Skip it for Wikimedia Commons and stock-photo sites. A `static/img/<section>/SOURCES.md` row is optional.
+- **Size:** keep each image under ~1 MB (downscale, crop, or extract a frame from an animation). This ships to GitHub Pages.
 - Reference as `/img/<section>/<path>.png` with **no** `/knowledge-base` prefix (`useBaseUrl` adds it).
 
 ## Markdown capabilities
 
-Available in any page, no import needed: admonitions (`:::note|tip|info|warning|danger`), Mermaid fences, KaTeX math (`$…$`, `$$…$$`), `<Tabs>/<TabItem>`, `<details><summary>`, `<Figure>`, `<Recall>`, `<Icon icon="lucide:name" />`, WaveDrom timing fences, and the Linux-section components listed in `docs/linux/CLAUDE.md`. ```` ```jsx live ```` renders a react-live playground — React only, keep them small.
+Available in any page, no import needed: admonitions (`:::note|tip|info|warning|danger`), `<Diagram>` with `<DiagramNode|Group|Row|Arrow>`, Mermaid fences (fallback only), KaTeX math (`$…$`, `$$…$$`), `<Tabs>/<TabItem>`, `<details><summary>`, `<Figure>`, `<Recall>` (algorithms summary card), `<Icon icon="lucide:name" />`, WaveDrom timing fences, and the Linux-section components listed in `docs/linux/CLAUDE.md`. ```` ```jsx live ```` renders a react-live playground — React only, keep them small.
 
 Prism languages: built-ins plus `armasm bash c cmake cpp csharp diff docker glsl hlsl ini json makefile nasm python systemd toml wgsl yaml`. Any other fence language needs adding to `prism.additionalLanguages` in `docusaurus.config.js`.
 

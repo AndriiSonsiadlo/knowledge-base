@@ -19,7 +19,8 @@ The goal is reader understanding and trustworthy information, not page count.
 | A new topic area with ≥ 4 pages | New folder with `_category_.json` (`link: generated-index`, plus a `description`). |
 
 3. **Place it.** Pick the folder whose readers need it. Set `sidebar_position` so prerequisites come before the pages that use them.
-4. **List prerequisites.** Which existing pages must the reader know? Link them near the top. If a prerequisite doesn't exist and is short, explain it inline; if it's substantial, write it first (or flag the gap — don't paper over it).
+4. **List prerequisites.** Which existing pages must the reader know? Link them near the top. If a prerequisite is short, explain it inline; if it's substantial and has no page yet, create its stub (see below) and link to it.
+5. **Create link targets before writing.** Any page you're about to link to that doesn't exist yet gets created first as a stub: full frontmatter, correct folder and `sidebar_position`, body `This page has not been written yet.` (`:::info[Not yet written]` in `docs/linux/`). Then write the content that links to it. This keeps the build green and the plan visible in the sidebar.
 
 ## 2. Page types
 
@@ -34,9 +35,22 @@ Pick one primary type per page. Mixing types is the most common cause of unfocus
 | **Troubleshooting** | Why is X broken? | Symptom → cause → fix, one entry per symptom |
 | **Overview / landing** (`readme.md`, `intro.md`, `00-overview/`) | What's in this area and in what order should I read it? | Scope, audience, reading order, links; no deep content |
 
-### Concept page skeleton (most pages in this repo)
+### Structuring a concept page
 
-Use only the sections that earn their place.
+There is no fixed section list. The topic decides the sections. Plan them by asking what a reader needs, in order, to understand *this* subject:
+
+- **Always:** a short opening (what it is, what problem it solves, why the reader cares), then the body, then `## References` when the page relies on sources.
+- **The body is shaped by the subject.** Its sections are the subject's own subtopics: the parts of a mechanism, the stages of a pipeline, the variants of an API, the cases of an algorithm. Name them after their content ("Warp scheduling", "The two-phase commit", "Copy vs. move"), not after a template ("How it works").
+- **Add only if the topic has real content for it:**
+  - *Mechanism / internals*: when how it works changes how you use it.
+  - *Usage / examples*: when there's a practical API, command, or pattern to show.
+  - *Trade-offs / when not to use*: when there are real alternatives or costs.
+  - *Pitfalls*: when there are known, non-obvious mistakes.
+  - *Comparison*: when readers routinely choose between this and something else.
+  - *Related*: when there are clear next steps; give each link a one-line reason.
+- A purely definitional or historical topic may need none of the optional parts. A deep topic may need several subtopic sections plus nested `###` breakdowns. Both are fine.
+
+Frontmatter (every page):
 
 ```md
 ---
@@ -46,22 +60,11 @@ sidebar_label: Thread Indexing
 sidebar_position: 4
 tags: [gpu, cuda]
 ---
-
-# Thread Indexing
-
-<1–3 sentences: the problem this solves and why the reader cares.>
-
-**Prerequisites:** [Threads, Blocks and Grids](./threads-blocks-and-grids.md)
-
-## <The core idea>
-## <How it works>          — mechanism, diagram or figure, minimal example
-## <Using it>              — realistic example, common patterns
-## Pitfalls / trade-offs   — what breaks, what it costs, when not to use it
-## Related                 — next steps and siblings, each with a one-line reason
-## References              — primary sources (vendor docs, specs, papers, source code)
 ```
 
-### How-to skeleton
+Link prerequisites near the top (`**Prerequisites:** [...](...)`) when the page depends on earlier material.
+
+### How-to pages (typical shape, adapt as needed)
 
 ```md
 # <Verb phrase: "Profile a kernel with Nsight Compute">
@@ -107,7 +110,7 @@ tags: [gpu, cuda]
 - **Renaming/moving a page.** Grep for its id and path across `docs/` (Linux `prerequisites`/`related` reference ids; CS pages are Linux prerequisites). The build catches broken links but not stale descriptions of the moved content.
 - **Contradictions.** Resolve in favor of: the implementation or primary source > the canonical page > other pages. Fix the losing statement; don't leave both.
 - **Related links** are meaningful: each says why the reader would go there. No link dumps.
-- **Gaps.** If you find a missing prerequisite you can't fill now, note it in the summary of your change rather than writing a placeholder page.
+- **Gaps.** If you find a missing prerequisite you can't fill now, create its stub so it's linkable and visible, and mention it in your change summary.
 
 ## 5. Visuals and interactive elements
 
@@ -115,22 +118,52 @@ Choose the simplest presentation that works. Plain prose, lists, and tables firs
 
 | Need | Use |
 |---|---|
-| Show a real thing (hardware, profiler output, vendor diagram) | `<Figure>` with provenance (see `CLAUDE.md`) |
-| Structure: flow, state machine, sequence, dependency | Mermaid (`flowchart`, `sequenceDiagram`, `stateDiagram-v2`) |
+| Architecture, layers, groupings, flows, "what talks to what" | `<Diagram>` (see below) |
+| Show a real thing (hardware, profiler output, vendor diagram) | `<Figure>` (credit only for official sources, see `CLAUDE.md`) |
+| Sequence of messages, state machine, dense graph | Mermaid (`sequenceDiagram`, `stateDiagram-v2`). Fallback only. |
 | Signal timing | WaveDrom fence |
 | Alternatives / per-platform variants of the same content | `<Tabs>` (`groupId` to sync choices across the page) |
 | Optional depth, long derivations, full listings | `<details><summary>` |
-| Warnings and key takeaways | Admonitions — sparingly; one or two per page |
+| Warnings and key takeaways | Admonitions, sparingly (one or two per page) |
 | End-of-page summary card | `<Recall>` (algorithms), `<KernelFacts>` (Linux) |
-| Ordered learning route | `<LearningPath>` (landing/roadmap pages) |
-| Letting the reader tweak a React example | ```` ```jsx live ```` — only for React content |
+| Letting the reader tweak a React example | ```` ```jsx live ````, only for React content |
+
+### `<Diagram>`
+
+Composable, real-text diagrams: rounded cards, dotted group frames, labelled arrows, one accent colour. Works in both themes and stacks vertically on phones.
+
+```mdx
+<Diagram title="What the agent can see" caption="Optional caption below the canvas." accent="green">
+  <DiagramNode variant="pill" accent>Agent knowledge</DiagramNode>
+  <DiagramArrow label="Unseen" icon="eye-off" dashed />
+  <DiagramGroup label="Outside the repository">
+    <DiagramNode icon="file-text" title="Design doc">Lives in Drive.</DiagramNode>
+    <DiagramNode icon="brain" title="Tacit knowledge">Lives in people's heads.</DiagramNode>
+  </DiagramGroup>
+</Diagram>
+
+<Diagram title="Request path" accent="blue">
+  <DiagramRow>
+    <DiagramNode icon="monitor" title="Client" />
+    <DiagramArrow direction="right" label="HTTPS" />
+    <DiagramNode icon="server" title="API" accent />
+    <DiagramArrow direction="right" />
+    <DiagramNode icon="cloud" title="Storage" />
+  </DiagramRow>
+</Diagram>
+```
+
+- `<Diagram>` stacks children top to bottom; `accent` is `green | blue | amber | violet`.
+- `<DiagramNode>`: `title`, `icon`, body as children; `variant="pill"` for the focal concept; `accent` highlights one node; `dashed` for optional/external.
+- `<DiagramGroup label>` is a framed side-by-side set; `<DiagramRow>` is the same without the frame.
+- `<DiagramArrow>`: `label`, `icon`, `dashed`; `direction="right"` inside rows.
+- Keep it to what the text discusses: ~3–9 nodes. Highlight one thing, not everything.
 
 Rules:
 - Never hide essential information inside `<details>` or a non-default tab.
-- Every diagram and figure is explained in the surrounding text; a reader who can't see it must still follow the argument. `alt` text says what the image shows.
-- Mermaid diagrams: under ~15 nodes; split larger ones. Label edges when the relationship isn't obvious.
+- Every diagram and figure is explained in the surrounding text.
 - No decorative images, animations, or icons that carry no information.
-- Interactive components must work in both themes, at narrow widths, and by keyboard.
+- New interactive components must work in both themes, at narrow widths, and by keyboard.
 
 ## 6. Review checklist
 
@@ -143,5 +176,6 @@ Before finishing a page change:
 - [ ] Terminology matches the rest of the section
 - [ ] Heading hierarchy clean; frontmatter complete; `sidebar_position` not duplicated
 - [ ] Related pages, landing pages, and summary cards updated if affected
-- [ ] Images have `alt`, on-page credit, a `SOURCES.md` row, and reasonable size
+- [ ] Linked-to pages exist (stubs created first where needed)
+- [ ] Diagrams use `<Diagram>` unless the shape needs Mermaid; images have `alt`, are under ~1 MB, and credit official sources only
 - [ ] Required gates from `CLAUDE.md` run and passing; rendered check done if layout/components changed
