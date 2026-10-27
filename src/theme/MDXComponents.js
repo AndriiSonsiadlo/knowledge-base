@@ -14,6 +14,11 @@ import lucideSubset from "@site/src/components/lucide-subset.json";
 import Recall from "@site/src/components/Recall";
 import Src from "@site/src/components/Src";
 import Video from "@site/src/components/Video";
+import {
+  Step,
+  StepChange,
+  Walkthrough,
+} from "@site/src/components/Walkthrough";
 import WaveDrom from "@site/src/components/WaveDrom";
 import TabItem from "@theme/TabItem";
 import Tabs from "@theme/Tabs";
@@ -60,6 +65,9 @@ export default {
   Recall,
   Src,
   Video,
+  Walkthrough,
+  Step,
+  StepChange,
   WaveDrom,
   Tabs,
   TabItem,
