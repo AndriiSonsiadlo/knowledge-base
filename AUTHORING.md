@@ -2,7 +2,7 @@
 
 How to write and maintain pages in this knowledge base. `CLAUDE.md` holds the mandatory project rules; this file explains how to meet them. Section `CLAUDE.md` files and design specs in `docs/superpowers/specs/` override this guide for their section (e.g. the algorithms page skeleton, the Linux `<KernelFacts />` closing card).
 
-The goal is reader understanding and trustworthy information, not page count.
+The goal is reader understanding and trustworthy information, not page count. The principles behind these rules are in `.specify/memory/constitution.md`.
 
 ## 1. Before writing: find where it belongs
 
@@ -101,7 +101,40 @@ Link prerequisites near the top (`**Prerequisites:** [...](...)`) when the page 
 
 **Length.** As short as the topic allows. Typical concept pages here run 150–350 lines. A page over ~400 lines is a split candidate; under ~40 lines is a candidate for merging into its parent.
 
-**Headings.** One `#` (matching `title`), then `##`/`###` without skipping levels. Headings name the content ("Bank conflicts"), not decoration ("Let's dive in").
+**Headings.** One `#` (matching `title`), then `##`/`###` without skipping levels. Headings name the content ("Bank conflicts"), not decoration ("Let's dive in"). Reading only the table of contents should tell the reader what the page teaches.
+
+### Formatting
+
+| Content | Format |
+|---|---|
+| One idea with its reasoning | A short paragraph (one idea per paragraph) |
+| Ordered actions or stages | Numbered list |
+| Unordered facts of the same kind | Bulleted list. Avoid nested lists deeper than two levels |
+| The same attributes across several items | Table |
+| A term the reader must remember | **Bold** on first definition only |
+| Code | Fenced block with a language. Add `title="path/file.cpp"` when the file matters and `{3,7-9}` / `// highlight-next-line` to point at the lines being discussed |
+| Command plus output | Command in a `bash` block, output in a separate `text` block (or the same block if short), never mixed with prompts the reader would copy |
+
+Don't bold whole sentences, stack admonitions, or put a table where two sentences would do.
+
+### Advanced topics
+
+For subjects with real depth (internals, concurrency, memory models, schedulers, compilers, ML architectures):
+
+1. **Layer the explanation.** Intuition first (a sentence or analogy that is *correct*, not just catchy), then the mechanism, then the precise detail and edge cases. Each layer must stand on its own, so readers can stop at the depth they need.
+2. **Show the structure.** Draw the moving parts with `<Diagram>` before describing how they interact.
+3. **Trace a worked example.** Use real inputs, show the intermediate state at each step, and give the result. For state that changes over steps, use `<Tabs>` with one tab per step (`Step 1 — …`, `Step 2 — …`), with each tab showing the state at that point.
+4. **Name the traps.** List the mistakes practitioners actually make, and why each one is wrong.
+5. **Put optional rigor in `<details>`.** Proofs, derivations, and full listings go there, while the main text still states the result.
+
+### When a page is complete
+
+A page leaves stub status only when all of these hold:
+- It covers the scope promised by its title and opening, end to end.
+- A reader with the listed prerequisites can follow it without any unwritten page.
+- Every mechanism, flow, or architecture it explains has a visual.
+- Advanced topics have a traced worked example and their known pitfalls.
+- It passes the review checklist below.
 
 ## 4. Continuity across pages
 
@@ -171,6 +204,8 @@ Before finishing a page change:
 
 - [ ] Searched for existing coverage; no duplicate explanation introduced
 - [ ] Purpose is clear in the first paragraph; prerequisites linked
+- [ ] Page is complete (see "When a page is complete") or is an explicit stub
+- [ ] Formatting matches content shape (lists, tables, titled/highlighted code); TOC alone shows what the page teaches
 - [ ] Every claim checkable against code, official docs, or a cited source
 - [ ] Code snippets correct for the stated versions; fragments marked
 - [ ] Terminology matches the rest of the section

@@ -2,12 +2,12 @@
 
 Personal knowledge base built with **Docusaurus 3.10** (React 19, Node ≥20). Content is Markdown/MDX under `docs/`; deployed to GitHub Pages at `https://andriisonsiadlo.github.io/knowledge-base/` on every push to `master`.
 
-This file holds project-wide rules. Two other layers exist:
+The principles behind all rules live in `.specify/memory/constitution.md` (Spec Kit constitution). This file holds project-wide rules. Two other layers exist:
 
 - **`AUTHORING.md`** (repo root) — page types, templates, writing standards, component guide, review checklist. **Read it before writing or restructuring a page.** Not needed for code-only or one-line edits.
 - **Section `CLAUDE.md`** files (`docs/<section>/CLAUDE.md`, `src/CLAUDE.md`) — section-local conventions and gates, loaded automatically when you work there. When a task is scoped to one section, stay inside it.
 
-If these layers conflict, the more specific file wins for its own scope (section > `AUTHORING.md` > this file), and the conflict should be fixed in the same change.
+The constitution's principles bind every layer. For concrete rules, the more specific file wins for its own scope (section > `AUTHORING.md` > this file), and the conflict should be fixed in the same change.
 
 ## Git
 
