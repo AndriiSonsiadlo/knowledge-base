@@ -4,5 +4,5 @@ Section-local notes, loaded only when working here. Site-wide rules (commits, rt
 
 - Numbered folders `00-overview` … `13-applied-kernels-and-patterns`, landing page `readme.md`. Some pages are still stubs ("This page has not been written yet.").
 - Design: `docs/superpowers/specs/2026-08-13-gpu-computing-docs-design.md` — read only for structural work.
-- Figures: `static/img/gpu/<NN-folder>/<name>.png`, referenced as `/img/gpu/...`. Every third-party image needs a row in `static/img/gpu/SOURCES.md` plus an italic source caption under it (root `CLAUDE.md` figure policy). Keep the folder near its ~1.2 MB budget.
+- Figures: `static/img/gpu/<NN-folder>/<name>.png`, referenced as `/img/gpu/...`. Credit and size rules: root `CLAUDE.md`.
 - No section-specific gate — `npm run build` is enough.
