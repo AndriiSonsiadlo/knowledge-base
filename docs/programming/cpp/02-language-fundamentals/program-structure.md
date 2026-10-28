@@ -3,442 +3,266 @@ id: program-structure
 title: Program Structure
 sidebar_label: Program Structure
 sidebar_position: 2
-tags: [c++, program-structure, main, organization]
+tags: [c++, program-structure, main, namespaces]
 ---
 
 # Program Structure
 
-C++ programs consist of one or more source files containing declarations, definitions, and the required `main()` function.
+A C++ program is one or more source files. Each holds **declarations** (introducing names) and
+**definitions** (giving them bodies or storage). Exactly one function, `main`, is where your code
+starts. This page covers what a program is made of at the source level: `main` and its arguments,
+how a program starts and ends, declaring before use, splitting code across files, and namespaces.
 
-:::info[Entry Point]
-Every C++ program must have exactly one `main()` function - this is where execution begins.
-:::
+**Prerequisites:** [Basic Syntax](./basic-syntax.md).
 
-## Minimal Program
+## `main`: the entry point
 
-```cpp showLineNumbers 
-int main() {
-    return 0;  // 0 indicates success
-}
+Every program must define exactly one `main` in the global namespace, returning `int`. The standard
+guarantees two forms:
+
+```cpp
+int main() { /* ... */ }
+int main(int argc, char* argv[]) { /* ... */ }   // char** argv means the same
 ```
 
-This is the simplest valid C++ program. It does nothing but exit successfully.
+Implementations may accept others (some add a third `envp` parameter), but these two are portable.
+`main` is special: you cannot call it yourself, take its address, or overload it.
 
----
+### Command-line arguments
 
-## Complete Program Structure
+`argc` is the number of arguments, and `argv` an array of C strings holding them. `argv[0]` is
+usually the program name as invoked (it may be empty), and `argv[argc]` is always a null pointer.
 
-```cpp showLineNumbers 
-// 1. Preprocessor directives
-#include <iostream>
-#include "myheader.h"
-#define MAX_SIZE 100
-
-// 2. Namespace declarations
-using namespace std;  // Or specific: using std::cout;
-
-// 3. Global declarations/definitions
-const double PI = 3.14159;
-int global_counter = 0;
-
-// 4. Function declarations (prototypes)
-void helper_function();
-int calculate(int x, int y);
-
-// 5. Class/struct definitions
-class Widget {
-    int value;
-public:
-    Widget(int v);
-    void display();
-};
-
-// 6. Main function (entry point)
-int main() {
-    Widget w(42);
-    w.display();
-    return 0;
-}
-
-// 7. Function definitions
-void helper_function() {
-    // Implementation
-}
-
-int calculate(int x, int y) {
-    return x + y;
-}
-
-Widget::Widget(int v) : value(v) {}
-
-void Widget::display() {
-    std::cout << value << "\n";
-}
-```
-
----
-
-## The main() Function
-
-### Standard Signatures
-
-```cpp showLineNumbers 
-// No arguments
-int main() {
-    return 0;
-}
-
-// With command-line arguments
-int main(int argc, char* argv[]) {
-    // argc: argument count
-    // argv: argument values (array of C-strings)
-    return 0;
-}
-
-// Alternative (less common)
-int main(int argc, char** argv) {
-    return 0;
-}
-```
-
-### Command-Line Arguments
-
-```cpp showLineNumbers 
+```cpp title="args.cpp" showLineNumbers
 #include <iostream>
 
 int main(int argc, char* argv[]) {
-    std::cout << "Program name: " << argv[0] << "\n";
-    std::cout << "Argument count: " << argc << "\n";
-    
-    for (int i = 1; i < argc; i++) {
-        std::cout << "Arg " << i << ": " << argv[i] << "\n";
-    }
-    
-    return 0;
-}
-
-// Run: ./program hello world
-// Output:
-// Program name: ./program
-// Argument count: 3
-// Arg 1: hello
-// Arg 2: world
-```
-
-### Return Values
-
-```cpp showLineNumbers 
-int main() {
-    // Return value indicates success/failure to OS
-    
-    if (error_condition) {
-        return 1;     // Failure (non-zero)
-    }
-    
-    return 0;         // Success
-    // If no return, 0 is implicit (C++11)
+    std::cout << "argc = " << argc << '\n';
+    for (int i = 0; i < argc; ++i)
+        std::cout << "argv[" << i << "] = " << argv[i] << '\n';
 }
 ```
-
-**Convention**:
-- `0`: Success
-- Non-zero: Error code (1, -1, EXIT_FAILURE)
-
-```cpp showLineNumbers 
-#include <cstdlib>
-
-int main() {
-    return EXIT_SUCCESS;  // 0
-    // or
-    return EXIT_FAILURE;  // Non-zero
-}
-```
-
----
-
-## File Organization
-
-### Single File Program
-
-```cpp showLineNumbers 
-// simple.cpp
-#include <iostream>
-
-void greet() {
-    std::cout << "Hello!\n";
-}
-
-int main() {
-    greet();
-    return 0;
-}
-```
-
-### Multi-File Program
-
-**Header file (math.h)**:
-```cpp showLineNumbers 
-#pragma once
-
-int add(int a, int b);
-int multiply(int a, int b);
-```
-
-**Implementation file (math.cpp)**:
-```cpp showLineNumbers 
-#include "math.h"
-
-int add(int a, int b) {
-    return a + b;
-}
-
-int multiply(int a, int b) {
-    return a * b;
-}
-```
-
-**Main file (main.cpp)**:
-```cpp showLineNumbers 
-#include <iostream>
-#include "math.h"
-
-int main() {
-    int result = add(5, 3);
-    std::cout << result << "\n";
-    return 0;
-}
-```
-
-**Compilation**:
-```bash
-g++ main.cpp math.cpp -o program
-./program
-```
-
----
-
-## Typical Project Structure
-
-```
-project/
-├── include/           # Public headers
-│   └── mylib/
-│       ├── api.h
-│       └── utils.h
-├── src/               # Source files
-│   ├── main.cpp
-│   ├── api.cpp
-│   └── utils.cpp
-├── tests/             # Test files
-│   └── test_api.cpp
-├── CMakeLists.txt     # Build configuration
-└── README.md
-```
-
----
-
-## Namespaces in Programs
-
-### Global Namespace
-
-```cpp showLineNumbers 
-// Global scope
-int global_var = 42;
-
-void global_func() {
-    // Can access global_var
-}
-
-int main() {
-    // Can access both
-}
-```
-
-### Custom Namespace
-
-```cpp showLineNumbers 
-namespace math {
-    const double PI = 3.14159;
-    
-    double square(double x) {
-        return x * x;
-    }
-}
-
-int main() {
-    double result = math::square(5);
-    std::cout << math::PI << "\n";
-}
-```
-
-### Using Declarations
-
-```cpp showLineNumbers 
-#include <iostream>
-#include <vector>
-
-// Specific using declarations (preferred)
-using std::cout;
-using std::vector;
-
-int main() {
-    vector<int> nums = {1, 2, 3};
-    cout << nums[0] << "\n";  // No std:: prefix
-}
-```
-
-### Using Directive
-
-```cpp showLineNumbers 
-// Entire namespace (avoid in headers!)
-using namespace std;
-
-int main() {
-    cout << "Hello\n";  // No std:: needed
-    vector<int> v;
-}
-```
-
-:::warning[Avoid in Headers]
-Never use `using namespace` in header files - it pollutes the namespace for all files that include the header.
-:::
-
----
-
-## Execution Flow
-
-```mermaid
-graph TD
-    A[Program Start] --> B[Static initialization]
-    B --> C[main called]
-    C --> D[Execute main body]
-    D --> E[Return from main]
-    E --> F[Static destruction]
-    F --> G[Program Exits]
-```
-
-### Static Initialization
-
-```cpp showLineNumbers 
-#include <iostream>
-
-// Initialized before main() starts
-int global = []() {
-    std::cout << "Global initialized\n";
-    return 42;
-}();
-
-class Logger {
-public:
-    Logger() {
-        std::cout << "Logger constructed\n";
-    }
-    ~Logger() {
-        std::cout << "Logger destroyed\n";
-    }
-};
-
-Logger log;  // Constructed before main
-
-int main() {
-    std::cout << "In main\n";
-    return 0;
-}
-
-// Output:
-// Global initialized
-// Logger constructed
-// In main
-// Logger destroyed
-```
-
----
-
-## Forward Declarations
-
-Declare functions before use:
-
-```cpp showLineNumbers 
-// Forward declaration
-void helper();
-
-int main() {
-    helper();  // OK: declared above
-    return 0;
-}
-
-// Definition can come after
-void helper() {
-    std::cout << "Helper\n";
-}
-```
-
-Without forward declaration:
-```cpp showLineNumbers 
-int main() {
-    helper();  // Error: 'helper' not declared
-    return 0;
-}
-
-void helper() {
-    std::cout << "Helper\n";
-}
-```
-
----
-
-## Compilation Units
-
-Each `.cpp` file is a separate compilation unit:
 
 ```bash
-# Separate compilation
-g++ -c main.cpp      # → main.o
-g++ -c utils.cpp     # → utils.o
-g++ -c math.cpp      # → math.o
-
-# Link into executable
-g++ main.o utils.o math.o -o program
+./args hello "two words"
 ```
 
----
+```text
+argc = 3
+argv[0] = ./args
+argv[1] = hello
+argv[2] = two words
+```
 
-## Summary
+The shell, not C++, splits the command line: the quotes made `two words` a single argument. To work
+with the arguments as strings, copy them: `std::vector<std::string> args(argv, argv + argc);`.
 
-C++ program structure:
+### The exit status
 
-1. **Preprocessor directives**: `#include`, `#define`
-2. **Declarations**: Forward declarations, `extern`
-3. **Definitions**: Functions, classes, globals
-4. **main() function**: Required entry point
-5. **Implementation**: Function bodies
+The value `main` returns becomes the process's exit status. `0` (or `EXIT_SUCCESS` from
+`<cstdlib>`) means success; `EXIT_FAILURE` or any other non-zero value means failure. Scripts and
+build tools check it (`$?` in a POSIX shell, `&&` chaining). POSIX shells see only the low 8 bits,
+so `return 259;` shows up as `3`; keep codes between 0 and 255.
 
-**main() function**:
-- Required (exactly one)
-- Returns `int`
-- `return 0` = success
-- Can accept command-line arguments
+Reaching the closing `}` of `main` without a `return` is equivalent to `return 0;`. This applies to
+`main` only, and has done since C++98. Every other non-`void` function must return a value.
 
-**Organization**:
-- Headers (`.h`): Declarations
-- Source (`.cpp`): Definitions
-- One `main()` per program
+## How a program starts and ends
 
-```cpp showLineNumbers 
-// Template structure
-#include <headers>
+`main` is not the first code to run. Objects with **static storage duration** (global variables,
+`static` data members, namespace-scope objects) are initialised before `main` starts, and destroyed
+after it returns:
 
-// Declarations
-void function();
+<Walkthrough title="Running startup.cpp" caption="Two globals and one local, each printing when constructed and destroyed." accent="green">
+  <Step title="The program">
 
-// main function
-int main(int argc, char* argv[]) {
-    // Program logic
-    return 0;
-}
+```cpp title="startup.cpp" showLineNumbers
+#include <iostream>
 
-// Implementations
-void function() {
-    // ...
+struct Tracer {
+    const char* name;
+    explicit Tracer(const char* n) : name{n} { std::cout << "construct " << name << '\n'; }
+    ~Tracer() { std::cout << "destroy " << name << '\n'; }
+};
+
+Tracer first{"first"};      // global: constructed before main
+Tracer second{"second"};
+
+int main() {
+    std::cout << "main starts\n";
+    Tracer local{"local"};
+    std::cout << "main returns\n";
 }
 ```
+
+  </Step>
+  <Step title="Before main: globals constructed">
+
+Globals defined in one file are initialised in the order they appear.
+
+```text
+construct first
+construct second
+```
+
+  </Step>
+  <Step title="main runs">
+
+```text
+main starts
+construct local
+main returns
+```
+
+  </Step>
+  <Step title="main returns: local destroyed">
+
+Leaving `main`'s block destroys its local objects first, like any other block.
+
+```text
+destroy local
+```
+
+  </Step>
+  <Step title="After main: globals destroyed in reverse">
+
+The return value is passed to `std::exit`, which destroys static objects in **reverse** order of
+construction and then ends the process.
+
+```text
+destroy second
+destroy first
+```
+
+  </Step>
+</Walkthrough>
+
+Within one file the order is the order of definition. **Across files it is unspecified**, so a
+global in one file must not rely on a global from another being ready: the "static initialisation
+order fiasco". The details and fixes are in
+[Storage Duration](../05-memory-and-object-lifetime/storage-duration.md).
+
+## Declare before use
+
+The compiler reads each file top to bottom, and a name must be declared before the code that uses
+it. A **declaration** says a name exists and what type it has; a **definition** also provides the
+body or storage. A function can be declared early and defined later:
+
+```cpp title="forward.cpp" showLineNumbers
+#include <iostream>
+
+void greet(const char* who);   // declaration ("prototype"): no body
+
+int main() {
+    greet("world");            // OK: greet has been declared
+}
+
+void greet(const char* who) {  // definition
+    std::cout << "Hello, " << who << "!\n";
+}
+```
+
+Without the declaration on line 3, the call in `main` fails with "'greet' was not declared in this
+scope". Everything may be declared many times but defined only once in the whole program: the
+**One Definition Rule**, covered in [Translation Units](../01-toolchain-and-build/translation-units.md).
+
+## Splitting a program across files
+
+Real programs put declarations in **headers** (`.h`/`.hpp`) and definitions in **source files**
+(`.cpp`). Any file that needs a function includes the header that declares it; exactly one `.cpp`
+defines it.
+
+<Tabs groupId="files">
+  <TabItem value="h" label="mathx.h">
+
+```cpp title="mathx.h"
+#pragma once            // include this header only once per source file
+
+int add(int a, int b);  // declaration only
+```
+
+  </TabItem>
+  <TabItem value="cpp" label="mathx.cpp">
+
+```cpp title="mathx.cpp"
+#include "mathx.h"
+
+int add(int a, int b) { return a + b; }   // the one definition
+```
+
+  </TabItem>
+  <TabItem value="main" label="main.cpp">
+
+```cpp title="main.cpp"
+#include <iostream>
+#include "mathx.h"
+
+int main() { std::cout << add(2, 3) << '\n'; }   // prints 5
+```
+
+  </TabItem>
+</Tabs>
+
+```bash
+g++ -std=c++20 -Wall main.cpp mathx.cpp -o app && ./app
+```
+
+Each `.cpp` is compiled separately and the linker joins the results. How that works, and why it is
+organised this way, is in [Translation Units](../01-toolchain-and-build/translation-units.md),
+[Headers and Includes](../01-toolchain-and-build/headers-and-includes.md) and
+[Include Guards and `#pragma once`](../01-toolchain-and-build/include-guards-and-pragma-once.md).
+
+## Namespaces
+
+Large programs and libraries all need names like `add`, `Buffer` or `parse`. A **namespace** groups
+names under a prefix so they cannot collide. The standard library lives in `std`.
+
+```cpp title="namespaces.cpp" showLineNumbers
+#include <iostream>
+
+namespace geometry {
+    constexpr double pi = 3.141592653589793;
+    double circle_area(double r) { return pi * r * r; }
+}
+
+namespace app::config {          // nested namespace shorthand (C++17)
+    int verbosity = 1;
+}
+
+int main() {
+    std::cout << geometry::circle_area(2.0) << '\n';   // qualified name: namespace::name
+    std::cout << app::config::verbosity << '\n';
+}
+```
+
+`::` is the scope resolution operator; a leading `::` (`::name`) means the global namespace. You can
+shorten names in two ways:
+
+| Form | Effect | Use |
+|---|---|---|
+| `using std::cout;` | **using-declaration**: brings one name into the current scope | fine in `.cpp` files and inside functions |
+| `using namespace std;` | **using-directive**: makes every name in `std` visible | small programs and tests at most |
+| `namespace fs = std::filesystem;` | **alias**: a shorter name for a namespace | anywhere |
+
+:::warning[No `using namespace` in headers]
+A using-directive in a header applies to every file that includes it, and can silently change which
+function a call picks or create ambiguities in code you never saw. Put using-directives only in
+`.cpp` files, after all `#include`s, or inside a function.
+:::
+
+A namespace without a name (`namespace { ... }`) makes its contents private to one source file;
+see [Translation Units](../01-toolchain-and-build/translation-units.md).
+
+## Key points
+
+- One `main` per program; its return value is the exit status, and falling off its end returns 0.
+- `argv[0]` is the program name, `argv[argc]` is null.
+- Globals are constructed before `main` and destroyed after, in reverse order; across files the order is unspecified.
+- Declare before use; define once. Headers declare, source files define.
+- Namespaces prevent name collisions; never put `using namespace` in a header.
+
+## Related
+
+- [Compilation Pipeline](../01-toolchain-and-build/compilation-pipeline.md) — from these files to an executable
+- [Storage Duration](../05-memory-and-object-lifetime/storage-duration.md) — static, automatic and dynamic lifetimes
+- [Function Declarations](../04-functions-and-call-mechanics/function-declarations.md) — declarations in depth

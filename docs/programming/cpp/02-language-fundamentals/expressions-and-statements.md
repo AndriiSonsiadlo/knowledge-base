@@ -8,477 +8,168 @@ tags: [c++, expressions, statements, syntax, fundamentals]
 
 # Expressions and Statements
 
-Expressions produce values; statements perform actions. Understanding the distinction is fundamental to C++ programming.
+C++ code is built from two kinds of pieces. An **expression** computes something: `x + 1`,
+`f(3)`, `a < b`. A **statement** is a unit of execution: it does something, in order, as part of a
+function body (`int x = 5;`, `return x;`, an `if`). Expressions live inside statements, and the
+distinction explains rules that otherwise look arbitrary, such as why `x + 1;` compiles and why
+`i++ + i++` is broken.
 
-:::info[Key Difference]
-**Expression**: Evaluates to a value (`5 + 3`, `x > 0`)  
-**Statement**: Complete instruction that executes (`int x = 5;`, `return 0;`)
-:::
+**Prerequisites:** [Basic Syntax](./basic-syntax.md), [Keywords and Tokens](./keywords-and-tokens.md).
+
+<Diagram title="return total + price * qty;" caption="A statement contains one full-expression, which is a tree of subexpressions." accent="blue">
+  <DiagramNode title="Statement">`return ... ;` (a jump statement)</DiagramNode>
+  <DiagramArrow label="contains" />
+  <DiagramNode title="Full-expression" accent>`total + price * qty`: not part of a larger expression</DiagramNode>
+  <DiagramArrow label="built from" />
+  <DiagramRow>
+    <DiagramNode title="Subexpression">`total`</DiagramNode>
+    <DiagramNode title="Subexpression">`price * qty`, itself built from `price` and `qty`</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
 ## Expressions
 
-An expression is any code that produces a value and can be evaluated.
+An expression is operators applied to operands, or a single operand on its own: a literal (`42`), a
+name (`x`), a function call (`f(3)`), or any combination (`(x + y) * f(3)`). Evaluating it can do
+two things:
 
-```cpp showLineNumbers 
-// Simple expressions
-42                  // Literal (value: 42)
-x                   // Variable (value: contents of x)
-x + 5               // Arithmetic (value: sum)
-x > 10              // Comparison (value: true/false)
-func()              // Function call (value: return value)
+- produce a **value**, which has a **type** (`x + 1` is an `int` when `x` is an `int`);
+- cause **side effects**: changes to the state of the program, such as writing a variable (`x = 5`,
+  `++i`) or performing output (`std::cout << x`).
 
-// Complex expressions
-(x + y) * (z - 3)   // Nested expressions
-x = y = 5           // Assignment chain (value: 5)
-++x                 // Pre-increment (value: new x)
-x++                 // Post-increment (value: old x)
+Some expressions exist only for their value (`a + b`), some only for their side effect (a call to a
+`void` function), some for both (`i++` yields the old value *and* increments `i`). Assignment is an
+expression too: `x = 5` has the value of `x` after the assignment, which is why `a = b = 0` works.
+
+Each expression also has a **value category**: roughly, whether it names an object that has an
+address (an *lvalue*, like `x` or `v[0]`) or is a temporary value (a *prvalue*, like `x + 1`). You
+can assign to `x` but not to `x + 1`, and that rule is the reason. The full story is in
+[Lvalues and Rvalues](../03-types-and-values/value-categories/lvalues-rvalues.md).
+
+### How expressions group and when they run
+
+Two independent sets of rules apply to an expression with several operators:
+
+| Question | Answered by | Page |
+|---|---|---|
+| Which operands belong to which operator? (`2 + 3 * 4` is `2 + (3 * 4)`) | precedence and associativity | [Operator Precedence](./operators/operator-precedence.md) |
+| In what order do the parts run? (is `f()` called before `g()` in `f() + g()`?) | sequencing rules | [Order of Evaluation](./operators/evaluation-order.md) |
+
+The second set is where `i++ + i++` becomes undefined behaviour. Until you have read that page, keep
+each side effect in a statement of its own.
+
+### The conditional operator `?:`
+
+`cond ? a : b` evaluates `cond`, then exactly **one** of `a` or `b`, and yields its value. It is the
+expression form of `if`/`else`, used where a value is needed:
+
+```cpp
+int larger = (x > y) ? x : y;
+std::string label = (n == 1) ? "item" : "items";   // both become std::string
 ```
 
-Every expression has:
-- **Type**: `int`, `double`, `bool`, etc.
-- **Value**: Result of evaluation
-- **Value category**: lvalue, rvalue, etc.
+`a` and `b` must have a common type. Chains (`x > 0 ? 1 : x < 0 ? -1 : 0`) read like `else if`; past
+two levels, use an `if` or a small function.
 
----
+### The comma operator
+
+`a, b` evaluates `a`, discards its value, then evaluates `b` and yields `b`. Its main legitimate use
+is a `for` header that updates two variables: `for (int i = 0, j = n - 1; i < j; ++i, --j)`. Note
+that the commas in a function call `f(a, b)` and in a declaration `int i = 0, j = 1;` are
+separators, not this operator.
 
 ## Statements
 
-A statement is a complete instruction that performs an action. Most statements end with `;`.
+A function body is a sequence of statements, executed one after another unless a control statement
+changes the order. The kinds:
 
-### Types of Statements
+| Statement | Example | Covered in |
+|---|---|---|
+| Expression statement | `x = 5;` `print(x);` | below |
+| Declaration statement | `int x = 5;` `auto it = v.begin();` | [Fundamental Types](../03-types-and-values/fundamental-types.md) |
+| Compound statement (block) | `{ int t = a; a = b; b = t; }` | below |
+| Selection | `if`, `switch` | [Conditional Statements](./control-flow/if-switch.md) |
+| Iteration | `for`, `while`, `do`, range-`for` | [Loops](./control-flow/loops.md) |
+| Jump | `break` `continue` `return` `goto` | [Loops](./control-flow/loops.md), [goto](./control-flow/goto-and-labels.md) |
+| Labeled | `case 1:` `default:` `done:` | [Conditional Statements](./control-flow/if-switch.md) |
+| Null statement | `;` | below |
+| `try` block | `try { ... } catch (...) { ... }` | [Exceptions](../10-error-handling-and-safety/01-exceptions.md) |
 
-```cpp showLineNumbers 
-// Expression statement (expression + semicolon)
-x = 5;              // Assignment statement
-func();             // Function call statement
-x + 3;              // Valid but useless (value discarded)
+### Expression statements
 
-// Declaration statement
-int x;              // Variable declaration
-int y = 10;         // Declaration with initialization
+Any expression followed by `;` is a statement. The value is discarded; only side effects remain.
+That is why `x + 1;` and `x == 5;` compile but do nothing (`-Wall` warns: GCC says "statement has
+no effect", Clang "expression result unused"). Marking a function `[[nodiscard]]` *(C++17)* makes the
+compiler warn when a caller ignores its result.
 
-// Compound statement (block)
-{
-    int x = 5;
-    std::cout << x;
-}
+Each statement's full-expression is completely evaluated, side effects included, before the next
+statement starts. That is the simplest way to make order explicit:
 
-// Control flow statements
-if (x > 0) { }      // If statement
-while (x > 0) { }   // While loop
-for (;;) { }        // For loop
-return 0;           // Return statement
-break;              // Break statement
+```cpp
+int a = read();   // first
+int b = read();   // definitely second
+use(a, b);
 ```
 
----
+### Blocks and scope
 
-## Expression vs Statement Examples
+A block `{ ... }` groups statements so they can stand where one statement is expected, such as the
+body of an `if`. It also opens a **scope**: names declared inside exist only until the closing
+brace, and local objects are destroyed there, in reverse order of declaration.
 
-```cpp showLineNumbers 
-// Expression: produces value, no semicolon needed
-int x = 5 + 3;      // '5 + 3' is expression
-        ^^^^
+```cpp title="scope.cpp" showLineNumbers
+#include <iostream>
 
-// Statement: complete instruction with semicolon
-int x = 5 + 3;      // Entire line is statement
-^^^^^^^^^^^^^
-
-// Expression used as statement
-x + 3;              // Expression becomes statement (value discarded)
-
-// Multiple expressions in one statement
-x = (y = 5) + 3;    // y = 5 is expression (value: 5)
-                    // (y = 5) + 3 is expression (value: 8)
-                    // Entire line is statement
-```
-
----
-
-## Expression Categories
-
-### Primary Expressions
-
-The building blocks of all expressions:
-
-```cpp showLineNumbers 
-// Literals
-42                  // Integer literal
-3.14                // Floating-point literal
-"hello"             // String literal
-'A'                 // Character literal
-true                // Boolean literal
-nullptr             // Null pointer literal
-
-// Identifiers
-x                   // Variable
-func                // Function
-
-// this pointer (in member functions)
-this->member        // Access to class member
-
-// Lambda expression (C++11)
-[](int x) { return x * 2; }
-```
-
-### Postfix Expressions
-
-```cpp showLineNumbers 
-arr[5]              // Array subscript
-obj.member          // Member access
-ptr->member         // Pointer member access
-func(arg1, arg2)    // Function call
-x++                 // Post-increment (returns old value)
-x--                 // Post-decrement
-type(value)         // Functional cast
-```
-
-### Unary Expressions
-
-```cpp showLineNumbers 
-++x                 // Pre-increment (returns new value)
---x                 // Pre-decrement
-+x                  // Unary plus
--x                  // Unary minus (negation)
-!x                  // Logical NOT
-~x                  // Bitwise NOT
-*ptr                // Dereference
-&var                // Address-of
-sizeof(x)           // Size in bytes
-(type)x             // C-style cast
-new int             // Dynamic allocation
-delete ptr          // Deallocation
-```
-
-### Binary Expressions
-
-```cpp showLineNumbers 
-// Arithmetic
-x + y               // Addition
-x - y               // Subtraction
-x * y               // Multiplication
-x / y               // Division
-x % y               // Modulus
-
-// Comparison
-x == y              // Equal
-x != y              // Not equal
-x < y               // Less than
-x > y               // Greater than
-x <= y              // Less or equal
-x >= y              // Greater or equal
-
-// Logical
-x && y              // AND
-x || y              // OR
-
-// Bitwise
-x & y               // Bitwise AND
-x | y               // Bitwise OR
-x ^ y               // Bitwise XOR
-x << 2              // Left shift
-x >> 2              // Right shift
-
-// Assignment
-x = y               // Assign
-x += y              // x = x + y
-x -= y              // x = x - y
-x *= y              // x = x * y
-```
-
-### Ternary Expression
-
-Only one ternary operator in C++:
-
-```cpp showLineNumbers 
-condition ? value_if_true : value_if_false
-
-// Examples
-int max = (x > y) ? x : y;
-std::string msg = (count > 0) ? "Items found" : "No items";
-
-// Can be nested (avoid for readability)
-int sign = (x > 0) ? 1 : (x < 0) ? -1 : 0;
-```
-
----
-
-## Operator Precedence
-
-Determines evaluation order when multiple operators present:
-
-```cpp showLineNumbers 
-// High to low precedence (simplified)
-x++  x--                    // Postfix
-++x  --x  !  ~  *  &        // Unary
-*  /  %                     // Multiplicative
-+  -                        // Additive
-<<  >>                      // Shift
-<  <=  >  >=                // Relational
-==  !=                      // Equality
-&                           // Bitwise AND
-^                           // Bitwise XOR
-|                           // Bitwise OR
-&&                          // Logical AND
-||                          // Logical OR
-? :                         // Conditional
-=  +=  -=  *=  /=           // Assignment
-,                           // Comma (lowest)
-
-// Examples
-int result = 5 + 3 * 2;     // 11 (not 16): * before +
-bool b = x > 5 && y < 10;   // Relational before logical
-int x = y = 5;              // 5 (right-to-left)
-```
-
-Use parentheses for clarity:
-
-```cpp showLineNumbers 
-// Unclear
-int result = x + y * z;
-
-// Clear
-int result = x + (y * z);   // Explicit intent
-```
-
----
-
-## Statement Types
-
-### Null Statement
-
-Empty statement (just semicolon):
-
-```cpp showLineNumbers 
-;                   // Null statement
-
-// Used in loops with no body
-while (getchar() != '\n')
-    ;               // Empty body
-
-// For loop with work in condition
-for (int i = 0; i < n; ++i, sum += i)
-    ;               // All work in for header
-```
-
-### Compound Statement (Block)
-
-Groups multiple statements:
-
-```cpp showLineNumbers 
-{
-    int x = 5;      // Local to block
-    int y = 10;
-    std::cout << x + y;
-}                   // x and y destroyed here
-
-// Creates scope
-int x = 1;
-{
-    int x = 2;      // Different variable
-    std::cout << x; // 2
-}
-std::cout << x;     // 1
-```
-
-### Declaration Statement
-
-```cpp showLineNumbers 
-int x;                      // Declaration
-int y = 5;                  // Declaration with initialization
-const double PI = 3.14;     // Constant declaration
-auto value = compute();     // Type deduction
-
-// Multiple declarations
-int a, b, c;
-int *ptr, arr[10];          // Pointer and array
-```
-
-### Selection Statements
-
-```cpp showLineNumbers 
-// If statement
-if (x > 0) {
-    std::cout << "Positive";
-} else if (x < 0) {
-    std::cout << "Negative";
-} else {
-    std::cout << "Zero";
-}
-
-// Switch statement
-switch (value) {
-    case 1:
-        doOne();
-        break;
-    case 2:
-        doTwo();
-        break;
-    default:
-        doDefault();
-}
-
-// If with initializer (C++17)
-if (auto result = compute(); result > 0) {
-    use(result);
+int main() {
+    int x = 1;
+    {
+        // highlight-next-line
+        int x = 2;               // a new x that hides (shadows) the outer one
+        std::cout << x << ' ';   // 2
+    }                            // inner x destroyed here
+    std::cout << x << '\n';      // 1
 }
 ```
 
-### Iteration Statements
+Shadowing is legal but confusing; `-Wshadow` (not in `-Wall`) warns about it. How long objects live
+beyond blocks is covered in [Storage Duration](../05-memory-and-object-lifetime/storage-duration.md).
 
-```cpp showLineNumbers 
-// While loop
-while (condition) {
-    // Body
-}
+### The null statement
 
-// Do-while loop
-do {
-    // Body executes at least once
-} while (condition);
+A lone `;` is a statement that does nothing. It is useful as an intentionally empty loop body, best
+written on its own line so it is clearly deliberate:
 
-// For loop
-for (int i = 0; i < n; i++) {
-    // Body
-}
-
-// Range-based for (C++11)
-for (auto& elem : container) {
-    // Process elem
-}
+```cpp
+while (std::cin.get() != '\n')
+    ;                            // discard the rest of the line
 ```
 
-### Jump Statements
+The accidental version is a classic bug: `if (ready);` or `for (...);` ends the statement at the
+semicolon, and the block that follows runs unconditionally, once.
 
-```cpp showLineNumbers 
-// Break: exit loop/switch
-while (true) {
-    if (done) break;
-}
+## Pitfalls
 
-// Continue: skip to next iteration
-for (int i = 0; i < n; i++) {
-    if (skip_condition) continue;
-    process(i);
-}
+**`=` instead of `==` in a condition.** `if (x = 5)` assigns 5 and is always true. GCC and Clang
+warn (`-Wparentheses`). If you really mean to assign and test, use an `if` init-statement:
+`if (int n = read(); n != 0)`.
 
-// Return: exit function
-int func() {
-    return 42;
-}
+**Several side effects on one variable in one expression.** `v[i] = i++;`, `f(i++, i++)`,
+`i = i++ + 1`: some are undefined, some unspecified, some fine only since C++17. Split them into
+statements. [Order of Evaluation](./operators/evaluation-order.md) explains which is which.
 
-// Goto: jump to label (avoid!)
-goto error_handler;
-error_handler:
-    cleanup();
-```
+**Thinking a declaration is an expression.** `int x = 5` is not an expression and has no value, so
+`if ((int x = 5) > 0)` does not compile. Use the init-statement form above.
 
----
+## Key points
 
-## Expression Evaluation
+- Expressions compute a value and may have side effects; statements execute in order.
+- `expression;` is a statement that keeps only the side effects.
+- Precedence decides grouping; sequencing decides order. They are separate rules.
+- `?:` evaluates only one branch; the comma operator evaluates both and keeps the right.
+- A block creates a scope; locals die at its closing brace.
 
-### Order of Evaluation
+## Related
 
-```cpp showLineNumbers 
-// Undefined order in most cases
-int result = f() + g() + h();  // f, g, h can be called in any order
-
-// Guaranteed left-to-right (C++17)
-a.b              // a before b
-a->b             // a before b
-a[b]             // a before b
-a << b           // a before b (streams)
-a >> b           // a before b (streams)
-
-// Short-circuit evaluation
-x && y           // If x is false, y not evaluated
-x || y           // If x is true, y not evaluated
-```
-
-### Sequence Points
-
-Points where all previous evaluations complete:
-
-```cpp showLineNumbers 
-// Semicolon is sequence point
-x = 1;
-y = x + 1;       // x=1 completes before this
-
-// Comma operator
-x = (a = 1, b = 2, a + b);  // a=1, then b=2, then add
-
-// Undefined behavior
-i = i++;         // UB: modifies i twice
-arr[i] = i++;    // UB: which i for index?
-
-// Well-defined
-i = 1;
-arr[i++] = 5;    // OK: i evaluated before increment
-```
-
----
-
-## Common Pitfalls
-
-### Assignment in Condition
-
-```cpp showLineNumbers 
-// Common mistake
-if (x = 5) {     // Assignment, not comparison!
-    // Always executes (5 is true)
-}
-
-// Intended comparison
-if (x == 5) {
-    // Executes when x equals 5
-}
-
-// Intentional assignment (rare)
-if ((x = getValue()) != 0) {
-    // Use x
-}
-```
-
-### Expression as Statement
-
-```cpp showLineNumbers 
-x + 5;           // Legal but useless (value discarded)
-x == 5;          // Legal but useless (comparison unused)
-
-x = 5;           // Useful statement
-```
-
----
-
-## Summary
-
-**Expressions**:
-- Produce values
-- Have types
-- Can be nested
-- `5 + 3`, `x > 0`, `func()`
-
-**Statements**:
-- Perform actions
-- Usually end with `;`
-- Control program flow
-- `int x = 5;`, `if (x > 0) { }`
-
-**Key points**:
-- Expressions become statements by adding `;`
-- Statements control execution flow
-- Operator precedence determines evaluation order
-- Short-circuit evaluation for `&&` and `||`
-
-```cpp showLineNumbers 
-// Expression
-x + y
-
-// Statement
-x + y;
-
-// Statement with expression
-int result = x + y;
-              ^^^^^ expression
-^^^^^^^^^^^^^^^^^^ statement
-```
+- [Operator Precedence](./operators/operator-precedence.md) — grouping
+- [Order of Evaluation](./operators/evaluation-order.md) — timing and undefined behaviour
+- [Control Flow](./control-flow/if-switch.md) — the statements that change execution order

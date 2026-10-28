@@ -8,431 +8,222 @@ tags: [c++, object-files, symbols, elf, linking]
 
 # Object Files and Symbols
 
-Object files (.o, .obj) are compiled but not yet linked binary files containing machine code, data, and metadata for the linker.
+An object file (`.o`) is what one translation unit becomes after [assembling](./assembling.md): the
+machine code and data for that file, cut into named **sections**, plus a **symbol table** listing
+what the file defines and what it needs, and **relocations** marking the bytes the linker must patch.
+Almost every linker error and most "why is my binary this big" questions are answered by reading
+these three tables, so this page is about reading them.
 
-:::info[Intermediate Format]
-Object files are the bridge between compilation and linking - they contain everything needed to build an executable except resolved external references.
-:::
+**Prerequisites:** [The Compilation Pipeline](./compilation-pipeline.md),
+[Translation Units](./translation-units.md) (for linkage).
 
-## Object File Format
+Linux uses **ELF** ([specification](https://refspecs.linuxfoundation.org/elf/elf.pdf)), Windows uses
+**COFF/PE** (`.obj`), macOS uses **Mach-O**. The ideas are the same; the tools differ (`nm`,
+`objdump`, `readelf` on Linux; `dumpbin` on Windows; `nm`, `otool` on macOS). Everything below is
+ELF on x86-64, produced with GCC 15.
 
-Different platforms use different formats:
+## Anatomy of an ELF object
 
-| Platform | Format | Extension |
-|----------|--------|-----------|
-| Linux | ELF (Executable and Linkable Format) | .o |
-| Windows | COFF/PE (Common Object File Format) | .obj |
-| macOS | Mach-O | .o |
+<Diagram title="What a .o file contains" caption="Sections hold bytes; the tables describe them for the linker." accent="amber">
+  <DiagramGroup label="Sections (contents)">
+    <DiagramNode title=".text">Machine code</DiagramNode>
+    <DiagramNode title=".data">Initialised, writable globals</DiagramNode>
+    <DiagramNode title=".bss">Zero-initialised globals. Size only, no bytes in the file</DiagramNode>
+    <DiagramNode title=".rodata">Constants, string literals</DiagramNode>
+  </DiagramGroup>
+  <DiagramArrow label="described by" />
+  <DiagramGroup label="Tables (metadata)">
+    <DiagramNode icon="key" title=".symtab" accent>Name → section, offset, size, binding</DiagramNode>
+    <DiagramNode icon="workflow" title=".rela.text">"Patch offset N with the address of symbol S"</DiagramNode>
+  </DiagramGroup>
+</Diagram>
 
-All formats contain similar information: code, data, symbols, and relocation info.
+Compile this file to see each kind of entity land somewhere:
 
----
+```cpp title="sections.cpp"
+int initialized = 42;
+int zeroed;
+static int file_local = 7;
+const int folded = 5;
+extern const int exported_const;
+extern const int exported_const = 9;
+const char* msg = "Hello";
+extern int defined_elsewhere;
 
-## Object File Sections
-
-```mermaid
-graph TD
-    A[Object File] --> B[.text]
-    A --> C[.data]
-    A --> D[.bss]
-    A --> E[.rodata]
-    A --> F[Symbol Table]
-    A --> G[Relocation Table]
-    
-    B --> H[Machine code]
-    C --> I[Initialized globals]
-    D --> J[Uninitialized globals]
-    E --> K[Constants]
+static int helper() { return file_local; }
+int answer() { return helper() + defined_elsewhere + folded; }
+inline int twice(int x) { return 2 * x; }
+int use_twice() { return twice(answer()); }
 ```
 
-### .text Section (Code)
+## Reading nm output
 
-Contains executable machine code:
+`nm` prints one line per symbol: value (offset within its section), a type letter, and the name.
+`-C` demangles C++ names ([Name Mangling](./name-mangling.md)).
 
-```cpp showLineNumbers 
-int add(int a, int b) {
-    return a + b;
-}
+<Tabs groupId="opt">
+  <TabItem value="o0" label="g++ -O0 -c; nm -C">
+
+```text
+0000000000000000 W twice(int)
+0000000000000010 T answer()
+000000000000002a T use_twice()
+0000000000000004 d file_local
+0000000000000000 r folded
+0000000000000000 t helper()
+                 U defined_elsewhere
+0000000000000004 R exported_const
+0000000000000000 D initialized
+0000000000000000 D msg
+0000000000000000 B zeroed
 ```
+
+  </TabItem>
+  <TabItem value="o2" label="g++ -O2 -c; nm -C">
+
+```text
+0000000000000000 T answer()
+0000000000000010 T use_twice()
+                 U defined_elsewhere
+0000000000000000 R exported_const
+0000000000000000 D initialized
+0000000000000000 D msg
+0000000000000000 B zeroed
+```
+
+  </TabItem>
+</Tabs>
+
+| Letter | Meaning | From the example |
+|---|---|---|
+| `T` / `t` | Code in `.text`; upper case = global, lower case = local to this file | `answer()` / `helper()` (`static`) |
+| `D` / `d` | Initialised data | `initialized` / `file_local` (`static`) |
+| `B` / `b` | Zero-initialised data in `.bss` | `zeroed` |
+| `R` / `r` | Read-only data | `exported_const` / `folded` |
+| `U` | **Undefined**: used here, must be defined in another object or library | `defined_elsewhere` |
+| `W` | Weak definition: the linker may pick any one of several, and a strong definition wins | `twice(int)`, an `inline` function |
+
+What the example shows:
+
+- **Internal linkage leaves no global symbol.** `static` variables and functions, anonymous-namespace
+  entities and namespace-scope `const` variables get lower-case letters, which the linker never
+  matches against other files. At `-O2` they disappear completely: `helper` was inlined, `folded`
+  was replaced by `5`, and `file_local` became the constant `7`.
+- **`const` at namespace scope is internal by default in C++.** `folded` is `r`; you need
+  `extern const` to export a constant (`exported_const`, `R`).
+- **`msg` is in `D`, not `R`.** The pointer is writable; only the string `"Hello"` is in `.rodata`.
+  (With `-fPIC`-style code, as here, the pointer actually sits in `.data.rel.local` because it needs a
+  relocation; `nm` still reports `D`.)
+- **`inline` functions are weak**, and their code goes into a separate section group
+  (`.text._Z5twicei`), so that the linker keeps one copy when many TUs emit it. At `-O2` the call was
+  inlined and no out-of-line copy was needed.
+
+Useful variations:
 
 ```bash
-# View disassembly
-objdump -d file.o
-
-# Output:
-0000000000000000 <add>:
-   0:   8d 04 37                lea    eax,[rdi+rsi]
-   3:   c3                      ret
+nm -C -u file.o            # only undefined symbols: what this file needs
+nm -C --defined-only file.o
+nm -S --size-sort -C app   # with sizes: what makes the binary big
+nm -D lib.so               # the dynamic symbol table: what a shared library exports
 ```
 
-### .data Section (Initialized Data)
-
-Contains initialized global and static variables:
-
-```cpp showLineNumbers 
-int global_var = 42;              // .data
-static int static_var = 100;     // .data
-const int writable_const = 5;    // .data (if modifiable)
-```
+## Sections and their sizes
 
 ```bash
-# View data section
-objdump -s -j .data file.o
+readelf -SW sections.o     # section headers
+size -A sections.o         # section sizes
+objdump -s -j .rodata sections.o
 ```
 
-### .bss Section (Uninitialized Data)
-
-Contains uninitialized globals (Block Started by Symbol):
-
-```cpp showLineNumbers 
-int uninitialized;                // .bss
-static int static_uninit;         // .bss
-int array[1000];                  // .bss (zero-initialized)
+```text
+Contents of section .rodata:
+ 0000 05000000 09000000 48656c6c 6f00      ........Hello.
 ```
 
-**Why separate?** .bss doesn't occupy disk space - the loader allocates and zeroes memory at runtime. Saves file size.
+That is `folded` (5), `exported_const` (9) and the string literal, in little-endian order. `.bss`
+has a size but no file contents: the loader allocates and zero-fills it. That is why a large
+zero-initialised array costs nothing in the file and an initialised one costs its full size.
 
-### .rodata Section (Read-Only Data)
+## Symbol binding: global, local, weak
 
-Contains constants and string literals:
+`readelf -s` shows the binding explicitly:
 
-```cpp showLineNumbers 
-const char* msg = "Hello";        // "Hello" in .rodata
-const int read_only = 42;         // .rodata
+```text
+     4: 0000000000000004     4 OBJECT  LOCAL  DEFAULT    4 _ZL10file_local
+     9: 0000000000000000     4 OBJECT  GLOBAL DEFAULT    4 initialized
+    15: 0000000000000000    18 FUNC    WEAK   DEFAULT    9 _Z5twicei
 ```
 
----
+- **GLOBAL**: visible to the linker; exactly one definition allowed in the program.
+- **LOCAL**: private to this object (`static`, anonymous namespace). Two files can each have a local
+  `helper` with no conflict.
+- **WEAK**: a definition that yields to a global one, and of which duplicates are allowed. The
+  compiler uses it for `inline` functions and template instantiations. You can request it with
+  `__attribute__((weak))` (GCC/Clang) to provide an overridable default; [Linking](./linking.md#weak-symbols)
+  shows that in action.
 
-## Symbol Table
+## Relocations
 
-Maps names to addresses and types. The linker uses this to resolve references.
-
-```cpp showLineNumbers 
-// example.cpp
-int global = 42;                  // Global symbol
-static int local_static = 10;    // Local symbol
-extern int external;              // Undefined symbol
-
-void function() {                 // Function symbol
-    // ...
-}
-```
+Every place in `.text` or `.data` that refers to an address unknown at assembly time has a
+relocation entry:
 
 ```bash
-# View symbols
-nm example.o
-
-# Output:
-0000000000000000 D global          # D = defined data
-0000000000000004 d local_static    # d = local data (static)
-                 U external        # U = undefined
-0000000000000000 T function        # T = text (function)
+readelf -rW main.o          # or: objdump -r main.o
 ```
 
-### Symbol Types
+```text
+Relocation section '.rela.text' at offset 0x190 contains 2 entries:
+    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend
+000000000000000e  0000000400000004 R_X86_64_PLT32         0000000000000000 _Z6squarei - 4
+0000000000000014  0000000500000002 R_X86_64_PC32          0000000000000000 counter - 4
+```
 
-| Letter | Meaning | Scope |
-|--------|---------|-------|
-| T | Text (function) | Global |
-| t | Text | Local (static) |
-| D | Initialized data | Global |
-| d | Initialized data | Local |
-| B | Uninitialized (BSS) | Global |
-| b | Uninitialized | Local |
-| U | Undefined | External |
-| W | Weak symbol | Can be overridden |
+(This is `main.o` from the [pipeline walkthrough](./compilation-pipeline.md#tracing-a-two-file-program).)
+Read each line as: *at offset `0xe` in `.text`, write the 32-bit distance to `_Z6squarei`, minus 4*.
+The −4 is because x86 measures PC-relative distances from the end of the 4-byte field.
 
-### Examining Symbols
+| Type | Used for |
+|---|---|
+| `R_X86_64_PC32` | PC-relative reference to data or code in the same module |
+| `R_X86_64_PLT32` | Function call; goes through the PLT if the target ends up in a shared library |
+| `R_X86_64_GOTPCRELX` / `REX_GOTPCRELX` | Load an address from the GOT (position-independent access to a global that may be in another module) |
+| `R_X86_64_64` | Absolute 64-bit address (for example, a pointer initialised to `&x` in `.data`) |
+
+## Static libraries are archives of objects
+
+A `.a` file is just a bundle of `.o` files with an index:
 
 ```bash
-# All symbols
-nm file.o
-
-# Only undefined symbols
-nm -u file.o
-
-# Only defined symbols
-nm -U file.o
-
-# Demangle C++ names
-nm -C file.o
-
-# Sort by address
-nm -n file.o
-
-# Show symbol sizes
-nm -S file.o
+ar rcs libgreet.a greet.o     # create (r: insert, c: create, s: write index)
+ar t libgreet.a               # list members
+nm -C libgreet.a              # symbols of every member
 ```
 
----
-
-## Symbol Binding
-
-### Global vs Local Symbols
-
-```cpp showLineNumbers 
-// Global symbol (visible to linker)
-int global_func() { return 42; }
-
-// Local symbol (not visible to linker)
-static int local_func() { return 42; }
-
-// Anonymous namespace (local to translation unit)
-namespace {
-    int helper() { return 42; }  // Local symbol
-}
-```
-
-Local symbols prevent name collisions and allow compiler optimizations.
-
-### Weak Symbols
-
-Allow providing default implementations:
-
-```cpp showLineNumbers 
-// Default implementation (weak)
-__attribute__((weak))
-void custom_allocator(size_t size) {
-    // Default: use malloc
-    return malloc(size);
-}
-
-// User can provide strong symbol to override
-void custom_allocator(size_t size) {
-    // Custom implementation replaces weak symbol
-    return my_custom_alloc(size);
-}
-```
-
----
-
-## Relocation Information
-
-Object files contain placeholders where addresses need filling:
-
-```cpp showLineNumbers 
-extern int external_var;
-
-int get_value() {
-    return external_var;  // Address unknown at compile time
-}
-```
-
-```bash
-# View relocations
-objdump -r file.o
-
-# Output:
-RELOCATION RECORDS FOR [.text]:
-OFFSET           TYPE              VALUE
-0000000000000003 R_X86_64_PC32     external_var-0x4
-```
-
-The linker fills in the actual address of `external_var` during linking.
-
-### Relocation Types
-
-```bash
-R_X86_64_PC32      # 32-bit PC-relative (common for function calls)
-R_X86_64_PLT32     # PLT (Procedure Linkage Table) for shared libs
-R_X86_64_64        # 64-bit absolute address
-R_X86_64_GOTPCREL  # GOT (Global Offset Table) relative
-```
-
----
-
-## Creating and Inspecting Object Files
-
-```bash
-# Compile to object file
-g++ -c source.cpp -o source.o
-
-# With debug info
-g++ -c -g source.cpp -o source.o
-
-# With optimization
-g++ -c -O3 source.cpp -o source.o
-
-# Position-independent code (for shared libraries)
-g++ -c -fPIC source.cpp -o source.o
-```
-
-### Complete Inspection
-
-```bash
-# File type
-file file.o
-# Output: ELF 64-bit LSB relocatable, x86-64
-
-# All sections
-objdump -h file.o
-
-# Disassemble code
-objdump -d file.o
-
-# View all data
-objdump -s file.o
-
-# Full analysis (Linux)
-readelf -a file.o
-
-# Size of sections
-size file.o
-# Output:
-#    text    data     bss     dec     hex filename
-#    1234     100      50    1384     568 file.o
-```
-
----
-
-## Symbol Visibility in Libraries
-
-Control which symbols are exported:
-
-```cpp showLineNumbers 
-// header.h
-#if defined(_WIN32)
-    #define EXPORT __declspec(dllexport)
-    #define IMPORT __declspec(dllimport)
-#elif defined(__GNUC__)
-    #define EXPORT __attribute__((visibility("default")))
-    #define IMPORT
-#else
-    #define EXPORT
-    #define IMPORT
-#endif
-
-// Public API
-EXPORT void public_function();
-
-// Internal (not exported)
-void internal_helper();
-```
-
-```bash
-# Compile with hidden visibility by default
-g++ -fvisibility=hidden -c file.cpp
-
-# View exported symbols
-nm -D libmylib.so | grep " T "
-```
-
-Hiding internal symbols:
-- Reduces library size
-- Speeds up linking
-- Prevents symbol conflicts
-- Enables better optimization
-
----
-
-## Common Issues
-
-### Duplicate Symbols
-
-```cpp showLineNumbers 
-// header.h (Wrong)
-int global = 42;  // Defined in header
-
-// file1.cpp
-#include "header.h"
-
-// file2.cpp  
-#include "header.h"
-
-// Link error: multiple definition of 'global'
-```
-
-**Solution**: Declare in header, define in one .cpp:
-
-```cpp showLineNumbers 
-// header.h
-extern int global;  // Declaration
-
-// file1.cpp
-int global = 42;    // Definition
-```
-
-### Undefined Symbols
-
-```cpp showLineNumbers 
-// main.cpp
-void missing_function();
-
-int main() {
-    missing_function();  // Undefined reference
-}
-```
-
-**Solutions**:
-1. Implement the function
-2. Link the library containing it
-3. Remove the call if not needed
-
----
-
-## Archive Files (.a, .lib)
-
-Static libraries are archives of object files:
-
-```bash
-# Create static library
-ar rcs libmylib.a file1.o file2.o file3.o
-
-# List contents
-ar t libmylib.a
-# Output:
-# file1.o
-# file2.o  
-# file3.o
-
-# Extract object file
-ar x libmylib.a file1.o
-
-# View symbols in archive
-nm libmylib.a
-```
-
-The linker extracts only needed object files from archives.
-
----
-
-## Debug Information
-
-Object files can include debug info for debuggers:
-
-```bash
-# Compile with debug info
-g++ -c -g source.cpp -o source.o
-
-# View debug info
-objdump -g source.o
-
-# Show source line mappings
-objdump -l source.o
-
-# Detailed debug info (DWARF format)
-readelf --debug-dump source.o
-```
-
-Debug info maps machine code back to source code for debuggers like GDB.
-
----
-
-## Summary
-
-Object files contain:
-- **Machine code** (.text section)
-- **Data** (.data, .bss, .rodata sections)
-- **Symbol table** (names and addresses)
-- **Relocation info** (where addresses need fixing)
-- **Debug info** (optional, for debuggers)
-
-**Key tools**:
-```bash
-nm file.o           # Symbol table
-objdump -d file.o   # Disassembly
-readelf -a file.o   # Complete info (Linux)
-size file.o         # Section sizes
-```
-
-Object files are the intermediate format between compilation and linking - they're relocatable, contain unresolved references, and multiple objects combine to form executables or libraries.
+The linker pulls a member out of an archive only if it defines a symbol that is still undefined at
+that point, which is why library order on the command line matters
+([Linking](./linking.md#library-order)).
+
+## Debug information
+
+`-g` adds DWARF sections (`.debug_info`, `.debug_line`, …) that map machine code back to source
+lines and variables. They do not get loaded at run time but can be larger than the code itself.
+`readelf --debug-dump=info file.o` dumps them; `strip` or `objcopy --only-keep-debug` removes them
+or moves them to a separate file. Using them is covered in
+[Debugging Basics](../14-debugging-and-profiling/01-debugging-basics.md).
+
+## Pitfalls
+
+- **Expecting a `static` or `const` global to be visible from another file.** It has internal
+  linkage: `nm` shows it lower case (or not at all), and other files get `undefined reference`.
+- **Defining a variable in a header.** Every TU that includes it gets a global `D`/`B` symbol, and
+  the link fails with `multiple definition`. Declare it `extern` in the header, or make it `inline`
+  *(C++17)*: see [Translation Units](./translation-units.md#the-one-definition-rule).
+- **Reading `nm` of a stripped binary.** `strip` removes `.symtab`; only `nm -D` (dynamic symbols)
+  works then.
+
+## Key points
+
+- An object file = sections (bytes) + symbol table (who defines/needs what) + relocations (holes).
+- `nm -C`: upper case is global, lower case is local, `U` is a dependency, `W` is weak.
+- Internal-linkage entities never collide across files and often vanish at `-O2`.
+- `.bss` costs no file space; `.data` and `.rodata` cost their full size.

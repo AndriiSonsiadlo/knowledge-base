@@ -6,421 +6,171 @@ sidebar_position: 11
 tags: [c++, include-guards, pragma-once, preprocessor, headers]
 ---
 
-# Include Guards and #pragma once
+# Include Guards and `#pragma once`
 
-Include guards prevent multiple inclusion of the same header file, avoiding redefinition errors. Two methods exist: traditional include guards and `#pragma once`.
+In a real project the same header reaches a translation unit along several paths: `main.cpp`
+includes `button.h` and `widget.h`, and both of those include `component.h`. Because `#include` is
+text pasting, `component.h` would appear twice, and its class definition would be a redefinition
+error. An **include guard** makes the second and later inclusions in the same TU produce nothing.
+There are two ways to write one, and every header needs one of them.
 
-:::info[Problem Solved]
-Without guards, including a header twice causes "redefinition" errors. Guards ensure header contents appear only once per translation unit.
-:::
+**Prerequisites:** [Preprocessing](./preprocessing.md), [Headers and Includes](./headers-and-includes.md).
 
-## The Problem
+## The problem
 
-```cpp showLineNumbers 
-// widget.h (no guard)
-class Widget {
-    int value;
-};
+```cpp title="widget.h (no guard)"
+class Widget { int value; };
+```
 
-// main.cpp
+```cpp title="twice.cpp"
 #include "widget.h"
-#include "widget.h"  // Error: redefinition of 'class Widget'
+#include "widget.h"
+int main() {}
 ```
 
-The preprocessor copies `widget.h` contents twice, causing duplicate class definition.
-
----
-
-## Solution 1: Traditional Include Guards
-
-```cpp showLineNumbers 
-// widget.h
-#ifndef WIDGET_H          // If not defined
-#define WIDGET_H          // Define it
-
-class Widget {
-    int value;
-public:
-    Widget(int v);
-    int getValue() const;
-};
-
-#endif  // WIDGET_H
+```text
+In file included from twice.cpp:2:
+widget.h:1:7: error: redefinition of ‘class Widget’
+    1 | class Widget { int value; };
+      |       ^~~~~~
+In file included from twice.cpp:1:
+widget.h:1:7: note: previous definition of ‘class Widget’
 ```
 
-**How it works**:
-1. First inclusion: `WIDGET_H` not defined → define it and include content
-2. Second inclusion: `WIDGET_H` already defined → skip content
+Nobody writes the same include twice on purpose. It happens through the include graph:
 
-### Guard Naming Convention
+<Diagram title="Diamond include" caption="component.h is reached along two paths in one TU." accent="amber">
+  <DiagramNode icon="file-text" title="main.cpp" />
+  <DiagramArrow label="#include" />
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="button.h" />
+    <DiagramNode icon="file-text" title="widget.h" />
+  </DiagramRow>
+  <DiagramArrow label="both #include" />
+  <DiagramNode icon="file-text" title="component.h" accent>Pasted twice without a guard</DiagramNode>
+</Diagram>
 
-```cpp showLineNumbers 
-// project/include/mylib/widget.h
+Guards work **per translation unit**. They do nothing about the same header being included in two
+different `.cpp` files, which is normal and required; that case is governed by the
+[One Definition Rule](./translation-units.md#the-one-definition-rule).
+
+## Two ways to guard a header
+
+<Tabs groupId="guard">
+  <TabItem value="macro" label="Macro guard (standard)">
+
+```cpp title="mylib/widget.h"
 #ifndef MYLIB_WIDGET_H
 #define MYLIB_WIDGET_H
-// ...
-#endif
-
-// project/include/mylib/utils/math.h
-#ifndef MYLIB_UTILS_MATH_H
-#define MYLIB_UTILS_MATH_H
-// ...
-#endif
-```
-
-**Best practice**: Use full path to avoid name collisions:
-- Project name
-- Path from include directory
-- Filename
-- All uppercase, underscores for separators
-
----
-
-## Solution 2: #pragma once (Modern)
-
-```cpp showLineNumbers 
-// widget.h
-#pragma once
-
-class Widget {
-    int value;
-public:
-    Widget(int v);
-    int getValue() const;
-};
-```
-
-**How it works**: Compiler tracks which files have `#pragma once` and includes them only once.
-
-### Comparison
-
-| Feature | Traditional Guards | #pragma once |
-|---------|-------------------|--------------|
-| **Standard** | ISO C++ standard | Non-standard but universal |
-| **Portability** | 100% portable | Works on all modern compilers |
-| **Speed** | Slightly slower | Faster (compiler-optimized) |
-| **Errors** | Typos in macro names | Rare issues with symlinks |
-| **Readability** | 3 lines | 1 line |
-| **Maintenance** | Manual naming | Automatic |
-
-:::success[Recommendation]
-Use `#pragma once` for new code - it's simpler, faster, and universally supported. Use traditional guards only if you need standards compliance or encounter symlink issues.
-:::
-
----
-
-## How Guards Prevent Multiple Inclusion
-
-### Scenario: Indirect Double Include
-
-```cpp showLineNumbers 
-// widget.h
-#pragma once
-#include "component.h"
-class Widget { Component* c; };
-
-// component.h
-#pragma once
-class Component {};
-
-// button.h
-#pragma once
-#include "widget.h"
-#include "component.h"  // component.h included again (safe with guard)
-class Button : public Widget {};
-
-// main.cpp
-#include "button.h"
-// Without guards: component.h included twice via different paths
-// With guards: component.h content appears once
-```
-
-```mermaid
-graph TD
-    A[main.cpp] --> B[button.h]
-    B --> C[widget.h]
-    B --> D[component.h]
-    C --> D
-    
-    D -.Guard prevents<br/>duplicate content.-> E[component.h<br/>included once]
-```
-
----
-
-## Edge Cases
-
-### Forgetting Include Guard
-
-```cpp showLineNumbers 
-// math.h (no guard - BAD)
-inline int square(int x) {
-    return x * x;
-}
-
-// file1.cpp
-#include "math.h"  // OK
-
-// file2.cpp
-#include "math.h"  // OK
-
-// Both include math.h, but:
-// - inline functions can be defined multiple times (ODR exception)
-// - Still wastes compilation time without guard
-```
-
-Even for inline functions, always use guards to avoid unnecessary reprocessing.
-
-### Macro Name Collision
-
-```cpp showLineNumbers 
-// Bad: Generic name
-// util.h
-#ifndef UTIL_H  // Too common!
-#define UTIL_H
-// ...
-#endif
-
-// Another library's util.h uses same guard
-// Second util.h silently skipped!
-
-// Good: Specific name
-// myproject/util.h
-#ifndef MYPROJECT_UTIL_H_2024
-#define MYPROJECT_UTIL_H_2024
-// ...
-#endif
-```
-
-### #pragma once with Symlinks
-
-```bash
-# Create symlink
-ln -s actual.h link.h
-
-# Include both
-#include "actual.h"
-#include "link.h"
-```
-
-Some compilers may include both if symlink points to same file. Traditional guards work correctly in this rare case.
-
----
-
-## Implementation Details
-
-### Traditional Guards
-
-```cpp showLineNumbers 
-// First inclusion
-#ifndef WIDGET_H     // Not defined → condition TRUE
-#define WIDGET_H     // Define it
-class Widget {};     // Include content
-#endif
-
-// Second inclusion
-#ifndef WIDGET_H     // Already defined → condition FALSE
-// Content skipped
-#endif
-```
-
-Preprocessor skips content on second pass - fast but still processes `#ifndef` check.
-
-### #pragma once
-
-```cpp showLineNumbers 
-// First inclusion
-#pragma once  // Compiler remembers: "Don't include this file again"
-class Widget {};
-
-// Second inclusion attempt
-// Compiler: "Already saw this file with #pragma once, skip entirely"
-// Doesn't even open the file!
-```
-
-Faster because compiler short-circuits before reading file contents.
-
----
-
-## Mixing Both Methods
-
-Can use both for maximum compatibility:
-
-```cpp showLineNumbers 
-// widget.h
-#pragma once  // Fast path for modern compilers
-
-#ifndef WIDGET_H  // Fallback for old compilers
-#define WIDGET_H
 
 class Widget {
     int value;
 };
 
-#endif  // WIDGET_H
+#endif  // MYLIB_WIDGET_H
 ```
 
-Modern compilers use `#pragma once` (faster), old compilers fall back to guards.
+  </TabItem>
+  <TabItem value="pragma" label="#pragma once">
 
----
+```cpp title="mylib/widget.h"
+#pragma once
 
-## Header Generation
-
-Some projects generate guard names automatically:
-
-```bash
-# Script to add guards to header
-FILE="widget.h"
-GUARD=$(echo "$FILE" | tr 'a-z.' 'A-Z_')
-
-cat > "$FILE" << EOF
-#ifndef ${GUARD}
-#define ${GUARD}
-
-// Header content
-
-#endif  // ${GUARD}
-EOF
-```
-
-Or use IDE features to auto-insert guards.
-
----
-
-## Common Mistakes
-
-### Guard Typo
-
-```cpp showLineNumbers 
-// widget.h
-#ifndef WIDGET_H
-#define WIDGTE_H  // Typo! Doesn't match
-class Widget {};
-#endif
-```
-
-Typo means guard never defined → multiple inclusion still occurs.
-
-### Missing #endif
-
-```cpp showLineNumbers 
-// widget.h
-#ifndef WIDGET_H
-#define WIDGET_H
-class Widget {};
-// Missing #endif!
-
-// Causes compilation errors in files that include this
-```
-
-### Incorrect Guard Scope
-
-```cpp showLineNumbers 
-// Guard around include, not content
-// widget.h
-#ifndef WIDGET_H
-#define WIDGET_H
-#endif
-
-class Widget {};  // Outside guard! Still duplicates!
-```
-
----
-
-## Checking for Guards
-
-```bash
-# Check if header has include guard
-grep -E "^#ifndef|^#define|^#endif" widget.h
-
-# Check for pragma once
-grep "^#pragma once" widget.h
-
-# Find headers without guards (dangerous)
-find . -name "*.h" -exec sh -c \
-  'grep -L "#pragma once" {} | xargs grep -L "#ifndef"' \;
-```
-
----
-
-## Best Practices
-
-:::success[DO]
-- Use `#pragma once` for simplicity (modern projects)
-- Use traditional guards if standards compliance required
-- Make guard names unique (include full path)
-- Check guards with `grep` or linters
-  :::
-
-:::danger[DON'T]
-- Forget guards on any header file
-- Use generic names like `UTIL_H`
-- Have typos in guard macros
-- Put guards around includes instead of content
-  :::
-
----
-
-## Modern Alternative: Modules (C++20)
-
-C++20 modules eliminate the need for include guards:
-
-```cpp showLineNumbers 
-// widget.cppm (module interface)
-export module widget;
-
-export class Widget {
+class Widget {
     int value;
-public:
-    Widget(int v);
 };
-
-// main.cpp
-import widget;  // No #include, no guards needed
-
-Widget w(42);
 ```
 
-Modules are imported directly without preprocessing. No multiple inclusion problem. However, modules have limited compiler support (2024).
+  </TabItem>
+</Tabs>
 
----
+<Walkthrough title="A macro guard on the second inclusion" accent="amber">
+  <Step title="First #include">
 
-## Summary
+`MYLIB_WIDGET_H` is not defined, so `#ifndef` is true. The preprocessor
+<StepChange>defines `MYLIB_WIDGET_H`</StepChange> and emits `class Widget { … };`.
 
-Include guards prevent multiple inclusion:
+  </Step>
+  <Step title="Second #include">
 
-**Traditional Guards**:
-```cpp showLineNumbers 
-#ifndef PROJECT_PATH_FILE_H
-#define PROJECT_PATH_FILE_H
-// Content
-#endif
+The file is opened again, but `MYLIB_WIDGET_H` <StepChange>is now defined</StepChange>, so
+everything up to `#endif` is skipped. The TU contains `Widget` once.
+
+  </Step>
+</Walkthrough>
+
+`#pragma once` asks the compiler to remember the **file** instead of a macro: once a file marked
+this way has been included, later `#include`s that resolve to the same file are ignored.
+
+| | Macro guard | `#pragma once` |
+|---|---|---|
+| Standard C++ | Yes | No, but supported by GCC, Clang, MSVC and other mainstream compilers |
+| Identity check | A macro name you choose | The compiler's idea of "the same file" |
+| Can collide | Yes: two headers using the same macro name hide each other | No names involved |
+| Can be typoed | Yes (GCC warns, see below) | No |
+| Speed | GCC and Clang recognise the guard pattern and skip reopening the file ([GCC: Once-Only Headers](https://gcc.gnu.org/onlinedocs/cpp/Once-Only-Headers.html)), so there is no reliable difference | |
+
+Either is fine; pick one per project and use it in every header. Most new code uses
+`#pragma once`; code that must work on unusual compilers, or that is copied into other projects'
+trees, uses macro guards. Combining both in one file buys nothing.
+
+## When "the same file" is ambiguous
+
+`#pragma once` depends on how the compiler decides two paths are the same file. A test with a
+symlink and with an identical copy in another directory (GCC 15 and Clang 21):
+
+```cpp
+#include "real.h"
+#include "link.h"        // symlink to real.h
+#include "copy/real.h"   // byte-identical copy of real.h
 ```
 
-**Modern #pragma once**:
-```cpp showLineNumbers 
-#pragma once
-// Content
-```
+| Case | GCC 15 | Clang 21 |
+|---|---|---|
+| Symlink to the same file | Included once | Included once |
+| Identical copy at a different path | Included once (GCC also compares contents and timestamp) | **Included twice**: `error: redefinition of 'P'` |
 
-**Key points**:
-- Required for all headers
-- `#pragma once` is simpler and faster
-- Traditional guards are standards-compliant
-- Both methods can coexist
-- Without guards: redefinition errors
+So the two compilers disagree on copies, which do occur: a header installed system-wide and also
+vendored in the source tree, or generated into two build directories. A macro guard with a unique
+name behaves the same everywhere in these cases. Without one, make sure each header exists at only
+one path on the include search path.
 
-**Quick decision**:
-- Modern project? → `#pragma once`
-- Need strict ISO C++ compliance? → Traditional guards
-- Maximum compatibility? → Both
+## Naming macro guards
 
-```cpp showLineNumbers 
-// Recommended modern header structure
-#pragma once
+The name must be unique across every header that might end up in the same TU, including
+third-party ones. Derive it from the path under the include root:
 
-#include <dependencies>
+| Header path | Guard |
+|---|---|
+| `include/mylib/widget.h` | `MYLIB_WIDGET_H` |
+| `include/mylib/net/socket.h` | `MYLIB_NET_SOCKET_H` |
 
-namespace myproject {
-    // Declarations
-}
-```
+Avoid names that start with an underscore followed by a capital letter (`_WIDGET_H`) or contain a
+double underscore: those are reserved for the implementation. Generic names such as `UTIL_H` are how
+two libraries end up silently hiding each other's headers.
+
+## Common mistakes
+
+- **Mismatched names.** GCC catches the typo:
+
+  ```text
+  typo.h:1: warning: header guard ‘WIDGET_H’ followed by ‘#define’ of a different macro [-Wheader-guard]
+      1 | #ifndef WIDGET_H
+  typo.h:2: note: ‘WIDGTE_H’ is defined here; did you mean ‘WIDGET_H’?
+  ```
+
+  The guard never takes effect, so the header behaves as if unguarded.
+- **Content outside the guard.** Anything after `#endif` is pasted every time.
+- **A missing `#endif`**: `error: unterminated #ifndef` in every file that includes the header.
+- **Copy-pasted guards.** A new header created from an old one keeps the old guard name; whichever
+  is included second disappears. Lint for it (clang-tidy `llvm-header-guard`) or use `#pragma once`.
+- **Expecting a guard to fix `multiple definition` link errors.** Those come from one definition in
+  *several* TUs; guards only work within one. See
+  [Linking](./linking.md#reading-linker-errors).
+
+## Key points
+
+- Every header needs a guard; without one, a diamond in the include graph is a redefinition error.
+- Guards act within one translation unit only.
+- `#pragma once` is simpler; macro guards are standard and immune to "same file?" ambiguity.
+- Name macro guards after the header's path; let `-Wheader-guard` or a linter catch typos.

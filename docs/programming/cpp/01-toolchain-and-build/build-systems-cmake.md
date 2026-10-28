@@ -8,286 +8,164 @@ tags: [c++, build-systems, cmake, make, automation]
 
 # Build Systems and CMake
 
-Build systems automate compilation, dependency management, and linking. They track changes and rebuild only what's necessary, making large C++ projects manageable.
+Running the [pipeline](./compilation-pipeline.md) by hand stops working at about three files. Every
+`.cpp` needs the same flags, only the files affected by an edit should be rebuilt, a header change
+must rebuild every TU that includes it, and libraries have to be linked in the right order. A
+**build system** does that: it keeps a graph of which outputs depend on which inputs and runs the
+minimum set of compiler and linker commands to bring the outputs up to date.
 
-:::info[Why Build Systems?]
-Manual compilation (`g++ *.cpp`) doesn't scale beyond a few files. Build systems handle dependencies, incremental builds, platform differences, and external libraries.
-:::
+This page is the toolchain view: what a build system does with the compiler, and how CMake maps
+onto the stages. How to *write* CMake is covered in its own section, the
+[CMake knowledge base](../../cmake/readme.md).
 
-## The Problem
+**Prerequisites:** [The Compilation Pipeline](./compilation-pipeline.md),
+[Linking](./linking.md).
+
+## What a build system tracks
+
+<Diagram title="The dependency graph for the two-file program" caption="Touching square.h makes both objects and the executable out of date; touching square.cpp only square.o and app." accent="blue">
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="main.cpp" />
+    <DiagramNode icon="file-text" title="square.h" accent>Included by both</DiagramNode>
+    <DiagramNode icon="file-text" title="square.cpp" />
+  </DiagramRow>
+  <DiagramArrow label="compile (one command per .cpp)" />
+  <DiagramRow>
+    <DiagramNode icon="binary" title="main.o" />
+    <DiagramNode icon="binary" title="square.o" />
+  </DiagramRow>
+  <DiagramArrow label="link" />
+  <DiagramNode icon="cpu" title="app" />
+</Diagram>
+
+The `.cpp` → `.o` edges are declared by you. The header edges are discovered from the compiler:
+`-MD`/`-MMD` makes GCC and Clang write a small dependency file while compiling, listing every header
+the TU opened ([GCC: Preprocessor Options](https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html)):
+
 ```bash
-# Manual compilation - tedious and error-prone
-g++ -c main.cpp -o main.o
-g++ -c utils.cpp -o utils.o
-g++ -c math.cpp -o math.o
-g++ main.o utils.o math.o -o app
-
-# Change utils.cpp → must remember to recompile it and relink
-# As project grows: hundreds of files, complex dependencies
-# Which flags? Which order? Which libraries?
+g++ -MMD -MP -c main.cpp      # writes main.d next to main.o
+cat main.d
 ```
 
-Build systems solve this by:
-- Tracking dependencies automatically
-- Rebuilding only changed files
-- Handling platform differences
-- Managing compiler flags and libraries
-- Enabling parallel compilation
-
-## Popular Build Systems
-
-| System    | Use Case                          | Complexity       | Ecosystem  |
-|-----------|-----------------------------------|------------------|------------|
-| **CMake** | Cross-platform, industry standard | Moderate         | Largest    |
-| **Make**  | Unix/Linux traditional            | Moderate         | Mature     |
-| **Ninja** | Fast builds (backend)             | Easy (generated) | Growing    |
-| **Meson** | Modern alternative                | Easy             | Good       |
-| **Bazel** | Google-scale monorepos            | Steep            | Enterprise |
-
-**Recommendation:** Use **CMake** for most C++ projects. It's the de facto standard with excellent IDE and tool support.
-
-## CMake Basics
-
-CMake is a meta-build system that generates native build files (Makefiles, Visual Studio projects, Xcode projects).
-
-### Minimal CMakeLists.txt
-```cmake
-cmake_minimum_required(VERSION 3.15)
-project(MyApp VERSION 1.0)
-
-set(CMAKE_CXX_STANDARD 20)
-
-add_executable(app
-    src/main.cpp
-    src/utils.cpp
-)
+```text
+main.o: main.cpp square.h
+square.h:
 ```
 
-### Build Process
-```bash
-# Configure (generate build system)
-mkdir build && cd build
-cmake ..
+`-MMD` omits system headers; `-MP` adds the empty `square.h:` rule so that deleting a header does
+not break the build. The build tool reads these files on the next run. Independent nodes (the two
+compiles) run in parallel.
 
-# Build
-cmake --build .
+## Generators and build tools
 
-# Or use generated Makefiles
-make
-```
+Build systems come in two layers:
 
-CMake generates platform-specific build files:
-- **Linux/macOS:** Makefiles
-- **Windows:** Visual Studio solution (.sln)
-- **macOS:** Xcode projects
+| Layer | Examples | Role |
+|---|---|---|
+| **Build tool** | [Make](./makefiles.md), Ninja, MSBuild | Executes a graph of commands; compares timestamps |
+| **Generator / meta-build** | CMake, Meson, Premake | Reads a high-level project description and writes the build tool's input for the current platform and compiler |
+| Integrated | Bazel, Buck2, build2 | Both layers in one tool, usually with hermetic, cacheable actions |
 
-### Key CMake Concepts
-```cmake
-# Executables
-add_executable(app main.cpp utils.cpp)
+CMake is the most widely used generator for C++, and most libraries ship CMake package files, so
+this knowledge base uses it. Ninja is a build tool designed to be generated, not hand-written; it is
+the usual pairing with CMake on all platforms.
 
-# Libraries
-add_library(mylib STATIC lib.cpp)
-add_library(myshared SHARED lib.cpp)
+## CMake from the compiler's point of view
 
-# Include directories
-target_include_directories(app PRIVATE include)
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.20)
+project(squares LANGUAGES CXX)
 
-# Link libraries
-target_link_libraries(app PRIVATE mylib pthread)
-
-# Compiler options
+add_executable(app main.cpp square.cpp)
+target_compile_features(app PRIVATE cxx_std_23)
 target_compile_options(app PRIVATE -Wall -Wextra)
-
-# Definitions
-target_compile_definitions(app PRIVATE DEBUG_MODE)
 ```
 
-### For Complete CMake Guide
-
-This is a brief overview. For comprehensive CMake documentation including:
-- Advanced configuration
-- Package management
-- Cross-compilation
-- Custom targets
-- Installation
-- Testing integration
-
-See the complete [CMake documentation](../../cmake/readme.md) in the build tools section.
-
-## Make (Traditional)
-
-Traditional Unix build system using Makefiles with rules and dependencies.
-
-### Basic Makefile
-```makefile
-# Compiler and flags
-CXX = g++
-CXXFLAGS = -std=c++20 -Wall -O2
-
-# Object files
-OBJS = main.o utils.o math.o
-
-# Target: dependencies
-app: $(OBJS)
-	$(CXX) $(OBJS) -o app
-
-# Pattern rule
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	rm -f *.o app
-
-.PHONY: clean
-```
-
-### Make Basics
 ```bash
-make          # Build default target
-make clean    # Run clean target
-make -j8      # Parallel build (8 jobs)
-make app      # Build specific target
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release    # configure: generate build/build.ninja
+cmake --build build -- -v                                  # build, printing each command
 ```
 
-**Advantages:**
-- Standard on Unix
-- Simple for small projects
-- Fast incremental builds
+These are the commands CMake 4.2 generated (paths shortened; the link line also had a `-Wl,--dependency-file=…` option, removed here):
 
-**Disadvantages:**
-- Platform-specific (Unix only)
-- Manual dependency tracking
-- Verbose for large projects
-
-## Ninja (Fast Backend)
-
-Designed for speed, usually generated by CMake or Meson.
-```bash
-# Use with CMake
-cmake -G Ninja ..
-ninja
-
-# Or with default generator
-cmake --build . --parallel
+```text
+[1/3] /usr/bin/c++ -O3 -DNDEBUG -std=gnu++23 -Wall -Wextra -MD -MT CMakeFiles/app.dir/main.cpp.o -MF CMakeFiles/app.dir/main.cpp.o.d -o CMakeFiles/app.dir/main.cpp.o -c main.cpp
+[2/3] /usr/bin/c++ -O3 -DNDEBUG -std=gnu++23 -Wall -Wextra -MD -MT CMakeFiles/app.dir/square.cpp.o -MF CMakeFiles/app.dir/square.cpp.o.d -o CMakeFiles/app.dir/square.cpp.o -c square.cpp
+[3/3] /usr/bin/c++ -O3 -DNDEBUG CMakeFiles/app.dir/main.cpp.o CMakeFiles/app.dir/square.cpp.o -o app
 ```
 
-**Why Ninja?**
-- 2-3x faster than Make
-- Optimal build parallelization
-- Better at incremental builds
+Each part of the CMake file became a compiler flag for a specific stage:
 
-Most projects use Ninja through CMake, not directly.
+| CMake | Became | Stage |
+|---|---|---|
+| `add_executable(app main.cpp square.cpp)` | one `-c` command per source, one link command | all |
+| `CMAKE_BUILD_TYPE=Release` | `-O3 -DNDEBUG` | compile, preprocess |
+| `target_compile_features(… cxx_std_23)` | `-std=gnu++23` (GNU extensions on; set `CMAKE_CXX_EXTENSIONS OFF` for `-std=c++23`) | compile |
+| `target_compile_options` | `-Wall -Wextra` | compile |
+| (automatic) | `-MD -MT … -MF ….o.d` | dependency discovery |
+| `target_include_directories` | `-I` / `-isystem` | preprocess |
+| `target_link_libraries` | library paths and `-l…`, in dependency order | link |
 
-## Comparison
+The incremental behaviour, from the same build directory:
 
-| Feature | CMake | Make | Ninja |
-|---------|-------|------|-------|
-| **Cross-platform** | Yes | No | Yes |
-| **Learning curve** | Moderate | Moderate | Easy (generated) |
-| **Speed** | Medium | Medium | Fast |
-| **Ecosystem** | Largest | Mature | Growing |
-| **IDE support** | Excellent | Good | Good |
-| **Use case** | Primary | Traditional | Backend |
+<Tabs>
+  <TabItem value="h" label="touch square.h">
 
-## Build System Workflow
-```mermaid
-graph LR
-    A[Source Changes] --> B[Build System]
-    B --> C{File Changed?}
-    C -->|Yes| D[Recompile]
-    C -->|No| E[Skip]
-    D --> F[Relink if Needed]
-    E --> F
-    F --> G[Executable]
-    
+```text
+[1/3] Building CXX object CMakeFiles/app.dir/square.cpp.o
+[2/3] Building CXX object CMakeFiles/app.dir/main.cpp.o
+[3/3] Linking CXX executable app
 ```
 
-Build systems track file timestamps and recompile only what changed.
+  </TabItem>
+  <TabItem value="cpp" label="touch square.cpp">
 
-## Common Build System Features
-
-### Dependency Tracking
-```cmake
-# CMake automatically tracks:
-# - Header dependencies
-# - Library dependencies
-# - Source file changes
-
-target_link_libraries(app PRIVATE utils)  
-# If utils changes, app relinks automatically
+```text
+[1/2] Building CXX object CMakeFiles/app.dir/square.cpp.o
+[2/2] Linking CXX executable app
 ```
 
-### Parallel Compilation
-```bash
-# CMake
-cmake --build . --parallel 8
+  </TabItem>
+</Tabs>
 
-# Make
-make -j8
+Note that the Release type gives `-O3`, not `-O2`; see [CMake build types](../../cmake/01-basics/build-types.md)
+if you want to change the defaults.
 
-# Ninja (automatic)
-ninja
-```
+### Where to read further
 
-### Configuration
-```cmake
-# Options
-option(BUILD_TESTS "Build tests" ON)
-option(ENABLE_LOGGING "Enable logging" OFF)
+| Topic | Page |
+|---|---|
+| First project, configure/build/install | [First Project](../../cmake/00-intro/first-project.md) |
+| Targets and `PUBLIC`/`PRIVATE` usage requirements | [Linking (CMake)](../../cmake/02-targets/linking.md), [Target Properties](../../cmake/02-targets/target-properties.md) |
+| Debug/Release and other configurations | [Build Types](../../cmake/01-basics/build-types.md) |
+| Shared settings across machines | [Presets](../../cmake/01-basics/presets.md) |
+| Third-party libraries | [find_package](../../cmake/03-dependencies/find-package.md), [FetchContent](../../cmake/03-dependencies/fetchcontent.md), [Package Managers](./package-managers.md) |
+| Building for another architecture | [Cross-Compilation](./cross-compilation.md) |
+| C++20 modules | [Modules](./modules.md#building-modules) |
 
-if(BUILD_TESTS)
-    add_subdirectory(tests)
-endif()
-```
-```bash
-# Configure
-cmake -DBUILD_TESTS=OFF -DENABLE_LOGGING=ON ..
-```
+## `compile_commands.json`
 
-## Choosing a Build System
+Configure with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON` and CMake writes `build/compile_commands.json`,
+one entry per TU with its exact compiler command. clangd, clang-tidy, include-what-you-use and most
+IDEs read it to understand the code exactly as the compiler does. Link it into the source root so
+tools find it.
 
-**For new C++ projects:**
-- **CMake** - Industry standard, best choice for most projects
-- **Meson** - Modern alternative, simpler syntax
-- Make - Use only for Unix-only projects
-- Bazel - Only for very large monorepos
+## Pitfalls
 
-**Quick decision guide:**
-```mermaid
-graph TD
-    A[New C++ Project?] -->|Yes| B[Use CMake]
-    A -->|Unix-only?| C[Consider Make]
-    A -->|Google-scale?| D[Consider Bazel]
-    A -->|Want modern?| E[Consider Meson]
-    
-    B --> F[Best choice]
-    
-```
+- **Building in the source directory.** Use a separate build directory (`-B build`); it can be
+  deleted to start clean, and several configurations can coexist.
+- **Global flags (`CMAKE_CXX_FLAGS`, `add_compile_options`, `include_directories`) instead of
+  `target_*`.** They apply to everything, including dependencies, and hide which target needs what.
+- **Globbing sources (`file(GLOB …)`).** CMake does not notice new files until it re-runs configure.
+  List sources explicitly, or use `CONFIGURE_DEPENDS` and accept the cost.
+- **Editing generated files.** `build.ninja` and Makefiles in the build directory are overwritten on
+  the next configure.
 
-## Summary
+## Key points
 
-Build systems automate C++ compilation:
-- **Track dependencies** - rebuild only what changed
-- **Parallel compilation** - use multiple cores
-- **Platform abstraction** - same build script, all platforms
-- **Library management** - handle external dependencies
-
-**Recommendations:**
-- **CMake** for most projects (cross-platform, standard)
-- **Ninja** as backend for speed (with CMake)
-- **Make** only for simple Unix-only projects
-
-**Typical workflow:**
-```bash
-# Configure once
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-
-# Build (incremental)
-cmake --build build --parallel
-
-# Run
-./build/app
-```
-
-Build systems transform C++ from unmanageable to maintainable, enabling large-scale software development.
+- A build system is a dependency graph plus the minimum commands to update it; the compiler supplies
+  header dependencies with `-MD`.
+- CMake generates the graph for a build tool (usually Ninja); every `target_*` command becomes a flag
+  for a particular pipeline stage.
+- `cmake --build build -- -v` shows the real compiler commands; `compile_commands.json` gives them to
+  tools.

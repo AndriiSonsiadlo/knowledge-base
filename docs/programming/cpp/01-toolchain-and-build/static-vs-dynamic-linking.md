@@ -8,361 +8,252 @@ tags: [c++, linking, static, dynamic, shared-libraries]
 
 # Static vs Dynamic Linking
 
-Linking can be **static** (library code copied into executable) or **dynamic** (library loaded at runtime). Each has trade-offs in size, deployment, and performance.
+A library can reach your program in two ways. With **static linking**, the linker copies the needed
+object files out of an archive (`.a`) into the executable, and the library is no longer needed. With
+**dynamic linking**, the executable only records the library's name; the **dynamic loader**
+(`ld-linux-x86-64.so.2` on x86-64 Linux) finds the shared library (`.so`) and maps it into the
+process every time the program starts. The choice decides what you ship, what can be updated
+independently, and what can fail at start-up.
 
-:::info[Key Difference]
-**Static**: Self-contained executable, larger size  
-**Dynamic**: Smaller executable, requires library files at runtime
-:::
+**Prerequisites:** [Linking](./linking.md), [Object Files and Symbols](./object-files-and-symbols.md).
 
-## Comparison Overview
+<Diagram title="Where the library code ends up" accent="green">
+  <DiagramGroup label="Static (.a)">
+    <DiagramNode icon="package" title="libgreet.a">Archive of .o files</DiagramNode>
+    <DiagramNode icon="cpu" title="app">Contains greet() itself</DiagramNode>
+  </DiagramGroup>
+  <DiagramGroup label="Dynamic (.so)">
+    <DiagramNode icon="cpu" title="app">Contains `NEEDED libgreet.so`</DiagramNode>
+    <DiagramNode icon="server" title="ld-linux.so" accent>Finds and maps the .so at every start</DiagramNode>
+    <DiagramNode icon="package" title="libgreet.so">Shared by every process using it</DiagramNode>
+  </DiagramGroup>
+</Diagram>
 
-```mermaid
-graph TD
-    A[Library Linking] --> B[Static Linking]
-    A --> C[Dynamic Linking]
-    
-    B --> D[Code copied into executable<br/>Larger file<br/>No dependencies]
-    C --> E[Code loaded at runtime<br/>Smaller file<br/>Requires .so/.dll]
-    
+## One library, both ways
+
+```cpp title="greet.cpp"
+#include <string>
+std::string greet(const std::string& who) { return "Hello, " + who; }
 ```
 
-| Aspect | Static (.a, .lib) | Dynamic (.so, .dll, .dylib) |
-|--------|-------------------|------------------------------|
-| **Size** | Large (includes library) | Small (references library) |
-| **Dependencies** | None (self-contained) | Requires library files |
-| **Updates** | Recompile needed | Library updates affect all |
-| **Load Time** | Faster | Slower (runtime loading) |
-| **Memory** | Duplicated per process | Shared between processes |
-| **Deployment** | Easy (single file) | Complex (multiple files) |
+```cpp title="main.cpp"
+#include <iostream>
+#include <string>
+std::string greet(const std::string& who);
+int main() { std::cout << greet("linker") << '\n'; }
+```
 
----
-
-## Static Linking
-
-Library code is **copied** into the executable at link time.
-
-### Creating Static Library
+<Tabs groupId="link">
+  <TabItem value="static" label="Static library">
 
 ```bash
-# Compile to object files
-g++ -c utils.cpp -o utils.o
-g++ -c math.cpp -o math.o
-
-# Create static library (archive)
-ar rcs libmylib.a utils.o math.o
-
-# Verify contents
-ar t libmylib.a
-# Output:
-# utils.o
-# math.o
+g++ -std=c++23 -O2 -c greet.cpp -o greet.o
+ar rcs libgreet.a greet.o
+g++ -std=c++23 -O2 main.cpp -L. -l:libgreet.a -o app_static_lib
+./app_static_lib
 ```
 
-The `ar` tool bundles object files into an archive (`.a` on Unix, `.lib` on Windows).
+```text
+Hello, linker
+```
 
-### Linking Statically
+`app_static_lib` runs from any directory: `greet()` is inside it. `libstdc++` and `libc` are still
+linked dynamically, because only `libgreet` was named as an archive.
+
+  </TabItem>
+  <TabItem value="shared" label="Shared library">
 
 ```bash
-# Link with static library
-g++ main.cpp -o app -L. -lmylib
-
-# Or explicitly
-g++ main.cpp libmylib.a -o app
-
-# Force static linking of all libraries
-g++ main.cpp -o app -static -lmylib
+g++ -std=c++23 -O2 -fPIC -shared greet.cpp -o libgreet.so
+g++ -std=c++23 -O2 main.cpp -L. -lgreet -o app_shared
+./app_shared
 ```
 
-The executable contains **all code** from `libmylib.a`:
+```text
+./app_shared: error while loading shared libraries: libgreet.so: cannot open shared object file: No such file or directory
+```
+
+The link succeeded (`-L.` told `ld` where to look), but the loader does not search `.` at run time.
+The next section fixes this.
+
+  </TabItem>
+</Tabs>
+
+Sizes from that run (GCC 15, `-O2`, not stripped):
+
+| File | Bytes |
+|---|---|
+| `libgreet.a` | 4,216 |
+| `libgreet.so` | 16,120 |
+| `app_static_lib` (libgreet static, rest dynamic) | 17,024 |
+| `app_shared` | 16,744 |
+| `app_full_static` (`-static`: also libstdc++ and libc) | 2,417,768 |
+
+For a small library the difference is noise. What makes a static binary large is pulling in
+`libstdc++` and `libc` with `-static`; `ldd app_full_static` then reports
+`not a dynamic executable`.
+
+## How the loader finds libraries
+
+The executable stores library **names** in `NEEDED` entries of its dynamic section. At start-up,
+`ld.so` searches for each in this order (per [ld.so(8)](https://man7.org/linux/man-pages/man8/ld.so.8.html)):
+
+1. `DT_RPATH` in the executable, **only if** it has no `DT_RUNPATH` (legacy).
+2. The `LD_LIBRARY_PATH` environment variable.
+3. `DT_RUNPATH` in the executable.
+4. The cache in `/etc/ld.so.cache` (rebuilt by `ldconfig`).
+5. The default directories `/lib` and `/usr/lib` (and their multiarch variants).
 
 ```bash
-ls -lh app
-# app: 2.5 MB  (includes mylib code)
+LD_LIBRARY_PATH=. ./app_shared                                   # works: for testing
+g++ -O2 main.cpp -L. -lgreet -Wl,-rpath,'$ORIGIN' -o app_rpath   # works: path embedded
+readelf -d app_rpath | grep -E 'NEEDED|RUNPATH'
 ```
 
-### Pros of Static Linking
+```text
+ 0x0000000000000001 (NEEDED)             Shared library: [libgreet.so]
+ 0x0000000000000001 (NEEDED)             Shared library: [libstdc++.so.6]
+ 0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]
+ 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
+ 0x000000000000001d (RUNPATH)            Library runpath: [$ORIGIN]
+```
 
-**No runtime dependencies** - works anywhere  
-**Faster startup** - no loading needed  
-**Versioning control** - exact library version embedded  
-**Easier deployment** - single file
+`-rpath` produced a `RUNPATH` here because Ubuntu's linker defaults to `--enable-new-dtags`.
+`$ORIGIN` means "the directory of the executable", so the program finds `libgreet.so` next to
+itself wherever it is installed. `ldd app` shows what the loader would resolve now, including
+`libgreet.so => not found` when it fails.
 
-### Cons of Static Linking
+## Shared library versioning
 
-**Large executable size** - includes all library code  
-**No updates** - must recompile to update library  
-**Memory duplication** - each process has own copy  
-**Longer link time** - more code to process
-
----
-
-## Dynamic Linking
-
-Library code is **loaded at runtime** from shared library files.
-
-### Creating Shared Library
+Linux shared libraries carry an **soname**: the name a program records in `NEEDED`, which changes
+only when the ABI breaks.
 
 ```bash
-# Compile with position-independent code (-fPIC)
-g++ -fPIC -c utils.cpp -o utils.o
-g++ -fPIC -c math.cpp -o math.o
-
-# Create shared library
-g++ -shared utils.o math.o -o libmylib.so  # Linux
-g++ -dynamiclib utils.o math.o -o libmylib.dylib  # macOS
-cl /LD utils.obj math.obj /OUT:mylib.dll  # Windows
+g++ -fPIC -shared -Wl,-soname,libgreet.so.1 greet.cpp -o libgreet.so.1.0.0
+ln -s libgreet.so.1.0.0 libgreet.so.1     # soname: what the loader looks for
+ln -s libgreet.so.1 libgreet.so           # dev link: what -lgreet finds at link time
+readelf -d libgreet.so.1.0.0 | grep SONAME
 ```
 
-`-fPIC` (Position-Independent Code) allows the library to load at any memory address.
-
-### Linking Dynamically
-
-```bash
-# Link with shared library
-g++ main.cpp -o app -L. -lmylib
-
-# Executable is smaller
-ls -lh app
-# app: 50 KB  (doesn't include mylib code)
+```text
+ 0x000000000000000e (SONAME)             Library soname: [libgreet.so.1]
 ```
 
-### Runtime Loading
+A program linked against this records `libgreet.so.1`. Installing `libgreet.so.1.0.1` and moving
+the `libgreet.so.1` link updates every program at once. An incompatible release gets soname
+`libgreet.so.2`, and old programs keep using `.so.1`. What counts as an ABI break in C++ (changing a
+class layout, a virtual function, a signature) is on [ABI](../12-low-level-and-platform/01-abi.md).
 
-The executable records which libraries it needs:
+## Exported symbols and visibility
 
-```bash
-# Linux: Show dynamic dependencies
-ldd app
-# Output:
-# libmylib.so => /usr/lib/libmylib.so
-# libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6
+By default every non-`static` function in a `.so` is exported, so it becomes part of the library's
+ABI and can be interposed by another library defining the same name. Build with
+`-fvisibility=hidden` and mark the public API explicitly:
 
-# macOS
-otool -L app
-
-# Windows
-dumpbin /DEPENDENTS app.exe
-```
-
-**At runtime**, the dynamic linker (`ld.so` on Linux) loads these libraries into memory.
-
-### Library Search Paths
-
-The loader searches:
-1. Directories in executable's `RPATH` (embedded path)
-2. `LD_LIBRARY_PATH` environment variable
-3. System paths (`/usr/lib`, `/lib`)
-
-```bash
-# Set runtime search path during linking
-g++ main.cpp -o app -L. -lmylib -Wl,-rpath,/path/to/libs
-
-# Or set at runtime
-export LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH
-./app
-```
-
-### Pros of Dynamic Linking
-
-**Small executable** - library code separate  
-**Shared memory** - one copy for all processes  
-**Easy updates** - replace library without recompiling  
-**Faster linking** - less code to process
-
-### Cons of Dynamic Linking
-
-**Runtime dependencies** - requires library files  
-**Version conflicts** - "DLL hell"  
-**Slower startup** - library loading overhead  
-**Complex deployment** - must distribute libraries
-
----
-
-## Symbol Visibility
-
-Control which symbols are exported in shared libraries:
-
-```cpp showLineNumbers 
-// header.h
-#ifdef _WIN32
-    #define EXPORT __declspec(dllexport)
+```cpp title="greet_api.h"
+#if defined(_WIN32)
+  #define GREET_API __declspec(dllexport)   // when building the DLL; dllimport when using it
 #else
-    #define EXPORT __attribute__((visibility("default")))
+  #define GREET_API __attribute__((visibility("default")))
 #endif
 
-// Only this function is visible
-EXPORT void public_function();
-
-// This is internal
-void internal_helper();  // Not exported
+GREET_API std::string greet(const std::string& who);
 ```
 
 ```bash
-# Hide all symbols by default
-g++ -fvisibility=hidden -fPIC -c utils.cpp
-
-# Show exported symbols
-nm -D libmylib.so
+g++ -O2 -fPIC -shared greet.cpp -o libgreet.so && nm -D --defined-only libgreet.so | c++filt
+g++ -O2 -fPIC -shared -fvisibility=hidden greet.cpp -o libhidden.so && nm -D --defined-only libhidden.so
 ```
 
-Hiding internal symbols reduces library size and link time.
+The first lists `greet(std::__cxx11::basic_string<…> const&)`; the second lists nothing, because
+`greet.cpp` above does not use the macro. Hidden symbols cannot clash with other libraries and let
+the compiler optimise calls within the library. See [GCC: Visibility](https://gcc.gnu.org/wiki/Visibility).
+On Windows, DLLs export nothing unless marked `dllexport`, so the macro is required there.
 
----
+## Loading code at run time: `dlopen`
 
-## Version Management
+A program can also load a shared library that it was never linked against, for plugins:
 
-### Shared Library Versioning (Linux)
+<Tabs>
+  <TabItem value="plugin" label="plugin.cpp">
 
-```bash
-# Create versioned library
-g++ -shared -Wl,-soname,libmylib.so.1 utils.o -o libmylib.so.1.0.0
-
-# Create symlinks
-ln -s libmylib.so.1.0.0 libmylib.so.1
-ln -s libmylib.so.1 libmylib.so
-
-# ls -l:
-# libmylib.so -> libmylib.so.1
-# libmylib.so.1 -> libmylib.so.1.0.0
-# libmylib.so.1.0.0
+```cpp title="plugin.cpp"
+#include <cstdio>
+extern "C" void plugin_init() { std::puts("plugin loaded"); }
 ```
 
-- `libmylib.so` - Used by linker at compile time
-- `libmylib.so.1` - Major version (ABI compatibility)
-- `libmylib.so.1.0.0` - Full version (actual file)
+  </TabItem>
+  <TabItem value="host" label="host.cpp">
 
-**ABI compatibility**: Programs linked against `1.0.0` work with `1.0.1` (bug fixes) but not `2.0.0` (breaking changes).
+```cpp title="host.cpp"
+#include <dlfcn.h>
+#include <iostream>
 
----
-
-## Plugin Systems
-
-Dynamic loading allows loading code at runtime without relinking:
-
-```cpp showLineNumbers 
-#include <dlfcn.h>  // POSIX
-
-// Load library at runtime
-void* handle = dlopen("./plugin.so", RTLD_LAZY);
-if (!handle) {
-    std::cerr << "Error: " << dlerror() << "\n";
-    return;
+int main() {
+    void* handle = dlopen("./plugin.so", RTLD_NOW);
+    if (!handle) {
+        std::cerr << "dlopen failed: " << dlerror() << '\n';
+        return 1;
+    }
+    using init_fn = void (*)();
+    auto init = reinterpret_cast<init_fn>(dlsym(handle, "plugin_init"));
+    if (!init) {
+        std::cerr << "dlsym failed: " << dlerror() << '\n';
+        return 1;
+    }
+    init();
+    dlclose(handle);
 }
-
-// Get function pointer
-typedef void (*plugin_func_t)();
-plugin_func_t plugin_func = (plugin_func_t)dlsym(handle, "plugin_init");
-
-// Call plugin function
-plugin_func();
-
-// Unload library
-dlclose(handle);
 ```
 
-This enables plugin architectures where modules can be added without recompiling the main program.
-
----
-
-## Practical Recommendations
-
-### Use Static When
-
-- Building standalone executables
-- Embedding in restricted environments
-- Controlling exact dependency versions
-- Simplifying deployment
+  </TabItem>
+</Tabs>
 
 ```bash
-# Example: Static linking for distribution
-g++ -O3 -static app.cpp -o app
-strip app  # Remove debug symbols
-# Single executable, works anywhere
+g++ -std=c++23 -fPIC -shared plugin.cpp -o plugin.so
+g++ -std=c++23 host.cpp -o host && ./host
 ```
 
-### Use Dynamic When
-
-- Library used by multiple programs
-- Need to update libraries independently
-- Memory efficiency matters
-- Platform standard (Windows, Linux desktop)
-
-```bash
-# Example: Dynamic linking for shared use
-g++ -fPIC -shared lib.cpp -o libmyapp.so
-g++ app.cpp -o app -L. -lmyapp -Wl,-rpath,'$ORIGIN'
-# Small app, shared library
+```text
+plugin loaded
 ```
 
-### Hybrid Approach
+`extern "C"` keeps the name unmangled so `dlsym` can find it by the plain string `"plugin_init"`
+([C Interoperability](../12-low-level-and-platform/07-interop-c.md)). On glibc 2.34 and later,
+`dlopen` is in `libc` itself, so no `-ldl` is needed. Windows uses `LoadLibrary`/`GetProcAddress`.
+See [dlopen(3)](https://man7.org/linux/man-pages/man3/dlopen.3.html).
 
-```bash
-# Link standard libraries dynamically, custom statically
-g++ app.cpp libmylib.a -o app -lm -lpthread
-# libmylib.a: static
-# libm, libpthread: dynamic
-```
+## Choosing
 
----
+| | Static | Dynamic |
+|---|---|---|
+| Deployment | One file to copy | Executable plus every `.so`, on the loader's path |
+| Security fixes in the library | Rebuild and redeploy every program | Replace the `.so` once |
+| Memory across processes | Each process has its own copy of the code | One copy of read-only pages shared by all processes |
+| Start-up | No library lookup | Loader resolves and maps libraries, and binds symbols |
+| Failure modes | None at start-up | Missing `.so`, wrong version (`GLIBCXX_3.4.xx not found`) |
+| Licences | LGPL code linked statically has extra obligations | Usual choice for LGPL libraries |
 
-## Troubleshooting
+A common split: link your own libraries statically and the system libraries (`libc`, `libstdc++`)
+dynamically. Fully static glibc binaries have caveats (functions such as `getpwnam` and `dlopen`
+still try to load shared modules), so use musl or a container if you need a single portable file.
 
-### Library Not Found
+## Pitfalls
 
-```bash
-./app
-# error: libmylib.so: cannot open shared object file
-```
+- **`LD_LIBRARY_PATH` in production.** It applies to every child process and overrides `RUNPATH`.
+  Use `-Wl,-rpath,'$ORIGIN/../lib'` or install to a system directory and run `ldconfig`.
+- **`version 'GLIBCXX_3.4.NN' not found`.** The program was built with a newer GCC than the target
+  machine's `libstdc++.so.6`. Build on the oldest target you support, or ship the newer
+  `libstdc++` (or link it with `-static-libstdc++`).
+- **Two copies of one static library in one process.** If both your executable and a `.so` link
+  `libfoo.a` statically, each has its own globals; a singleton exists twice.
+- **Forgetting `-fPIC`** for objects that go into a `.so`: the link fails with
+  `recompile with -fPIC`.
 
-**Solutions**:
-```bash
-# 1. Set LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=./libs:$LD_LIBRARY_PATH
+## Key points
 
-# 2. Install to system path
-sudo cp libmylib.so /usr/local/lib
-sudo ldconfig  # Update library cache
-
-# 3. Use RPATH (embed path in executable)
-g++ -Wl,-rpath,./libs main.cpp -o app
-```
-
-### Version Mismatch
-
-```bash
-./app
-# version `GLIBCXX_3.4.26' not found
-```
-
-**Solution**: Recompile or update library version.
-
----
-
-## Summary
-
-**Static Linking**:
-- Library code → executable (self-contained)
-- Larger size, no dependencies, easy deployment
-- Use for: standalone apps, controlled environments
-
-**Dynamic Linking**:
-- Library code → separate file (loaded at runtime)
-- Smaller size, shared memory, requires library files
-- Use for: shared libraries, system integration, plugins
-
-**Choice depends on**:
-- Deployment complexity tolerance
-- Size constraints
-- Update frequency
-- Memory efficiency needs
-
-```bash
-# Quick decision helper
-# Self-contained single binary? → Static
-g++ -static app.cpp -o app
-
-# System integration / plugins? → Dynamic
-g++ -shared -fPIC lib.cpp -o lib.so
-g++ app.cpp -o app -L. -llib
-```
+- Static: code is copied in at link time. Dynamic: only the name is stored, and `ld.so` resolves it
+  at every start.
+- A successful link says nothing about run time: check `ldd`/`readelf -d` for `NEEDED` and `RUNPATH`.
+- Version shared libraries with an soname; hide everything that is not the public API.
+- `dlopen` + `extern "C"` is the portable-on-POSIX plugin mechanism.

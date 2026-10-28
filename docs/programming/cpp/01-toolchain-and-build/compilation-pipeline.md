@@ -1,419 +1,299 @@
 ---
 id: compilation-pipeline
-title: C++ Compilation Pipeline
+title: The Compilation Pipeline
 sidebar_label: Compilation Pipeline
 sidebar_position: 1
 tags: [c++, compilation, build, toolchain, compiler]
 ---
 
-# C++ Compilation Pipeline
+# The Compilation Pipeline
 
-The C++ compilation process transforms source code into executable binary through four main stages: **preprocessing**, **compilation**, **assembly**, and **linking**.
+`g++ main.cpp square.cpp -o app` looks like one step, but the driver runs four separate tools in
+sequence: the **preprocessor**, the **compiler proper**, the **assembler**, and the **linker**. Each
+one has its own input format, its own output, and its own class of errors. Knowing which stage you
+are in tells you what an error message means, which flag affects it, and which tool you need to
+inspect it.
 
-:::info[Single Command, Multiple Steps]
-`g++ main.cpp -o app` hides 4 distinct phases. Understanding each helps debug build errors and optimize compile times.
-:::
+This page is the map of the whole section. It traces one small program through every stage with
+real tool output. Each stage then has its own page with the detail.
 
-## Complete Pipeline Overview
+## The four stages
 
-```mermaid
-graph LR
-    A[Source .cpp/.h] --> B[Preprocessor]
-    B --> C[.i Preprocessed]
-    C --> D[Compiler]
-    D --> E[.s Assembly]
-    E --> F[Assembler]
-    F --> G[.o Object]
-    G --> H[Linker]
-    H --> I[Executable]
-    
+<Diagram title="From source files to an executable" caption="Stages 1–3 run once per .cpp file; the linker runs once for the whole program." accent="blue">
+  <DiagramGroup label="Per translation unit (each .cpp separately)">
+    <DiagramNode icon="file-text" title="1. Preprocess">`.cpp` + headers → `.ii`. Text only: `#include`, macros, `#if`.</DiagramNode>
+    <DiagramNode icon="brain" title="2. Compile">`.ii` → `.s`. Parse, type-check, instantiate templates, optimise.</DiagramNode>
+    <DiagramNode icon="binary" title="3. Assemble">`.s` → `.o`. Machine code with holes for unknown addresses.</DiagramNode>
+  </DiagramGroup>
+  <DiagramArrow label="all .o files + libraries" />
+  <DiagramNode icon="workflow" title="4. Link" accent>Resolve symbols across files, fill the holes, write the executable.</DiagramNode>
+</Diagram>
+
+The split matters because **each `.cpp` is compiled in isolation**. While compiling `main.cpp`, the
+compiler knows nothing about `square.cpp`; it only knows the declarations that the headers pasted
+in. Everything that connects the files happens in the linker. One preprocessed `.cpp` file is
+called a [translation unit](./translation-units.md), and it is the unit the first three stages work
+on.
+
+| Stage | Tool run by `g++` | Stop after it with | Output | Canonical page |
+|---|---|---|---|---|
+| Preprocess | `cc1plus -E` (the integrated preprocessor) | `-E` | `.ii` (C++ text) | [Preprocessing](./preprocessing.md) |
+| Compile | `cc1plus` | `-S` | `.s` (assembly text) | [Compilation](./compilation.md) |
+| Assemble | `as` | `-c` | `.o` (ELF relocatable object) | [Assembling](./assembling.md) |
+| Link | `collect2` → `ld` | (none: the default) | executable or `.so` | [Linking](./linking.md) |
+
+GCC's documentation names the extensions: `.ii` is preprocessed C++, `.s` is assembly that needs no
+further preprocessing ([GCC: Overall Options](https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html)).
+Run `g++ -v` to see the driver print each sub-command it launches; on GCC 15 those are
+`/usr/libexec/gcc/x86_64-linux-gnu/15/cc1plus …`, then `as …`, then `collect2 …`.
+
+## Tracing a two-file program
+
+The program below is small enough to read every stage's output in full. `main.cpp` calls a function
+defined in another file and writes a global variable, which is exactly what forces the linker to do
+real work.
+
+<Tabs>
+  <TabItem value="h" label="square.h">
+
+```cpp title="square.h"
+#pragma once
+#define SCALE 3
+int square(int x);
 ```
 
----
+  </TabItem>
+  <TabItem value="sq" label="square.cpp">
 
-## Stage 1: Preprocessing
+```cpp title="square.cpp"
+#include "square.h"
 
-The preprocessor handles directives starting with `#` - includes, macros, conditional compilation. It produces pure C++ code with no preprocessor directives.
+int square(int x) { return x * x; }
+```
 
-**Input**: Source files (.cpp, .h)  
-**Output**: Preprocessed file (.i)  
-**Tool**: cpp (C preprocessor)  
-**Deep dive**: [Preprocessing](./preprocessing.md) · [Headers and Includes](./headers-and-includes.md)
+  </TabItem>
+  <TabItem value="main" label="main.cpp">
 
-```cpp showLineNumbers 
-// main.cpp - before preprocessing
-#include <iostream>
-#define MAX 100
+```cpp title="main.cpp"
+#include "square.h"
+
+int counter = 0;
 
 int main() {
-    std::cout << MAX << "\n";
+    counter = square(SCALE);
+    return counter;
 }
 ```
 
-After preprocessing, `#include` is replaced with entire iostream contents (~10,000 lines), and `MAX` becomes literal `100`:
+  </TabItem>
+</Tabs>
+
+All output below is from GCC 15.2 and GNU binutils 2.46 on x86-64 Linux, with `-O1` so that the
+assembly stays short. Assembly is shown in Intel syntax (`-masm=intel`, `objdump -M intel`).
+
+<Walkthrough title="main.cpp through the pipeline" caption="One translation unit followed from text to a linked instruction stream." accent="blue" fixedHeight={false}>
+  <Step title="Preprocess: g++ -E">
 
 ```bash
-# See preprocessed output
-g++ -E main.cpp -o main.i
+g++ -std=c++23 -E -P main.cpp -o main.ii    # -P drops the '# line' markers
+```
 
-# main.i (simplified)
-# ... 10,000+ lines from iostream ...
+```cpp title="main.ii"
+int square(int x);
+int counter = 0;
 int main() {
-    std::cout << 100 << "\n";  // MAX expanded
+    counter = square(3);
+    return counter;
 }
 ```
 
-The preprocessor performs text substitution: includes become file contents, macros become their definitions, `#ifdef` blocks are evaluated.
+The `#include` line was replaced by the header's text, `#pragma once` was consumed, and `SCALE`
+became <StepChange>`3`</StepChange>. The `#define` itself is gone: the compiler never sees macros.
+Without `-P` the file also carries line markers such as `# 1 "square.h" 1`, which is how later
+error messages still point at the right header line.
 
----
-
-## Stage 2: Compilation
-
-The compiler translates preprocessed C++ into assembly language. This is the "intelligence" phase - syntax checking, optimization, template instantiation.
-
-**Input**: Preprocessed file (.i)  
-**Output**: Assembly file (.s)  
-**Tool**: cc1plus (compiler proper)  
-**Deep dive**: [Compilation Phase](./compilation.md) · [Name Mangling](./name-mangling.md)
+  </Step>
+  <Step title="Compile: g++ -S">
 
 ```bash
-# Generate assembly
-g++ -S main.cpp -o main.s
-
-# Optimized assembly
-g++ -S -O3 main.cpp -o main.s
+g++ -std=c++23 -O1 -S -masm=intel main.cpp -o main.s
 ```
 
-```asm
-# main.s (x86-64 assembly - simplified)
+```nasm title="main.s (directives trimmed)"
 main:
-    push    rbp
-    mov     rbp, rsp
-    mov     esi, 100          # MAX value
-    mov     edi, OFFSET FLAT:std::cout
-    call    std::ostream::operator<<
-    mov     eax, 0
-    pop     rbp
-    ret
+	sub	rsp, 8
+	mov	edi, 3
+	call	_Z6squarei@PLT
+	mov	DWORD PTR counter[rip], eax
+	add	rsp, 8
+	ret
+	.globl	counter
+	.bss
+counter:
+	.zero	4
 ```
 
-The assembly shows low-level operations: register manipulation, function calls, memory access. Optimization flags (`-O2`, `-O3`) dramatically change this output.
+The compiler has type-checked the code and chosen instructions. Two things to notice: the call
+target is not `square` but the **mangled** name <StepChange>`_Z6squarei`</StepChange> (`square`
+taking an `int`, see [Name Mangling](./name-mangling.md)), and `counter`, zero-initialised, goes in
+`.bss`. The compiler does not know where `square` lives. It only emits the name.
 
-**Compilation does**:
-- Syntax and semantic checking
-- Template instantiation
-- Function inlining decisions
-- Optimization passes
-- Type checking
-
----
-
-## Stage 3: Assembly
-
-The assembler converts human-readable assembly into machine code (binary). Each assembly instruction becomes actual CPU instructions.
-
-**Input**: Assembly file (.s)  
-**Output**: Object file (.o)  
-**Tool**: as (assembler)  
-**Deep dive**: [Assembling Phase](./assembling.md) · [Object Files and Symbols](./object-files-and-symbols.md)
+  </Step>
+  <Step title="Assemble: g++ -c">
 
 ```bash
-# Create object file
-g++ -c main.cpp -o main.o
-
-# Inspect object file contents
-objdump -d main.o
-nm main.o  # Show symbols
+g++ -std=c++23 -O1 -c main.cpp -o main.o
+objdump -d -r -M intel main.o
 ```
 
-Object files contain:
-- **Machine code**: Binary CPU instructions
-- **Symbol table**: Function/variable names and addresses
-- **Relocation information**: Where to patch addresses during linking
-- **Debug info**: Source line mappings (if `-g` used)
+```text
+0000000000000000 <main>:
+   0:	f3 0f 1e fa          	endbr64
+   4:	48 83 ec 08          	sub    rsp,0x8
+   8:	bf 03 00 00 00       	mov    edi,0x3
+   d:	e8 00 00 00 00       	call   12 <main+0x12>
+			e: R_X86_64_PLT32	_Z6squarei-0x4
+  12:	89 05 00 00 00 00    	mov    DWORD PTR [rip+0x0],eax        # 18 <main+0x18>
+			14: R_X86_64_PC32	counter-0x4
+  18:	48 83 c4 08          	add    rsp,0x8
+  1c:	c3                   	ret
+```
+
+The instructions are now bytes, and the addresses start at 0. The call's operand is
+<StepChange>`00 00 00 00`</StepChange>: a hole. Each hole has a **relocation** record (the indented
+`R_X86_64_…` lines) telling the linker which symbol's address to write there. (`endbr64` was added
+because Ubuntu's GCC enables `-fcf-protection` by default.)
+
+  </Step>
+  <Step title="Read the symbol table: nm">
 
 ```bash
-# Object file structure (simplified)
-main.o:
-    .text section:    # Code
-        <machine code bytes>
-    .data section:    # Initialized data
-        <data bytes>
-    .bss section:     # Uninitialized data
-    Symbol table:
-        main (function, undefined: std::cout)
+nm main.o
+nm square.o
 ```
 
-The object file has **undefined symbols** (like `std::cout`) that will be resolved during linking.
+```text
+                 U _Z6squarei
+0000000000000000 B counter
+0000000000000000 T main
 
----
+0000000000000000 T _Z6squarei
+```
 
-## Stage 4: Linking
+`main.o` **defines** `main` (`T`, code) and `counter` (`B`, `.bss`), and **needs**
+<StepChange>`U _Z6squarei`</StepChange>: undefined, expected from somewhere else. `square.o`
+defines exactly that symbol. The letters are explained in
+[Object Files and Symbols](./object-files-and-symbols.md#reading-nm-output).
 
-The linker combines multiple object files and libraries into a single executable. It resolves symbol references and assigns final memory addresses.
-
-**Input**: Object files (.o) + Libraries (.a, .so)  
-**Output**: Executable binary  
-**Tool**: ld (linker), or g++ (which calls ld)  
-**Deep dive**: [Linking Process](./linking.md) · [Static vs Dynamic Linking](./static-vs-dynamic-linking.md)
+  </Step>
+  <Step title="Link: g++ main.o square.o">
 
 ```bash
-# Link object files
-g++ main.o utils.o -o app
-
-# Link with libraries
-g++ main.o -o app -lpthread -lm
-
-# Static linking (include library code)
-g++ main.o -o app -static
-
-# Show what executable depends on
-ldd app
+g++ main.o square.o -o app
+./app; echo "exit=$?"
+objdump -d -M intel app | sed -n '/<main>:/,/^$/p'
 ```
 
-**Linking does**:
-1. **Symbol resolution**: Finds definitions for all function/variable references
-2. **Relocation**: Assigns final memory addresses
-3. **Library inclusion**: Adds code from static/dynamic libraries
-
-```mermaid
-graph TD
-    A[main.o] --> D[Linker]
-    B[utils.o] --> D
-    C[libc.so] --> D
-    D --> E[Executable]
-    
-    A --> F["Undefined: foo()"]
-    B --> G["Defines: foo()"]
-    F -.Resolved.-> G
+```text
+exit=9
+0000000000001129 <main>:
+    1129:	f3 0f 1e fa          	endbr64
+    112d:	48 83 ec 08          	sub    rsp,0x8
+    1131:	bf 03 00 00 00       	mov    edi,0x3
+    1136:	e8 0b 00 00 00       	call   1146 <_Z6squarei>
+    113b:	89 05 d3 2e 00 00    	mov    DWORD PTR [rip+0x2ed3],eax        # 4014 <counter>
+    1141:	48 83 c4 08          	add    rsp,0x8
+    1145:	c3                   	ret
 ```
 
----
+The linker placed `main` at `0x1129`, `square` at `0x1146` and `counter` at `0x4014`, then filled
+both holes: the call operand became <StepChange>`0b 00 00 00`</StepChange> (`0x113b + 0x0b =
+0x1146`) and the store's offset became `d3 2e 00 00` (`0x2ed3`). The program returns
+`square(3) = 9`. The addresses are offsets because this is a position-independent executable (PIE).
+The loader adds a random base at run time.
 
-## Complete Example
-
-```cpp showLineNumbers 
-// hello.cpp
-#include <iostream>
-#define GREETING "Hello"
-
-int main() {
-    std::cout << GREETING << "\n";
-    return 0;
-}
-```
-
-### Step-by-Step Compilation
+  </Step>
+  <Step title="Remove square.o: the link fails">
 
 ```bash
-# 1. Preprocessing only (-E stops after preprocessing)
-g++ -E hello.cpp -o hello.i
-# Result: hello.i contains iostream + code with GREETING expanded
-
-# 2. Compilation to assembly (-S stops after compilation)
-g++ -S hello.cpp -o hello.s
-# Result: hello.s contains x86-64 assembly
-
-# 3. Assembly to object (-c stops after assembly)
-g++ -c hello.cpp -o hello.o
-# Result: hello.o contains machine code + symbols
-
-# 4. Linking to executable (no flag = complete pipeline)
-g++ hello.o -o hello
-# Result: hello is executable binary
-
-# Or all at once
-g++ hello.cpp -o hello
+g++ main.o -o app
 ```
 
----
-
-## Build Artifacts
-
-| File | Extension | Stage | Content | Binary? |
-|------|-----------|-------|---------|---------|
-| Source | .cpp, .h | Input | C++ code | No |
-| Preprocessed | .i | After preprocessing | Expanded C++ | No |
-| Assembly | .s | After compilation | Assembly code | No |
-| Object | .o, .obj | After assembly | Machine code + symbols | Yes |
-| Static library | .a, .lib | Linking | Archive of .o files | Yes |
-| Shared library | .so, .dll | Runtime | Shared object code | Yes |
-| Executable | (no ext), .exe | Final | Runnable program | Yes |
-
----
-
-## Optimization Impact
-
-Different optimization levels produce vastly different code:
-
-```cpp showLineNumbers 
-int sum(int n) {
-    int total = 0;
-    for (int i = 1; i <= n; i++) {
-        total += i;
-    }
-    return total;
-}
+```text
+/usr/bin/x86_64-linux-gnu-ld.bfd: main.o: in function `main':
+main.cpp:(.text+0xe): undefined reference to `square(int)'
+collect2: error: ld returned 1 exit status
 ```
 
-```bash
-# No optimization (-O0)
-g++ -S -O0 sum.cpp
-# Assembly: Full loop with increment, compare, jump
+Compilation of `main.cpp` already succeeded, so this is purely a **linker** error. The offset
+<StepChange>`.text+0xe`</StepChange> is exactly the relocation from step 3 that had no symbol to
+point at. `ld` demangles `_Z6squarei` back to `square(int)` for the message.
 
-# Maximum optimization (-O3)
-g++ -S -O3 sum.cpp
-# Assembly: Formula (n * (n+1)) / 2 - no loop!
-```
+  </Step>
+</Walkthrough>
 
-The `-O3` compiler recognizes the pattern and replaces the entire loop with a mathematical formula. This is why compiled C++ is fast.
+## Which stage produced this error?
 
----
+Recognising the stage from the message is the fastest way to a fix.
 
-## Common Issues by Stage
+| Message looks like | Stage | Typical cause | Go to |
+|---|---|---|---|
+| `fatal error: foo.h: No such file or directory` | Preprocess | Missing `-I` path, wrong quotes vs angle brackets | [Headers and Includes](./headers-and-includes.md#where-the-compiler-looks) |
+| `error: 'x' was not declared in this scope`, type mismatch, template errors | Compile | Code is ill-formed, missing declaration | [Compilation](./compilation.md) |
+| `Error:` from `as`, unknown instruction | Assemble | Almost always hand-written or inline asm | [Assembling](./assembling.md) |
+| `undefined reference to …`, `multiple definition of …` (from `ld`/`collect2`) | Link | Missing `.o`/library, wrong library order, ODR violation | [Linking](./linking.md#reading-linker-errors) |
+| `error while loading shared libraries: libX.so` | Run time (dynamic loader) | Library not on the loader's search path | [Static vs Dynamic Linking](./static-vs-dynamic-linking.md#how-the-loader-finds-libraries) |
 
-### Preprocessing Errors
+## Which flags affect which stage
 
-```cpp showLineNumbers 
-#include "missing.h"  // fatal error: missing.h: No such file or directory
-#define X Y
-#define Y X
-int x = X;  // Infinite macro expansion
-```
+`g++` accepts every flag on one command line and passes each to the stage that understands it.
 
-**Solution**: Check include paths, avoid circular macros.
+| Flag | Stage | Effect |
+|---|---|---|
+| `-I dir`, `-D NAME=val`, `-include file` | Preprocess | Add an include path, define a macro, force-include a file |
+| `-std=c++23`, `-W…`, `-O…`, `-g`, `-fPIC`, `-march=…` | Compile | Language version, warnings, optimisation, debug info, code model |
+| `-Wa,opt` | Assemble | Pass `opt` straight to `as` |
+| `-L dir`, `-l name`, `-static`, `-shared`, `-Wl,opt` | Link | Library search path, libraries, link mode, raw linker options |
+| `-E`, `-S`, `-c`, `-o file`, `-v` | Driver | Where to stop, where to write, show sub-commands |
 
-### Compilation Errors
+## Build artifacts
 
-```cpp showLineNumbers 
-int x = "hello";  // error: invalid conversion from 'const char*' to 'int'
-template<typename T> T max(T a, T b);
-max(5, 3.14);  // error: no matching function (int vs double)
-```
+| File | Produced by | Contains |
+|---|---|---|
+| `.ii` | `-E` | Preprocessed C++ (one translation unit) |
+| `.s` | `-S` | Assembly text for one TU |
+| `.o` (`.obj` on MSVC) | `-c` | Relocatable machine code, symbol table, relocations |
+| `.a` (`.lib`) | `ar` | Archive of `.o` files: a static library |
+| `.so` (`.dll`, `.dylib`) | `-shared` | Shared library, loaded at run time |
+| executable | link | Final program; on Linux an ELF executable, usually PIE |
 
-**Solution**: Fix type errors, template arguments.
+To keep all intermediate files from a normal build, add `-save-temps`: GCC leaves `main.ii`,
+`main.s` and `main.o` next to the output.
 
-### Linking Errors
+## Pitfalls
 
-```cpp showLineNumbers 
-// main.cpp
-void foo();
-int main() { foo(); }
+- **Treating a link error as a compile error.** `undefined reference` means the declarations were
+  fine and every file compiled; the fix is in what you link (a missing `.cpp`, `-l` flag or library
+  order), not in the code that calls the function.
+- **Reading `-O0` assembly to judge performance.** Unoptimised code stores every variable to the
+  stack. Look at `-O2` output, as [Compilation](./compilation.md#optimisation-levels) shows.
+- **Assuming a header change only rebuilds one file.** Every translation unit that includes the
+  header, directly or transitively, has to be recompiled. That is why build systems track header
+  dependencies ([Build Systems](./build-systems-cmake.md)).
 
-// undefined reference to `foo()'
-```
+## Key points
 
-**Solution**: Add missing source files, link required libraries.
-
----
-
-## Compilation Command Breakdown
-
-```bash
-g++ -std=c++20 -Wall -Wextra -O2 -g -I./include -L./lib -lmylib main.cpp -o app
-```
-
-| Flag | Purpose | Stage Affected |
-|------|---------|----------------|
-| `-std=c++20` | Use C++20 standard | Compilation |
-| `-Wall -Wextra` | Enable warnings | Compilation |
-| `-O2` | Optimization level 2 | Compilation |
-| `-g` | Include debug info | Assembly |
-| `-I./include` | Add include directory | Preprocessing |
-| `-L./lib` | Add library directory | Linking |
-| `-lmylib` | Link with libmylib | Linking |
-| `-o app` | Output filename | Final |
-
----
-
-## Speeding Up Compilation
-
-### 1. Precompiled Headers
-
-```cpp showLineNumbers 
-// stdafx.h - rarely changing headers
-#include <iostream>
-#include <vector>
-#include <map>
-```
-
-```bash
-# Precompile header once
-g++ -x c++-header stdafx.h -o stdafx.h.gch
-
-# Use in compilation (faster)
-g++ main.cpp -include stdafx.h
-```
-
-### 2. Parallel Compilation
-
-```bash
-# Compile multiple files in parallel
-make -j8  # Use 8 cores
-ninja     # Ninja build system (fast by default)
-```
-
-### 3. Incremental Builds
-
-```bash
-# Only recompile changed files
-make      # Checks timestamps, rebuilds only necessary files
-```
-
----
-
-## Examining Build Output
-
-```bash
-# Show compilation stages
-g++ -v main.cpp -o app
-
-# Stop at each stage
-g++ -E main.cpp          # Preprocessing only
-g++ -S main.cpp          # + Compilation
-g++ -c main.cpp          # + Assembly
-g++ main.cpp -o app      # + Linking
-
-# Verbose linking
-g++ main.o -o app -Wl,--verbose
-
-# Show included files
-g++ -H main.cpp
-
-# Show macro expansions
-g++ -E -dM main.cpp
-```
-
----
-
-## Summary
-
-The compilation pipeline:
-
-1. **Preprocessing** (`#include`, `#define`) → Expands macros, includes files
-2. **Compilation** (C++ → Assembly) → Syntax checking, optimization
-3. **Assembly** (Assembly → Machine code) → Creates object files
-4. **Linking** (Objects + Libraries → Executable) → Resolves symbols, creates binary
-
-```mermaid
-graph LR
-    A[.cpp] -->|cpp| B[.i]
-    B -->|cc1plus| C[.s]
-    C -->|as| D[.o]
-    D -->|ld| E[exe]
-    
-```
-
-**Key Takeaways**:
-- Each stage is independent and can be examined
-- Errors at each stage have different causes
-- Understanding stages helps debug build problems
-- Optimization happens during compilation
-- Linking resolves cross-file dependencies
+- Preprocess, compile and assemble run **per `.cpp`**, blind to other files; only the linker sees
+  the whole program.
+- An object file is machine code with **holes** plus a list of the symbols it defines and needs.
+- `-E`, `-S`, `-c` stop after stages 1, 2, 3; `nm` and `objdump -dr` show what the linker will get.
+- The error's source tool (`cc1plus`, `as`, `ld`, the loader) tells you where to look for the fix.
 
 ## Related
 
-- Stage deep-dives: [Preprocessing](./preprocessing.md) · [Compilation](./compilation.md) · [Assembling](./assembling.md) · [Linking](./linking.md)
-- [Translation Units](./translation-units.md) · [Object Files and Symbols](./object-files-and-symbols.md) · [Name Mangling](./name-mangling.md)
-- [Modules (C++20)](./modules.md) — the model that replaces textual `#include`
-- Build tools: [Build Systems / CMake](./build-systems-cmake.md) · [Makefiles](./makefiles.md)
+- [Translation Units](./translation-units.md): what the compiler sees as "one file", and the One
+  Definition Rule that the linker enforces.
+- [Modules](./modules.md) *(C++20)*: replaces textual inclusion in stage 1 with compiled interfaces.
+- [Build Systems and CMake](./build-systems-cmake.md): automating this pipeline for many files.
+- [Reading Assembly](../14-debugging-and-profiling/07-reading-assembly.md): how to read the `.s`
+  and `objdump` output in more depth.
