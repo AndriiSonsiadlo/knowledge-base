@@ -123,7 +123,7 @@ For subjects with real depth (internals, concurrency, memory models, schedulers,
 
 1. **Layer the explanation.** Intuition first (a sentence or analogy that is *correct*, not just catchy), then the mechanism, then the precise detail and edge cases. Each layer must stand on its own, so readers can stop at the depth they need.
 2. **Show the structure.** Draw the moving parts with `<Diagram>` before describing how they interact.
-3. **Trace a worked example.** Use real inputs, show the intermediate state at each step, and give the result. For state that changes over steps, use `<Tabs>` with one tab per step (`Step 1 — …`, `Step 2 — …`), with each tab showing the state at that point.
+3. **Trace a worked example.** Use real inputs, show the intermediate state at each step, and give the result. When state changes over steps, use `<Walkthrough>` (one `<Step>` per state) and mark what changed in each.
 4. **Name the traps.** List the mistakes practitioners actually make, and why each one is wrong.
 5. **Put optional rigor in `<details>`.** Proofs, derivations, and full listings go there, while the main text still states the result.
 
@@ -154,6 +154,7 @@ Choose the simplest presentation that works. Plain prose, lists, and tables firs
 | Architecture, layers, groupings, flows, "what talks to what" | `<Diagram>` (see below) |
 | Show a real thing (hardware, profiler output, vendor diagram) | `<Figure>` (credit only for official sources, see `CLAUDE.md`) |
 | Sequence of messages, state machine, dense graph | Mermaid (`sequenceDiagram`, `stateDiagram-v2`). Fallback only. |
+| Worked example whose state changes step by step | `<Walkthrough>` (see below) |
 | Signal timing | WaveDrom fence |
 | Alternatives / per-platform variants of the same content | `<Tabs>` (`groupId` to sync choices across the page) |
 | Optional depth, long derivations, full listings | `<details><summary>` |
@@ -191,6 +192,33 @@ Composable, real-text diagrams: rounded cards, dotted group frames, labelled arr
 - `<DiagramGroup label>` is a framed side-by-side set; `<DiagramRow>` is the same without the frame.
 - `<DiagramArrow>`: `label`, `icon`, `dashed`; `direction="right"` inside rows.
 - Keep it to what the text discusses: ~3–9 nodes. Highlight one thing, not everything.
+
+### `<Walkthrough>`
+
+Shows a worked example one step at a time, with Previous/Next, a numbered step rail, and a "Step X of N" counter. Every step is in the page HTML, so print, readers without JavaScript, and site search all get every step.
+
+```mdx
+<Walkthrough title="Kruskal on five vertices" caption="Edges taken in weight order." accent="blue">
+  <Step title="Sort the edges">
+
+Sorted: `(A,B,1) (B,C,2) (A,C,3) (C,D,4) (D,E,5)`.
+
+  </Step>
+  <Step title="Take A–B">
+
+Union-find merges `{A}` and `{B}` into <StepChange>`{A,B}`</StepChange>.
+
+  </Step>
+</Walkthrough>
+```
+
+- **Blank lines around step content are required**, as with `<TabItem>`. Without them MDX won't parse the markdown inside.
+- `<Walkthrough>` props: `title`, `caption`, `accent` (`green | blue | amber | violet`), and `fixedHeight` (default `true`: the box keeps the tallest step's height so the controls don't move. Set it to `false` when one step is much taller than the rest).
+- `<Step title>`: the title is required. A walkthrough with no steps, or a step without a title, fails the build.
+- A walkthrough with a single step renders as plain content with no controls. Use it only when there are two or more states.
+- **Mark what changed** in each step: `<StepChange>` (optional `label`, default "changed") for inline values, `{N}` or `// highlight-next-line` for code lines, and `<DiagramNode accent>` for diagram parts.
+- Keep steps comparable in size, at one change of state per step.
+- **Headings inside a step must be `####` or lower** (or just bold text). Site search splits pages at `#`–`###`, so a `###` inside a step cuts every later step out of the search index. Headings inside steps can be linked to: opening the link switches to that step. In `.mdx` files, escape custom heading ids as `\{#id\}`.
 
 Rules:
 - Never hide essential information inside `<details>` or a non-default tab.

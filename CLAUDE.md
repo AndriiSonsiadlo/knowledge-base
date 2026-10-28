@@ -76,7 +76,7 @@ Detail and rationale live in `AUTHORING.md`; these are the non-negotiables.
 
 ## Markdown capabilities
 
-Available in any page, no import needed: admonitions (`:::note|tip|info|warning|danger`), `<Diagram>` with `<DiagramNode|Group|Row|Arrow>`, Mermaid fences (fallback only), KaTeX math (`$…$`, `$$…$$`), `<Tabs>/<TabItem>`, `<details><summary>`, `<Figure>`, `<Recall>` (algorithms summary card), `<Icon icon="lucide:name" />`, WaveDrom timing fences, and the Linux-section components listed in `docs/linux/CLAUDE.md`. ```` ```jsx live ```` renders a react-live playground — React only, keep them small.
+Available in any page, no import needed: admonitions (`:::note|tip|info|warning|danger`), `<Diagram>` with `<DiagramNode|Group|Row|Arrow>`, Mermaid fences (fallback only), KaTeX math (`$…$`, `$$…$$`), `<Tabs>/<TabItem>`, `<details><summary>`, `<Figure>`, `<Walkthrough>` with `<Step>`/`<StepChange>` (step-by-step worked examples), `<Recall>` (algorithms summary card), `<Icon icon="lucide:name" />`, WaveDrom timing fences, and the Linux-section components listed in `docs/linux/CLAUDE.md`. ```` ```jsx live ```` renders a react-live playground — React only, keep them small.
 
 Prism languages: built-ins plus `armasm bash c cmake cpp csharp diff docker glsl hlsl ini json makefile nasm python systemd toml wgsl yaml`. Any other fence language needs adding to `prism.additionalLanguages` in `docusaurus.config.js`.
 
