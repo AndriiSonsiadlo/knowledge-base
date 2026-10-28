@@ -8,216 +8,117 @@ tags: [cpp, functions, default-arguments, parameters]
 
 # Default Function Arguments
 
-**Default arguments** allow function parameters to have default values when not explicitly provided by the caller.
+A **default argument** is a value the compiler supplies for a trailing parameter the caller leaves
+out. The important thing to understand is *where* that happens: at the **call site**, by rewriting
+`connect("db")` into `connect("db", 80)` using the declaration the caller can see. The function
+itself always receives every argument. That one fact explains all of the rules and surprises below.
 
-## Basic Syntax
-```cpp
-// Declaration with defaults
-void print(std::string msg, int count = 1, bool newline = true);
+**Prerequisites:** [Function Declarations](./function-declarations.md).
 
-// Calls
-print("Hello");              // count=1, newline=true
-print("Hello", 3);           // count=3, newline=true
-print("Hello", 3, false);    // count=3, newline=false
+```cpp showLineNumbers
+// ...
+void connect(const std::string& host, int port = 80, bool tls = false);
+
+connect("db");             // connect("db", 80, false)
+connect("db", 443);        // connect("db", 443, false)
+connect("db", 443, true);
 ```
 
-:::info
-Default arguments must appear **rightmost** in the parameter list. Once a parameter has a default, all following parameters must also have defaults.
-:::
+## Rules
 
-## Rules and Restrictions
-```cpp
-// CORRECT: defaults are rightmost
-void f1(int a, int b = 2, int c = 3);
+- **Defaults go at the end.** After a parameter with a default, every later parameter needs one too
+  (except a function parameter pack). `void p(int a = 1, int b);` is an error.
+- **Put them in the declaration the callers see,** normally the header. A default can't be repeated
+  in a later declaration of the same scope, so a `.cpp` definition that restates it is an error
+  ("default argument given for parameter 1").
+- **Later declarations can add defaults** for parameters that don't have one yet, right to left:
 
-// WRONG: non-default after default
-// void f2(int a = 1, int b, int c = 3);  // Error!
+  ```cpp showLineNumbers
+  // ...
+  void connect(const std::string& host, int port = 80);
+  void connect(const std::string& host = "localhost", int port);   // OK: adds a default for host
+  ```
 
-// CORRECT: multiple defaults
-void f3(int a, int b = 2, int c = 3, int d = 4);
+- **What a default may refer to:** any expression valid at the declaration, including function calls
+  and `static` members. Not other parameters (`void f(int a, int b = a)` is an error), not `this`,
+  and not non-static members.
+
+```cpp showLineNumbers
+// ...
+struct Widget {
+    int size_ = 100;
+    static constexpr int default_size = 64;
+    void resize(int n = default_size);    // OK: static member
+    // void grow(int n = size_);          // error: invalid use of non-static data member
+};
 ```
 
-### Declaration vs Definition
-```cpp
-// In header (.h)
-void configure(int port, std::string host = "localhost", int timeout = 30);
+## Evaluated at every call
 
-// In source (.cpp) - NO defaults here!
-void configure(int port, std::string host, int timeout) {
-    // Implementation
+The default expression is evaluated anew for each call that uses it, in the caller's context:
+
+```cpp title="each-call.cpp" showLineNumbers
+#include <cstdio>
+
+int next_id() { static int id = 0; return ++id; }
+void tag(int id = next_id()) { std::printf("id %d\n", id); }
+
+int main() {
+    tag();     // id 1
+    tag();     // id 2
+    tag(7);    // id 7: next_id() not called
 }
-
-// WRONG: defaults in both places
-// void configure(int port, std::string host = "localhost", int timeout = 30) {
-//     // Error!
-// }
 ```
 
-:::warning
-Default arguments should only appear in the **declaration**, not the definition (if separated).
-:::
+## Pitfalls
 
-## Common Patterns
+**Virtual functions take the default from the static type.** The *function* is chosen at run time,
+but the default is inserted at compile time from the declaration the compiler sees:
 
-### Pattern 1: Optional Configuration
-```cpp
-#include <string>
+```cpp title="virtual-default.cpp" showLineNumbers
+#include <cstdio>
 
-class Logger {
-public:
-    void log(const std::string& msg, 
-             const std::string& level = "INFO",
-             bool timestamp = true);
+struct Base {
+    virtual void greet(const char* who = "base") const { std::printf("Base %s\n", who); }
+    virtual ~Base() = default;
+};
+struct Derived : Base {
+    void greet(const char* who = "derived") const override { std::printf("Derived %s\n", who); }
 };
 
-// Usage
-logger.log("Server started");                    // INFO, with timestamp
-logger.log("Error occurred", "ERROR");          // ERROR, with timestamp
-logger.log("Debug info", "DEBUG", false);       // DEBUG, no timestamp
-```
-
-### Pattern 2: Builder-Style APIs
-```cpp
-class HttpRequest {
-public:
-    HttpRequest& setMethod(const std::string& method = "GET");
-    HttpRequest& setTimeout(int seconds = 30);
-    HttpRequest& setRetries(int count = 3);
-};
-
-// Usage
-request.setMethod()           // Uses "GET"
-       .setTimeout()          // Uses 30
-       .setRetries(5);        // Override to 5
-```
-
-### Pattern 3: Backward Compatibility
-```cpp
-// Old API
-void process(int value);
-
-// New API - adds optional parameter
-void process(int value, bool verbose = false);
-
-// Old code still works!
-process(42);        // verbose=false (backward compatible)
-```
-
-## Non-Constant Defaults
-
-Default arguments are evaluated at **call time**, not declaration time:
-```cpp
-int getDefaultValue() {
-    return 42;
+int main() {
+    Derived d;
+    const Base& b = d;
+    b.greet();   // "Derived base": Derived's body, Base's default
+    d.greet();   // "Derived derived"
 }
-
-void func(int x = getDefaultValue()) {
-    std::cout << x << '\n';
-}
-
-// Each call evaluates getDefaultValue()
-func();  // Calls getDefaultValue()
-func();  // Calls getDefaultValue() again
 ```
 
-### Member Variables as Defaults
-```cpp
-class Widget {
-    int defaultSize_ = 100;
-    
-public:
-    // WRONG: can't use member as default
-    // void resize(int size = defaultSize_);  // Error!
-    
-    // CORRECT: use overload or other approach
-    void resize(int size);
-    void resize() { resize(defaultSize_); }
-};
-```
+Don't give overrides different defaults. Better still, keep defaults off virtual functions and put
+them on a non-virtual wrapper.
 
-## Default Arguments vs Overloading
-```cpp
-// Approach 1: Default arguments
-void display(std::string text, int size = 12, bool bold = false);
+**Defaults are not part of the function type.** A function pointer to `void cb(int, int = 5)` has
+type `void(*)(int, int)`, and calling it with one argument is an error. The same goes for
+`std::function` and templates that forward arguments.
 
-// Approach 2: Overloading
-void display(std::string text);
-void display(std::string text, int size);
-void display(std::string text, int size, bool bold);
-```
+**Defaults are baked into the caller's binary.** Changing a default in a library header has no effect
+on already-compiled callers until they are rebuilt, because the value lives in their call
+instructions, not in the library.
 
-| Default Arguments | Overloading |
-|-------------------|-------------|
-| Single function | Multiple functions |
-| Can't change logic per parameter | Different logic per version |
-| Evaluated at call site | Can have different implementations |
-| Less code | More flexibility |
+**Overlapping with an overload.** `void f(int, int = 0);` and `void f(int);` can both be declared, but
+every call `f(42)` is ambiguous. See [Overloading](./overloading.md).
 
-## Practical Examples
+## Defaults or overloads?
 
-### Example 1: Database Connection
-```cpp
-#include <string>
+| Prefer a default argument when | Prefer overloads when |
+|---|---|
+| The omitted case is the same function with a common value | The omitted case needs different logic |
+| The value is stable across library versions | The value might change without rebuilding callers |
+| The function isn't virtual and isn't taken by address | You need each arity as a separate function (pointers, callbacks) |
 
-class Database {
-public:
-    bool connect(
-        const std::string& host = "localhost",
-        int port = 5432,
-        const std::string& user = "admin",
-        const std::string& password = "",
-        int timeout = 30
-    );
-};
+## Key points
 
-// Usage examples
-db.connect();                                      // All defaults
-db.connect("192.168.1.100");                      // Custom host
-db.connect("192.168.1.100", 3306);                // Custom host and port
-db.connect("192.168.1.100", 3306, "root", "pwd"); // Custom connection
-```
-
-### Example 2: File Operations
-```cpp
-#include <string>
-#include <fstream>
-
-class FileWriter {
-public:
-    void write(
-        const std::string& filename,
-        const std::string& content,
-        bool append = false,
-        bool createIfMissing = true
-    ) {
-        auto mode = std::ios::out;
-        if (append) mode |= std::ios::app;
-        if (!createIfMissing) mode |= std::ios::in;
-        
-        std::ofstream file(filename, mode);
-        file << content;
-    }
-};
-```
-
-## Best Practices
-
-:::success[**DO:**]
-- Use defaults for frequently-used values
-- Place defaults in header files (declarations)
-- Keep defaults simple (literals or simple expressions)
-- Use defaults for optional configuration
-  :::
-
-:::danger
-**DON'T:**
-- Use defaults with complex expressions (performance)
-- Mix defaults and overloading carelessly
-- Use member variables as default values
-- Put defaults in both declaration and definition
-  :::
-
-## Related Topics
-
-- **[Function Declarations](function-declarations.md)** - Function signatures
-- **[Overloading](overloading.md)** - Alternative approach
+- The compiler fills defaults in at the call site, from the declaration visible there.
+- Defaults are trailing, declared once (usually in the header), and evaluated on every call.
+- Virtual calls use the static type's default; function pointers don't carry defaults at all.
+- Changing a default requires recompiling the callers.
