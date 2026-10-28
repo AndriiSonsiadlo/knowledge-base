@@ -3,404 +3,222 @@ id: noexcept
 title: noexcept Specifier
 sidebar_label: noexcept
 sidebar_position: 6
-tags: [c++, noexcept, exceptions, optimization, cpp11]
+tags: [c++, noexcept, exceptions, cpp11, cpp17]
 ---
 
 # noexcept Specifier
 
-`noexcept` specifies that a function won't throw exceptions, enabling optimizations and stronger guarantees.
+`noexcept` does two jobs. As a **specifier** on a function (`void f() noexcept`) it promises that no
+exception leaves the function, and the language enforces that promise by calling `std::terminate` if
+one tries. As an **operator** (`noexcept(expr)`) it asks the compiler, at compile time, whether an
+expression is declared not to throw. Generic code combines the two, and the standard library uses the
+answer to choose between moving and copying. This page covers the mechanics. Why a non-throwing
+commit step makes the strong exception guarantee possible is on
+[Exception Safety and the Strong Guarantee](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md).
 
-:::info[Performance & Safety]
-`noexcept` allows compilers to optimize (no exception handling overhead) and enables move operations in standard containers. For how it underpins the **strong exception guarantee**, see [Exception Safety](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md).
-:::
+**Prerequisites:** [Exceptions](../10-error-handling-and-safety/01-exceptions.md),
+[Copy and Move Semantics](../07-classes-and-oop/copy-and-move-semantics.md).
 
-## Basic Usage
+## The specifier
 
-```cpp showLineNumbers 
-// Function that doesn't throw
-void safe_function() noexcept {
-    // No exceptions thrown
-}
+```cpp showLineNumbers
+// ...
+void a() noexcept;                // non-throwing
+void b() noexcept(true);          // same as a
+void c() noexcept(false);         // potentially throwing, same as no specifier
+void d();                         // potentially throwing
 
-// Function that might throw (default)
-void risky_function() {
-    throw std::runtime_error("Error");
-}
-
-// Conditional noexcept (C++11)
-void conditional() noexcept(sizeof(int) == 4) {
-    // noexcept if condition is true
-}
+template <class T>
+void e(T& x) noexcept(std::is_nothrow_move_constructible_v<T>);   // conditional
 ```
 
----
+The argument of `noexcept(...)` must be a constant expression convertible to `bool`. `noexcept` is not
+a static check: the compiler doesn't verify that the body can't throw. It only changes what happens
+if an exception reaches the function's boundary.
 
-## noexcept vs throw()
+*(C++17)* The exception specification is **part of the function type**. A pointer to a `noexcept`
+function converts to a plain function pointer, but not the other way round, and `void(*)() noexcept`
+and `void(*)()` are distinct types. You still can't overload on `noexcept` alone.
 
-```cpp showLineNumbers 
-// Old style (C++98, deprecated)
-void old_style() throw() {
-    // Exception specification (avoid)
-}
+## What happens when the promise is broken
 
-// Modern style (C++11+)
-void modern_style() noexcept {
-    // Preferred
-}
-```
+```cpp title="terminate.cpp" showLineNumbers
+#include <cstdio>
+#include <stdexcept>
 
-**Difference**: `throw()` calls `std::unexpected`, `noexcept` calls `std::terminate`. Both crash if exception escapes, but `noexcept` is more efficient.
-
----
-
-## What Happens if Exception Thrown?
-
-```cpp showLineNumbers 
-void marked_noexcept() noexcept {
-    throw std::runtime_error("Oops");  // Compiles but dangerous!
-}
+void parse() { throw std::runtime_error("bad input"); }
+void load() noexcept { parse(); }        // compiles: nothing checks the body
 
 int main() {
-    try {
-        marked_noexcept();
-    } catch (...) {
-        // Never reached!
-    }
-}
-// std::terminate called → program crashes
-```
-
-**Rule**: If exception escapes `noexcept` function, `std::terminate` is called immediately.
-
----
-
-## Conditional noexcept
-
-```cpp showLineNumbers 
-// noexcept depends on expression
-template<typename T>
-void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible_v<T>) {
-    T temp(std::move(a));
-    a = std::move(b);
-    b = std::move(temp);
-}
-
-// Simple types
-int x = 1, y = 2;
-swap(x, y);  // noexcept(true)
-
-// Complex types
-std::string s1 = "hello", s2 = "world";
-swap(s1, s2);  // noexcept(true) - string's move doesn't throw
-
-// Custom type that might throw
-struct MightThrow {
-    MightThrow(MightThrow&&) { /* might throw */ }
-};
-MightThrow a, b;
-swap(a, b);  // noexcept(false)
-```
-
----
-
-## Testing for noexcept
-
-```cpp showLineNumbers 
-void func1() noexcept { }
-void func2() { }
-
-// Check if function is noexcept
-static_assert(noexcept(func1()), "func1 is noexcept");
-static_assert(!noexcept(func2()), "func2 can throw");
-
-// Check expressions
-int x = 0;
-static_assert(noexcept(x + 1), "Addition doesn't throw");
-static_assert(!noexcept(std::string("hello")), "String ctor might throw");
-```
-
----
-
-## Move Semantics and noexcept
-
-Standard containers use move only if it's `noexcept`:
-
-```cpp showLineNumbers 
-class Widget {
-public:
-    // Without noexcept
-    Widget(Widget&& other) {
-        // std::vector uses COPY when growing
-    }
-    
-    // With noexcept
-    Widget(Widget&& other) noexcept {
-        // std::vector uses MOVE when growing (efficient!)
-    }
-};
-
-std::vector<Widget> vec;
-vec.push_back(Widget{});  // Triggers potential reallocation
-```
-
-**Why**: If move throws during vector reallocation, strong exception guarantee is broken. So vector copies instead (inefficient but safe).
-
-:::warning[Critical for Performance]
-Mark move constructors/assignments `noexcept` or standard containers won't use them!
-:::
-
----
-
-## Destructors
-
-Destructors are implicitly `noexcept`:
-
-```cpp showLineNumbers 
-class Widget {
-public:
-    ~Widget() {  // Implicitly noexcept
-        // Throwing here is dangerous
-    }
-};
-
-// Explicitly not noexcept (rare, dangerous)
-class Bad {
-public:
-    ~Bad() noexcept(false) {
-        throw std::runtime_error("Bad idea");
-    }
-};
-```
-
-**Rule**: Never throw from destructors. If exception during stack unwinding, `std::terminate` is called.
-
----
-
-## Functions That Should Be noexcept
-
-```cpp showLineNumbers 
-class Widget {
-public:
-    // Move operations (critical!)
-    Widget(Widget&&) noexcept;
-    Widget& operator=(Widget&&) noexcept;
-    
-    // Destructor (implicit)
-    ~Widget() noexcept;
-    
-    // Swap
-    void swap(Widget& other) noexcept;
-    
-    // Simple getters
-    int getValue() const noexcept { return value; }
-    
-private:
-    int value;
-};
-```
-
----
-
-## Propagating noexcept
-
-```cpp showLineNumbers 
-template<typename T>
-class Wrapper {
-    T value;
-public:
-    // Propagate noexcept from T's constructor
-    Wrapper(T v) noexcept(std::is_nothrow_move_constructible_v<T>)
-        : value(std::move(v)) {}
-    
-    // Propagate from T's swap
-    void swap(Wrapper& other) noexcept(noexcept(std::swap(value, other.value))) {
-        std::swap(value, other.value);
-    }
-};
-```
-
----
-
-## Performance Impact
-
-### Without noexcept
-
-```cpp showLineNumbers 
-void process() {
-    // Compiler must generate exception handling code
-    // - Setup exception tables
-    // - Add cleanup code
-    // - Maintain exception state
+    try { load(); }
+    catch (const std::exception&) { std::puts("caught"); }   // never runs
 }
 ```
 
-### With noexcept
-
-```cpp showLineNumbers 
-void process() noexcept {
-    // Compiler can optimize away exception handling
-    // - Smaller code
-    // - Faster execution
-    // - Better inlining opportunities
-}
+```text
+$ g++ -std=c++23 terminate.cpp -o terminate && ./terminate
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  bad input
+Aborted (core dumped)        # exit status 134
 ```
 
-**Typical improvement**: 10-20% faster in hot paths, smaller binary.
+<Walkthrough title="An exception meets a noexcept boundary" caption="Unwinding searches outward for a handler; a noexcept frame ends the search." accent="violet">
+  <Step title="throw in parse()">
 
----
+`parse()` throws `std::runtime_error`. The runtime starts looking for a matching handler in the
+frames above: <StepChange>`parse` → `load` → `main`</StepChange>.
 
-## Wide Contracts vs Narrow Contracts
+  </Step>
+  <Step title="Reach load()">
 
-### Wide Contract (noexcept friendly)
+`load` is `noexcept`. The search reaches its boundary before it ever gets to `main`'s `try` block.
+<StepChange>The exception may not leave this frame.</StepChange>
 
-```cpp showLineNumbers 
-// Accepts any input, never throws
-int abs(int x) noexcept {
-    return x < 0 ? -x : x;
-}
-```
+  </Step>
+  <Step title="std::terminate">
 
-### Narrow Contract (throws on invalid input)
+The runtime calls <StepChange>`std::terminate()`</StepChange>, which by default calls `std::abort`.
+The `catch` in `main` never runs. Whether `parse`'s frame was unwound (its destructors run) before
+terminating is implementation-defined, so don't rely on cleanup happening.
 
-```cpp showLineNumbers 
-// Preconditions: size > 0
-int front(std::vector<int>& vec) {
-    if (vec.empty()) {
-        throw std::out_of_range("Empty vector");
-    }
-    return vec.front();
-}
-// Can't mark noexcept - might throw
-```
+  </Step>
+</Walkthrough>
 
-**Guideline**: Wide contracts (no preconditions) can be `noexcept`, narrow contracts (preconditions) usually can't.
+This is why the compiler can generate less exception-handling code around calls to `noexcept`
+functions: callers don't need to prepare for an exception coming out of them. How much that saves
+depends on the code and platform; measure before claiming a speedup.
 
----
+## The noexcept operator
 
-## Real-World Example
+`noexcept(expr)` is a compile-time `bool`: `false` if `expr` contains a call to a potentially throwing
+function, a `throw`, or a `dynamic_cast` to a reference that could throw, and `true` otherwise. The
+expression isn't evaluated.
 
-```cpp showLineNumbers 
-class String {
-    char* data;
-    size_t len;
-    
-public:
-    // Move constructor - must be noexcept for container optimization
-    String(String&& other) noexcept
-        : data(other.data), len(other.len) {
-        other.data = nullptr;
-        other.len = 0;
-    }
-    
-    // Move assignment - also noexcept
-    String& operator=(String&& other) noexcept {
-        if (this != &other) {
-            delete[] data;
-            data = other.data;
-            len = other.len;
-            other.data = nullptr;
-            other.len = 0;
-        }
-        return *this;
-    }
-    
-    // Destructor - implicitly noexcept
-    ~String() noexcept {
-        delete[] data;
-    }
-    
-    // Swap - should be noexcept
-    void swap(String& other) noexcept {
-        std::swap(data, other.data);
-        std::swap(len, other.len);
-    }
-};
-```
-
----
-
-## Common Mistakes
-
-### Over-promising
-
-```cpp showLineNumbers 
-void process(const std::string& s) noexcept {
-    std::string copy = s;  // Might throw bad_alloc!
-}
-// If throws, std::terminate is called
-```
-
-### Under-promising
-
-```cpp showLineNumbers 
-// Could be noexcept but isn't marked
-int add(int a, int b) {
-    return a + b;  // Never throws
-}
-// Missed optimization opportunity
-```
-
----
-
-## Checking Standard Library
-
-```cpp showLineNumbers 
+```cpp title="operator.cpp" showLineNumbers
+#include <string>
 #include <type_traits>
+#include <vector>
 
-// Check if type's operations are noexcept
+void f() noexcept;
+void g();
+
+static_assert(noexcept(f()));
+static_assert(!noexcept(g()));
+static_assert(noexcept(1 + 2));
+static_assert(!noexcept(std::string("hello")));              // may allocate
 static_assert(std::is_nothrow_move_constructible_v<std::string>);
-static_assert(std::is_nothrow_move_assignable_v<std::vector<int>>);
 
-// Check specific operations
-std::vector<int> vec;
-static_assert(noexcept(vec.size()));     // true
-static_assert(!noexcept(vec.at(0)));     // false (throws on out of range)
-static_assert(noexcept(vec[0]));         // true (no bounds checking)
+std::vector<int> v(1);
+static_assert(noexcept(v.size()));
+static_assert(noexcept(v[0]));      // libstdc++ marks operator[] noexcept; the standard doesn't require it
+static_assert(!noexcept(v.at(0)));  // at() throws std::out_of_range
+
+int main() {}
+void f() noexcept {}
+void g() {}
 ```
 
----
+Combining specifier and operator gives **conditional `noexcept`**: "I don't throw if the operations I
+use don't throw". The doubled keyword is not a typo; the inner one is the operator:
 
-## Best Practices
-
-:::success[DO]
-- Mark move constructors/assignments `noexcept`
-- Mark destructors `noexcept` (implicit, but can be explicit)
-- Mark swap functions `noexcept`
-- Mark simple getters `noexcept`
-- Use conditional `noexcept` for templates
-  :::
-
-:::danger[DON'T]
-- Mark functions `noexcept` if they might throw
-- Throw from destructors
-- Throw from `noexcept` functions (causes terminate)
-- Forget `noexcept` on move operations
-  :::
-
----
-
-## Summary
-
-**noexcept**:
-- Promises no exceptions
-- Enables optimizations
-- Required for efficient moves
-- Crashes program if violated (std::terminate)
-
-**Key functions to mark**:
-```cpp showLineNumbers 
-class T {
-    T(T&&) noexcept;              // Move constructor
-    T& operator=(T&&) noexcept;   // Move assignment
-    ~T() noexcept;                 // Destructor (implicit)
-    void swap(T&) noexcept;       // Swap
+```cpp showLineNumbers
+// ...
+template <class T>
+class Wrapper {
+    T value_;
+public:
+    void swap(Wrapper& other) noexcept(noexcept(std::swap(value_, other.value_))) {
+        std::swap(value_, other.value_);
+    }
 };
 ```
 
-**Benefits**:
-- Better performance (10-20% in hot paths)
-- Smaller binary size
-- Standard containers use move operations
-- Stronger exception safety guarantees
+For the common cases, the `std::is_nothrow_*` traits in `<type_traits>` read better than a raw
+operator.
 
-**Cost**: Must ensure function truly doesn't throw, or program terminates.
+## What is noexcept without saying so
+
+- **Destructors**, unless a base or member destructor is potentially throwing, or you write
+  `noexcept(false)`.
+- **Implicitly declared or `= default` special members** (constructors, assignments) are `noexcept`
+  exactly when the operations they call on bases and members are.
+- `operator delete` and the global deallocation functions.
+
+Everything else, including your own move constructor written by hand, is potentially throwing unless
+you mark it.
+
+## Why move operations should be noexcept \{#move-semantics-and-noexcept\}
+
+When `std::vector` grows it has to transfer its elements to new storage. If it moved them and a move
+threw halfway, the old buffer would already be partly hollowed out, and `push_back` could no longer
+promise to leave the vector unchanged. So it uses `std::move_if_noexcept`: it moves only if the move
+constructor is `noexcept` (or the type can't be copied), and **copies** otherwise.
+
+```cpp title="grow.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+#include <utility>
+#include <vector>
+
+struct Loud {
+    std::string s = "x";
+    Loud() = default;
+    Loud(const Loud& o) : s(o.s) { std::puts("copy"); }
+    Loud(Loud&& o) : s(std::move(o.s)) { std::puts("move"); }            // not noexcept
+};
+struct Quiet {
+    std::string s = "x";
+    Quiet() = default;
+    Quiet(const Quiet& o) : s(o.s) { std::puts("copy"); }
+    Quiet(Quiet&& o) noexcept : s(std::move(o.s)) { std::puts("move"); }
+};
+
+int main() {
+    std::vector<Loud>  a(1); std::puts("-- Loud grows");  a.emplace_back();
+    std::vector<Quiet> b(1); std::puts("-- Quiet grows"); b.emplace_back();
+}
+```
+
+```text
+-- Loud grows
+copy
+-- Quiet grows
+move
+```
+
+Output from GCC 15.2 with libstdc++ (`-std=c++23`). In both cases the new element is constructed in
+place; the printed line is the transfer of the one existing element. The easiest fix is to not write
+the move constructor at all: a defaulted one is `noexcept` whenever the members' moves are.
+
+## Where to put noexcept
+
+- **Always:** move constructors, move assignment, `swap`, and destructors (already implicit). These are
+  the operations other code relies on to be non-throwing.
+- **Templates:** use conditional `noexcept` that forwards the property of the operations you call.
+- **Otherwise, be careful.** `noexcept` is part of your interface; removing it later can break callers
+  that tested it with the operator. A common guideline (the "Lakos rule", followed by the standard
+  library) is not to mark functions with preconditions (narrow contracts) `noexcept`, so a checking
+  build can report a violation by throwing.
+
+`throw()` is the pre-C++11 spelling. Dynamic exception specifications (`throw(X)`) were deprecated in
+C++11 and removed in C++17; `throw()` meant `noexcept(true)` in C++17 and was removed in C++20. Use
+`noexcept`.
+
+## Common mistakes
+
+- **Promising too much.** `void log(const std::string& s) noexcept { std::string copy = s; }` can throw
+  `std::bad_alloc`, which now ends the program instead of reaching a handler.
+- **Hand-written move constructor without `noexcept`.** The type works, but every `vector`
+  reallocation copies it, as the output above shows.
+- **Thinking `noexcept` is checked.** A `noexcept` function may call anything; GCC warns only for a
+  `throw` written directly in the body (`-Wterminate`).
+- **Throwing from a destructor.** Destructors are `noexcept`, so the exception terminates the program.
+  Report failures from a separate `close()` function instead.
+
+## Key points
+
+- Specifier: a promise enforced by `std::terminate`, not by the compiler.
+- Operator: a compile-time `bool` saying whether an expression is declared non-throwing.
+- `noexcept(noexcept(expr))` forwards the property in generic code; *(C++17)* it is part of the
+  function type.
+- Mark moves and `swap` `noexcept`, or containers copy instead of moving.
