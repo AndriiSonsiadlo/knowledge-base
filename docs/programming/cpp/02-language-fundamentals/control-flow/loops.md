@@ -8,99 +8,145 @@ tags: [c++, control-flow, loops, iteration]
 
 # Loops (`for`, `while`, `do-while`)
 
-Four looping forms cover every case. The decision is rarely about capability — they are mostly
-interchangeable — and mostly about **intent**: pick the form that makes the loop's contract obvious
-to the reader.
+A loop repeats a statement while a condition holds. C++ has four forms. Any of them can express any
+loop, so the choice is about **intent**: pick the one that tells the reader what kind of repetition
+this is, whether a count, a condition, "at least once", or "each element".
+
+**Prerequisites:** [Expressions and Statements](../expressions-and-statements.md),
+[Conditional Statements](./if-switch.md).
 
 ## The four forms
 
-```cpp showLineNumbers
-for (int i = 0; i < n; ++i) { ... }      // known/counted iteration; i scoped to the loop
-while (cond) { ... }                     // zero-or-more: test BEFORE each pass
-do { ... } while (cond);                 // one-or-more: test AFTER each pass
-for (const auto& x : container) { ... }  // range-based: "for each element"
+```cpp
+for (int i = 0; i < n; ++i) { /* ... */ }      // counted: init; condition; step
+while (cond) { /* ... */ }                     // zero or more times: test before each pass
+do { /* ... */ } while (cond);                 // one or more times: test after each pass
+for (const auto& x : container) { /* ... */ }  // range-based (C++11): each element
 ```
 
-| Form         | Test timing | Reach for it when…                          |
-|--------------|-------------|---------------------------------------------|
-| `for`        | before      | the index/count is part of the logic        |
-| `while`      | before      | iterations depend on a condition, not a count |
-| `do-while`   | after       | the body must run at least once (menus, retry) |
-| range-`for`  | before      | you just need each element, not the index   |
+| Form | Condition tested | Use when |
+|---|---|---|
+| `for` | before each pass | an index or counter is part of the logic |
+| `while` | before each pass | you repeat until something happens (input ends, queue empties) |
+| `do`-`while` | after each pass | the body must run at least once (prompt, then validate) |
+| range-`for` | (iterator compare) | you need each element and not its position |
 
-## Prefer range-based `for`
+## How a `for` loop runs
 
-When you only need the elements, the range form removes the index, the bounds, and a whole class of
-off-by-one and iterator-invalidation bugs.
+The three parts of the `for` header run at different times. Tracing `for (int i = 0; i < 3; ++i)`
+with a body that prints `i`:
 
-```cpp showLineNumbers
-for (const auto& item : items) total += item.price;   // read-only: const ref, no copy
-for (auto& item : items)       item.price *= 1.1;      // mutate in place: non-const ref
-for (auto [key, val] : table)  use(key, val);          // structured bindings over a map (C++17)
+<Walkthrough title="for (int i = 0; i < 3; ++i) std::cout << i;" caption="init once; then condition → body → step, until the condition is false." accent="blue">
+  <Step title="Init, once">
+
+`int i = 0` runs exactly once. `i` exists only inside the loop. State: <StepChange>`i == 0`</StepChange>
+
+  </Step>
+  <Step title="Condition, body, step">
+
+`0 < 3` is true, so the body prints `0`. Then the step `++i` runs: <StepChange>`i == 1`</StepChange>
+
+  </Step>
+  <Step title="Repeat">
+
+`1 < 3`: print `1`, `i` becomes 2. `2 < 3`: print `2`, `i` becomes <StepChange>`3`</StepChange>.
+
+  </Step>
+  <Step title="Condition false: exit">
+
+`3 < 3` is false. The body and step do not run; the loop ends and `i` goes out of scope.
+Output: `012`. The body ran 3 times; the condition was tested 4 times.
+
+  </Step>
+</Walkthrough>
+
+Any part of the header may be empty; `for (;;)` loops forever (until `break` or `return`). A
+`while (cond) body` is the same as `for (; cond;) body`.
+
+## Range-based `for`
+
+When you need only the elements, the range form removes the index, the bounds and the off-by-one
+errors that come with them. It works on arrays, standard containers, and anything with
+`begin()`/`end()`.
+
+```cpp
+for (const auto& item : items) total += item.price;   // read without copying
+for (auto& item : items)       item.price *= 2;        // modify in place
+for (const auto& [key, value] : table) use(key, value); // map entries via structured bindings (C++17)
 ```
 
-:::tip[Choosing the loop variable]
-- `const auto&` — read elements without copying (the default).
-- `auto&` — modify elements in place.
-- `auto` (by value) — only when you genuinely want a copy to mutate locally.
+The loop variable's type decides what happens to each element:
 
-Plain `auto` over a container of heavy objects silently copies every element.
-:::
+| Loop variable | Effect |
+|---|---|
+| `const auto&` | reads each element without copying: the default choice |
+| `auto&` | modifies the elements in the container |
+| `auto` | copies each element: fine for `int`, wasteful for strings or large objects |
 
-## `break`, `continue`, and exit conditions
+*(C++20)* adds an init-statement: `for (auto v = load(); const auto& x : v)`.
 
-```cpp showLineNumbers
-for (auto& job : queue) {
-    if (job.cancelled) continue;   // skip to the next iteration
+## `break` and `continue`
+
+```cpp
+for (const auto& job : jobs) {
+    if (job.cancelled) continue;   // skip the rest of this pass, go to the next
     if (job.fatal)     break;      // leave the loop entirely
-    process(job);
+    run(job);
 }
 ```
 
-`break`/`continue` affect only the **innermost** loop. To exit nested loops, prefer extracting the
-nest into a function and `return`-ing, rather than reaching for [`goto`](./goto-and-labels.md).
+Both affect only the **innermost** loop (and `break` also leaves a `switch`). To leave several nested
+loops at once, move them into a function and `return`; see [`goto`](./goto-and-labels.md) for the
+alternative.
 
-## Common pitfalls
+## Pitfalls
 
-:::warning[Iterator/index invalidation]
-Modifying a container *while* looping over it can invalidate the iterator or index you are using.
+**Erasing while iterating.** `v.erase(it)` invalidates `it`, so `++it` afterwards is undefined:
 
 ```cpp
 for (auto it = v.begin(); it != v.end(); ++it)
-    if (pred(*it)) v.erase(it);     // BUG: erase invalidates it
+    if (is_bad(*it)) v.erase(it);              // bug: it is invalid after erase
 
-v.erase(std::remove_if(v.begin(), v.end(), pred), v.end());   // erase–remove idiom: correct
+std::erase_if(v, is_bad);                       // (C++20) correct
+v.erase(std::remove_if(v.begin(), v.end(), is_bad), v.end());   // before C++20
 ```
-:::
 
-:::warning[Unsigned counters and reverse loops]
-`for (size_t i = n - 1; i >= 0; --i)` never terminates — an unsigned value is always `>= 0`, so it
-wraps around instead of going negative. Loop with a signed index, or use iterators / `i-- ` tricks.
-:::
+A range-`for` uses iterators internally, so adding or removing elements inside one is the same bug.
+Rules per container: [Iterators](../../09-standard-library/iterators.md).
 
-## Beyond hand-written loops
+**Counting down with an unsigned index.** `for (std::size_t i = n - 1; i >= 0; --i)` never ends:
+an unsigned value is always `>= 0`, and `0 - 1` wraps to the largest value. Test before decrementing:
 
-Many loops are really an algorithm in disguise. Expressing the intent is clearer and harder to get
-wrong than re-deriving the mechanics:
+```cpp
+for (std::size_t i = n; i-- > 0; ) use(v[i]);   // visits n-1 down to 0
+```
 
-```cpp showLineNumbers
-auto n = std::count_if(v.begin(), v.end(), is_even);   // vs a manual counting loop
-std::ranges::sort(v);                                  // vs a hand-rolled sort (C++20)
+**Comparing signed and unsigned.** `for (int i = 0; i < v.size(); ++i)` mixes `int` with
+`std::size_t`; `-Wall -Wextra` warns (`-Wsign-compare`). Use `std::size_t`, or a range-`for`.
+
+**A semicolon after the header.** `while (x > 0);` has an empty body and loops forever if `x > 0`.
+
+## Algorithms instead of loops
+
+Many loops are a standard algorithm written out by hand. Naming the algorithm states the intent:
+
+```cpp
+auto evens = std::ranges::count_if(v, is_even);   // instead of a counting loop (C++20)
+std::ranges::sort(v);
 ```
 
 See [Algorithms](../../09-standard-library/algorithms.md) and [Ranges](../../09-standard-library/ranges.md).
 
-## Summary
+## Key points
 
-- Match the form to intent: `for` for counts, `while`/`do-while` for conditions, range-`for` for elements.
-- Default the range loop variable to `const auto&`; use `auto&` to mutate.
-- `break`/`continue` touch only the innermost loop.
-- Don't mutate a container's size while iterating it — use the erase–remove idiom.
-- Reverse loops with unsigned counters underflow forever; use a signed index.
-- If a loop is "count / find / transform / sort", an algorithm says it better.
+- `for` for counts, `while` for conditions, `do`-`while` for at least once, range-`for` for elements.
+- A `for` header runs init once, then condition → body → step until the condition fails.
+- Default the range-`for` variable to `const auto&`; `auto&` to modify.
+- `break`/`continue` act on the innermost loop only.
+- Never change a container's size while iterating it; use `std::erase_if`.
 
 ## Related
 
-- [Conditional Statements (if, switch)](./if-switch.md)
-- [goto and Labels](./goto-and-labels.md)
-- [Algorithms](../../09-standard-library/algorithms.md) · [Iterators](../../09-standard-library/iterators.md)
+- [Conditional Statements](./if-switch.md)
+- [goto and Labels](./goto-and-labels.md) — leaving nested loops
+- [Iterators](../../09-standard-library/iterators.md) — what range-`for` uses underneath

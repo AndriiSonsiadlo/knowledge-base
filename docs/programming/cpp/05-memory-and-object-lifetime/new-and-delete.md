@@ -1,203 +1,218 @@
 ---
 id: new-and-delete
-title: new and delete Operators
+title: new and delete
 sidebar_label: new & delete
 sidebar_position: 5
-tags: [c++, new, delete, dynamic-memory, heap, allocation]
+tags: [c++, new, delete, dynamic-memory, heap, operator-new]
 ---
 
-# new and delete Operators
+# new and delete
 
-Manual dynamic memory management in C++. Allocates on heap, requires explicit deallocation. Modern C++ prefers smart pointers.
+A `new`-expression creates an object with dynamic storage duration: it allocates memory **and**
+constructs the object in it. A `delete`-expression does the reverse: it destroys the object **and**
+frees the memory. Each half calls a separate function you can see and replace, which is what
+[placement new](./placement-new.md), custom allocators, and memory-leak checkers build on. In
+application code you rarely write `new` directly: `std::make_unique`, `std::make_shared`, and the
+containers do it for you. You still need to know what they do.
 
-:::warning[Manual Memory = Manual Cleanup]
-Every `new` requires exactly one `delete`. Missing = leak. Double = crash. Modern code uses `unique_ptr`/`shared_ptr` instead.
-:::
+**Prerequisites:** [Storage duration](./storage-duration.md),
+[object lifetime](./object-lifetime.md).
 
-## Basic Usage
-```cpp showLineNumbers
-// Allocation + construction
-int* p = new int;           // Uninitialized
-int* p = new int();         // Zero-initialized
-int* p = new int{42};       // Direct initialization
+## The forms
 
-delete p;                   // Deallocation + destruction
-p = nullptr;                // Prevent dangling pointer
-```
+```cpp title="forms.cpp" showLineNumbers
+#include <string>
 
-**Rule**: `new` = allocate + construct. `delete` = destruct + deallocate.
+int main() {
+    int* a = new int;              // default-initialized: indeterminate value
+    int* b = new int();            // value-initialized: 0
+    int* c = new int{42};          // 42
+    auto* s = new std::string(3, 'x');   // "xxx"
 
-## Arrays
-```cpp showLineNumbers
-// Array allocation
-int* arr = new int[10];     // Allocate 10 ints
-int* arr = new int[10]();   // All zeros
-int* arr = new int[10]{1,2,3}; // Partial init {1,2,3,0...0}
+    int* arr  = new int[4];        // 4 indeterminate ints
+    int* zero = new int[4]();      // 4 zeros
+    int* some = new int[4]{1, 2};  // {1, 2, 0, 0}
 
-delete[] arr;               // Array delete
-
-// WRONG
-delete arr;                 // Undefined behavior! Use delete[]
-```
-
-**Critical**: `new[]` ⟷ `delete[]` and `new` ⟷ `delete`. Never mix.
-
-## Memory Problems
-
-### Memory Leak
-```cpp showLineNumbers
-void leak() {
-    int* p = new int(42);
-    return;                 // Forgot delete - memory leaked
-}
-
-// Fix with RAII
-void safe() {
-    auto p = std::make_unique<int>(42);
-    return;                 // Auto-deleted
+    delete a; delete b; delete c; delete s;
+    delete[] arr; delete[] zero; delete[] some;   // array form for array new
 }
 ```
 
-### Double Delete
-```cpp showLineNumbers
-int* p = new int(42);
-delete p;
-delete p;                   // Undefined behavior - heap corrupted
+The initializer after the type follows the normal [initialization rules](./initialization/default-initialization.md):
+no initializer means default initialization, which leaves scalars indeterminate.
 
-// Safe pattern
-delete p;
-p = nullptr;
-delete p;                   // OK: deleting nullptr is no-op
-```
+`new T` must be paired with `delete`, and `new T[n]` with `delete[]`. Mixing them is undefined
+behavior. For arrays, prefer `std::vector<T>` or `std::make_unique<T[]>(n)`.
 
-### Use After Free
-```cpp showLineNumbers
-int* p = new int(42);
-delete p;
-*p = 10;                    // Undefined behavior - accessing freed memory
-std::cout << *p;            // May crash, return garbage, or "work"
-```
+## What a new-expression does
 
-## Allocation Failure
-```cpp showLineNumbers
-// Default: throws exception
-try {
-    int* huge = new int[1000000000000];
-} catch (const std::bad_alloc& e) {
-    std::cerr << "Out of memory\n";
+A `new`-expression is not a function call. The compiler expands it into two steps: a call to an
+**allocation function** named `operator new`, then construction in the returned storage.
+
+```cpp title="expansion.cpp" showLineNumbers
+#include <cstdio>
+#include <cstdlib>
+#include <new>
+
+void* operator new(std::size_t n) {          // replace the global allocation function
+    std::printf("operator new(%zu)\n", n);
+    if (void* p = std::malloc(n)) return p;
+    throw std::bad_alloc{};
+}
+void operator delete(void* p) noexcept { std::printf("operator delete\n"); std::free(p); }
+void operator delete(void* p, std::size_t n) noexcept {   // sized form (C++14)
+    std::printf("operator delete(%zu)\n", n);
+    std::free(p);
 }
 
-// Nothrow: returns nullptr
-int* p = new (std::nothrow) int[1000];
-if (!p) {
-    std::cerr << "Allocation failed\n";
-}
-```
+struct Widget {
+    int a, b;
+    Widget() : a(1), b(2) { std::printf("Widget()\n"); }
+    ~Widget() { std::printf("~Widget()\n"); }
+};
 
-## Quick Comparison
-
-| Operation | Stack | Heap (`new`) |
-|-----------|-------|--------------|
-| **Speed** | ~1ns | ~50-100ns |
-| **Size** | Limited (1-8MB) | Large (GB) |
-| **Lifetime** | Automatic | Manual |
-| **Cleanup** | Automatic | `delete` required |
-| **Failure** | Stack overflow (crash) | Exception or nullptr |
-
-## Modern Alternatives
-```cpp showLineNumbers
-// Old style (manual management)
-Widget* w = new Widget();
-// ... use w ...
-delete w;
-
-// Modern (automatic management)
-auto w = std::make_unique<Widget>();
-// Auto-deleted when out of scope
-
-// Shared ownership
-auto shared = std::make_shared<Widget>();
-// Deleted when last reference dies
-```
-
-**Prefer**: `unique_ptr` > `shared_ptr` > raw `new/delete`
-
-## Common Patterns
-```cpp showLineNumbers
-// Resource leak with early return
-void dangerous() {
-    int* p = new int(42);
-    if (error) return;      // Leaks p
-    delete p;
-}
-
-// Exception safety
-void risky() {
-    int* p = new int(42);
-    might_throw();          // If throws, p leaks
-    delete p;
-}
-
-// Solution: RAII
-void safe() {
-    auto p = std::make_unique<int>(42);
-    if (error) return;      // Auto-cleaned
-    might_throw();          // Auto-cleaned on exception
+int main() {
+    Widget* w = new Widget;   // allocate, then construct
+    delete w;                 // destroy, then deallocate
 }
 ```
 
-## Key Rules
+<Walkthrough title="new Widget and delete w" caption="g++ 15 and clang++ 21 on x86-64, -std=c++23. Both call the sized operator delete." accent="amber">
+  <Step title="Allocate">
 
-:::success[DO]
-- Use smart pointers (`unique_ptr`, `shared_ptr`)
-- Match `new` with `delete`, `new[]` with `delete[]`
-- Set deleted pointers to `nullptr`
-- Initialize with `()` or `{}`, not bare `new int`
-  :::
+```text
+operator new(8)
+```
 
-:::danger[DON'T]
-- Mix `new/delete` with `new[]/delete[]`
-- Delete same pointer twice
-- Use after delete
-- Forget to delete (use smart pointers instead)
-  :::
+The compiler calls `operator new(sizeof(Widget))`. It returns <StepChange>raw storage</StepChange>:
+8 bytes, aligned to at least `__STDCPP_DEFAULT_NEW_ALIGNMENT__` (16 on x86-64 Linux). No `Widget`
+exists yet. If allocation fails, `operator new` throws `std::bad_alloc` and nothing else happens.
 
-## Summary
+  </Step>
+  <Step title="Construct">
 
-:::info[new and delete - Key Points]
-**Basic Operations:**
-- **`new`**: Allocates heap memory + constructs object
-- **`delete`**: Destructs object + deallocates memory
-- **`new[]`**: Allocates array on heap
-- **`delete[]`**: Destructs array + deallocates
-- **Critical**: Match `new` with `delete`, `new[]` with `delete[]`
+```text
+Widget()
+```
 
-**Common Bugs:**
-- **Memory leak**: Forgot `delete` → memory never reclaimed
-- **Double delete**: `delete` twice → heap corruption, crash
-- **Use-after-free**: Access after `delete` → undefined behavior
-- **Wrong delete**: `delete` on `new[]` → undefined behavior
-- **Mixing**: Never mix single/array forms
+The constructor runs in that storage. When it returns, the <StepChange>lifetime begins</StepChange>
+and `w` holds the address. If the constructor had thrown, the compiler would call the matching
+`operator delete` automatically and let the exception continue. The memory does not leak.
 
-**Initialization Forms:**
-- `new int` → uninitialized (garbage)
-- `new int()` → zero-initialized
-- `new int{42}` → initialized to 42
-- `new int[10]()` → array, all zeros
+  </Step>
+  <Step title="Destroy">
 
-**Safety Patterns:**
-- Set to `nullptr` after delete (safe to delete nullptr)
-- Check allocation success with nothrow: `new (nothrow)`
-- Modern code: use smart pointers instead
+```text
+~Widget()
+```
 
-**Modern C++ Alternatives:**
-- **`unique_ptr`**: Exclusive ownership, auto-deleted
-- **`shared_ptr`**: Reference-counted, shared ownership
-- **`make_unique/make_shared`**: Factory functions (safer)
-- Eliminates: leaks, double-deletes, use-after-free
+`delete w` first calls the destructor. The <StepChange>lifetime ends</StepChange>. The storage
+still belongs to the program.
 
-**Performance:**
-- Stack allocation: ~1ns (automatic)
-- Heap allocation: ~50-100ns (manual management)
-- Smart pointers: Minimal overhead, huge safety gain
-  :::
+  </Step>
+  <Step title="Deallocate">
+
+```text
+operator delete(8)
+```
+
+Then the compiler calls the deallocation function. With sized deallocation *(C++14)* it passes the
+size it already knows, so the allocator can skip looking it up. <StepChange>The storage is
+released</StepChange>, and `w` is now dangling.
+
+  </Step>
+</Walkthrough>
+
+`new T[n]` works the same way through `operator new[]`, then constructs `n` elements in order, and
+`delete[]` destroys them in reverse order before calling `operator delete[]`. For element types with
+a non-trivial destructor, implementations store the element count in front of the array (the Itanium
+C++ ABI calls it an "array cookie"), which is how `delete[]` knows how many destructors to run. That
+is also why `delete` on a `new[]` pointer breaks things: it passes the wrong address and runs only
+one destructor.
+
+Types that need more alignment than `__STDCPP_DEFAULT_NEW_ALIGNMENT__` get an aligned
+`operator new(std::size_t, std::align_val_t)` overload *(C++17)*. See
+[alignment](./alignment.md#over-aligned-types-and-new).
+
+## When allocation fails
+
+```cpp title="failure.cpp" showLineNumbers
+#include <cstdio>
+#include <new>
+
+int main() {
+    try {
+        auto* huge = new char[1ull << 60];        // far more than any machine has
+        delete[] huge;
+    } catch (const std::bad_alloc&) {
+        std::puts("bad_alloc");
+    }
+
+    char* p = new (std::nothrow) char[1ull << 60];   // returns nullptr instead of throwing
+    std::puts(p ? "allocated" : "nullptr");
+    delete[] p;                                     // deleting nullptr is a no-op
+}
+```
+
+Output:
+
+```text
+bad_alloc
+nullptr
+```
+
+On Linux, overcommit means that ordinary-sized requests usually succeed even when memory is short,
+and the process is killed by the OOM killer later when it touches the pages. Do not rely on
+`bad_alloc` as an out-of-memory detector there. The `std::nothrow` form only makes the
+*allocation* non-throwing. The constructor can still throw.
+
+## Deleting through a base pointer
+
+`delete p` where `p` is a `Base*` pointing to a `Derived` is undefined behavior unless `Base` has a
+**virtual destructor**. Without it only `~Base` runs and the wrong size may be passed to
+`operator delete`. Give every polymorphic base `virtual ~Base() = default;`. See
+[virtual functions](../07-classes-and-oop/virtual-functions.md).
+
+## Common mistakes
+
+| Mistake | What happens | Fix |
+|---|---|---|
+| Missing `delete` (often on an early `return` or an exception) | Memory leak | `std::unique_ptr` / `std::make_unique` |
+| `delete p;` twice | Undefined behavior. Typically heap corruption, detected by glibc as `free(): double free detected` | One owner. Smart pointers. |
+| Using `*p` after `delete p` | Use after free | Smart pointers. AddressSanitizer finds it. |
+| `delete` for `new[]`, or `delete[]` for `new` | Undefined behavior | Use `std::vector` / `std::make_unique<T[]>` |
+| `free` on `new` memory, or `delete` on `malloc` memory | Undefined behavior: different allocation functions | Keep each pair together |
+| `new int` and reading the value | Indeterminate value | `new int()` or `new int{}` |
+
+Setting a pointer to `nullptr` after `delete` makes a second `delete` of *that variable* harmless,
+but does nothing for other copies of the pointer. It is a patch, not ownership.
+
+## The modern replacement
+
+```cpp title="owners.cpp" showLineNumbers
+#include <memory>
+#include <vector>
+
+struct Widget { int value = 0; };
+
+int main() {
+    auto one = std::make_unique<Widget>();            // owned; deleted at scope exit
+    auto shared = std::make_shared<Widget>();         // reference-counted
+    auto arr = std::make_unique<int[]>(100);          // value-initialized: 100 zeros
+    std::vector<Widget> many(10);                     // usually the best "dynamic array"
+    return one->value + shared->value + arr[0] + many[9].value;   // returns 0
+}
+```
+
+Ownership semantics are covered in
+[unique_ptr](../06-pointers-references-and-smart-pointers/unique-ptr.md) and
+[shared_ptr](../06-pointers-references-and-smart-pointers/shared-ptr.md).
+
+## Key points
+
+- `new` = `operator new` (allocate) + constructor. `delete` = destructor + `operator delete`
+  (deallocate).
+- If a constructor throws inside `new`, the memory is freed for you.
+- Match `new`/`delete`, `new[]`/`delete[]`, `malloc`/`free`, never across.
+- Write `new` only inside owning types. Everywhere else use `make_unique`, `make_shared` and
+  containers.

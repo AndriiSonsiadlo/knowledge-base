@@ -8,308 +8,200 @@ tags: [c++, decltype-auto, type-deduction, cpp14]
 
 # decltype(auto)
 
-`decltype(auto)` (C++14) combines `auto` convenience with `decltype` precision - deduces type while preserving references and const.
+`decltype(auto)` *(C++14)* is a placeholder like `auto`, but it deduces with the
+[decltype](./decltype.md) rules applied to the initializer: `decltype(auto) x = e;` gives `x` the
+type `decltype(e)`. Its main job is in function return types, where a wrapper has to return exactly
+what the function it wraps returns, a reference included. Plain `auto` can't: it always deduces a
+non-reference. The same exactness makes it easy to return a dangling reference, so this page covers
+both.
 
-:::info[Best of Both Worlds]
-`auto` is convenient but drops references. `decltype` preserves them but verbose. `decltype(auto)` gives both.
-:::
+**Prerequisites:** [auto](./auto.md), [decltype](./decltype.md)
 
-## The Problem
+## The rule
 
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3};
+| Declaration | Deduced as |
+|---|---|
+| `auto x = e;` | By-value template rule: no reference, no top-level `const` |
+| `decltype(auto) x = e;` | `decltype(e)`: declared type for a bare name, otherwise `T` / `T&` / `T&&` by category |
 
-// auto drops reference
-auto x = vec[0];  // int (copy)
-x = 42;           // Doesn't modify vec
+```cpp title="decltype-auto-vars.cpp" showLineNumbers
+#include <type_traits>
+#include <vector>
+using std::is_same_v;
 
-// decltype preserves reference but verbose
-decltype(vec[0]) y = vec[0];  // int&
-y = 42;  // Modifies vec[0]
+int main() {
+    std::vector<int> v{1, 2, 3};
+    int x = 0;
+    const int& cr = x;
 
-// decltype(auto) - concise AND preserves reference
-decltype(auto) z = vec[0];  // int&
-z = 42;  // Modifies vec[0]
-```
-
----
-
-## Basic Usage
-
-```cpp showLineNumbers 
-int x = 42;
-const int cx = x;
-int& rx = x;
-
-// auto deduction (drops reference/const)
-auto a = rx;            // int
-
-// decltype deduction (preserves)
-decltype(rx) b = rx;    // int&
-
-// decltype(auto) - auto syntax, decltype rules
-decltype(auto) c = rx;  // int&
-```
-
-**Rule**: `decltype(auto)` uses `decltype` rules on the initializer expression.
-
----
-
-## Perfect Return Type Forwarding
-
-### Before C++14
-
-```cpp showLineNumbers 
-// C++11: Need to duplicate expression
-template<typename Container, typename Index>
-auto getElement(Container& c, Index i) -> decltype(c[i]) {
-    return c[i];  // Expression duplicated
+    auto           a = v[0];   static_assert(is_same_v<decltype(a), int>);         // copy
+    decltype(auto) b = v[0];   static_assert(is_same_v<decltype(b), int&>);        // refers to v[0]
+    decltype(auto) c = x;      static_assert(is_same_v<decltype(c), int>);         // bare name: declared type
+    decltype(auto) d = (x);    static_assert(is_same_v<decltype(d), int&>);        // lvalue expression
+    decltype(auto) e = cr;     static_assert(is_same_v<decltype(e), const int&>);  // declared type kept
+    b = 42;                    // changes v[0]
+    (void)a; (void)c; (void)d; (void)e;
 }
 ```
 
-### C++14: decltype(auto)
+`decltype(auto)` must appear on its own: `const decltype(auto)`, `decltype(auto)&` and
+`decltype(auto)*` are all errors. As a variable declaration it is rarely clearer than naming the
+type or writing `auto&`. Its real use is return types.
 
-```cpp showLineNumbers 
-// Clean and DRY (Don't Repeat Yourself)
-template<typename Container, typename Index>
-decltype(auto) getElement(Container& c, Index i) {
-    return c[i];  // Preserves reference if c[i] returns reference
-}
+## Forwarding a return type
 
-std::vector<int> vec = {1, 2, 3};
-decltype(auto) elem = getElement(vec, 0);  // int&
-elem = 42;  // Modifies vec[0]
-```
+A function that wraps another, such as a logging or locking wrapper, should not change what the
+callee returns. With `auto` the reference disappears:
 
----
+<Tabs>
+  <TabItem value="auto" label="auto: always a copy">
 
-## Variable Declarations
+```cpp title="wrap-auto.cpp" showLineNumbers
+#include <vector>
 
-```cpp showLineNumbers 
-int x = 42;
-int& ref = x;
+template <class C>
+auto at(C& c, std::size_t i) { return c[i]; }   // deduces int for vector<int>
 
-// Deduction from initializer
-decltype(auto) a = x;    // int (x is lvalue)
-decltype(auto) b = ref;  // int& (ref is reference)
-decltype(auto) c = (x);  // int& (parentheses → expression)
-```
-
-:::danger[Parentheses Matter]
-```cpp showLineNumbers 
-int x = 42;
-
-decltype(auto) a = x;    // int
-decltype(auto) b = (x);  // int& (expression!)
-
-b = 10;  // Modifies x
-```
-
-`(x)` is an expression, making `b` a reference to `x`.
-:::
-
----
-
-## Return Type Deduction
-
-### Value vs Reference
-
-```cpp showLineNumbers 
-std::string getString() {
-    std::string s = "hello";
-    return s;  // Returns by value
-}
-
-decltype(auto) func1() {
-    return getString();  // std::string (by value)
-}
-
-decltype(auto) func2() {
-    std::string s = "hello";
-    return s;  // std::string (by value)
-}
-
-decltype(auto) func3() {
-    std::string s = "hello";
-    return (s);  // std::string& (expression!) Dangling!
+int main() {
+    std::vector<int> v{1, 2, 3};
+    // at(v, 0) = 10;   // error: assigning to a prvalue int
+    return at(v, 0);
 }
 ```
 
-:::warning[Dangling References]
-```cpp showLineNumbers 
-decltype(auto) bad() {
-    int x = 42;
-    return (x);  // Returns int& to local variable!
-}  // x destroyed, reference dangles
-```
-:::
+  </TabItem>
+  <TabItem value="decltype-auto" label="decltype(auto): exactly what c[i] is">
 
----
+```cpp title="wrap-decltype-auto.cpp" showLineNumbers
+#include <cstdio>
+#include <vector>
 
-## Comparison Table
+template <class C>
+decltype(auto) at(C& c, std::size_t i) { return c[i]; }   // int& for vector<int>
 
-| Syntax | Type Deduced | Preserves Ref | Preserves Const |
-|--------|--------------|---------------|-----------------|
-| `auto x = expr` | Template rules | No | No (top-level) |
-| `auto& x = expr` | Template + & | Yes | Yes |
-| `decltype(expr) x` | Exact type | Yes | Yes |
-| `decltype(auto) x = expr` | decltype rules | Yes | Yes |
-
----
-
-## Practical Examples
-
-### Generic Wrapper
-
-```cpp showLineNumbers 
-template<typename Func, typename... Args>
-decltype(auto) callWrapper(Func&& f, Args&&... args) {
-    log("Calling function");
-    return std::forward<Func>(f)(std::forward<Args>(args)...);
-    // Preserves exact return type of f (value, ref, or rvalue ref)
-}
-
-int getValue() { return 42; }
-int& getRef() { static int x = 42; return x; }
-
-auto val = callWrapper(getValue);  // int
-decltype(auto) ref = callWrapper(getRef);  // int&
-```
-
-### Container Access
-
-```cpp showLineNumbers 
-template<typename Container>
-class Wrapper {
-    Container c;
-public:
-    decltype(auto) operator[](size_t i) {
-        return c[i];  // Preserves Container's operator[] return type
-    }
-};
-
-Wrapper<std::vector<int>> w;
-decltype(auto) elem = w[0];  // int& (matches vector's behavior)
-```
-
-### Lazy Evaluation
-
-```cpp showLineNumbers 
-template<typename Func>
-class Lazy {
-    Func func;
-public:
-    Lazy(Func f) : func(f) {}
-    
-    decltype(auto) get() {
-        return func();  // Preserves func's return type
-    }
-};
-
-auto lazy = Lazy([]() -> int& { 
-    static int x = 42; 
-    return x; 
-});
-
-decltype(auto) value = lazy.get();  // int&
-```
-
----
-
-## When to Use
-
-### Use decltype(auto) When
-
-```cpp showLineNumbers 
-// Perfect forwarding return types
-template<typename T>
-decltype(auto) forward_call(T&& arg) {
-    return some_function(std::forward<T>(arg));
-}
-
-// Preserving reference in generic code
-template<typename Container>
-decltype(auto) getFirst(Container& c) {
-    return c[0];  // Reference if Container returns reference
-}
-
-// Avoiding type repetition
-decltype(auto) result = complicated_expression();
-```
-
-### Use auto When
-
-```cpp showLineNumbers 
-// Want a copy
-auto copy = vec[0];  // int (copy)
-
-// Don't want reference
-auto value = get_reference();  // Copy even if returns reference
-
-// Type is obvious
-auto count = vec.size();  // size_t
-```
-
----
-
-## Common Pitfalls
-
-### Unintended Reference
-
-```cpp showLineNumbers 
-decltype(auto) getLocal() {
-    int x = 42;
-    return (x);  // Returns int& to local!
+int main() {
+    std::vector<int> v{1, 2, 3};
+    at(v, 0) = 10;             // writes through the returned reference
+    std::printf("%d\n", v[0]); // prints 10
 }
 ```
 
-### Expression vs Variable
+  </TabItem>
+</Tabs>
 
-```cpp showLineNumbers 
-int x = 42;
+For a container whose `operator[]` returns a value (or a proxy, like `std::vector<bool>`), the
+`decltype(auto)` version returns that value too. The general wrapper forwards both its arguments
+and its result:
 
-decltype(auto) a = x;    // int (variable)
-decltype(auto) b = (x);  // int& (expression)
+```cpp title="invoke-wrapper.cpp" showLineNumbers
+#include <cstdio>
+#include <functional>
+#include <type_traits>
+#include <utility>
 
-a = 10;  // OK: modifies a
-b = 10;  // OK: modifies x through reference
-```
+template <class F, class... Args>
+decltype(auto) logged(F&& f, Args&&... args) {
+    std::puts("calling");
+    return std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+}
 
-### Const Propagation
+int  value() { return 1; }
+int& counter() { static int n = 0; return n; }
 
-```cpp showLineNumbers 
-const std::vector<int> cvec = {1, 2, 3};
-
-decltype(auto) elem = cvec[0];  // const int& (preserves const)
-elem = 42;  // Error: const
-```
-
----
-
-## Summary
-
-`decltype(auto)`:
-- **C++14 feature**
-- Uses `decltype` deduction rules
-- Preserves references and const
-- Useful for perfect forwarding
-- **Beware parentheses** - create expressions!
-
-**Decision guide**:
-```cpp showLineNumbers 
-auto x = expr;              // Want copy, drop ref/const
-auto& x = expr;             // Want reference
-decltype(expr) x;           // Exact type, but verbose
-decltype(auto) x = expr;    // Exact type, concise
-```
-
-**Common use**:
-```cpp showLineNumbers 
-// Generic return type forwarding
-template<typename F, typename... Args>
-decltype(auto) call(F&& f, Args&&... args) {
-    return std::forward<F>(f)(std::forward<Args>(args)...);
+int main() {
+    static_assert(std::is_same_v<decltype(logged(value)), int>);
+    static_assert(std::is_same_v<decltype(logged(counter)), int&>);
+    logged(counter) += 5;
+    std::printf("%d\n", counter());
 }
 ```
 
-The key benefit: write `auto` simplicity while getting `decltype` precision.
+```text
+calling
+5
+```
+
+`std::invoke` *(C++17, `<functional>`)* calls any callable. `decltype` is unevaluated, so the two
+`static_assert` lines print nothing; only the call on line 18 prints.
+
+## Return statements, traced
+
+With `decltype(auto)` the exact spelling of the `return` operand decides the return type. Each
+function below returns something different:
+
+```cpp title="returns.cpp" showLineNumbers
+#include <utility>
+#include <vector>
+
+std::vector<int> g_vec{1, 2, 3};
+int make();
+
+decltype(auto) r1() { return g_vec[0]; }        // int&
+decltype(auto) r2() { int x = 0; return x; }    // int
+decltype(auto) r3() { int x = 0; return (x); }  // int& (C++20), int&& (C++23): dangles
+decltype(auto) r4() { int x = 0; return std::move(x); }  // int&& -> dangles
+decltype(auto) r5() { return make(); }          // int
+// ...
+```
+
+<Walkthrough title="What each return statement deduces" accent="amber">
+  <Step title="return g_vec[0];">
+
+`g_vec[0]` is a call to `operator[]`, which returns `int&`, so it is an lvalue expression of type
+`int`: <StepChange>`int&`</StepChange>. Safe, because `g_vec` outlives the call.
+
+  </Step>
+  <Step title="return x;">
+
+`x` is a bare name declared `int`, so rule 1 gives the declared type:
+<StepChange>`int`</StepChange>. A copy (or NRVO) of the local, which is fine.
+
+  </Step>
+  <Step title="return (x);">
+
+The parentheses make it an expression rather than a bare name, so rule 2 applies. Up to C++20 it is
+an lvalue: <StepChange label="dangling">`int&`</StepChange>. C++23
+([P2266](https://wg21.link/p2266r3)) treats a returned local as an xvalue even in parentheses, so
+GCC 15 and Clang 21 with `-std=c++23` deduce `int&&`. Either way the function returns a reference
+to `x`, which is destroyed on return. Both compilers warn (`-Wreturn-local-addr` /
+`-Wreturn-stack-address`, on by default).
+
+  </Step>
+  <Step title="return std::move(x);">
+
+`std::move(x)` is an xvalue: <StepChange label="dangling">`int&&`</StepChange>. Also a reference to
+a dead local. Plain `auto` would have deduced `int` here and been correct.
+
+  </Step>
+  <Step title="return make();">
+
+A call returning `int` by value is a prvalue: <StepChange>`int`</StepChange>. With `auto` and with
+`decltype(auto)` alike, the result is the value.
+
+  </Step>
+</Walkthrough>
+
+## Common mistakes
+
+- **Parentheses around a returned local.** `return (result);` is a habit carried over from C. With
+  `decltype(auto)` it turns a value return into a dangling reference.
+- **Forwarding a temporary into a reference.** A pass-through like
+  `template <class T> decltype(auto) id(T&& t) { return std::forward<T>(t); }` returns `T&&`. Then
+  `decltype(auto) s = id(std::string("x"));` declares `s` as `std::string&&` bound to a temporary
+  that dies at the end of the line. Lifetime extension doesn't pass through function returns.
+- **Using it where you want a value.** If the caller should get its own object, write `auto`. Use
+  `decltype(auto)` only when the function's purpose is to return whatever the inner expression is.
+
+## Key points
+
+- `decltype(auto) x = e;` means "the type `decltype(e)`".
+- It is the tool for wrappers that must not change a callee's return type.
+- `return (x);` and `return std::move(x);` in a `decltype(auto)` function return references to
+  locals.
+
+## Related
+
+- [Reference Collapsing](../value-categories/reference-collapsing.md): forwarding the arguments that
+  go with a forwarded return.
+- [Object Lifetime](../../05-memory-and-object-lifetime/object-lifetime.md#lifetime-extension):
+  which reference bindings extend a temporary's lifetime.

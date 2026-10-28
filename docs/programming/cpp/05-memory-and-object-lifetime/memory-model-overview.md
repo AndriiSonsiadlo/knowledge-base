@@ -1,449 +1,162 @@
 ---
 id: memory-model-and-allocation
-title: Memory Model and Allocation
-sidebar_label: Memory Model
+title: Process Memory and Allocation
+sidebar_label: Process Memory Overview
 sidebar_position: 1
-tags: [c++, memory-model, stack, heap, memory-allocation]
+tags: [c++, memory, stack, heap, address-space, storage-duration]
 ---
 
-# Memory Model and Allocation
+# Process Memory and Allocation
 
-Understanding how C++ programs use memory is fundamental to writing efficient, safe code. Memory is divided into distinct regions with different characteristics and management strategies.
+A running C++ program keeps its code, its global variables, its function-local variables and its
+dynamically allocated objects in different parts of its address space. Where an object lives decides
+how long it lives, how fast it is to create, and who is responsible for destroying it. This page is
+the map of that address space and the entry point for this section. The pages after it cover each
+part in detail.
 
-:::info[Foundation]
-The memory model defines how programs interact with memory - regions, lifetimes, and allocation strategies. Master this to understand pointers, object lifetime, and performance.
+:::note[Not the concurrency memory model]
+The standard also uses "memory model" for the rules on how threads see each other's writes
+(happens-before, `std::memory_order`, data races). That topic is in
+[C++ memory model](../11-concurrency-and-memory-model/01-cpp-memory-model.md). This page is about
+*where objects are stored*, not about ordering between threads.
 :::
 
-## Memory Regions
+**Prerequisites:** [Fundamental types](../03-types-and-values/fundamental-types.md) and
+[raw pointers](../06-pointers-references-and-smart-pointers/raw-pointers.md).
 
-Every C++ program's memory is organized into distinct regions, each serving a specific purpose.
-```mermaid
-graph TD
-    A[Program Memory] --> B[Code/Text]
-    A --> C[Data]
-    A --> D[Stack]
-    A --> E[Heap]
-    
-    C --> F[.data - Initialized]
-    C --> G[.bss - Uninitialized]
-    
-```
+## The address space of a process
 
-### Complete Address Space Layout
+The C++ standard does not define a stack, a heap or segments. It defines four
+[storage durations](./storage-duration.md), and compilers and operating systems implement them with
+the regions below. The diagram shows the usual layout of a Linux process on x86-64 (ELF executable).
+Other platforms use the same regions with different addresses.
 
-![stack-vs-heap](./stack-vs-heap.gif)
+<Diagram title="Typical process address space (high addresses at the top)" caption="Each thread gets its own stack. Shared libraries and memory-mapped files sit in the gap between heap and stack." accent="blue">
+  <DiagramNode icon="layers" title="Stack" accent>Automatic storage: locals, parameters, return addresses. Grows down. One per thread.</DiagramNode>
+  <DiagramArrow label="free gap: mmap regions, shared libraries" dashed />
+  <DiagramNode icon="boxes" title="Heap">Dynamic storage: `new`, `malloc`, container buffers. Grows up.</DiagramNode>
+  <DiagramGroup label="Static storage (from the executable file)">
+    <DiagramNode icon="binary" title=".bss">Zero-initialized statics. Takes no space in the file.</DiagramNode>
+    <DiagramNode icon="file-text" title=".data">Statics with a non-zero initial value.</DiagramNode>
+    <DiagramNode icon="lock" title=".rodata">String literals, constant tables. Read-only.</DiagramNode>
+  </DiagramGroup>
+  <DiagramNode icon="cpu" title=".text">Machine code. Read-only and executable, shared between processes running the same file.</DiagramNode>
+</Diagram>
 
-```
-High Address
-┌─────────────────┐
-│ Stack           │ ↓ Grows downward
-│ (automatic)     │   ~1-8 MB
-│                 │
-├─────────────────┤
-│ (unmapped)      │
-├─────────────────┤
-│ Heap            │ ↑ Grows upward
-│ (dynamic)       │   Large (GBs)
-│                 │
-├─────────────────┤
-│ .bss            │ Uninitialized globals
-│ (zero-init)     │
-├─────────────────┤
-│ .data           │ Initialized globals/static
-├─────────────────┤
-│ .rodata         │ Read-only data (string literals)
-├─────────────────┤
-│ .text           │ Executable instructions
-└─────────────────┘
-Low Address
-```
+| Region | Holds | Storage duration | Created / released |
+|---|---|---|---|
+| `.text` | Compiled functions | — (code, not objects) | Mapped when the program loads |
+| `.rodata` | String literals, `const` tables the compiler can place there | Static | Load time |
+| `.data` | `int g = 42;`, `static int s = 7;` | Static | Load time, values copied from the file |
+| `.bss` | `int g;`, `static int s = 0;` | Static | Load time, zero-filled by the loader |
+| Heap | Objects from `new`, `malloc`, allocators | Dynamic | Your code allocates and frees |
+| Stack | Local variables, parameters, spilled registers | Automatic | Function entry and exit |
+| Thread-local block | `thread_local` variables | Thread | Thread start and exit |
 
-### Code/Text Segment
+The snippet shows one variable of each kind. Printing their addresses on Linux shows the order of the
+diagram: the global and static addresses are low, the heap address is above them, and the stack
+address is far higher.
 
-Contains executable machine instructions. Read-only, shared between processes.
-```cpp showLineNumbers
-void function() {  // Code stored in .text segment
-    int x = 42;    // Instructions here
-}
+```cpp title="regions.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
 
-// Properties:
-// - Read-only (attempting to modify causes crash)
-// - Shared (multiple instances share same code)
-// - Fixed size (determined at compile time)
-```
+int initialized = 42;          // .data
+int zeroed;                    // .bss
+const char* text = "hello";    // pointer in .data, the characters in .rodata
 
-### Data Segment
-
-**Initialized data (.data):**
-```cpp showLineNumbers
-int global = 42;              // .data segment
-static int fileStatic = 100;  // .data segment
-const char* str = "hello";    // Pointer in .data, string in .rodata
-
-// Properties:
-// - Initialized at program start
-// - Writable (unless const)
-// - Program lifetime
-```
-
-**Uninitialized data (.bss):**
-```cpp showLineNumbers
-int globalUninit;             // .bss segment
-static int fileStaticUninit;  // .bss segment
-
-// Properties:
-// - Zero-initialized at program start
-// - Doesn't take space in executable
-// - Allocated at runtime
-```
-
-### Stack Memory
-
-Automatic storage for local variables. Fast, limited, LIFO (Last In, First Out).
-```cpp showLineNumbers
-void function() {
-    int local = 10;        // Stack allocation
-    char buffer[100];      // Stack array
-    Widget w;              // Stack object (constructor called)
-}  // All destroyed automatically when function returns
-```
-
-**Stack characteristics:**
-- **Speed:** Extremely fast (~1 ns allocation)
-- **Size:** Limited (typically 1-8 MB)
-- **Lifetime:** Scope-based (automatic cleanup)
-- **Management:** Automatic (RAII)
-- **Allocation:** $O(1)$ pointer bump
-- **Deallocation:** $O(1)$ pointer bump
-- **Fragmentation:** None
-- **Thread-safety:** Each thread has its own stack
-
-**How stack works:**
-```
-Stack frame for function():
-High Address
-├─────────────┐
-│   local=10  │ ← Stack pointer (SP)
-├─────────────┤
-│  buffer[0]  │
-│  buffer[1]  │
-│     ...     │
-│ buffer[99]  │
-├─────────────┤
-│   Widget w  │
-├─────────────┤
-│   (free)    │
-Low Address
-
-// When function returns, SP moves up, deallocating everything
-```
-
-### Heap Memory
-
-
-Dynamic memory for runtime allocations. Flexible, large, manually managed.
-```cpp showLineNumbers
-void function() {
-    int* ptr = new int(42);        // Heap allocation
-    char* buffer = new char[1024]; // Heap array
-    Widget* w = new Widget();      // Heap object
-    
-    // Must manually clean up
-    delete ptr;
-    delete[] buffer;
-    delete w;
+int main() {
+    static int counter = 0;                 // .bss: static storage, zero initial value
+    int local = 1;                          // stack
+    auto heap = std::make_unique<int>(2);   // the int is on the heap, `heap` itself on the stack
+    std::printf("data  %p\nbss   %p\nheap  %p\nstack %p\n",
+                static_cast<void*>(&initialized), static_cast<void*>(&zeroed),
+                static_cast<void*>(heap.get()), static_cast<void*>(&local));
+    return counter + *heap - local - 1 + zeroed;  // keep everything used; returns 0
 }
 ```
 
-**Heap characteristics:**
-- **Speed:** Slower (~50-100 ns allocation)
-- **Size:** Large (gigabytes available)
-- **Lifetime:** Explicit (new/delete)
-- **Management:** Manual
-- **Allocation:** $O(1)$ to $O(\log n)$ depending on allocator
-- **Deallocation:** Complex (coalescing, free lists)
-- **Fragmentation:** Possible
-- **Thread-safety:** Requires synchronization
+The exact addresses change on every run because of address-space layout randomization (ASLR). The
+relative order is what stays the same.
 
-**How heap works:**
-```
-Memory allocator maintains free lists:
+## Stack and heap
 
-Free blocks:
-[16 bytes] → [32 bytes] → [1024 bytes] → ...
+Most day-to-day decisions are between the stack (automatic storage) and the heap (dynamic storage).
 
-Allocation:
-1. Find suitable block (best-fit, first-fit, etc.)
-2. Split if too large
-3. Return pointer
+| | Stack | Heap |
+|---|---|---|
+| Allocation | Adjusting the stack pointer, done once per function call for all locals | A call into the allocator (`operator new`, `malloc`), which searches its free lists |
+| Release | Automatic at scope exit, in reverse order of construction | Explicit (`delete`) or by an owning object such as `std::unique_ptr` or `std::vector` |
+| Size limit | Small and fixed per thread: on Linux the main thread's limit is `ulimit -s`, 8 MiB by default; MSVC links a 1 MiB default stack | Limited by available virtual memory |
+| Size known | At compile time (VLAs are not standard C++) | At run time |
+| Failure mode | Stack overflow: the process crashes, usually with `SIGSEGV` | `std::bad_alloc` is thrown (or `nullptr` with `std::nothrow`) |
+| Typical bugs | Returning a pointer or reference to a local | Leaks, double `delete`, use after free |
 
-Deallocation:
-1. Mark block as free
-2. Coalesce with adjacent free blocks
-```
+Heap allocation is slower than stack allocation because the allocator has to find a free block, may
+take a lock, and may ask the operating system for more pages. How much slower depends on the
+allocator, the size, and the access pattern, so measure your own case rather than trusting a fixed
+ratio.
 
-## Stack vs Heap Comparison
+Default to the stack. Use the heap when:
 
-| Aspect             | Stack                | Heap                      |
-|--------------------|----------------------|---------------------------|
-| **Speed**          | Very fast (~1 ns)    | Slower (~50-100 ns)       |
-| **Size**           | Limited (1-8 MB)     | Large (GBs)               |
-| **Lifetime**       | Automatic (scope)    | Manual (new/delete)       |
-| **Allocation**     | $O(1)$, trivial        | $O(1)$ to $O(\log n)$          |
-| **Deallocation**   | $O(1)$, automatic      | Manual, can leak          |
-| **Fragmentation**  | None                 | Possible                  |
-| **Cache locality** | Excellent            | Variable                  |
-| **Thread-safe**    | Per-thread           | Requires sync             |
-| **Overflow**       | Stack overflow crash | Returns nullptr or throws |
+- the size is only known at run time, or is too large for the stack (`std::vector`, `std::string`);
+- the object has to outlive the scope that created it (return a `std::unique_ptr`);
+- the object's dynamic type is chosen at run time (`std::unique_ptr<Base>` holding a `Derived`).
 
-## When to Use Each
+In all three cases, let an owning type manage the heap memory. Plain `new` and `delete` are covered
+in [new and delete](./new-and-delete.md) so you know what those types do for you.
 
-### Use Stack When:
-```cpp showLineNumbers
-// Small objects
-int x = 42;
-std::array<int, 100> arr;
+```cpp title="choose.cpp" showLineNumbers
+#include <array>
+#include <memory>
+#include <vector>
 
-// Scope-limited lifetime
-{
-    Widget w;
-}  // Destroyed automatically
+struct Shape { virtual ~Shape() = default; virtual double area() const = 0; };
+struct Square : Shape { double s = 2; double area() const override { return s * s; } };
 
-// Performance-critical code
-void hotPath() {
-    int temp[16];  // Stack is faster
-    process(temp);
-}
+std::unique_ptr<Shape> make_shape() { return std::make_unique<Square>(); }  // outlives the call
 
-// RAII objects
-std::lock_guard<std::mutex> lock(mtx);  // Automatic unlock
-```
-
-### Use Heap When:
-```cpp showLineNumbers
-// Large objects (exceed stack size)
-int* huge = new int[1000000];  // 4 MB
-
-// Runtime-determined size
-int* arr = new int[userInput];
-
-// Lifetime beyond scope
-Widget* create() {
-    return new Widget();  // Outlives function
-}
-
-// Polymorphism
-Base* ptr = new Derived();  // Dynamic type
-
-// Shared ownership
-std::shared_ptr<Resource> shared = std::make_shared<Resource>();
-```
-
-## Performance Impact
-```cpp showLineNumbers
-// Benchmark: 1 million allocations
-
-// Stack: ~1ms total (~1 ns each)
-void stackBenchmark() {
-    for (int i = 0; i < 1000000; ++i) {
-        int arr[10];  // Nearly free
-    }
-}
-
-// Heap: ~50-100ms total (~50-100 ns each)
-void heapBenchmark() {
-    for (int i = 0; i < 1000000; ++i) {
-        int* arr = new int[10];
-        delete[] arr;
-    }
-}
-
-// Stack is 50-100x faster!
-```
-
-## Common Issues
-
-### Stack Overflow
-```cpp showLineNumbers
-// Stack overflow causes
-void recursiveBomb() {
-    recursiveBomb();  // Infinite recursion
-}
-
-void largeLocals() {
-    int huge[1000000];  // 4 MB, exceeds typical stack
-}
-
-void deepNesting() {
-    int arr[10000];     // 40 KB
-    anotherFunction();  // Each call adds to stack
+int main() {
+    std::array<int, 16> small{};             // fixed size: stack
+    std::vector<int> big(1'000'000);         // 4 MB of ints: heap, owned by the vector
+    auto shape = make_shape();               // runtime type: heap, owned by unique_ptr
+    return static_cast<int>(shape->area()) - 4 + small[0] + big[0];   // returns 0
 }
 ```
 
-**Solutions:**
-```bash
-# Check stack size
-ulimit -s  # Linux
+## What else lives in this section
 
-# Increase stack size (temporary)
-ulimit -s unlimited
+<Diagram title="From storage to a usable object" accent="green">
+  <DiagramRow>
+    <DiagramNode title="Storage duration">Which region, and for how long</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="Initialization">What value the object starts with</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="Object lifetime" accent>When the object exists and may be used</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-# Compile with stack protection
-g++ -fstack-protector-all program.cpp
-```
+- [Storage duration](./storage-duration.md): the four durations, static initialization order,
+  `thread_local`.
+- [Initialization](./initialization/default-initialization.md): default, value, aggregate and list
+  initialization, and when a variable is left indeterminate.
+- [Object lifetime](./object-lifetime.md): when lifetime starts and ends, temporaries, implicit
+  object creation.
+- [new and delete](./new-and-delete.md) and [placement new](./placement-new.md): separating
+  allocation from construction.
+- [Alignment](./alignment.md) and [strict aliasing](./strict-aliasing.md): the rules that decide
+  which addresses an object may live at and which types may access it.
 
-### Heap Fragmentation
-```cpp showLineNumbers
-// Fragmentation example
-char* a = new char[100];  // [100]
-char* b = new char[100];  // [100][100]
-delete a;                 // [free:100][100]
+Common lifetime bugs, how undefined behavior lets the compiler exploit them, and the tools that catch
+them are covered in [Undefined behavior](../10-error-handling-and-safety/06-undefined-behavior.md)
+and [Sanitizers](../14-debugging-and-profiling/04-sanitizers.md).
 
-// Can't fit 150-byte allocation in 100-byte hole
-char* c = new char[150];  // Allocated elsewhere
-// Heap: [free:100][used:100][used:150 elsewhere]
-```
+## Key points
 
-### Memory Leaks
-```cpp showLineNumbers
-// Leak
-void leak() {
-    int* ptr = new int(42);
-    // Never deleted!
-}
-
-// RAII solution
-void noLeak() {
-    std::unique_ptr<int> ptr = std::make_unique<int>(42);
-    // Automatically deleted
-}
-
-// Smart pointer for arrays
-void arraySafe() {
-    std::vector<int> vec(1000);  // Manages heap internally
-    // Automatic cleanup
-}
-```
-
-## Object Representation
-
-Every object has four key properties:
-```cpp showLineNumbers
-int x = 42;
-
-// 1. Type: int
-// 2. Size: sizeof(x) = 4 bytes (typical)
-// 3. Address: &x = 0x7fff1234 (example)
-// 4. Value: x = 42
-// 5. Lifetime: Until scope ends (stack) or delete (heap)
-```
-
----
-
-## Memory Alignment
-
-Objects must be aligned to boundaries for CPU efficiency.
-```cpp showLineNumbers
-struct Example {
-    char c;      // 1 byte, offset 0
-    // 3 bytes padding
-    int i;       // 4 bytes, offset 4 (aligned to 4)
-    char c2;     // 1 byte, offset 8
-    // 3 bytes padding
-};  // Total: 12 bytes (not 6!)
-
-sizeof(Example);   // 12 bytes
-alignof(Example);  // 4 (from int)
-```
-
-**Alignment requirements:**
-- `char`: 1-byte
-- `short`: 2-byte
-- `int`: 4-byte
-- `double`: 8-byte
-- Pointers: 4 or 8 bytes (platform-dependent)
-
-## Storage Duration
-
-### Automatic Storage (Stack)
-```cpp showLineNumbers
-void function() {
-    int x = 42;  // Created on entry, destroyed on exit
-}
-```
-
-### Static Storage
-```cpp showLineNumbers
-int global = 10;              // Program lifetime
-static int fileScope = 20;    // Program lifetime
-
-void function() {
-    static int functionScope = 30;  // Program lifetime, initialized once
-}
-```
-
-### Dynamic Storage (Heap)
-```cpp showLineNumbers
-int* ptr = new int(42);  // Lives until delete
-delete ptr;
-```
-
-### Thread Storage (C++11)
-```cpp showLineNumbers
-thread_local int tlsVar = 0;  // Per-thread lifetime
-```
-
-## Best Practices
-
-:::success[DO]
-- **Default to stack** for local variables
-- **Use smart pointers** for heap (unique_ptr, shared_ptr)
-- **Prefer std::vector** over new[] for dynamic arrays
-- **Use std::string** over char* for strings
-- **Profile before optimizing** memory usage
-:::
-
-:::danger[DON'T]
-- **Don't put large arrays on stack** (causes overflow)
-- **Don't forget to delete** heap allocations
-- **Don't use new/delete** when stack works
-- **Don't assume heap is always bad** (sometimes necessary)
-- **Don't mix new/delete** with malloc/free
-:::
-
-## Summary
-
-**Memory regions:**
-- **Code (.text)** - executable instructions, read-only
-- **Data (.data/.bss)** - global/static variables
-- **Stack** - automatic variables, fast, limited
-- **Heap** - dynamic allocations, flexible, manual
-
-**Stack advantages:**
-- Extremely fast (~1 ns allocation)
-- Automatic cleanup (RAII)
-- Excellent cache locality
-- No fragmentation
-- No memory leaks possible
-
-**Heap advantages:**
-- Large size (gigabytes)
-- Runtime-determined sizes
-- Lifetime beyond scope
-- Shared ownership
-
-**Decision guide:**
-```cpp
-// Stack (default choice)
-int x = 42;
-Widget w;
-std::array<int, 100> arr;
-
-// Heap (when needed)
-std::vector<int> dynamicArr;            // Dynamic size
-std::unique_ptr<Widget> ptr;            // Outlives scope
-std::shared_ptr<Resource> shared;       // Multiple owners
-new Widget();                           // Polymorphism (but use smart ptr!)
-```
-
-**Golden rule:** Use stack unless you have a specific reason for heap. When using heap, prefer smart pointers and RAII wrappers over raw new/delete.
+- The standard speaks of storage durations. Stack, heap and segments are how implementations provide
+  them.
+- Globals and statics are in `.data` or `.bss` and exist for the whole run. `.bss` costs no file
+  space because the loader zero-fills it.
+- The stack is fast and small. A large local array can overflow it without any warning at compile
+  time.
+- Heap memory should always have an owner object. Write `new` only inside such owners.

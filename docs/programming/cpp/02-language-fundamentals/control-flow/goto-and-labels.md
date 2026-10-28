@@ -8,90 +8,122 @@ tags: [c++, control-flow, goto, labels]
 
 # `goto` and Labels
 
-`goto` jumps unconditionally to a **label** in the same function. It exists, it is occasionally the
-clearest tool, and in idiomatic C++ it is almost always the wrong one. This page explains the rules
-so you recognise the rare legitimate use — and the modern constructs that replace the rest.
+`goto label;` jumps unconditionally to a **label** (a name followed by `:`) elsewhere in the same
+function. C code uses it for error cleanup; idiomatic C++ almost never does, because destructors do
+that job. This page gives the rules so you can read `goto` in existing code, recognise the one case
+where it is still defensible, and know what replaces it.
 
-```cpp showLineNumbers
-    if (!ok) goto cleanup;     // jump forward to the label
-    // ...
-cleanup:                       // a label: an identifier followed by ':'
+**Prerequisites:** [Loops](./loops.md), [Conditional Statements](./if-switch.md).
+
+```cpp
+    if (!ok) goto cleanup;   // jump forward
+    // ...                   // skipped when !ok
+cleanup:                     // the label
     release();
 ```
 
-## Why it is discouraged
+## The rules
 
-Unrestricted jumps produce "spaghetti" control flow that is hard to read, hard to verify, and hard
-for the optimiser to reason about. C++ already provides structured replacements for every common use:
-
-| You reached for `goto` to… | Use instead |
-|----------------------------|-------------|
-| break out of nested loops  | extract the nest into a function and `return` |
-| run cleanup on every exit path | [RAII](../../13-idioms-and-design/01-raii.md) — destructors free resources automatically |
-| retry a block              | a `while`/`do-while` loop |
-| jump over remaining work   | `continue`, `break`, early `return` |
-
-## The C-style cleanup pattern (and its C++ replacement)
-
-In C, `goto cleanup` is the standard way to free resources acquired so far. In C++ this is exactly
-what RAII removes — the destructor runs no matter how the scope exits, including on exceptions.
-
-```cpp showLineNumbers
-// C-style: manual, error-prone, must keep labels in sync with acquisitions
-FILE* f = fopen(p, "r");
-if (!f) goto done;
-buf = malloc(n);
-if (!buf) goto close_file;
-// ... work ...
-close_file: fclose(f);
-done:       free(buf);
-
-// C++: no goto, no leaks, exception-safe
-std::ifstream f(p);                 // closed by destructor
-std::vector<char> buf(n);           // freed by destructor
-// ... work ...  every exit path cleans up automatically
-```
-
-See [RAII](../../13-idioms-and-design/01-raii.md) — this is the single biggest reason day-to-day C++
-has no `goto`.
-
-## Hard rules
-
-:::danger[You cannot jump over an initialization]
-A `goto` that enters the scope of a variable with a non-trivial initializer is **ill-formed** — the
-compiler rejects it. This protects you from using an object that was never constructed.
+- A label's scope is the **whole function**: you can jump forwards or backwards, but never into
+  another function. Label names don't clash with variable names.
+- You **cannot jump past a declaration with an initialiser** into the part of the scope where that
+  variable is visible. `int x = 5;` is enough to trigger it, as is any variable whose constructor
+  would be skipped. Only scalar or trivial types declared *without* an initialiser (`int x;`) may be
+  jumped over. The `case` labels of a `switch` follow the same rule.
+- A label must label a statement. Before C++23, a label just before a closing `}` needed an empty
+  statement (`done: ;`); C++23 allows the label alone.
 
 ```cpp
-goto skip;          // error: jumps into scope of 'guard'
-std::lock_guard guard(m);
-skip:;
+void f(bool b, std::mutex& m) {
+    if (b) goto skip;               // error: jump bypasses initialization of 'guard'
+    std::lock_guard<std::mutex> guard(m);
+skip:
+    return;
+}
 ```
-:::
 
-Other limits: `goto` cannot cross function boundaries (it is local to one function), and labels
-share a single per-function namespace.
+The rule exists so that no code can see an object whose constructor never ran.
 
-## A defensible use
+## What to use instead
 
-The one case that still comes up: breaking out of a **deeply nested loop** when refactoring into a
-function is genuinely awkward. Even here, a flag or extracted function is usually cleaner.
+| You reached for `goto` to… | Use |
+|---|---|
+| run cleanup on every exit path | [RAII](../../13-idioms-and-design/01-raii.md): an object whose destructor does the cleanup |
+| leave several nested loops | move the loops into a function and `return` |
+| retry an operation | a `while` or `do`-`while` loop |
+| skip the rest of the work | `continue`, `break`, or an early `return` |
 
-```cpp showLineNumbers
-for (int i = 0; i < n; ++i)
-    for (int j = 0; j < m; ++j)
-        if (grid[i][j] == target) goto found;   // forward jump out of both loops
+## C-style cleanup and its C++ replacement
+
+In C, each acquired resource gets a label, and failures jump to the label that releases everything
+acquired so far, in reverse order:
+
+<Tabs groupId="lang">
+  <TabItem value="c" label="C: goto cleanup">
+
+```c
+int process(const char* path, size_t n) {
+    int rc = -1;
+    FILE* f = fopen(path, "r");
+    if (!f) goto done;
+    char* buf = malloc(n);   // valid C; in C++ the goto above would be ill-formed
+    if (!buf) goto close_file;
+    /* ... work; on error: goto free_buf ... */
+    rc = 0;
+free_buf:
+    free(buf);
+close_file:
+    fclose(f);
+done:
+    return rc;
+}
+```
+
+  </TabItem>
+  <TabItem value="cpp" label="C++: destructors">
+
+```cpp
+int process(const std::string& path, std::size_t n) {
+    std::ifstream f(path);              // closed by its destructor
+    if (!f) return -1;
+    std::vector<char> buf(n);           // freed by its destructor
+    // ... work; any return or exception cleans up both
+    return 0;
+}
+```
+
+  </TabItem>
+</Tabs>
+
+The C version only works if every label stays in the right order as the function changes, and it
+cannot handle exceptions. In C++, objects are destroyed automatically on every exit, so the labels
+disappear. This is the main reason C++ code has no `goto`.
+
+## The defensible case: leaving nested loops
+
+`break` leaves only the innermost loop. When moving the loops into a function would be awkward, a
+forward `goto` out of the nest is clear:
+
+```cpp
+for (int i = 0; i < rows; ++i)
+    for (int j = 0; j < cols; ++j)
+        if (grid[i][j] == target) goto found;
+not_found();
+return;
 found:
-    // ...
+report();
 ```
 
-## Summary
+A separate `find` function returning the position is usually cleaner still.
 
-- `goto` jumps to a label within the same function; it cannot leave the function.
-- Prefer structured flow: `return` from an extracted function, loops for retry, RAII for cleanup.
-- Jumping *into* the scope of a non-trivially-initialized variable is a compile error.
-- The only semi-legitimate use is escaping deeply nested loops — and even that has cleaner alternatives.
+## Key points
+
+- `goto` jumps within one function only.
+- Jumping past an initialised declaration into its scope does not compile.
+- RAII replaces C's `goto cleanup`.
+- The only common justified use is escaping nested loops, and a function with `return` is usually better.
 
 ## Related
 
-- [RAII](../../13-idioms-and-design/01-raii.md) — replaces goto-based cleanup
-- [Loops](./loops.md) · [Conditional Statements](./if-switch.md)
+- [RAII](../../13-idioms-and-design/01-raii.md) — why C++ doesn't need cleanup labels
+- [Loops](./loops.md) — `break` and `continue`
