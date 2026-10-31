@@ -130,9 +130,9 @@
 .searchSurface {
   display: flex;
   flex-direction: column;
-  width: min(100%, 36rem);
+  width: 100%;
   min-width: 0;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .modalPanel,
@@ -142,19 +142,19 @@
 .searchSurface :global(.navbar__search),
 .searchSurface :global(.navbar__search > span),
 .searchSurface :global(.navbar__search-input),
-.searchSurface :global([class^='dropdownMenu_']) {
+.searchSurface :global([class*='dropdownMenu_']) {
   box-sizing: border-box;
 }
 
 .searchSurface :global(.navbar__search),
-.searchSurface :global([class^='searchBarContainer_']) {
+.searchSurface :global([class*='searchBarContainer_']) {
   display: block;
   width: 100%;
   min-width: 0;
   max-width: none;
 }
 
-.searchSurface :global([class^='searchBarContainer_']) {
+.searchSurface :global([class*='searchBarContainer_']) {
   margin: 0;
 }
 
@@ -203,7 +203,7 @@
   right: 0.95rem;
 }
 
-.searchSurface :global([class^='dropdownMenu_']) {
+.searchSurface :global([class*='dropdownMenu_']) {
   position: static !important;
   inset: auto !important;
   width: 100% !important;
@@ -217,7 +217,7 @@
   padding: 0.55rem;
 }
 
-:global([data-theme='dark']) .searchSurface :global([class^='dropdownMenu_']) {
+:global([data-theme='dark']) .searchSurface :global([class*='dropdownMenu_']) {
   border-color: rgb(255 255 255 / 0.1);
   background: rgb(20 16 31 / 0.94);
   box-shadow: 0 18px 40px rgb(0 0 0 / 0.34);

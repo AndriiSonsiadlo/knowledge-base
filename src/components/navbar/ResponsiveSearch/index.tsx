@@ -145,9 +145,13 @@ export default function ResponsiveSearch({
     document.addEventListener("keydown", onKeyDown);
 
     const frame = window.requestAnimationFrame(() => {
-      const input = panelRef.current?.querySelector<HTMLElement>(
-        "input, button, [tabindex]:not([tabindex='-1'])",
-      );
+      // Prefer the search input; querySelector with a selector list returns
+      // the first match in document order, which was the close button.
+      const input =
+        panelRef.current?.querySelector<HTMLElement>("input") ??
+        panelRef.current?.querySelector<HTMLElement>(
+          "button, [tabindex]:not([tabindex='-1'])",
+        );
       input?.focus();
     });
 
