@@ -6,7 +6,7 @@ export default function NavbarLogo() {
     <Link
       to="/"
       className="navbar__brand wb-brand"
-      aria-label="Knowledge Base home"
+      aria-label="knowledge-base home"
     >
       <span className="wb-brand__mark" aria-hidden="true">
         &gt;_

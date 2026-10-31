@@ -1,6 +1,6 @@
-import { themes as prismThemes } from "prism-react-renderer";
 import knowledgeGraphPlugin from "./src/plugins/knowledge-graph-plugin.js";
 import remarkWavedrom from "./src/plugins/remark-wavedrom.js";
+import workbenchPrismTheme from "./src/prism/workbench-theme.js";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -285,8 +285,8 @@ const config = {
         copyright: `Copyright © ${new Date().getFullYear()} Andrii Sonsiadlo. Knowledge Base.`,
       },
       prism: {
-        theme: prismThemes.github,
-        darkTheme: prismThemes.dracula,
+        theme: workbenchPrismTheme,
+        darkTheme: workbenchPrismTheme,
         additionalLanguages: [
           "armasm",
           "bash",

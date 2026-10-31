@@ -214,7 +214,6 @@ export default function ResponsiveSearch({
           ref={triggerRef}
           type="button"
           className={clsx("clean-btn", styles.compactTrigger)}
-          aria-label="Open search"
           aria-controls={modalId}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
