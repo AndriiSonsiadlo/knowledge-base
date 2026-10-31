@@ -58,6 +58,15 @@ const config = {
       attributes: {},
       innerHTML: `(function(){try{if(localStorage.getItem("docs-sidebar-collapsed")==="true"){document.documentElement.setAttribute("data-sidebar-collapsed","true");}}catch(e){}})();`,
     },
+    // Marks the page as JS-capable before first paint (an attribute, not a class:
+    // Helmet rewrites <html class> on hydration). <Walkthrough> hides its
+    // inactive steps only under html[data-kb-js], so readers without JS (and print)
+    // still see every step, and JS readers never see them collapse on load.
+    {
+      tagName: "script",
+      attributes: {},
+      innerHTML: `document.documentElement.setAttribute("data-kb-js","");`,
+    },
   ],
 
   stylesheets: [

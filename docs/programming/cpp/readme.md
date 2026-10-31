@@ -23,7 +23,7 @@ the cross-links between them.
 
 |   | Section | What it covers |
 |---|---------|----------------|
-| <Icon icon="lucide:book-open" inline /> | [Overview](./00-overview/what-is-cpp.md) | What C++ is, its philosophy, and the standard versions |
+| <Icon icon="lucide:book-open" inline /> | [Overview](./00-overview/what-is-cpp.md) | What C++ is, how it differs from C, the standard versions, and the tool ecosystem |
 | <Icon icon="lucide:wrench" inline /> | [Toolchain & Build](./01-toolchain-and-build/compilation-pipeline.md) | Preprocess → compile → assemble → link, and the build tools around it |
 | <Icon icon="lucide:braces" inline /> | [Language Fundamentals](./02-language-fundamentals/basic-syntax.md) | Syntax, expressions, operators, control flow |
 | <Icon icon="lucide:shapes" inline /> | [Types & Values](./03-types-and-values/fundamental-types.md) | Fundamental types, conversions, `cv`-qualifiers, value categories, type deduction |
@@ -59,11 +59,11 @@ flowchart LR
 ```
 
 - <Icon icon="lucide:rocket" inline /> **New to C++:** [Overview](./00-overview/what-is-cpp.md) → [Language Fundamentals](./02-language-fundamentals/basic-syntax.md) → [Types & Values](./03-types-and-values/fundamental-types.md) → [Classes & OOP](./07-classes-and-oop/constructors-and-destructors.md) → [Standard Library](./09-standard-library/containers.md). Enough to read and write real code.
-- <Icon icon="lucide:arrow-left-right" inline /> **Coming from C:** skim [Overview](./00-overview/what-is-cpp.md) and [Language Fundamentals](./02-language-fundamentals/basic-syntax.md), then [Memory & Object Lifetime](./05-memory-and-object-lifetime/memory-model-overview.md), [Smart Pointers](./06-pointers-references-and-smart-pointers/unique-ptr.md) and [RAII](./13-idioms-and-design/01-raii.md) — that's where C++ diverges most.
+- <Icon icon="lucide:arrow-left-right" inline /> **Coming from C:** read [C vs C++](./00-overview/c-vs-cpp.md), skim [Language Fundamentals](./02-language-fundamentals/basic-syntax.md), then [Memory & Object Lifetime](./05-memory-and-object-lifetime/memory-model-overview.md), [Smart Pointers](./06-pointers-references-and-smart-pointers/unique-ptr.md) and [RAII](./13-idioms-and-design/01-raii.md) — that's where C++ diverges most.
 - <Icon icon="lucide:cpu" inline /> **Systems / performance:** [Toolchain](./01-toolchain-and-build/linking.md), [Memory](./05-memory-and-object-lifetime/memory-model-overview.md), [Concurrency](./11-concurrency-and-memory-model/01-cpp-memory-model.md), [Low-Level & Platform](./12-low-level-and-platform/01-abi.md) and [Debugging & Profiling](./14-debugging-and-profiling/01-debugging-basics.md).
 
 :::tip[Conventions used across these docs]
 - Code blocks compile against C++17 or later; version-specific features are tagged inline (e.g. *(C++20)*).
 - Admonitions flag the important bits: `info` for context, `tip` for guidance, `warning`/`danger` for foot-guns.
-- Diagrams are Mermaid; data tables prefer plain words over decorative symbols.
+- Diagrams use the `<Diagram>` component (Mermaid only for sequence/state diagrams); data tables prefer plain words over decorative symbols.
 :::

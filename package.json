@@ -27,6 +27,7 @@
     "test:plugins": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/remark-wavedrom.test.mjs",
     "test:kernel-source": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/kernel-source.test.mjs",
     "test:graph": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/build-graph.test.mjs",
+    "test:walkthrough": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test scripts/walkthrough.test.mjs",
     "scaffold:linux": "node tools/scaffold-linux-docs.mjs",
     "check:algo": "node tools/check-algo-docs.mjs",
     "check:linux": "node tools/check-linux-docs.mjs",

@@ -8,433 +8,167 @@ tags: [ c++, overview, introduction, history ]
 
 # What is C++?
 
-C++ is a general-purpose, compiled programming language that extends C with object-oriented,
-generic, and functional programming features. It provides low-level memory control while offering
-high-level abstractions.
+C++ is a statically typed, compiled, general-purpose language. Its design bet is that you can have
+high-level abstractions (classes, templates, containers, algorithms) without giving up the control
+and speed of C: the abstractions are resolved at compile time and become ordinary machine code,
+with no virtual machine or garbage collector underneath. That bet explains both why C++ is used
+where performance and hardware control matter, and why it is a large, demanding language.
 
-:::info[Key Characteristics]
-**Multi-paradigm**: Supports procedural, OOP, generic, and functional programming  
-**Performance**: Zero-overhead abstractions and direct hardware access  
-**Compiled**: Translates to native machine code for maximum efficiency
-:::
+This page covers where C++ came from, the ideas that shape it, what it costs, and how a program
+gets built. Everything here is a summary. Each topic links to the page that covers it in full.
 
-## History and Evolution
+## Origins
 
-C++ was created by Bjarne Stroustrup at Bell Labs in 1979, initially called "C with Classes." The
-language evolved from a simple extension of C into one of the most widely-used programming languages
-in the world.
+| Year | Event |
+|---|---|
+| 1979 | Bjarne Stroustrup starts "C with Classes" at Bell Labs: C plus Simula-style classes. |
+| 1983 | Renamed C++ (`++` is C's increment operator). |
+| 1985 | First commercial release (the Cfront compiler) and *The C++ Programming Language*, 1st edition. |
+| 1998 | First ISO standard, C++98. |
+| 2011 | C++11, the start of what people call "modern C++". A new standard every three years since. |
 
-```mermaid
-timeline
-    title C++ Evolution Timeline
-    1979 : C with Classes created
-    1983 : Renamed to C++
-    1985 : First commercial release
-    1998 : C++98 (First ISO standard)
-    2011 : C++11 (Modern C++ era begins)
-    2014 : C++14
-    2017 : C++17
-    2020 : C++20 (Major update)
-    2023 : C++23
-```
+The per-standard detail is in [C++ Versions](./cpp-versions.md).
 
-The name "C++" itself is a programmer's joke – the `++` operator in C increments a variable by one,
-suggesting C++ is "one better" than C.
+## The ideas behind the language
 
----
+### Zero-overhead abstraction
 
-## Core Philosophy
+Stroustrup states the principle in two parts: *what you don't use, you don't pay for*, and *what you
+do use, you couldn't hand-code any better*. A feature you don't use must cost nothing at runtime. A
+feature you do use should compile to roughly what you would have written by hand.
 
-### Zero-Overhead Principle
-
-C++ follows the principle: "You don't pay for what you don't use." Features that you don't utilize
-have zero runtime cost. This means abstractions like classes, templates, and inline functions
-compile down to code as efficient as hand-written C or assembly.
-
-```cpp showLineNumbers 
-// High-level abstraction
-std::vector<int> numbers = {1, 2, 3, 4, 5};
-int sum = std::accumulate(numbers.begin(), numbers.end(), 0);
-
-// Compiles to code as efficient as:
-int arr[] = {1, 2, 3, 4, 5};
-int sum = 0;
-for(int i = 0; i < 5; i++) {
-    sum += arr[i];
-}
-```
-
-The compiler optimizes the high-level vector code to produce machine code nearly identical to the
-manual loop, giving you both expressiveness and performance.
-
-### Direct Hardware Access
-
-Unlike higher-level languages, C++ allows direct manipulation of memory addresses, bit patterns, and
-hardware registers. This makes it ideal for systems programming, embedded systems, and
-performance-critical applications.
-
-```cpp showLineNumbers 
-// Direct memory manipulation
-void* ptr = malloc(1024);              // Allocate raw memory
-uint8_t* bytes = static_cast<uint8_t*>(ptr);
-bytes[0] = 0xFF;                       // Write directly to memory address
-
-// Bit-level operations
-uint32_t flags = 0b00000000;
-flags |= (1 << 3);                     // Set bit 3
-bool isSet = (flags & (1 << 3)) != 0;  // Check bit 3
-```
-
-This level of control is essential when writing device drivers, game engines, or real-time systems
-where every CPU cycle matters.
-
----
-
-## Where C++ Excels
-
-### 1. Systems Programming
-
-C++ powers operating systems, compilers, and databases. Its ability to manage resources explicitly
-while providing abstractions makes it perfect for building foundational software.
-
-**Examples**: Linux kernel components, Windows core services, PostgreSQL, MySQL
-
-### 2. Game Development
-
-The gaming industry relies heavily on C++ for performance-critical game engines. Modern games need
-to render complex 3D graphics at 60+ FPS while simulating physics, AI, and networking.
-
-**Examples**: Unreal Engine, Unity (core), CryEngine, id Tech engines
-
-```cpp showLineNumbers 
-// Simplified game loop structure
-class Game {
-    void run() {
-        while (isRunning) {
-            float deltaTime = calculateDeltaTime();
-            
-            processInput();              // Handle keyboard/mouse
-            update(deltaTime);           // Update game logic
-            render();                    // Draw everything
-            
-            // All must complete in ~16ms for 60 FPS
-        }
-    }
-};
-```
-
-Each frame must complete in approximately 16 milliseconds (60 FPS) or 8 milliseconds (120 FPS),
-requiring extremely efficient code that C++ enables.
-
-### 3. High-Performance Computing
-
-Scientific simulations, financial trading systems, and data processing pipelines use C++ for its
-speed. When processing millions of transactions per second or simulating weather patterns,
-performance is non-negotiable.
-
-**Examples**: Trading systems, particle physics simulations (CERN), machine learning frameworks (TensorFlow core)
-
-### 4. Embedded Systems
-
-Resource-constrained devices like microcontrollers, IoT devices, and automotive systems use C++ for
-direct hardware control and minimal memory footprint.
-
-**Examples**: Automotive ECUs, medical devices, Mars rovers, Arduino advanced projects
-
----
-
-## C++ vs Other Languages
-
-```mermaid
-graph LR
-    A[C++] --> B[Low-level control]
-    A --> C[High-level abstractions]
-    A --> D[Performance]
-
-    B --> E[like C, Rust]
-    C --> F[like Python]
-    D --> G[faster than interpreted languages]
-```
-
-| Aspect             | C++                 | Python             | Rust                      |
-|--------------------|---------------------|--------------------|---------------------------|
-| **Speed**          | Very fast               | Slow                  | Very fast                     |
-| **Memory Control** | Manual              | Automatic          | Ownership system          |
-| **Learning Curve** | Steep               | Gentle             | Very steep                |
-| **Safety**         | Manual              | Safe               | Memory safe               |
-| **Use Case**       | Systems, games, HPC | Scripting, ML, web | Systems, safe concurrency |
-
-Python's simplicity makes it great for rapid development, but C++ is 10-100x faster for
-compute-intensive tasks. Rust offers memory safety guarantees but has a steeper learning curve.
-
----
-
-## Key Features
-
-### 1. Object-Oriented Programming
-
-C++ supports classes, inheritance, polymorphism, and encapsulation. This allows modeling complex
-systems as interacting objects with clear interfaces.
-
-```cpp showLineNumbers 
-class BankAccount {
-private:
-    double balance;                     // Encapsulated data
-    
-public:
-    explicit BankAccount(double initial) : balance(initial) {}
-    
-    virtual void deposit(double amount) {  // Virtual for polymorphism
-        if (amount > 0) {
-            balance += amount;
-        }
-    }
-    
-    double getBalance() const { return balance; }
-};
-
-class SavingsAccount : public BankAccount {  // Inheritance
-    double interestRate;
-public:
-    SavingsAccount(double initial, double rate) 
-        : BankAccount(initial), interestRate(rate) {}
-    
-    void applyInterest() {
-        deposit(getBalance() * interestRate);
-    }
-};
-```
-
-The encapsulation ensures `balance` cannot be directly modified, inheritance allows specialization,
-and virtual functions enable runtime polymorphism.
-
-### 2. Generic Programming (Templates)
-
-Templates allow writing code that works with any type, enabling type-safe reusable algorithms and
-data structures. The STL (Standard Template Library) is built entirely on templates.
-
-```cpp showLineNumbers 
-// Generic function works with any comparable type
-template<typename T>
-T max(T a, T b) {
-    return (a > b) ? a : b;
-}
-
-// Used with different types at compile-time
-int maxInt = max(10, 20);              // Instantiates max<int>
-double maxDouble = max(3.14, 2.71);    // Instantiates max<double>
-std::string maxStr = max(std::string("apple"), 
-                         std::string("banana")); // max<std::string>
-```
-
-The compiler generates specialized versions of the function for each type used, maintaining type
-safety while avoiding code duplication.
-
-### 3. Standard Template Library (STL)
-
-The STL provides battle-tested containers (`vector`, `map`, `set`), algorithms (`sort`, `find`, `transform`),
-and iterators. These components work together seamlessly and are heavily optimized.
-
-```cpp showLineNumbers 
+```cpp showLineNumbers
+#include <numeric>
 #include <vector>
-#include <algorithm>
-#include <iostream>
 
-std::vector<int> numbers = {5, 2, 8, 1, 9};
+int sum_vector(const std::vector<int>& v) {
+    return std::accumulate(v.begin(), v.end(), 0);   // generic algorithm + iterators
+}
 
-// STL algorithm with lambda
-std::sort(numbers.begin(), numbers.end(), 
-         [](int a, int b) { return a > b; });  // Sort descending
-
-// STL algorithm with iterator
-auto it = std::find(numbers.begin(), numbers.end(), 8);
-if (it != numbers.end()) {
-    std::cout << "Found at position: " 
-              << std::distance(numbers.begin(), it) << "\n";
+int sum_array(const int* p, std::size_t n) {
+    int s = 0;
+    for (std::size_t i = 0; i < n; ++i) s += p[i];   // the hand-written loop
+    return s;
 }
 ```
 
-The vector automatically manages memory, `std::sort` uses an optimized IntroSort algorithm, and the
-lambda provides a custom comparison inline without defining a separate function.
+With optimisation on (`-O2`), GCC and Clang inline the iterator and template machinery in
+`sum_vector`, which leaves a loop over the same memory as `sum_array`. Don't take that on trust:
+paste both into [Compiler Explorer](https://godbolt.org) and compare the assembly.
+[Reading Assembly](../14-debugging-and-profiling/07-reading-assembly.md) shows how.
 
-### 4. RAII (Resource Acquisition Is Initialization)
+The principle is a goal, not a guarantee. Some features have a cost you pay when you use them, such
+as virtual dispatch, exceptions on the throw path, and `std::shared_ptr` reference counting. The
+pages for those features say what the cost is.
 
-RAII ties resource lifetime to object lifetime, ensuring automatic cleanup even during exceptions.
-This is C++'s answer to garbage collection, but with deterministic timing.
+### Close to the hardware
 
-```cpp showLineNumbers 
-{
-    std::fstream file("data.txt");  // File opened in constructor
-    file << "Hello, World!";
-    
-    if (error) {
-        throw std::runtime_error("Error occurred");
-    }
-    
-    // File automatically closed when 'file' goes out of scope,
-    // even if exception is thrown above
-}
-```
+C++ keeps C's model of memory: objects have addresses, pointers are addresses, and you choose where
+an object lives (stack, heap, static storage, or a buffer you manage). You can control object layout
+and alignment and write to memory-mapped registers. That is why C++ fits operating-system
+components, embedded firmware, game engines and anything with a latency budget. See
+[Memory & Object Lifetime](../05-memory-and-object-lifetime/memory-model-overview.md) and
+[Low-Level & Platform](../12-low-level-and-platform/01-abi.md).
 
-The file is guaranteed to close regardless of how the scope exits (normal return, exception, early
-return), preventing resource leaks.
+### Deterministic cleanup
 
-### 5. Move Semantics (C++11)
+C++ has no garbage collector. Instead, an object's destructor runs at a known point: when the object
+goes out of scope or is deleted. Tying a resource (memory, a file, a lock) to an object's lifetime is
+called **RAII**, and it is the main way C++ code avoids leaks without a runtime. See
+[RAII](../13-idioms-and-design/01-raii.md).
 
-Move semantics allow transferring resources instead of copying them, dramatically improving
-performance when working with temporary objects or large data structures.
+### Multi-paradigm
 
-```cpp showLineNumbers 
-std::vector<int> createLargeVector() {
-    std::vector<int> vec(1000000);  // 1 million elements
-    // ... populate vector ...
-    return vec;  // Move, not copy!
-}
+C++ doesn't push one style. Procedural code, classes with
+[virtual functions](../07-classes-and-oop/virtual-functions.md),
+[templates](../08-templates-and-metaprogramming/function-templates.md) for generic code, and
+[lambdas](../07-classes-and-oop/lambdas.md) for functional style all mix freely, often in the same
+function.
 
-std::vector<int> myVec = createLargeVector();  // No expensive copy
-```
+### Compatibility with C
 
-Without move semantics, returning the vector would require copying all 1 million elements. With
-C++11, the vector's internal pointer is just transferred, making it essentially free.
+Most C code compiles as C++, and C++ can call C libraries directly. This was a deliberate choice
+for adoption, and the reason C++ inherits C's sharp edges. The two languages differ in more places
+than people expect. See [C vs C++](./c-vs-cpp.md).
 
----
+## What it costs
 
-## Modern C++ (C++11 and Beyond)
+These trade-offs come from the same design choices:
 
-The 2011 standard modernized C++, making it safer and more expressive while maintaining performance.
+- **Undefined behaviour.** Out-of-bounds access, signed overflow, use-after-free and data races are
+  not checked. The program's behaviour is simply undefined, and the optimiser is allowed to assume
+  they never happen. See [Undefined Behavior](../10-error-handling-and-safety/06-undefined-behavior.md).
+- **Size.** Forty years of backward compatibility mean there are often several ways to do the same
+  thing. Old and new styles coexist in real codebases, so you have to be able to read both.
+- **Build times.** Headers are re-parsed in every translation unit, and templates are instantiated
+  at compile time. [Modules](../01-toolchain-and-build/modules.md) (C++20) address the first problem.
+- **No single toolchain.** The standard defines the language, not a build system or package
+  manager. You assemble those yourself; [the ecosystem](./cpp-ecosystem.md) maps the usual choices.
 
-### Before C++11
+## From source to running program
 
-```cpp showLineNumbers 
-// Manual memory management
-Widget* ptr = new Widget();
-// ... use ptr ...
-delete ptr;  // Easy to forget!
+A C++ program is translated ahead of time into a native executable for one target platform:
 
-// Verbose iterator loops
-std::vector<int> vec;
-for (std::vector<int>::iterator it = vec.begin(); 
-     it != vec.end(); ++it) {
-    std::cout << *it << "\n";
-}
+<Diagram title="Building a C++ program" caption="Each .cpp file is compiled separately; the linker joins the results." accent="blue">
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="Source">main.cpp, util.cpp + headers</DiagramNode>
+    <DiagramArrow direction="right" label="compile each" />
+    <DiagramNode icon="binary" title="Object files">main.o, util.o</DiagramNode>
+    <DiagramArrow direction="right" label="link" />
+    <DiagramNode icon="cpu" title="Executable" accent>Native machine code</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-// No lambda functions
-bool isEven(int n) { return n % 2 == 0; }
-std::count_if(vec.begin(), vec.end(), isEven);
-```
+Each step is covered in [The Compilation Pipeline](../01-toolchain-and-build/compilation-pipeline.md).
+For a single file, one command runs all of them:
 
-### After C++11
-
-```cpp showLineNumbers 
-// Automatic memory management
-auto ptr = std::make_unique<Widget>();
-// Automatically deleted when ptr goes out of scope
-
-// Range-based for loop
-std::vector<int> vec;
-for (int value : vec) {
-    std::cout << value << "\n";
-}
-
-// Lambda functions
-auto count = std::count_if(vec.begin(), vec.end(), 
-                          [](int n) { return n % 2 == 0; });
-```
-
-The modern version is safer (no manual delete), more readable (range-based for), and more concise (
-lambdas), all without sacrificing performance.
-
----
-
-## Common Misconceptions
-
-:::danger[Myth #1: "C++ is just C with classes"]
-**Reality**: C++ has diverged significantly from C. Modern features like RAII, move semantics,
-templates, and constexpr make it a fundamentally different language.
-:::
-
-:::danger[Myth #2: "C++ is too complex"]
-**Reality**: Modern C++ (C++11+) is simpler than legacy C++. Smart pointers replace manual memory
-management, auto reduces boilerplate, and range-based for loops simplify iteration.
-:::
-
-:::danger[Myth #3: "C++ is obsolete"]
-**Reality**: C++ powers Chrome, Firefox, Microsoft Office, Adobe Photoshop, game engines, and most
-high-performance systems. It's consistently among the top 5 most-used languages.
-:::
-
----
-
-## Getting Started
-
-### Minimal C++ Program
-
-```cpp showLineNumbers 
+```cpp title="hello.cpp"
 #include <iostream>
 
 int main() {
     std::cout << "Hello, C++!\n";
-    return 0;
 }
 ```
 
-Every C++ program starts at the `main()` function. The `#include` preprocessor directive imports the
-iostream library for console I/O. The `std::cout` object sends output to the console, and `\n`
-creates a newline. The `return 0` indicates successful program execution to the operating system.
-
-### Compilation
-
 ```bash
-# Compile with g++
-g++ -std=c++17 -Wall -O2 hello.cpp -o hello
-
-# Run
+g++ -std=c++20 -Wall -Wextra -O2 hello.cpp -o hello
 ./hello
 ```
 
-The `-std=c++17` flag specifies the C++17 standard, `-Wall` enables all warnings to catch potential
-issues, `-O2` enables optimizations, and `-o hello` names the output executable.
+```text
+Hello, C++!
+```
 
----
+- `-std=c++20` selects the language standard. See [C++ Versions](./cpp-versions.md#choosing-a-standard).
+- `-Wall -Wextra` turns on the commonly useful warnings. Despite its name, `-Wall` is not every
+  warning.
+- `-O2` enables optimisation. Without it, the zero-overhead claims above don't hold.
+- `main` is the program's entry point. Reaching the end of `main` without a `return` returns 0.
 
-## Who Uses C++?
+## Where C++ is used
 
-### Tech Giants
+C++ is common wherever performance, latency or hardware access decides the design. Projects whose
+core is written in C++ include:
 
-- **Google**: Chrome browser, TensorFlow, servers
-- **Microsoft**: Windows OS, Office, Visual Studio
-- **Facebook/Meta**: Backend infrastructure, Folly library
-- **Amazon**: High-performance services, AWS components
-- **Apple**: macOS/iOS internals, Safari WebKit
+- **Browsers and compilers:** Chromium, Firefox (alongside Rust), LLVM/Clang, GCC (written in C++ since GCC 4.8).
+- **Game engines:** Unreal Engine, and the runtime of Unity.
+- **Machine learning:** the cores of PyTorch and TensorFlow, which expose Python APIs.
+- **Databases:** MySQL, MongoDB, ClickHouse.
 
-### Industries
+Many other systems are written in C rather than C++, including the Linux kernel and PostgreSQL.
 
-- **Gaming**: AAA game studios (Naughty Dog, Rockstar, Epic Games)
-- **Finance**: Trading platforms (Bloomberg, Goldman Sachs)
-- **Automotive**: Tesla, Mercedes, BMW (embedded systems)
-- **Aerospace**: NASA, SpaceX, Boeing
-- **Scientific**: CERN, particle physics simulations
+## Where to go next
 
----
+- [C vs C++](./c-vs-cpp.md): read this next if you know C.
+- [C++ Versions](./cpp-versions.md): which standard added what, and which one to use.
+- [The C++ Ecosystem](./cpp-ecosystem.md): compilers, build systems, libraries and tools.
+- [The Compilation Pipeline](../01-toolchain-and-build/compilation-pipeline.md): the start of the
+  main reading path.
 
-## Summary
+## References
 
-C++ is a powerful, efficient language that combines:
-
-- **Low-level control** - Direct hardware access, manual memory management
-- **High-level abstractions** - Classes, templates, STL
-- **Performance** - Compiles to native code, zero-overhead abstractions
-- **Versatility** - Systems programming, games, scientific computing, embedded
-- **Industry standard** - Used in critical infrastructure worldwide
-
-:::success[When to Choose C++]
-
-- Performance is critical
-- Need direct hardware access
-- Building systems software, game engines, or real-time applications
-- Working with existing C++ codebases
-- Want compile-time guarantees and zero-cost abstractions
-  :::
-
-C++ empowers developers to write software that's both expressive and blazingly fast, making it
-irreplaceable in domains where performance matters most.
+- Bjarne Stroustrup, [FAQ](https://www.stroustrup.com/bs_faq.html): history and design aims, in the
+  author's words.
+- Bjarne Stroustrup, *The Design and Evolution of C++* (1994): source of the zero-overhead
+  principle.
+- [isocpp.org: The Standard](https://isocpp.org/std/the-standard): how C++ is standardised.
