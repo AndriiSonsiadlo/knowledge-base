@@ -139,13 +139,34 @@ const config = {
         hideOnScroll: false,
         items: [
           {
-            type: "docSidebar",
-            sidebarId: "programmingSidebar",
+            type: "dropdown",
             position: "left",
             label: "Programming",
-            description:
-              "Learn Python, C++, and master modern programming languages with practical examples.",
-            icon: "code",
+            items: [
+              {
+                type: "docSidebar",
+                sidebarId: "cppSidebar",
+                label: "C++",
+                description:
+                  "Modern C++ from the toolchain up: types, memory, templates, concurrency, the standard library.",
+                icon: "code",
+              },
+              {
+                type: "docSidebar",
+                sidebarId: "cppLibrariesSidebar",
+                label: "C++ Libraries & Tooling",
+                description:
+                  "CMake builds plus the libraries around the standard: Boost, fmt, nlohmann/json, spdlog.",
+                icon: "boxes",
+              },
+              {
+                type: "docSidebar",
+                sidebarId: "pythonSidebar",
+                label: "Python",
+                description: "Python language notes.",
+                icon: "code",
+              },
+            ],
           },
           {
             type: "dropdown",

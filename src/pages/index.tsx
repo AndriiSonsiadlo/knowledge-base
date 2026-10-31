@@ -7,10 +7,12 @@ import { usePluginData } from "@docusaurus/useGlobalData";
 import Layout from "@theme/Layout";
 import {
   Binary,
+  Boxes,
   Braces,
   CircuitBoard,
   Cpu,
   Database,
+  FileCode,
   Gamepad2,
   type LucideIcon,
   Sparkles,
@@ -132,7 +134,9 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
 
 // Decorative section glyphs (lucide, 1.5 stroke); keyed by navbar sidebarId.
 const SECTION_ICONS: Record<string, LucideIcon> = {
-  programmingSidebar: Braces,
+  cppSidebar: Braces,
+  cppLibrariesSidebar: Boxes,
+  pythonSidebar: FileCode,
   computerScienceSidebar: Binary,
   gpuComputingSidebar: Cpu,
   embeddedSidebar: CircuitBoard,
@@ -188,7 +192,7 @@ export default function Home(): ReactNode {
     (usePluginData("recent-docs-plugin") as { docs?: RecentDoc[] } | null)
       ?.docs ?? [];
 
-  // Single-section groups (Programming, Game Development) render together
+  // Single-section groups (Game Development) render together
   // under "Sections"; dropdown groups get their own `###` heading.
   const singles = groups.filter((g) => g.sections.length === 1);
   const multis = groups.filter((g) => g.sections.length > 1);

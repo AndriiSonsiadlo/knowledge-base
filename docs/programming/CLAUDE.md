@@ -6,3 +6,4 @@ Section-local notes, loaded only when working here. Site-wide rules (commits, rt
 - C++ library pages follow `docs/superpowers/specs/2026-08-07-cpp-library-docs-design.md` — read it only when adding/restructuring a library subtree, not for small edits.
 - Each library's entry page is `readme.md` (`sidebar_position: 1`, `sidebar_label: Overview`).
 - To place a new page, read the target folder's `_category_.json` and the `sidebar_position` of its siblings only.
+- Navigation: "Programming" is a navbar dropdown with three sidebars defined by hand in `sidebars.js` — `cppSidebar` (`cpp/`), `cppLibrariesSidebar` (`cmake/`, `boost/`, `fmt/`, `nlohmann-json/`, `spdlog/`), `pythonSidebar` (`python/`). A new top-level subtree here must be added to one of them (and the navbar) or it won't appear in any sidebar.

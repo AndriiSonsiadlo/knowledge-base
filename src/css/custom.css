@@ -1462,6 +1462,11 @@ body {
   align-items: center;
 }
 
+/* Blocks stacked without an arrow between them need their own gap. */
+.kb-dg__stack > :not(.kb-dg__arrow) + :not(.kb-dg__arrow) {
+  margin-top: 0.75rem;
+}
+
 .kb-dg__row {
   display: flex;
   flex-wrap: wrap;
