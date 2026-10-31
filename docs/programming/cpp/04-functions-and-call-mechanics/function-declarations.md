@@ -2,299 +2,156 @@
 id: function-declarations
 title: Function Declarations and Definitions
 sidebar_label: Function Declarations
-sidebar_position: 4
+sidebar_position: 1
 tags: [cpp, functions, declarations, signatures, prototypes]
 ---
 
 # Function Declarations and Definitions
 
-A **function declaration** (or prototype) specifies a function's name, return type, and parameters without providing the implementation.
+A **declaration** tells the compiler a function exists and what its type is, so calls can be checked
+and compiled. A **definition** is a declaration that also supplies the body. You can declare a
+function as often as you like, but the program needs exactly one definition of each non-inline
+function that is used. This page covers how declarations are written and what makes two of them the
+same function. The rest of this section builds on it: [default arguments](./default-arguments.md),
+[overloading](./overloading.md), [inline](./inline-functions.md),
+[constexpr](./constexpr-functions.md), [noexcept](./noexcept.md) and
+[calling conventions](./calling-conventions.md).
 
-## Basic Syntax
-```cpp
-// Declaration (forward declaration)
-int add(int a, int b);
+**Prerequisites:** [Translation Units](../01-toolchain-and-build/translation-units.md) (why each
+`.cpp` file needs its own declarations, and the One Definition Rule).
 
-// Definition (implementation)
-int add(int a, int b) {
+```cpp showLineNumbers
+int add(int a, int b);            // declaration ("prototype")
+int add(int, int);                // redeclaration: parameter names are optional and ignored
+
+int add(int a, int b) {           // definition
     return a + b;
 }
-
-// Usage
-int result = add(5, 3);
 ```
 
-## Declaration vs Definition
-```mermaid
-graph LR
-    A[Declaration] -->|Tells compiler| B[Function exists]
-    C[Definition] -->|Provides| D[Implementation]
-    
-    B --> E[Can be repeated]
-    D --> F[Must be unique]
-```
-```cpp
-// Declaration (can appear multiple times)
-void foo();
-void foo();  // OK: redeclaration
+A call compiles as long as a declaration is visible; the definition can be in another file. If no
+file defines it, the error comes from the linker ("undefined reference to `add(int, int)`"), not the
+compiler.
 
-// Definition (must appear exactly once)
-void foo() {
-    // Implementation
-}
+<Diagram title="Declarations in headers, one definition in a source file" accent="blue">
+  <DiagramNode icon="file-text" title="math.h" accent>`int add(int, int);`</DiagramNode>
+  <DiagramArrow label="#include" />
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="math.cpp">Defines `add`</DiagramNode>
+    <DiagramNode icon="file-text" title="main.cpp">Calls `add`</DiagramNode>
+  </DiagramRow>
+  <DiagramArrow label="link" />
+  <DiagramNode icon="binary" title="Program">The call in main.o resolves to the definition in math.o</DiagramNode>
+</Diagram>
 
-// void foo() { }  // Error: redefinition!
-```
+To *define* a function in a header instead, it must be [`inline`](./inline-functions.md) (or a
+template), or every file that includes it adds another definition.
 
-## Function Signature
+## The function's type and its signature
 
-The **signature** uniquely identifies a function:
-```cpp
-// Signature: name + parameter types (NOT return type!)
-int calculate(double x, double y);      // Signature: calculate(double, double)
-double calculate(int x, int y);         // Different signature!
-int calculate(double x, double y);      // Same signature as first - ERROR!
-```
+A function's **type** is its return type plus its parameter-type list (and, *(C++17)*, whether it is
+`noexcept`). The **parameter-type list** is what makes two declarations name the same function or
+two different [overloads](./overloading.md). The return type isn't part of that comparison: two
+functions with the same name and parameters but different return types are an error, not overloads.
 
-:::info
-The function signature includes the function name and parameter types, but **NOT** the return type.
-:::
+Before parameter types are compared, each one is **adjusted**:
 
-## Parameter Names in Declarations
-```cpp
-// Parameter names are optional in declarations
-void process(int, double);              // OK
-void process(int count, double value);  // Better: shows intent
+| Written | Adjusted to | So these declare one function |
+|---|---|---|
+| `const int x` | `int` (top-level `const` dropped) | `void f(int)` and `void f(const int)` |
+| `int a[10]` or `int a[]` | `int*` | `void f(int*)` and `void f(int[10])` |
+| `int g(int)` (a function) | `int (*)(int)` | `void f(int g(int))` and `void f(int (*g)(int))` |
 
-// Definition must have names
-void process(int count, double value) {
-    // Use count and value
-}
-```
+Top-level `const` in a *definition* still matters inside the body (`x` can't be modified), so it is
+fine to write it there while the header declares plain `int`. Note that an array parameter loses its
+size: `sizeof a` inside the function is the size of a pointer.
 
-## Common Declaration Patterns
+## Return types: leading, trailing, deduced
 
-### Pattern 1: Header/Source Split
-```cpp
-// widget.h
-class Widget {
-public:
-    void setSize(int width, int height);
-    int getWidth() const;
-    
-private:
-    int width_, height_;
-};
+```cpp title="returns.cpp" showLineNumbers
+#include <vector>
 
-// widget.cpp
-void Widget::setSize(int width, int height) {
-    width_ = width;
-    height_ = height;
-}
+int square(int x) { return x * x; }                  // classic
 
-int Widget::getWidth() const {
-    return width_;
-}
-```
+auto cube(int x) -> int { return x * x * x; }       // trailing return type (C++11)
 
-### Pattern 2: Forward Declarations
-```cpp
-// Declare class without full definition
-class Database;
-
-// Can use pointers/references
-class UserManager {
-    Database* db_;  // OK: pointer to forward-declared class
-    
-public:
-    void setDatabase(Database* db);
-};
-
-// Full definition later
-class Database {
-    // ...
-};
-```
-
-### Pattern 3: Namespace Scope
-```cpp
-namespace math {
-    double sqrt(double x);
-    double pow(double base, double exp);
-}
-
-// Implementation
-namespace math {
-    double sqrt(double x) {
-        // Implementation
-    }
-}
-```
-
-## Special Member Functions
-```cpp
-class Widget {
-public:
-    // Constructor
-    Widget(int value);
-    
-    // Destructor
-    ~Widget();
-    
-    // Copy constructor
-    Widget(const Widget& other);
-    
-    // Copy assignment
-    Widget& operator=(const Widget& other);
-    
-    // Move constructor
-    Widget(Widget&& other) noexcept;
-    
-    // Move assignment
-    Widget& operator=(Widget&& other) noexcept;
-};
-```
-
-## Function Attributes
-
-### const Member Functions
-```cpp
-class Point {
-    int x_, y_;
-    
-public:
-    int getX() const;        // Doesn't modify object
-    void setX(int x);        // May modify object
-};
-```
-
-### noexcept Specification
-```cpp
-void safeFunction() noexcept;           // Never throws
-void mayThrow();                        // May throw
-void conditionalNoexcept() noexcept(true);
-```
-
-### [[nodiscard]] Attribute (C++17)
-```cpp
-[[nodiscard]] int calculate();
-
-void usage() {
-    calculate();  // Warning: ignoring return value
-    int result = calculate();  // OK
-}
-```
-
-## Trailing Return Type (C++11)
-```cpp
-// Traditional syntax
-int getValue();
-
-// Trailing return type
-auto getValue() -> int;
-
-// Useful with templates
-template<typename T, typename U>
-auto multiply(T a, U b) -> decltype(a * b) {
+template <class T, class U>
+auto mul(T a, U b) -> decltype(a * b) {             // return type depends on the parameters
     return a * b;
 }
 
-// C++14: auto deduction
-auto add(int a, int b) {
-    return a + b;  // Return type deduced
+auto half(double x) { return x / 2; }                // deduced from the return statement (C++14)
+
+auto& first(std::vector<int>& v) { return v[0]; }   // deduced reference: int&
+
+int main() {
+    std::vector<int> v{1, 2};
+    first(v) = 7;
+    return square(2) + cube(1) + static_cast<int>(mul(2, 1.5) + half(2.0)) + v[0];   // 4+1+3+1+7
 }
 ```
 
-## Function Pointers
-```cpp
-// Declaration
-int (*funcPtr)(int, int);
+The trailing form exists because a leading return type can't name the parameters. A deduced return
+type (`auto` with no trailing part) needs the body to be visible, so such a function is normally
+defined in a header and can't be used before its definition. The deduction rules are on
+[Type Deduction](../03-types-and-values/type-deduction/auto.md).
 
-// Assignment
+## Attributes worth knowing
+
+```cpp showLineNumbers
+// ...
+[[nodiscard]] int parse(const char* s);          // C++17: warn if the result is ignored
+[[nodiscard("check the error")]] int open_file();  // C++20: with a reason
+[[noreturn]] void fatal(const char* msg);         // C++11: never returns (exit, throw, abort)
+[[deprecated("use parse2")]] int parse_old();     // C++14
+[[maybe_unused]] static void debug_dump();        // C++17: no unused warning
+```
+
+`parse("1");` on its own line then gives GCC's "ignoring return value of 'int parse(const char*)',
+declared with attribute 'nodiscard'". `[[noreturn]]` lets the compiler drop code after the call; if
+such a function does return, the behaviour is undefined.
+
+## Function types and pointers
+
+A function name converts to a pointer to the function, and a pointer can be called directly:
+
+```cpp title="pointers.cpp" showLineNumbers
+#include <cstdio>
+
 int add(int a, int b) { return a + b; }
-funcPtr = &add;
+int sub(int a, int b) { return a - b; }
 
-// Call
-int result = funcPtr(5, 3);
+using BinaryOp = int (*)(int, int);       // pointer-to-function type alias
+// equivalently: using BinaryOp = int(*)(int, int);  or  int (*op)(int, int);
 
-// Using type alias
-using BinaryOp = int(*)(int, int);
-BinaryOp operation = &add;
-```
+int apply(BinaryOp op, int x, int y) { return op(x, y); }
 
-## Practical Examples
-
-### Example 1: API Header
-```cpp
-// api.h
-#ifndef API_H
-#define API_H
-
-#include <string>
-#include <vector>
-
-namespace api {
-    // User management
-    bool createUser(const std::string& username, const std::string& password);
-    bool deleteUser(const std::string& username);
-    std::vector<std::string> listUsers();
-    
-    // Data operations
-    bool saveData(const std::string& key, const std::string& value);
-    std::string loadData(const std::string& key);
+int main() {
+    BinaryOp op = add;                    // &add is the same
+    std::printf("%d %d\n", apply(op, 5, 3), apply(sub, 5, 3));   // 8 2
 }
-
-#endif
 ```
 
-### Example 2: Class Interface
-```cpp
-class TextEditor {
-public:
-    // File operations
-    bool open(const std::string& filename);
-    bool save();
-    bool saveAs(const std::string& filename);
-    void close();
-    
-    // Edit operations
-    void insertText(size_t position, const std::string& text);
-    void deleteText(size_t start, size_t length);
-    std::string getText() const;
-    
-    // Query operations
-    size_t getLength() const;
-    bool isModified() const;
-    std::string getFilename() const;
-    
-private:
-    std::string content_;
-    std::string filename_;
-    bool modified_;
-};
-```
+For callbacks that may also be lambdas with captures, take a template parameter or `std::function`
+instead (see [Lambdas](../07-classes-and-oop/lambdas.md)). Member functions have a different pointer
+type (`int (Widget::*)() const`) because they need an object to be called on.
 
-## Best Practices
+## Common mistakes
 
-:::success[**DO:**]
-- Declare functions in headers, define in source files
-- Use meaningful parameter names in declarations
-- Mark const member functions with `const`
-- Use `noexcept` for functions that don't throw
-- Use forward declarations to reduce dependencies
-  :::
+- **Declaration and definition disagree.** `int area(int, int);` in the header and
+  `int area(long w, long h) { ... }` in the source define a *different* overload. Callers link
+  against the declared one and get "undefined reference". Include the header in its own `.cpp` so
+  mismatches in return type at least become compile errors.
+- **`int f();` in C++ means "no parameters".** In C before C23 it meant "unspecified parameters".
+  See [C vs C++](../00-overview/c-vs-cpp.md).
+- **The most vexing parse.** `Widget w();` declares a function returning `Widget`, not a
+  default-constructed object. Write `Widget w;` or `Widget w{};`.
+- **Relying on an array parameter's size.** `void f(int a[10])` takes an `int*`; nothing checks that
+  the caller passed ten elements. Use `std::span<int, 10>` *(C++20)* or a reference to an array.
 
-:::danger
-**DON'T:**
-- Define functions in headers (causes multiple definition errors)
-- Forget to include headers with declarations
-- Declare functions without defining them (causes linker errors)
-- Mismatch declarations and definitions
-  :::
+## Key points
 
-## Related Topics
-
-- **[Default Arguments](default-arguments.md)** - Optional parameters
-- **[Overloading](overloading.md)** - Multiple functions same name
-- **[noexcept](noexcept.md)** - Exception specifications
-- **[constexpr Functions](constexpr-functions.md)** - Compile-time functions
+- Declare many times, define once; missing definitions are link errors.
+- Overloads are told apart by the adjusted parameter-type list; the return type doesn't take part.
+- Top-level `const`, array sizes and parameter names don't change which function you declared.
+- Use a trailing return type when it depends on parameters; `auto` deduction needs a visible body.

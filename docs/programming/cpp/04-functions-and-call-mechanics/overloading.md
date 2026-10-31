@@ -8,397 +8,243 @@ tags: [c++, functions, overloading, overload-resolution]
 
 # Function Overloading
 
-Function overloading allows multiple functions with the same name but different parameters. The compiler selects the best match based on arguments.
+**Overloading** lets several functions in the same scope share a name as long as their parameter
+lists differ. At each call the compiler runs **overload resolution**: it collects the candidates,
+discards the ones that can't take the arguments, and ranks the rest by how much conversion each
+argument needs. This happens entirely at compile time and is a different mechanism from overriding
+a [virtual function](../07-classes-and-oop/virtual-functions.md), which is chosen at run time.
+Overloading is also why C++ needs [name mangling](../01-toolchain-and-build/name-mangling.md).
 
-:::info[Compile-Time Selection]
-Overload resolution happens at compile-time based on argument types, not runtime values.
-:::
+**Prerequisites:** [Function Declarations](./function-declarations.md) (what a signature is),
+[Conversions and Promotions](../03-types-and-values/conversions-and-promotions.md) (the conversions
+that resolution ranks).
 
-Resolution looks only at the **parameters**, ranking each viable candidate by how well the arguments
-match — an exact match beats a promotion, which beats a standard conversion. The single best-ranked
-candidate wins; a tie is an *ambiguity* error. Two things commonly trip people up: the **return type
-alone cannot distinguish overloads**, and overloading (same scope, resolved at compile time) is a
-different mechanism from *overriding* a [virtual function](../07-classes-and-oop/virtual-functions.md)
-(across base/derived, resolved at runtime).
+```cpp title="basic.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
 
-## Basic Overloading
+void print(int)                { std::puts("int"); }
+void print(long)               { std::puts("long"); }
+void print(double)             { std::puts("double"); }
+void print(const std::string&) { std::puts("string"); }
 
-```cpp showLineNumbers 
-void print(int x) {
-    std::cout << "int: " << x << "\n";
+int main() {
+    print('A');     // int:    char -> int is a promotion
+    print(3.14f);   // double: float -> double is a promotion
+    print(42L);     // long:   exact match
 }
-
-void print(double x) {
-    std::cout << "double: " << x << "\n";
-}
-
-void print(const char* x) {
-    std::cout << "string: " << x << "\n";
-}
-
-print(42);       // Calls print(int)
-print(3.14);     // Calls print(double)
-print("hello");  // Calls print(const char*)
 ```
 
----
+## What can and cannot differ
 
-## Overloading Rules
+Two declarations overload each other only if their parameter-type lists differ **after adjustment**.
+The compiler first rewrites each parameter type: top-level `const`/`volatile` is dropped, arrays
+become pointers, and function types become function pointers.
 
-Functions can differ by:
+| Declarations | Result |
+|---|---|
+| `f(int)` / `f(int, int)` | Overloads: different count |
+| `f(int)` / `f(double)` | Overloads: different type |
+| `f(int*)` / `f(const int*)` | Overloads: `const` on the pointee is part of the type |
+| `f(int&)` / `f(int&&)` / `f(const int&)` | Overloads: different reference types |
+| `f(int)` / `f(const int)` | **Same function**: top-level `const` is dropped |
+| `f(int*)` / `f(int[])` / `f(int[10])` | **Same function**: arrays adjust to pointers |
+| `int f(int)` / `double f(int)` | **Error**: differ only in return type |
 
-**Number of parameters**
-```cpp showLineNumbers 
-void func(int x);
-void func(int x, int y);
-```
+Member functions can also overload on their `const` qualifier and on ref-qualifiers (`&`, `&&`),
+because those change the type of the implicit object parameter:
 
-**Type of parameters**
-```cpp showLineNumbers 
-void func(int x);
-void func(double x);
-```
-
-**const/volatile qualifiers**
-```cpp showLineNumbers 
-void func(int x);
-void func(const int x);  // Same (top-level const ignored)
-
-void func(int* p);
-void func(const int* p);  // Different (low-level const)
-
-void process(std::string& s);      // Lvalue
-void process(const std::string& s); // Lvalue (different)
-void process(std::string&& s);     // Rvalue
-```
-
-**Reference qualifiers**
-```cpp showLineNumbers 
-void func(int& x);   // Lvalue reference
-void func(int&& x);  // Rvalue reference
-```
-
-**Return type only** (not allowed)
-```cpp showLineNumbers 
-int func(int x);
-double func(int x);  // Error: differs only by return type
-```
-
----
-
-## Overload Resolution Process
-
-1. **Find candidates**: Functions with matching name
-2. **Filter viable**: Can be called with given arguments
-3. **Select best match**: Most specific match wins
-
-```cpp showLineNumbers 
-void func(int x);          // #1
-void func(double x);       // #2
-void func(int x, int y);   // #3
-
-func(42);        // Calls #1: exact match
-func(3.14);      // Calls #2: exact match
-func(42, 10);    // Calls #3: exact match
-func('c');       // Calls #1: char promotes to int
-```
-
----
-
-## Exact Match vs Conversion
-
-```cpp showLineNumbers 
-void print(int x);
-void print(double x);
-
-print(42);       // Exact match → print(int)
-print(3.14);     // Exact match → print(double)
-print(3.14f);    // float → double conversion → print(double)
-print('A');      // char → int promotion → print(int)
-```
-
-**Ranking**:
-1. Exact match
-2. Promotions (char→int, float→double)
-3. Standard conversions (int→double)
-4. User-defined conversions
-
----
-
-## Ambiguous Overloads
-
-```cpp showLineNumbers 
-void func(int x, double y);
-void func(double x, int y);
-
-func(42, 3.14);    // OK: exact match on both
-// func(42, 42);   // Error: ambiguous!
-                   // Both require one conversion
-```
-
-### Resolving Ambiguity
-
-```cpp showLineNumbers 
-// Explicit cast
-func(42, static_cast<double>(42));  // Calls first overload
-func(static_cast<double>(42), 42);  // Calls second overload
-
-// Or add more overloads
-void func(int x, int y);  // Exact match for func(42, 42)
-```
-
----
-
-## const Overloading
-
-```cpp showLineNumbers 
-class Widget {
+```cpp showLineNumbers
+// ...
+class Buffer {
 public:
-    int getValue() const {        // const version
-        std::cout << "const\n";
-        return value;
-    }
-    
-    int& getValue() {             // non-const version
-        std::cout << "non-const\n";
-        return value;
-    }
-    
+    char&       at(std::size_t i)       { return data_[i]; }  // called on non-const objects
+    const char& at(std::size_t i) const { return data_[i]; }  // called on const objects
+    std::string take() &&               { return std::move(data_); }  // only on rvalues
 private:
-    int value = 42;
+    std::string data_;
+};
+```
+
+## How resolution ranks candidates
+
+Overload resolution has three stages:
+
+1. **Candidate functions.** Name lookup finds every function with that name visible at the call:
+   ordinary lookup plus [argument-dependent lookup](https://en.cppreference.com/w/cpp/language/adl).
+   Function templates contribute a specialization each, if deduction succeeds.
+2. **Viable functions.** Keep the candidates with the right number of parameters (counting defaults
+   and `...`) where every argument has *some* implicit conversion to its parameter.
+3. **Best viable function.** For each argument, rank the conversion that each candidate needs.
+
+Each argument's conversion sequence falls into one of these categories, best first:
+
+| Rank | What it covers | Examples |
+|---|---|---|
+| **Exact match** | No conversion, or only lvalue-to-rvalue, array-to-pointer, function-to-pointer, adding `const` to a pointee | `int` → `int`, `int[4]` → `int*`, `int*` → `const int*` |
+| **Promotion** | Integral promotion, `float` → `double` | `char` → `int`, `bool` → `int`, `float` → `double` |
+| **Conversion** | Any other standard conversion | `int` → `long`, `int` → `double`, `double` → `int`, `Derived*` → `Base*` |
+| **User-defined conversion** | A converting constructor or conversion operator, plus standard conversions around it | `const char*` → `std::string` |
+| **Ellipsis** | Matching a `...` parameter | `printf`-style |
+
+Candidate F1 is **better** than F2 if none of F1's argument conversions is worse than F2's and at
+least one is strictly better. The best viable function must be better than *every* other viable
+function. If no candidate satisfies that, the call is **ambiguous** and won't compile. A function
+that wins on one argument and loses on another is not better than its rival.
+
+Note that `int` → `long` is a *conversion*, not a promotion. Only conversions to `int` (or
+`unsigned int`) and `float` → `double` count as promotions.
+
+## A traced example
+
+Three overloads and two calls. Compiled with GCC 15 and Clang 21 (`-std=c++23`):
+
+```cpp title="trace.cpp" showLineNumbers
+#include <cstdio>
+
+void f(int, double)  { std::puts("#1 f(int, double)"); }
+void f(double, int)  { std::puts("#2 f(double, int)"); }
+void f(long, long)   { std::puts("#3 f(long, long)"); }
+
+int main() {
+    f('a', 2.0f);    // prints "#1 f(int, double)"
+    // f(1, 2);      // error: call of overloaded 'f(int, int)' is ambiguous
+}
+```
+
+<Walkthrough title="Resolving f('a', 2.0f), then f(1, 2)" caption="Each argument is ranked separately; the winner must be at least as good on every argument." accent="blue">
+  <Step title="Candidates and viability">
+
+All three `f` are candidates. All three are viable for `f('a', 2.0f)`: `char` and `float` both
+convert implicitly to `int`, `double` and `long`.
+
+  </Step>
+  <Step title="Rank argument 1: 'a' (char)">
+
+| | #1 `int` | #2 `double` | #3 `long` |
+|---|---|---|---|
+| `char` → | <StepChange>Promotion</StepChange> | Conversion | Conversion |
+
+Only #1 gets a promotion. `char` → `long` is a conversion, not a promotion.
+
+  </Step>
+  <Step title="Rank argument 2: 2.0f (float)">
+
+| | #1 `double` | #2 `int` | #3 `long` |
+|---|---|---|---|
+| `float` → | <StepChange>Promotion</StepChange> | Conversion | Conversion |
+
+`float` → `double` is the one floating-point promotion.
+
+  </Step>
+  <Step title="Compare: #1 wins">
+
+#1 is at least as good as #2 and #3 on both arguments and strictly better on at least one.
+<StepChange>#1 `f(int, double)` is the best viable function.</StepChange>
+
+  </Step>
+  <Step title="Now f(1, 2): rank both arguments">
+
+| | #1 `(int, double)` | #2 `(double, int)` | #3 `(long, long)` |
+|---|---|---|---|
+| arg 1 `int` → | Exact | Conversion | Conversion |
+| arg 2 `int` → | Conversion | Exact | Conversion |
+
+  </Step>
+  <Step title="Compare: no winner">
+
+#1 beats #2 on argument 1 but loses on argument 2, so neither is better. Both beat #3, but that
+doesn't help: the best function must beat every other one.
+<StepChange>Ambiguous: compile error.</StepChange> Adding `f(int, int)` or casting one argument fixes it.
+
+  </Step>
+</Walkthrough>
+
+## Tie-breakers
+
+When the argument rankings don't separate two candidates, these rules are tried, among others:
+
+- A **non-template** beats a function-template specialization with equally good conversions.
+- Between two templates, the **more specialized** one wins (see
+  [Function Templates](../08-templates-and-metaprogramming/function-templates.md)).
+- For reference binding, an rvalue binds better to `T&&` than to `const T&`, and a reference to a
+  less-qualified type beats a more-qualified one (`int&` over `const int&` for a non-const lvalue).
+- *(C++20)* A candidate whose constraints subsume the other's wins (see
+  [Concepts](../08-templates-and-metaprogramming/concepts-and-requires.md)).
+
+```cpp title="refs.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+#include <utility>
+
+void process(const std::string&) { std::puts("lvalue"); }
+void process(std::string&&)      { std::puts("rvalue"); }
+
+int main() {
+    std::string s = "hi";
+    process(s);             // lvalue
+    process(std::string{}); // rvalue: && binds an rvalue better than const&
+    process(std::move(s));  // rvalue
+}
+```
+
+## Common mistakes
+
+**A forwarding-reference template beats your specific overload.** `T&&` deduces to the exact type,
+including non-const, so it often matches better than a hand-written `const` overload:
+
+```cpp title="greedy.cpp" showLineNumbers
+#include <cstdio>
+
+template <class T> void g(T&&)  { std::puts("template T&&"); }
+void g(const int&)              { std::puts("const int&"); }
+
+int main() {
+    int x = 1;
+    const int cx = 2;
+    g(x);    // template T&&: T = int&, exact; const int& would add const
+    g(cx);   // const int&: tie on conversions, non-template wins
+}
+```
+
+The fix is to constrain the template (`requires`) so it drops out for the types you handle
+separately.
+
+**Two conversions of the same rank are ambiguous.** With `k(long)` and `k(double)`, `k(42)` doesn't
+compile: `int` → `long` and `int` → `double` are both conversions. Add `k(int)` or cast.
+
+**A derived class hides base overloads.** Declaring `func` in a derived class hides *every* `func`
+from the base, so resolution never sees them:
+
+```cpp title="hiding.cpp" showLineNumbers
+#include <cstdio>
+
+struct Base { void func(int) { std::puts("Base::func(int)"); } };
+struct D1 : Base { void func(double) { std::puts("D1::func(double)"); } };
+struct D2 : Base {
+    using Base::func;   // bring the base overloads into this scope
+    void func(double) { std::puts("D2::func(double)"); }
 };
 
-Widget w;
-w.getValue() = 100;  // Calls non-const, returns int&
-
-const Widget cw;
-int x = cw.getValue();  // Calls const version
-```
-
----
-
-## Reference Overloading
-
-```cpp showLineNumbers 
-void process(const std::string& s) {
-    std::cout << "lvalue: " << s << "\n";
+int main() {
+    D1{}.func(42);   // D1::func(double): Base::func(int) is hidden
+    D2{}.func(42);   // Base::func(int): exact match now visible
 }
-
-void process(std::string&& s) {
-    std::cout << "rvalue: " << s << "\n";
-    // Can move from s
-}
-
-std::string str = "hello";
-process(str);              // Calls lvalue version
-process("temporary");      // Calls rvalue version
-process(std::move(str));   // Calls rvalue version
 ```
 
----
+**Overloads that collide with default arguments.** Declaring `f(int, int = 0)` and `f(int)` is legal,
+but every call `f(42)` is ambiguous. See [Default Arguments](./default-arguments.md).
 
-## Pointer vs Array
+Operators are overloaded with the same resolution rules; how to write them is on
+[Operator Overloading](../02-language-fundamentals/operators/operator-overloading.md).
 
-```cpp showLineNumbers 
-void func(int* arr);
-void func(int arr[]);     // Same as int*
-void func(int arr[10]);   // Still same as int*
+## Key points
 
-// All three are identical - no overloading!
-
-void func(int (&arr)[10]); // Different: reference to array
-```
-
----
-
-## Default Arguments
-
-```cpp showLineNumbers 
-void func(int x, int y = 0);
-void func(int x);  // Error: ambiguous with func(x, 0)
-
-// Call
-func(42);  // Which one? Ambiguous!
-```
-
----
-
-## Template Overloading
-
-```cpp showLineNumbers 
-template<typename T>
-void func(T x) {
-    std::cout << "template\n";
-}
-
-void func(int x) {
-    std::cout << "non-template\n";
-}
-
-func(42);    // Calls non-template (exact match preferred)
-func(3.14);  // Calls template (only option)
-```
-
-**Rule**: Non-template functions preferred over templates for exact matches.
-
----
-
-## Variadic Overloading
-
-```cpp showLineNumbers 
-void print(int x) {
-    std::cout << x << "\n";
-}
-
-template<typename T, typename... Args>
-void print(T first, Args... rest) {
-    std::cout << first << ", ";
-    print(rest...);  // Recursive
-}
-
-print(1, 2, 3, 4);  // 1, 2, 3, 4
-```
-
----
-
-## Name Hiding in Inheritance
-
-```cpp showLineNumbers 
-class Base {
-public:
-    void func(int x) {
-        std::cout << "Base::func\n";
-    }
-};
-
-class Derived : public Base {
-public:
-    void func(double x) {  // Hides Base::func!
-        std::cout << "Derived::func\n";
-    }
-};
-
-Derived d;
-d.func(42);    // Calls Derived::func(double), not Base::func(int)!
-               // Even though int→int is better than int→double
-```
-
-**Solution**: Use `using` declaration:
-
-```cpp showLineNumbers 
-class Derived : public Base {
-public:
-    using Base::func;  // Bring Base::func into scope
-    
-    void func(double x) {
-        std::cout << "Derived::func\n";
-    }
-};
-
-Derived d;
-d.func(42);  // Now calls Base::func(int) - better match
-```
-
----
-
-## Operator Overloading
-
-```cpp showLineNumbers 
-class Complex {
-    double real, imag;
-public:
-    Complex(double r, double i) : real(r), imag(i) {}
-    
-    // Member function
-    Complex operator+(const Complex& other) const {
-        return Complex(real + other.real, imag + other.imag);
-    }
-    
-    // Can also overload as friend/global function
-};
-
-Complex a(1, 2), b(3, 4);
-Complex c = a + b;  // Calls operator+
-```
-
----
-
-## Best Practices
-
-:::success[DO]
-- Overload for different types/counts
-- Use const overloading for getter/setter pairs
-- Use reference qualifiers (lvalue/rvalue) for optimization
-- Keep overload sets intuitive
-  :::
-
-:::danger[DON'T]
-- Overload with same parameter types (differs only by names)
-- Create ambiguous overload sets
-- Differ only by return type
-- Use overloading when different names are clearer
-  :::
-
----
-
-## Common Pitfalls
-
-### Surprising Conversions
-
-```cpp showLineNumbers 
-void func(long x);
-void func(double x);
-
-func(42);  // Ambiguous! int→long and int→double both conversions
-```
-
-### Pointer/Bool Conversion
-
-```cpp showLineNumbers 
-void func(int x);
-void func(bool x);
-
-func(nullptr);  // Ambiguous in some cases
-```
-
-### Forwarding References
-
-```cpp showLineNumbers 
-template<typename T>
-void func(T&& x);  // Universal reference
-
-void func(int& x);
-
-int x = 42;
-func(x);  // Which one? Template is exact match!
-```
-
----
-
-## Summary
-
-Function overloading:
-- **Same name, different parameters**
-- Resolved at **compile-time**
-- Ranked: Exact > Promotion > Conversion
-
-**Can overload on**:
-- Parameter count
-- Parameter types
-- const qualifiers (low-level)
-- Reference type (lvalue/rvalue)
-
-**Cannot overload on**:
-- Return type only
-- Parameter names
-- Top-level const
-
-```cpp showLineNumbers 
-// Good overload set
-void process(int x);              // Integer
-void process(double x);           // Floating-point
-void process(const std::string& s); // String lvalue
-void process(std::string&& s);    // String rvalue
-```
-
-Overloading enables type-safe, expressive APIs while maintaining performance through compile-time resolution.
+- Overloads must differ in parameter types after adjustment; return type and top-level `const` don't
+  count.
+- Ranking per argument: exact match, promotion, conversion, user-defined, ellipsis.
+- The winner must be at least as good on every argument and better on one; otherwise the call is
+  ambiguous.
+- `int` → `long` is a conversion, not a promotion; that surprise causes many ambiguities.
+- Watch unconstrained `T&&` templates and name hiding in derived classes.
+- Full rules: [overload resolution on cppreference](https://en.cppreference.com/w/cpp/language/overload_resolution).

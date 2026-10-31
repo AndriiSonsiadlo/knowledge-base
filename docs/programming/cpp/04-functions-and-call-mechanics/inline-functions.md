@@ -3,377 +3,181 @@ id: inline-functions
 title: Inline Functions
 sidebar_label: Inline
 sidebar_position: 4
-tags: [c++, functions, inline, optimization, performance]
+tags: [c++, functions, inline, optimization, odr]
 ---
 
 # Inline Functions
 
-`inline` suggests the compiler replace function calls with function body, eliminating call overhead. Modern compilers decide automatically.
+The `inline` keyword has two meanings that people mix up. Its **language meaning**, the one the
+standard guarantees, is about linkage: an inline function (or *(C++17)* variable) may be *defined* in
+every translation unit that uses it, which is what lets you put a definition in a header. Its
+**optimization meaning**, replacing a call with the function body, is only a hint, and modern
+compilers mostly ignore it in favour of their own heuristics. This page separates the two.
 
-:::info[Suggestion, Not Command]
-`inline` is a hint. Compilers inline automatically based on optimization settings, often ignoring the keyword.
-:::
+**Prerequisites:** [Translation Units](../01-toolchain-and-build/translation-units.md) and the
+[One Definition Rule](../01-toolchain-and-build/linking.md#one-definition-rule-odr), which this page
+builds on rather than repeats. [Function Declarations](./function-declarations.md) for
+declaration versus definition.
 
-## Basic Usage
+<Diagram title="Two things called inline" accent="green">
+  <DiagramRow>
+    <DiagramNode title="Language rule (guaranteed)" accent>The function may be defined in many translation units. All definitions must be identical; the linker keeps one.</DiagramNode>
+    <DiagramNode title="Inlining (optimization)" dashed>Replace a call with the body. Decided by the optimizer for any function whose body it can see, keyword or not.</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-```cpp showLineNumbers 
-// Without inline
-int square(int x) {
-    return x * x;
-}
+## The ODR meaning: definitions in headers
 
-int result = square(5);  // Function call overhead
+The ODR allows only one definition of a non-inline function in the whole program. Put that definition
+in a header included by two `.cpp` files and each object file gets a copy:
 
-// With inline
-inline int square(int x) {
-    return x * x;
-}
-
-int result = square(5);  // May be replaced with: 5 * 5
-```
-
----
-
-## How Inlining Works
-
-### Normal Function Call
-
-```cpp showLineNumbers 
-int add(int a, int b) {
-    return a + b;
-}
-
-int x = add(5, 3);
-
-// Assembly (simplified):
-// push 3
-// push 5
-// call add
-// add esp, 8
-// mov x, eax
-```
-
-### Inlined Function
-
-```cpp showLineNumbers 
-inline int add(int a, int b) {
-    return a + b;
-}
-
-int x = add(5, 3);
-
-// Assembly (simplified):
-// mov eax, 5
-// add eax, 3
-// mov x, eax
-```
-
-No call overhead: no stack manipulation, no jump, faster execution.
-
----
-
-## When to Inline
-
-### Good Candidates
-
-```cpp showLineNumbers 
-// Small, frequently called functions
-inline int max(int a, int b) {
-    return a > b ? a : b;
-}
-
-// Getters/setters
-class Widget {
-    int value;
-public:
-    inline int getValue() const { return value; }
-    inline void setValue(int v) { value = v; }
-};
-
-// Simple calculations
-inline double square(double x) { return x * x; }
-```
-
-### Poor Candidates
-
-```cpp showLineNumbers 
-// Large functions (defeats purpose)
-inline void processComplexData(/*...*/) {
-    // 100 lines of code
-    // Inlining duplicates code everywhere
-}
-
-// Recursive functions (compiler won't inline)
-inline int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
-
-// Virtual functions (can't inline through base pointer)
-class Base {
-public:
-    virtual inline void func() {}  // inline ineffective
-};
-```
-
----
-
-## Definition Placement
-
-Inline functions must be defined in headers (visible to all translation units):
-
-```cpp showLineNumbers 
-// widget.h
+```cpp title="util.h"
 #pragma once
+int square(int x) { return x * x; }   // no inline
+```
 
-class Widget {
-public:
-    // Implicitly inline (defined in class)
-    int getValue() const { return value; }
-    
-    // Explicitly inline
-    inline void setValue(int v);
-    
-private:
-    int value;
+```cpp title="a.cpp"
+#include "util.h"
+int a() { return square(2); }
+```
+
+```cpp title="main.cpp"
+#include "util.h"
+int a();
+int main() { return square(3) + a(); }
+```
+
+```text
+$ g++ -std=c++23 a.cpp main.cpp -o app
+ld: main.cpp:(.text+0x0): multiple definition of `square(int)'; a.cpp:(.text+0x0): first defined here
+collect2: error: ld returned 1 exit status
+```
+
+Write `inline int square(int x)` and the program links and exits with 13. The compiler now emits
+`square` as a **weak** symbol in a mergeable section. `nm` shows the difference:
+
+```text
+$ nm -C a.o | grep square
+0000000000000000 W square(int)     # W = weak; without inline it is T, a strong definition
+```
+
+<Diagram title="How an inline function survives linking" caption="Each translation unit emits its own copy; the linker keeps one and discards the rest." accent="green">
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="a.o">weak `square(int)`</DiagramNode>
+    <DiagramNode icon="file-text" title="main.o">weak `square(int)`</DiagramNode>
+  </DiagramRow>
+  <DiagramArrow label="link" />
+  <DiagramNode icon="binary" title="app" accent>one `square(int)`, every call and `&square` refer to it</DiagramNode>
+</Diagram>
+
+The price of this permission is a promise: **every definition must be token-for-token identical and
+mean the same thing.** The linker does not check it. If two translation units see different
+definitions (say a macro changes the body), the program is ill-formed, no diagnostic required, and the
+linker silently picks one copy. An inline function still has a single address in the program, and its
+`static` local variables are shared by all translation units.
+
+### What is implicitly inline
+
+You rarely write `inline` on functions, because the common header-defined cases are already inline:
+
+- Member functions **defined inside the class body**, including friends defined there.
+- `constexpr` functions *(C++11)* and `consteval` functions *(C++20)*.
+- Deleted functions (`= delete`).
+- *(C++17)* `static constexpr` data members.
+
+Function **templates are not implicitly inline**. They may also appear in headers, but under a
+separate ODR provision for templates. A full specialization of a function template is an ordinary
+function and needs `inline` if it is defined in a header.
+
+*(C++20)* Inside a [named module](../01-toolchain-and-build/modules.md), a member function defined in
+the class body is no longer implicitly inline. Modules don't need the header permission, and this lets
+the module's interface keep the body private to its own compilation.
+
+## Inline variables *(C++17)*
+
+The same rule applies to variables. Before C++17, a global shared through a header needed an `extern`
+declaration in the header and one definition in a `.cpp` file. Now the header can define it:
+
+```cpp title="config.h"
+#pragma once
+#include <string>
+
+inline int request_count = 0;                    // one object shared by every TU
+inline const std::string default_host = "localhost";
+
+struct Limits {
+    static constexpr int max_users = 100;        // implicitly inline (C++17)
+    static inline int created = 0;               // non-const static member defined in-class
 };
-
-// Still in header
-inline void Widget::setValue(int v) {
-    value = v;
-}
 ```
 
-:::warning[One Definition Rule]
-Inline functions can be defined in multiple translation units (identical definitions required).
-:::
+Without `inline`, `const` namespace-scope variables have internal linkage, so each translation unit
+would get its *own* copy, which is a different and sometimes surprising result.
 
----
+## The optimization meaning: inlining
 
-## Implicit Inline
+**Inlining** replaces a call with a copy of the callee's body. It removes the call itself, but the
+bigger win is that the optimizer can then simplify the body in context (constant-fold arguments,
+drop dead branches). The cost is code size, since every inlined call site gets its own copy.
 
-### Member Functions Defined in Class
+The keyword doesn't control it. At `-O2` GCC inlines small functions whose body it can see whether
+they are marked `inline` or not. Here neither function says `inline`; one is inlined, the other is
+stopped with an attribute:
 
-```cpp showLineNumbers 
-class Widget {
-public:
-    // Implicitly inline
-    int getValue() const {
-        return value;
-    }
-    
-    // Also implicitly inline
-    void setValue(int v) { value = v; }
-    
-private:
-    int value;
-};
+```cpp title="inl.cpp" showLineNumbers
+static int square(int x) { return x * x; }          // no inline keyword
+[[gnu::noinline]] int cube(int x) { return x * x * x; }
+
+int use(int n) { return square(n) + cube(n); }
 ```
 
-### constexpr Functions
+GCC 15.2, `g++ -std=c++23 -O2 -S -masm=intel` (directives removed):
 
-```cpp showLineNumbers 
-// constexpr is implicitly inline
-constexpr int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
+```nasm
+_Z3usei:
+    call  _Z4cubei        ; cube: still a call, noinline forbids inlining
+    mov   edx, edi
+    imul  edx, edi        ; square(n) inlined: n * n, no call
+    add   eax, edx
+    ret
 ```
 
----
+At `-O0` the same file has two `call` instructions and nothing is inlined.
 
-## Modern Compiler Behavior
+What decides it is visibility of the body and the optimizer's cost model. A function defined in
+another `.cpp` file can't be inlined at all unless you enable link-time optimization (`-flto`), which
+lets the optimizer see across files.
 
-### Automatic Inlining
+### Controlling it when you must
 
-```cpp showLineNumbers 
-// Even without 'inline', compilers inline with optimization
-int square(int x) {
-    return x * x;
-}
+| Intent | GCC / Clang | MSVC |
+|---|---|---|
+| Always inline (error/warning if impossible) | `[[gnu::always_inline]] inline` | `__forceinline` |
+| Never inline | `[[gnu::noinline]]` | `__declspec(noinline)` |
 
-// With -O2 or -O3, this is inlined automatically
-```
+Use these for measured hot spots or to keep a function visible in profiles and backtraces, not as a
+default. Inlined frames don't appear as separate calls in a stack trace unless the debugger
+reconstructs them from debug info (GDB does this with `-g`).
 
-### Force Inline (Compiler-Specific)
+## Common mistakes
 
-```cpp showLineNumbers 
-// GCC/Clang
-__attribute__((always_inline))
-inline int add(int a, int b) {
-    return a + b;
-}
+- **Using `inline` as a speed annotation.** It doesn't make a call faster, and leaving it off doesn't
+  stop inlining. Use it when a definition has to live in a header.
+- **Defining a non-inline function in a header.** Works while one `.cpp` includes it, then fails with
+  "multiple definition" the day a second one does.
+- **Different inline definitions in different TUs.** A macro or `#ifdef` that changes the body per file
+  is an ODR violation the linker won't report; one version silently wins.
+- **"Virtual or recursive functions can't be inlined."** Not quite. A virtual call is inlined when the
+  compiler can prove the dynamic type (devirtualization), and compilers can inline a few levels of a
+  recursive call. Through an unknown base pointer, a virtual call stays a call.
+- **Expecting a `static` local in an inline function to be per-file.** There is one object for the
+  whole program. (A `static` *non-member* function is the opposite: each TU gets its own copy.)
 
-// MSVC
-__forceinline int add(int a, int b) {
-    return a + b;
-}
-```
+## Key points
 
-### Prevent Inline
-
-```cpp showLineNumbers 
-// GCC/Clang
-__attribute__((noinline))
-void debug_func() {
-    // Always appears in stack traces
-}
-
-// MSVC
-__declspec(noinline) void debug_func() {
-    // ...
-}
-```
-
----
-
-## Performance Impact
-
-### Benefits
-
-```cpp showLineNumbers 
-// Eliminates call overhead
-for (int i = 0; i < 1000000; i++) {
-    result += square(i);  // No function call per iteration
-}
-
-// Enables further optimization
-inline int compute(int x) {
-    return x * 2 + 1;
-}
-
-int y = compute(5);  // Compiler sees: 5 * 2 + 1
-                     // Can optimize to: 11 (constant folding)
-```
-
-### Drawbacks
-
-```cpp showLineNumbers 
-// Code bloat
-inline void largeFunction() {
-    // 50 lines of code
-}
-
-// Called 100 times = 100 copies of 50 lines
-// Increases binary size, hurts instruction cache
-```
-
----
-
-## Inline Variables (C++17)
-
-```cpp showLineNumbers 
-// header.h
-inline int global_counter = 0;  // OK in header (C++17)
-
-inline const std::string default_name = "Widget";
-```
-
-Before C++17, needed workarounds:
-
-```cpp showLineNumbers 
-// C++14 workaround
-extern const std::string default_name;
-
-// In one .cpp file:
-const std::string default_name = "Widget";
-```
-
----
-
-## Templates and Inline
-
-Template functions are implicitly inline:
-
-```cpp showLineNumbers 
-// Implicitly inline (defined in header)
-template<typename T>
-T max(T a, T b) {
-    return a > b ? a : b;
-}
-
-// Can explicitly mark inline (redundant)
-template<typename T>
-inline T min(T a, T b) {
-    return a < b ? a : b;
-}
-```
-
----
-
-## Link-Time Optimization (LTO)
-
-```bash
-# Modern alternative: LTO inlines across files
-g++ -flto -O3 file1.cpp file2.cpp -o app
-
-# Compiler can inline functions in file1.cpp called from file2.cpp
-# Without needing 'inline' keyword
-```
-
----
-
-## Best Practices
-
-:::success[DO]
-- Let compiler decide (use -O2/-O3)
-- Mark small, frequently-called functions inline
-- Define inline functions in headers
-- Use for getters/setters
-  :::
-
-:::danger[DON'T]
-- Inline large functions
-- Inline recursive functions
-- Inline virtual functions (ineffective)
-- Rely on inline for performance (profile first)
-  :::
-
----
-
-## Debugging
-
-Inlined functions don't appear in stack traces:
-
-```cpp showLineNumbers 
-inline void helper() {
-    throw std::runtime_error("Error");
-}
-
-void process() {
-    helper();  // Stack trace won't show helper()
-}
-```
-
-**Solution**: Compile with `-O0` or use `noinline` attribute for debugging.
-
----
-
-## Summary
-
-**inline keyword**:
-- Suggests function body replacement
-- Eliminates call overhead
-- Must be defined in header
-- Compilers decide automatically with optimization
-
-**Implicit inline**:
-- Functions defined in class body
-- constexpr functions
-- Template functions
-
-**Modern practice**:
-```cpp showLineNumbers 
-// Let compiler decide
-int square(int x) { return x * x; }
-
-// Compile with optimization
-g++ -O3 program.cpp
-
-// Compiler inlines automatically
-```
-
-**Use inline when**:
-- Multiple definitions needed (header-only)
-- Defining globals in headers (C++17)
-- Small, performance-critical functions
-
-**Key point**: Modern compilers are better at inlining decisions than humans. Use optimization flags (`-O2`, `-O3`) and profile performance rather than manually adding `inline` everywhere.
+- `inline` means "may be defined in several translation units"; the definitions must be identical.
+- Use it for functions and *(C++17)* variables defined in headers; class-body members and `constexpr`
+  functions already have it.
+- Function templates are not implicitly inline, but they may be defined in headers anyway.
+- Whether a call is actually inlined is the optimizer's choice; the keyword barely affects it.
+- Cross-file inlining needs the body visible: a header definition or `-flto`.

@@ -1,458 +1,220 @@
 ---
 id: constexpr-functions
-title: constexpr Functions
+title: constexpr, consteval and constinit
 sidebar_label: constexpr
 sidebar_position: 5
-tags: [c++, constexpr, compile-time, optimization, cpp11]
+tags: [c++, constexpr, consteval, constinit, compile-time, cpp11, cpp20]
 ---
 
-# constexpr Functions
+# constexpr, consteval and constinit
 
-`constexpr` indicates values or functions can be evaluated at compile-time, enabling compile-time computation and optimization.
+C++ can run ordinary-looking code during compilation. A `constexpr` function **may** be evaluated
+at compile time when it is called in a context that needs a constant, and runs as a normal function
+otherwise. *(C++20)* `consteval` makes compile-time evaluation **mandatory**, and `constinit` makes
+a global's **initialization** happen at compile time without making it `const`. This page explains
+when each one is evaluated, what each standard allowed inside such functions, and the mistakes that
+come from assuming `constexpr` means "computed at compile time".
 
-:::info[Compile-Time Execution]
-`constexpr` functions execute during compilation when possible, producing constants that can be used in array sizes, template arguments, and other constant expressions.
-:::
+**Prerequisites:** [Function Declarations](./function-declarations.md),
+[cv-qualifiers](../03-types-and-values/cv-qualifiers.md) (`const` versus `constexpr` variables),
+[Storage Duration](../05-memory-and-object-lifetime/storage-duration.md) (for `constinit`).
 
-## Basic Usage
+<Diagram title="The three keywords" accent="amber">
+  <DiagramRow>
+    <DiagramNode title="constexpr (C++11)">Function: *can* run at compile time. Variable: is a `const` compile-time constant.</DiagramNode>
+    <DiagramNode title="consteval (C++20)" accent>Function only: *every* call must be a constant expression.</DiagramNode>
+    <DiagramNode title="constinit (C++20)">Static/thread variable only: initialized at compile time, still mutable.</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-```cpp showLineNumbers 
-// constexpr variable (must be compile-time constant)
-constexpr int x = 42;
-constexpr double pi = 3.14159;
+## When a constexpr function runs at compile time
 
-// Use in compile-time contexts
-int arr[x];  // OK: x is compile-time constant
-```
+The compiler **must** evaluate a call during compilation only when the result is needed in a
+**manifestly constant-evaluated** context: a `constexpr` variable's initializer, an array bound, a
+template argument, a `static_assert`, a `case` label, a `constinit` initializer. Everywhere else the
+call is an ordinary function call. The optimizer may still fold it to a constant, but that is an
+optimization, not a guarantee.
 
----
+```cpp title="contexts.cpp" showLineNumbers
+#include <array>
+#include <cstdio>
 
-## constexpr Functions
-
-```cpp showLineNumbers 
-// C++11 constexpr function (single return statement)
-constexpr int square(int x) {
-    return x * x;
+constexpr int factorial(int n) {        // C++14 rules: locals and loops
+    int r = 1;
+    for (int i = 2; i <= n; ++i) r *= i;
+    return r;
 }
 
-// Compile-time evaluation
-constexpr int result = square(5);  // Computed at compile-time
-int arr[result];  // OK: result is compile-time constant
+static_assert(factorial(5) == 120);      // compile time: required
+std::array<int, factorial(4)> slots{};   // compile time: template argument
 
-// Can also run at runtime
-int n = 10;
-int runtime_result = square(n);  // Computed at runtime
-```
-
-**Key property**: `constexpr` functions can execute at compile-time OR runtime depending on context.
-
----
-
-## C++11 vs C++14 vs C++20
-
-### C++11 Restrictions
-
-```cpp showLineNumbers 
-// C++11: Very limited
-constexpr int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);  // Only recursion
-}
-
-// Not allowed in C++11:
-// - Local variables
-// - Multiple statements
-// - Loops
-```
-
-### C++14 Relaxed Rules
-
-```cpp showLineNumbers 
-// C++14: Much more flexible
-constexpr int factorial(int n) {
-    int result = 1;  // Local variables OK
-    for (int i = 2; i <= n; ++i) {  // Loops OK
-        result *= i;
-    }
-    return result;
-}
-
-constexpr int fib(int n) {
-    if (n <= 1) return n;
-    int a = 0, b = 1;
-    for (int i = 2; i <= n; ++i) {
-        int tmp = a + b;
-        a = b;
-        b = tmp;
-    }
-    return b;
+int main(int argc, char**) {
+    constexpr int a = factorial(6);      // compile time: constexpr variable
+    int b = factorial(6);                // not required; the optimizer will probably fold it
+    int c = factorial(argc + 3);         // run time: argc is unknown
+    std::printf("%d %d %d %zu\n", a, b, c, slots.size());   // 720 720 24 24
 }
 ```
 
-### C++20 Enhanced
+During constant evaluation the compiler acts as an interpreter that **must reject undefined
+behaviour**. That makes compile-time evaluation a correctness check:
 
-```cpp showLineNumbers 
-// C++20: Even more features
-constexpr std::string getMessage() {
-    std::string s = "Hello";  // Dynamic allocation OK!
-    s += " World";
-    return s;
+<Walkthrough title="Constant-evaluating factorial(4)" caption="The compiler interprets the body; any undefined behaviour stops compilation." accent="amber">
+  <Step title="Call">
+
+`static_assert(factorial(4) == 24)` needs a constant, so the compiler evaluates the call itself.
+`n` = 4, <StepChange>`r` = 1</StepChange>.
+
+  </Step>
+  <Step title="i = 2, 3, 4">
+
+The loop runs in the interpreter: `r` = 2, then 6, then <StepChange>`r` = 24</StepChange>. Every
+signed multiplication is checked for overflow.
+
+  </Step>
+  <Step title="Return and check">
+
+`i` = 5 ends the loop; the call yields <StepChange>24</StepChange> and the assertion holds. No code
+for this call is emitted.
+
+  </Step>
+  <Step title="What if it went wrong">
+
+`factorial(13)` overflows `int` (13! > 2³¹−1). In a constant-required context this is a
+<StepChange>compile error</StepChange> ("overflow in constant expression"), where at run time it would
+be silent undefined behaviour. Division by zero, out-of-bounds access and reading a dead object are
+caught the same way.
+
+  </Step>
+</Walkthrough>
+
+## What each standard allows inside
+
+`constexpr` started very restricted and has been relaxed in every standard since:
+
+| Standard | Newly allowed in `constexpr` functions |
+|---|---|
+| C++11 | Only a single `return` statement (plus `using`, `static_assert`). Recursion instead of loops. |
+| C++14 | Local variables, loops, `if`/`switch`, mutation of locals. Member functions are no longer implicitly `const`. |
+| C++17 | `constexpr` lambdas; `if constexpr` (a compile-time branch, see [Type Traits](../08-templates-and-metaprogramming/type-traits.md)) |
+| C++20 | Virtual functions, `try` blocks (a `throw` still can't be evaluated), `dynamic_cast`/`typeid`, uninitialized locals, changing the active union member, **transient allocation** with `new`/`delete` (so `std::vector` and `std::string` work), `std::is_constant_evaluated()` |
+| C++23 | `static`/`thread_local` variables that are themselves `constexpr`, `goto` and labels in code that isn't evaluated, `if consteval` |
+
+These are checked with GCC 15: the C++14 `factorial` above fails under `-std=c++11` with "body of
+'constexpr' function not a return-statement". The full list per paper is on
+[cppreference](https://en.cppreference.com/w/cpp/language/constexpr).
+
+*(C++20)* "Transient" means the memory must be freed before constant evaluation ends. You can build
+and use a `std::vector` inside a `constexpr` function, but you can't keep one as a `constexpr`
+variable:
+
+```cpp title="transient.cpp" showLineNumbers
+#include <string>
+#include <vector>
+
+constexpr std::size_t total_len() {
+    std::vector<std::string> v{"ab", "cde"};   // allocated during constant evaluation...
+    std::size_t n = 0;
+    for (const auto& s : v) n += s.size();
+    return n;                                   // ...and freed before it ends
 }
+static_assert(total_len() == 5);
 
-constexpr std::vector<int> getNumbers() {
-    std::vector<int> v;
-    v.push_back(1);
-    v.push_back(2);
-    return v;  // Vector destroyed properly at compile-time
+// constexpr std::vector<int> leak{1, 2};       // error: refers to a result of 'operator new'
+
+int main() {}
+```
+
+A common use is building a lookup table once, at compile time, with an immediately invoked lambda:
+
+```cpp title="table.cpp" showLineNumbers
+#include <array>
+
+constexpr auto pow2 = [] {
+    std::array<int, 8> t{};
+    for (int i = 0; i < 8; ++i) t[i] = 1 << i;
+    return t;
+}();
+static_assert(pow2[7] == 128);
+
+int main() { return pow2[3]; }   // exits with 8
+```
+
+## consteval: compile time or error *(C++20)*
+
+A `consteval` function is an **immediate function**: every call must produce a constant, or the
+program doesn't compile. Use it when running at run time would be a bug, for example validating a
+format string or computing a hash of a literal.
+
+```cpp title="consteval.cpp" showLineNumbers
+consteval int sq(int x) { return x * x; }
+
+constexpr int nine = sq(3);     // OK
+int main(int argc, char**) {
+    int ok = sq(4);             // OK: 4 is a constant, so the call is constant-evaluated
+    // int bad = sq(argc);      // error: call to consteval function 'sq(argc)' is not a constant expression
+    return ok - 16 + nine - 9 + argc - argc;
 }
 ```
 
----
+*(C++23)* `if consteval` lets one `constexpr` function choose a path depending on whether it is being
+constant-evaluated, and makes it legal to call `consteval` functions from the compile-time branch:
 
-## constexpr vs const
+```cpp title="if-consteval.cpp" showLineNumbers
+#include <cstdio>
 
-```cpp showLineNumbers 
-// const: Runtime or compile-time constant
-const int x = 10;           // Compile-time
-const int y = getValue();   // Runtime (depends on getValue)
+constexpr int pick(int x) {
+    if consteval { return x * 10; }   // during constant evaluation
+    else         { return x; }        // at run time
+}
+static_assert(pick(2) == 20);
 
-// constexpr: MUST be compile-time constant
-constexpr int a = 10;              // OK
-constexpr int b = getValue();      // Error if getValue not constexpr
-
-// In practice
-const int size1 = 10;
-int arr1[size1];  // OK (const works here)
-
-const int size2 = getValue();
-int arr2[size2];  // Error: not compile-time constant
-
-constexpr int size3 = 10;
-int arr3[size3];  // OK (guaranteed compile-time)
+int main(int argc, char**) { std::printf("%d\n", pick(argc)); }   // prints 1
 ```
 
-**Rule**: `constexpr` is always compile-time; `const` might be runtime.
+## constinit: compile-time initialization, run-time mutation *(C++20)*
 
----
+Global and `static` variables are initialized either at compile time (**constant initialization**) or
+when the program starts (**dynamic initialization**). Dynamic initialization across translation units
+happens in an unspecified order, the static initialization order problem described in
+[Storage Duration](../05-memory-and-object-lifetime/storage-duration.md). `constinit` asserts that a
+variable gets constant initialization and refuses to compile otherwise, but leaves the variable
+mutable:
 
-## constexpr Constructors
+```cpp title="constinit.cpp" showLineNumbers
+consteval int sq(int x) { return x * x; }
 
-```cpp showLineNumbers 
-class Point {
-    int x, y;
-public:
-    constexpr Point(int x_, int y_) : x(x_), y(y_) {}
-    
-    constexpr int getX() const { return x; }
-    constexpr int getY() const { return y; }
-    
-    constexpr int distanceSquared() const {
-        return x * x + y * y;
-    }
-};
+constinit int counter = sq(4);     // initialized at compile time
+void tick() { ++counter; }          // still writable: constinit is not const
 
-// Compile-time object
-constexpr Point p(3, 4);
-constexpr int dist = p.distanceSquared();  // 25 at compile-time
+int g = 0;
+// constinit int h = g;            // error: 'constinit' variable 'h' does not have a constant initializer
 
-// Use in constant expressions
-int arr[dist];  // OK: array of 25 elements
+int main() { tick(); return counter; }   // exits with 17
 ```
 
----
-
-## Compile-Time vs Runtime
-
-```cpp showLineNumbers 
-constexpr int compute(int x) {
-    return x * x + 1;
-}
-
-// Compile-time
-constexpr int result1 = compute(5);  // Evaluated at compile-time
-static_assert(result1 == 26);        // Can verify at compile-time
-
-// Runtime
-int n;
-std::cin >> n;
-int result2 = compute(n);  // Evaluated at runtime (n not known)
-```
-
-**Compiler decides**: If all arguments are compile-time constants, function executes at compile-time.
-
----
-
-## Requirements for constexpr Functions
-
-```cpp showLineNumbers 
-// OK
-constexpr int good(int x) {
-    return x * 2;  // Simple computation
-}
-
-// Not OK
-constexpr int bad1(int x) {
-    static int counter = 0;  // Static local variables
-    return x + counter++;
-}
-
-constexpr int bad2() {
-    return rand();  // rand() not constexpr
-}
-
-// C++11, C++14+
-constexpr int maybe(int x) {
-    int result = 0;  // Local variable
-    for (int i = 0; i < x; ++i) {
-        result += i;
-    }
-    return result;
-}
-```
-
----
-
-## constexpr if (C++17)
-
-Compile-time conditional compilation:
-
-```cpp showLineNumbers 
-template<typename T>
-auto process(T value) {
-    if constexpr (std::is_integral_v<T>) {
-        return value * 2;  // Integer path
-    } else if constexpr (std::is_floating_point_v<T>) {
-        return value * 1.5;  // Float path
-    } else {
-        return value;  // Other types
-    }
-}
-
-auto x = process(10);      // Returns 20 (int path compiled)
-auto y = process(3.14);    // Returns 4.71 (float path compiled)
-// Other paths not compiled for these types!
-```
-
-**Difference from regular if**: Only the selected branch is compiled.
-
----
-
-## Practical Uses
-
-### Array Sizes
-
-```cpp showLineNumbers 
-constexpr int buffer_size = 1024;
-char buffer[buffer_size];  // Compile-time array size
-```
-
-### Template Arguments
-
-```cpp showLineNumbers 
-constexpr int size = compute_size();
-std::array<int, size> arr;  // Template argument must be compile-time
-```
-
-### Lookup Tables
-
-```cpp showLineNumbers 
-constexpr int pow2(int n) {
-    return 1 << n;
-}
-
-constexpr std::array<int, 10> powers = {
-    pow2(0), pow2(1), pow2(2), pow2(3), pow2(4),
-    pow2(5), pow2(6), pow2(7), pow2(8), pow2(9)
-};  // Computed at compile-time
-```
-
-### Compile-Time Validation
-
-```cpp showLineNumbers 
-constexpr bool is_valid_port(int port) {
-    return port > 0 && port <= 65535;
-}
-
-static_assert(is_valid_port(8080), "Port must be valid");
-// static_assert(is_valid_port(70000), "Invalid"); // Compile error
-```
-
----
-
-## consteval (C++20)
-
-Forces compile-time evaluation:
-
-```cpp showLineNumbers 
-consteval int must_be_compile_time(int x) {
-    return x * x;
-}
-
-constexpr int result1 = must_be_compile_time(5);  // OK: compile-time
-
-int n = 5;
-int result2 = must_be_compile_time(n);  // Error: runtime argument
-```
-
-**Difference**: `constexpr` can be runtime, `consteval` must be compile-time.
-
----
-
-## constinit (C++20)
-
-`constinit` completes the trio. It applies to **variables with static or thread storage**, not
-functions, and asserts that the variable is initialized at compile time — guaranteeing **constant
-initialization** and so eliminating that variable from the [static initialization order
-fiasco](../05-memory-and-object-lifetime/storage-duration.md). Unlike `constexpr`, the variable is
-*not* `const` afterwards — it can still be mutated at runtime.
-
-```cpp showLineNumbers
-constinit int counter = 7;      // guaranteed initialized at compile time...
-// counter is still mutable:
-void tick() { ++counter; }       // ...but not const
-
-// constinit int bad = std::time(nullptr);   // error: not a constant initializer
-```
-
-| Keyword | Applies to | Compile-time? | Result is `const`? |
-|---------|-----------|---------------|--------------------|
-| `constexpr` | functions, variables | *may* be evaluated at compile time | yes (variables) |
-| `consteval` | functions | **must** be compile time | n/a |
-| `constinit` | static/thread variables | **initialization** is compile time | **no** |
-
----
-
-## Performance Benefits
-
-### Code Bloat Reduction
-
-```cpp showLineNumbers 
-// Without constexpr
-int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
-
-constexpr int size = factorial(5);  // Computed at runtime
-char buffer[120];  // Must hardcode result
-
-// With constexpr
-constexpr int factorial(int n) {
-    return n <= 1 ? 1 : n * factorial(n - 1);
-}
-
-constexpr int size = factorial(5);  // Computed at compile-time
-char buffer[size];  // size = 120, no runtime computation
-```
-
-### Optimization Opportunities
-
-```cpp showLineNumbers 
-constexpr int compute_hash(const char* str) {
-    int hash = 0;
-    while (*str) {
-        hash = hash * 31 + *str++;
-    }
-    return hash;
-}
-
-// Compile-time hash
-switch (compute_hash(input)) {
-    case compute_hash("command1"):  // Compare at compile-time
-        handle_command1();
-        break;
-    case compute_hash("command2"):
-        handle_command2();
-        break;
-}
-```
-
----
-
-## Common Pitfalls
-
-### Undefined Behavior
-
-```cpp showLineNumbers 
-constexpr int divide(int a, int b) {
-    return a / b;  // UB if b is 0
-}
-
-// constexpr int x = divide(10, 0);  // Compile error (UB detected)
-```
-
-### Non-constexpr Dependencies
-
-```cpp showLineNumbers 
-int global = 42;
-
-constexpr int bad() {
-    return global;  // Error: global not constexpr
-}
-
-constexpr int global_constexpr = 42;
-
-constexpr int good() {
-    return global_constexpr;  // OK
-}
-```
-
-### Pointer Conversions
-
-```cpp showLineNumbers 
-constexpr int x = 42;
-
-constexpr int* ptr = &x;  // Error: address not compile-time constant
-                          // (except in constexpr context)
-
-constexpr const int* ptr2 = &x;  // Still problematic
-```
-
----
-
-## Best Practices
-
-:::success[DO]
-- Use `constexpr` for compile-time computations
-- Mark constructors `constexpr` when possible
-- Use `constexpr if` for type-dependent code
-- Prefer `constexpr` over macros
-  :::
-
-:::danger[DON'T]
-- Mark functions `constexpr` if they can't be evaluated at compile-time
-- Use `constexpr` for runtime-only operations
-- Assume `constexpr` always means compile-time (can be runtime)
-  :::
-
----
-
-## Summary
-
-**constexpr**:
-- Enables compile-time evaluation
-- Can also run at runtime
-- C++14 added loops, local variables
-- C++20 added dynamic allocation
-
-**vs const**:
-- `const`: Runtime or compile-time
-- `constexpr`: Compile-time capable
-
-**vs consteval (C++20)**:
-- `constexpr`: Can be runtime
-- `consteval`: Must be compile-time
-
-```cpp showLineNumbers 
-// Common pattern
-constexpr int factorial(int n) {
-    int result = 1;
-    for (int i = 2; i <= n; ++i) {
-        result *= i;
-    }
-    return result;
-}
-
-constexpr int size = factorial(5);  // 120 at compile-time
-int arr[size];  // No runtime computation
-```
-
-**Use when**: Need compile-time constants, optimization, or type-safe alternatives to macros.
+`constinit` applies only to variables with static or thread storage duration, and it can be put on an
+`extern` declaration in a header, so users in other files know the variable is safe to read during
+their own static initialization.
+
+## Common mistakes
+
+- **Assuming `constexpr` means compile time.** `int b = factorial(6);` is allowed to run at run time.
+  If it must be a constant, store it in a `constexpr` variable or use `consteval`.
+- **Expecting `constexpr` on a function to be checked.** Since C++23 a `constexpr` function doesn't have
+  to be usable in a constant expression for *any* argument; you find out at the first call that needs
+  it. Add a `static_assert` test next to it.
+- **`constexpr` versus `const`.** `const int n = read();` is a run-time constant and can't size an
+  array. `constexpr int n = ...;` must be a compile-time constant.
+- **Taking the address of a local in a `constexpr` pointer.** `constexpr const int* p = &x;` works only
+  if `x` has static storage; the address of an automatic variable isn't a constant.
+- **Using `constinit` as `const`.** It only fixes *when* the variable is initialized.
+
+## Key points
+
+- `constexpr` function: may run at compile time; must when the result is needed as a constant.
+- Constant evaluation rejects undefined behaviour, so `static_assert` tests catch bugs early.
+- C++14 allowed loops and locals, C++20 allowed `virtual`, `try` and transient `new`; check the table
+  before relying on a feature.
+- `consteval`: always compile time. `constinit`: compile-time initialization of a mutable global.
+- `constexpr` functions are implicitly [inline](./inline-functions.md), so they belong in headers.
