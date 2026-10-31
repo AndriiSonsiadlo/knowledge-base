@@ -3,404 +3,252 @@ id: object-lifetime
 title: Object Lifetime
 sidebar_label: Object Lifetime
 sidebar_position: 4
-tags: [c++, lifetime, construction, destruction, raii]
+tags: [c++, lifetime, construction, destruction, temporaries, implicit-object-creation, advanced]
 ---
 
 # Object Lifetime
 
-Object lifetime spans from construction to destruction. Understanding lifetime is critical for memory safety, RAII, and avoiding undefined behavior.
+An object's **lifetime** is the part of its storage duration during which the object exists and may
+be used as an object of its type. Storage comes first and goes last. The lifetime starts once
+initialization is complete and ends when destruction starts. Reading or writing an object outside its
+lifetime is undefined behavior. That covers every dangling pointer, use-after-free and dangling
+reference bug, and it is also why storage reuse needs [placement new](./placement-new.md) and, in some
+cases, `std::launder`.
 
-:::info[Construction to Destruction]
-An object's lifetime begins when its constructor completes and ends when its destructor begins.
-:::
+**Prerequisites:** [Storage duration](./storage-duration.md),
+[constructors and destructors](../07-classes-and-oop/constructors-and-destructors.md).
 
-The practical weight of that rule: touching an object **before** its constructor finishes or
-**after** its destructor begins is undefined behavior — the root of dangling references,
-use-after-free, and the "don't call virtual functions from a constructor or destructor" rule. Binding
-a resource's lifetime to an object's is exactly what [RAII](../13-idioms-and-design/01-raii.md) does,
-which is why it underpins safe C++.
+## Storage versus lifetime
 
-## Lifetime Phases
+<Diagram title="Five phases of every object" caption="Lifetime is the accented middle: a strict subset of the time the storage exists." accent="violet">
+  <DiagramRow>
+    <DiagramNode title="1. Storage acquired">Stack frame, allocator, static segment, or a buffer</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="2. Initialized">Constructor runs. Not yet alive.</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="3. Lifetime" accent>Object may be read, written, passed around</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="4. Destroyed">Destructor runs. Lifetime already over.</DiagramNode>
+    <DiagramArrow direction="right" />
+    <DiagramNode title="5. Storage released">Memory reused or returned</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-```mermaid
-graph LR
-    A[Memory Allocated] --> B[Constructor Called]
-    B --> C[Object Lifetime BEGINS]
-    C --> D[Object Usage]
-    D --> E[Destructor Called]
-    E --> F[Object Lifetime ENDS]
-    F --> G[Memory Deallocated]
-    
-```
+The precise rules, from [basic.life]:
 
----
+- **Lifetime begins** when storage with the right size and alignment is obtained **and** the object's
+  initialization (if any) is complete. For a class, that means the constructor has returned. If the
+  constructor throws, the lifetime never begins and the destructor is not called. Already
+  constructed members and bases are destroyed.
+- **Lifetime ends** when the destructor call **starts** (class types), when the object is destroyed
+  (non-class types), or when its storage is released or **reused** by another object.
 
-## Automatic Objects
+During construction and destruction the object is not yet (or no longer) alive, but the standard
+gives special rules for this window. Member functions can be called from the constructor and
+destructor, and virtual calls dispatch to the class currently being constructed, not to a derived
+class. See [virtual functions](../07-classes-and-oop/virtual-functions.md).
 
-```cpp showLineNumbers 
-{
-    Widget w;  // 1. Memory allocated on stack
-               // 2. Constructor called
-               // 3. Lifetime begins
-    
-    w.use();   // Object valid
-    
-}              // 4. Destructor called
-               // 5. Lifetime ends
-               // 6. Memory deallocated (stack pointer moves)
-```
+## Tracing one object
 
-### Construction Order
+The program below makes each phase visible. The storage is a buffer on the stack, so acquiring and
+releasing it are separate from constructing and destroying the object.
 
-```cpp showLineNumbers 
-{
-    Widget a;
-    Widget b;
-    Widget c;
-}  // Destroyed in reverse: c → b → a
-```
+```cpp title="phases.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <new>
 
-**Rule**: Objects destroyed in reverse order of construction.
-
----
-
-## Dynamic Objects
-
-```cpp showLineNumbers 
-Widget* ptr = new Widget();  // 1. Allocate heap memory
-                             // 2. Call constructor
-                             // 3. Lifetime begins
-
-ptr->use();  // Object valid
-
-delete ptr;  // 4. Call destructor
-             // 5. Lifetime ends
-             // 6. Free heap memory
-             // ptr is now dangling!
-```
-
-### Dangling Pointers
-
-```cpp showLineNumbers 
-Widget* ptr = new Widget();
-delete ptr;  // Object destroyed
-
-ptr->use();  // Undefined behavior! Lifetime ended
-*ptr = Widget();  // UB
-```
-
----
-
-## Member Object Lifetimes
-
-```cpp showLineNumbers 
-class Container {
-    Widget member;  // Member object
-public:
-    Container() {
-        // member constructed BEFORE Container body
-    }
-    
-    ~Container() {
-        // Container body completes
-        // member destroyed AFTER
-    }
+struct Widget {
+    int value;
+    explicit Widget(int v) : value(v) { std::printf("construct %d\n", value); }
+    ~Widget() { std::printf("destroy %d\n", value); }
 };
-```
-
-**Order**:
-1. Base class constructors (if any)
-2. Member constructors (declaration order)
-3. Container constructor body
-4. Container destructor body
-5. Member destructors (reverse order)
-6. Base class destructors (if any)
-
-```cpp showLineNumbers 
-class Example {
-    Widget a;
-    Widget b;
-public:
-    Example() : a(), b() {  // a then b constructed
-        std::cout << "Example constructed\n";
-    }
-    
-    ~Example() {
-        std::cout << "Example destroyed\n";
-        // b then a destroyed
-    }
-};
-```
-
----
-
-## Temporary Object Lifetimes
-
-```cpp showLineNumbers 
-std::string getString() { return "hello"; }
-
-// Temporary destroyed at end of statement
-getString().size();  // OK: temporary lives for statement
-
-// Reference extends lifetime
-const std::string& ref = getString();  // Temporary lives until ref destroyed
-std::cout << ref;  // OK
-
-// Dangling reference
-const std::string& bad() {
-    return std::string("temp");  // Temporary destroyed!
-}
-// Caller gets dangling reference
-```
-
-**Rule**: Binding temporary to const reference extends its lifetime to reference's scope.
-
----
-
-## Lifetime Extension
-
-### Const Reference
-
-```cpp showLineNumbers 
-const Widget& ref = Widget();  // Temporary lifetime extended
-// Widget lives as long as ref
-
-{
-    const Widget& ref = Widget();
-    // Use ref
-}  // Temporary destroyed here
-```
-
-### Not Extended
-
-```cpp showLineNumbers 
-Widget&& rref = Widget();  // Lifetime extended (rvalue reference)
-
-void func(const Widget& w);
-func(Widget());  // Temporary destroyed after func returns
-```
-
----
-
-## Placement New
-
-Separate allocation from construction:
-
-```cpp showLineNumbers 
-alignas(Widget) char buffer[sizeof(Widget)];  // Raw memory
-
-// Construct in pre-allocated memory
-Widget* w = new (buffer) Widget();  // Placement new
-
-w->use();  // OK
-
-w->~Widget();  // Explicit destructor call
-// Don't delete w! We didn't allocate with new
-```
-
----
-
-## Static Initialization
-
-```cpp showLineNumbers 
-Widget global;  // Constructed before main()
 
 int main() {
-    static Widget local_static;  // Constructed on first encounter
-    
-    std::cout << "In main\n";
-}
-
-// Destroyed after main() returns:
-// 1. local_static
-// 2. global
+    alignas(Widget) unsigned char storage[sizeof(Widget)];  // 1. storage
+    Widget* w = std::construct_at(reinterpret_cast<Widget*>(storage), 7);  // 2.
+    w->value += 1;                                            // 3. use
+    std::printf("use %d\n", w->value);
+    std::destroy_at(w);                                       // 4. destroy
+    // w now dangles: storage still exists, the Widget does not
+}                                                             // 5. storage released
 ```
 
-**Order fiasco**:
+<Walkthrough title="A Widget from storage to release" caption="Output: construct 7, use 8, destroy 8." accent="violet">
+  <Step title="Storage acquired">
 
-```cpp showLineNumbers 
-// file1.cpp
-int a = compute_a();
-
-// file2.cpp
-int b = compute_b();  // Uses 'a'
-// Order undefined! b might initialize before a
+```cpp
+alignas(Widget) unsigned char storage[sizeof(Widget)];
 ```
 
-**Solution**: Function-local static (lazy initialization):
+`main`'s stack frame now has `sizeof(Widget)` bytes, aligned for `Widget`. There is
+<StepChange>no Widget yet</StepChange>: reading `w->value` here would be undefined behavior.
 
-```cpp showLineNumbers 
-Widget& getWidget() {
-    static Widget w;  // Constructed on first call
-    return w;
-}
+  </Step>
+  <Step title="Initialization">
+
+```cpp
+Widget* w = std::construct_at(reinterpret_cast<Widget*>(storage), 7);
 ```
 
----
+`std::construct_at` *(C++20)* runs `Widget(7)` in that storage and prints `construct 7`. When the
+constructor returns, <StepChange>the lifetime begins</StepChange>. The returned pointer points to the
+new object.
 
-## Lifetime and RAII
+  </Step>
+  <Step title="In lifetime">
 
-```cpp showLineNumbers 
-class File {
-    FILE* handle;
-public:
-    File(const char* name) {
-        handle = fopen(name, "r");
-        // Lifetime begins
-    }
-    
-    ~File() {
-        if (handle) {
-            fclose(handle);  // Cleanup before lifetime ends
-        }
-        // Lifetime ends
-    }
-};
-
-{
-    File f("data.txt");  // Opens file
-    // Use file
-}  // Closes file automatically
+```cpp
+w->value += 1;
 ```
 
-**RAII**: Resource Acquisition Is Initialization - resource lifetime tied to object lifetime.
+Reads and writes through `w` are valid. `value` is <StepChange>8</StepChange>. The program prints
+`use 8`.
 
----
+  </Step>
+  <Step title="Destruction">
 
-## Moved-From Objects
-
-```cpp showLineNumbers 
-std::vector<int> v1 = {1, 2, 3};
-std::vector<int> v2 = std::move(v1);
-
-// v1 is still alive (lifetime continues)
-// But in valid-but-unspecified state
-
-// Can assign or destroy
-v1 = {4, 5, 6};  // OK
-// v1 destroyed normally
-
-// Don't use without reassigning
-std::cout << v1.size();  // Technically OK but don't rely on value
+```cpp
+std::destroy_at(w);
 ```
 
----
+The destructor is called. As soon as it <StepChange>starts</StepChange>, the lifetime has ended. It
+prints `destroy 8`. The bytes are still there, but `w` is now a dangling pointer.
 
-## Common Lifetime Bugs
+  </Step>
+  <Step title="Storage released">
 
-### Use After Free
+At the closing brace of `main` the stack frame goes away and <StepChange>the storage
+ends</StepChange>. Nothing else runs: `storage` is an `unsigned char` array, so it has no destructor.
+With a plain `Widget w(7);` the compiler does steps 1 to 5 for you.
 
-```cpp showLineNumbers 
-Widget* ptr = new Widget();
-delete ptr;
-ptr->method();  // Lifetime ended
+  </Step>
+</Walkthrough>
+
+For an ordinary automatic variable, steps 1 and 5 are the stack frame and steps 2 and 4 are the
+constructor and destructor. For `new`/`delete`, steps 1 and 5 are `operator new` and
+`operator delete` ([new and delete](./new-and-delete.md#what-a-new-expression-does)).
+
+## Subobjects: bases and members
+
+A class's bases and members have their own lifetimes nested inside the enclosing object's: bases
+first, then members in **declaration order** (not in the order of the member initializer list),
+then the constructor body. Destruction runs exactly in reverse. The rules and examples are in
+[constructors and destructors](../07-classes-and-oop/constructors-and-destructors.md#construction-order).
+
+## Temporaries
+
+A temporary (the result of a prvalue that has to exist in memory, like `std::string("x")` passed to a
+`const std::string&`) is destroyed at the end of the **full-expression** that created it, roughly at
+the next `;`. Using it within that expression is fine:
+
+```cpp
+std::size_t n = std::string("hello").size();   // the temporary lives until the ';'
 ```
 
-### Dangling Reference
+### Lifetime extension
 
-```cpp showLineNumbers 
-Widget& getRef() {
-    Widget w;
-    return w;  // Returns reference to destroyed object
-}
-```
+Binding a temporary directly to a `const T&` or a `T&&` **extends** its lifetime to that of the
+reference. The rule applies only to the reference the temporary is bound to directly, and it does
+not carry through functions.
 
-### Double Delete
+```cpp title="extension.cpp" showLineNumbers
+#include <string>
+#include <utility>
 
-```cpp showLineNumbers 
-Widget* ptr = new Widget();
-delete ptr;
-delete ptr;  // Lifetime already ended
-```
+std::string make() { return "temp"; }
+const std::string& pass(const std::string& s) { return s; }
 
-### Accessing Before Construction
-
-```cpp showLineNumbers 
-class Bad {
-    Widget& ref;
-public:
-    Bad() : ref(*new Widget()) {
-        // Member init happens BEFORE body
-    }
-    
-    ~Bad() {
-        // ref is member, can't delete properly!
-    }
-};
-```
-
----
-
-## Lifetime-Dependent Objects
-
-```cpp showLineNumbers 
-class View {
-    const std::string& data;  // References another object
-public:
-    View(const std::string& s) : data(s) {}
-    
-    void print() { std::cout << data; }
-};
-
-void example() {
-    std::string s = "hello";
-    View v(s);  // v depends on s
-    
-    v.print();  // OK
-}  // s destroyed AFTER v (reverse construction order)
-
-void broken() {
-    View v(std::string("temp"));  // Temporary destroyed!
-    v.print();  // data dangles
+int main() {
+    const std::string& a = make();      // extended: lives as long as `a`
+    std::string&& b = make();           // extended as well
+    const std::string& c = pass(make()); // NOT extended: the temporary dies at ';'
+    // c.size() here would read a destroyed string: undefined behavior
+    (void)c;
+    return static_cast<int>(a.size() + b.size()) - 8;   // returns 0
 }
 ```
 
----
+The `c` line is a dangling reference. The compiler sees `pass` returning some reference, not the
+temporary, so nothing is extended. GCC 15 warns with `-Wdangling-reference` (enabled by `-Wall`).
+The same trap appears with `std::max(a, b)` on temporaries, `std::string_view sv = std::string(...)`
+(a view does not extend anything), and member functions returning references into `*this` called on
+a temporary.
 
-## Perfect Forwarding and Lifetime
+C++23 fixed one common case. In a range-based `for`, temporaries created in the range expression now
+live until the end of the loop *(C++23, P2718)*, so `for (char c : make().substr(1))` is safe.
+Before C++23 only the outermost temporary was extended.
 
-```cpp showLineNumbers 
-template<typename T>
-void wrapper(T&& arg) {
-    process(std::forward<T>(arg));  // Preserves value category
+## Moved-from objects are alive
+
+`std::move` does not end a lifetime. A moved-from object is still within its lifetime and is
+destroyed normally at the end of its scope. The standard library leaves its types in a "valid but
+unspecified" state: you may assign to them, destroy them, or call member functions with no
+preconditions (`clear()`, `empty()`), but you should not rely on their value. See
+[move semantics](../07-classes-and-oop/copy-and-move-semantics.md).
+
+## Implicit object creation *(C++20)*
+
+C code routinely does `struct P* p = malloc(sizeof *p); p->x = 1;`. For years this was technically
+undefined behavior in C++: `malloc` returns storage, not an object, and nothing started a `P`'s
+lifetime. P0593 (adopted for C++20 and applied as a defect report to earlier standards) made it
+defined. Certain operations **implicitly create objects** of **implicit-lifetime types**, as many as
+needed to make the program's behavior defined.
+
+| Implicit-lifetime types | Operations that implicitly create objects |
+|---|---|
+| Scalars (`int`, `double`, pointers, enums) | `std::malloc`, `calloc`, `realloc`, `std::aligned_alloc` |
+| Arrays of any type | `operator new` / `operator new[]` (the allocation functions, not `new T`) |
+| Aggregates whose destructor is not user-provided | `std::allocator<T>::allocate` |
+| Classes with a trivial eligible constructor and a trivial, non-deleted destructor | `std::memcpy`, `std::memmove`, `std::bit_cast` |
+| | Starting the lifetime of an `unsigned char` or `std::byte` array |
+
+```cpp title="malloc.cpp" showLineNumbers
+#include <cstdlib>
+
+struct Point { int x, y; };   // aggregate: implicit-lifetime type
+
+int main() {
+    auto* p = static_cast<Point*>(std::malloc(sizeof(Point)));  // a Point is implicitly created
+    if (!p) return 1;
+    p->x = 1;                 // defined since C++20 (and as a DR before)
+    p->y = 2;
+    int sum = p->x + p->y;
+    std::free(p);
+    return sum - 3;           // returns 0
 }
-
-std::string s = "hello";
-wrapper(s);                  // Forwards lvalue
-wrapper(std::string("temp")); // Forwards rvalue
 ```
 
----
+This does **not** help with a type that has a non-trivial constructor such as `std::string`. Its
+objects must still be created explicitly with `new` or `std::construct_at`.
 
-## Summary
+To reinterpret bytes that already hold a valid representation (a buffer filled by `read()` from a
+file or socket), C++23 adds `std::start_lifetime_as<T>(p)`. It starts the lifetime of a `T` at `p`
+with the existing bytes as its value. As of GCC 15 / libstdc++ the feature-test macro
+`__cpp_lib_start_lifetime_as` is not defined, so the portable choice today is still `std::memcpy`
+into a real `T` (see [strict aliasing](./strict-aliasing.md#safe-type-punning)).
 
-**Lifetime = Construction → Destruction**:
-```cpp showLineNumbers 
-{
-    Widget w;  // Construction (lifetime begins)
-    w.use();   // Usage (lifetime active)
-}              // Destruction (lifetime ends)
-```
+## Pitfalls
 
-**Key rules**:
-- Destroyed in reverse construction order
-- Temporaries destroyed at statement end (unless bound to const&)
-- Members constructed before body, destroyed after
-- Static objects: program lifetime
-- Dynamic objects: manual lifetime (new/delete)
+| Mistake | Why it is wrong | Fix |
+|---|---|---|
+| `int& r = v[0]; v.push_back(1); r = 2;` | Reallocation destroys the old elements and frees their storage. `r` dangles. | Re-fetch after operations that invalidate (see container docs), or store an index. |
+| `std::string_view sv = get_name();` where `get_name` returns `std::string` | The string temporary dies at `;`. `sv` points into freed memory. | Keep the `std::string`: `auto name = get_name();` |
+| Returning `const T&` from a function argument that may be a temporary | Lifetime extension does not pass through functions. | Return by value. |
+| Lambda captures `[&]` and is stored or run later | The captured locals may be gone when it runs. | Capture by value, or make sure the lambda does not outlive the scope. |
+| `delete p; p->f();` or use after `std::destroy_at` | Lifetime has ended. Often "works" until the memory is reused. | Use owning types. Build tests with AddressSanitizer. |
+| Calling a virtual function in a constructor expecting the derived override | During construction the dynamic type is the class being constructed. | Call the virtual function after construction, from a factory. |
 
-**Lifetime bugs**:
-```cpp showLineNumbers 
-delete ptr; ptr->use();  // Use after free
-return local;            // Return local by reference
-delete p; delete p;      // Double delete
-```
+AddressSanitizer (`-fsanitize=address`) catches use after free, use after return
+(with `ASAN_OPTIONS=detect_stack_use_after_return=1`) and use after scope at run time. See
+[Sanitizers](../14-debugging-and-profiling/04-sanitizers.md).
 
-**Best practices**:
-- Use RAII for resource management
-- Prefer automatic (stack) objects
-- Use smart pointers for dynamic objects
-- Avoid returning references to locals
-- Don't access moved-from objects without reassigning
+## Key points
 
-Understanding object lifetime is fundamental to writing correct C++ code and avoiding undefined behavior.
+- Storage outlives the object at both ends: lifetime is from the end of construction to the start
+  of destruction.
+- A temporary dies at the end of its full-expression unless bound directly to a reference. Extension
+  never passes through a function call.
+- A moved-from object is alive. It will be destroyed normally.
+- Since C++20, `malloc` and `memcpy` create implicit-lifetime objects (scalars, arrays, trivial
+  aggregates) automatically. Everything else needs a constructor call.

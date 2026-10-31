@@ -107,7 +107,11 @@ const config = {
         },
         blog: false,
         theme: {
-          customCss: ["./src/css/custom.css", "./src/css/linux-components.css"],
+          customCss: [
+            "./src/css/custom.css",
+            "./src/css/linux-components.css",
+            "./src/css/workbench.css",
+          ],
         },
       }),
     ],

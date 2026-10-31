@@ -1,396 +1,248 @@
 ---
 id: translation-units
-title: Translation Units
+title: Translation Units and the One Definition Rule
 sidebar_label: Translation Units
 sidebar_position: 9
 tags: [c++, translation-units, compilation, linking, one-definition-rule]
 ---
 
-# Translation Units
+# Translation Units and the One Definition Rule
 
-A translation unit is a single source file plus all its included headers after preprocessing. It's the basic unit of compilation in C++.
+A **translation unit** (TU) is one source file after preprocessing: the `.cpp` with every header it
+includes pasted in. It is the unit the compiler works on, and each one is compiled with no knowledge
+of any other. Two consequences shape all multi-file C++: the compiler can only check a TU against
+the *declarations* it contains, and the rules that keep the separately compiled pieces consistent
+(**linkage** and the **One Definition Rule**) are checked only partly, by the linker, or not at all.
 
-:::info[One File In, One Object Out]
-Each .cpp file becomes one translation unit, which compiles independently into one object file (.o).
-:::
+**Prerequisites:** [The Compilation Pipeline](./compilation-pipeline.md),
+[Object Files and Symbols](./object-files-and-symbols.md).
 
-## What is a Translation Unit?
+## One `.cpp`, one TU, one object
 
-```cpp showLineNumbers 
-// main.cpp (before preprocessing)
-#include <iostream>
-#include "utils.h"
+<Diagram title="Separate compilation" caption="No arrow connects the two TUs until the linker." accent="blue">
+  <DiagramRow>
+    <DiagramGroup label="TU 1">
+      <DiagramNode icon="file-text" title="main.cpp">+ square.h pasted in</DiagramNode>
+      <DiagramNode icon="binary" title="main.o">needs `square(int)`</DiagramNode>
+    </DiagramGroup>
+    <DiagramGroup label="TU 2">
+      <DiagramNode icon="file-text" title="square.cpp">+ square.h pasted in</DiagramNode>
+      <DiagramNode icon="binary" title="square.o">defines `square(int)`</DiagramNode>
+    </DiagramGroup>
+  </DiagramRow>
+  <DiagramArrow label="link" />
+  <DiagramNode icon="cpu" title="app" accent>The only place the two meet</DiagramNode>
+</Diagram>
 
-int main() {
-    std::cout << "Hello\n";
-}
+Headers are not compiled on their own; they are text that becomes part of every TU that includes
+them. That is why a header's contents must be things that are safe to repeat in many TUs:
+declarations, class definitions, `inline` functions and templates. See
+[Headers and Includes](./headers-and-includes.md) for how to organise them.
 
-// After preprocessing = Translation Unit
-// Contains: iostream contents + utils.h contents + main.cpp code
-// This entire preprocessed result is ONE translation unit
+Separate compilation is what makes incremental builds possible: edit `square.cpp` and only that TU
+is recompiled before relinking. Edit `square.h` and every TU that includes it is recompiled.
+
+## Declarations and definitions
+
+A **declaration** introduces a name and its type. A **definition** is a declaration that also
+creates the entity: allocates the variable, provides the function body, gives the class its members
+([cppreference: definitions and ODR](https://en.cppreference.com/w/cpp/language/definition)).
+
+| Code | Declaration or definition? |
+|---|---|
+| `int square(int x);` | Declaration of a function |
+| `int square(int x) { return x * x; }` | Definition |
+| `extern int counter;` | Declaration of a variable |
+| `int counter;` / `int counter = 0;` | Definition (zero-initialised if no initialiser, for a namespace-scope variable) |
+| `class Widget;` | Declaration (forward declaration; `Widget` is an incomplete type) |
+| `class Widget { int v; };` | Definition of the class (its member functions may still be only declared) |
+
+A TU can use a function or variable after seeing only its declaration; the linker supplies the
+definition. Using a class by value, or calling its members, needs the class definition in the TU.
+
+## Linkage: which names are shared
+
+**Linkage** decides whether the same name in two TUs refers to the same entity.
+
+| Linkage | How you get it | Effect | `nm` shows |
+|---|---|---|---|
+| **External** | Default for non-`const` namespace-scope variables and functions; `extern` | One entity for the whole program | Upper-case letter (`T`, `D`, `B`) |
+| **Internal** | `static` at namespace scope, anything in an unnamed namespace, namespace-scope `const`/`constexpr` variables (unless `extern` or `inline`) | Each TU has its own private copy | Lower-case letter, or nothing at all |
+| **None** | Local variables, function parameters | Only visible in its own scope | Nothing |
+| **Module** *(C++20)* | Non-exported names in a named module | Shared within the module only | [Modules](./modules.md) |
+
+```cpp title="linkage.cpp"
+namespace { int hidden = 1; }   // internal
+static int also_hidden = 2;     // internal
+int visible = 3;                // external
+int use() { return hidden + also_hidden; }
 ```
 
-**Translation Unit = Preprocessed Source File**
-
----
-
-## Compilation Flow
-
-```mermaid
-graph LR
-    A[main.cpp] -->|Preprocess| B[TU: main.cpp + headers]
-    C[utils.cpp] -->|Preprocess| D[TU: utils.cpp + headers]
-    
-    B -->|Compile| E[main.o]
-    D -->|Compile| F[utils.o]
-    
-    E -->|Link| G[Executable]
-    F -->|Link| G
-    
+```text
+0000000000000000 T use()
+0000000000000004 d also_hidden
+0000000000000000 d (anonymous namespace)::hidden
+0000000000000008 D visible
 ```
 
-Each .cpp file is independently preprocessed and compiled. They don't "see" each other until linking.
+Prefer the unnamed namespace for TU-private helpers. It also works for types, which `static`
+cannot mark.
 
----
+## The One Definition Rule
 
-## Independent Compilation
+The ODR has two halves:
 
-```cpp showLineNumbers 
-// math.cpp (Translation Unit 1)
-int add(int a, int b) {
-    return a + b;
-}
+1. **Within one TU**, any variable, function, class, enum or template may be defined at most once.
+   The compiler checks this (`redefinition of …`).
+2. **Across the program**, every non-inline function and variable with external linkage that is
+   used must be defined **exactly once**. Classes, `inline` functions, `inline` variables
+   *(C++17)* and templates may be defined in several TUs, but **every definition must be token for
+   token identical** and mean the same thing.
 
-// main.cpp (Translation Unit 2)
-int add(int, int);  // Declaration
-int main() {
-    return add(5, 3);  // Uses declaration
-}
+The linker enforces only part of the second half:
+
+| Violation | Detected? |
+|---|---|
+| A used function or variable defined in no TU | Yes: `undefined reference` |
+| A non-inline definition in two TUs (for example, `int global = 42;` in a header) | Yes: `multiple definition of 'global'` |
+| An `inline` function or a class defined *differently* in two TUs | **No.** Undefined behaviour, no diagnostic required |
+
+The last row is the dangerous one. Two TUs that each define their own `struct Config` and
+`inline int get_size()`:
+
+<Tabs>
+  <TabItem value="a" label="a.cpp">
+
+```cpp title="a.cpp"
+struct Config { int size = 1; };
+inline int get_size() { Config c; return c.size; }
+int from_a() { return get_size(); }
 ```
 
-```bash
-# Compile separately
-g++ -c math.cpp -o math.o    # TU1 compiles independently
-g++ -c main.cpp -o main.o    # TU2 compiles independently
+  </TabItem>
+  <TabItem value="b" label="b.cpp">
 
-# Link together
-g++ main.o math.o -o app     # Linker connects them
+```cpp title="b.cpp"
+struct Config { int size = 2; };
+inline int get_size() { Config c; return c.size; }
+int from_a();
+#include <cstdio>
+int main() { std::printf("%d %d\n", from_a(), get_size()); }
 ```
 
-Each translation unit compiles without knowing about the others. The linker resolves references later.
+  </TabItem>
+</Tabs>
 
----
+<Walkthrough title="One ODR violation, three answers" caption="GCC 15. Same sources, no warnings, different output." accent="amber">
+  <Step title="g++ -O0 a.cpp b.cpp">
 
-## One Definition Rule (ODR)
-
-**Rule**: Each symbol can have only ONE definition across all translation units.
-
-### Valid: Definition in One TU
-
-```cpp showLineNumbers 
-// math.cpp (TU1)
-int calculate(int x) {
-    return x * 2;
-}
-
-// main.cpp (TU2)
-int calculate(int);  // Declaration only
-int main() {
-    return calculate(5);
-}
+```text
+1 1
 ```
 
-One definition (`math.cpp`), multiple declarations allowed.
+`get_size` is a weak symbol in both objects. The linker keeps the **first** one it sees, from
+<StepChange>`a.o`</StepChange>, so `main` also gets `1`.
 
-### Invalid: Multiple Definitions
+  </Step>
+  <Step title="g++ -O0 b.cpp a.cpp">
 
-```cpp showLineNumbers 
-// file1.cpp (TU1)
-int global = 42;
-
-// file2.cpp (TU2)
-int global = 100;  // ODR violation!
-
-// Link error: multiple definition of 'global'
+```text
+2 2
 ```
 
----
+Only the order of the files changed. Now <StepChange>`b.o`'s copy</StepChange> is kept, and
+`from_a` returns `2`.
 
-## Declarations vs Definitions
+  </Step>
+  <Step title="g++ -O2 a.cpp b.cpp">
 
-### Declarations (Multiple Allowed)
-
-```cpp showLineNumbers 
-// Can appear in multiple TUs
-extern int global;           // Variable declaration
-void function(int);          // Function declaration
-class Widget;                // Forward declaration
+```text
+1 2
 ```
 
-### Definitions (One Only)
+At `-O2` each TU inlines its own `get_size` before the linker runs, so each one sees
+<StepChange>its own `Config`</StepChange>. The weak copies are never called.
 
-```cpp showLineNumbers 
-// Must appear in exactly ONE TU
-int global = 42;                    // Variable definition
-void function(int x) { /*...*/ }    // Function definition
-class Widget { int value; };        // Class definition
+  </Step>
+</Walkthrough>
+
+The real-world version of this bug is two libraries that each have an internal `struct Node`, or a
+header compiled with different `#define`s in different TUs. The fixes:
+
+- Put TU-private types and helpers in an **unnamed namespace**: each TU then has its own distinct
+  entity, and there is nothing to violate.
+- Put shared definitions in **one header**, included everywhere, never copied.
+- Compile all TUs of a program with the same macros and flags that affect headers.
+
+### Defining shared variables
+
+```cpp title="config.h"
+extern int request_count;          // declaration: every TU may see it
+inline int max_connections = 64;   // definition, allowed in many TUs (C++17)
+constexpr int buffer_size = 4096;  // internal linkage: one private copy per TU
 ```
 
-**Exception**: Inline functions and templates can be defined in headers (must be identical in all TUs).
+`request_count` then needs exactly one `int request_count = 0;` in one `.cpp`. `inline` variables
+*(C++17)* remove that need: the linker keeps one copy, as with `inline` functions.
 
----
+## Templates and inline functions
 
-## Header Files and TUs
+To instantiate a template or inline a function, the compiler needs its **definition** in the
+current TU. A template declared in a header and defined in a `.cpp` compiles, then fails to link:
 
-Headers are textually included in multiple translation units:
-
-```cpp showLineNumbers 
-// utils.h
-int square(int x);  // Declaration
-
-// file1.cpp (TU1)
-#include "utils.h"
-// square declaration copied here
-
-// file2.cpp (TU2)
-#include "utils.h"
-// square declaration copied here (same declaration, OK)
-
-// utils.cpp (TU3)
-#include "utils.h"
-int square(int x) {  // Definition (ONE copy)
-    return x * x;
-}
-```
-
-Declarations can repeat; definitions cannot.
-
----
-
-## Static vs Extern
-
-### static Keyword
-
-Makes symbols local to the translation unit (internal linkage):
-
-```cpp showLineNumbers 
-// file1.cpp
-static int helper = 42;  // Local to file1.cpp
-static void internal_func() {}  // Local to file1.cpp
-
-// file2.cpp
-static int helper = 100;  // Different variable! Local to file2.cpp
-// No ODR violation - different symbols
-```
-
-Each TU gets its own copy. No conflicts at link time.
-
-### extern Keyword
-
-Declares a symbol defined elsewhere (external linkage):
-
-```cpp showLineNumbers 
-// globals.cpp
-int shared_var = 42;  // Definition
-
-// file1.cpp
-extern int shared_var;  // Declaration
-void foo() { shared_var = 10; }
-
-// file2.cpp
-extern int shared_var;  // Declaration
-void bar() { shared_var = 20; }
-```
-
-All TUs share the same `shared_var` via linker.
-
----
-
-## Inline Functions
-
-Inline functions can be defined in headers without ODR violations:
-
-```cpp showLineNumbers 
-// header.h
-inline int square(int x) {
-    return x * x;
-}
-
-// file1.cpp
-#include "header.h"  // square definition copied
-
-// file2.cpp
-#include "header.h"  // square definition copied again
-
-// OK: Linker keeps one copy, discards duplicates
-```
-
-**Requirements**: All definitions must be **identical**. The linker picks one and discards the rest.
-
----
-
-## Templates and TUs
-
-Templates must be fully visible in each TU that uses them:
-
-```cpp showLineNumbers 
-// Wrong: Template split between header and source
-// math.h
-template<typename T>
-T max(T a, T b);
-
-// math.cpp
-template<typename T>
-T max(T a, T b) {
-    return a > b ? a : b;
-}
-
+```cpp title="fragment: max.h, max.cpp, main.cpp"
+// max.h
+template <typename T> T biggest(T a, T b);
+// max.cpp
+#include "max.h"
+template <typename T> T biggest(T a, T b) { return a > b ? a : b; }
 // main.cpp
-#include "math.h"
-max(5, 10);  // Linker error: undefined reference
+#include "max.h"
+int main() { return biggest(5, 10); }
 ```
 
-**Why?** The compiler needs the template definition to instantiate `max<int>` in main.cpp's TU.
-
-**Solution**: Define templates in headers:
-
-```cpp showLineNumbers 
-// math.h
-template<typename T>
-T max(T a, T b) {
-    return a > b ? a : b;  // Definition in header
-}
+```text
+main.cpp:(.text+0x13): undefined reference to `int biggest<int>(int, int)'
 ```
 
----
+`main.cpp` needed `biggest<int>` but could not create it; `max.cpp` could have, but nothing in that
+TU asked for `int`. Either define the template in the header, or keep it in the `.cpp` and add
+explicit instantiations there (`template int biggest<int>(int, int);`) for the types you support.
+The meaning of `inline` itself is on [Inline Functions](../04-functions-and-call-mechanics/inline-functions.md).
 
-## Anonymous Namespaces
+## How big is a TU?
 
-Modern alternative to `static` for internal linkage:
+Measured with GCC 15, `g++ -std=c++23 -E -P | wc -l` on a file containing only the include:
 
-```cpp showLineNumbers 
-// file.cpp
-namespace {
-    int internal_var = 42;  // Local to this TU
-    void helper() {}        // Local to this TU
-}
+| Header | Lines after preprocessing |
+|---|---|
+| `<iostream>` | 49,552 |
+| `<algorithm>` | 23,974 |
+| `<string>` | 23,859 |
+| `<vector>` | 21,470 |
+| `<map>` | 20,155 |
+| all five together | 61,707 |
 
-void public_func() {
-    internal_var++;  // Can use internal symbols
-}
-```
+The headers share most of their internals, so the total is far less than the sum. Even so, a
+one-line `main.cpp` that includes them makes the compiler parse over 60,000 lines, and it does so
+again in every TU. This is the cost [modules](./modules.md) and
+[precompiled headers](./headers-and-includes.md#precompiled-headers) attack.
 
-Symbols in anonymous namespaces have internal linkage - not visible to other TUs.
+## Pitfalls
 
----
+- **A variable defined in a header** without `inline`/`extern`: `multiple definition` as soon as two
+  TUs include it.
+- **The same class name for two different classes** in two `.cpp` files, both at namespace scope:
+  a silent ODR violation, as traced above. Use an unnamed namespace.
+- **A `static` variable in a header used as a "global".** Each TU gets its own copy; updates in one
+  TU are invisible in the others.
+- **Different `-D` flags for different TUs** that include the same header with `#ifdef`-dependent
+  class layouts: the classes differ, and nothing reports it.
 
-## Translation Unit Size Impact
+## Key points
 
-### Large Translation Units
-
-```cpp showLineNumbers 
-// main.cpp
-#include <iostream>   // ~10,000 lines
-#include <vector>     // ~5,000 lines
-#include <algorithm>  // ~8,000 lines
-#include <map>        // ~6,000 lines
-
-int main() {
-    std::cout << "Hello\n";
-}
-// TU size: ~30,000+ lines to compile!
-```
-
-**Impact**: Slower compilation. Every time main.cpp changes, 30,000+ lines recompile.
-
-**Solution**: Forward declarations, separate headers, precompiled headers.
-
-### Minimizing TU Size
-
-```cpp showLineNumbers 
-// Better: Forward declare when possible
-// widget.h
-class Database;  // Forward declaration (no need to include database.h)
-
-class Widget {
-    Database* db;  // Pointer/reference OK with forward declaration
-public:
-    void process();
-};
-
-// widget.cpp (only here include full header)
-#include "database.h"
-```
-
----
-
-## Separate Compilation Benefits
-
-```bash
-# Change one file
-vim main.cpp
-
-# Only recompile that TU
-g++ -c main.cpp -o main.o    # Fast!
-
-# Relink (fast)
-g++ main.o utils.o db.o -o app
-
-# vs. recompiling everything:
-g++ main.cpp utils.cpp db.cpp -o app  # Slow!
-```
-
-Separate compilation enables incremental builds - only modified TUs recompile.
-
----
-
-## Checking Translation Unit Contents
-
-```bash
-# Preprocess to see TU contents
-g++ -E main.cpp -o main.i
-
-# See what gets included
-g++ -H main.cpp
-# Output:
-# . /usr/include/c++/11/iostream
-# .. /usr/include/x86_64-linux-gnu/c++/11/bits/c++config.h
-# ...
-
-# Count TU size
-g++ -E main.cpp | wc -l
-# Output: 32456 lines
-```
-
----
-
-## Summary
-
-Translation Unit:
-- **= Preprocessed source file** (source + all included headers)
-- **Compiles independently** into object file
-- **Must obey ODR**: One definition per symbol across all TUs
-- **static/anonymous namespace**: Internal linkage (TU-local)
-- **extern**: External linkage (shared across TUs)
-- **inline/template**: Special rules (can repeat)
-
-**Key concepts**:
-```cpp showLineNumbers 
-// Declaration (multiple TUs OK)
-extern int var;
-void func();
-
-// Definition (ONE TU only)
-int var = 42;
-void func() {}
-
-// Internal linkage (per-TU)
-static int local;
-namespace { int local; }
-
-// Can repeat (compiler merges)
-inline int square(int x) { return x*x; }
-template<typename T> T max(T a, T b);
-```
-
-Understanding translation units is essential for managing compilation, avoiding ODR violations, and optimizing build times.
+- A TU is one `.cpp` after preprocessing; the compiler sees nothing else.
+- External linkage = one entity program-wide; internal linkage = a private copy per TU.
+- ODR: one definition of each non-inline entity; identical definitions of inline entities and
+  classes. The linker catches missing and duplicate definitions, not differing ones.
+- Templates must be defined (or explicitly instantiated) where they are used.

@@ -1,469 +1,278 @@
 ---
 id: preprocessing
-title: Preprocessing in C++
+title: Preprocessing
 sidebar_label: Preprocessing
 sidebar_position: 2
 tags: [c++, preprocessor, macros, includes, compilation]
 ---
 
-# Preprocessing in C++
+# Preprocessing
 
-The preprocessor is a text manipulation tool that runs before compilation. It handles `#include`, `#define`, `#ifdef`, and other directives, producing pure C++ code for the compiler.
+The preprocessor is stage 1 of the [compilation pipeline](./compilation-pipeline.md). It rewrites
+the source text before the compiler parses it: it pastes in `#include`d files, expands macros, and
+keeps or drops blocks of code under `#if`. It works on **tokens, not on C++**: it knows nothing
+about types, scopes or namespaces. That is what makes it useful for things the language cannot
+express (platform switches, build-time configuration) and dangerous for everything else.
 
-:::info[Text Substitution]
-The preprocessor doesn't understand C++ - it only does text replacement. This makes it powerful but dangerous if misused.
-:::
+**Prerequisites:** [The Compilation Pipeline](./compilation-pipeline.md).
 
-## Preprocessor Directives
+This page covers the directives and macros. How to organise headers is on
+[Headers and Includes](./headers-and-includes.md), and stopping a header from being pasted twice is
+on [Include Guards and `#pragma once`](./include-guards-and-pragma-once.md).
 
-All preprocessor commands start with `#` and are processed before compilation:
+## What the preprocessor does
 
-```cpp showLineNumbers 
-#include <iostream>      // File inclusion
-#define MAX 100          // Macro definition
-#ifdef DEBUG             // Conditional compilation
-#pragma once             // Compiler-specific directive
+<Diagram title="Inputs and output of stage 1" accent="violet">
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="main.cpp">Your source with `#` directives</DiagramNode>
+    <DiagramNode icon="layers" title="Headers">Every file reached through `#include`, recursively</DiagramNode>
+    <DiagramNode icon="settings" title="Command line">`-D`, `-U`, `-I`, plus predefined macros</DiagramNode>
+  </DiagramRow>
+  <DiagramArrow label="include, expand, select" />
+  <DiagramNode icon="file-text" title="Translation unit (.ii)" accent>One long C++ text with no directives left</DiagramNode>
+</Diagram>
+
+The standard describes this as translation phases 1–6: line splicing (a `\` at the end of a line
+joins it to the next), splitting into preprocessing tokens, then directive execution and macro
+expansion ([cppreference: phases of translation](https://en.cppreference.com/w/cpp/language/translation_phases)).
+To see the result, stop after stage 1:
+
+```bash
+g++ -std=c++23 -E main.cpp -o main.ii        # full output with '# line' markers
+g++ -std=c++23 -E -P main.cpp                # without line markers
+g++ -std=c++23 -H -fsyntax-only main.cpp     # print the include tree to stderr
+echo | g++ -std=c++23 -dM -E -x c++ -        # list every predefined macro
 ```
 
----
+The result is large: with GCC 15, preprocessing a file that contains only `#include <iostream>`
+gives 49,552 lines (`g++ -std=c++23 -E -P | wc -l`).
 
-## File Inclusion (#include)
+## The directives
 
-`#include` literally copies the entire contents of a file into your source code.
+| Directive | Purpose |
+|---|---|
+| `#include <file>` / `#include "file"` | Replace the line with the file's contents. Search rules: [Headers and Includes](./headers-and-includes.md#where-the-compiler-looks) |
+| `#define`, `#undef` | Define or remove a macro |
+| `#if`, `#ifdef`, `#ifndef`, `#elif`, `#else`, `#endif` | Conditional inclusion of code |
+| `#elifdef`, `#elifndef` *(C++23)* | Shorthand for `#elif defined(X)` / `#elif !defined(X)` |
+| `#error "msg"`, `#warning "msg"` *(`#warning` standard since C++23)* | Stop with an error, or print a warning |
+| `#pragma …` | Implementation-defined instruction to the compiler |
+| `#line N "file"` | Change the reported line number and file name (used by code generators) |
+| `__has_include(<file>)` *(C++17)* | In `#if`: is this header available? |
 
-### Angle Brackets vs Quotes
+## Object-like and function-like macros
 
-```cpp showLineNumbers 
-#include <iostream>      // System/standard library headers
-                         // Searches: /usr/include, /usr/local/include
+A macro is a name that the preprocessor replaces with a token sequence before the compiler sees it.
 
-#include "myheader.h"    // User headers
-                         // Searches: Current directory first, then system paths
+```cpp
+#define BUFFER_SIZE 4096                 // object-like
+#define SQUARE(x) ((x) * (x))            // function-like
 ```
 
-**How it works**: The preprocessor finds the file and replaces the `#include` line with the file's contents.
+Function-like macros are text substitution, not calls, so the argument is pasted in as written. The
+three classic failures, all from one run (GCC 15, `-Wall -Wextra`):
 
-```cpp showLineNumbers 
-// Before preprocessing
+```cpp title="macro_traps.cpp"
 #include <iostream>
-int main() {
-    std::cout << "Hello\n";
-}
-
-// After preprocessing (simplified - actually ~10,000 lines)
-namespace std {
-    // ... entire iostream implementation ...
-}
-int main() {
-    std::cout << "Hello\n";
-}
-```
-
-### Include Guard Problem
-
-Without protection, including the same header multiple times causes redefinition errors:
-
-```cpp showLineNumbers 
-// widget.h
-class Widget {
-    int value;
-};
-
-// main.cpp
-#include "widget.h"
-#include "widget.h"  // Error: redefinition of 'class Widget'
-```
-
-**Solution 1: Include Guards**
-
-```cpp showLineNumbers 
-// widget.h
-#ifndef WIDGET_H
-#define WIDGET_H
-
-class Widget {
-    int value;
-};
-
-#endif  // WIDGET_H
-```
-
-First inclusion defines `WIDGET_H`, second inclusion skips the content because `WIDGET_H` is already defined.
-
-**Solution 2: #pragma once (Modern)**
-
-```cpp showLineNumbers 
-// widget.h
-#pragma once  // Non-standard but universally supported
-
-class Widget {
-    int value;
-};
-```
-
-`#pragma once` is simpler and faster than include guards. All modern compilers support it.
-
----
-
-## Macros (#define)
-
-Macros perform text substitution before compilation. They're useful but dangerous - prefer `const` or `inline` functions when possible.
-
-### Object-Like Macros
-
-```cpp showLineNumbers 
-#define PI 3.14159
-#define MAX_SIZE 1000
-
-double area = PI * r * r;  // Becomes: 3.14159 * r * r
-
-// Better alternative: const
-const double PI = 3.14159;
-constexpr int MAX_SIZE = 1000;
-```
-
-The preprocessor replaces `PI` with `3.14159` everywhere. Unlike `const`, macros have no type safety.
-
-### Function-Like Macros
-
-```cpp showLineNumbers 
-#define SQUARE(x) ((x) * (x))
-
-int result = SQUARE(5);    // Becomes: ((5) * (5)) = 25
-int bad = SQUARE(2 + 3);   // Becomes: ((2 + 3) * (2 + 3)) = 25
-
-// Without parentheses - bug!
-#define BAD_SQUARE(x) x * x
-int oops = BAD_SQUARE(2 + 3);  // Becomes: 2 + 3 * 2 + 3 = 11
-
-// Better: inline function
-inline int square(int x) { return x * x; }
-```
-
-**Always use parentheses** in macro arguments and the entire expression. Better yet, use inline functions which are type-safe.
-
-### Macro Pitfalls
-
-```cpp showLineNumbers 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-
-// Problem 1: Multiple evaluation
-int x = 5;
-int m = MAX(x++, 10);  // Expands to: ((x++) > (10) ? (x++) : (10))
-                       // x incremented twice if x > 10! 
-
-// Problem 2: No type checking
-MAX("hello", 42);  // Compiles but nonsensical!
-
-// Solution: template function
-template<typename T>
-T max(T a, T b) { return a > b ? a : b; }
-```
-
----
-
-## Conditional Compilation
-
-Compile different code based on conditions - useful for platform-specific code, debug builds, and feature flags.
-
-### Basic Conditionals
-
-```cpp showLineNumbers 
-#define DEBUG 1
-
+#define BAD_SQUARE(x) x * x
 int main() {
-    #ifdef DEBUG
-        std::cout << "Debug mode\n";  // Included if DEBUG defined
-    #endif
-    
-    #ifndef RELEASE
-        doDebugChecks();  // Included if RELEASE NOT defined
-    #endif
-    
-    #if DEBUG == 1
-        verboseLogging();  // Included if DEBUG equals 1
-    #elif DEBUG == 2
-        minimalLogging();
-    #else
-        noLogging();
-    #endif
+    int x = 5;
+    int m = MAX(x++, 10);
+    std::cout << "m=" << m << " x=" << x << '\n';
+    int y = 15;
+    int n = MAX(y++, 10);
+    std::cout << "n=" << n << " y=" << y << '\n';
+    std::cout << BAD_SQUARE(2 + 3) << '\n';
 }
 ```
 
-The preprocessor evaluates these conditions and removes code from branches not taken. Dead code never reaches the compiler.
-
-### Platform-Specific Code
-
-```cpp showLineNumbers 
-#ifdef _WIN32
-    #include <windows.h>
-    void platformInit() {
-        // Windows-specific code
-    }
-#elif __linux__
-    #include <unistd.h>
-    void platformInit() {
-        // Linux-specific code
-    }
-#elif __APPLE__
-    #include <mach-o/dyld.h>
-    void platformInit() {
-        // macOS-specific code
-    }
-#endif
+```text
+m=10 x=6
+n=16 y=17
+11
 ```
 
-This allows one codebase to compile on multiple platforms with platform-specific implementations.
+- **Missing parentheses.** `BAD_SQUARE(2 + 3)` expands to `2 + 3 * 2 + 3`, which is 11, not 25.
+  Parenthesise every parameter and the whole body.
+- **Double evaluation.** `MAX(y++, 10)` expands to `((y++) > (10) ? (y++) : (10))`. When `y` wins,
+  `y++` runs twice: the result is 16 and `y` ends at 17. When `x` loses, it runs once. Parentheses
+  cannot fix this.
+- **No scope.** A macro is visible from its `#define` to the end of the translation unit, in every
+  namespace and every header included after it. A header that defines `max` breaks `std::max`.
 
-### Debug vs Release
+### Prefer language features
 
-```cpp showLineNumbers 
-class Widget {
-    void process() {
-        #ifdef DEBUG
-            std::cout << "Processing widget " << id << "\n";
-            validateState();
-        #endif
-        
-        // Production code
-        doWork();
-    }
-};
+Every macro in this table has a replacement that is typed, scoped and visible in a debugger:
 
-// Compile with debug
-g++ -DDEBUG main.cpp
+| Macro use | Replacement |
+|---|---|
+| `#define PI 3.14159` | `constexpr double pi = 3.14159;` (or `std::numbers::pi` *(C++20)*) |
+| `#define SQUARE(x) ((x)*(x))` | `constexpr int square(int x) { return x * x; }` or a template |
+| `#define MAX(a,b) …` | `std::max(a, b)` |
+| `#ifdef` around a few lines of logic | `if constexpr (flag)` on a `constexpr bool` *(C++17)* |
+| Header text pasted per TU | [Modules](./modules.md) *(C++20)* |
 
-// Compile without debug (no logging, no validation)
-g++ main.cpp
-```
+`if constexpr` only replaces the *branch*; it still needs a `constexpr bool` defined somewhere, and
+both branches must be valid C++ that parses. Selecting between headers or platform APIs that do not
+exist on the other platform still needs `#if`.
 
-The `-DDEBUG` flag defines `DEBUG` during compilation, enabling debug code. Release builds omit it for performance.
+## Stringification and token pasting
 
----
+Two operators work only inside a function-like macro body:
 
-## Predefined Macros
+- `#param` turns the argument into a string literal, spelled as written.
+- `a##b` glues two tokens into one, which can form a new identifier.
 
-The preprocessor provides standard macros for debugging and meta-information:
-
-```cpp showLineNumbers 
+```cpp title="stringify.cpp"
 #include <iostream>
 
-void logError() {
-    std::cout << "Error at " 
-              << __FILE__      // Current filename
-              << ":" 
-              << __LINE__      // Current line number
-              << " in " 
-              << __func__      // Current function name (C99)
-              << "\n";
-}
-
-void showCompileInfo() {
-    std::cout << "Compiled on " 
-              << __DATE__      // "Feb 15 2024"
-              << " at " 
-              << __TIME__      // "14:30:00"
-              << "\n";
-              
-    std::cout << "C++ version: " 
-              << __cplusplus   // 201703L for C++17, 202002L for C++20
-              << "\n";
-}
-```
-
-These macros are replaced with actual values during preprocessing. Useful for logging, assertions, and version checks.
-
----
-
-## Stringification and Token Pasting
-
-Advanced macro techniques for manipulating tokens.
-
-### Stringification (#)
-
-Converts macro argument to string literal:
-
-```cpp showLineNumbers 
 #define STRINGIFY(x) #x
-#define LOG(var) std::cout << #var << " = " << var << "\n"
+#define LOG(var) std::cout << #var << " = " << (var) << '\n'
+#define CONCAT(a, b) a##b
 
 int main() {
     int count = 42;
-    
-    LOG(count);  // Expands to: std::cout << "count" << " = " << count << "\n"
-    // Output: count = 42
-    
-    std::string s = STRINGIFY(hello);  // Becomes: "hello"
+    int CONCAT(value, _tmp) = 7;      // declares value_tmp
+    LOG(count);
+    LOG(value_tmp * 2);
+    std::cout << STRINGIFY(hello world) << '\n';
+    std::cout << __FILE__ << ':' << __LINE__ << " in " << __func__ << '\n';
 }
 ```
 
-The `#` operator turns the token into a string, preserving whitespace and quotes.
-
-### Token Pasting (##)
-
-Concatenates tokens to create new identifiers:
-
-```cpp showLineNumbers 
-#define DECLARE_VAR(type, name, suffix) \
-    type name##suffix
-
-DECLARE_VAR(int, value, _tmp);  // Expands to: int value_tmp;
-DECLARE_VAR(double, pi, _val);  // Expands to: double pi_val;
-
-// Useful for generating similar code
-#define PROPERTY(type, name) \
-    private: type m_##name; \
-    public: \
-        type get##name() const { return m_##name; } \
-        void set##name(type value) { m_##name = value; }
-
-class Widget {
-    PROPERTY(int, Width)   // Generates getWidth/setWidth
-    PROPERTY(int, Height)  // Generates getHeight/setHeight
-};
+```text
+count = 42
+value_tmp * 2 = 14
+hello world
+stringify.cpp:13 in main
 ```
 
----
+This is the one job macros do that nothing else can: capture the *source text* of an expression,
+which is how `assert` prints the failed condition. Since C++20, `std::source_location` replaces the
+`__FILE__`/`__LINE__` part without a macro.
 
-## #pragma Directives
+## Conditional compilation
 
-Compiler-specific directives for control and optimization:
+`#if` takes an integer constant expression over macros; undefined identifiers count as `0`.
+`defined(NAME)` tests whether a macro exists. Code in a dropped branch is removed before the
+compiler sees it, so it does not even have to compile.
 
-```cpp showLineNumbers 
-#pragma once  // Include guard alternative (universal support)
+```cpp title="config.cpp"
+#include <iostream>
 
-#pragma pack(push, 1)  // Pack struct without padding
-struct Data {
-    char c;
-    int i;
-};  // Size: 5 bytes instead of 8
-#pragma pack(pop)
-
-#pragma GCC optimize("O3")  // Force optimization for next function
-
-#pragma message("Compiling with debug mode")  // Compile-time message
-
-#pragma warning(push)
-#pragma warning(disable: 4996)  // MSVC: Disable specific warning
-// ... code that triggers warning ...
-#pragma warning(pop)
-```
-
----
-
-## Viewing Preprocessor Output
-
-```bash
-# See what preprocessor produces
-g++ -E main.cpp -o main.i
-
-# Show only user code (filter out system headers)
-g++ -E main.cpp | grep -v "^#"
-
-# Show include tree
-g++ -H main.cpp
-
-# Show all predefined macros
-g++ -dM -E - < /dev/null
-```
-
-This shows exactly what the compiler sees after preprocessing. Useful for debugging macro issues.
-
----
-
-## Best Practices
-
-:::success[DO]
-- Use `#pragma once` for include guards (simpler)
-- Use `const`/`constexpr` instead of `#define` for constants
-- Use `inline` functions instead of function macros
-- Use `#ifdef` for platform-specific code
-- Document complex macros thoroughly
-  :::
-
-:::danger[DON'T]
-- Use macros when templates/inline functions work
-- Forget parentheses in macro arguments
-- Rely on macro side effects (like `x++`)
-- Use macros for type-unsafe operations
-- Create multi-line macros without backslashes
-  :::
-
-### Modern Alternatives
-
-```cpp showLineNumbers 
-// Old style
-#define MAX 100
-#define SQUARE(x) ((x) * (x))
-
-// Modern C++
-constexpr int MAX = 100;
-constexpr int square(int x) { return x * x; }
-
-// Old debug logging
-#ifdef DEBUG
-    #define LOG(x) std::cout << x << "\n"
+#ifndef NDEBUG
+#define TRACE(msg) std::cerr << __FILE__ << ':' << __LINE__ << ": " << (msg) << '\n'
 #else
-    #define LOG(x)
+#define TRACE(msg) ((void)0)
 #endif
 
-// Modern C++17
-if constexpr (DEBUG) {
-    std::cout << value << "\n";
+constexpr bool kVerbose =
+#ifdef VERBOSE
+    true;
+#else
+    false;
+#endif
+
+int main() {
+    TRACE("starting");
+    if constexpr (kVerbose) {
+        std::cout << "verbose build\n";
+    }
+    std::cout << "done\n";
 }
 ```
 
----
+<Tabs groupId="build">
+  <TabItem value="debug" label="g++ config.cpp">
 
-## Common Patterns
-
-### Debug Assertions
-
-```cpp showLineNumbers 
-#ifdef DEBUG
-    #define ASSERT(condition) \
-        if (!(condition)) { \
-            std::cerr << "Assertion failed: " #condition \
-                      << " at " << __FILE__ << ":" << __LINE__ << "\n"; \
-            std::abort(); \
-        }
-#else
-    #define ASSERT(condition) ((void)0)  // No-op in release
-#endif
-
-ASSERT(ptr != nullptr);
-ASSERT(size > 0);
+```text
+config.cpp:17: starting
+done
 ```
 
-### Feature Detection
+  </TabItem>
+  <TabItem value="release" label="g++ -DNDEBUG -DVERBOSE config.cpp">
 
-```cpp showLineNumbers 
-#if __cplusplus >= 202002L
-    // C++20 code
-    #define HAS_CONCEPTS 1
-    template<std::integral T>
-    void process(T value) { }
+```text
+verbose build
+done
+```
+
+  </TabItem>
+</Tabs>
+
+The pattern converts the macro into a `constexpr bool` once, at the top, so the rest of the code
+uses an ordinary typed constant. `NDEBUG` is the standard switch: `<cassert>` disables `assert` when
+it is defined, and build systems define it in release configurations
+([CMake build types](../../cmake/01-basics/build-types.md)).
+
+### Platform and feature detection
+
+Compilers predefine macros that describe the target and the language level. The values below are
+from `g++ -std=c++23 -dM -E` (GCC 15) and the same with Clang 21:
+
+| Macro | GCC 15 | Clang 21 | Meaning |
+|---|---|---|---|
+| `__cplusplus` | `202302L` | `202302L` | Language standard selected by `-std` (`201703L` C++17, `202002L` C++20) |
+| `__GNUC__` | `15` | `4` | GCC major version. Clang defines it as `4` for compatibility, so test `__clang__` first |
+| `__clang_major__` | (undefined) | `21` | Clang major version |
+| `__linux__`, `_WIN32`, `__APPLE__` | target OS | target OS | Operating system of the **target**, not the build machine |
+| `__x86_64__`, `__aarch64__` | target CPU | target CPU | Architecture |
+| `__cpp_concepts`, `__cpp_lib_print`, … | `202002L`, … | | Feature-test macros: test the feature, not the version |
+
+Prefer feature-test macros over `__cplusplus` comparisons. Library macros such as `__cpp_lib_print`
+are defined by the library headers, so include `<version>` *(C++20)* first.
+
+```cpp
+#include <version>
+#if defined(__cpp_lib_print)
+#include <print>          // use std::println
 #else
-    // Pre-C++20 fallback
-    #define HAS_CONCEPTS 0
-    template<typename T>
-    void process(T value) { }
+#include <cstdio>         // fall back to printf
 #endif
 ```
 
----
+## `#pragma`
 
-## Summary
+A pragma is a compiler-specific instruction. An unknown pragma is ignored (GCC warns with
+`-Wunknown-pragmas`, part of `-Wall`), so they are not portable by construction.
 
-The preprocessor:
-- Runs before compilation as **text manipulation**
-- Handles `#include` (file insertion), `#define` (macros), `#ifdef` (conditionals)
-- Has **no understanding of C++** - purely textual
-- Powerful but **dangerous** - prefer modern C++ alternatives
-- Essential for platform-specific code and conditional compilation
+| Pragma | Supported by | Effect |
+|---|---|---|
+| `#pragma once` | GCC, Clang, MSVC | Include this file at most once per TU: [Include Guards](./include-guards-and-pragma-once.md) |
+| `#pragma pack(push, 1)` … `pop` | GCC, Clang, MSVC | Remove padding: `struct { char c; int i; }` becomes 5 bytes instead of 8 (checked with `static_assert` on GCC 15 x86-64). See [Padding](../12-low-level-and-platform/03-padding-and-offsetof.md) |
+| `#pragma GCC diagnostic push/ignored "-W…"/pop` | GCC, Clang | Silence one warning in a region |
+| `#pragma warning(push)` / `disable: N` / `pop` | MSVC | Same, MSVC syntax |
+| `#pragma message("text")` | GCC, Clang, MSVC | Print a note during compilation |
 
-**Key Rules**:
-- Always use `#pragma once` or include guards
-- Prefer `const`/`constexpr`/`inline` over macros
-- Parenthesize all macro arguments
-- Test preprocessor output with `g++ -E`
+`_Pragma("…")` is the operator form, usable inside a macro body where `#pragma` cannot appear.
+
+## Pitfalls
+
+- **A macro that names a common identifier.** `<windows.h>` defines `min` and `max` unless
+  `NOMINMAX` is defined first; then `std::max(a, b)` stops compiling. Name macros in `UPPER_CASE`
+  with a project prefix, and `#undef` local helpers when done.
+- **Multi-statement macros without `do { … } while (0)`.** `#define SWAP(a,b) t=a; a=b; b=t;` under
+  an un-braced `if` runs only the first statement conditionally. Wrap the body in
+  `do { … } while (0)`, or better, write a function.
+- **Testing a macro's value with `#ifdef`.** `#define DEBUG 0` makes `#ifdef DEBUG` *true*. Use
+  `#if DEBUG` when the value matters.
+- **Expecting a self-referential macro to loop.** `#define X Y` / `#define Y X` does not recurse: a
+  macro is never re-expanded inside its own expansion, so `int X = 1;` preprocesses to
+  `int X = 1;`. This is a confusing name, not an infinite loop.
+- **Platform checks against the host.** `#ifdef __linux__` describes the target you compile for,
+  which matters when [cross-compiling](./cross-compilation.md).
+
+## Key points
+
+- The preprocessor is text rewriting before parsing; `g++ -E` shows exactly what the compiler gets.
+- Function-like macros paste arguments: parenthesise everything, and never pass side effects.
+- Use macros for what only they can do: conditional compilation, platform detection, capturing
+  source text. Use `constexpr`, templates and `if constexpr` for everything else.
+- Detect features with `__cpp_*` macros after `#include <version>`, not with compiler versions.
+
+## References
+
+- [cppreference: Preprocessor](https://en.cppreference.com/w/cpp/preprocessor)
+- [GCC: Preprocessor Options](https://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html)

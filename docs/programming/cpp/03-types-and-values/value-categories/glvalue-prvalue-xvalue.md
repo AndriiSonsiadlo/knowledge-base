@@ -3,302 +3,229 @@ id: glvalue-prvalue-xvalue
 title: glvalue, prvalue, xvalue
 sidebar_label: Value Categories
 sidebar_position: 2
-tags: [c++, value-categories, glvalue, prvalue, xvalue, cpp11]
+tags: [c++, value-categories, glvalue, prvalue, xvalue, cpp11, cpp17]
 ---
 
-# Value Categories (C++11)
+# glvalue, prvalue, xvalue
 
-C++11 refined value categories into five types: `lvalue`, `prvalue`, `xvalue`, `glvalue`, and `rvalue`. Understanding these enables perfect forwarding and move semantics.
+The lvalue/rvalue split on the [previous page](./lvalues-rvalues.md) leaves one case unexplained:
+`std::move(x)` is an rvalue, yet it refers to the existing object `x`, unlike `42`. C++11 named that
+case **xvalue** and split every expression into exactly one of three *primary* categories, plus two
+*mixed* categories that group them. C++17 then changed what a prvalue *is*, which is the reason
+`return T{...};` never copies. This page gives the precise model, a table of which expressions fall
+where, and the temporary-materialization rule.
 
-:::info[Category Tree]
-![value-categories](valuecategories.png)
-:::
+**Prerequisites:** [Lvalues and Rvalues](./lvalues-rvalues.md)
 
-## The Five Categories
+## Two properties, three categories
 
-### Primary Categories
-:::info[lvalue]
-Has identity, can't be moved from
-- Variables: `int x`
-- Dereferenced pointers: `*ptr`
-- Functions returning lvalue references: `getRef()`
-:::
+The categories come from two yes/no questions about an expression:
 
-:::info[prvalue]
-No identity, can be moved from (pure rvalue)
-- Literals: `42`, `3.14`
-- Temporaries: `x + y`, `Point{1,2}`
-- Functions returning by value: `getValue()`
-:::
+- **Identity:** does it refer to a particular object or function, one you could compare by address
+  with another?
+- **Movable:** may the object's resources be taken, because nobody will look at it again?
 
-:::info[xvalue]
-Has identity, can be moved from (expiring value)
-- `std::move(x)`
-- Cast to rvalue reference: `static_cast<T&&>(x)`
-- Temporary materialization
-:::
+<Diagram title="The value-category tree" caption="Every expression is exactly one of the bottom row. xvalue belongs to both mixed categories." accent="violet">
+  <DiagramRow>
+    <DiagramNode title="glvalue">Has identity. Either an lvalue or an xvalue.</DiagramNode>
+    <DiagramNode title="rvalue">Movable. Either an xvalue or a prvalue.</DiagramNode>
+  </DiagramRow>
+  <DiagramArrow label="each splits into" />
+  <DiagramRow>
+    <DiagramNode title="lvalue">Identity, not movable. `x`, `*p`, `++i`, `"text"`</DiagramNode>
+    <DiagramNode title="xvalue" accent>Identity and movable. `std::move(x)`, `f().member`</DiagramNode>
+    <DiagramNode title="prvalue">No identity. `42`, `x + 1`, `make()`</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-### Composite Categories
+The fourth combination, no identity and not movable, has no category. The standard
+([\[basic.lval\]](https://eel.is/c++draft/basic.lval)) defines the categories by what the expression
+does rather than by these two properties, but the two views agree:
 
-`glvalue` (generalized `lvalue`): Has identity
-- Includes: `lvalue` + `xvalue`
+| Category | Standard definition (paraphrased) |
+|---|---|
+| **glvalue** ("generalized lvalue") | Its evaluation determines the identity of an object, bit-field, or function |
+| **prvalue** ("pure rvalue") | Its evaluation computes a value, or initializes an object |
+| **xvalue** ("expiring value") | A glvalue denoting an object whose resources can be reused |
+| **lvalue** | A glvalue that is not an xvalue |
+| **rvalue** | A prvalue or an xvalue |
 
-`rvalue`: Can be moved from
-- Includes: `prvalue` + `xvalue`
+## Which expressions are which
 
----
+Each row below was checked by the program in the next section with GCC 15 and Clang 21; both agree.
 
-## Detailed Breakdown
+| Expression | Category | Rule |
+|---|---|---|
+| `i`, `*p`, `pt.x` | lvalue | Name of a variable, dereference, member of an lvalue |
+| `"text"` | lvalue | String literals are arrays with static storage |
+| `++i`, `i = 5` | lvalue | Built-in prefix increment and assignment return their left operand |
+| `fn`, `std::move(fn)` | lvalue | Any expression naming a function is an lvalue, even through `T&&` |
+| `42`, `nullptr`, `red` (enumerator) | prvalue | Literals other than string literals; enumerators |
+| `i++`, `i + 1` | prvalue | Built-in arithmetic and postfix increment compute a value |
+| `make()` (returns `Point`) | prvalue | Call to a function returning a non-reference |
+| `s + "b"` | prvalue | `operator+` for `std::string` returns by value |
+| `[] {}` | prvalue | A lambda expression |
+| `this` | prvalue | A pointer value, not an object you can take the address of |
+| `std::move(s)`, `static_cast<int&&>(i)` | xvalue | Call or cast to rvalue reference to object type |
+| `make().x`, `std::move(pt).x` | xvalue | Non-static data member of an rvalue |
 
-### lvalue (Locator Value)
+Two rows surprise people. `make().x` is an xvalue, not a prvalue: once the `Point` returned by
+`make()` is materialized it is an object with an address, so its member has identity. And a
+function never becomes an rvalue: `std::move(fn)` returns `void(&&)()`, and a call returning an
+rvalue reference to a *function* is an lvalue.
 
-Has persistent address, cannot be moved from:
+## Asking the compiler
 
-```cpp showLineNumbers 
-int x = 42;              // x is lvalue
-int* p = &x;             // Can take address
-x = 10;                  // Can appear on left of assignment
+`decltype((e))` with double parentheses encodes the category of `e` in a type: `T&` for an lvalue,
+`T&&` for an xvalue, plain `T` for a prvalue (the full rule is on [decltype](../type-deduction/decltype.md)).
+That turns the category into something you can print:
 
-int& getRef() { static int x = 0; return x; }
-getRef() = 100;          // Function returning lvalue ref → lvalue
+```cpp title="category.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+#include <type_traits>
+#include <utility>
 
-std::string s = "hello";
-s.append(" world");      // s is lvalue, can call non-const methods
-```
-
-**Properties**:
-- Can take address
-- May or may not be modifiable (depends on const)
-- Cannot bind to `rvalue` reference
-
-### prvalue (Pure Rvalue)
-
-Temporary value with no address:
-
-```cpp showLineNumbers 
-42                       // Literal prvalue
-x + y                    // Arithmetic result
-x && y                   // Logical result
-std::string("temp")      // Temporary object
-
-int getValue() { return 42; }
-getValue()               // Function returning by value → prvalue
-
-// Cannot take address
-// int* p = &42;         // Error
-// int* p = &getValue(); // Error
-```
-
-**Properties**:
-- No address
-- Always movable
-- Binds to `rvalue` reference or `const lvalue` reference
-
-### xvalue (Expiring Value)
-
-Has identity but about to expire (can be moved from):
-
-```cpp showLineNumbers 
-std::vector<int> v = {1, 2, 3};
-
-std::move(v)             // xvalue (cast to rvalue)
-static_cast<std::vector<int>&&>(v)  // xvalue
-
-// Function returning rvalue reference
-std::vector<int>&& getRRef() { 
-    static std::vector<int> v; 
-    return std::move(v); 
+template <class T> constexpr const char* category() {
+    if constexpr (std::is_lvalue_reference_v<T>) return "lvalue";
+    else if constexpr (std::is_rvalue_reference_v<T>) return "xvalue";
+    else return "prvalue";
 }
-getRRef()                // xvalue
-```
+// highlight-next-line
+#define SHOW(...) std::printf("%-16s %s\n", #__VA_ARGS__, category<decltype((__VA_ARGS__))>())
 
-**Properties**:
-- Has identity (can be named)
-- Can be moved from
-- Result of `std::move`
-- Binds to `rvalue` reference
+struct Point { int x; int y; };
+Point make() { return {1, 2}; }
 
----
-
-## Examples by Category
-
-### lvalues
-
-```cpp showLineNumbers 
-int x;                   // Variable
-int arr[10];             
-arr[0]                   // Array element
-*ptr                     // Dereferenced pointer
-++x                      // Pre-increment
-s.append("!")            // Non-const member function
-"string literal"         // String literal (special case)
-```
-
-### prvalues
-
-```cpp showLineNumbers 
-42                       // Literals
-x + y                    // Arithmetic
-x++                      // Post-increment (returns copy)
-this                     // this pointer
-lambda expression        // []{} 
-Point{1, 2}             // Temporary object
-```
-
-### xvalues
-
-```cpp showLineNumbers 
-std::move(x)             // Cast to rvalue
-std::move(vec[0])        // Element moved
-static_cast<T&&>(x)      // Explicit cast
-a.m (where a is rvalue and m is non-static member)
-```
-
----
-
-## Reference Binding
-
-```cpp showLineNumbers 
-int x = 42;
-
-// lvalue references
-int& lr1 = x;                    // lvalue → lvalue ref
-// int& lr2 = 42;                // prvalue → lvalue ref
-// int& lr3 = std::move(x);      // xvalue → lvalue ref
-
-// const lvalue references (bind to everything)
-const int& clr1 = x;             // lvalue
-const int& clr2 = 42;            // prvalue
-const int& clr3 = std::move(x);  // xvalue
-
-// rvalue references
-// int&& rr1 = x;                // lvalue → rvalue ref
-int&& rr2 = 42;                  // prvalue → rvalue ref
-int&& rr3 = std::move(x);        // xvalue → rvalue ref
-```
-
-| Category  | Has Identity | Movable | Binds to T& | Binds to T&& | Binds to const T& |
-|-----------|--------------|---------|-------------|--------------|-------------------|
-| `lvalue`  | Yes        | No    | Yes       | No         | Yes             |
-| `prvalue` | No         | Yes   | No        | Yes        | Yes             |
-| `xvalue`  | Yes        | Yes   | No        | Yes        | Yes             |
-
----
-
-## Temporary Materialization
-
-`prvalue`s convert to `xvalue`s when binding to references:
-
-```cpp showLineNumbers 
-struct Point { int x, y; };
-
-Point getPoint() { return {1, 2}; }  // Returns prvalue
-
-// Temporary materialization
-const Point& ref = getPoint();  
-// getPoint() prvalue → xvalue when binding
-// Lifetime extended to ref's scope
-```
-
----
-
-## Why the categories matter: move and forwarding
-
-The whole reason to separate xvalues from prvalues is to drive two features: **move semantics** (an
-rvalue source — prvalue *or* xvalue — selects the move constructor) and **perfect forwarding**
-(`std::forward` recovers the caller's original category). Both have dedicated pages:
-
-- [Reference Collapsing](./reference-collapsing.md) — forwarding references and how `std::forward` works
-- [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md) — implementing move
-
-```cpp showLineNumbers
-Buffer b1 = getBuffer();      // move — prvalue source
-Buffer b2 = std::move(b1);    // move — xvalue source
-Buffer b3 = b1;               // copy — lvalue source
-```
-
----
-
-## decltype and Value Categories
-
-`decltype` reveals value category:
-
-```cpp showLineNumbers 
-int x = 42;
-
-decltype(x)       // int (lvalue variable → type)
-decltype((x))     // int& (lvalue expression)
-decltype(42)      // int (prvalue)
-decltype(std::move(x))  // int&& (xvalue)
-
-// Rule: decltype(expression)
-// - lvalue → T&
-// - xvalue → T&&
-// - prvalue → T
-```
-
----
-
-## Practical Impact
-
-### Overload Resolution
-
-```cpp showLineNumbers 
-void process(const std::string& s) {
-    std::cout << "lvalue\n";
+int main() {
+    int i = 0;
+    std::string s = "a";
+    SHOW(i);
+    SHOW(i++);
+    SHOW(make());
+    SHOW(make().x);
+    SHOW(std::move(s));
+    SHOW(s + "b");
 }
+```
 
-void process(std::string&& s) {
-    std::cout << "rvalue\n";
+```text
+i                lvalue
+i++              prvalue
+make()           prvalue
+make().x         xvalue
+std::move(s)     xvalue
+s + "b"          prvalue
+```
+
+`decltype` doesn't evaluate its operand, so `SHOW(i++)` leaves `i` unchanged (Clang warns about
+exactly that with `-Wunevaluated-expression`).
+
+## Temporary materialization *(C++17)*
+
+Before C++17 a prvalue of class type was itself a temporary object, so `Point p = make();` notionally
+created a temporary and then copied or moved it into `p`. Compilers usually elided that copy, but the
+copy or move constructor still had to exist.
+
+Since C++17 a prvalue is not an object. It is a *recipe* for initializing one, and it runs directly
+against its final destination. When the language needs an actual object, for example to bind a
+reference or to access a member, it applies the **temporary materialization conversion**: it creates
+a temporary from the prvalue, and the result is an xvalue that denotes that temporary.
+
+```cpp title="materialize.cpp" showLineNumbers
+struct Pinned {
+    Pinned() = default;
+    Pinned(const Pinned&) = delete;   // neither copyable
+    Pinned(Pinned&&) = delete;        // nor movable
+};
+
+Pinned make() { return Pinned{}; }    // OK since C++17: the prvalue initializes the return object
+
+int main() {
+    Pinned a = make();                // OK since C++17: no temporary, no copy, no move
+    const Pinned& r = make();         // materialized: a temporary exists, r binds to it
+    (void)a; (void)r;
 }
-
-std::string s = "hello";
-process(s);                // lvalue
-process("hello");          // prvalue → rvalue overload
-process(std::move(s));     // xvalue → rvalue overload
 ```
 
-### Return Value Optimization
+This compiles with `-std=c++17` and later. With `-std=c++14`, both GCC and Clang reject lines 7 and
+10 because the deleted move constructor is still required. This is the **guaranteed copy elision**
+of C++17. It applies only to prvalues: `return local_variable;` is still *named* return value
+optimization (NRVO), which is allowed but not required. See [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md#copy-elision-and-rvo).
 
-```cpp showLineNumbers 
-std::string make() {
-    return std::string("hello");  // prvalue
-    // Compiler can elide copy/move (RVO)
-}
+## Tracing one statement
 
-std::string s = make();  // No copy, no move with RVO
+The categories nest: the category of an outer expression depends on the operator, not on the
+categories of its operands. Follow one initialization through its sub-expressions:
+
+```cpp
+std::string r = std::move(a) + b.substr(1);   // a and b are std::string variables
 ```
 
----
+<Walkthrough title="Categories inside one initializer" caption="Checked with the SHOW macro above, GCC 15 and Clang 21." accent="violet">
+  <Step title="Name the operands">
 
-## Summary
+`a` and `b` are names of variables: both are <StepChange>lvalues</StepChange>. Nothing may be stolen
+from them yet.
 
-**Five categories**:
-- `lvalue`: Has address, can't move (variables)
-- `prvalue`: Pure temporary, can move (literals, function returns)
-- `xvalue`: Expiring value, can move (`std::move` result)
-- `glvalue`: `lvalue` or `xvalue` (has identity)
-- `rvalue`: `prvalue` or `xvalue` (can move from)
+  </Step>
+  <Step title="std::move(a)">
 
-**Key distinctions**:
-```cpp showLineNumbers 
-int x = 42;
+`std::move` returns `std::string&&`. A call returning an rvalue reference to an object is an
+<StepChange>xvalue</StepChange>: it still denotes `a` (identity), but it is now marked as movable.
 
-x                    // lvalue (has identity, not movable)
-42                   // prvalue (no identity, movable)
-std::move(x)         // xvalue (has identity, movable)
+  </Step>
+  <Step title="b.substr(1)">
 
-x + 1                // prvalue (temporary)
-std::move(x).size()  // xvalue (member of xvalue)
-```
+`substr` returns `std::string` by value, so the call is a <StepChange>prvalue</StepChange>. It
+doesn't name an object yet.
 
-**Binding rules**:
-- `T&` binds to lvalues only
-- `T&&` binds to rvalues (`prvalue` + `xvalue`)
-- `const T&` binds to everything
+  </Step>
+  <Step title="Binding the operands of operator+">
 
-Understanding value categories is essential for:
-- Move semantics
-- Perfect forwarding
-- Overload resolution
-- Template metaprogramming
+The best overload is `operator+(std::string&&, std::string&&)`. The xvalue binds directly. The
+prvalue is <StepChange label="materialized">materialized</StepChange> into a temporary so the
+reference has an object to bind to.
+
+  </Step>
+  <Step title="The sum">
+
+`operator+` returns `std::string` by value, so `std::move(a) + b.substr(1)` is a
+<StepChange>prvalue</StepChange>. Because its operands were rvalues, this overload may append
+into `a`'s existing buffer instead of allocating a new one.
+
+  </Step>
+  <Step title="Initializing r">
+
+The prvalue initializes `r` directly. There is <StepChange label="C++17">no temporary and no
+move</StepChange> at this step. Afterwards `a` is valid but unspecified.
+
+  </Step>
+</Walkthrough>
+
+## Common mistakes
+
+- **Reading the category off the type.** A variable of type `std::string&&` is an lvalue when
+  named. Category describes how an expression is used, not what was declared.
+- **Treating "rvalue" as "temporary".** An xvalue is an rvalue that refers to a perfectly ordinary
+  long-lived object, such as `std::move(member)`. Moving from it changes that object.
+- **Expecting `return x;` to be guaranteed elision.** Only prvalues are guaranteed. Returning a
+  named local is NRVO, which can fail (for example with two different locals returned on different
+  paths) and then falls back to an implicit move.
+- **Moving the same object twice.** `f(std::move(v), std::move(v))` passes two xvalues denoting the
+  same `v`. Whichever parameter is initialized second sees a moved-from object.
+
+## Key points
+
+- Two properties, identity and movable, give three primary categories: lvalue, xvalue, prvalue.
+- glvalue = lvalue or xvalue. rvalue = xvalue or prvalue. xvalue is in both.
+- An xvalue is what you get from `std::move` and from members of rvalues.
+- Since C++17 a prvalue initializes its destination directly. A temporary appears only when it is
+  materialized, and the result is then an xvalue.
+
+## Related
+
+- [Reference Collapsing](./reference-collapsing.md): forwarding references and `std::forward`, which
+  preserve these categories through templates.
+- [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md): the constructors
+  that rvalue arguments select.

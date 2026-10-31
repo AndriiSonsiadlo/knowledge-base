@@ -3,366 +3,300 @@ id: storage-duration
 title: Storage Duration
 sidebar_label: Storage Duration
 sidebar_position: 2
-tags: [c++, storage-duration, lifetime, memory]
+tags: [c++, storage-duration, static-initialization, thread-local, lifetime]
 ---
 
 # Storage Duration
 
-Storage duration defines when and where objects are created and destroyed. C++ has four storage durations: automatic, static, dynamic, and thread.
+Every object has a **storage duration**: the minimum time its storage is guaranteed to exist. C++ has
+four of them: automatic, static, thread and dynamic. The duration is fixed by how the object is
+declared or created. It decides when the object is initialized, when it is destroyed, and in which
+order relative to other objects. Getting the order wrong is the cause of the "static initialization
+order fiasco" and of crashes at program exit.
 
-:::info[Lifetime Determines Behavior]
-Storage duration affects performance, thread-safety, and memory management strategy.
-:::
+**Prerequisites:** [Process memory overview](./memory-model-overview.md) (where each duration is
+usually stored).
 
-## Four Storage Durations
+## The four durations
 
-| Duration | When Created | When Destroyed | Location |
-|----------|--------------|----------------|----------|
-| **Automatic** | Block entry | Block exit | Stack |
-| **Static** | Program start | Program end | Data segment |
-| **Dynamic** | Explicit `new` | Explicit `delete` | Heap |
-| **Thread** | Thread start | Thread end | Thread-local |
+| Duration | Declared as | Storage exists | Typical location |
+|---|---|---|---|
+| Automatic | Block-scope variable without `static`/`thread_local`/`extern`; function parameters | From block entry to block exit | Stack (or registers) |
+| Static | Namespace-scope variable; any variable declared `static` or `extern` | Whole program run | `.data` / `.bss` |
+| Thread *(C++11)* | Any variable declared `thread_local` | Lifetime of the thread | Per-thread TLS block |
+| Dynamic | Object created by a `new`-expression or by an allocator | Until it is explicitly released | Heap |
 
----
+Storage duration belongs to **objects**, and a variable's duration is that of the object it names.
+A member has the duration of its enclosing object: a `std::string` member of a global has static
+storage duration, even though the characters it owns are on the heap with dynamic duration.
 
-## Automatic Storage Duration
+Storage existing does not mean the object exists. An object's lifetime starts when its
+initialization finishes and ends when its destructor starts, which is a shorter span inside the
+storage duration. See [Object lifetime](./object-lifetime.md).
 
-Default for local variables:
+## Automatic storage
 
-```cpp showLineNumbers 
-void function() {
-    int x = 42;        // Created
-    Widget w;          // Constructor called
-    
-    if (condition) {
-        int y = 10;    // Created inside if
-    }                  // y destroyed
-    
-}  // x and w destroyed (destructor called for w)
-```
+Automatic objects are created when control reaches their declaration and destroyed when control
+leaves the block, in reverse order of construction. That includes leaving by `return`, `break`,
+`goto`, or an exception. This guarantee is what [RAII](../13-idioms-and-design/01-raii.md) relies on.
 
-**Characteristics**:
-- Fast allocation (stack)
-- LIFO destruction order
-- Scope-based lifetime
-- No memory leaks possible
+```cpp title="automatic.cpp" showLineNumbers
+#include <cstdio>
 
-### Destruction Order
-
-```cpp showLineNumbers 
-{
-    Widget a;
-    Widget b;
-    Widget c;
-}  // Destroyed in reverse: c, b, a
-```
-
----
-
-## Static Storage Duration
-
-Exists for entire program:
-
-```cpp showLineNumbers 
-// Global scope
-int global = 42;                    // Static duration
-
-// File scope
-static int file_scope = 100;        // Static duration
-
-// Function scope
-void function() {
-    static int call_count = 0;      // Static duration
-    call_count++;
-}
-
-// Class scope
-class Widget {
-    static int instance_count;      // Static duration (definition needed)
+struct Tag {
+    const char* name;
+    explicit Tag(const char* n) : name(n) { std::printf("+%s ", name); }
+    ~Tag() { std::printf("-%s ", name); }
 };
-int Widget::instance_count = 0;
-```
-
-### Initialization
-
-```cpp showLineNumbers 
-// Zero-initialization first
-int global_uninit;  // Zero before program starts
-
-// Constant initialization (compile-time if possible)
-constexpr int compile_time = 42;
-
-// Dynamic initialization (runtime)
-int runtime_init = getValue();  // Called before main()
-```
-
-### Initialization Order Issues
-
-```cpp showLineNumbers 
-// file1.cpp
-int a = compute_a();
-
-// file2.cpp
-int b = compute_b();  // Uses 'a'
-
-// Order undefined across translation units!
-// b might initialize before a
-```
-
-**Solution**: Local static (lazy initialization):
-
-```cpp showLineNumbers 
-Widget& getInstance() {
-    static Widget instance;  // Initialized on first call (thread-safe C++11+)
-    return instance;
-}
-```
-
----
-
-## Dynamic Storage Duration
-
-Manual lifetime control:
-
-```cpp showLineNumbers 
-// Create
-int* ptr = new int(42);
-Widget* w = new Widget();
-
-// Use...
-
-// Destroy
-delete ptr;
-delete w;  // Calls destructor
-
-// Array
-int* arr = new int[10];
-delete[] arr;  // Use delete[], not delete!
-```
-
-### Common Patterns
-
-```cpp showLineNumbers 
-// RAII wrapper (preferred)
-std::unique_ptr<Widget> ptr = std::make_unique<Widget>();
-// Automatic delete when ptr goes out of scope
-
-// Shared ownership
-std::shared_ptr<Widget> shared = std::make_shared<Widget>();
-// Deleted when last shared_ptr destroyed
-```
-
-### Memory Management
-
-```cpp showLineNumbers 
-class Buffer {
-    char* data;
-    size_t size;
-    
-public:
-    Buffer(size_t s) : size(s) {
-        data = new char[size];  // Dynamic allocation
-    }
-    
-    ~Buffer() {
-        delete[] data;  // Manual cleanup
-    }
-    
-    // Rule of Five for dynamic resources
-    Buffer(const Buffer&);
-    Buffer& operator=(const Buffer&);
-    Buffer(Buffer&&) noexcept;
-    Buffer& operator=(Buffer&&) noexcept;
-};
-```
-
----
-
-## Thread Storage Duration (C++11)
-
-One instance per thread:
-
-```cpp showLineNumbers 
-thread_local int tls_counter = 0;  // Separate for each thread
-
-void thread_function() {
-    tls_counter++;  // Each thread has own copy
-    std::cout << tls_counter << "\n";
-}
-
-std::thread t1(thread_function);  // tls_counter = 1
-std::thread t2(thread_function);  // Different tls_counter = 1
-```
-
-**Use cases**:
-- Thread-specific caches
-- Per-thread random number generators
-- Thread-local error codes
-
----
-
-## Storage Duration Examples
-
-### Example 1: Mixing Durations
-
-```cpp showLineNumbers 
-int global = 10;  // Static
-
-void function() {
-    int local = 20;  // Automatic
-    static int function_static = 30;  // Static
-    
-    int* dynamic = new int(40);  // Dynamic
-    
-    thread_local int tls = 50;  // Thread
-    
-    delete dynamic;
-}  // local destroyed, others remain
-```
-
-### Example 2: Lifetime Demonstration
-
-```cpp showLineNumbers 
-class Logger {
-public:
-    Logger(const char* name) : name_(name) {
-        std::cout << name_ << " created\n";
-    }
-    ~Logger() {
-        std::cout << name_ << " destroyed\n";
-    }
-private:
-    const char* name_;
-};
-
-Logger global("Global");  // Created before main
 
 int main() {
-    Logger local("Local");  // Created on entry
-    
-    static Logger static_obj("Static");  // Created on first encounter
-    
-    Logger* dynamic = new Logger("Dynamic");  // Created by new
-    
-    delete dynamic;  // Destroyed by delete
-    
-}  // local destroyed
-  // static_obj destroyed
-  // global destroyed
+    Tag a("a");
+    {
+        Tag b("b");
+        Tag c("c");
+    }               // c, then b
+    Tag d("d");
+    std::printf("| ");
+}                   // d, then a
 ```
 
-**Output**:
-```
-Global created
-Local created
-Static created
-Dynamic created
-Dynamic destroyed
-Local destroyed
-Static destroyed
-Global destroyed
+Output:
+
+```text
++a +b +c -c -b +d | -d -a
 ```
 
----
+## Static storage
 
-## Performance Comparison
+Namespace-scope variables, `static` data members and `static` locals all have static storage
+duration. They are initialized in two phases:
 
-```cpp showLineNumbers 
-// Automatic (fastest)
-void fast() {
-    int arr[1000];  // Stack allocation
-}  // Instant cleanup
+1. **Static initialization**, done before any other code runs. Every static object is first
+   **zero-initialized** (see [Value initialization](./initialization/value-initialization.md#zero-initialization)).
+   If its initializer is a constant expression, it gets **constant initialization** instead, and
+   the value is usually baked into `.data` by the compiler.
+2. **Dynamic initialization** for the rest: initializers that call non-`constexpr` functions or
+   constructors run at run time, before the first use of anything in their translation unit (in
+   practice, before `main` for ordinary globals).
 
-// Static (once per program)
-void lazy_init() {
-    static ExpensiveObject obj;  // Only first call pays cost
+```cpp title="phases.cpp" showLineNumbers
+#include <cstdlib>
+
+int zeroed;                                   // zero-initialized only: 0
+constexpr int limit = 64;                     // constant initialization
+int doubled = limit * 2;                      // constant initialization (constant expression)
+const char* home = std::getenv("HOME");       // dynamic initialization at run time
+
+int main() { return zeroed + (home ? 0 : 0) + doubled - 128; }   // returns 0
+```
+
+### Static locals
+
+A `static` local is initialized the first time control passes through its declaration, not at
+program start. Since C++11 this initialization is thread-safe: if two threads reach it at once, one
+runs the initializer and the other waits. A static local with a constant initializer is constant
+initialized up front, like a global.
+
+```cpp title="counter.cpp" showLineNumbers
+int next_id() {
+    static int id = 0;   // initialized once; keeps its value between calls
+    return ++id;
 }
 
-// Dynamic (slowest)
-void slow() {
-    int* arr = new int[1000];  // Heap allocation
-    delete[] arr;  // Explicit cleanup
+int main() { next_id(); next_id(); return next_id() - 3; }   // returns 0
+```
+
+### The static initialization order fiasco
+
+Within one translation unit, dynamically initialized globals are initialized in the order they are
+defined. Across translation units the order is **unspecified**. If a global in `a.cpp` reads a
+global from `b.cpp` during its own initialization, it may see a zero-initialized object that has not
+been constructed yet.
+
+```cpp title="two files (fragment)"
+// config.cpp
+std::string config_path = std::string(std::getenv("HOME")) + "/.app";
+
+// logger.cpp
+extern std::string config_path;
+Logger global_logger(config_path);   // may run before config_path is constructed: UB
+```
+
+Two fixes:
+
+- **Make it constant.** If the value can be a constant expression, declare it `constexpr`, or
+  `constinit` *(C++20)*. `constinit` requires constant initialization and fails to compile if the
+  initializer is not a constant expression, so the variable can never take part in the order
+  problem.
+- **Use a function-local static** (the "construct on first use" idiom). The object is created the
+  first time someone asks for it, whichever translation unit that is.
+
+```cpp title="first-use.cpp" showLineNumbers
+#include <string>
+
+const std::string& config_path() {
+    static const std::string path = "/etc/app.conf";   // built on first call
+    return path;
+}
+
+constinit int max_connections = 128;   // C++20: guaranteed compile-time initialization
+
+int main() { return config_path().empty() + max_connections - 128; }   // returns 0
+```
+
+### Destruction at exit
+
+Static objects are destroyed after `main` returns (or `std::exit` is called), in the **reverse
+order** of the completion of their construction. Static locals that were never reached are never
+constructed and so are never destroyed. The same order problem exists in reverse: a destructor that
+uses another static object may find it already destroyed. When that matters, a common choice is to
+never destroy the object: `static auto& log = *new Logger;` leaks on purpose and stays usable until
+the process ends.
+
+## Thread storage
+
+A `thread_local` variable has one instance per thread. Each thread's instance is initialized before
+that thread first uses it (or at thread start, depending on the implementation) and destroyed when
+the thread exits. `thread_local` at block scope implies `static`.
+
+```cpp title="tls.cpp" showLineNumbers
+#include <cstdio>
+#include <thread>
+
+thread_local int calls = 0;
+
+void work(const char* who) {
+    for (int i = 0; i < 3; ++i) ++calls;
+    std::printf("%s: %d\n", who, calls);   // each thread counts its own calls
+}
+
+int main() {
+    std::thread t1(work, "t1");
+    std::thread t2(work, "t2");
+    t1.join();
+    t2.join();
+    work("main");
 }
 ```
 
-**Benchmark** (typical):
-- Automatic: ~1 ns
-- Dynamic: ~50-100 ns (malloc/free overhead)
-- Thread-local: ~5-10 ns (TLS access)
+Each line prints `3`. The order of the `t1` and `t2` lines can vary between runs. Typical uses are
+per-thread caches, random number generators, and error state like `errno`. Accessing a
+`thread_local` can cost more than a plain global, especially from a shared library, because the
+address has to be looked up for the current thread.
 
----
+## Dynamic storage
 
-## Common Patterns
+Objects with dynamic storage duration are created by a `new`-expression (or by an allocator plus
+construction) and live until they are explicitly destroyed. Nothing destroys them for you, so in
+modern code they are always owned by another object: a container, a `std::unique_ptr`, or a
+`std::shared_ptr`. The mechanics are in [new and delete](./new-and-delete.md), the owners in
+[unique_ptr](../06-pointers-references-and-smart-pointers/unique-ptr.md).
 
-### Singleton (Static)
+## Watching all four
 
-```cpp showLineNumbers 
-class Singleton {
-public:
-    static Singleton& getInstance() {
-        static Singleton instance;  // Thread-safe in C++11+
-        return instance;
-    }
-    
-private:
-    Singleton() = default;
-    Singleton(const Singleton&) = delete;
+The program below creates one object of each duration and prints when each is constructed and
+destroyed.
+
+```cpp title="durations.cpp" showLineNumbers
+#include <cstdio>
+#include <thread>
+
+struct Logger {
+    const char* name;
+    explicit Logger(const char* n) : name(n) { std::printf("%s created\n", name); }
+    ~Logger() { std::printf("%s destroyed\n", name); }
 };
+
+Logger global("global");                       // static: before main
+
+void in_thread() { thread_local Logger tls("thread_local"); }
+
+int main() {
+    std::printf("main starts\n");
+    Logger local("local");                     // automatic
+    static Logger once("static local");        // static: on first pass
+    Logger* dynamic = new Logger("dynamic");   // dynamic
+    std::thread(in_thread).join();             // created and destroyed with the thread
+    delete dynamic;
+    std::printf("main ends\n");
+}                                              // local, then static local, then global
 ```
 
-### Factory (Dynamic)
+<Walkthrough title="Order of construction and destruction" caption="Output of durations.cpp, built with g++ 15 and clang++ 21, -std=c++23." accent="blue">
+  <Step title="Before main">
 
-```cpp showLineNumbers 
-std::unique_ptr<Widget> createWidget() {
-    return std::make_unique<Widget>();  // Dynamic
-}
-
-auto widget = createWidget();
-// Automatic cleanup when widget destroyed
+```text
+global created
 ```
 
-### Thread Pool (Thread-local)
+Dynamic initialization of the namespace-scope `global` runs before `main` starts.
 
-```cpp showLineNumbers 
-thread_local std::vector<Task> local_queue;
+  </Step>
+  <Step title="Inside main">
 
-void worker_thread() {
-    // Each thread has own queue
-    local_queue.push_back(task);
-}
+```text
+main starts
+local created
+static local created
+dynamic created
 ```
 
----
+`local` is constructed when its declaration is reached. The static local is constructed on the
+first pass through its declaration. `new` creates the dynamic object.
 
-## Summary
+  </Step>
+  <Step title="The thread">
 
-**Storage durations**:
-```cpp showLineNumbers 
-// Automatic (default)
-int local;          // Destroyed at scope end
-
-// Static (program lifetime)
-static int s;       // Destroyed at program end
-int global;         // Destroyed at program end
-
-// Dynamic (manual)
-int* p = new int;   // Lives until delete
-delete p;
-
-// Thread (per-thread)
-thread_local int t; // Destroyed when thread ends
+```text
+thread_local created
+thread_local destroyed
 ```
 
-**Choosing duration**:
-- **Automatic**: Default choice, fast, safe
-- **Static**: Singletons, config, program-wide state
-- **Dynamic**: Variable size, runtime decisions, shared ownership
-- **Thread**: Per-thread caches, thread-local state
+The `thread_local` exists only while the thread runs. It is <StepChange>destroyed at thread
+exit</StepChange>, before `join` returns.
 
-**Best practices**:
-- Prefer automatic (stack) when possible
-- Use smart pointers for dynamic allocations
-- Static for true program-wide state only
-- Thread-local for thread-specific data
+  </Step>
+  <Step title="Explicit delete">
 
-Understanding storage duration is fundamental to memory management, performance optimization, and preventing lifetime bugs.
+```text
+dynamic destroyed
+main ends
+```
+
+The dynamic object dies exactly where `delete` runs, not at any scope boundary.
+
+  </Step>
+  <Step title="After main">
+
+```text
+local destroyed
+static local destroyed
+global destroyed
+```
+
+`local` dies at the closing brace of `main`. Then the statics are destroyed in
+<StepChange>reverse order of construction</StepChange>: the static local was constructed after
+`global`, so it is destroyed first.
+
+  </Step>
+</Walkthrough>
+
+## Pitfalls
+
+- **Reading another TU's global during initialization.** The order is unspecified. Use `constinit`
+  or a function-local static.
+- **Returning a pointer or reference to an automatic object.** It is destroyed at `return`. Compilers
+  warn (`-Wreturn-local-addr` in GCC, `-Wreturn-stack-address` in Clang), but not through
+  indirections.
+- **Static destructors using other statics.** Destruction order is the reverse of construction and
+  may not be what you expect across translation units.
+- **Large automatic arrays.** `char buf[16 << 20];` compiles fine and overflows an 8 MiB stack at
+  run time. Use `std::vector`.
+
+## Key points
+
+- Four durations: automatic (scope), static (program), thread (thread), dynamic (until `delete`).
+- Statics are zero-initialized first, then constant or dynamic initialized. Only dynamic
+  initialization has ordering problems.
+- `constinit` *(C++20)* and function-local statics remove cross-file order dependencies.
+- Destruction is always in reverse order of construction, for both automatic and static objects.

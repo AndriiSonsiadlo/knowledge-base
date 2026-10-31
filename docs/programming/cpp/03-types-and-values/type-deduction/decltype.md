@@ -8,288 +8,164 @@ tags: [c++, decltype, type-deduction, cpp11]
 
 # decltype
 
-`decltype` deduces the type of an expression, preserving references and const qualifiers exactly.
+`decltype(e)` *(C++11)* names the type of an entity or expression without evaluating it. Where
+[auto](./auto.md) answers "what type should a copy of this have?", `decltype` answers "what type
+is this, exactly?", references and `const` included. It has two rules, and which one applies
+depends on whether you write a bare name or any other expression. Most `decltype` surprises,
+`decltype(x)` versus `decltype((x))` among them, come from that split.
 
-:::info[Difference from auto]
-`auto` uses template deduction (drops ref/const), `decltype` preserves exact type including references.
-:::
+**Prerequisites:** [glvalue, prvalue, xvalue](../value-categories/glvalue-prvalue-xvalue.md)
 
-## Basic Usage
+## The two rules
 
-```cpp showLineNumbers 
-int x = 42;
-decltype(x) y = x;  // int (same type as x)
+<Diagram title="How decltype(e) picks a type" accent="green">
+  <DiagramNode variant="pill" accent>decltype(e)</DiagramNode>
+  <DiagramArrow label="is e an unparenthesized name or member access?" />
+  <DiagramRow>
+    <DiagramNode title="Yes: rule 1">The **declared** type of that variable, parameter, or member</DiagramNode>
+    <DiagramNode title="No: rule 2">Type `T` of the expression, adjusted by its category</DiagramNode>
+  </DiagramRow>
+  <DiagramArrow label="rule 2 by category" />
+  <DiagramRow>
+    <DiagramNode title="lvalue">`T&`</DiagramNode>
+    <DiagramNode title="xvalue">`T&&`</DiagramNode>
+    <DiagramNode title="prvalue">`T`</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-const int& ref = x;
-decltype(ref) r = x;  // const int& (preserves reference and const)
+1. If `e` is an **unparenthesized id-expression** (a variable, function or parameter name, an
+   enumerator) or an **unparenthesized class member access** (`p.x`, `ptr->x`), the result is the
+   type the entity was declared with. A variable declared `const int&` gives `const int&`; a
+   member declared `double` gives `double` even when accessed through a `const` object.
+2. Otherwise `e` is an ordinary expression of some type `T`, and the result encodes its value
+   category: `T&` for an lvalue, `T&&` for an xvalue, `T` for a prvalue.
 
-auto a = ref;         // int (drops reference and const)
-decltype(ref) b = ref;  // const int& (keeps everything)
-```
+Rule 1 also covers structured bindings *(C++17)*, which report the type of the element they
+refer to. The full wording is on [cppreference: decltype](https://en.cppreference.com/w/cpp/language/decltype).
 
----
+The operand is never evaluated: `decltype(f())` doesn't call `f`, and `decltype(i++)` doesn't
+increment `i`. The function only has to be declared.
 
-## decltype Rules
+## Applying the rules
 
-### Named Variables
+<Walkthrough title="decltype on six operands" caption="Each line is checked by static_assert in the program below." accent="green">
+  <Step title="decltype(x)">
 
-```cpp showLineNumbers 
-int x = 42;
-const int cx = x;
-int& rx = x;
+`x` is a bare name, declared `int`, so rule 1 applies: <StepChange>`int`</StepChange>.
 
-decltype(x)   // int
-decltype(cx)  // const int
-decltype(rx)  // int&
-```
+  </Step>
+  <Step title="decltype((x))">
 
-**Rule 1**: For named variables, `decltype` gives the declared type exactly.
+Parentheses make `(x)` an ordinary expression, so rule 2 applies. `(x)` is an lvalue of type
+`int`: <StepChange>`int&`</StepChange>. Same object, different rule.
 
-### Expressions
+  </Step>
+  <Step title="decltype(cr)">
 
-```cpp showLineNumbers 
-int x = 42;
+`cr` is declared `const int&`. Rule 1 reports the declaration unchanged:
+<StepChange>`const int&`</StepChange>. Compare `auto`, which would give `int`.
 
-decltype((x))    // int& (parentheses make it expression)
-decltype(x + 0)  // int (expression result)
-decltype(x++)    // int (post-increment returns value)
-decltype(++x)    // int& (pre-increment returns reference)
-```
+  </Step>
+  <Step title="decltype(x + 1) and decltype(x++)">
 
-**Rule 2**: For expressions (including parentheses around names), `decltype` gives value category:
-- **lvalue expression** → `T&`
-- **xvalue expression** → `T&&`
-- **prvalue expression** → `T`
+Neither is a name. Both are prvalues of type `int`: <StepChange>`int`</StepChange>. Prefix
+`++x` is an lvalue, so `decltype(++x)` is `int&`.
 
----
+  </Step>
+  <Step title="decltype(cp.v) and decltype((cp.v))">
 
-## Practical Uses
+`cp` is a `const Point`. `cp.v` is an unparenthesized member access, so rule 1 gives the member's
+declared type, <StepChange>`double`</StepChange>, ignoring the object's `const`. `(cp.v)` is an
+lvalue of type `const double`, so rule 2 gives `const double&`.
 
-### Variable Type Matching
+  </Step>
+  <Step title="decltype(std::move(x))">
 
-```cpp showLineNumbers 
-std::vector<int> vec;
+A call returning `int&&` is an xvalue: <StepChange>`int&&`</StepChange>.
 
-// Declare same type as existing variable
-decltype(vec) vec2;  // std::vector<int>
-decltype(vec.size()) size;  // size_t
+  </Step>
+</Walkthrough>
 
-// Useful when type is complex
-std::map<std::string, std::vector<int>> map;
-decltype(map) map2;  // Exact same type
-```
+```cpp title="decltype-rules.cpp" showLineNumbers
+#include <type_traits>
+#include <utility>
+#include <vector>
+using std::is_same_v;
 
-### Return Type Deduction
+struct Point { double v; };
+int compute();                         // declared only: decltype doesn't call it
 
-```cpp showLineNumbers 
-template<typename Container>
-auto getElement(Container& c, int index) -> decltype(c[index]) {
-    return c[index];
-}
+int main() {
+    int x = 0;
+    const int& cr = x;
+    const Point cp{1.0};
+    std::vector<int> vec{1, 2, 3};
 
-// c[index] might return reference
-std::vector<int> vec = {1, 2, 3};
-auto& elem = getElement(vec, 0);  // Returns int&
-```
-
-### Perfect Return Type
-
-```cpp showLineNumbers 
-template<typename T, typename U>
-auto add(T a, U b) -> decltype(a + b) {
-    return a + b;
-}
-
-auto result = add(5, 3.14);  // double (decltype(int + double))
-```
-
----
-
-## decltype vs auto
-
-```cpp showLineNumbers 
-const int x = 42;
-const int& ref = x;
-
-// auto drops const and reference
-auto a = ref;       // int
-
-// decltype preserves everything
-decltype(ref) b = ref;  // const int&
-
-// auto with modifiers
-auto& c = ref;      // const int&
-const auto d = ref; // const int
-
-// decltype for exact type
-decltype(ref) e = ref;  // const int& (exact match)
-```
-
----
-
-## Common Patterns
-
-### Type of Member
-
-```cpp showLineNumbers 
-struct Point {
-    double x, y;
-};
-
-Point p;
-decltype(p.x) value;  // double
-
-decltype(Point::x) coord;  // double (static member access)
-```
-
-### Container Element Type
-
-```cpp showLineNumbers 
-std::vector<int> vec;
-decltype(vec[0]) elem;  // int& (vector::operator[] returns reference)
-
-std::vector<bool> bvec;
-decltype(bvec[0]) proxy;  // std::vector<bool>::reference (proxy)
-```
-
-### Function Return Type
-
-```cpp showLineNumbers 
-int func();
-
-decltype(func()) x;  // int (return type of func)
-decltype(func) f;    // int() (function type)
-decltype(&func) fp;  // int(*)() (function pointer type)
-```
-
----
-
-## Parentheses Matter!
-
-```cpp showLineNumbers 
-int x = 42;
-
-decltype(x)   // int (name)
-decltype((x)) // int& (expression - lvalue)
-
-// Why? (x) is an lvalue expression referring to x
-// decltype of lvalue expression → reference
-```
-
-:::warning[Critical Difference]
-`decltype(name)` ≠ `decltype((name))`  
-Parentheses change name to expression!
-:::
-
----
-
-## Return Type Deduction (C++11 vs C++14)
-
-### C++11: Trailing Return Type
-
-```cpp showLineNumbers 
-template<typename T, typename U>
-auto add(T a, U b) -> decltype(a + b) {
-    return a + b;
+    static_assert(is_same_v<decltype(x),            int>);
+    static_assert(is_same_v<decltype((x)),          int&>);
+    static_assert(is_same_v<decltype(cr),           const int&>);
+    static_assert(is_same_v<decltype(x + 1),        int>);
+    static_assert(is_same_v<decltype(++x),          int&>);
+    static_assert(is_same_v<decltype(cp.v),         double>);
+    static_assert(is_same_v<decltype((cp.v)),       const double&>);
+    static_assert(is_same_v<decltype(std::move(x)), int&&>);
+    static_assert(is_same_v<decltype(Point::v),     double>);   // non-static member, unevaluated
+    static_assert(is_same_v<decltype(compute()),    int>);
+    static_assert(is_same_v<decltype(vec[0]),       int&>);     // operator[] returns int&
+    static_assert(is_same_v<decltype("hi"),         const char(&)[3]>);  // string literal: lvalue
+    (void)cr;
 }
 ```
 
-Must use trailing return type because `a` and `b` not in scope before parameter list.
+## Where `decltype` is used
 
-### C++14: auto Return
+**Declaring something with the type of something else.** `decltype(vec) copy;` or
+`using Elem = decltype(vec)::value_type;` (C++11 allows `decltype(...)` before `::`). If the
+result is a reference, the declaration needs an initializer: `decltype(vec[0]) e;` is an error
+because `e` would be an uninitialized `int&`.
 
-```cpp showLineNumbers 
-template<typename T, typename U>
-auto add(T a, U b) {
-    return a + b;  // auto deduction (uses template rules)
-}
+**Return types that depend on parameters.** Before C++14 the only way to return "whatever `a + b`
+is" was a trailing return type, because the parameters aren't in scope before the parameter list:
 
-// Returns int for add(5, 10), drops reference
-std::vector<int> vec;
-auto getFirst() {
-    return vec[0];  // Returns int (copy), not int&
-}
+```cpp title="trailing.cpp" showLineNumbers
+#include <type_traits>
+
+template <class T, class U>
+auto add(T a, U b) -> decltype(a + b) { return a + b; }
+
+static_assert(std::is_same_v<decltype(add(5, 3.14)), double>);
+
+int main() {}
 ```
 
----
+C++14 lets you write plain `auto add(T a, U b)` instead. That uses the `auto` by-value rule, so it
+can't return a reference; [decltype(auto)](./decltype-auto.md) can.
 
-## Combining auto and decltype
+**Types of expressions you can't write out.** `decltype` of a lambda, or of
+`std::declval<T>().size()` in a trait (`std::declval` from `<utility>` produces an expression of type
+`T&&` without constructing a `T`, and is only usable in unevaluated contexts). See
+[Type Traits](../../08-templates-and-metaprogramming/type-traits.md).
 
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3};
+## Common mistakes
 
-// auto drops reference
-auto x = vec[0];  // int (copy)
+- **Parenthesizing a name by accident.** `decltype((x))` and `decltype(x)` differ for any variable.
+  Macros that wrap their argument in parentheses trigger this silently.
+- **Expecting `const` from a `const` object's member.** `decltype(cp.v)` is `double`. Write
+  `decltype((cp.v))` or `std::remove_reference_t<decltype((cp.v))>` to see the access type.
+- **Declaring a reference without an initializer.** Any rule-2 lvalue gives a reference type.
+  `decltype(*p) y;` doesn't compile.
+- **`vector<bool>`.** `decltype(bvec[0])` is `std::vector<bool>::reference`, a proxy class, not
+  `bool&`.
 
-// decltype preserves reference
-decltype(vec[0]) y = vec[0];  // int&
+## Key points
 
-// decltype(auto) - best of both worlds (C++14)
-decltype(auto) z = vec[0];  // int& (preserves return type)
-```
+- Bare name or member access: the declared type. Anything else: the type plus its category.
+- lvalue gives `T&`, xvalue `T&&`, prvalue `T`. Extra parentheses turn a name into an lvalue
+  expression.
+- The operand is unevaluated; a declaration is enough.
 
----
+## Related
 
-## Use Cases
-
-### Generic Code
-
-```cpp showLineNumbers 
-template<typename Container>
-void process(Container& c) {
-    // Get exact type of element
-    decltype(c[0]) elem = c[0];
-    
-    // Modify if it's a reference
-    elem = 42;  // Modifies container if elem is reference
-}
-```
-
-### Type Traits
-
-```cpp showLineNumbers 
-template<typename T>
-struct remove_reference {
-    using type = T;
-};
-
-template<typename T>
-struct remove_reference<T&> {
-    using type = T;
-};
-
-int x;
-using Type = typename remove_reference<decltype(x)>::type;  // int
-```
-
----
-
-## Summary
-
-**decltype**:
-- Preserves exact type including references and const
-- `decltype(name)` → declared type
-- `decltype(expression)` → value category type
-- `decltype((name))` → reference (expression)
-
-**Comparison**:
-```cpp showLineNumbers 
-const int& ref = x;
-
-auto a = ref;           // int (template deduction)
-decltype(ref) b = ref;  // const int& (exact type)
-decltype(auto) c = ref; // const int& (C++14)
-```
-
-**Use when**:
-- Need exact type preservation
-- Template return type forwarding
-- Type of complex expressions
-- Generic code requiring perfect forwarding
-
-```cpp showLineNumbers 
-// Common idioms
-decltype(expr) var;           // Match expression type
-decltype(auto) var = expr;    // Deduce with preservation (C++14)
-auto func() -> decltype(expr) // Trailing return type
-```
+- [auto](./auto.md): the by-value deduction rule that `decltype` doesn't follow.
+- [decltype(auto)](./decltype-auto.md): `decltype` rules with `auto` syntax, for forwarding return
+  types.

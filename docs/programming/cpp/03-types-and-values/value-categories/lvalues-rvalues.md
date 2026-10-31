@@ -3,386 +3,204 @@ id: lvalues-rvalues
 title: Lvalues and Rvalues
 sidebar_label: Lvalues & Rvalues
 sidebar_position: 1
-tags: [c++, lvalue, rvalue, value-categories, move-semantics]
+tags: [c++, lvalue, rvalue, value-categories, references]
 ---
 
 # Lvalues and Rvalues
 
-Every C++ expression has a type and a **value category**. Lvalues have persistent storage; rvalues are temporaries.
+Every C++ expression has two independent properties: a **type** (`int`, `std::string`) and a
+**value category**. The category answers one question: does this expression name an object that
+keeps existing after the expression, or is it a value you may consume? The answer decides which
+references can bind to the expression, which overload is chosen, and whether an object is copied or
+moved. This page covers the two-way split, lvalue versus rvalue, which is enough for everyday code.
+The full five-category taxonomy is on [glvalue, prvalue, xvalue](./glvalue-prvalue-xvalue.md).
 
-:::info[Simple Rule]
-**Can you take its address?** → Lvalue  
-**Is it temporary?** → Rvalue
-:::
+**Prerequisites:** [References](../../06-pointers-references-and-smart-pointers/references.md)
 
-## Basic Distinction
+## The two categories
 
-```cpp showLineNumbers 
-int x = 42;  // x is lvalue, 42 is rvalue
+- An **lvalue** designates an object or function that you can refer to again: a variable, `*p`,
+  `a[i]`, a call to a function that returns `T&`. You can take its address with `&`.
+- An **rvalue** is an expression whose object (if any) you are allowed to treat as expendable: a
+  literal such as `42`, the result of `x + 1`, a call that returns by value, or `std::move(x)`.
 
-x = 10;      // OK: lvalue on left
-// 10 = x;   // Error: rvalue cannot be assigned to
+The quick test is "can I take its address?". It works for most expressions but not all:
+`std::move(x)` refers to the very object `x`, yet `&std::move(x)` doesn't compile because the
+expression is an rvalue. Category is a property of the *expression*, not of the object behind it.
 
-int* ptr = &x;     // OK: can take address of lvalue
-// int* p = &42;   // Error: cannot take address of rvalue
-```
+```cpp title="basic.cpp" showLineNumbers
+int main() {
+    int x = 42;   // `x` is an lvalue, `42` is an rvalue
+    x = 10;       // OK: assign to an lvalue
+    int* p = &x;  // OK: take the address of an lvalue
+    *p = 7;       // `*p` is an lvalue too
 
-**Lvalue**: Has identity (name/address), persists beyond expression  
-**Rvalue**: Temporary value, exists only during expression evaluation
-
----
-
-## Identifying Lvalues
-
-```cpp showLineNumbers 
-// Variables are lvalues
-int x = 5;           // x is lvalue
-std::string s;       // s is lvalue
-
-// Array elements are lvalues
-int arr[10];
-arr[0] = 42;         // arr[0] is lvalue
-
-// Dereferenced pointers are lvalues
-int* ptr = &x;
-*ptr = 10;           // *ptr is lvalue
-
-// Functions returning references are lvalues
-int& getRef() { static int x = 0; return x; }
-getRef() = 100;      // OK: lvalue
-
-// String literals are lvalues (special case)
-const char* p = "hello";  // "hello" is lvalue
-&"hello";            // OK: can take address
-```
-
----
-
-## Identifying Rvalues
-
-```cpp showLineNumbers 
-// Literals (except strings)
-42                   // rvalue
-3.14                 // rvalue
-true                 // rvalue
-
-// Temporary results
-x + y                // rvalue (temporary sum)
-x * 2                // rvalue
-x++                  // rvalue (post-increment returns copy)
-
-// Functions returning by value
-int getValue() { return 42; }
-getValue()           // rvalue (temporary)
-
-// Casts to non-reference types
-static_cast<int>(3.14)  // rvalue
-
-// Temporaries
-std::string("temp")  // rvalue
-Point{1, 2}         // rvalue (temporary object)
-```
-
----
-
-## Lvalue References
-
-Bind to lvalues only:
-
-```cpp showLineNumbers 
-int x = 42;
-
-int& ref = x;        // OK: lvalue reference to lvalue
-// int& r2 = 42;     // Error: cannot bind to rvalue
-
-// Exception: const lvalue reference binds to anything
-const int& cref1 = x;   // OK: lvalue
-const int& cref2 = 42;  // OK: rvalue (lifetime extended!)
-```
-
-:::success[const& Magic]
-`const T&` can bind to both lvalues and rvalues, making it perfect for function parameters.
-:::
-
----
-
-## Rvalue References (C++11)
-
-Bind to rvalues only:
-
-```cpp showLineNumbers 
-int x = 42;
-
-int&& rref1 = 42;        // OK: rvalue reference to rvalue
-int&& rref2 = x + 1;     // OK: temporary
-// int&& rref3 = x;      // Error: cannot bind to lvalue
-
-// Convert lvalue to rvalue with std::move
-int&& rref4 = std::move(x);  // OK: explicit cast
-```
-
----
-
-## Named Rvalue References are Lvalues!
-
-```cpp showLineNumbers 
-void process(int&& x) {
-    // Inside function, x has a name
-    // Therefore x is an LVALUE, even though type is rvalue reference!
-    
-    int& lref = x;       // OK: x is lvalue
-    // int&& rref = x;   // Error: x is lvalue
-    
-    int&& rref = std::move(x);  // OK: explicit cast
+    // 10 = x;    // error: cannot assign to an rvalue of type int
+    // &42;       // error: cannot take the address of an rvalue
+    // &(x + 1);  // error: same
 }
-
-process(42);  // 42 is rvalue, binds to x
 ```
 
-**Key insight**: Expression's value category ≠ its type
+| Expression | Category | Why |
+|---|---|---|
+| `x`, `*p`, `a[i]`, `s.member` (with `s` an lvalue) | lvalue | Names an existing object |
+| `++x`, `x = 5`, `x += 1` | lvalue | Built-in prefix increment and assignment return the object |
+| `"text"` | lvalue | A string literal is an array object with static storage |
+| A call to a function returning `T&` | lvalue | Refers to an object that lives elsewhere |
+| `42`, `true`, `nullptr` | rvalue | Just a value |
+| `x + 1`, `x++`, `a < b` | rvalue | A computed value. `x++` yields a copy of the old value |
+| A call to a function returning `T` (by value) | rvalue | A fresh value |
+| `std::move(x)`, `static_cast<T&&>(x)` | rvalue | Marks `x` as expendable |
 
----
+## How references bind
 
-## Reference Binding Rules
+The categories matter most when initializing references. Each kind of reference accepts a different
+set of expressions:
 
-```cpp showLineNumbers 
-int x = 10;
-
-// Lvalue reference
-int& r1 = x;              // Lvalue → lvalue ref
-// int& r2 = 42;          // Rvalue → lvalue ref
-
-// Const lvalue reference (universal)
-const int& r3 = x;        // Lvalue → const lvalue ref
-const int& r4 = 42;       // Rvalue → const lvalue ref
-
-// Rvalue reference
-// int&& r5 = x;          // Lvalue → rvalue ref
-int&& r6 = 42;            // Rvalue → rvalue ref
-int&& r7 = std::move(x);  // Lvalue→rvalue (explicit)
-```
-
-| Reference Type | Binds to Lvalue | Binds to Rvalue |
-|----------------|-----------------|-----------------|
+| Reference | Binds to lvalue | Binds to rvalue |
+|---|---|---|
 | `T&` | Yes | No |
 | `const T&` | Yes | Yes |
-| `T&&` | No | Yes |
+| `T&&` *(C++11)* | No | Yes |
 
----
-
-## Lifetime Extension
-
-Binding rvalue to const reference extends its lifetime:
-
-```cpp showLineNumbers 
-std::string getString() { return "temporary"; }
-
-// Destroyed immediately
-getString();  
-
-// Lifetime extended to ref's scope
-const std::string& ref = getString();
-std::cout << ref;  // OK: still valid
-
-// Also works with rvalue references
-std::string&& rref = getString();
-std::cout << rref;  // OK: still valid
-```
-
----
-
-## std::move
-
-Casts lvalue to rvalue (enables move):
-
-```cpp showLineNumbers 
+```cpp title="binding.cpp" showLineNumbers
 #include <utility>
 
-std::vector<int> v1 = {1, 2, 3};
+int main() {
+    int x = 10;
 
-// std::move casts v1 to rvalue
-std::vector<int> v2 = std::move(v1);
+    int& r1 = x;                // lvalue to T&
+    // int& r2 = 42;            // error: T& cannot bind to an rvalue
 
-// v1 is now in valid but unspecified state
-std::cout << v1.size();  // Likely 0, but not guaranteed
+    const int& r3 = x;          // lvalue to const T&
+    const int& r4 = 42;         // rvalue to const T&: a temporary is created
+
+    // int&& r5 = x;            // error: T&& cannot bind to an lvalue
+    int&& r6 = 42;              // rvalue to T&&
+    int&& r7 = std::move(x);    // std::move turns x into an rvalue
+
+    (void)r1; (void)r3; (void)r4; (void)r6; (void)r7;
+}
 ```
 
-:::warning[std::move Doesn't Move!]
-`std::move` only casts to rvalue. Actual moving happens in move constructor/assignment.
-:::
+`const T&` accepting both kinds is why it is the default parameter type for read-only arguments.
+When `r4` or `r6` binds to a temporary, the temporary lives as long as the reference. That rule and
+its exceptions are on [Object Lifetime](../../05-memory-and-object-lifetime/object-lifetime.md#lifetime-extension).
 
----
+## A named rvalue reference is an lvalue
 
-## Function Overloading
+The type of a variable and the category of an expression naming it are separate. A parameter
+declared `int&& x` has type "rvalue reference to `int`", but inside the function the expression `x`
+is an lvalue, because it has a name and can be used again on the next line:
 
-Functions can overload on value category:
+```cpp title="named.cpp" showLineNumbers
+#include <utility>
 
-```cpp showLineNumbers 
-void process(int& x) {
-    std::cout << "Lvalue: " << x << "\n";
-}
+void take(int&&) {}
 
 void process(int&& x) {
-    std::cout << "Rvalue: " << x << "\n";
+    int& lref = x;           // OK: the expression `x` is an lvalue
+    // take(x);              // error: cannot bind int&& to an lvalue
+    take(std::move(x));      // OK: cast back to an rvalue
+    (void)lref;
 }
+
+int main() { process(42); }
+```
+
+This is deliberate. If a named rvalue reference were an rvalue, the first use of it could move from
+the object and every later use would see a moved-from value.
+
+## Overloading on category
+
+Because `T&`/`const T&` and `T&&` accept different categories, a pair of overloads can treat
+"the caller still needs this" and "the caller is done with this" differently. The output below is
+from GCC 15 and Clang 21 with `-std=c++23`:
+
+```cpp title="overload.cpp" showLineNumbers
+#include <iostream>
+#include <utility>
+
+void process(const int& x) { std::cout << "lvalue overload: " << x << '\n'; }
+void process(int&& x)      { std::cout << "rvalue overload: " << x << '\n'; }
 
 int main() {
     int a = 10;
-    
-    process(a);           // Calls lvalue version
-    process(20);          // Calls rvalue version
-    process(a + 5);       // Calls rvalue version
-    process(std::move(a)); // Calls rvalue version
+    process(a);             // a is an lvalue
+    process(20);            // literal: rvalue
+    process(a + 5);         // computed value: rvalue
+    process(std::move(a));  // cast to rvalue
 }
 ```
 
----
-
-## Move Semantics
-
-Rvalue references enable efficient resource transfer:
-
-```cpp showLineNumbers 
-class Buffer {
-    int* data;
-    size_t size;
-public:
-    // Copy constructor (from lvalue)
-    Buffer(const Buffer& other) {
-        size = other.size;
-        data = new int[size];
-        std::copy(other.data, other.data + size, data);
-        std::cout << "Copied\n";
-    }
-    
-    // Move constructor (from rvalue)
-    Buffer(Buffer&& other) noexcept {
-        size = other.size;
-        data = other.data;      // Steal pointer
-        other.data = nullptr;   // Leave other valid
-        other.size = 0;
-        std::cout << "Moved\n";
-    }
-};
-
-Buffer create() { return Buffer(100); }
-
-Buffer b1 = create();  // Move (creates temporary)
-Buffer b2 = b1;        // Copy (b1 is lvalue)
-Buffer b3 = std::move(b1);  // Move (explicit)
+```text
+lvalue overload: 10
+rvalue overload: 20
+rvalue overload: 15
+rvalue overload: 10
 ```
 
----
+This is the mechanism behind move semantics: a class provides a copy constructor taking
+`const T&` and a move constructor taking `T&&`, and the argument's category picks one. Writing those
+constructors is covered on [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md).
 
-## Pre-increment vs Post-increment
+## `std::move` is only a cast
 
-```cpp showLineNumbers 
-int x = 5;
+`std::move(x)` (in `<utility>`) is `static_cast<std::remove_reference_t<T>&&>(x)`. It generates no
+code and moves nothing. It changes the category of the expression to rvalue, so that overload
+resolution picks a `T&&` overload if one exists. The move, if any, happens in the function that
+receives the rvalue:
 
-++x;  // Pre-increment: modifies x, returns lvalue (reference to x)
-x++;  // Post-increment: modifies x, returns rvalue (old value copy)
+```cpp title="move-cast.cpp" showLineNumbers
+#include <iostream>
+#include <string>
+#include <utility>
 
-int& r1 = ++x;  // OK: lvalue
-// int& r2 = x++;  // Error: rvalue
+int main() {
+    std::string a = "hello";
+    std::string&& r = std::move(a);      // no move: r is just a reference to a
+    std::cout << r << '\n';              // prints hello: r and a are the same object
 
-(++x) = 10;  // OK: lvalue can be assigned
-// (x++) = 10;  // Error: rvalue cannot be assigned
-```
-
----
-
-## Practical Examples
-
-### Temporary Objects
-
-```cpp showLineNumbers 
-std::string s1 = "hello";
-std::string s2 = "world";
-
-// Temporary from concatenation
-std::string s3 = s1 + s2;  // s1 + s2 is rvalue
-// (s1 + s2).append("!");  // Can't modify rvalue (pre-C++11)
-
-// In C++11+, temporaries can be used if class allows
-(s1 + s2).size();  // OK: const member function
-```
-
-### Perfect Forwarding
-
-```cpp showLineNumbers 
-template<typename T>
-void wrapper(T&& arg) {
-    // Forward preserving value category
-    actual_function(std::forward<T>(arg));
+    std::string b = std::move(a);        // the move constructor runs here
+    std::cout << b << ' ' << a.size() << '\n';
 }
-
-int x = 10;
-wrapper(x);      // Forwards as lvalue
-wrapper(20);     // Forwards as rvalue
 ```
 
----
-
-## Common Pitfalls
-
-### Using Moved-From Objects
-
-```cpp showLineNumbers 
-std::vector<int> v1 = {1, 2, 3};
-std::vector<int> v2 = std::move(v1);
-
-// v1 is now moved-from
-std::cout << v1.size();  // Undefined! Don't use moved-from objects
-// v1.clear();           // Must reset before using
+```text
+hello
+hello 0
 ```
 
-### Dangling References
+The `0` is what libstdc++ and libc++ happen to leave behind. The standard only says a moved-from
+`std::string` is in a *valid but unspecified* state: calling `size()` on it is fine, relying on the
+value is not.
 
-```cpp showLineNumbers 
-const std::string& getDangling() {
-    return "temporary";  // Returns reference to temporary!
-}
+## Common mistakes
 
-const std::string& ref = getDangling();
-std::cout << ref;  // Undefined: temporary destroyed
-```
+- **Assuming moved-from means unusable.** A moved-from standard library object is valid. You may
+  call any member without preconditions (`size()`, `clear()`, assignment). What you can't do is
+  assume its contents. Assign a new value before reading it again.
+- **`std::move` on a `const` object.** `std::move(c)` with `const std::string c` yields
+  `const std::string&&`. That doesn't bind to `std::string&&`, so the *copy* constructor runs, and
+  neither GCC nor Clang warns about it with `-Wall -Wextra`.
+- **`std::move` on a return value.** `return std::move(local);` turns a return that the compiler
+  could have elided into a forced move. Write `return local;`. GCC and Clang warn with
+  `-Wpessimizing-move`, which both enable with `-Wall`.
+- **Returning a reference to a temporary.** `const std::string& f() { return "x"; }` returns a
+  reference to a temporary that dies at the end of the `return` statement. The caller reads a
+  dangling reference. Return by value.
 
-### Moving const Objects
+## Key points
 
-```cpp showLineNumbers 
-const std::vector<int> cv = {1, 2, 3};
-std::vector<int> v2 = std::move(cv);  // Calls COPY! const prevents move
-```
+- Category belongs to an expression, not to an object or a variable's type.
+- `T&` takes lvalues, `T&&` takes rvalues, `const T&` takes both.
+- Anything with a name is an lvalue, including a variable of type `T&&`.
+- `std::move` is a cast to rvalue; the move happens in whatever receives it.
 
----
+## Related
 
-## Summary
-
-**Lvalue**:
-- Has persistent storage
-- Can take address: `&x`
-- Variables, dereferenced pointers, references
-- Binds to `T&` or `const T&`
-
-**Rvalue**:
-- Temporary value
-- Cannot take address
-- Literals, temporaries, function returns by value
-- Binds to `T&&` or `const T&`
-
-**Key points**:
-```cpp showLineNumbers 
-int x = 42;
-
-x                    // lvalue
-42                   // rvalue
-x + 1                // rvalue
-std::move(x)         // rvalue (cast)
-
-int& lr = x;         // OK
-const int& cr = 42;  // OK (extends lifetime)
-int&& rr = 42;       // OK
-int&& rr2 = std::move(x);  // OK
-```
-
-Understanding lvalues and rvalues is essential for move semantics, perfect forwarding, and writing efficient modern C++.
+- [glvalue, prvalue, xvalue](./glvalue-prvalue-xvalue.md): the precise five-category model and
+  temporary materialization.
+- [Reference Collapsing](./reference-collapsing.md): how `T&&` in a template accepts both
+  categories and how `std::forward` restores them.
+- [decltype](../type-deduction/decltype.md): asking the compiler for an expression's category.

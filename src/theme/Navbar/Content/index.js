@@ -78,13 +78,13 @@ export default function NavbarContent() {
           styles.utilityRail,
         )}
       >
-        <NavbarItems items={utilityItems} />
-        <NavbarColorModeToggle className={styles.colorModeToggle} />
         {!searchBarItem && (
           <NavbarSearch>
             <SearchBar />
           </NavbarSearch>
         )}
+        <NavbarItems items={utilityItems} />
+        <NavbarColorModeToggle className={styles.colorModeToggle} />
       </div>
     </div>
   );

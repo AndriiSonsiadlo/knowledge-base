@@ -88,6 +88,18 @@ export default function ResponsiveSearch({
     });
   }, [history, closeModal]);
 
+  // Ctrl/Cmd+K opens search, as the trigger's shortcut hint promises.
+  useEffect(() => {
+    const onShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setIsOpen(true);
+      }
+    };
+    document.addEventListener("keydown", onShortcut);
+    return () => document.removeEventListener("keydown", onShortcut);
+  }, []);
+
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") {
       return;
@@ -204,7 +216,9 @@ export default function ResponsiveSearch({
           aria-haspopup="dialog"
           onClick={() => setIsOpen(true)}
         >
-          <Search size={18} />
+          <Search size={16} aria-hidden="true" />
+          <span className="wb-search-label">Search notes</span>
+          <kbd className="wb-search-kbd">Ctrl K</kbd>
         </button>
       </div>
       {modal}

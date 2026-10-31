@@ -1,408 +1,186 @@
 ---
 id: name-mangling
-title: Name Mangling in C++
+title: Name Mangling
 sidebar_label: Name Mangling
 sidebar_position: 8
 tags: [c++, name-mangling, abi, linking, symbols]
 ---
 
-# Name Mangling in C++
+# Name Mangling
 
-Name mangling (name decoration) encodes C++ function signatures into unique symbol names for the linker. This enables function overloading and namespaces while maintaining linkage compatibility.
+The linker matches symbols by plain string. C++ allows many entities with the same name: overloads
+(`print(int)` and `print(double)`), the same name in different namespaces and classes, template
+instantiations. **Name mangling** is how the compiler gives each of them a unique linker name, by
+encoding the scope and the parameter types into the symbol. It is invisible until a link fails,
+and then the mangled name in the message is usually the clue.
 
-:::info[Why Mangle?]
-C++ supports function overloading (multiple functions with same name), but linkers only understand unique symbol names. Mangling creates unique names by encoding type information.
-:::
+**Prerequisites:** [Object Files and Symbols](./object-files-and-symbols.md).
 
-## The Problem
-
-```cpp showLineNumbers 
-// C++ allows this
-void print(int x);
-void print(double x);
-void print(const char* x);
-
-// But linker needs unique names for each!
-// Solution: Mangle names to include parameter types
-```
-
-Without mangling, the linker would see three symbols all called `print` and report duplicate definitions.
-
----
-
-## Mangled vs Unmangled
-
-```cpp showLineNumbers 
-void calculate(int a, double b);
-```
-
-**Unmangled (source code)**: `calculate`  
-**Mangled (symbol table)**: `_Z9calculateid`
-
-The mangled name encodes:
-- `_Z` = C++ mangling prefix
-- `9` = name length (9 characters)
-- `calculate` = function name
-- `i` = int parameter
-- `d` = double parameter
-
----
-
-## Viewing Mangled Names
+## Mangled names in practice
 
 ```bash
-# Compile
-g++ -c example.cpp -o example.o
-
-# View mangled symbols
-nm example.o
-# Output:
-# 0000000000000000 T _Z9calculateid
-
-# Demangle symbols
-nm -C example.o
-# Output:
-# 0000000000000000 T calculate(int, double)
-
-# Demangle specific name
-c++filt _Z9calculateid
-# Output: calculate(int, double)
+nm main.o            # raw:        U _Z6squarei
+nm -C main.o         # demangled:  U square(int)
+c++filt _Z4funcPKc   # one name:   func(char const*)
 ```
 
-The `-C` flag or `c++filt` tool converts mangled names back to readable form.
+GCC and Clang on Linux, macOS and most other non-Windows platforms use the scheme from the
+[Itanium C++ ABI](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#mangling). Every name below was
+produced by compiling the declarations with GCC 15 and reading `nm`.
 
----
+## Reading an Itanium name
 
-## Mangling Rules
+<Diagram title="_ZN4math6Vector9normalizeEv" caption="Nested name between N and E, each component prefixed by its length; then the parameter types." accent="violet">
+  <DiagramRow>
+    <DiagramNode title="_Z">C++ symbol prefix</DiagramNode>
+    <DiagramNode title="N … E">Nested (qualified) name</DiagramNode>
+    <DiagramNode title="4math 6Vector 9normalize" accent>Length + identifier, outermost first</DiagramNode>
+    <DiagramNode title="v">Parameter list: `void` = no parameters</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-Different compilers use different schemes, but most follow Itanium C++ ABI:
+The function's **return type is not encoded** for ordinary functions, only the parameters. That is
+why two functions that differ only in return type cannot be overloaded: they would get the same
+symbol.
 
-### Basic Types
+### Parameter types
 
-```cpp showLineNumbers 
-void func(int);           // _Z4funci
-void func(char);          // _Z4funcc
-void func(bool);          // _Z4funcb
-void func(float);         // _Z4funcf
-void func(double);        // _Z4funcd
-void func(void*);         // _Z4funcPv
-```
+| Declaration | Symbol | Codes |
+|---|---|---|
+| `void func(int)` | `_Z4funci` | `i` int |
+| `void func(char)` | `_Z4funcc` | `c` char |
+| `void func(bool)` | `_Z4funcb` | `b` bool |
+| `void func(float)` | `_Z4funcf` | `f` float |
+| `void func(double)` | `_Z4funcd` | `d` double |
+| `void process(long)` | `_Z7processl` | `l` long |
+| `void func(void*)` | `_Z4funcPv` | `P` pointer to, `v` void |
+| `void func(int*)` | `_Z4funcPi` | |
+| `void func(int**)` | `_Z4funcPPi` | |
+| `void func(const int*)` | `_Z4funcPKi` | `K` const |
+| `void func(int&)` | `_Z4funcRi` | `R` lvalue reference (`O` is rvalue reference) |
+| `void calculate(int, double)` | `_Z9calculateid` | parameters in order |
 
-**Type codes**:
-- `i` = int
-- `c` = char
-- `b` = bool
-- `f` = float
-- `d` = double
-- `v` = void
-- `P` = pointer
-- `R` = reference
+### Members, constructors, templates
 
-### Pointers and References
+| Declaration | Symbol | Notes |
+|---|---|---|
+| `void Widget::setValue(int)` | `_ZN6Widget8setValueEi` | |
+| `int Widget::getValue() const` | `_ZNK6Widget8getValueEv` | `K` after `N`: const member function |
+| `static void Widget::reset()` | `_ZN6Widget5resetEv` | Same form as a non-static member: `static` is not encoded |
+| `Widget::Widget()` | `_ZN6WidgetC1Ev`, `_ZN6WidgetC2Ev` | `C1` complete-object, `C2` base-object constructor; both are emitted |
+| `Widget::~Widget()` | `_ZN6WidgetD1Ev`, `_ZN6WidgetD2Ev` | `D0` (deleting) also appears for virtual destructors |
+| `template void sort<int>(int*, int)` | `_Z4sortIiEvPT_i` | `IiE` template arguments; for templates the return type `v` **is** encoded; `T_` refers back to the first template parameter |
+| `extern "C" void c_style_function(int)` | `c_style_function` | No mangling at all |
 
-```cpp showLineNumbers 
-void func(int*);          // _Z4funcPi   (Pointer to int)
-void func(int&);          // _Z4funcRi   (Reference to int)
-void func(int**);         // _Z4funcPPi  (Pointer to pointer to int)
-void func(const int*);    // _Z4funcPKi  (Pointer to const int, K=const)
-```
+### MSVC is different
 
-### Classes and Namespaces
+MSVC uses its own scheme: `void func(int, double)` becomes `?func@@YAXHN@Z`. Objects from MSVC and
+from GCC/MinGW therefore cannot be linked together even for the same source, which is one reason
+C++ libraries are distributed per compiler. Mangling is one part of the wider
+[ABI](../12-low-level-and-platform/01-abi.md), along with object layout, vtables and calling
+conventions.
 
-```cpp showLineNumbers 
-namespace math {
-    class Vector {
-    public:
-        void normalize();
-    };
-}
+## `extern "C"`: switching mangling off
 
-// Mangled: _ZN4math6Vector9normalizeEv
-// Breakdown:
-// _Z = prefix
-// N...E = nested name
-// 4math = namespace "math" (4 chars)
-// 6Vector = class "Vector" (6 chars)
-// 9normalize = method "normalize" (9 chars)
-// v = void return type
-```
+C has no overloading, so C compilers emit the plain name. To call C from C++, or to make a C++
+function callable from C, `dlsym` or another language, declare it `extern "C"`:
 
-### Function Overloading
-
-```cpp showLineNumbers 
-void print(int x);           // _Z5printi
-void print(double x);        // _Z5printd
-void print(int x, int y);    // _Z5printii
-```
-
-Each overload gets a unique mangled name encoding its parameter types.
-
-### Templates
-
-```cpp showLineNumbers 
-template<typename T>
-void sort(T* data, int size);
-
-sort<int>(arr, 10);          // _Z4sortIiEvPT_i
-sort<double>(arr2, 10);      // _Z4sortIdEvPT_i
-
-// IiE = template parameter int
-// IdE = template parameter double
-```
-
----
-
-## C Linkage (No Mangling)
-
-C doesn't support overloading, so C functions don't get mangled:
-
-```c
-// C code
-void c_function(int x);  // Symbol: c_function (unmangled)
-```
-
-### extern "C"
-
-Prevents name mangling for C++ code, enabling C/C++ interoperability:
-
-```cpp showLineNumbers 
-// C++ code
-extern "C" void c_style_function(int x);
-// Symbol: c_style_function (unmangled, C-compatible)
-
-extern "C" {
-    void func1(int x);
-    void func2(double y);
-    // Both unmangled
-}
-```
-
-**Common use case**: Creating C-compatible libraries from C++:
-
-```cpp showLineNumbers 
-// library.h
+```cpp title="api.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void api_function(int x);
+void api_function(int x);    // symbol: api_function
 
 #ifdef __cplusplus
 }
 #endif
 ```
 
-This header works in both C and C++ code.
+`__cplusplus` is defined only by C++ compilers, so the same header works from both languages. An
+`extern "C"` function cannot be overloaded, because two of them would have the same symbol. The
+full interop rules are on [C Interoperability](../12-low-level-and-platform/07-interop-c.md).
 
----
+## Signature mismatches
 
-## Platform Differences
+The most common mangling-related bug: the header and the definition disagree on a parameter type.
+Both files compile; the link fails, and the error names the signature the *caller* expected.
 
-### GCC/Clang (Itanium ABI)
-
-```cpp showLineNumbers 
-void func(int, double);
-// _Z4funcid
-```
-
-### MSVC (Windows)
-
-```cpp showLineNumbers 
-void func(int, double);
-// ?func@@YAXHN@Z
-```
-
-MSVC uses a different mangling scheme with `?` prefix and `@@` separators.
-
-**Consequence**: Object files compiled with GCC can't link with MSVC-compiled code due to different mangling.
-
----
-
-## ABI Compatibility
-
-Name mangling is part of the ABI (Application Binary Interface). Breaking changes cause link errors:
-
-```cpp showLineNumbers 
-// Version 1
-void process(int x);         // _Z7processi
-
-// Version 2 (changed signature)
-void process(long x);        // _Z7processl  (different mangled name!)
-```
-
-Programs compiled against v1 looking for `_Z7processi` won't find it in v2. This breaks binary compatibility.
-
----
-
-## Practical Examples
-
-### Linking Errors
-
-```cpp showLineNumbers 
-// header.h
+```cpp title="fragment: three files"
+// calc.h
 void calculate(int a, int b);
 
-// implementation.cpp
-void calculate(int a, double b) {  // Wrong signature!
-    // ...
-}
+// calc.cpp: the definition takes a double by mistake
+void calculate(int a, double b) { /* ... */ }    // defines _Z9calculateid
 
 // main.cpp
-#include "header.h"
-calculate(5, 10);  // Undefined reference to _Z9calculateii
-                   // Implementation provides _Z9calculateid
+#include "calc.h"
+int main() { calculate(5, 10); }                 // needs   _Z9calculateii
 ```
 
-The mangled names don't match because parameter types differ.
+```text
+undefined reference to `calculate(int, int)'
+```
 
-### Finding Functions
+Diagnose it by comparing what is needed against what is defined:
 
 ```bash
-# Find all functions in library
-nm -C libmath.so | grep " T "
-
-# Find specific overload
-nm libmath.so | grep calculate
-# _Z9calculateii  (int, int)
-# _Z9calculateid  (int, double)
-# _Z9calculatedd  (double, double)
-
-# Search for class methods
-nm -C libwidget.so | grep "Widget::"
+nm -C main.o | grep calculate     #   U calculate(int, int)
+nm -C calc.o | grep calculate     # T   calculate(int, double)
 ```
 
----
+The same mismatch happens without a typo when a library is rebuilt with a different signature
+(`int` changed to `long`), or with a different standard library ABI: GCC's `std::string` mangles
+as `std::__cxx11::basic_string<…>` since GCC 5, so objects built with
+`-D_GLIBCXX_USE_CXX11_ABI=0` do not link with ones built without it.
 
-## Member Functions
+## Demangling at run time
 
-```cpp showLineNumbers 
-class Widget {
-    int value;
-public:
-    void setValue(int v);
-    int getValue() const;
-    static void reset();
-};
+`typeid(T).name()` returns the mangled type name on GCC and Clang. The ABI library provides
+`abi::__cxa_demangle` to decode it:
 
-// Mangled names:
-// _ZN6Widget8setValueEi       - setValue
-// _ZNK6Widget8getValueEv      - getValue (K = const)
-// _ZN6Widget5resetEv          - reset (static, no 'this')
-```
-
-Member functions encode:
-- Class name
-- Function name
-- Parameter types
-- `const` qualification
-- `static` vs non-static
-
----
-
-## Constructor and Destructor
-
-```cpp showLineNumbers 
-class Widget {
-public:
-    Widget();                    // Constructor
-    ~Widget();                   // Destructor
-};
-
-// Mangled:
-// _ZN6WidgetC1Ev              - Constructor (C1)
-// _ZN6WidgetD1Ev              - Destructor (D1)
-```
-
-Special mangling for constructors (C1, C2) and destructors (D1, D2) to handle different variants (complete object, base object).
-
----
-
-## Troubleshooting
-
-### Undefined Reference
-
-```bash
-# Error:
-undefined reference to `_Z4funcPKc'
-
-# Demangle to see what's missing
-c++filt _Z4funcPKc
-# Output: func(char const*)
-
-# Solution: Implement func(const char*) or link correct library
-```
-
-### Symbol Not Found
-
-```bash
-# Check if symbol exists
-nm -C library.a | grep "function_name"
-
-# If found with different signature:
-# Signature mismatch - recompile or fix declaration
-```
-
----
-
-## Demangling in Code
-
-```cpp showLineNumbers 
+```cpp title="demangle.cpp"
 #include <cxxabi.h>
+#include <cstdlib>
+#include <iostream>
 #include <memory>
+#include <string>
+#include <typeinfo>
+#include <vector>
 
 std::string demangle(const char* name) {
-    int status;
-    std::unique_ptr<char, void(*)(void*)> result(
-        abi::__cxa_demangle(name, nullptr, nullptr, &status),
-        std::free
-    );
-    return (status == 0) ? result.get() : name;
+    int status = 0;
+    std::unique_ptr<char, void (*)(void*)> result(
+        abi::__cxa_demangle(name, nullptr, nullptr, &status), std::free);
+    return status == 0 ? result.get() : name;
 }
 
-// Usage
-typeid(std::vector<int>).name();  // Returns mangled name
-demangle(typeid(std::vector<int>).name());  // Human-readable
+int main() {
+    const char* raw = typeid(std::vector<int>).name();
+    std::cout << raw << '\n' << demangle(raw) << '\n';
+}
 ```
 
----
-
-## Best Practices
-
-:::success[DO]
-- Use `extern "C"` for C compatibility
-- Use `nm -C` to debug link errors
-- Maintain ABI compatibility in library updates
-- Document exported symbols
-  :::
-
-:::danger[DON'T]
-- Rely on mangled names directly in code
-- Change function signatures in stable ABIs
-- Mix compilers with different mangling schemes
-- Assume mangling scheme across platforms
-  :::
-
----
-
-## Summary
-
-Name mangling:
-- **Encodes** function signatures into unique symbol names
-- **Enables** function overloading and namespaces
-- **Differs** between compilers (GCC vs MSVC)
-- **Can be disabled** with `extern "C"` for C compatibility
-
-**Key tools**:
-```bash
-nm -C file.o        # View demangled symbols
-c++filt name        # Demangle specific name
-objdump -t file.o   # Symbol table
+```text
+St6vectorIiSaIiEE
+std::vector<int, std::allocator<int> >
 ```
 
-**Encoding scheme** (Itanium ABI):
-```
-_Z<length><name><param_types>
-_ZN<namespace><class><method>E<params>
-```
+`<cxxabi.h>` is a GCC/Clang header, not standard C++; MSVC's `name()` already returns a readable
+string.
 
-Name mangling is transparent most of the time, but understanding it helps debug linking issues and maintain ABI compatibility across library versions.
+## Pitfalls
+
+- **Declaring a C library's functions without `extern "C"`.** The C++ caller looks for `_Z…`, the
+  library has the plain name: `undefined reference`. Well-behaved C headers include the
+  `__cplusplus` guard; for ones that don't, wrap the `#include` in `extern "C" { }`.
+- **Overloading on return type, or on `static`.** Neither is part of the symbol; the compiler
+  rejects it before mangling would collide.
+- **Mixing compilers or standard-library ABIs** in one link. The symbols simply don't match.
+
+## Key points
+
+- Mangling encodes scope and parameter types (not the return type) into a unique linker name.
+- `nm -C` and `c++filt` decode it; compare needed (`U`) against defined (`T`) to find mismatches.
+- `extern "C"` disables mangling for C interop and `dlsym`, at the cost of overloading.
+- Itanium (GCC/Clang) and MSVC schemes differ, so their objects don't link together.

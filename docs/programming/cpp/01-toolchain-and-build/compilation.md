@@ -1,453 +1,264 @@
 ---
 id: compilation
-title: Compilation Phase
+title: Compilation
 sidebar_label: Compilation
 sidebar_position: 3
 tags: [c++, compiler, optimization, assembly]
 ---
 
-# Compilation Phase
+# Compilation
 
-The compilation phase translates preprocessed C++ code into assembly language. This is where syntax checking, semantic analysis, optimization, and code generation happen.
+Compilation proper is stage 2 of the [pipeline](./compilation-pipeline.md): it takes one
+preprocessed translation unit and turns it into assembly for the target CPU. This is the only stage
+that understands C++. It is where syntax and type errors come from, where templates are
+instantiated, and where the optimiser decides what your code actually does at run time. It is also,
+by a wide margin, the stage where build time goes.
 
-:::info[Brain of the Build]
-Compilation is the "smart" phase - it understands C++, checks types, instantiates templates, and performs optimizations.
-:::
+**Prerequisites:** [The Compilation Pipeline](./compilation-pipeline.md),
+[Preprocessing](./preprocessing.md).
 
-## What the Compiler Does
+## Inside the compiler
 
-```mermaid
-graph LR
-    A[Preprocessed C++] --> B[Parser]
-    B --> C[AST]
-    C --> D[Semantic Analysis]
-    D --> E[Optimizer]
-    E --> F[Code Generator]
-    F --> G[Assembly]
-```
+<Diagram title="Front end, middle end, back end" caption="GCC and Clang are both structured this way; only the IR differs (GIMPLE/RTL vs LLVM IR)." accent="green">
+  <DiagramRow>
+    <DiagramNode icon="file-text" title="Front end">Tokens → syntax tree. Name lookup, overload resolution, templates, type checks. All C++ errors come from here.</DiagramNode>
+    <DiagramArrow direction="right" label="IR" />
+    <DiagramNode icon="gauge" title="Optimiser" accent>Language-independent passes on an intermediate representation: inlining, constant folding, loop transforms.</DiagramNode>
+    <DiagramArrow direction="right" label="IR" />
+    <DiagramNode icon="cpu" title="Back end">Instruction selection, register allocation, scheduling for `-march`. Writes `.s`.</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-**Input**: Preprocessed `.i` file (pure C++, no directives)  
-**Output**: Assembly `.s` file (human-readable CPU instructions)
+You can look at each layer with Clang. For `int add(int a, int b) { return a + b * 2; }`:
 
----
-
-## Compilation Stages
-
-### 1. Lexical Analysis (Tokenization)
-
-Breaks source code into tokens (keywords, identifiers, operators):
-
-```cpp showLineNumbers 
-int x = 42 + y;
-
-// Tokenized as:
-[int] [x] [=] [42] [+] [y] [;]
-```
-
-### 2. Syntax Analysis (Parsing)
-
-Builds Abstract Syntax Tree (AST) ensuring code follows C++ grammar:
-
-```cpp showLineNumbers 
-x = a + b * c;
-
-// AST:
-    =
-   / \
-  x   +
-     / \
-    a   *
-       / \
-      b   c
-```
-
-The tree respects operator precedence (`*` before `+`). Syntax errors are caught here.
-
-### 3. Semantic Analysis
-
-Checks types, scopes, and semantics:
-
-```cpp showLineNumbers 
-int x = "hello";  // Type error: can't assign string to int
-foo();            // Error: 'foo' not declared
-int y = x + z;    // OK if z is int/compatible type
-```
-
-**Checks performed**:
-- Type compatibility
-- Function signatures
-- Variable declarations
-- Access control (private/public)
-- Template instantiation
-
-### 4. Intermediate Representation (IR)
-
-Converts AST to platform-independent intermediate form. Optimizations work on IR:
-
-```cpp showLineNumbers 
-int sum(int a, int b) {
-    int temp = a + b;
-    return temp;
-}
-
-// IR (LLVM-style, simplified):
-%temp = add i32 %a, %b
-ret i32 %temp
-```
-
-### 5. Optimization
-
-Transforms code for better performance without changing behavior:
-
-```cpp showLineNumbers 
-// Original
-int square(int x) {
-    return x * x;
-}
-int result = square(5);
-
-// After constant folding & inlining
-int result = 25;  // Computed at compile-time!
-```
-
-### 6. Code Generation
-
-Translates optimized IR to target assembly:
-
-```cpp showLineNumbers 
-int add(int a, int b) {
-    return a + b;
-}
-
-// Generated x86-64 assembly:
-add:
-    lea    eax, [rdi + rsi]  # eax = rdi + rsi (a + b)
-    ret
-```
-
----
-
-## Optimization Levels
+<Tabs>
+  <TabItem value="ast" label="Syntax tree">
 
 ```bash
-g++ -O0 main.cpp  # No optimization (default, fastest compile)
-g++ -O1 main.cpp  # Basic optimization
-g++ -O2 main.cpp  # Recommended for production
-g++ -O3 main.cpp  # Aggressive optimization
-g++ -Os main.cpp  # Optimize for size
-g++ -Og main.cpp  # Optimize for debugging
+clang++ -std=c++23 -Xclang -ast-dump -fsyntax-only add.cpp
 ```
 
-### O0 vs O3 Comparison
+```text
+`-ReturnStmt <col:22, col:33>
+  `-BinaryOperator 'int' '+'
+    |-ImplicitCastExpr 'int' <LValueToRValue>
+    | `-DeclRefExpr 'int' lvalue ParmVar 'a' 'int'
+    `-BinaryOperator 'int' '*'
+      |-ImplicitCastExpr 'int' <LValueToRValue>
+      | `-DeclRefExpr 'int' lvalue ParmVar 'b' 'int'
+      `-IntegerLiteral 'int' 2
+```
 
-```cpp showLineNumbers 
-int factorial(int n) {
-    if (n <= 1) return 1;
-    return n * factorial(n - 1);
+Precedence is already resolved: `*` sits below `+`. (Node addresses removed.)
+
+  </TabItem>
+  <TabItem value="ir" label="LLVM IR (-O1)">
+
+```bash
+clang++ -O1 -S -emit-llvm add.cpp -o -
+```
+
+```text
+define dso_local noundef i32 @_Z3addii(i32 noundef %0, i32 noundef %1) local_unnamed_addr #0 {
+  %3 = shl nsw i32 %1, 1
+  %4 = add nsw i32 %3, %0
+  ret i32 %4
 }
 ```
 
-**-O0 (no optimization)**:
-```asm
-factorial:
-    push   rbp
-    mov    rbp, rsp
-    sub    rsp, 16
-    mov    DWORD PTR [rbp-4], edi
-    cmp    DWORD PTR [rbp-4], 1
-    jg     .L2
-    mov    eax, 1
-    jmp    .L3
+The optimiser already replaced `* 2` by a shift. `nsw` ("no signed wrap") records that signed
+overflow is undefined, which later passes are allowed to rely on.
+
+  </TabItem>
+</Tabs>
+
+Everything the front end does is language semantics, covered in the language sections: overload
+resolution in [Overloading](../04-functions-and-call-mechanics/overloading.md), templates in
+[Function Templates](../08-templates-and-metaprogramming/function-templates.md). What matters for
+the toolchain is the consequence: **templates are instantiated in every translation unit that uses
+them**, so their definitions must be visible there (see
+[Translation Units](./translation-units.md#templates-and-inline-functions)).
+
+## Optimisation levels
+
+| Flag | What it does (per [GCC: Optimize Options](https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html)) | Use for |
+|---|---|---|
+| `-O0` | Default. No optimisation; every variable lives in memory, so the debugger sees everything | Debugging |
+| `-Og` | Optimisations that don't interfere with debugging | Debug builds you still want to run at a reasonable speed |
+| `-O1` | Basic optimisations without large compile-time cost | Rarely chosen directly |
+| `-O2` | Nearly all optimisations that don't trade size for speed | The usual release level |
+| `-O3` | `-O2` plus more aggressive inlining and vectorisation; can grow code | Hot numeric code; measure it |
+| `-Os` / `-Oz` | Optimise for size | Embedded, caches |
+
+`-O3` is not automatically faster than `-O2`. Measure your own program before choosing it.
+
+### The same loop at `-O0` and `-O2`
+
+```cpp title="sum_to.cpp"
+int sum_to(int n) {
+    int total = 0;
+    for (int i = 1; i <= n; ++i) total += i;
+    return total;
+}
+```
+
+<Tabs groupId="opt">
+  <TabItem value="o0" label="GCC 15 -O0">
+
+```nasm
+_Z6sum_toi:
+	push	rbp
+	mov	rbp, rsp
+	mov	DWORD PTR -20[rbp], edi      # n spilled to the stack
+	mov	DWORD PTR -8[rbp], 0         # total = 0
+	mov	DWORD PTR -4[rbp], 1         # i = 1
+	jmp	.L2
+.L3:
+	mov	eax, DWORD PTR -4[rbp]
+	add	DWORD PTR -8[rbp], eax       # total += i
+	add	DWORD PTR -4[rbp], 1         # ++i
 .L2:
-    mov    eax, DWORD PTR [rbp-4]
-    sub    eax, 1
-    mov    edi, eax
-    call   factorial
-    imul   eax, DWORD PTR [rbp-4]
-.L3:
-    leave
-    ret
+	mov	eax, DWORD PTR -4[rbp]
+	cmp	eax, DWORD PTR -20[rbp]
+	jle	.L3
+	mov	eax, DWORD PTR -8[rbp]
+	pop	rbp
+	ret
 ```
 
-**-O3 (aggressive optimization)**:
-```asm
-factorial:
-    cmp    edi, 1
-    jle    .L4
-    push   rbx
-    mov    ebx, edi
+  </TabItem>
+  <TabItem value="o2" label="GCC 15 -O2">
+
+```nasm
+_Z6sum_toi:
+	test	edi, edi
+	jle	.L4
+	lea	ecx, 1[rdi]
+	xor	edx, edx
+	and	edi, 1
+	mov	eax, 1
+	je	.L3
+	mov	eax, 2
+	mov	edx, 1
+	cmp	eax, ecx
+	je	.L1
 .L3:
-    sub    edi, 1
-    call   factorial
-    imul   ebx, eax
-    mov    eax, ebx
-    pop    rbx
-    ret
+	lea	edx, 1[rdx+rax*2]            # two iterations per pass
+	add	eax, 2
+	cmp	eax, ecx
+	jne	.L3
+.L1:
+	mov	eax, edx
+	ret
 .L4:
-    mov    eax, 1
-    ret
+	xor	edx, edx
+	mov	eax, edx
+	ret
 ```
 
-The `-O3` version is shorter, faster, and may even unroll loops or use tail recursion optimization.
+  </TabItem>
+  <TabItem value="clang" label="Clang 21 -O2">
 
----
-
-## Common Optimizations
-
-### 1. Constant Folding
-
-```cpp showLineNumbers 
-int x = 3 + 4 * 5;  // Computed at compile-time
-// Becomes: int x = 23;
+```nasm
+_Z6sum_toi:
+	test	edi, edi
+	jle	.LBB0_1
+	lea	eax, [rdi - 1]
+	lea	ecx, [rdi - 2]
+	imul	rcx, rax
+	shr	rcx
+	lea	eax, [rcx + 2*rdi]
+	dec	eax
+	ret
+.LBB0_1:
+	xor	eax, eax
+	ret
 ```
 
-### 2. Dead Code Elimination
+  </TabItem>
+</Tabs>
 
-```cpp showLineNumbers 
-int compute() {
-    int unused = 42;  // Removed - never used
-    return 10;
-    // Everything after return is removed
-}
-```
+All three were produced with `-S -masm=intel -fno-asynchronous-unwind-tables` (GCC also
+`-fcf-protection=none`), with directives removed. At `-O0` every access goes through the stack. At
+`-O2`, GCC keeps everything in registers and unrolls by two; Clang recognises the arithmetic series
+and computes it in closed form with no loop at all. Two compilers, same source, same flag, different
+code: claims like "the compiler turns this into a formula" are compiler-specific and need checking.
+[Compiler Explorer](https://godbolt.org) shows the output of many compilers side by side.
 
-### 3. Function Inlining
+Optimisations you will see in output like this: **inlining** (copying a callee's body into the
+caller, which enables everything else), **constant folding** (`3 + 4 * 5` becomes `23`), **dead code
+elimination**, **strength reduction** (`x * 2` to a shift or `lea`), **loop unrolling**, and
+**vectorisation** (SIMD instructions at `-O2`/`-O3`). The optimiser may assume undefined behaviour
+never happens, which is why code with UB can change meaning between `-O0` and `-O2`; see
+[Undefined Behavior](../10-error-handling-and-safety/06-undefined-behavior.md).
 
-```cpp showLineNumbers 
-inline int square(int x) { return x * x; }
+## Warnings
 
-int result = square(5);
-// Becomes: int result = 5 * 5;  (no function call overhead)
-```
-
-The compiler replaces function calls with the function body when beneficial.
-
-### 4. Loop Unrolling
-
-```cpp showLineNumbers 
-for (int i = 0; i < 4; i++) {
-    sum += arr[i];
-}
-
-// Unrolled:
-sum += arr[0];
-sum += arr[1];
-sum += arr[2];
-sum += arr[3];
-// Eliminates loop overhead
-```
-
-### 5. Strength Reduction
-
-```cpp showLineNumbers 
-int result = x * 8;
-// Optimized to: int result = x << 3;  (bit shift is faster)
-
-for (int i = 0; i < n; i++) {
-    y = i * 4;  // In loop
-}
-// Optimized to:
-for (int i = 0, y = 0; i < n; i++, y += 4) {
-    // Use y directly (addition instead of multiplication)
-}
-```
-
----
-
-## Template Instantiation
-
-The compiler generates code for each template specialization used:
-
-```cpp showLineNumbers 
-template<typename T>
-T max(T a, T b) {
-    return a > b ? a : b;
-}
-
-int main() {
-    max(5, 10);           // Instantiates max<int>
-    max(3.14, 2.71);      // Instantiates max<double>
-    max("ab", "cd");      // Instantiates max<const char*>
-}
-```
-
-The compiler creates **three separate functions** in the assembly output. This is why template code must be in headers - the compiler needs the definition to instantiate.
-
----
-
-## Viewing Compiler Output
+Warnings are the front end telling you that code is valid but probably wrong. Turn them on for every
+build ([GCC: Warning Options](https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html)):
 
 ```bash
-# Generate assembly
-g++ -S main.cpp -o main.s
-
-# Generate assembly with mixed source
-g++ -S -fverbose-asm main.cpp -o main.s
-
-# Generate LLVM IR (Clang)
-clang++ -S -emit-llvm main.cpp -o main.ll
-
-# Show optimization remarks
-g++ -O3 -fopt-info main.cpp
-
-# Compiler Explorer (godbolt.org)
-# Visual side-by-side source and assembly
+g++ -std=c++23 -Wall -Wextra -Wpedantic -Wconversion -Wshadow main.cpp
 ```
 
----
+| Flag | Catches (examples) |
+|---|---|
+| `-Wall` | Unused variables, `if (x = 5)`, missing `return`, misleading indentation. Despite the name, not "all" |
+| `-Wextra` | Unused parameters, signed/unsigned comparisons in C++ |
+| `-Wpedantic` | Non-standard extensions (VLAs, GNU syntax) |
+| `-Wconversion` | Implicit narrowing: `int` → `short`, `double` → `int` |
+| `-Wshadow` | A local hiding another variable of the same name |
+| `-Werror` | Turn warnings into errors (common in CI; risky in released build scripts, since a new compiler version adds warnings) |
 
-## Compiler Warnings
+Example from GCC 15 with `-Wall`:
 
-Enable warnings to catch potential bugs:
+```text
+w.cpp:3:11: warning: comparison of integer expressions of different signedness: ‘unsigned int’ and ‘int’ [-Wsign-compare]
+```
+
+The bracket names the flag, so you can look it up or disable that one warning locally.
+
+## Inspecting compiler output
 
 ```bash
-g++ -Wall -Wextra -Wpedantic main.cpp
-
-# Individual warnings
--Wunused-variable      # Unused variables
--Wunused-parameter     # Unused function parameters
--Wconversion           # Implicit conversions
--Wsign-compare         # Signed/unsigned comparison
--Wformat              # printf format errors
+g++ -O2 -S -masm=intel main.cpp -o main.s       # assembly
+g++ -O2 -S -fverbose-asm main.cpp -o main.s     # assembly annotated with variable names
+g++ -O2 -save-temps -c main.cpp                 # keep .ii, .s and .o
+clang++ -O2 -S -emit-llvm main.cpp -o main.ll   # LLVM IR
+g++ -O2 -fopt-info-vec-missed main.cpp          # report loops that were NOT vectorised
+g++ -ftime-report -c main.cpp                   # where compile time went
 ```
 
-```cpp showLineNumbers 
-// Examples caught by warnings
-int x;                    // -Wuninitialized
-void foo(int unused) {}   // -Wunused-parameter
-if (x = 5) {}            // -Wparentheses (assignment in condition)
-unsigned u = -1;          // -Wsign-conversion
-```
+## Reducing compile time
 
-**Treat warnings as errors**:
-```bash
-g++ -Wall -Wextra -Werror main.cpp  # Fail on warnings
-```
+The compiler re-parses every included header in every TU, so most compile-time fixes reduce how
+much text each TU contains:
 
----
+- **Include less.** Forward-declare types you only use by pointer or reference, and include what
+  you use: [Headers and Includes](./headers-and-includes.md#forward-declarations).
+- **Precompiled headers.** Parse a stable set of headers once and reuse the result
+  ([details](./headers-and-includes.md#precompiled-headers)).
+- **Explicit instantiation.** `extern template class Box<int>;` in a header stops every TU from
+  instantiating `Box<int>`; one `.cpp` provides `template class Box<int>;`.
+- **Modules** *(C++20)*: compile an interface once and import it: [Modules](./modules.md).
+- **Parallel and incremental builds**, which the build system provides:
+  [Build Systems](./build-systems-cmake.md).
 
-## Compilation Time Optimization
+## Pitfalls
 
-### 1. Precompiled Headers
+- **Benchmarking a `-O0` build.** It measures memory traffic the release build will not have.
+- **`-march=native` in shipped binaries.** It targets the build machine's CPU. The binary may crash
+  with an illegal instruction on an older CPU. Use it only for code that runs where it is built.
+- **Believing `inline` controls inlining.** At `-O2` the compiler inlines by its own cost model.
+  The keyword's real meaning is about the One Definition Rule
+  ([Inline Functions](../04-functions-and-call-mechanics/inline-functions.md)).
+- **Debugging optimised code without `-g`.** `-O2 -g` is valid and common; variables may show as
+  `<optimized out>`, but stack traces and line numbers work.
 
-```cpp showLineNumbers 
-// pch.h - stable headers
-#include <iostream>
-#include <vector>
-#include <map>
+## Key points
 
-// Precompile once
-g++ -x c++-header pch.h -o pch.h.gch
-
-// Use in compilation (faster)
-g++ -include pch.h main.cpp
-```
-
-### 2. Forward Declarations
-
-```cpp showLineNumbers 
-// Slow - includes entire header
-#include "widget.h"
-
-// Fast - just declares
-class Widget;
-void process(Widget* w);
-```
-
-### 3. Extern Templates
-
-```cpp showLineNumbers 
-// header.h
-template<typename T>
-class Container { /* ... */ };
-
-extern template class Container<int>;  // Don't instantiate here
-
-// implementation.cpp
-template class Container<int>;  // Instantiate once here
-```
-
-Prevents the compiler from instantiating templates in every translation unit.
-
----
-
-## Common Compiler Errors
-
-### Undefined Reference (Actually Linker Error)
-
-```cpp showLineNumbers 
-// header.h
-void foo();
-
-// main.cpp
-foo();  // undefined reference to `foo()'
-```
-
-**Solution**: Implement `foo()` in a source file and link it.
-
-### Template Instantiation Error
-
-```cpp showLineNumbers 
-template<typename T>
-void print(T value) {
-    std::cout << value.name << "\n";  // Assumes T has 'name'
-}
-
-print(42);  // int has no member 'name'
-```
-
-**Solution**: Add concept/static_assert or SFINAE.
-
-### Ambiguous Overload
-
-```cpp showLineNumbers 
-void foo(int x) {}
-void foo(double x) {}
-
-foo(3.14f);  // Ambiguous: float converts to both int and double
-```
-
----
-
-## Compiler-Specific Features
-
-```cpp showLineNumbers 
-// GCC/Clang attributes
-[[gnu::always_inline]]
-int fast_func() { return 42; }
-
-[[gnu::noinline]]
-int debug_func() { return 42; }
-
-// MSVC
-__declspec(noinline)
-void no_inline() {}
-
-// Portable C++11
-[[noreturn]]
-void exit_program() { std::exit(1); }
-```
-
----
-
-## Summary
-
-The compilation phase:
-
-- **Parses** C++ into AST
-- **Checks** syntax, types, and semantics
-- **Instantiates** templates
-- **Optimizes** code (-O0 to -O3)
-- **Generates** assembly language
-
-**Key points**:
-- Use `-O2` or `-O3` for production
-- Enable all warnings (`-Wall -Wextra`)
-- Understand optimization impact on debugging
-- Template code must be in headers
-- Compilation is the slowest build phase
-
-```bash
-# Recommended production compilation
-g++ -std=c++20 -O3 -Wall -Wextra -Werror -march=native main.cpp -o app
-```
+- Front end (C++ semantics, all errors) → optimiser (IR) → back end (target assembly).
+- `-O2` is the normal release level; `-O3` and `-march=native` are choices to measure and justify.
+- Different compilers optimise the same code differently. Read the assembly before claiming what it
+  does.
+- Compile time is mostly header text; reduce what each translation unit includes.

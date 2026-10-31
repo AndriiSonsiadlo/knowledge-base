@@ -8,266 +8,185 @@ tags: [c++, const, volatile, qualifiers, const-correctness]
 
 # const and volatile Qualifiers
 
-CV-qualifiers (`const` and `volatile`) modify type behavior. `const` prevents modification; `volatile` prevents compiler optimization.
+`const` and `volatile`, the **cv-qualifiers**, are part of a type: `const int` and `int` are
+different types, and the compiler tracks the difference through every expression, pointer, and
+reference. `const` means the object may not be modified through this name. `volatile` means every
+access to the object is an observable side effect that the compiler must not remove or merge. This
+page covers what the qualifiers attach to, the **top-level / low-level** distinction that the
+deduction rules depend on, and `const` member functions. Pointer declarations and `volatile` in
+hardware code have their own pages, linked below.
 
-:::info[const is About Contract]
-`const` is a compile-time contract stating "this value won't change" - enabling optimization and catching bugs early.
-:::
+**Prerequisites:** [Fundamental Types](./fundamental-types.md)
 
-## const Qualifier
+## `const` objects
 
-### Basic const
+A `const` object must be initialized, and can't be assigned afterwards:
 
-```cpp showLineNumbers 
-const int x = 42;
-x = 10;  // Error: cannot modify const
+```cpp title="const-basics.cpp" showLineNumbers
+int compute() { return 7; }
 
-int y = 100;
-y = 200;  // OK: not const
-```
-
-### const Variables Must Initialize
-
-```cpp showLineNumbers 
-const int x;        // Error: uninitialized const
-const int y = 42;   // OK
-```
-
-### const with Pointers
-
-```cpp showLineNumbers 
-// Pointer to const (cannot modify value)
-const int* ptr1 = &x;
-*ptr1 = 10;  // Error
-ptr1 = &y;   // OK: can change pointer
-
-// Const pointer (cannot change pointer)
-int* const ptr2 = &x;
-*ptr2 = 10;  // OK: can modify value
-ptr2 = &y;   // Error: cannot change pointer
-
-// Const pointer to const (both const)
-const int* const ptr3 = &x;
-*ptr3 = 10;  // Error
-ptr3 = &y;   // Error
-
-// Read right-to-left
-const int* ptr;        // ptr is pointer to const int
-int const* ptr;        // Same as above
-int* const ptr;        // ptr is const pointer to int
-const int* const ptr;  // ptr is const pointer to const int
-```
-
-### const with References
-
-```cpp showLineNumbers 
-int x = 42;
-
-// const reference (cannot modify through reference)
-const int& ref = x;
-ref = 10;  // Error
-x = 10;    // OK: x itself can change
-
-// const reference can bind to temporary
-const int& ref2 = 42;  // OK: lifetime extended
-int& ref3 = 42;        // Error: non-const ref to temporary
-```
-
-### const Member Functions
-
-```cpp showLineNumbers 
-class Counter {
-    int count;
-public:
-    Counter() : count(0) {}
-    
-    // const member function (doesn't modify object)
-    int getCount() const {
-        // count++;  // Error: modifies member
-        return count;
-    }
-    
-    // Non-const member function
-    void increment() {
-        count++;  // OK
-    }
-};
-
-const Counter c;
-c.getCount();    // OK: const function
-c.increment();   // Error: non-const function on const object
-```
-
-### mutable (Override const)
-
-```cpp showLineNumbers 
-class Cache {
-    mutable int access_count;  // Can modify even in const functions
-    std::string data;
-    
-public:
-    std::string getData() const {
-        access_count++;  // OK: mutable
-        return data;
-    }
-};
-```
-
----
-
-## constexpr (C++11)
-
-Compile-time constants and functions:
-
-```cpp showLineNumbers 
-constexpr int square(int x) {
-    return x * x;
+int main() {
+    const int limit = 100;          // known at compile time
+    const int answer = compute();   // fine: const doesn't require a constant expression
+    // const int missing;           // error: uninitialized const
+    // limit = 5;                   // error: assignment of read-only variable
+    return limit + answer;
 }
-
-constexpr int value = square(5);  // Evaluated at compile-time
-
-int arr[value];  // OK: value is compile-time constant
 ```
 
-**const vs constexpr**:
-```cpp showLineNumbers 
-const int x = 10;           // Runtime or compile-time
-constexpr int y = 10;       // Must be compile-time
+`const` is a promise about modification, not about compile-time evaluation. When you need a value
+the compiler computes, such as an array bound or template argument, use `constexpr`; see
+[constexpr Functions](../04-functions-and-call-mechanics/constexpr-functions.md).
 
-const int cx = getValue();  // OK: runtime const
-constexpr int cy = getValue();  // Error: must be compile-time
-```
+Modifying an object that was *defined* `const` is undefined behavior, even if you get a non-`const`
+path to it with `const_cast`. Removing `const` is only safe when the object itself was not `const`.
+Details are on [const and Pointers](../06-pointers-references-and-smart-pointers/const-and-pointers.md#casting-away-const).
 
----
+## Top-level and low-level `const`
 
-## volatile Qualifier
+In a compound type, each `const` applies to one level. For pointers, read the declaration from
+right to left: `const int* const p` is "`p` is a const pointer to a const int".
 
-Prevents compiler optimization - value can change externally:
+<Diagram title="Two levels of const in one declaration" caption="const int* const p = &x;" accent="green">
+  <DiagramRow>
+    <DiagramNode title="p (the pointer)" accent>**Top-level** `const`: `p` can't be reseated. Dropped when `p` is copied</DiagramNode>
+    <DiagramArrow direction="right" label="points to" />
+    <DiagramNode title="*p (the int)">**Low-level** `const`: can't write through `p`. Kept when `p` is copied</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-```cpp showLineNumbers 
-volatile int* hardware_register = (volatile int*)0x40000000;
+- A **top-level** `const` qualifies the object itself: `const int x`, or the pointer in
+  `int* const p`.
+- A **low-level** `const` qualifies something reached through the object: the pointee in
+  `const int* p`, or the referenced object in `const int& r`. A reference has no top-level
+  `const`; it can't be reseated anyway.
 
-// Compiler won't optimize away reads
-int x = *hardware_register;
-int y = *hardware_register;  // Second read actually happens
+The distinction matters whenever a value is copied. A copy is a new object, so the source's
+top-level `const` doesn't constrain it. Low-level `const` protects some *other* object, so a copy
+must keep it:
 
-// Without volatile, compiler might optimize to:
-// int x = *hardware_register;
-// int y = x;  // Reuse cached value
-```
+```cpp title="levels.cpp" showLineNumbers
+int main() {
+    int x = 1;
+    const int ci = 2;
 
-### Common Uses
-
-```cpp showLineNumbers 
-// 1. Memory-mapped I/O
-volatile uint32_t* GPIO = (volatile uint32_t*)0x40020000;
-*GPIO = 0xFF;  // Write to hardware
-
-// 2. Multi-threaded shared data (pre-C++11, now use atomics)
-volatile bool flag = false;  // Can change in another thread
-
-// 3. Signal handlers
-volatile sig_atomic_t signal_received = 0;
-```
-
-:::warning[volatile is NOT for Threading]
-In modern C++, use `std::atomic` for thread-safe variables, not `volatile`.
-:::
-
----
-
-## const Correctness
-
-Practice of using `const` wherever possible:
-
-```cpp showLineNumbers 
-// Good const correctness
-class String {
-    char* data;
-    size_t length;
-    
-public:
-    // const getters
-    size_t size() const { return length; }
-    char at(size_t i) const { return data[i]; }
-    
-    // const parameters
-    void append(const String& other) {
-        // ...
-    }
-    
-    // const return (for immutable access)
-    const char* c_str() const { return data; }
-};
-```
-
-### Benefits
-
-```cpp showLineNumbers 
-void process(const std::vector<int>& data) {  // Won't modify
-    // data.push_back(5);  // Error: const
-    
-    for (int x : data) {  // OK to read
-        std::cout << x;
-    }
+    int a = ci;                 // OK: top-level const of ci is irrelevant to the copy a
+    const int* p = &x;          // low-level const
+    const int* q = p;           // OK: q keeps the low-level const
+    // int* r = p;              // error: would discard the low-level const
+    int* const s = &x;          // top-level const
+    int* t = s;                 // OK: copying s drops its top-level const
+    *t = 3;
+    return a + *q;
 }
-
-// Accepts temporaries
-process({1, 2, 3});  // OK: binds to const&
 ```
 
----
+This is the rule [auto](./type-deduction/auto.md) and template deduction follow: deducing a
+by-value type drops top-level cv-qualifiers and keeps low-level ones. Function signatures follow it
+too: `void f(int)` and `void f(const int)` declare the same function, because a top-level `const`
+on a by-value parameter only affects the function body. The full set of pointer forms is on
+[const and Pointers](../06-pointers-references-and-smart-pointers/const-and-pointers.md).
 
-## Top-Level vs Low-Level const
+## `const` references
 
-```cpp showLineNumbers 
-const int x = 42;          // Top-level const (x itself)
-const int* ptr = &x;       // Low-level const (pointed-to value)
-int* const ptr2 = &y;      // Top-level const (pointer itself)
-const int* const ptr3 = &x;// Both
+A `const T&` can bind to a `const` or non-`const` lvalue and also to an rvalue, so it is the usual
+parameter type for "read this, don't copy it". Binding to a temporary extends the temporary's
+lifetime to the reference's. See [Lvalues and Rvalues](./value-categories/lvalues-rvalues.md#how-references-bind).
+The referenced object can still change through another name: `const` restricts the reference, not
+the object.
 
-// Copying ignores top-level const
-const int a = 10;
-int b = a;  // OK: copies value, b is non-const
+## `const` member functions
 
-// Low-level const must match
-const int* p1 = &a;
-int* p2 = p1;  // Error: discards const
-```
+A member function declared with `const` after the parameter list promises not to modify the
+object. Inside it, `this` has type `const T*`, so every data member is accessed as `const`.
+Only `const` member functions can be called on a `const` object, or through a `const T&`:
 
----
+```cpp title="const-member.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+#include <utility>
 
-## Summary
-
-**const**:
-- Prevents modification
-- Enables optimization
-- `const int* ptr` = pointer to const
-- `int* const ptr` = const pointer
-- const member functions don't modify object
-- constexpr = compile-time const
-
-**volatile**:
-- Prevents optimization
-- For hardware registers, old threading
-- Modern code uses `std::atomic` instead
-
-**Best practices**:
-- Use `const` by default
-- Pass large objects as `const&`
-- Mark non-modifying members `const`
-- Use `constexpr` for compile-time values
-
-```cpp showLineNumbers 
-// Good const usage
-void process(const std::string& input) {
-    // Read-only access
-}
-
-class Widget {
+class Document {
 public:
-    int getValue() const { return value; }  // const method
+    explicit Document(std::string text) : text_(std::move(text)) {}
+
+    std::size_t length() const {        // callable on const Document
+        ++reads_;                       // OK: reads_ is mutable
+        return text_.size();
+    }
+    void append(const std::string& s) { text_ += s; }
+
+    std::size_t reads() const { return reads_; }
+
 private:
-    int value;
+    std::string text_;
+    mutable std::size_t reads_ = 0;     // bookkeeping, not part of the observable value
 };
+
+void show(const Document& d) {
+    std::printf("%zu\n", d.length());
+    // d.append("!");                   // error: append is not const
+}
+
+int main() {
+    Document doc("hello");
+    show(doc);
+    show(doc);
+    std::printf("reads: %zu\n", doc.reads());
+}
 ```
+
+```text
+5
+5
+reads: 2
+```
+
+`const` and non-`const` member functions can overload each other. That is how containers return
+`T&` from `operator[]` on a non-`const` container and `const T&` on a `const` one.
+
+A **`mutable`** data member can be modified even in a `const` member function. Use it for state
+that isn't part of the object's logical value: caches, counters, or a mutex. A `const` member
+function can be called from several threads at once, so a `mutable` member that it writes needs
+synchronization.
+
+## `volatile`
+
+`volatile` tells the compiler that every read and write of the object must happen as written:
+it can't keep the value in a register, remove a "redundant" read, or combine two writes. That is
+what memory-mapped hardware registers need, and what a variable written from a signal handler
+needs (as `volatile std::sig_atomic_t`).
+
+`volatile` does **not** make an access atomic or order it with respect to other threads. It has
+never been a way to share data between threads in standard C++; use `std::atomic`. Hardware use,
+and what `volatile` does not guarantee, are covered on [volatile](../12-low-level-and-platform/05-volatile.md).
+C++20 deprecated several uses of `volatile` that suggested it did more, such as `++` and compound
+assignment on a `volatile` variable ([P1152](https://wg21.link/p1152r4)).
+
+`volatile` follows the same top-level / low-level rules as `const`, and the two combine:
+`const volatile std::uint32_t*` is a pointer to a read-only register that may change on its own.
+
+## Common mistakes
+
+- **Expecting `const` to make data immutable.** `const int& r = x;` doesn't stop other code from
+  changing `x`. It only stops you from changing it through `r`.
+- **Top-level `const` on a returned value.** `const std::string f();` prevents the caller from
+  moving out of the result and has no other effect. Return non-`const` values.
+- **`const` on a by-value parameter in the declaration.** `void f(const int x);` in a header is
+  the same signature as `void f(int x);`. Put the `const` only in the definition if you want it.
+- **Using `volatile` for thread communication.** It doesn't prevent data races; the program has
+  undefined behavior. Use `std::atomic<bool>`.
+
+## Key points
+
+- cv-qualifiers are part of the type and apply to one level of a compound type.
+- Copies drop top-level `const` and must keep low-level `const`. Deduction follows the same rule.
+- In a `const` member function `this` is `const T*`; `mutable` members are the exception.
+- `volatile` is about accesses not being optimized away, not about threads.
+
+## Related
+
+- [const and Pointers](../06-pointers-references-and-smart-pointers/const-and-pointers.md): every
+  pointer/`const` combination and `const_cast`.
+- [volatile](../12-low-level-and-platform/05-volatile.md): memory-mapped I/O, interrupts, and
+  `volatile` versus atomics.
