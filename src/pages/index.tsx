@@ -5,12 +5,25 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import { usePluginData } from "@docusaurus/useGlobalData";
 import Layout from "@theme/Layout";
+import {
+  Binary,
+  Braces,
+  CircuitBoard,
+  Cpu,
+  Database,
+  Gamepad2,
+  type LucideIcon,
+  Sparkles,
+  Terminal,
+} from "lucide-react";
 import type { ReactNode } from "react";
+
+import { useCountUp } from "../hooks/useCountUp";
 
 import styles from "./index.module.css";
 
 // Home page in the Workbench style (mockups/ide): one reading column, mono
-// chrome, `##` section markers, flat surface cards. Sections come from the
+// chrome, `>` section markers, flat surface cards. Sections come from the
 // navbar config so this page never drifts from the site navigation.
 
 interface NavItem {
@@ -24,6 +37,7 @@ interface NavItem {
 }
 
 interface Section {
+  id?: string;
   label: string;
   description?: string;
   href: string;
@@ -60,7 +74,12 @@ function useSectionGroups(): { groups: SectionGroup[]; docCount: number } {
       item.to ??
       (item.sidebarId ? sidebars[item.sidebarId]?.link?.path : undefined);
     return href && item.label
-      ? { label: item.label, description: item.description, href }
+      ? {
+          id: item.sidebarId,
+          label: item.label,
+          description: item.description,
+          href,
+        }
       : null;
   };
 
@@ -80,7 +99,10 @@ function useSectionGroups(): { groups: SectionGroup[]; docCount: number } {
     })
     .filter(Boolean) as SectionGroup[];
 
-  return { groups, docCount: version?.docs.length ?? 0 };
+  // Generated category index pages ("/category/…") are not written pages.
+  const docCount =
+    version?.docs.filter((d) => !d.id.startsWith("/category/")).length ?? 0;
+  return { groups, docCount };
 }
 
 const SECTION_LABELS: Record<string, string> = {
@@ -108,17 +130,50 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
   timeZone: "UTC",
 });
 
+// Decorative section glyphs (lucide, 1.5 stroke); keyed by navbar sidebarId.
+const SECTION_ICONS: Record<string, LucideIcon> = {
+  programmingSidebar: Braces,
+  computerScienceSidebar: Binary,
+  gpuComputingSidebar: Cpu,
+  embeddedSidebar: CircuitBoard,
+  linuxSidebar: Terminal,
+  machineLearningSidebar: Sparkles,
+  dataToolsSidebar: Database,
+  gameDevSidebar: Gamepad2,
+};
+
+function Stat({ value, label }: { value: number; label: string }) {
+  const [shown, ref] = useCountUp<HTMLDivElement>(value);
+  return (
+    <div ref={ref} className={styles.stat}>
+      <dt className={styles.statLabel}>{label}</dt>
+      <dd className={styles.statValue}>{shown}</dd>
+    </div>
+  );
+}
+
 function SectionCards({ sections }: { sections: Section[] }) {
   return (
     <ul className={styles.cards}>
-      {sections.map((s) => (
-        <li key={s.href}>
-          <Link to={s.href}>
-            <strong>{s.label}</strong>
-            {s.description ? <span>{s.description}</span> : null}
-          </Link>
-        </li>
-      ))}
+      {sections.map((s) => {
+        const Icon = s.id ? SECTION_ICONS[s.id] : undefined;
+        return (
+          <li key={s.href}>
+            <Link to={s.href}>
+              {Icon ? (
+                <Icon
+                  className={styles.cardIcon}
+                  size={20}
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+              ) : null}
+              <strong>{s.label}</strong>
+              {s.description ? <span>{s.description}</span> : null}
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -148,8 +203,6 @@ export default function Home(): ReactNode {
 
           <h1 className={styles.title}>Knowledge Base</h1>
           <p className={styles.meta}>
-            <span>{docCount} pages</span>
-            <span>{sectionCount} sections</span>
             <span>by Andrii Sonsiadlo</span>
           </p>
 
@@ -160,6 +213,12 @@ export default function Home(): ReactNode {
             science fundamentals to data structures, algorithms, and machine
             learning.
           </p>
+
+          <dl className={styles.stats} aria-label="Site statistics">
+            <Stat value={docCount} label="pages" />
+            <Stat value={sectionCount} label="sections" />
+            <Stat value={groups.length} label="areas" />
+          </dl>
 
           <div className={styles.admonition} role="note">
             <p className={styles.admTitle}>How it’s organized</p>

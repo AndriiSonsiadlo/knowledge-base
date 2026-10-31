@@ -108,13 +108,57 @@
 }
 
 .article h2::before {
-  content: "## ";
-  color: var(--wb-muted);
+  content: "> ";
+  color: var(--wb-accent);
 }
 
 .article h3::before {
-  content: "### ";
+  content: ">> ";
+  color: var(--wb-accent);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 28px 0 0;
+  border-block: 1px solid var(--wb-rule);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--wb-rule);
+}
+
+.statValue {
+  margin: 0;
+  font-family: var(--wb-font-mono);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--wb-ink);
+}
+
+.statLabel {
+  order: 1;
+  margin: 4px 0 0;
+  font-family: var(--wb-font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--wb-muted);
+}
+
+.cardIcon {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--wb-accent);
 }
 
 .cards {
