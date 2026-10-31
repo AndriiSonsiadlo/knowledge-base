@@ -1,96 +1,98 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Personal knowledge base built with **Docusaurus 3.10** (React 19, Node ≥20). Content is Markdown/MDX under `docs/`; deployed to GitHub Pages at `https://andriisonsiadlo.github.io/knowledge-base/` on every push to `master`.
 
-## Git commits
+This file holds project-wide rules. Two other layers exist:
 
-Commit as you go — after each self-contained change, not batched at the end of a session.
+- **`AUTHORING.md`** (repo root) — page types, templates, writing standards, component guide, review checklist. **Read it before writing or restructuring a page.** Not needed for code-only or one-line edits.
+- **Section `CLAUDE.md`** files (`docs/<section>/CLAUDE.md`, `src/CLAUDE.md`) — section-local conventions and gates, loaded automatically when you work there. When a task is scoped to one section, stay inside it.
 
-- Message style: short and concise. `<type>: <what>` on one line (`fix:`, `feat:`, `docs:`, `chore:`, `refactor:`).
-- No body unless the change genuinely needs it. No bullet list of every file touched.
+If these layers conflict, the more specific file wins for its own scope (section > `AUTHORING.md` > this file), and the conflict should be fixed in the same change.
+
+## Git
+
+- Commit after each self-contained change, not batched at the end.
+- Message: one line, `<type>: <what>` (`fix:`, `feat:`, `docs:`, `chore:`, `refactor:`). No body unless genuinely needed.
 - **Never** add a `Co-Authored-By` trailer or a "Generated with Claude Code" line.
-
-## What this is
-
-A personal knowledge-base documentation site built with **Docusaurus 3.9** (React 19, Node ≥20). Content is Markdown under `docs/`; the rest is a customized Docusaurus theme. Deployed to GitHub Pages at `https://andriisonsiadlo.github.io/knowledge-base/`.
-
-## Shell output: rtk
-
-`rtk` (Rust Token Killer, `~/.local/bin/rtk`) filters and compacts command output before it reaches the model. It is installed, and a `PreToolUse` hook in `~/.claude/settings.json` (`rtk hook claude`) **rewrites Bash commands automatically**. Verified rewrites:
-
-| You type | Actually runs |
-|---|---|
-| `cat FILE` | `rtk read FILE` |
-| `head -50 FILE` | `rtk read FILE --max-lines 50` |
-| `grep -rn ...` | `rtk grep -rn ...` |
-| `ls -la`, `find`, `wc -l`, `curl -s` | `rtk ls` / `rtk find` / `rtk wc` / `rtk curl` |
-| `git status`, `git log`, `git diff` | `rtk git ...` |
-| `npm run build` / `npm run typecheck` | `rtk npm run ...` |
-| `npx docusaurus ...` | `rtk npx ...` |
-
-So **do not type the `rtk` prefix by hand** for those — the hook already did it, and `rtk rtk git status` is not a command.
-
-**What the hook does not catch.** Reach for rtk explicitly here:
-
-- `sed -n '1,20p' FILE` — not rewritten. Use `rtk read FILE --max-lines 20` instead; it is the single biggest source of wasted tokens in this repo, since reading Markdown docs is most of the work.
-- Pipelines, heredocs, and `python3 -`/`node` scripts pass through unfiltered. If such a command prints a lot, pipe it: `... | rtk pipe`.
-
-**One trap — the lint gate.** The hook rewrites `npm run lint` to bare `rtk lint` and `npx biome check .` to `rtk lint check .`, discarding the npm script. `rtk lint` speaks ESLint, not Biome: it reported `Lint: No issues found` on `src/lib` while Biome was reporting a real `organizeImports` violation and a formatting diff on the same file. **Never trust a rewritten lint command.** Run it raw:
-
-```bash
-rtk run 'npm run lint'      # raw shell, no filter, no rewrite
-rtk proxy <cmd>             # unfiltered but still counted in `rtk gain`
-```
-
-`npm run build` is the correctness gate and is safe under `rtk npm` — it still fails loudly on a broken link. `rtk gain` shows savings so far; `rtk discover` lists commands still being run the expensive way.
 
 ## Commands
 
 ```bash
-npm install          # install deps (README says `npm run install` — that's a typo, use plain install)
-npm run start        # dev server at localhost:3000, hot reload
-npm run build        # production build to ./build — ALSO validates links (see below)
-npm run serve        # preview the production build locally
-npm run clear        # clear Docusaurus cache (.docusaurus) — try this when dev behaves oddly
-npm run typecheck    # tsc, no emit
-npm run lint         # biome check  (lint, not auto-fix)
-npm run format       # biome format --write
+npm install
+npm run start                # dev server, localhost:3000/knowledge-base/
+npm run build                # production build — the main correctness gate
+npm run serve                # serve ./build
+npm run clear                # wipe .docusaurus cache when dev behaves oddly
+npm run typecheck            # tsc
+rtk run 'npm run lint'       # Biome check — always run raw, see rtk below
+npm run format               # Biome format --write
+npm run check:algo [path]    # gate for docs/computer-science/algorithms/
+npm run check:linux -- --written   # gate for docs/linux/
+npm run test:plugins | test:graph | test:kernel-source   # node --test suites for src/plugins + tools
 ```
 
-There is no test suite. The closest thing to a correctness gate is `npm run build`: `onBrokenLinks: "throw"` in `docusaurus.config.js` means a broken internal link **fails the build** (and therefore the deploy). Run a build before assuming doc/link changes are safe.
+## Quality gates
 
-## Linting/formatting
+Run what the change touches; don't claim a check passed unless you ran it.
 
-**Biome is the configured tool** (`biome.json`), 2-space indent, applied to JS/TS/JSON/MD. A `.prettierrc` also exists but only carries `prettier-plugin-tailwindcss` for class sorting in editors — the npm scripts use Biome, not Prettier.
+| Change | Required | Conditional |
+|---|---|---|
+| Any `docs/` edit | `npm run build` (fails on broken internal links, bad Linux prerequisites) | — |
+| `docs/linux/` or `algorithms/` page | the section gate above | — |
+| `src/`, config, `.js/.ts/.json` | `rtk run 'npm run lint'`, `npm run typecheck`, build | matching `test:*` suite |
+| New/changed MDX component, interactive block, layout/CSS | build + look at it rendered (dev server, Playwright MCP or Chrome DevTools MCP) in light **and** dark theme and at a narrow (~390px) viewport; check console for errors | Lighthouse/a11y audit for new components |
+| Typo / prose-only fix | build (or skip if no links, frontmatter, or MDX changed — say so) | — |
+
+Browser tools are for verifying rendered behavior, not for routine text edits. External links are not checked by the build; verify any new external URL actually resolves before adding it.
 
 ## Content architecture
 
-This is the part that requires reading multiple files to understand:
+- **Folder structure is the navigation.** `sidebars.js` has one autogenerated sidebar per top-level folder: `programming`, `game-development`, `computer-science` (algorithms live in `computer-science/algorithms/`), `data-tools`, `machine-learning`, `gpu-computing`, `embedded`, `linux`. Navbar entries are in `docusaurus.config.js` (`themeConfig.navbar.items`). Never hand-edit nav.
+- **`_category_.json`** sets a folder's label, `position`, and `link` (usually `generated-index`). `NN-` folder prefixes only order folders on disk; Docusaurus strips them from doc ids and URLs (`linux/04-kernel-architecture-and-idioms/x.md` → id `linux/kernel-architecture-and-idioms/x`).
+- **Frontmatter** on every page: `id`, `title`, `sidebar_label`, `sidebar_position`, `tags`. No duplicate `sidebar_position` within a folder. Section CLAUDE.md files may require more (Linux: `prerequisites`, `related`).
+- **Excluded from the site:** `docs/superpowers/` (design specs and implementation plans — read the relevant spec before structural work in a section that has one), `**/CLAUDE.md`, and `_`-prefixed partials.
+- **Links:** prefer relative doc links (`../memory-model/coalescing.md`). `baseUrl` is `/knowledge-base/`, so a hard-coded absolute path must include it; static assets are the exception (see images).
 
-- **`docs/` → sidebars.** Eight top-level folders each map to one autogenerated sidebar in `sidebars.js`: `programming`, `game-development`, `computer-science`, `data-tools`, `machine-learning`, `gpu-computing`, `embedded`, and `linux`. Each section has its own `CLAUDE.md` with section-local conventions — when a task is scoped to one section, stay inside it and don't survey the others. Sidebars are `{ type: "autogenerated", dirName: ... }`, so **folder structure on disk *is* the navigation** — you don't hand-edit nav. Algorithms now live under `docs/computer-science/algorithms/` rather than as a separate top-level section. The navbar items that surface these sidebars live in `docusaurus.config.js` (`themeConfig.navbar.items`).
-- **`_category_.json`** in a folder sets that folder's sidebar label, `position` (ordering among siblings), and `link` (usually `generated-index` for an auto landing page). Numeric folder prefixes like `00-overview/`, `01-toolchain-and-build/` exist only to order folders on disk; the displayed label/order comes from `_category_.json`.
-- **Doc frontmatter** drives per-page nav: `id`, `title`, `sidebar_label`, `sidebar_position`, `tags`. `sidebar_position` orders pages within their folder.
-- **Markdown features in use:** Mermaid diagrams (```` ```mermaid ````, enabled via `@docusaurus/theme-mermaid`) and Docusaurus admonitions (`:::info`, `:::note`, etc.). `additionalLanguages` for Prism are `bash`, `cmake`, `csharp`, `glsl`, `hlsl`, `ini`, `json`, `python`, and `wgsl` — using another language in a code fence needs it added to `prism.additionalLanguages` in the config.
-- **Live code blocks:** `@docusaurus/theme-live-codeblock` is registered in `themes`. A fence tagged ```` ```jsx live ```` renders an editable react-live playground instead of a static block. Only for React/JSX — everything else stays Prism-highlighted. Keep live blocks small; each one ships its own runtime editor to the client.
-- **Figures are preferred over Mermaid diagrams.** When a real figure, photo, or screenshot would show the thing better than a drawn diagram, use one — a picture of actual hardware, a real profiler screenshot, or a published vendor figure carries information a hand-drawn box-and-arrow diagram cannot. Mermaid is still the right tool when the content is genuinely structural (object models, pipelines, decision flows, call graphs) or when no properly-sourced figure exists; a good diagram beats a bad or irrelevant image. The two also work together: a schematic that labels the mechanism next to a figure that shows the real thing is often better than either alone.
-  - **Provenance is not optional.** Every third-party image needs a row in `static/img/gpu/SOURCES.md` (source URL, publisher, retrieval date, notes) and an italic source caption on the page directly beneath it. Prefer the vendor's own documentation; never substitute an image from a blog or image host just to have a figure. If no properly-sourced figure exists, use Mermaid — that is the correct outcome, not a fallback to apologize for.
-  - **Be accurate about what an image is.** If it is a frame extracted from an animation, or a crop, say so in the `SOURCES.md` notes. Someone re-sourcing it later depends on that.
-  - **Watch the file size.** All images under `static/img/gpu/` together total ~1.2 MB. This deploys to GitHub Pages, so a single multi-megabyte GIF or screenshot is not an acceptable trade for one figure — extract a representative frame or downscale instead.
-  - Reference images as `/img/<path>/<name>.png` with **no** `/knowledge-base` prefix; Docusaurus prepends `baseUrl` itself.
-- **Search** is local/offline via `@easyops-cn/docusaurus-search-local` (no external service); it indexes `docs/` at build time automatically.
+## Content rules (mandatory)
 
-## Linux & Kernel Internals section (`docs/linux/`)
+Detail and rationale live in `AUTHORING.md`; these are the non-negotiables.
 
-Plugin-backed section with its own prerequisite graph, MDX components, manifest, and gate. Full rules live in `docs/linux/CLAUDE.md` (loaded automatically when working there).
+1. **Search before writing.** `grep -ril '<term>' docs/` for the topic and its key terms. If a page already covers it, extend or link to that page — do not write a second explanation.
+2. **One canonical home per concept.** Other pages give a one-sentence recap and link to it. When you change a fact, grep for other statements of it and update or link them in the same change.
+3. **Prerequisites come first.** A page may rely only on concepts explained earlier in its path or linked as prerequisites.
+4. **Never invent facts.** APIs, flags, versions, numbers, and benchmarks must come from the implementation, official docs (use context7 MCP for library docs), or a cited source. If you can't verify something, leave it out or mark it explicitly as unverified.
+5. **Code must be correct.** Snippets compile/run as shown or are clearly marked as fragments. Pin versions where behavior is version-dependent.
+6. **Create link targets first.** Before writing pages that link to a topic with no page yet, create that page as a stub (full frontmatter, correct folder and `sidebar_position`, body `This page has not been written yet.` — `:::info[Not yet written]` in `docs/linux/`). Links then resolve and the build stays green; the stub is filled in later.
+7. **No filler.** A page exists because a reader needs it; stubs exist only as link targets for planned topics.
 
-## Theme / React code (`src/`)
+## Diagrams and images
 
-Aliases, Tailwind v4, shadcn/ui, Kibo `CodeBlock`, and custom plugins are documented in `src/CLAUDE.md` (loaded automatically when working there).
+- **Diagrams: use `<Diagram>`** (global MDX component, `src/components/Diagram/`) for architecture, layers, groupings, and flows — clean cards, dotted group frames, labelled arrows, one accent colour. Mermaid renders as dated, cramped blocks; use it only for what `<Diagram>` can't lay out (sequence diagrams, state machines, dense graphs). If a recurring picture needs a shape `<Diagram>` lacks, extend the component rather than falling back to Mermaid. Icons (`icon="name"`) come from the bundled lucide subset — add new names to `WANT` in `scripts/gen-icons.mjs` and run `npm run gen-icons`.
+- **Real images** (hardware photos, vendor diagrams, profiler screenshots) via `<Figure src alt caption />` when they show the thing better than a drawing; `photo` for photos/screenshots. `alt` describes what the image shows.
+- **Licenses:** don't check or record them; all assets in use are fine.
+- **Credit:** add `source`/`href` on `<Figure>` only for **official** sources (vendor docs, spec bodies, project documentation). Skip it for Wikimedia Commons and stock-photo sites. A `static/img/<section>/SOURCES.md` row is optional.
+- **Size:** keep each image under ~1 MB (downscale, crop, or extract a frame from an animation). This ships to GitHub Pages.
+- Reference as `/img/<section>/<path>.png` with **no** `/knowledge-base` prefix (`useBaseUrl` adds it).
 
-## Tooling for agents
+## Markdown capabilities
 
-- **context7 MCP** is available and is the preferred way to look up library documentation — Docusaurus, React, Tailwind, Radix, shadcn/ui, Biome, Shiki, and anything else in `package.json`. Use it before answering from memory or reaching for a web search; this stack moves fast (Tailwind v4 and Docusaurus 3.x in particular broke a lot of older advice). Resolve the library id first, then query the docs. Do not use it for repo-specific questions — for those, read the code.
+Available in any page, no import needed: admonitions (`:::note|tip|info|warning|danger`), `<Diagram>` with `<DiagramNode|Group|Row|Arrow>`, Mermaid fences (fallback only), KaTeX math (`$…$`, `$$…$$`), `<Tabs>/<TabItem>`, `<details><summary>`, `<Figure>`, `<Recall>` (algorithms summary card), `<Icon icon="lucide:name" />`, WaveDrom timing fences, and the Linux-section components listed in `docs/linux/CLAUDE.md`. ```` ```jsx live ```` renders a react-live playground — React only, keep them small.
 
-## Deployment
+Prism languages: built-ins plus `armasm bash c cmake cpp csharp diff docker glsl hlsl ini json makefile nasm python systemd toml wgsl yaml`. Any other fence language needs adding to `prism.additionalLanguages` in `docusaurus.config.js`.
 
-GitHub Actions (`.github/workflows/deploy.yml`) builds and deploys to GitHub Pages on every push to `master`. Because of `onBrokenLinks: "throw"`, a broken link merged to `master` will break the deploy, not just warn. `baseUrl` is `/knowledge-base/`, so absolute in-repo paths must account for that prefix (prefer relative doc links).
+Search is local (`@easyops-cn/docusaurus-search-local`), indexed at build time.
+
+## Shell output: rtk
+
+A `PreToolUse` hook rewrites common commands through `rtk` (output compactor): `cat`/`head` → `rtk read`, `grep`, `ls`, `find`, `git`, `npm run build`, `npx`. Don't type the `rtk` prefix for those yourself.
+
+- Not rewritten: `sed -n` (use `rtk read FILE --max-lines N`), pipelines, heredocs, inline scripts — pipe large output through `| rtk pipe`.
+- **Lint trap:** the hook turns `npm run lint` into `rtk lint` (ESLint semantics), which reports "no issues" while Biome finds real ones. Always run `rtk run 'npm run lint'`.
+- When compressed output hides something you need, use `rtk proxy <cmd>` or redirect to a file and read that.
+
+## Code and tooling
+
+- Biome (`biome.json`) is the linter/formatter for JS/TS/JSON/CSS, 2-space indent. `biome.json` lists `**/*.md`, but Biome ignores Markdown — nothing lints prose; the build and the section gates are the only automated doc checks. `.prettierrc` exists only for editor Tailwind class sorting.
+- Theme/React specifics (aliases, Tailwind v4, shadcn/ui, Kibo `CodeBlock`, custom plugins): `src/CLAUDE.md`.
+- Library docs: use **context7 MCP** before answering from memory — Docusaurus 3.x and Tailwind v4 invalidated much older advice.
+- Don't add new tools, plugins, or dependencies without a concrete need stated in the change.

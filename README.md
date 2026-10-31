@@ -41,7 +41,7 @@ cd knowledge-base
 Then install all the dependencies:
 
 ```bash
-npm run install
+npm install
 ```
 
 ### Running the Development Server

@@ -24,6 +24,10 @@ const WANT = [
 	"hard-drive", "network", "database", "clock", "git-fork",
 	// Embedded sections
 	"zap", "plug", "timer", "wifi", "battery", "terminal", "shield", "lock", "refresh-cw",
+	// <Diagram /> general-purpose glyphs
+	"eye", "eye-off", "file-text", "user", "users", "brain", "server", "cloud", "globe",
+	"monitor", "smartphone", "key", "message-square", "workflow", "git-branch",
+	"arrow-right", "circle-alert", "check", "x", "inbox", "send", "filter", "gauge",
 ];
 
 const out = { prefix: "lucide", icons: {}, width: full.width ?? 24, height: full.height ?? 24 };

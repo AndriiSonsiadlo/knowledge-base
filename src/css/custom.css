@@ -1311,43 +1311,45 @@ body {
 }
 
 /* --- <Recall /> --------------------------------------------------------- */
-/* The recall card at the top of every algorithms page. Colour never carries
-   meaning on its own, so it stays legible in print and in both themes. */
+/* Closing summary card on algorithms pages, in the same visual language as
+   <Diagram />: dotted canvas, thin strokes, mono labels, one accent. Four tiles
+   in a 2x2 grid that collapses to one column on narrow screens. */
 .kb-recall {
+  --kb-rc-accent: var(--kb-dg-accent-green);
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
   margin: 0 0 1.75rem;
-  border: 1px solid var(--ifm-color-emphasis-300);
-  border-left: 4px solid var(--ifm-color-primary);
-  border-radius: var(--ifm-global-radius);
-  background: var(--ifm-background-surface-color);
-  box-shadow: var(--ifm-global-shadow-lw);
-  overflow: hidden;
+  padding: 0.75rem;
+  border: 1px solid var(--kb-dg-stroke);
+  border-radius: 1rem;
+  background-color: var(--kb-dg-bg);
+  background-image: radial-gradient(var(--kb-dg-dot) 1px, transparent 1px);
+  background-size: 6px 6px;
+  color: var(--kb-dg-text);
 }
 
 .kb-recall__row {
-  display: grid;
-  grid-template-columns: 8.5rem 1fr;
-  gap: 0.3rem 1.25rem;
-  align-items: baseline;
-  padding: 0.85rem 1.25rem;
-}
-
-.kb-recall__row + .kb-recall__row {
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--kb-dg-stroke);
+  border-radius: 0.6rem;
+  background: var(--kb-dg-card);
 }
 
 .kb-recall__label {
-  color: var(--ifm-color-primary);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--kb-rc-accent);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  align-self: start;
-  padding-top: 0.2rem;
 }
 
 .kb-recall__body {
-  line-height: 1.6;
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .kb-recall__body code,
@@ -1355,14 +1357,10 @@ body {
   font-size: 0.85em;
 }
 
-/* the Costs row's own mini-table: one bordered row per [label, cost] pair,
-   instead of the label/value pairs running together as one paragraph. */
 .kb-recall__costs {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--ifm-color-emphasis-200);
-  border-radius: calc(var(--ifm-global-radius) - 2px);
-  overflow: hidden;
+  font-size: 0.9rem;
 }
 
 .kb-recall__cost-row {
@@ -1370,35 +1368,301 @@ body {
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.4rem 0.7rem;
+  padding: 0.2rem 0;
 }
 
 .kb-recall__cost-row + .kb-recall__cost-row {
-  border-top: 1px solid var(--ifm-color-emphasis-200);
+  border-top: 1px dashed var(--kb-dg-stroke);
 }
 
 .kb-recall__cost-label {
-  color: var(--ifm-color-emphasis-800);
+  color: var(--kb-dg-muted);
 }
 
 .kb-recall__cost {
   flex-shrink: 0;
-  text-align: right;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.85em;
 }
 
-@media (max-width: 480px) {
-  .kb-recall__row {
+@media (max-width: 640px) {
+  .kb-recall {
     grid-template-columns: 1fr;
   }
+}
 
-  .kb-recall__cost-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
+/* --- <Diagram /> -------------------------------------------------------- */
+/* Box-and-arrow diagrams built from real text. Light and dark palettes share
+   one structure; the accent is the only colour and never carries meaning alone. */
+:root {
+  --kb-dg-bg: #f7f7f5;
+  --kb-dg-card: #ffffff;
+  --kb-dg-stroke: #cfcfca;
+  --kb-dg-dot: rgba(0, 0, 0, 0.09);
+  --kb-dg-text: #141414;
+  --kb-dg-muted: #5c5c58;
+  --kb-dg-accent-green: #3f8f1f;
+  --kb-dg-accent-blue: #2563eb;
+  --kb-dg-accent-amber: #b45309;
+  --kb-dg-accent-violet: #7c3aed;
+}
+
+[data-theme="dark"] {
+  --kb-dg-bg: #050505;
+  --kb-dg-card: #0b0b0b;
+  --kb-dg-stroke: #3a3a3a;
+  --kb-dg-dot: rgba(255, 255, 255, 0.09);
+  --kb-dg-text: #f2f2f2;
+  --kb-dg-muted: #a3a3a3;
+  --kb-dg-accent-green: #7cc443;
+  --kb-dg-accent-blue: #60a5fa;
+  --kb-dg-accent-amber: #fbbf24;
+  --kb-dg-accent-violet: #a78bfa;
+}
+
+.kb-dg {
+  margin: 1.75rem 0;
+}
+
+.kb-dg[data-accent="green"] { --kb-dg-accent: var(--kb-dg-accent-green); }
+.kb-dg[data-accent="blue"] { --kb-dg-accent: var(--kb-dg-accent-blue); }
+.kb-dg[data-accent="amber"] { --kb-dg-accent: var(--kb-dg-accent-amber); }
+.kb-dg[data-accent="violet"] { --kb-dg-accent: var(--kb-dg-accent-violet); }
+
+.kb-dg__canvas {
+  padding: 1.75rem 1.5rem;
+  border-radius: 1rem;
+  background: var(--kb-dg-bg);
+  color: var(--kb-dg-text);
+}
+
+.kb-dg__title {
+  margin-bottom: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.kb-dg__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kb-dg__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+}
+
+.kb-dg__row > .kb-dg__node--card {
+  flex: 1 1 13rem;
+}
+
+.kb-dg__group {
+  width: 100%;
+  padding: 1.1rem;
+  border: 1px solid var(--kb-dg-stroke);
+  border-radius: 1.4rem;
+  background-image: radial-gradient(var(--kb-dg-dot) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+.kb-dg__group--accent {
+  border-color: var(--kb-dg-accent);
+}
+
+.kb-dg__group-label {
+  margin: -0.2rem 0 0.8rem 0.2rem;
+  color: var(--kb-dg-muted);
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.kb-dg__icon {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.kb-dg__node {
+  border: 1px solid var(--kb-dg-stroke);
+  background: var(--kb-dg-card);
+}
+
+.kb-dg__node--card {
+  display: flex;
+  gap: 0.8rem;
+  padding: 1rem 1.1rem;
+  border-radius: 0.6rem;
+}
+
+.kb-dg__node-title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.kb-dg__node-body {
+  margin-top: 0.3rem;
+  color: var(--kb-dg-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.kb-dg__node-body > :last-child {
+  margin-bottom: 0;
+}
+
+.kb-dg__node--pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-width: min(22rem, 100%);
+  padding: 1rem 2rem;
+  border-radius: 999px;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kb-dg__node--accent {
+  border-color: var(--kb-dg-accent);
+  border-width: 1.5px;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--kb-dg-accent) 30%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 6px 6px;
+}
+
+.kb-dg__node--dashed {
+  border-style: dashed;
+}
+
+/* Arrow: line — optional label — line with arrowhead. */
+.kb-dg__arrow {
+  display: flex;
+  align-items: center;
+  color: var(--kb-dg-muted);
+  font-size: 0.85rem;
+}
+
+.kb-dg__arrow--down {
+  flex-direction: column;
+  padding: 0.35rem 0;
+}
+
+.kb-dg__arrow--right {
+  flex-direction: row;
+  align-self: center;
+  padding: 0 0.25rem;
+}
+
+.kb-dg__arrow-line {
+  position: relative;
+  background: var(--kb-dg-muted);
+}
+
+.kb-dg__arrow--down .kb-dg__arrow-line {
+  width: 1px;
+  height: 1.1rem;
+}
+
+.kb-dg__arrow--right .kb-dg__arrow-line {
+  width: 1.4rem;
+  height: 1px;
+}
+
+.kb-dg__arrow--dashed .kb-dg__arrow-line {
+  background: none;
+  border: 0 dashed var(--kb-dg-muted);
+}
+
+.kb-dg__arrow--down.kb-dg__arrow--dashed .kb-dg__arrow-line {
+  border-left-width: 1px;
+}
+
+.kb-dg__arrow--right.kb-dg__arrow--dashed .kb-dg__arrow-line {
+  border-top-width: 1px;
+}
+
+.kb-dg__arrow-line--head::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border: solid var(--kb-dg-muted);
+  border-width: 0 1px 1px 0;
+}
+
+.kb-dg__arrow--down .kb-dg__arrow-line--head::after {
+  bottom: 0;
+  left: -3px;
+  transform: rotate(45deg);
+}
+
+.kb-dg__arrow--right .kb-dg__arrow-line--head::after {
+  top: -3px;
+  right: 0;
+  transform: rotate(-45deg);
+}
+
+.kb-dg__arrow-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  text-align: center;
+}
+
+.kb-dg__arrow-label .kb-dg__icon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.kb-dg__caption {
+  margin-top: 0.6rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .kb-dg__canvas {
+    padding: 1.1rem 0.9rem;
   }
 
-  .kb-recall__cost {
-    text-align: left;
+  .kb-dg__row {
+    flex-direction: column;
+  }
+
+  .kb-dg__row > .kb-dg__node--card {
+    flex: 0 0 auto;
+  }
+
+  .kb-dg__arrow--right {
+    flex-direction: column;
+  }
+
+  .kb-dg__arrow--right .kb-dg__arrow-line {
+    width: 1px;
+    height: 1.1rem;
+  }
+
+  .kb-dg__arrow--right .kb-dg__arrow-line--head::after {
+    top: auto;
+    bottom: 0;
+    right: auto;
+    left: -3px;
+    transform: rotate(45deg);
   }
 }
 
