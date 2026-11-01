@@ -2,400 +2,236 @@
 id: multiple-inheritance
 title: Multiple Inheritance
 sidebar_label: Multiple Inheritance
-sidebar_position: 7
+sidebar_position: 8
 tags: [c++, classes, multiple-inheritance, diamond-problem, virtual-inheritance]
 ---
 
 # Multiple Inheritance
 
-Multiple inheritance allows a class to inherit from multiple base classes. This enables combining functionality but introduces complexity, especially the diamond problem.
+A C++ class can have several direct base classes: `class Duck : public Flyer, public Swimmer`. The
+derived object then holds one subobject per base, and converts implicitly to a reference to any of
+them. This is how a class implements several independent interfaces, or picks up several small
+mixins. It also brings two problems single inheritance doesn't have: **ambiguous names**, when two
+bases declare the same member, and the **diamond**, when two bases share a common base of their own.
+**Virtual inheritance** solves the diamond, at a cost in layout and construction rules.
 
-:::info[Multiple Inheritance]
-**Power** = Combine multiple base classes  
-**Danger** = Diamond problem (ambiguity and duplication)  
-**Solution** = Virtual inheritance
-:::
+This page is the canonical home for multiple and virtual inheritance. Single-inheritance mechanics
+(name lookup, hiding) are on [inheritance](./inheritance.md). Byte-level layouts are on
+[object layout](../12-low-level-and-platform/02-object-layout.md).
 
-## Basic Multiple Inheritance
+**Prerequisites:** [Inheritance](./inheritance.md),
+[virtual functions](./virtual-functions.md) (vptrs, for the layout sections).
 
-A class can inherit from multiple base classes, getting members from all of them.
-```cpp showLineNumbers
-class Flyable {
-public:
-    void fly() { std::cout << "Flying\n"; }
+## Several bases, several subobjects
+
+Bases are constructed in the order they appear in the base-specifier list (not the order of the
+mem-initializer list) and destroyed in reverse. Each base is a separate subobject, so converting a
+`Derived*` to its second base generally **changes the pointer value** to point at that subobject:
+
+```cpp title="mi_layout.cpp" showLineNumbers
+#include <cstdio>
+
+struct B1 { virtual void f1() {} };
+struct B2 { virtual void f2() {} };
+struct D : B1, B2 {
+    void f1() override {}
+    void f2() override {}
 };
 
-class Swimmable {
-public:
-    void swim() { std::cout << "Swimming\n"; }
-};
-
-class Duck : public Flyable, public Swimmable {
-public:
-    void quack() { std::cout << "Quack\n"; }
-};
-
-Duck d;
-d.fly();   // From Flyable
-d.swim();  // From Swimmable
-d.quack(); // From Duck
+int main() {
+    D d;
+    B1* p1 = &d;
+    B2* p2 = &d;
+    std::printf("sizeof(D) = %zu, p2 - p1 = %td bytes\n",
+                sizeof(D), reinterpret_cast<char*>(p2) - reinterpret_cast<char*>(p1));
+}
 ```
 
-Duck has all members from both Flyable and Swimmable plus its own. This works cleanly when base classes are independent.
-
-## Memory Layout
-
-Each base class appears as a subobject within the derived class.
-```cpp showLineNumbers
-class Base1 {
-    int b1;
-public:
-    void f1() {}
-};
-
-class Base2 {
-    int b2;
-public:
-    void f2() {}
-};
-
-class Derived : public Base1, public Base2 {
-    int d;
-public:
-    void f3() {}
-};
-
-sizeof(Derived);  // 12 bytes
+```text
+sizeof(D) = 16, p2 - p1 = 8 bytes
 ```
 
-**Memory layout:**
-```
-[Base1: b1 (4 bytes)]
-[Base2: b2 (4 bytes)]
-[Derived: d (4 bytes)]
-Total: 12 bytes
-```
+Measured with GCC 15 and Clang 21 on x86-64 Linux (Itanium ABI). The `B1` subobject sits at offset
+0 and the `B2` subobject at offset 8, each with its own vptr.
 
-Each base class occupies its own space in the derived object. The order matches the inheritance list.
+<Diagram title="D with two polymorphic bases (x86-64, Itanium ABI)" caption="Converting D* to B2* adds 8. Calls through the B2 vptr reach D's overrides via small adjustment stubs (thunks)." accent="blue">
+  <DiagramGroup label="D object, 16 bytes">
+    <DiagramNode title="B1 subobject" accent>offset 0: vptr (D's primary vtable)</DiagramNode>
+    <DiagramNode title="B2 subobject">offset 8: vptr (D's secondary vtable for B2)</DiagramNode>
+  </DiagramGroup>
+</Diagram>
 
-## Ambiguity Problem
+The compiler applies this adjustment for every implicit conversion and `static_cast`, and
+`p2 == &d` still compares equal because `&d` is converted first. The adjustment does *not* happen
+through `void*` or `reinterpret_cast`. Round-tripping a `D*` through `void*` and then casting it to
+`B2*` gives a wrong pointer. When `D::f2` is called through a `B2*`, `this` must point at the whole
+`D`. The Itanium ABI handles this with a **thunk**, a stub in the `B2`-in-`D` vtable that subtracts 8
+from `this` and jumps to `D::f2`.
 
-When multiple bases have members with the same name, you must disambiguate.
-```cpp showLineNumbers
-class Base1 {
-public:
-    void print() { std::cout << "Base1\n"; }
+## Ambiguous names
+
+If a name is found in more than one base, using it unqualified is ill-formed. Lookup does not
+prefer one base over the other, and overload resolution is not used to break the tie:
+
+```cpp title="ambiguity.cpp" showLineNumbers
+#include <iostream>
+
+struct Flyer   { void move() const { std::cout << "fly\n"; } };
+struct Swimmer { void move() const { std::cout << "swim\n"; } };
+
+struct Duck : Flyer, Swimmer {
+    void move() const { Flyer::move(); Swimmer::move(); }  // resolves the ambiguity
 };
 
-class Base2 {
-public:
-    void print() { std::cout << "Base2\n"; }
-};
-
-class Derived : public Base1, public Base2 {
-};
-
-Derived d;
-// d.print();  // Error: ambiguous! Which print()?
-
-d.Base1::print();  // Explicitly specify Base1's version
-d.Base2::print();  // Explicitly specify Base2's version
+int main() {
+    Duck d;
+    d.move();
+    d.Swimmer::move();
+}
 ```
 
-The compiler won't guess which base class member to use. You must be explicit.
-
-### Resolving Ambiguity
-
-Override the ambiguous member in the derived class.
-```cpp showLineNumbers
-class Derived : public Base1, public Base2 {
-public:
-    void print() {
-        std::cout << "Derived's print\n";
-        Base1::print();  // Can call base versions
-        Base2::print();
-    }
-};
-
-Derived d;
-d.print();  // Calls Derived's version
+```text
+fly
+swim
+swim
 ```
 
-## The Diamond Problem
+Without `Duck::move`, the call `d.move()` would be ambiguous. Three ways to resolve it: declare
+the member in the derived class, as above (it hides both); qualify the call (`d.Swimmer::move()`);
+or bring one version in with `using Flyer::move;`.
 
-The diamond problem occurs when a class inherits from two classes that share a common base.
-```cpp showLineNumbers
-class Animal {
-public:
+## The diamond
+
+A diamond forms when two bases share a common base:
+
+<Diagram title="Diamond hierarchy" accent="amber">
+  <DiagramNode title="Animal" accent>int age</DiagramNode>
+  <DiagramArrow label="both derive from Animal" />
+  <DiagramRow>
+    <DiagramNode title="Mammal" />
+    <DiagramNode title="Winged" />
+  </DiagramRow>
+  <DiagramArrow label="Bat derives from both" />
+  <DiagramNode title="Bat" />
+</Diagram>
+
+With ordinary inheritance, `Bat` contains **two** `Animal` subobjects, one inside `Mammal` and one
+inside `Winged`:
+
+```cpp title="diamond.cpp" showLineNumbers
+#include <iostream>
+
+struct Animal { int age = 0; };
+struct Mammal : Animal {};
+struct Winged : Animal {};
+struct Bat : Mammal, Winged {};
+
+int main() {
+    Bat bat;
+    // bat.age = 5;               // error: request for member 'age' is ambiguous
+    bat.Mammal::age = 5;
+    bat.Winged::age = 3;          // a second, independent Animal
+    // Animal* a = &bat;          // error: Animal is an ambiguous base of Bat
+    Animal* a = static_cast<Mammal*>(&bat);
+    std::cout << a->age << ' ' << bat.Winged::age << '\n';
+}
+```
+
+```text
+5 3
+```
+
+Sometimes two copies are what you want, for example two independent intrusive list hooks. Usually
+they are a modelling error: a bat has one age.
+
+## Virtual inheritance
+
+Declaring the base `virtual` in every class on the paths to it makes all of them share a single
+subobject:
+
+```cpp title="virtual_base.cpp" showLineNumbers
+#include <iostream>
+
+struct Animal {
+    explicit Animal(int age) : age(age) { std::cout << "Animal(" << age << ")\n"; }
     int age;
-    void eat() { std::cout << "Eating\n"; }
+};
+struct Mammal : virtual Animal {
+    Mammal() : Animal(1) {}             // ignored when Mammal is not the most derived
+};
+struct Winged : virtual Animal {
+    Winged() : Animal(2) {}             // ignored when Winged is not the most derived
+};
+struct Bat : Mammal, Winged {
+    Bat() : Animal(7) {}                // the most derived class initializes Animal
 };
 
-class Mammal : public Animal {
-public:
-    void nurse() { std::cout << "Nursing\n"; }
-};
-
-class WingedAnimal : public Animal {
-public:
-    void fly() { std::cout << "Flying\n"; }
-};
-
-class Bat : public Mammal, public WingedAnimal {
-public:
-    void sonar() { std::cout << "Sonar\n"; }
-};
+int main() {
+    Bat b;
+    std::cout << b.age << '\n';
+    Mammal m;
+    std::cout << m.age << '\n';
+}
 ```
 
-**Diamond structure:**
-```mermaid
-graph TD
-    A[Animal] --> B[Mammal]
-    A --> C[WingedAnimal]
-    B --> D[Bat]
-    C --> D
-    
+```text
+Animal(7)
+7
+Animal(1)
+1
 ```
 
-### Diamond Problem Issues
+`b.age` is now unambiguous, and `Animal* a = &b;` compiles. Two construction rules come with it:
 
-Bat inherits **two copies** of Animal - one through Mammal, one through WingedAnimal.
-```cpp showLineNumbers
-Bat bat;
+- **The most derived class constructs every virtual base**, before any non-virtual base. The
+  `Animal(1)` and `Animal(2)` initializers in `Mammal` and `Winged` are skipped when those classes
+  are bases of `Bat`, and used when they are the complete object, as `Mammal m` shows. If `Bat`
+  didn't name `Animal`, its default constructor would be used, and since `Animal` has none, `Bat`
+  would not compile. Every class further down the hierarchy inherits this obligation.
+- `virtual` must be on the edges *into* the shared base (`Mammal : virtual Animal`). Marking only
+  `Bat : virtual Mammal, virtual Winged` does not merge the two `Animal`s.
 
-// Ambiguity: which Animal's age?
-// bat.age = 5;  // Error: ambiguous
+## What virtual inheritance costs
 
-// Ambiguity: which Animal's eat()?
-// bat.eat();    // Error: ambiguous
+The virtual base is no longer at a fixed offset from each class that inherits it. Its position
+depends on the most derived type. In the Itanium ABI, each class with a virtual base gets a vptr,
+and its vtable records the offset to the virtual base. Reaching a virtual base member through a
+`Mammal&` takes an extra load. Sizes measured with GCC 15 and Clang 21 on x86-64 Linux:
 
-// Must disambiguate:
-bat.Mammal::age = 5;
-bat.WingedAnimal::age = 3;  // Different variable!
+| Type | Bases | `sizeof` |
+|---|---|---|
+| `struct Base { int data; }` | none | 4 |
+| `struct NormalDerived : Base { int d; }` | non-virtual | 8 |
+| `struct VirtualDerived : virtual Base { int d; }` | virtual | 16 (vptr + `d` + `Base`) |
+| `Bat` (`Mammal`, `Winged` each `: Animal` with one `int`, plus one `int`) | non-virtual diamond | 20 |
+| Same with `virtual Animal` | virtual diamond | 40 (two vptrs, members, one `Animal`, padding) |
 
-bat.Mammal::eat();
-bat.WingedAnimal::eat();
+Other costs:
 
-sizeof(Bat);  // Contains TWO Animal subobjects!
-```
+- Converting from a virtual base back down to a derived class cannot use `static_cast`.
+  It needs `dynamic_cast`, so the virtual base must be polymorphic.
+- Construction and destruction are harder to follow. Every constructor has two variants (complete
+  object and base subobject), which the Itanium ABI calls C1 and C2.
+- Layout is not [standard-layout](./class-layout.md), so no `offsetof` or C interop.
 
-**Memory layout with diamond:**
-```
-[Animal (via Mammal): age]
-[Mammal data]
-[Animal (via WingedAnimal): age]  ← Duplicate!
-[WingedAnimal data]
-[Bat data]
-```
+Use virtual inheritance only when a shared base subobject is really what the design needs. The
+standard library uses it in iostreams: `std::basic_iostream` derives from `basic_istream` and
+`basic_ostream`, which both inherit virtually from `basic_ios`.
 
-This duplication causes:
-- **Ambiguity** - which Animal member?
-- **Waste** - duplicate data
-- **Inconsistency** - two `age` variables can have different values
+## When multiple inheritance fits
 
-## Virtual Inheritance Solution
+- **Several interfaces**: bases with only pure virtual functions and no data (`Drawable`,
+  `Serializable`). This is the use that causes the fewest problems. Diamonds of stateless interfaces
+  are harmless and rarely need `virtual`.
+- **Mixins and policies**: small, often empty bases that add one capability, such as a
+  [non-copyable](../13-idioms-and-design/04-non-copyable.md) base or a [CRTP](../13-idioms-and-design/03-crtp.md)
+  helper. Empty bases usually cost no space (empty base optimization).
+- **Implementation reuse from several classes with state**: usually a design smell. Composition
+  (data members, forwarding functions) avoids the ambiguity and the diamond, and keeps
+  implementation details out of the class's type.
 
-Virtual inheritance ensures only **one copy** of the common base class.
-```cpp showLineNumbers
-class Animal {
-public:
-    int age;
-    void eat() { std::cout << "Eating\n"; }
-};
+## References
 
-class Mammal : public virtual Animal {  // virtual inheritance
-public:
-    void nurse() { std::cout << "Nursing\n"; }
-};
-
-class WingedAnimal : public virtual Animal {  // virtual inheritance
-public:
-    void fly() { std::cout << "Flying\n"; }
-};
-
-class Bat : public Mammal, public WingedAnimal {
-public:
-    void sonar() { std::cout << "Sonar\n"; }
-};
-
-Bat bat;
-bat.age = 5;   // No ambiguity - only one Animal!
-bat.eat();     // No ambiguity
-
-bat.nurse();   // From Mammal
-bat.fly();     // From WingedAnimal
-bat.sonar();   // From Bat
-```
-
-With virtual inheritance, Bat contains only **one** Animal subobject shared by both Mammal and WingedAnimal.
-
-### Virtual Inheritance Memory Layout
-```
-[Mammal data + vptr]
-[WingedAnimal data + vptr]
-[Bat data]
-[Shared Animal: age]  ← Only one copy!
-```
-
-Virtual bases are placed at the end of the object, and each path to the virtual base has a vptr pointing to offset information.
-
-## Virtual Inheritance Constructor
-
-The **most derived class** must initialize the virtual base, not intermediate classes.
-```cpp showLineNumbers
-class Animal {
-    int age;
-public:
-    Animal(int a) : age(a) {}
-};
-
-class Mammal : public virtual Animal {
-public:
-    Mammal(int a) : Animal(a) {}  // Ignored when Mammal is a base!
-};
-
-class WingedAnimal : public virtual Animal {
-public:
-    WingedAnimal(int a) : Animal(a) {}  // Ignored when base!
-};
-
-class Bat : public Mammal, public WingedAnimal {
-public:
-    // Bat must initialize Animal directly!
-    Bat(int a) 
-        : Animal(a),           // Most derived class initializes
-          Mammal(a),           // These don't initialize Animal
-          WingedAnimal(a) {}
-};
-
-Bat bat(5);  // Bat's constructor initializes Animal
-```
-
-:::warning[Virtual Base Initialization]
-With virtual inheritance, the **most derived class** is responsible for initializing the virtual base, even if intermediate classes have constructors that would normally initialize it.
-:::
-
-## Virtual Inheritance Cost
-
-Virtual inheritance has performance overhead.
-```cpp showLineNumbers
-class Base {
-    int data;
-};
-
-class NormalDerived : public Base {
-    int d;
-};
-sizeof(NormalDerived);  // 8 bytes (4 + 4)
-
-class VirtualDerived : public virtual Base {
-    int d;
-};
-sizeof(VirtualDerived);  // 24 bytes (includes vptr for offset)
-```
-
-**Costs:**
-- **Size:** Extra vtable pointer per virtual base path
-- **Speed:** Indirect access through vtable to find virtual base
-- **Complexity:** More complex construction/destruction order
-
-## When to Use Multiple Inheritance
-```cpp showLineNumbers
-// Good: Combining independent interfaces
-class Serializable {
-public:
-    virtual std::string serialize() = 0;
-};
-
-class Drawable {
-public:
-    virtual void draw() = 0;
-};
-
-class Shape : public Serializable, public Drawable {
-    // Implements both interfaces
-};
-
-// Good: Mixins (small utility classes)
-class NonCopyable {
-public:
-    NonCopyable() = default;
-    NonCopyable(const NonCopyable&) = delete;
-};
-
-class Widget : public NonCopyable {
-    // Widget is now non-copyable
-};
-```
-
-**Good use cases:**
-- Pure interface classes (all pure virtual)
-- Mixins (small utility/policy classes)
-- Combining independent capabilities
-
-## Alternatives to Multiple Inheritance
-
-Often composition is clearer than multiple inheritance.
-```cpp showLineNumbers
-// Instead of multiple inheritance:
-class Bat : public Mammal, public WingedAnimal {
-};
-
-// Consider composition:
-class Bat {
-    MammalBehavior mammalBehavior;
-    FlyingBehavior flyingBehavior;
-    
-public:
-    void nurse() { mammalBehavior.nurse(); }
-    void fly() { flyingBehavior.fly(); }
-};
-```
-
-:::success[Composition benefits]
-- No diamond problem
-- Clear ownership
-- Easier to understand
-- More flexible (can change behavior at runtime)
-:::
-
-## Summary
-
-:::info[Multiple inheritance basics]
-- Class inherits from multiple base classes
-- Gets all members from all bases
-- Each base is a subobject in derived class
-:::
-
-:::info[Diamond problem]
-- Occurs when two bases share a common base
-- Creates duplicate base subobjects
-- Causes ambiguity and waste
-:::
-
-:::info[Virtual inheritance]
-- Ensures only one copy of common base
-- Use `public virtual BaseClass`
-- Most derived class initializes virtual base
-- Performance overhead (size and speed)
-:::
-
-:::info[Best practices]
-- Use for pure interfaces (abstract classes)
-- Good for mixins and independent capabilities
-- Consider composition as alternative
-- Virtual inheritance only when needed for diamond
-:::
-
-:::info[Ambiguity resolution]
-- Disambiguate with `BaseClass::member`
-- Override in derived class
-- Virtual inheritance eliminates need
-:::
-
-:::info[Costs]
-- Normal inheritance: no overhead
-- Virtual inheritance: extra vptr per path, indirect access
-- Diamond without virtual: duplicate data
-- Diamond with virtual: shared data, complex layout
-:::
+- [cppreference: Derived classes, virtual base classes](https://en.cppreference.com/w/cpp/language/derived_class#Virtual_base_classes)
+- [cppreference: Constructors and member initializer lists, initialization order](https://en.cppreference.com/w/cpp/language/constructor#Initialization_order)
+- [Itanium C++ ABI: class layout and virtual tables](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#layout)
