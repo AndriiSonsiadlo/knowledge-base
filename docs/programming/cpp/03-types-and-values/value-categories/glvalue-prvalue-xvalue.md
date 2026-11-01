@@ -151,7 +151,7 @@ int main() {
 This compiles with `-std=c++17` and later. With `-std=c++14`, both GCC and Clang reject lines 7 and
 10 because the deleted move constructor is still required. This is the **guaranteed copy elision**
 of C++17. It applies only to prvalues: `return local_variable;` is still *named* return value
-optimization (NRVO), which is allowed but not required. See [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md#copy-elision-and-rvo).
+optimization (NRVO), which is allowed but not required. See [Copy and Move Semantics](../../07-classes-and-oop/copy-and-move-semantics.md#copy-elision).
 
 ## Tracing one statement
 
