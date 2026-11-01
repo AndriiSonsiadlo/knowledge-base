@@ -188,8 +188,7 @@ int main() { print_tuple(std::tuple{1, "hi", 2.5}); }
 
 A class template pack is usually consumed by a [partial specialization](./specialization/partial-specialization.md)
 that splits off the head, the type-level version of the recursive function above. This is the
-classic shape of a hand-written tuple (real `std::tuple` implementations use multiple inheritance
-instead, which is implementation-specific):
+classic shape of a hand-written tuple (real implementations store elements through inheritance, recursive or flat depending on the library, rather than nested members, which enables the empty-base optimization):
 
 ```cpp title="mini_tuple.cpp" showLineNumbers
 #include <cstddef>
@@ -246,7 +245,7 @@ Before C++20 the same check is a `static_assert` over a fold or `std::conjunctio
 - **A deduced pack must come last** among the function parameters it is deduced from. In
   `template <typename... Ts, typename U> void f(Ts..., U)`, `Ts` is in a non-deduced context and is
   deduced as empty.
-- **Unevaluated order.** Arguments in an expanded call `g(h(args)...)` are evaluated in unspecified
+- **Unspecified evaluation order.** Arguments in an expanded call `g(h(args)...)` are evaluated in unspecified
   order, as with any function call. Braced-init-lists and comma [folds](./fold-expressions.md) are
   evaluated left to right.
 

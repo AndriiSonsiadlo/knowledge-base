@@ -156,7 +156,7 @@ int main() {
 3.0
 ```
 
-- **Return types** are never deduced from. Put such parameters first so callers can write
+- **Return types.** In a function call, the return type is never used for deduction. Put such parameters first so callers can write
   `convert<double>(x)` and let the rest be deduced. Explicit arguments fill the parameter list from
   the left.
 - **Non-deduced contexts.** A type to the left of `::` (`typename std::vector<T>::iterator`) cannot be
