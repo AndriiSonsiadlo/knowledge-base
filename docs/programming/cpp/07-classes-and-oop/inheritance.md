@@ -3,258 +3,186 @@ id: inheritance
 title: Inheritance
 sidebar_label: Inheritance
 sidebar_position: 6
-tags: [c++, inheritance, polymorphism, oop]
+tags: [c++, inheritance, base-class, derived-class, name-hiding, oop]
 ---
 
 # Inheritance
 
-Inheritance lets you create new classes based on existing ones, reusing code and establishing "is-a" relationships. Derived classes inherit members from base classes and can add new functionality or override existing behavior.
+A **derived class** is declared with one or more **base classes**: `class Dog : public Animal`. Every
+`Dog` object contains a complete `Animal` object inside it, the **base-class subobject**, followed by
+`Dog`'s own members. The derived class gets the base's members without re-declaring them, and with
+`public` inheritance a `Dog&` can be used wherever an `Animal&` is expected. That substitutability
+is what makes [virtual functions](./virtual-functions.md) useful.
 
-:::info[Base and Derived]
-**Base class** (parent) provides common functionality  
-**Derived class** (child) inherits and extends or specializes
-:::
+This page covers the mechanics of single inheritance: how a derived class is declared and
+constructed, the derived-to-base conversion, and how names from the base are found or hidden.
+Other pages cover the neighbouring topics:
 
-## Basic Inheritance
+- [Access control](./access-control.md) owns `public` / `protected` /
+  `private` inheritance and what each does to the base's members.
+- [Virtual functions](./virtual-functions.md) owns overriding, `override`/`final`, abstract classes
+  and virtual destructors.
+- [Multiple inheritance](./multiple-inheritance.md) owns several bases, diamonds and `virtual` bases.
+- [Constructors and destructors](./constructors-and-destructors.md) owns the full
+  construction/destruction order.
 
-```cpp showLineNumbers 
+**Prerequisites:** [Access control](./access-control.md),
+[constructors and destructors](./constructors-and-destructors.md).
+
+## Declaring a derived class
+
+```cpp title="inheritance.cpp" showLineNumbers
+#include <iostream>
+#include <string>
+#include <utility>
+
 class Animal {
+public:
+    explicit Animal(std::string name) : name_(std::move(name)) {}
+    void eat() const { std::cout << name_ << " eats\n"; }
+    void move(int metres) const { std::cout << name_ << " moves " << metres << " m\n"; }
 protected:
-    std::string name;
-    
-public:
-    Animal(std::string n) : name(n) {}
-    
-    void eat() { std::cout << name << " is eating\n"; }
-};
-
-class Dog : public Animal {  // Dog inherits from Animal
-public:
-    Dog(std::string n) : Animal(n) {}  // Call base constructor
-    
-    void bark() { std::cout << name << " says woof!\n"; }
-};
-
-Dog d("Buddy");
-d.eat();   // Inherited from Animal
-d.bark();  // Defined in Dog
-```
-
-**Key points:**
-- Dog has everything Animal has plus its own stuff
-- `protected` members accessible in derived class
-- Must call base constructor in derived constructor initializer list
-
-## Access Control in Inheritance
-
-The inheritance specifier affects how base members appear in derived class:
-
-```cpp showLineNumbers 
-class Base {
-public:    int pub;
-protected: int prot;
-private:   int priv;
-};
-
-// Public inheritance (most common)
-class Derived1 : public Base {
-    // pub stays public
-    // prot stays protected
-    // priv inaccessible
-};
-
-// Protected inheritance (rare)
-class Derived2 : protected Base {
-    // pub becomes protected
-    // prot stays protected  
-    // priv inaccessible
-};
-
-// Private inheritance (implementation reuse)
-class Derived3 : private Base {
-    // pub becomes private
-    // prot becomes private
-    // priv inaccessible
-};
-```
-
-**Public inheritance** = "is-a" relationship (Dog IS-A Animal)  
-**Private inheritance** = "implemented-in-terms-of" (rare, prefer composition)
-
-## Virtual Functions
-
-Virtual functions enable polymorphism - calling the right function based on actual object type:
-
-```cpp showLineNumbers 
-class Shape {
-public:
-    virtual void draw() {  // virtual = can be overridden
-        std::cout << "Drawing shape\n";
-    }
-    
-    virtual ~Shape() = default;  // Always virtual destructor!
-};
-
-class Circle : public Shape {
-public:
-    void draw() override {  // override = replacing base version
-        std::cout << "Drawing circle\n";
-    }
-};
-
-Shape* s = new Circle();
-s->draw();  // "Drawing circle" (calls Circle's version!)
-delete s;   // Calls Circle's destructor (virtual!)
-```
-
-**Without virtual:** Calls base class version (static binding)  
-**With virtual:** Calls actual object's version (dynamic binding)
-
-## Pure Virtual and Abstract Classes
-
-Pure virtual functions have no implementation and make class abstract:
-
-```cpp showLineNumbers 
-class Shape {
-public:
-    virtual void draw() = 0;  // = 0 means pure virtual
-    virtual double area() = 0;
-    
-    virtual ~Shape() = default;
-};
-
-// Shape s;  // Error: can't instantiate abstract class
-
-class Rectangle : public Shape {
-public:
-    void draw() override { /* must implement */ }
-    double area() override { return width * height; }
-    
+    const std::string& name() const { return name_; }
 private:
-    double width, height;
+    std::string name_;
 };
 
-Rectangle r;  // OK: all pure virtuals implemented
+class Dog : public Animal {
+public:
+    using Animal::Animal;                       // inherit Animal(std::string)
+    void bark() const { std::cout << name() << " barks\n"; }
+};
+
+int main() {
+    Dog d{"Rex"};
+    d.eat();
+    d.bark();
+    Animal& a = d;      // Dog& -> Animal& is implicit
+    a.move(3);
+}
 ```
 
-Abstract classes define interfaces that derived classes must implement.
-
-## Override and Final
-
-Modern C++ keywords make intent explicit:
-
-```cpp showLineNumbers 
-class Base {
-public:
-    virtual void foo() {}
-    virtual void bar() {}
-};
-
-class Derived : public Base {
-public:
-    void foo() override {  // Explicitly overriding
-        // If foo() doesn't exist in Base, compiler error
-    }
-    
-    void bar() final {  // final = can't override further
-        // No further derived class can override bar()
-    }
-    
-    // void baz() override {}  // Error: nothing to override
-};
-
-class MoreDerived : public Derived {
-    // void bar() override {}  // Error: bar is final
-};
+```text
+Rex eats
+Rex barks
+Rex moves 3 m
 ```
 
-## Constructor and Destructor Order
+Points the example shows:
 
-```cpp showLineNumbers 
-class Base {
-public:
-    Base() { std::cout << "Base constructor\n"; }
-    ~Base() { std::cout << "Base destructor\n"; }
+- `Dog` calls `eat()` and `move()` as if it had declared them. They are members of the `Animal`
+  subobject, found by name lookup in the base.
+- `name_` is `private` in `Animal`, so `Dog` cannot touch it. `Dog` uses the `protected` accessor
+  instead. Keeping data `private` and giving derived classes a narrow `protected` interface lets the
+  base keep its invariants.
+- `using Animal::Animal;` inherits the base's constructors *(C++11)*. Without it, `Dog` would have
+  to write `explicit Dog(std::string n) : Animal(std::move(n)) {}`. Either way, the base subobject
+  is always constructed before the derived class's members and body, and destroyed after them. The
+  details are on [constructors and destructors](./constructors-and-destructors.md).
+- `class` defaults to `private` inheritance and `struct` to `public`, so write the keyword
+  explicitly for `class`.
+
+## What a derived object looks like
+
+<Diagram title="A Dog object" caption="The Animal subobject comes first in practice; Dog's own members follow. Exact placement is up to the ABI." accent="blue">
+  <DiagramGroup label="Dog">
+    <DiagramNode title="Animal subobject" accent>name_ (std::string)</DiagramNode>
+    <DiagramNode title="Dog's own members">none in this example</DiagramNode>
+  </DiagramGroup>
+</Diagram>
+
+Because the base subobject is a real `Animal`, converting a `Dog*` to an `Animal*` (or `Dog&` to
+`Animal&`) is implicit and just yields the address of that subobject. With single, non-virtual
+inheritance the address usually does not change. With [multiple
+inheritance](./multiple-inheritance.md) it can. How the compiler places bases, members and
+vtable pointers is covered in [class layout](./class-layout.md).
+
+The conversion only works where the base is **accessible**: for `private` or `protected`
+inheritance, code outside the class cannot convert `Derived*` to `Base*`. The opposite direction,
+base to derived, is never implicit. Use `static_cast` when you know the dynamic type, or
+`dynamic_cast` to check it at run time
+(see [RTTI](./virtual-functions.md#rtti-dynamic_cast-and-typeid)).
+
+Copying a `Dog` *into* an `Animal` by value copies only the `Animal` subobject. That is
+[object slicing](./object-slicing.md), and it is why polymorphic objects are handled through
+references and pointers.
+
+## Name lookup and name hiding
+
+A name used in a derived class is looked up in the derived class first and only then in its bases.
+Lookup stops at the first scope that declares the name. **Overload resolution happens only after
+that**, among the candidates from that one scope. So a member function in the derived class
+**hides every base member with the same name**, whatever their parameter lists:
+
+```cpp title="name_hiding.cpp" showLineNumbers
+#include <iostream>
+
+struct Base {
+    void f(int)    { std::cout << "Base::f(int)\n"; }
+    void f(double) { std::cout << "Base::f(double)\n"; }
 };
 
-class Derived : public Base {
-public:
-    Derived() { std::cout << "Derived constructor\n"; }
-    ~Derived() { std::cout << "Derived destructor\n"; }
+struct Hides : Base {
+    void f(const char*) { std::cout << "Hides::f(const char*)\n"; }
 };
 
-Derived d;
-// Output:
-// Base constructor
-// Derived constructor
-// Derived destructor  
-// Base destructor
+struct Unhides : Base {
+    using Base::f;                               // bring both Base::f back
+    void f(const char*) { std::cout << "Unhides::f(const char*)\n"; }
+};
+
+int main() {
+    Hides h;
+    h.f("x");
+    // h.f(1);        // error: Hides::f(const char*) hides every Base::f
+    h.Base::f(1);     // a qualified name still reaches it
+    Unhides u;
+    u.f(1);
+    u.f(2.5);
+    u.f("x");
+}
 ```
 
-**Construction:** Base → Derived (bottom-up)  
-**Destruction:** Derived → Base (top-down, reverse order)
-
-## Virtual Destructors
-
-Always make base class destructor virtual if you'll delete through base pointer:
-
-```cpp showLineNumbers 
-class Base {
-public:
-    ~Base() { std::cout << "~Base\n"; }  // Not virtual!
-};
-
-class Derived : public Base {
-    int* data;
-public:
-    Derived() : data(new int[100]) {}
-    ~Derived() { delete[] data; std::cout << "~Derived\n"; }
-};
-
-Base* ptr = new Derived();
-delete ptr;  // Only calls ~Base, not ~Derived! Memory leak!
-
-// Fix: virtual destructor
-class Base {
-public:
-    virtual ~Base() { std::cout << "~Base\n"; }
-};
-// Now delete ptr calls both destructors correctly
+```text
+Hides::f(const char*)
+Base::f(int)
+Base::f(int)
+Base::f(double)
+Unhides::f(const char*)
 ```
 
-## Slicing Problem
+`h.f(1)` does not fall back to `Base::f(int)`. Lookup found `f` in `Hides` and stopped, and
+`const char*` cannot be initialized from `1`. The two fixes are a **using-declaration**
+(`using Base::f;`), which adds the base overloads to the derived scope so all of them take part in
+overload resolution, or a qualified call (`h.Base::f(1)`). The same hiding rule applies to data
+members and nested types.
 
-Copying derived object to base object "slices off" derived parts:
+Hiding is different from overriding. A derived function with the same signature as a base
+**virtual** function overrides it and takes part in dynamic dispatch. A function with the same name
+and any signature that does not override anything only hides. Marking intended overrides with
+`override` makes the compiler tell the two apart for you (see
+[virtual functions](./virtual-functions.md#override-and-final)).
 
-```cpp showLineNumbers 
-class Base {
-public:
-    int x = 1;
-    virtual void print() { std::cout << "Base\n"; }
-};
+A using-declaration can also change the access of an inherited member, for example to make a
+`protected` base function `public` in the derived class. That is covered on
+[access control](./access-control.md).
 
-class Derived : public Base {
-public:
-    int y = 2;
-    void print() override { std::cout << "Derived\n"; }
-};
+## When to inherit
 
-Derived d;
-Base b = d;  // Slicing! y is lost
+Public inheritance means "is a": every operation valid on the base must make sense on the derived
+object, and code written against `Animal&` must keep working when handed a `Dog`. When that is not
+true, or when you only want to reuse an implementation, a data member (composition) is usually the
+better tool. It doesn't expose the base's interface, doesn't allow the derived-to-base conversion,
+and can be replaced without changing the class's public type.
 
-b.print();  // "Base" (not "Derived"!)
-// Only Base part was copied, Derived part lost
-```
+Inheritance without virtual functions is still useful: mixin and policy bases, empty bases that
+cost no space under the [empty base optimization](./class-layout.md),
+and the [CRTP](../13-idioms-and-design/03-crtp.md). Such a base should not have a public
+non-virtual destructor if users might `delete` a derived object through a base pointer. Make it
+`protected`, or make it virtual (see [virtual destructors](./virtual-functions.md#virtual-destructors)).
 
-**Solution:** Use pointers or references to maintain polymorphism.
+## References
 
-:::success[Inheritance Checklist]
-
-**public inheritance** = is-a relationship  
-**virtual functions** = runtime polymorphism  
-**override keyword** = catch typos at compile-time  
-**virtual destructor** = essential for base classes  
-**Pure virtual (=0)** = defines interface  
-**final keyword** = prevent further overriding  
-**Avoid slicing** = use pointers/references for polymorphism
-:::
+- [cppreference: Derived classes](https://en.cppreference.com/w/cpp/language/derived_class)
+- [cppreference: Unqualified name lookup](https://en.cppreference.com/w/cpp/language/unqualified_lookup)
+- [cppreference: Using-declaration](https://en.cppreference.com/w/cpp/language/using_declaration)
