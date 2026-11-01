@@ -28,7 +28,7 @@ type:
 
 | Operation | Signature | Runs for |
 |---|---|---|
-| Copy constructor | `T(const T&)` | `T b = a;`, `T b(a);`, pass/return by value from an lvalue |
+| Copy constructor | `T(const T&)` | `T b = a;`, `T b(a);`, pass by value from an lvalue |
 | Move constructor | `T(T&&)` | the same forms when the source is an rvalue |
 | Copy assignment | `T& operator=(const T&)` | `b = a;` with an existing `b` |
 | Move assignment | `T& operator=(T&&)` | `b = std::move(a);`, `b = make();` |
@@ -202,7 +202,7 @@ location. This is **copy elision**, and it comes in two kinds.
   an optimization but the meaning of a prvalue (temporary materialization), so it works even for
   types with deleted copy and move constructors.
 - **Named return value optimization (NRVO).** `return local;` where `local` is a non-volatile
-  automatic object of the return type *may* be constructed directly in the caller's storage. It is
+  automatic object (not a function parameter) of the return type *may* be constructed directly in the caller's storage. It is
   permitted, not required. When it does not happen, the return uses the move constructor (the
   returned name is treated as an rvalue), falling back to copy only if there is no move.
 
@@ -246,18 +246,8 @@ GCC and Clang apply NRVO here even without optimization, but that is a compiler 
 (`-fno-elide-constructors` turns it off for NRVO, not for the C++17 guaranteed case). The last case
 returns an expression that is not a plain name, so neither elision nor the implicit move applies.
 
-Because guaranteed elision is about prvalues, this compiles since C++17 even though the type can be
-neither copied nor moved:
-
-```cpp title="non_movable.cpp" showLineNumbers
-struct NonMovable {
-    NonMovable() = default;
-    NonMovable(const NonMovable&) = delete;
-    NonMovable(NonMovable&&) = delete;
-};
-NonMovable make() { return NonMovable{}; }   // OK since C++17: no copy or move happens
-int main() { NonMovable n = make(); (void)n; }
-```
+Because guaranteed elision is about prvalues, it compiles since C++17 even for a type that can be
+neither copied nor moved (see the `Pinned` example on the page below).
 
 The full value-category story behind this, including temporary materialization, is on the
 [glvalue, prvalue, xvalue](../03-types-and-values/value-categories/glvalue-prvalue-xvalue.md) page.

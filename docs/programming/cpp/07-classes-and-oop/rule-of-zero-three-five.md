@@ -73,7 +73,6 @@ struct MoveOnly { MoveOnly() = default; MoveOnly(MoveOnly&&) noexcept {} };
 
 // Moves of DtorOnly and CopyOnly silently fall back to copying:
 static_assert(std::is_move_constructible_v<DtorOnly>);    // satisfied by the copy ctor
-static_assert(!std::is_trivially_move_constructible_v<DtorOnly>);
 static_assert(std::is_move_constructible_v<CopyOnly>);    // also the copy ctor
 // Declaring a move constructor deletes the implicit copy operations
 // and suppresses the implicit move assignment:
@@ -164,70 +163,29 @@ C++11 added the move operations, and the generation table shows why the rule gre
 five: declaring a destructor or copy operation quietly removes the moves. A class that owns a raw
 resource writes all five:
 
-```cpp title="rule_of_five.cpp" showLineNumbers
-#include <algorithm>
+```cpp title="rule_of_five.cpp (fragment: declarations only)" showLineNumbers
 #include <cstddef>
-#include <utility>
 
 class Buffer {
 public:
-    explicit Buffer(std::size_t n) : size_(n), data_(new char[n]{}) {}
-
-    ~Buffer() { delete[] data_; }                                     // 1
-
-    Buffer(const Buffer& other)                                       // 2
-        : size_(other.size_), data_(new char[other.size_]) {
-        std::copy_n(other.data_, size_, data_);
-    }
-
-    Buffer& operator=(const Buffer& other) {                          // 3
-        if (this != &other) {
-            char* fresh = new char[other.size_];   // allocate first: if this throws,
-            std::copy_n(other.data_, other.size_, fresh);   // *this is unchanged
-            delete[] data_;
-            data_ = fresh;
-            size_ = other.size_;
-        }
-        return *this;
-    }
-
-    Buffer(Buffer&& other) noexcept                                   // 4
-        : size_(std::exchange(other.size_, 0)),
-          data_(std::exchange(other.data_, nullptr)) {}
-
-    Buffer& operator=(Buffer&& other) noexcept {                      // 5
-        if (this != &other) {
-            delete[] data_;
-            size_ = std::exchange(other.size_, 0);
-            data_ = std::exchange(other.data_, nullptr);
-        }
-        return *this;
-    }
-
-    std::size_t size() const { return size_; }
+    explicit Buffer(std::size_t n);
+    ~Buffer();                                      // 1: release the resource
+    Buffer(const Buffer& other);                    // 2: deep copy
+    Buffer& operator=(const Buffer& other);         // 3: deep copy, strong guarantee
+    Buffer(Buffer&& other) noexcept;                // 4: steal, leave other empty
+    Buffer& operator=(Buffer&& other) noexcept;     // 5: release own, then steal
+    std::size_t size() const;
 
 private:
-    std::size_t size_;   // declared before data_, so initialized first
+    std::size_t size_;
     char* data_;
 };
-
-int main() {
-    Buffer a(100), b(10);
-    b = a;
-    Buffer c = std::move(a);
-    a = std::move(c);
-    return static_cast<int>(a.size() + b.size() + c.size()) - 200;   // 0
-}
 ```
 
-Details that each line above gets right:
-
-- `size_` is declared before `data_`, because members are initialized in declaration order, not
-  initializer-list order. With the order reversed, `new char[size_]` would read an uninitialized
-  `size_`.
-- Copy assignment allocates before it frees, so a throwing `new` leaves `*this` intact. Deleting
-  first and then allocating would leave a dangling pointer on failure.
-- Both moves are `noexcept` so containers use them ([why](./copy-and-move-semantics.md#why-move-operations-should-be-noexcept)).
+The definitions of all five, with the reasoning for each, are on the
+[copy and move semantics](./copy-and-move-semantics.md) page, which owns what the operations do.
+This page owns which ones to declare. One declaration-level detail matters here: both moves are
+`noexcept` so containers use them ([why](./copy-and-move-semantics.md#why-move-operations-should-be-noexcept)).
 
 A single by-value `operator=(Buffer other)` with a `noexcept` swap can replace both assignment
 operators; that is the [copy-and-swap idiom](../13-idioms-and-design/05-copy-and-swap.md).
