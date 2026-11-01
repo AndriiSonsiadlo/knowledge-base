@@ -31,7 +31,7 @@ passing callables to algorithms in [Algorithms](../09-standard-library/algorithm
 ```
 
 - **Captures** list which enclosing variables the closure stores and how. `[]` captures nothing.
-- **Parameters** work as for any function. The `()` may be omitted when empty (`[] { ... }`).
+- **Parameters** work as for any function. The `()` may be omitted when empty (`[] { ... }`); with specifiers, only since C++23.
 - **Specifiers** include `mutable`, `constexpr` / `consteval`, `noexcept`, and `static` *(C++23)*.
 - **Return type** is deduced from `return` statements unless given with `->`.
 
@@ -142,11 +142,11 @@ struct Button {
     }
 };
 
-int main() { std::cout << Button{}.handler() << '\n'; }   // OKOK
+int main() { std::cout << Button{}.handler() << '\n'; }   // OK
 ```
 
 `[=]` used to capture `this` implicitly, which hid the fact that members were accessed by pointer.
-That implicit capture is **deprecated in C++20**; GCC 15 and Clang 21 warn about it under `-Wall`
+That implicit capture is **deprecated in C++20**; GCC 15 and Clang 21 warn about it by default in C++20 mode
 (`-Wdeprecated` / `-Wdeprecated-this-capture`). Write `[=, this]` or `[*this]` explicitly.
 
 ### `mutable`
@@ -162,7 +162,7 @@ A reference capture, `[this]`, or a captured raw pointer does not extend any lif
 closure outlives the referenced object, calling it is undefined behaviour. This happens when a lambda
 is returned, stored as a callback, or handed to another thread:
 
-```cpp title="lifetime.cpp" showLineNumbers
+```cpp title="lifetime.cpp (compile with -std=c++23)" showLineNumbers
 #include <functional>
 #include <memory>
 #include <iostream>
@@ -197,7 +197,7 @@ or with an init-capture that owns what it needs, for example a `std::shared_ptr`
 
 ## Generic, template and recursive lambdas
 
-```cpp title="generic.cpp" showLineNumbers
+```cpp title="generic.cpp (compile with -std=c++23)" showLineNumbers
 #include <iostream>
 #include <string>
 #include <vector>

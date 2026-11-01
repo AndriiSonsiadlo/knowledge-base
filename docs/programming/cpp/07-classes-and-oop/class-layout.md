@@ -26,8 +26,7 @@ inheritance.
 
 <Diagram title="Parts of a class object" caption="Typical Itanium ABI order for a class with one polymorphic base. The vptr is shared with the primary base." accent="blue">
   <DiagramRow>
-    <DiagramNode title="vptr" accent>Present if the class or a base has virtual functions</DiagramNode>
-    <DiagramNode title="Base subobject">Base members, in base declaration order</DiagramNode>
+    <DiagramNode title="Base subobject" accent>Base members, in base declaration order; holds the shared vptr if the base is polymorphic</DiagramNode>
     <DiagramNode title="Own members">Declaration order, with padding</DiagramNode>
     <DiagramNode title="Tail padding" dashed>Rounds sizeof up to a multiple of alignof</DiagramNode>
   </DiagramRow>
