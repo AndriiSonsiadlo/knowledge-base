@@ -60,7 +60,7 @@ copyable and support `<`. Nothing states that requirement until you add a constr
 | Kind | Example | Argument |
 |---|---|---|
 | Type | `template <typename T>` | any type: `int`, `std::string`, `int*` |
-| Non-type (constant) | `template <int N>`, `template <std::size_t N>` | a constant expression of that type. Since C++20 also floating-point and literal class types |
+| Non-type (constant) | `template <int N>`, `template <std::size_t N>` | a constant expression of that type. Since C++20 also floating-point types and *structural* class types (all bases and non-static data members public and non-mutable, recursively structural) |
 | Template template | `template <template <typename> class C>` | a class template, see [Class Templates](./class-templates.md#default-arguments-and-template-template-parameters) |
 | Pack | `template <typename... Ts>` | zero or more arguments, see [Variadic Templates](./variadic-templates.md) |
 
@@ -96,7 +96,7 @@ int main() {
 When a call needs `larger<int>` and no such function exists yet, the compiler **implicitly
 instantiates** it: it substitutes `int` for `T` in the declaration and body, and compiles the result
 as a normal function. Each translation unit that uses `larger<int>` instantiates its own copy. The
-copies are emitted as weak/COMDAT symbols, so the linker keeps one (the same mechanism as
+copies are exempt from the one definition rule, so the linker may keep one; on ELF and COFF toolchains (GCC, Clang, MSVC) they are emitted as weak/COMDAT symbols (the same mechanism as
 [inline functions](../04-functions-and-call-mechanics/inline-functions.md)).
 
 <Diagram title="One template, several functions" caption="Each set of template arguments produces its own function. The template itself produces no code." accent="blue">
@@ -227,10 +227,8 @@ int main() {
 ```
 
 An explicit specialization `template <> const char* larger(const char*, const char*)` would also
-work here, but specializations do not take part in overload ranking: the primary template is chosen
-first and the specialization only replaces its body. That makes them easy to bypass by accident.
-[Full Specialization](./specialization/full-specialization.md) covers when specializing is the right
-tool.
+work here, but specializations don't take part in overload resolution; see
+[Full Specialization](./specialization/full-specialization.md#prefer-overloading-for-function-templates).
 
 ## Pitfalls
 

@@ -95,7 +95,7 @@ right value instead of default-constructing it and then assigning. A **default m
 (`int id_ = 0;` in the class body) supplies the value for constructors whose list does not mention
 that member, so simple defaults are written once instead of in every constructor.
 
-## Construction and destruction order {#construction-order}
+## Construction and destruction order \{#construction-order\}
 
 The order in which parts are initialized is fixed by the class definition, **not** by the order you
 write the initializer list:
