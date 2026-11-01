@@ -167,7 +167,7 @@ int main() {
 ```
 
 This relies on `&&` evaluating left to right, which it guarantees. Once the logic gets this
-involved, a loop over an array is often clearer: `for (T x : {rest...})`, if all elements share a type.
+involved, a loop is often clearer: `for (T x : std::initializer_list<T>{rest...})`, if all elements share a type.
 
 ## Folds in constraints
 

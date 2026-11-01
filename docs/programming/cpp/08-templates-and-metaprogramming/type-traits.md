@@ -49,7 +49,7 @@ requires inside a template (before C++20 relaxed some of those cases).
 ## Query traits
 
 Every snippet below is one compiled file (`traits.cpp`, GCC 15 and Clang 21, `-std=c++23`); each
-line is a `static_assert` that holds.
+line is a `static_assert` that holds (the `sizeof(long)` line on LP64 platforms, not Windows).
 
 ```cpp title="traits.cpp" showLineNumbers
 #include <string>
@@ -132,7 +132,8 @@ Traits are consumed in three places: `if constexpr` (choose code), `static_asser
 with a readable message), and constraints ([`enable_if`](./sfinae-and-enable-if.md) or
 [`requires`](./concepts-and-requires.md)) that choose between overloads.
 
-```cpp title="using_traits.cpp" showLineNumbers {7,17-18}
+```cpp title="using_traits.cpp" showLineNumbers {8,17-18}
+#include <cstddef>
 #include <cstring>
 #include <string>
 #include <type_traits>

@@ -268,7 +268,7 @@ How the match works for `has_size<std::vector<int>>`, written as `has_size<std::
 after the default argument is filled in:
 
 1. The specialization's second argument is `void_t<decltype(...)>`. For a vector the expression is
-   valid, so it is `void`, matching the `void` the user's type was given. The specialization is more
+   valid, so it is `void`, which matches the defaulted second argument `void`. The specialization is more
    specialized than the primary, so it wins: `true_type`.
 2. For `int`, `std::declval<const int&>().size()` is invalid. Substitution into the specialization
    fails, the specialization is discarded (SFINAE applies to partial specialization matching too), and
