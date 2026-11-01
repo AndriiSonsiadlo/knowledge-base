@@ -2,216 +2,209 @@
 id: object-slicing
 title: Object Slicing
 sidebar_label: Object Slicing
-sidebar_position: 10
-tags: [c++, object-slicing, polymorphism, pitfalls]
+sidebar_position: 9
+tags: [c++, object-slicing, polymorphism, inheritance, pitfalls]
 ---
 
 # Object Slicing
 
-Object slicing occurs when you copy a derived class object to a base class object. The derived parts are "sliced off" and lost.
+**Object slicing** happens when a derived object is copied into an object of a base type. The base
+copy constructor or copy assignment only knows about the base subobject, so it copies that part and
+ignores the rest. The result is a plain base object: the derived members are gone, and virtual calls
+on it run the base versions. Nothing about it is an error to the compiler, which is why it is a
+common bug in polymorphic code. This page is the canonical home for slicing; how virtual dispatch
+works is on [Virtual Functions and vtables](./virtual-functions.md).
 
-:::info[The Slicing Problem]
-Copying derived object to base object only copies the base part. Derived data and virtual function overrides are lost!
-:::
+**Prerequisites:** [Inheritance](./inheritance.md), [Virtual Functions and vtables](./virtual-functions.md),
+[Copy and Move Semantics](./copy-and-move-semantics.md).
 
-The root cause is always the same: handling a polymorphic object **by value**. A `Base` variable is
-exactly `Base`-sized, so assigning a `Derived` into it copies only the base subobject and leaves a
-plain `Base` (vtable included) — the override is gone. The cure is equally simple: pass and store
-polymorphic types by **reference, pointer, or smart pointer**, never by value. See
-[Virtual Functions](./virtual-functions.md).
+## How a copy slices
 
-## Basic Slicing Example
+A derived object contains its base as a subobject ([class layout](./class-layout.md)). A variable of
+type `Animal` has room for exactly one `Animal`, and its dynamic type is always `Animal`. Copying a
+`Dog` into it calls `Animal(const Animal&)`, which binds the reference to the `Animal` subobject of
+the `Dog` and copies that.
 
-```cpp showLineNumbers 
-class Animal {
-public:
+<Diagram title="Animal sliced = dog;" caption="Only the base subobject is copied. The new object's vptr points to Animal's vtable." accent="amber">
+  <DiagramGroup label="Dog d">
+    <DiagramNode title="Animal subobject" accent>vptr → Dog vtable, legs</DiagramNode>
+    <DiagramNode title="Dog members">breed</DiagramNode>
+  </DiagramGroup>
+  <DiagramArrow label="Animal(const Animal&)" />
+  <DiagramGroup label="Animal sliced">
+    <DiagramNode title="Animal object" accent>vptr → Animal vtable, legs copied</DiagramNode>
+    <DiagramNode title="breed" dashed>not copied: no room, not known to Animal</DiagramNode>
+  </DiagramGroup>
+</Diagram>
+
+The constructor sets the new object's vptr for its own class, so virtual calls on `sliced` go to
+`Animal`. The vptr is an implementation mechanism (the standard only says the object's dynamic type
+is `Animal`), but it explains why the override "disappears".
+
+```cpp title="slicing.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <string>
+#include <vector>
+
+struct Animal {
+    virtual ~Animal() = default;
+    virtual const char* speak() const { return "..."; }
     int legs = 4;
-    virtual void speak() { std::cout << "Animal sound\n"; }
 };
 
-class Dog : public Animal {
+struct Dog : Animal {
+    const char* speak() const override { return "Woof"; }
+    std::string breed = "Labrador";
+};
+
+void by_value(Animal a)      { std::printf("by value:     %s\n", a.speak()); }
+void by_ref(const Animal& a) { std::printf("by reference: %s\n", a.speak()); }
+
+int main() {
+    Dog d;
+    Animal sliced = d;                     // copies only the Animal subobject
+    std::printf("sliced:       %s\n", sliced.speak());
+    by_value(d);
+    by_ref(d);
+
+    std::vector<std::unique_ptr<Animal>> zoo;
+    zoo.push_back(std::make_unique<Dog>());
+    std::printf("unique_ptr:   %s\n", zoo[0]->speak());
+}
+```
+
+Output (g++ 15, clang++ 21):
+
+```text
+sliced:       ...
+by value:     ...
+by reference: Woof
+unique_ptr:   Woof
+```
+
+## Where slicing happens
+
+Every place that copies or moves into a base-typed *object* slices:
+
+- **Initialization:** `Animal a = d;`, `Animal a(d);`, `Animal a{d};`.
+- **Pass by value:** a parameter of type `Animal` initialized from a `Dog`.
+- **Return by value:** a function returning `Animal` that returns a `Dog`.
+- **Containers of base objects:** `std::vector<Animal>::push_back(dog)` stores an `Animal`.
+- **Catch by value:** `catch (std::exception e)` slices a `std::runtime_error` and loses its
+  override of `what()`. Catch by `const&`.
+
+Moves slice the same way: `Animal a = std::move(d);` runs `Animal(Animal&&)` on the base part.
+
+## Assignment through a base reference
+
+Slicing also happens without creating a new object. Assigning through a base reference calls the
+base class's `operator=`, which is not virtual, so only the base members of the target are
+overwritten:
+
+```cpp title="partial_assign.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+
+struct Animal {
+    virtual ~Animal() = default;
+    Animal() = default;
+    Animal(const Animal&) = default;
+    Animal& operator=(const Animal&) = default;
+    std::string name;
+};
+
+struct Dog : Animal {
+    std::string breed;
+};
+
+int main() {
+    Dog rex;   rex.name = "Rex";   rex.breed = "Labrador";
+    Dog fido;  fido.name = "Fido"; fido.breed = "Beagle";
+
+    Animal& ref = rex;
+    ref = fido;            // Animal::operator=: copies name only
+    std::printf("%s the %s\n", rex.name.c_str(), rex.breed.c_str());
+}
+```
+
+Output: `Fido the Labrador`. `rex` is now half of each dog. This is often called **partial
+assignment**. It is worse than ordinary slicing because the result is an object of the right type
+in an inconsistent state.
+
+## Avoiding it
+
+1. **Handle polymorphic objects through references or pointers.** Take parameters as
+   `const Animal&` or `Animal&`, and store them as `std::unique_ptr<Animal>` (or
+   `std::shared_ptr` when ownership is shared, see [unique_ptr](../06-pointers-references-and-smart-pointers/unique-ptr.md)).
+2. **Catch exceptions by reference:** `catch (const std::exception& e)`.
+3. **Make the base impossible to copy from outside.** If a class is abstract, it cannot be
+   instantiated, so `Shape s = sq;` is already an error. Making the base's copy operations
+   `protected` also blocks partial assignment through a base reference, while derived classes can
+   still use them in their own copy operations. For a polymorphic copy, add a virtual `clone()`.
+
+```cpp title="no_slicing.cpp" showLineNumbers
+#include <memory>
+
+class Shape {
 public:
-    std::string breed = "Golden Retriever";
-    void speak() override { std::cout << "Woof!\n"; }
+    virtual ~Shape() = default;
+    virtual double area() const = 0;
+    virtual std::unique_ptr<Shape> clone() const = 0;
+
+protected:
+    Shape() = default;
+    Shape(const Shape&) = default;              // derived classes can still copy
+    Shape& operator=(const Shape&) = default;
 };
 
-Dog dog;
-dog.breed = "Labrador";
+class Square final : public Shape {
+public:
+    explicit Square(double s) : side_(s) {}
+    double area() const override { return side_ * side_; }
+    std::unique_ptr<Shape> clone() const override { return std::make_unique<Square>(*this); }
+private:
+    double side_;
+};
 
-Animal animal = dog;  // SLICING!
-// Only Animal part is copied
-// breed is lost!
-// speak() calls Animal's version!
-
-animal.speak();  // "Animal sound" - not "Woof!"
-// animal.breed;  // Error: Animal has no breed member
-```
-
-When you assign a Dog to an Animal, only the Animal parts are copied. The Dog-specific parts (breed member, overridden speak()) are gone.
-
-## Why Slicing Happens
-
-```cpp showLineNumbers 
-Animal animal = dog;
-// This is NOT polymorphic assignment!
-// It's copy construction: Animal(const Animal& other)
-// The copy constructor only knows how to copy Animal parts
-
-sizeof(Animal);  // 16 bytes
-sizeof(Dog);     // 48 bytes (Animal + Dog parts)
-// Can't fit a Dog into an Animal-sized space!
-```
-
-Base class copy constructor/assignment only handles base class members. It doesn't know about derived class parts.
-
-## Slicing with Functions
-
-Passing by value causes slicing:
-
-```cpp showLineNumbers 
-void processAnimal(Animal a) {  // Pass by value
-    a.speak();  // Always calls Animal::speak!
-}
-
-Dog dog;
-processAnimal(dog);  // "Animal sound" - sliced!
-// Dog is copied to Animal parameter, losing derived parts
-```
-
-## Preventing Slicing: Use Pointers
-
-```cpp showLineNumbers 
-void processAnimal(Animal* a) {  // Pointer
-    a->speak();  // Calls correct overridden version!
-}
-
-Dog dog;
-processAnimal(&dog);  // "Woof!" - no slicing!
-```
-
-Pointers and references preserve polymorphism. No copying, no slicing.
-
-## Preventing Slicing: Use References
-
-```cpp showLineNumbers 
-void processAnimal(const Animal& a) {  // Reference
-    a.speak();  // Calls correct overridden version!
-}
-
-Dog dog;
-processAnimal(dog);  // "Woof!" - no slicing!
-```
-
-References are usually the best choice for polymorphic parameters.
-
-## Slicing in Containers
-
-Storing objects (not pointers) in containers causes slicing:
-
-```cpp showLineNumbers 
-std::vector<Animal> animals;  // Stores Animal objects
-
-Dog dog;
-Cat cat;
-
-animals.push_back(dog);  // Sliced to Animal!
-animals.push_back(cat);  // Sliced to Animal!
-
-for (auto& a : animals) {
-    a.speak();  // All say "Animal sound"
+int main() {
+    Square sq(2.0);
+    Square copy = sq;                 // fine: copying the complete type
+    // Shape s = sq;                  // error: Shape is abstract and its copy ctor is protected
+    const Shape& ref = sq;
+    // Shape& r2 = copy; r2 = ref;    // error: Shape::operator= is protected
+    std::unique_ptr<Shape> p = ref.clone();   // polymorphic copy
+    return p->area() == copy.area() ? 0 : 1;
 }
 ```
 
-**Solution**: Store pointers (preferably smart pointers):
+Because `Shape` now declares a destructor and copy operations, it also controls which moves exist;
+see [Rule of 0/3/5](./rule-of-zero-three-five.md#polymorphic-base-classes).
 
-```cpp showLineNumbers 
-std::vector<std::unique_ptr<Animal>> animals;  // Pointers
+## Compiler diagnostics
 
-animals.push_back(std::make_unique<Dog>());
-animals.push_back(std::make_unique<Cat>());
+Neither GCC 15 (with `-Wall -Wextra -Weffc++`) nor Clang 21 (even with `-Weverything`) warns about
+the slicing copies in `slicing.cpp` above. Clang's `-Wdeprecated` reports the implicit copy
+constructor of `Animal` as deprecated (because `Animal` declares a destructor), which points at the
+copy but does not say "slicing". The one compiler warning aimed at slicing is GCC's
+`-Wcatch-value` (enabled by `-Wall`), which reports `catching polymorphic type 'class
+std::exception' by value`.
 
-for (auto& a : animals) {
-    a->speak();  // Calls correct overridden versions!
-}
+clang-tidy's `cppcoreguidelines-slicing` check does find the copies. On `slicing.cpp` (clang-tidy 21):
+
+```text
+22:21: warning: slicing object from type 'Dog' to 'Animal' discards 36 bytes of state [cppcoreguidelines-slicing]
+22:21: warning: slicing object from type 'Dog' to 'Animal' discards override 'speak' [cppcoreguidelines-slicing]
+24:14: warning: slicing object from type 'Dog' to 'Animal' discards 36 bytes of state [cppcoreguidelines-slicing]
+24:14: warning: slicing object from type 'Dog' to 'Animal' discards override 'speak' [cppcoreguidelines-slicing]
 ```
 
-## Assignment Slicing
+Even with tooling, the protected-copy design above is the reliable defense,
+because it turns the mistake into a compile error.
 
-```cpp showLineNumbers 
-Dog dog;
-Cat cat;
-Animal& ref = dog;  // Reference, no slicing
+## References
 
-ref = cat;  // Slicing!
-// Calls Animal::operator=(const Animal&)
-// Only copies Animal parts of cat into dog's Animal part
-// dog is still a Dog, but with corrupted Animal data!
-
-dog.speak();  // "Woof!" - still a Dog
-// But animal data is messed up from cat
-```
-
-Assignment through references still slices because it calls the base class assignment operator.
-
-## Copy Construction vs Assignment
-
-```cpp showLineNumbers 
-Dog dog;
-
-Animal a1 = dog;    // Copy construction: slicing
-Animal a2(dog);     // Copy construction: slicing
-Animal a3{dog};     // Copy construction: slicing
-
-Animal a4;
-a4 = dog;           // Copy assignment: slicing
-```
-
-All of these slice! They all invoke Animal's copy operations which only copy Animal parts.
-
-## Detecting Slicing
-
-Some compilers warn about slicing:
-
-```bash
-# GCC/Clang warnings
-g++ -Wextra -Wall file.cpp
-# warning: slicing object of type 'Dog' to 'Animal'
-
-# Enable more warnings
-g++ -Weffc++ file.cpp
-```
-
-## Real-World Example
-
-```cpp showLineNumbers 
-// Bad: slicing
-std::vector<Animal> zoo;
-zoo.push_back(Dog());   // Sliced!
-zoo.push_back(Cat());   // Sliced!
-zoo.push_back(Bird());  // Sliced!
-
-for (auto& animal : zoo) {
-    animal.speak();  // All say "Animal sound"
-}
-
-// Good: polymorphic collection
-std::vector<std::unique_ptr<Animal>> zoo;
-zoo.push_back(std::make_unique<Dog>());
-zoo.push_back(std::make_unique<Cat>());
-zoo.push_back(std::make_unique<Bird>());
-
-for (auto& animal : zoo) {
-    animal->speak();  // Each speaks correctly!
-}
-```
-
-:::success[Avoiding Slicing]
-
-**Problem** = copying derived to base loses derived parts  
-**Pass by value** = causes slicing  
-**Pass by pointer/reference** = preserves polymorphism  
-**Containers of objects** = slice  
-**Containers of pointers** = preserve polymorphism  
-**Smart pointers** = best for polymorphic collections  
-**Always use pointers/references** for polymorphic behavior
-:::
+- [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines), rules C.67
+  (a polymorphic class should suppress public copy/move) and C.145 (access polymorphic objects
+  through pointers and references), and E.15 (catch exceptions from a hierarchy by reference)
+- clang-tidy: [cppcoreguidelines-slicing](https://clang.llvm.org/extra/clang-tidy/checks/cppcoreguidelines/slicing.html)
