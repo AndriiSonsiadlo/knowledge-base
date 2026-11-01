@@ -34,6 +34,7 @@ any constructor suppresses that, and `= default` brings it back.
 ```cpp title="widget.cpp" showLineNumbers
 #include <iostream>
 #include <string>
+#include <utility>
 
 class Widget {
 public:
@@ -65,7 +66,7 @@ constructor body runs later, after every member already exists, so a statement s
 `name_ = name;` in the body is an *assignment* to an already-constructed string, not its
 initialization.
 
-The initializer list is required for anything that cannot be assigned or default-constructed:
+These must be initialized by the initializer list or by a default member initializer; they cannot be assigned in the body:
 
 - `const` members and reference members,
 - members and bases with no default constructor,
@@ -76,7 +77,7 @@ The initializer list is required for anything that cannot be assigned or default
 
 struct Config {
     Config(const std::string& path, int& counter)
-        : path(path), counter(counter), retries(3) {}   // the only way to set these
+        : path(path), counter(counter), retries(3) {}   // cannot be assigned in the body
     const std::string path;
     int& counter;
     const int retries;
@@ -94,7 +95,7 @@ right value instead of default-constructing it and then assigning. A **default m
 (`int id_ = 0;` in the class body) supplies the value for constructors whose list does not mention
 that member, so simple defaults are written once instead of in every constructor.
 
-## Construction and destruction order
+## Construction and destruction order {#construction-order}
 
 The order in which parts are initialized is fixed by the class definition, **not** by the order you
 write the initializer list:
@@ -177,11 +178,11 @@ read it before it has been set:
 
 ```cpp title="reorder.cpp" showLineNumbers
 struct Range {
+    int* data;   // declared first, so initialized first
     int  size;
-    int* data;
-    // Listed data-first, but size is declared first, so size is initialized first.
-    // Fine here because neither initializer reads the other member.
-    Range(int n) : data(new int[n]), size(n) {}
+    // Listed size-first, but data is initialized first and reads size too early.
+    // BUG: size is read before it is initialized (indeterminate value)
+    Range(int n) : size(n), data(new int[size]) {}
     ~Range() { delete[] data; }
 };
 
@@ -230,7 +231,7 @@ int main() {
 
 Make single-argument constructors `explicit` unless the conversion is genuinely lossless and
 expected (`std::string` from `const char*` is the classic intentional case). Copy and move
-constructors are not marked `explicit`. Since C++20, `explicit(condition)` makes it conditional,
+constructors should not be marked `explicit` (that breaks copy-initialization and return by value). Since C++20, `explicit(condition)` makes it conditional,
 which generic wrappers like `std::pair` use. How implicit conversions are ranked is covered in
 [Conversions and promotions](../03-types-and-values/conversions-and-promotions.md).
 

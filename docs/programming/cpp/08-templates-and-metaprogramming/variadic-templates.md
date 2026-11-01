@@ -2,261 +2,257 @@
 id: variadic-templates
 title: Variadic Templates
 sidebar_label: Variadic Templates
-sidebar_position: 6
-tags: [c++, templates, variadic-templates, cpp11]
+sidebar_position: 5
+tags: [c++, templates, variadic-templates, parameter-pack, pack-expansion, cpp11]
 ---
 
 # Variadic Templates
 
-Variadic templates accept any number of arguments of any types. They're the foundation for functions like `std::make_tuple`, `printf`, and perfect forwarding.
+A **variadic template** *(C++11)* takes any number of template arguments, zero included. It is how
+`std::tuple`, `std::make_unique`, `std::thread`'s constructor and `std::format` accept argument lists
+of arbitrary length and type, with full type checking and no C-style `...` varargs. This page is the
+canonical home for parameter packs, pack expansion and `sizeof...`. Reducing a pack with an operator
+has its own page, [fold expressions](./fold-expressions.md).
 
-:::info[Variable Number of Arguments]
-`...` = template parameter pack (any number of types)  
-Functions can accept 0, 1, 2, or any number of arguments!
-:::
+**Prerequisites:** [Function templates](./function-templates.md),
+[template argument deduction](./template-argument-deduction.md). Forwarding a pack uses
+[reference collapsing](../03-types-and-values/value-categories/reference-collapsing.md).
 
-The classic technique is **recursion**: peel one argument off the pack, handle it, then recurse on
-the rest, with a non-template (or empty) base case to stop. Since C++17, [fold
-expressions](./fold-expressions.md) collapse that whole pattern into a single line for reductions
-like "sum all" or "print all" — reach for a fold first, and fall back to recursion only when each
-element needs genuinely different handling.
+## Parameter packs
 
-## Basic Variadic Template
+A **template parameter pack** is declared with `...` before the name; it stands for zero or more
+template arguments. A **function parameter pack** is a function parameter whose type contains a
+template parameter pack.
 
-```cpp showLineNumbers 
-// Base case: no arguments
-void print() {
-    std::cout << "\n";
-}
+```cpp title="fragment"
+template <typename... Ts>          // Ts: template parameter pack (types)
+void f(Ts... args);                // args: function parameter pack
 
-// Recursive case: at least one argument
-template<typename T, typename... Args>
-void print(T first, Args... rest) {
-    std::cout << first << " ";
-    print(rest...);  // Recursive call with remaining args
-}
+template <int... Ns>               // a pack of values works too
+struct Ints {};
 
-print(1, 2, 3);              // "1 2 3"
-print("hello", 42, 3.14);    // "hello 42 3.14"
-print();                     // "" (calls base case)
+template <template <typename> class... Ms>   // and a pack of templates
+struct Templates {};
 ```
 
-**How it works:**
-- `typename... Args` = parameter pack (0 or more types)
-- `Args... rest` = expands to multiple parameters
-- `rest...` = expands pack in function call
+For `f(1, "a", 2.5)` deduction gives `Ts = {int, const char*, double}` and `args` is three
+parameters of those types. A pack is not a value or a type you can use on its own. The only things
+you can do with it are **expand** it and ask its size.
 
-## Parameter Pack Expansion
+## Pack expansion
 
-```cpp showLineNumbers 
-template<typename... Args>
-void forward(Args... args) {
-    // args... expands to: arg1, arg2, arg3, ...
-    process(args...);
-}
+A **pack expansion** is a *pattern* followed by `...`. The compiler instantiates the pattern once per
+pack element, replacing the pack with that element, and joins the results with commas. The pattern
+can be any expression or type that mentions the pack, not just the pack's name.
 
-forward(1, 2, 3);
-// Expands to: process(1, 2, 3);
-```
+| You write | `Ts = {int, double}`, `args = {a, b}` expands to |
+|---|---|
+| `g(args...)` | `g(a, b)` |
+| `g(h(args)...)` | `g(h(a), h(b))` |
+| `g(args * args...)` | `g(a * a, b * b)` |
+| `std::tuple<Ts...>` | `std::tuple<int, double>` |
+| `std::tuple<std::vector<Ts>...>` | `std::tuple<std::vector<int>, std::vector<double>>` |
+| `std::forward<Ts>(args)...` | `std::forward<int>(a), std::forward<double>(b)` |
 
-## Getting Pack Size
+Expansion is allowed only where the grammar has a comma-separated list: function arguments,
+template arguments, braced initializers, base-class lists, member initializer lists, lambda
+captures, `using` declarations *(C++17)*, and a few more. If two packs appear in one pattern, they
+are expanded in lockstep and must have the same length.
 
-```cpp showLineNumbers 
-template<typename... Args>
-void info(Args... args) {
-    std::cout << "Number of arguments: " << sizeof...(Args) << "\n";
-    std::cout << "Number of values: " << sizeof...(args) << "\n";
-}
+```cpp title="expansion.cpp" showLineNumbers
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <utility>
 
-info(1, 2, 3);        // 3
-info("hello", 3.14);  // 2
-info();               // 0
-```
+template <typename... Ts>
+constexpr std::size_t count(const Ts&...) { return sizeof...(Ts); }
 
-`sizeof...` is a compile-time operator that returns pack size.
-
-## Modern Approach: Fold Expressions (C++17)
-
-Much simpler than recursion!
-
-```cpp showLineNumbers 
-// Sum all arguments
-template<typename... Args>
-auto sum(Args... args) {
-    return (args + ...);  // Right fold: ((arg1 + arg2) + arg3) + ...
-}
-
-auto total = sum(1, 2, 3, 4, 5);  // 15
-
-// Print all arguments
-template<typename... Args>
-void print(Args... args) {
-    ((std::cout << args << " "), ...);
-    std::cout << "\n";
-}
-
-print(1, "hello", 3.14);  // "1 hello 3.14"
-```
-
-We'll cover fold expressions in detail in the next section!
-
-## Perfect Forwarding
-
-Variadic templates + forwarding = perfect forwarding:
-
-```cpp showLineNumbers 
-template<typename... Args>
-void wrapper(Args&&... args) {
-    // Forward all arguments preserving lvalue/rvalue-ness
-    actualFunction(std::forward<Args>(args)...);
-}
-
-int x = 42;
-wrapper(x, 100, std::string("hello"));
-// x forwarded as lvalue
-// 100 forwarded as rvalue
-// temporary string forwarded as rvalue
-```
-
-This is how `std::make_unique` and `std::make_shared` work!
-
-## Variadic Class Templates
-
-```cpp showLineNumbers 
-template<typename... Types>
-class Tuple {};
-
-// Specialization for non-empty tuple
-template<typename Head, typename... Tail>
-class Tuple<Head, Tail...> {
-    Head head;
-    Tuple<Tail...> tail;
-    
-public:
-    Tuple(Head h, Tail... t) : head(h), tail(t...) {}
-    
-    Head getHead() const { return head; }
-    Tuple<Tail...>& getTail() { return tail; }
-};
-
-Tuple<int, double, std::string> t(42, 3.14, "hello");
-```
-
-## Expanding in Different Contexts
-
-```cpp showLineNumbers 
-template<typename... Args>
-void example(Args... args) {
-    // Function call
-    func(args...);              // func(arg1, arg2, arg3)
-    
-    // Constructor initialization
-    MyClass obj(args...);       // MyClass(arg1, arg2, arg3)
-    
-    // Brace initialization
-    int arr[] = {args...};      // {arg1, arg2, arg3}
-    
-    // Template arguments
-    std::tuple<Args...> t(args...);
-}
-```
-
-## Processing Each Argument
-
-```cpp showLineNumbers 
-// C++17: Using fold expression
-template<typename... Args>
-void processAll(Args... args) {
-    (process(args), ...);  // Calls process() for each arg
-}
-
-// Pre-C++17: Using initializer list trick
-template<typename... Args>
-void processAll(Args... args) {
-    int dummy[] = {(process(args), 0)...};
-    (void)dummy;  // Avoid unused variable warning
-}
-
-processAll(1, 2, 3);
-// Calls: process(1), process(2), process(3)
-```
-
-## Variadic Constructor
-
-```cpp showLineNumbers 
-template<typename... Args>
-class Logger {
-    std::vector<std::string> messages;
-    
-public:
-    Logger(Args... args) {
-        (messages.push_back(std::to_string(args)), ...);
-    }
-    
-    void print() {
-        for (const auto& msg : messages) {
-            std::cout << msg << " ";
-        }
-        std::cout << "\n";
-    }
-};
-
-Logger log(1, 2, 3, 4);
-log.print();  // "1 2 3 4"
-```
-
-## Index Sequence
-
-Generating indices at compile-time for accessing tuple elements:
-
-```cpp showLineNumbers 
-template<size_t... Is>
-void printIndices(std::index_sequence<Is...>) {
-    ((std::cout << Is << " "), ...);
-}
-
-printIndices(std::make_index_sequence<5>{});
-// Output: 0 1 2 3 4
-```
-
-Used internally by standard library for tuple operations.
-
-## Real-World: make_unique
-
-```cpp showLineNumbers 
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
+template <typename T, typename... Args>
+std::unique_ptr<T> make(Args&&... args) {
     return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
-// Usage
-auto p1 = make_unique<std::string>(10, 'x');  // string(10, 'x')
-auto p2 = make_unique<std::vector<int>>(5, 42);  // vector(5, 42)
-```
-
-Perfect forwarding lets you pass constructor arguments through!
-
-## Type Constraints
-
-```cpp showLineNumbers 
-// C++20: Require all types satisfy a concept
-template<typename... Args>
-requires (std::integral<Args> && ...)
-auto sum(Args... args) {
-    return (args + ...);
+template <typename... Ts>
+auto squares(Ts... xs) {
+    return std::tuple<Ts...>(xs * xs...);         // pattern xs * xs, expanded per element
 }
 
-sum(1, 2, 3);      // OK: all ints
-// sum(1, 2.5, 3);   // Error: 2.5 is not integral
+int main() {
+    static_assert(count() == 0 && count(1, 'a', 2.0) == 3);
+    auto s = make<std::string>(3, 'x');           // std::string(3, 'x') == "xxx"
+    auto t = squares(2, 3.0);
+    return (*s == "xxx" && std::get<0>(t) == 4 && std::get<1>(t) == 9.0) ? 0 : 1;
+}
 ```
 
-:::success[Variadic Template Essentials]
+`sizeof...(Ts)` and `sizeof...(args)` are compile-time constants giving the number of elements.
+`make` is essentially `std::make_unique`: `Args&&...` is a pack of
+[forwarding references](./template-argument-deduction.md), and `std::forward<Args>(args)...` passes
+each argument on with its original value category.
 
-**Parameter pack** = `typename... Args` (0+ types)  
-**Pack expansion** = `args...` expands to multiple arguments  
-**sizeof...** = pack size at compile-time  
-**Fold expressions (C++17)** = `(args + ...)` simplifies operations  
-**Perfect forwarding** = `std::forward<Args>(args)...`  
-**Common use** = factory functions, wrappers, tuples  
-**Recursion vs folds** = prefer fold expressions when possible
-:::
+## Processing elements one at a time
+
+There is no way to index a function parameter pack directly before C++26 (P2662 pack indexing,
+`args...[0]`). The traditional technique is **recursion**: one overload takes the first element plus
+the rest as a pack, handles the first and calls itself on the rest. A non-template overload, or an
+`if constexpr` on `sizeof...`, stops it.
+
+```cpp title="recursive_print.cpp" showLineNumbers
+#include <iostream>
+
+void print() { std::cout << '\n'; }               // base case: empty pack
+
+template <typename T, typename... Rest>
+void print(const T& first, const Rest&... rest) {
+    std::cout << first;
+    if constexpr (sizeof...(rest) > 0) std::cout << ", ";
+    print(rest...);                               // recurse on the tail
+}
+
+int main() {
+    print(1, "two", 3.5);
+    print();
+}
+```
+
+```text
+1, two, 3.5
+
+```
+
+<Walkthrough title='print(1, "two", 3.5)' caption="Each call peels one element off the pack; the pack shrinks until the non-template base case matches.">
+  <Step title="First call">
+
+`T = int`, `Rest = {const char*, double}`. Prints `1, ` and calls `print("two", 3.5)`.
+
+  </Step>
+  <Step title="Second call">
+
+`T = const char*`, <StepChange>`Rest = {double}`</StepChange>. Prints `two, ` and calls `print(3.5)`.
+
+  </Step>
+  <Step title="Third call">
+
+`T = double`, <StepChange>`Rest = {}`</StepChange>. `sizeof...(rest)` is 0, so no comma. Calls `print()`.
+
+  </Step>
+  <Step title="Base case">
+
+The non-template `print()` is the only match for zero arguments. It prints the newline. Three
+template instantiations plus the base case were generated, one per pack length.
+
+  </Step>
+</Walkthrough>
+
+Each step is a separate instantiation, so long packs mean more compile time and, without inlining,
+more code. When the per-element work is the same operation every time, a
+[fold expression](./fold-expressions.md) *(C++17)* does it in one line with no recursion:
+`((std::cout << args), ...)`.
+
+## Indexing a pack with `std::index_sequence`
+
+To pair each element of a tuple with its position, generate a pack of indices and expand over it.
+`std::index_sequence<0, 1, ..., N-1>` *(C++14)* is an empty type whose only job is to carry that pack
+into a function, where deduction recovers it as `Is...`.
+
+```cpp title="print_tuple.cpp" showLineNumbers
+#include <cstddef>
+#include <iostream>
+#include <tuple>
+#include <utility>
+
+template <typename Tuple, std::size_t... Is>
+void print_tuple(const Tuple& t, std::index_sequence<Is...>) {
+    ((std::cout << (Is == 0 ? "" : " ") << std::get<Is>(t)), ...);
+    std::cout << '\n';
+}
+
+template <typename... Ts>
+void print_tuple(const std::tuple<Ts...>& t) {
+    print_tuple(t, std::index_sequence_for<Ts...>{});
+}
+
+int main() { print_tuple(std::tuple{1, "hi", 2.5}); }
+```
+
+```text
+1 hi 2.5
+```
+
+`std::index_sequence_for<Ts...>` is `std::make_index_sequence<sizeof...(Ts)>`. For a whole tuple,
+`std::apply(f, t)` *(C++17)* does this unpacking for you and calls `f(get<0>(t), get<1>(t), ...)`.
+
+## Variadic class templates
+
+A class template pack is usually consumed by a [partial specialization](./specialization/partial-specialization.md)
+that splits off the head, the type-level version of the recursive function above. This is the
+classic shape of a hand-written tuple (real `std::tuple` implementations use multiple inheritance
+instead, which is implementation-specific):
+
+```cpp title="mini_tuple.cpp" showLineNumbers
+#include <cstddef>
+// A minimal recursive tuple: one element plus the tuple of the rest.
+template <typename... Ts>
+struct Tuple {};                                  // empty pack: the end
+
+template <typename Head, typename... Tail>
+struct Tuple<Head, Tail...> {
+    Head head;
+    Tuple<Tail...> tail;
+};
+
+template <std::size_t I, typename Head, typename... Tail>
+constexpr auto& get(Tuple<Head, Tail...>& t) {
+    if constexpr (I == 0) return t.head;
+    else return get<I - 1>(t.tail);
+}
+
+int main() {
+    Tuple<int, double, char> t{1, {2.5, {'c', {}}}};
+    get<1>(t) = 4.0;
+    return (get<0>(t) == 1 && get<1>(t) == 4.0 && get<2>(t) == 'c') ? 0 : 1;
+}
+```
+
+<Diagram title="Tuple<int, double, char> as nested members" caption="Each level stores one element and the tuple of the remaining types; the empty Tuple<> ends the chain." accent="violet">
+  <DiagramNode title="Tuple<int, double, char>" accent>head: int</DiagramNode>
+  <DiagramArrow label="tail" />
+  <DiagramNode title="Tuple<double, char>">head: double</DiagramNode>
+  <DiagramArrow label="tail" />
+  <DiagramNode title="Tuple<char>">head: char</DiagramNode>
+  <DiagramArrow label="tail" />
+  <DiagramNode title="Tuple<>" dashed>empty primary template</DiagramNode>
+</Diagram>
+
+Packs also expand in base-class lists. `struct Overloaded : Fs... { using Fs::operator()...; };`
+inherits from every lambda type in `Fs` and pulls in all their call operators *(C++17)*, which is the
+usual helper for `std::visit`.
+
+## Constraining a pack
+
+A [concept](./concepts-and-requires.md) can constrain every element, either with a constrained pack
+`template <std::integral... Ts>` or with a fold over the constraint, `requires (std::integral<Ts> && ...)`.
+Before C++20 the same check is a `static_assert` over a fold or `std::conjunction_v<std::is_integral<Ts>...>`.
+
+## Pitfalls
+
+- **Forgetting the `...`.** Using a pack without expanding it, `g(args)`, is an error: "parameter
+  packs not expanded".
+- **Ambiguous recursion end.** If the base case is a template that also matches one argument, the
+  one-element call can become ambiguous. A non-template zero-argument base, or `if constexpr`, avoids
+  that.
+- **A deduced pack must come last** among the function parameters it is deduced from. In
+  `template <typename... Ts, typename U> void f(Ts..., U)`, `Ts` is in a non-deduced context and is
+  deduced as empty.
+- **Unevaluated order.** Arguments in an expanded call `g(h(args)...)` are evaluated in unspecified
+  order, as with any function call. Braced-init-lists and comma [folds](./fold-expressions.md) are
+  evaluated left to right.
+
+## References
+
+- [cppreference: Pack](https://en.cppreference.com/w/cpp/language/pack)
+- [cppreference: `sizeof...`](https://en.cppreference.com/w/cpp/language/sizeof...)
+- [cppreference: `std::integer_sequence`](https://en.cppreference.com/w/cpp/utility/integer_sequence)
+- [P2662R3: Pack indexing](https://wg21.link/P2662R3) (C++26)
