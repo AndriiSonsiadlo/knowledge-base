@@ -2,386 +2,302 @@
 id: sfinae-and-enable-if
 title: SFINAE and enable_if
 sidebar_label: SFINAE & enable_if
-sidebar_position: 9
-tags: [c++, templates, sfinae, enable-if, metaprogramming]
+sidebar_position: 8
+tags: [c++, templates, sfinae, enable-if, void-t, detection-idiom, metaprogramming]
 ---
 
 # SFINAE and enable_if
 
-SFINAE (Substitution Failure Is Not An Error) is a fundamental C++ template mechanism that enables conditional template compilation. `std::enable_if` is the primary tool for applying SFINAE in practice.
+**SFINAE**, "substitution failure is not an error", is the overload-resolution rule that makes it
+possible to switch function templates on and off depending on properties of their template
+arguments. Before C++20 it was the only way to say "this overload exists only for integral types" or
+"only if `T` has a `.size()`". `std::enable_if` and `std::void_t` are the library tools built on it.
+This page is the canonical home for SFINAE, `enable_if` and the `void_t` detection idiom.
 
-:::info[Conditional Template Compilation]
-**SFINAE:** When template substitution fails, remove template from consideration instead of erroring  
-**enable_if:** Enable/disable templates based on compile-time conditions
-:::
+In C++20 code, prefer [concepts and `requires`](./concepts-and-requires.md): they express the same
+constraints directly, give readable diagnostics, and rank overloads by subsumption. You still need
+SFINAE to read pre-C++20 code and libraries, and to target older compilers.
 
-:::tip[In C++20, prefer concepts]
-SFINAE works but is hard to read and produces brutal error messages.
-[Concepts and `requires`](./concepts-and-requires.md) express the same constraints with readable
-syntax and far better diagnostics. Reach for SFINAE only to support pre-C++20 compilers, or for
-detection patterns concepts don't cover.
-:::
+**Prerequisites:** [Function templates](./function-templates.md),
+[template argument deduction](./template-argument-deduction.md),
+[type traits](./type-traits.md), [`decltype`](../03-types-and-values/type-deduction/decltype.md).
 
-## SFINAE Core Concept
+## The rule
 
-When the compiler tries to substitute template arguments and fails, that's not an error - the template is simply removed from the overload set.
-```cpp showLineNumbers
-// Works for types with .size() method
-template<typename T>
-auto getSize(const T& container) 
-    -> decltype(container.size()) 
-{
-    return container.size();
+For each function template in an overload set, the compiler deduces the template arguments and then
+**substitutes** them into the function's declaration: its return type, parameter types, and template
+parameter list (including default arguments). If that substitution produces an invalid type or
+expression, the template is **silently removed** from the candidate set. Only if no viable candidate
+remains is there an error.
+
+```cpp title="sfinae_basic.cpp" showLineNumbers
+#include <iostream>
+#include <vector>
+
+// Candidate 1: the return type names T::value_type.
+template <typename T>
+typename T::value_type first(const T& c) { return c[0]; }
+
+// Candidate 2: an ordinary function for numbers.
+long first(long x) { return x; }
+
+int main() {
+    std::vector<int> v{42, 7};
+    std::cout << first(v) << ' '    // only candidate 1 is viable
+              << first(5) << '\n';  // candidate 1: int::value_type fails -> dropped; uses 2
 }
-
-// Works for array types
-template<typename T, size_t N>
-size_t getSize(const T (&array)[N]) {
-    return N;
-}
-
-std::vector<int> vec{1, 2, 3};
-int arr[5];
-
-auto s1 = getSize(vec);  // Calls first (vector has .size())
-auto s2 = getSize(arr);  // Calls second (array version)
 ```
 
-If `vec.size()` didn't exist, the first template would SFINAE away, not cause an error.
-
-## How SFINAE Works
-```cpp showLineNumbers
-// This will SFINAE away for types without ::value_type
-template<typename T>
-typename T::value_type get(const T& container) {
-    return container[0];
-}
-
-// Fallback for types without ::value_type
-template<typename T>
-T get(const T& value) {
-    return value;
-}
-
-std::vector<int> vec{42};
-int x = 42;
-
-auto a = get(vec);  // Uses first (vector has value_type)
-auto b = get(x);    // Uses second (int doesn't, SFINAE)
+```text
+42 5
 ```
 
-**Process:**
-1. Compiler tries first template with `int`
-2. Substitution fails: `int::value_type` doesn't exist
-3. SFINAE: Remove first template, **no error**
-4. Try second template: Success!
+<Diagram title="Overload resolution for first(5)" caption="Substitution failure removes a candidate; it does not stop compilation." accent="blue">
+  <DiagramNode variant="pill" accent>Call: first(5)</DiagramNode>
+  <DiagramArrow label="collect candidates" />
+  <DiagramGroup label="Candidates">
+    <DiagramNode title="template first(const T&)">Deduce T = int. Substitute: return type int::value_type is invalid.</DiagramNode>
+    <DiagramNode title="first(long)">Non-template. int converts to long.</DiagramNode>
+  </DiagramGroup>
+  <DiagramArrow label="SFINAE drops the template" icon="filter" />
+  <DiagramNode title="Viable set: first(long)" accent>Chosen.</DiagramNode>
+</Diagram>
 
-## Expression SFINAE
+### The immediate context
 
-Check if expressions compile without actually compiling them.
-```cpp showLineNumbers
-// Check if T supports operator[]
-template<typename T>
-auto access(T& container, size_t index)
-    -> decltype(container[index])  // SFINAE on this
-{
-    return container[index];
-}
+SFINAE covers only failures in the **immediate context** of the substitution: the types and
+expressions written in the declaration itself. If substitution requires instantiating some *other*
+template, and that instantiation fails inside its own body, the error is hard:
 
-// Fallback
-template<typename T>
-auto access(T& value, size_t)
-    -> decltype(value)
-{
-    return value;
-}
-
-std::vector<int> vec{1, 2, 3};
-int x = 42;
-
-access(vec, 1);  // Returns vec[1]
-access(x, 0);    // Returns x (no operator[])
-```
-
-## Trailing Return Type SFINAE
-
-Perfect for SFINAE - checked during substitution.
-```cpp showLineNumbers
-// Only enabled if T has .begin() and .end()
-template<typename T>
-auto print(const T& container)
-    -> decltype(container.begin(), container.end(), void())
-{
-    for (const auto& item : container) {
-        std::cout << item << " ";
-    }
-}
-
-// Fallback
-void print(...) {  // Variadic catch-all
-    std::cout << "Not a container";
-}
-
-std::vector<int> vec{1, 2, 3};
-int x = 42;
-
-print(vec);  // "1 2 3"
-print(x);    // "Not a container"
-```
-
-**Trick:** `(expr1, expr2, void())` checks multiple expressions and returns `void`.
-
-## Basic enable_if
-
-`std::enable_if` is the standard tool for SFINAE-based template control.
-```cpp showLineNumbers
+```cpp title="hard_error.cpp" showLineNumbers
 #include <type_traits>
 
-// Only enable for integral types
-template<typename T>
-typename std::enable_if<std::is_integral<T>::value, T>::type
-increment(T value) {
-    return value + 1;
-}
-
-int x = increment(5);       // int is integral
-// double y = increment(3.14);  // Removed from overload set
-```
-
-**How it works:**
-- `std::enable_if<condition, T>::type` exists only if condition is true
-- If false, substitution fails → SFINAE
-- Template removed, not an error
-
-## Modern enable_if (C++14)
-```cpp showLineNumbers
-// C++14: Shorter with _t alias
-template<typename T>
-std::enable_if_t<std::is_integral_v<T>, T>
-increment(T value) {
-    return value + 1;
-}
-
-// Even shorter with trailing return
-template<typename T>
-auto increment(T value) 
-    -> std::enable_if_t<std::is_integral_v<T>, T>
-{
-    return value + 1;
-}
-```
-
-**C++14 helpers:**
-- `enable_if_t<...>` = shortcut for `::type`
-- `is_integral_v<T>` = shortcut for `::value`
-
-## Return Type enable_if
-```cpp showLineNumbers
-template<typename T>
-std::enable_if_t<std::is_floating_point_v<T>, T>
-sqrt(T value) {
-    return std::sqrt(value);
-}
-
-auto x = sqrt(3.14);  // double
-// auto y = sqrt(5);     // int not floating point
-```
-
-## Template Parameter enable_if
-
-Cleaner - keeps function signature readable.
-```cpp showLineNumbers
-// Default template parameter approach
-template<typename T, 
-         std::enable_if_t<std::is_integral_v<T>, int> = 0>
-T twice(T value) {
-    return value * 2;
-}
-
-// Or as extra parameter
-template<typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
-T triple(T value) {
-    return value * 3;
-}
-```
-
-## Multiple Overloads
-
-Different implementations for different type categories.
-```cpp showLineNumbers
-// For integral types
-template<typename T>
-std::enable_if_t<std::is_integral_v<T>, void>
-process(T value) {
-    std::cout << "Processing integer: " << value << "\n";
-}
-
-// For floating point types
-template<typename T>
-std::enable_if_t<std::is_floating_point_v<T>, void>
-process(T value) {
-    std::cout << "Processing float: " << value << "\n";
-}
-
-process(42);     // "Processing integer: 42"
-process(3.14);   // "Processing float: 3.14"
-```
-
-## Class Templates
-```cpp showLineNumbers
-template<typename T, typename Enable = void>
-class Container;
-
-// Specialization for integral types
-template<typename T>
-class Container<T, std::enable_if_t<std::is_integral_v<T>>> {
-public:
-    void info() { std::cout << "Integer container\n"; }
+template <typename T>
+struct Bad {
+    static_assert(sizeof(T) == 0, "instantiated");   // hard error if Bad<T> is instantiated
+    using type = T;
 };
 
-// Specialization for floating point
-template<typename T>
-class Container<T, std::enable_if_t<std::is_floating_point_v<T>>> {
-public:
-    void info() { std::cout << "Float container\n"; }
+// Substitution needs Bad<T>::type, which instantiates Bad<int>; the static_assert fires
+// outside the immediate context, so this is a hard error, not SFINAE.
+template <typename T>
+typename Bad<T>::type g(T);
+
+void g(...) {}
+
+int main() {
+    // g(1);   // error: static assertion failed: instantiated
+    g();
+}
+```
+
+The function body is never part of the immediate context either. A template whose declaration
+substitutes fine but whose body does not compile for `T` is selected and then fails to instantiate.
+SFINAE constrains declarations, not bodies.
+
+## Expression SFINAE with `decltype`
+
+*(C++11)* Any expression can be put into the declaration through `decltype`, usually as a trailing
+return type. If the expression is invalid for the deduced types, the overload disappears:
+
+```cpp title="expression_sfinae.cpp" showLineNumbers
+#include <cstddef>
+#include <iostream>
+#include <vector>
+
+// Expression SFINAE: viable only if c.size() is a valid expression.
+template <typename T>
+auto length(const T& c) -> decltype(c.size()) { return c.size(); }
+
+template <typename T, std::size_t N>
+std::size_t length(const T (&)[N]) { return N; }
+
+int main() {
+    std::vector<int> v{1, 2, 3};
+    int a[5]{};
+    std::cout << length(v) << ' ' << length(a) << '\n';   // 3 5
+    // length(42);   // error: no viable candidate (both were removed / did not match)
+}
+```
+
+To test several expressions but return a different type, use the comma operator inside `decltype`:
+`-> decltype(c.begin(), c.end(), void())` requires both calls to be valid and yields `void`.
+
+## `std::enable_if`
+
+`std::enable_if<Cond, T>` *(C++11)* has a member `type` (equal to `T`, default `void`) only when `Cond`
+is `true`. Naming `enable_if<false, T>::type` is a substitution failure, so it turns any compile-time
+boolean, usually a [type trait](./type-traits.md), into an on/off switch. `std::enable_if_t<Cond, T>`
+*(C++14)* is the alias for `::type`. A minimal implementation is just a partial specialization:
+
+```cpp title="fragment"
+template <bool B, typename T = void> struct enable_if {};
+template <typename T>                struct enable_if<true, T> { using type = T; };
+```
+
+It can go in three places. The template-parameter form is the most common because it leaves the
+return and parameter types readable and works for constructors, which have no return type:
+
+```cpp title="enable_if.cpp" showLineNumbers
+#include <iostream>
+#include <type_traits>
+
+// 1. In the return type
+template <typename T>
+std::enable_if_t<std::is_integral_v<T>, T> twice(T x) { return x * 2; }
+
+// 2. As a non-type template parameter (the usual form)
+template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
+T half(T x) { return x / 2; }
+
+// Overloads on mutually exclusive conditions
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
+const char* kind(T) { return "integer"; }
+
+template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
+const char* kind(T) { return "floating"; }
+
+int main() {
+    std::cout << twice(21) << ' ' << half(3.0) << ' ' << kind(1) << ' ' << kind(1.0) << '\n';
+    // twice(1.5);   // error: no matching function
+}
+```
+
+```text
+42 1.5 integer floating
+```
+
+The third place, an extra defaulted function parameter `std::enable_if_t<Cond>* = nullptr`, works but
+changes the function's arity and is rarely used now.
+
+Combine conditions with ordinary `&&`, `||`, `!` on the `_v` values, or with `std::conjunction_v<...>`,
+`std::disjunction_v<...>`, `std::negation<...>` *(C++17)*, which short-circuit instantiation of the
+remaining traits.
+
+### Pitfall: the `typename = enable_if_t<...>` form
+
+A popular variant puts `enable_if_t` in a defaulted **type** template parameter. That breaks as soon
+as two overloads differ only in the condition, because default template arguments are not part of a
+function template's signature:
+
+```cpp title="enable_if_redefinition.cpp" showLineNumbers
+#include <type_traits>
+
+// Broken: two templates that differ only in a default template argument
+// are the same template declared twice.
+//
+// template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+// void f(T) {}
+// template <typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+// void f(T) {}   // error: redefinition of 'template<class T, class> void f(T)'
+
+// Fixed: the condition is part of the template-parameter's type.
+template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
+void f(T) {}
+template <typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
+void f(T) {}
+
+int main() { f(1); f(1.0); }
+```
+
+### Pitfall: conditions on a class's own parameter
+
+Inside a class template, a member function's condition must depend on a template parameter of
+**that member**. `T` of the enclosing class is already fixed when the class is instantiated, so
+`enable_if_t<is_pointer_v<T>>` in a member declaration is a hard error for every `T` where it is
+false. The fix is a defaulted member template parameter `U = T`:
+
+```cpp title="member_enable_if.cpp" showLineNumbers
+#include <type_traits>
+
+template <typename T>
+struct Box {
+    // Not SFINAE: T is fixed once Box<int> is instantiated, so this is a hard error.
+    // std::enable_if_t<std::is_pointer_v<T>, int> deref();
+
+    // SFINAE: U is deduced when deref() is called, so the condition is in the immediate context.
+    template <typename U = T, std::enable_if_t<std::is_pointer_v<U>, int> = 0>
+    auto deref() const { return *value; }
+
+    T value;
 };
 
-Container<int> c1;
-c1.info();  // "Integer container"
-
-Container<double> c2;
-c2.info();  // "Float container"
-```
-
-## Combining Conditions
-```cpp showLineNumbers
-// Multiple requirements
-template<typename T>
-std::enable_if_t<std::is_arithmetic_v<T> && !std::is_same_v<T, bool>, T>
-process(T value) {
-    return value * 2;
-}
-
-// std::conjunction (C++17)
-template<typename T>
-std::enable_if_t<std::conjunction_v
-    std::is_arithmetic<T>,
-    std::negation<std::is_same<T, bool>>
->, T>
-process2(T value) {
-    return value * 2;
+int main() {
+    int x = 5;
+    Box<int*> p{&x};
+    Box<int> b{3};          // fine: deref() is never instantiated for Box<int>
+    return p.deref() - 5 + b.value - 3;
 }
 ```
 
-## Detection Idiom
+In C++20 this becomes a trailing `requires std::is_pointer_v<T>` on the member, with no dummy
+parameter.
 
-Check if types have specific members.
-```cpp showLineNumbers
-// Primary template: assume false
-template<typename, typename = void>
+## Detection idiom: `std::void_t`
+
+To ask "does `T` have a `.size()`?" as a compile-time boolean (rather than to drop an overload),
+combine SFINAE with [partial specialization](./specialization/partial-specialization.md).
+`std::void_t<Ts...>` *(C++17)* is an alias that is always `void`, but substituting into it still
+checks that every `Ts` is a valid type:
+
+```cpp title="detection.cpp" showLineNumbers
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+// Primary template: the default answer.
+template <typename T, typename = void>
 struct has_size : std::false_type {};
 
-// Specialization: true if T::size() exists
-template<typename T>
-struct has_size<T, std::void_t<decltype(std::declval<T>().size())>>
-    : std::true_type {};
+// Partial specialization: chosen only if the expression inside void_t is valid.
+template <typename T>
+struct has_size<T, std::void_t<decltype(std::declval<const T&>().size())>> : std::true_type {};
 
-// Helper variable template
-template<typename T>
-constexpr bool has_size_v = has_size<T>::value;
+template <typename T>
+inline constexpr bool has_size_v = has_size<T>::value;
 
-// Usage
-has_size_v<std::vector<int>>  // true
-has_size_v<int>                // false
+static_assert(has_size_v<std::vector<int>>);
+static_assert(has_size_v<std::string>);
+static_assert(!has_size_v<int>);
+
+int main() {}
 ```
 
-**How it works:**
-- `std::void_t` turns any type into `void`
-- If `T::size()` doesn't exist, substitution fails → SFINAE
-- Falls back to primary template (false_type)
+How the match works for `has_size<std::vector<int>>`, written as `has_size<std::vector<int>, void>`
+after the default argument is filled in:
 
-## std::void_t Explained
-```cpp showLineNumbers
-// std::void_t always produces void
-template<typename...>
-using void_t = void;
+1. The specialization's second argument is `void_t<decltype(...)>`. For a vector the expression is
+   valid, so it is `void`, matching the `void` the user's type was given. The specialization is more
+   specialized than the primary, so it wins: `true_type`.
+2. For `int`, `std::declval<const int&>().size()` is invalid. Substitution into the specialization
+   fails, the specialization is discarded (SFINAE applies to partial specialization matching too), and
+   the primary template gives `false_type`.
 
-// Useful for SFINAE
-template<typename T, typename = void>
-struct has_foo : std::false_type {};
+`std::declval<T>()` produces an expression of type `T&&` for use in unevaluated operands like
+`decltype`, without needing `T` to be default-constructible. The default argument must be exactly
+`void`; that is why `void_t` maps everything to `void`.
 
-template<typename T>
-struct has_foo<T, std::void_t<decltype(&T::foo)>>
-    : std::true_type {};
+Library Fundamentals TS v2 proposed a generic `std::experimental::is_detected` on top of this
+pattern. It never became part of the standard; in C++20 a `requires` expression does the same job
+inline.
 
-// If T::foo exists, void_t<...> produces void → matches specialization
-// Otherwise, SFINAE removes specialization, uses primary
-```
+## SFINAE, `if constexpr` and concepts
 
-## Common Type Traits
-```cpp showLineNumbers
-std::is_integral<T>         // int, long, char, bool
-std::is_floating_point<T>   // float, double
-std::is_arithmetic<T>       // integral or floating
-std::is_pointer<T>          // pointer types
-std::is_reference<T>        // reference types
-std::is_const<T>            // const qualified
-std::is_class<T>            // class or struct
-std::is_enum<T>             // enum types
+| Need | C++11/14 | C++17 | C++20 |
+|---|---|---|---|
+| Remove an overload unless a condition holds | `enable_if_t` in a template parameter | same | `requires` clause / constrained parameter |
+| Ask "is this expression valid?" as a `bool` | `void_t`-style detector (hand-written `void_t` in C++11/14) | `std::void_t` detector | `requires { expr; }` |
+| Pick one of several code paths inside one function | tag dispatch or overloads | `if constexpr` | `if constexpr` with a `requires` expression |
+| Prefer the more specific of two overloads | manual mutual exclusion of conditions | same | automatic, via [subsumption](./concepts-and-requires.md#subsumption-picking-the-more-constrained-overload) |
 
-std::is_same<T, U>          // T and U are same type
-std::is_base_of<Base, Derived>  // Inheritance check
-std::is_convertible<From, To>   // Can convert?
-```
+`if constexpr` *(C++17)* does not remove overloads; it discards the untaken branch *inside* a template
+body. It replaces SFINAE when one function can handle every type and only the implementation
+differs.
 
-## Concepts (C++20) - Modern Alternative
+## References
 
-Concepts are cleaner and more readable than SFINAE/enable_if.
-```cpp showLineNumbers
-// Old way with enable_if
-template<typename T>
-std::enable_if_t<std::is_integral_v<T>, T>
-twice(T value) {
-    return value * 2;
-}
-
-// New way with concepts
-template<std::integral T>
-T twice(T value) {
-    return value * 2;
-}
-
-// Or with requires clause
-template<typename T>
-requires std::integral<T>
-T twice(T value) {
-    return value * 2;
-}
-```
-
-Much more readable! See the Concepts section for details.
-
-## Summary
-
-**SFINAE fundamentals:**
-- Substitution Failure Is Not An Error
-- Failed substitution removes template, doesn't error
-- Enables conditional template compilation
-- Foundation for template metaprogramming
-
-**enable_if usage:**
-- `enable_if<condition, T>::type` exists only if condition true
-- Use `enable_if_t` (C++14) for brevity
-- Common positions: return type, template parameter, function parameter
-- Combine with type traits for powerful conditions
-
-**Common patterns:**
-- Multiple overloads for different type categories
-- Detection idiom with `void_t` for member checking
-- Expression SFINAE with `decltype`
-- Trailing return types for SFINAE
-
-**Modern alternatives:**
-- Concepts (C++20) - cleaner, better errors
-- `if constexpr` (C++17) - simpler branching
-- Prefer these over SFINAE when available
+- [cppreference: SFINAE](https://en.cppreference.com/w/cpp/language/sfinae)
+- [cppreference: `std::enable_if`](https://en.cppreference.com/w/cpp/types/enable_if)
+- [cppreference: `std::void_t`](https://en.cppreference.com/w/cpp/types/void_t)
+- [N3911: TransformationTrait Alias `void_t`](https://wg21.link/N3911)

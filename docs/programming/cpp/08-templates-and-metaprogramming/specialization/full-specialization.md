@@ -3,426 +3,222 @@ id: full-specialization
 title: Full Template Specialization
 sidebar_label: Full Specialization
 sidebar_position: 1
-tags: [c++, templates, specialization, template-specialization]
+tags: [c++, templates, specialization, explicit-specialization]
 ---
 
 # Full Template Specialization
 
-Full specialization provides a completely custom implementation for specific template arguments. It's like saying "for this exact type, use this completely different code."
+A template generates the same code for every argument. Sometimes one exact argument needs a
+different definition: a trait that must answer "what is this type called", a `std::hash` for your
+own class, a member function that has to format `bool` differently. A **full specialization** (the
+standard calls it an **explicit specialization**) replaces the template's definition for one
+complete set of template arguments. This page is the canonical home for `template<>`: what it can
+specialize, the declaration-order rule, and why functions should usually be overloaded instead.
 
-:::info[Complete Override]
-Full specialization = brand new implementation for specific types. `Template<int>` can be totally different from `Template<double>`.
-:::
+**Prerequisites:** [Function templates](../function-templates.md),
+[class templates](../class-templates.md).
 
-Unlike [partial specialization](./partial-specialization.md), full specialization works for **both
-class and function templates** — but for functions it's usually the wrong tool: a plain **overload**
-is simpler, composes with overload resolution, and avoids the subtle rule that a function
-specialization doesn't participate in overload ranking. Rule of thumb: overload functions, specialize
-classes, and use full specialization mainly for trait-style "one exact type → one exact answer" cases.
+Specializing for a *pattern* of arguments (`T*`, `Pair<T, T>`) is
+[partial specialization](./partial-specialization.md), which only class and variable templates
+support.
 
-## Function Template Specialization
+## Syntax: `template<>` plus every argument
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-T max(T a, T b) {
-    return (a > b) ? a : b;
-}
+The specialization starts with an empty parameter list, `template <>`, and names the template with
+all its arguments filled in. The primary template must already be declared.
 
-// Full specialization for const char*
-template<>
-const char* max<const char*>(const char* a, const char* b) {
-    return (strcmp(a, b) > 0) ? a : b;
-}
+```cpp title="type_name.cpp" showLineNumbers
+#include <cstring>
+#include <iostream>
 
-// Usage
-int x = max(5, 10);           // Uses primary template
-const char* s = max("abc", "xyz");  // Uses specialization
-```
+template <typename T>
+struct TypeName {
+    static constexpr const char* value = "unknown";
+};
 
-**Syntax:** `template<>` with explicit type after function name.
+template <>
+struct TypeName<int> {
+    static constexpr const char* value = "int";
+};
 
-## Why Specialize?
+template <>
+struct TypeName<double> {
+    static constexpr const char* value = "double";
+};
 
-**Different algorithm for specific types:**
-```cpp showLineNumbers 
-// Generic swap
-template<typename T>
-void swap(T& a, T& b) {
-    T temp = std::move(a);
-    a = std::move(b);
-    b = std::move(temp);
-}
-
-// Optimized for large arrays - swap pointers instead
-template<>
-void swap<std::array<int, 1000>>(
-    std::array<int, 1000>& a,
-    std::array<int, 1000>& b
-) {
-    a.swap(b);  // Member swap is faster
+int main() {
+    std::cout << TypeName<int>::value << ' '
+              << TypeName<double>::value << ' '
+              << TypeName<char>::value << '\n';
 }
 ```
 
-## Class Template Specialization
-
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Storage {
-    T data;
-public:
-    void set(T value) { data = value; }
-    T get() const { return data; }
-    void print() const { std::cout << data << "\n"; }
-};
-
-// Full specialization for bool (bit packing)
-template<>
-class Storage<bool> {
-    unsigned char data;
-    int position;
-public:
-    void set(bool value) {
-        if (value) {
-            data |= (1 << position);
-        } else {
-            data &= ~(1 << position);
-        }
-    }
-    
-    bool get() const {
-        return (data >> position) & 1;
-    }
-    
-    void print() const {
-        std::cout << (get() ? "true" : "false") << "\n";
-    }
-};
-
-Storage<int> intStore;
-intStore.set(42);
-
-Storage<bool> boolStore;  // Uses specialized version
-boolStore.set(true);
+```text
+int double unknown
 ```
 
-**Different implementation, same interface!**
+A class specialization is a **separate class**. It shares nothing with the primary template: no
+members, no base classes, no default member initializers. If `TypeName<int>` forgot to declare
+`value`, `TypeName<int>::value` would not compile even though the primary template has one.
 
-## Multiple Template Parameters
+<Diagram title="Which definition does TypeName<X> use?" accent="violet">
+  <DiagramNode variant="pill" accent>TypeName&lt;X&gt;</DiagramNode>
+  <DiagramArrow label="look for an explicit specialization with exactly X" />
+  <DiagramGroup label="Candidates">
+    <DiagramNode title="TypeName<int>">used when X is int</DiagramNode>
+    <DiagramNode title="TypeName<double>">used when X is double</DiagramNode>
+    <DiagramNode title="Primary template" dashed>instantiated for every other X</DiagramNode>
+  </DiagramGroup>
+</Diagram>
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T, typename U>
-class Pair {
-public:
-    T first;
-    U second;
-    void info() { std::cout << "Different types\n"; }
+## What can be fully specialized
+
+| Entity | Fully specializable | Notes |
+|---|---|---|
+| Class template | Yes | The whole class is replaced. |
+| Member of a class template | Yes | One member function or static data member for one argument; the rest of the class is still generated from the primary template. |
+| Function template | Yes | Usually the wrong tool, see [below](#prefer-overloading-for-function-templates). |
+| Variable template *(C++14)* | Yes | `template <> constexpr bool is_x<int> = true;` |
+| Alias template | No | An alias is not a type of its own. Specialize a class template and alias its `::type`. |
+
+### Specializing one member
+
+When only one behaviour differs, specialize just that member instead of copying the class:
+
+```cpp title="member_spec.cpp" showLineNumbers {14-15}
+#include <iostream>
+#include <string>
+
+template <typename T>
+struct Printer {
+    void print(const T& v) const;
+    int width = 8;                       // shared by every Printer<T>
 };
 
-// Full specialization: both same type
-template<typename T>
-class Pair<T, T> {
-public:
-    T first;
-    T second;
-    void info() { std::cout << "Same type\n"; }
-    
-    void swap() {  // Extra method only for same types
-        std::swap(first, second);
-    }
-};
+template <typename T>
+void Printer<T>::print(const T& v) const { std::cout << "generic: " << v << '\n'; }
 
-Pair<int, double> p1;
-p1.info();  // "Different types"
+// Explicit specialization of one member: the rest of Printer<bool> is generated as usual.
+template <>
+void Printer<bool>::print(const bool& v) const { std::cout << (v ? "yes" : "no") << '\n'; }
 
-Pair<int, int> p2;
-p2.info();  // "Same type"
-p2.swap();  // Only available in specialization
-```
-
-## Specialization for Pointers
-
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class SmartPtr {
-    T* ptr;
-public:
-    T& operator*() { return *ptr; }
-    T* operator->() { return ptr; }
-};
-
-// Specialization for void* (can't dereference)
-template<>
-class SmartPtr<void> {
-    void* ptr;
-public:
-    // No operator* or operator-> (void* can't be dereferenced)
-    void* get() { return ptr; }
-};
-```
-
-## Specialization Declaration and Definition
-
-**Declare in header:**
-```cpp showLineNumbers 
-// header.h
-template<typename T>
-class Widget {
-    void process();
-};
-
-// Declare specialization
-template<>
-class Widget<int>;
-
-// Or declare just member
-template<>
-void Widget<int>::process();
-```
-
-**Define in source:**
-```cpp showLineNumbers 
-// source.cpp
-template<>
-class Widget<int> {
-    void process() {
-        std::cout << "Specialized for int\n";
-    }
-};
-
-// Or define just member
-template<>
-void Widget<int>::process() {
-    std::cout << "Specialized member for int\n";
+int main() {
+    Printer<int>{}.print(42);
+    Printer<bool> pb;
+    pb.print(true);
+    std::cout << pb.width << '\n';
 }
 ```
 
-## Member Function Specialization
-
-```cpp showLineNumbers 
-template<typename T>
-class Processor {
-public:
-    void process(T value);
-};
-
-// General template definition
-template<typename T>
-void Processor<T>::process(T value) {
-    std::cout << "Generic: " << value << "\n";
-}
-
-// Specialize just one member function
-template<>
-void Processor<std::string>::process(std::string value) {
-    std::cout << "String specialized: " << value << "\n";
-}
-
-Processor<int> pi;
-pi.process(42);  // "Generic: 42"
-
-Processor<std::string> ps;
-ps.process("hello");  // "String specialized: hello"
+```text
+generic: 42
+yes
+8
 ```
 
-## Specialization for Complex Types
+`Printer<bool>` still has `width`, because only `print` was replaced. This form is also how you
+give one instantiation a different value for a static data member.
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Container {
-public:
-    void info() { std::cout << "Generic container\n"; }
-};
+## Declare it before it is used
 
-// Specialization for std::vector
-template<typename T>
-class Container<std::vector<T>> {
-public:
-    void info() { std::cout << "Vector container\n"; }
-};
+A specialization must be declared before the first use that would cause the primary template to be
+**implicitly instantiated** for the same arguments, in every translation unit that has such a use.
+If the compiler sees the use first, the primary template has already been instantiated and the
+later specialization contradicts it:
 
-Container<int> c1;
-c1.info();  // "Generic container"
+```cpp title="too_late.cpp" showLineNumbers
+template <typename T>
+struct Limits { static constexpr int bits = 0; };
 
-Container<std::vector<int>> c2;
-c2.info();  // "Vector container"
+void use() { (void)Limits<int>::bits; }   // implicitly instantiates Limits<int>
+
+// template <> struct Limits<int> { static constexpr int bits = 32; };
+// error: specialization of 'Limits<int>' after instantiation
+
+int main() { use(); }
 ```
 
-## static Members in Specializations
+GCC 15 and Clang 21 both reject the commented line. The dangerous case is the one the compiler
+cannot see: the specialization lives in a `.cpp` file and another translation unit uses the
+template without seeing it. That program is ill-formed with no diagnostic required, and the two
+translation units silently disagree about what `Limits<int>` is. Put specializations in the same
+header as the primary template, or in a header that every user of that argument includes.
 
-Each specialization has its own static members:
+## Specializing standard library templates
 
-```cpp showLineNumbers 
-template<typename T>
-class Counter {
-    static int count;
-public:
-    Counter() { ++count; }
-    static int getCount() { return count; }
-};
+You may specialize a standard class template for a program-defined type when the standard allows it.
+The everyday case is `std::hash`, so the type can be an `unordered_map` key:
 
-template<typename T>
-int Counter<T>::count = 0;
+```cpp title="hash_point.cpp" showLineNumbers {8-14}
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <unordered_map>
 
-// Specialization for bool with different initial value
-template<>
-int Counter<bool>::count = 100;
+struct Point { int x, y; bool operator==(const Point&) const = default; };
 
-Counter<int> i1, i2, i3;
-std::cout << Counter<int>::getCount();  // 3
-
-Counter<bool> b1, b2;
-std::cout << Counter<bool>::getCount();  // 102 (started at 100!)
-```
-
-## Specialization Order Matters
-
-```cpp showLineNumbers 
-// Forward declare specialization before use
-template<typename T>
-class Widget;
-
-template<>
-class Widget<int> {
-    // Specialization
-};
-
-// Too late! Already used above
-// template<>
-// class Widget<int> { ... };
-```
-
-Always declare specializations before first use.
-
-## Friend Functions in Specializations
-
-```cpp showLineNumbers 
-template<typename T>
-class Box {
-    T value;
-    
-    friend std::ostream& operator<<(std::ostream& os, const Box& b) {
-        os << b.value;
-        return os;
+template <>
+struct std::hash<Point> {
+    std::size_t operator()(const Point& p) const noexcept {
+        std::size_t h = std::hash<int>{}(p.x);
+        return h ^ (std::hash<int>{}(p.y) + 0x9e3779b9 + (h << 6) + (h >> 2));
     }
 };
 
-// Specialized for bool - different output format
-template<>
-class Box<bool> {
-    bool value;
-    
-    friend std::ostream& operator<<(std::ostream& os, const Box& b) {
-        os << (b.value ? "TRUE" : "FALSE");
-        return os;
-    }
-};
-```
-
-## Type Traits Implementation
-
-Specialization is how type traits work:
-
-```cpp showLineNumbers 
-// Primary template: assume false
-template<typename T>
-struct is_pointer {
-    static constexpr bool value = false;
-};
-
-// Specialization for pointer types
-template<typename T>
-struct is_pointer<T*> {
-    static constexpr bool value = true;
-};
-
-is_pointer<int>::value;    // false
-is_pointer<int*>::value;   // true
-is_pointer<char*>::value;  // true
-```
-
-## Real-World Example: Custom Hash
-
-```cpp showLineNumbers 
-// Primary template (assumes type has std::hash)
-template<typename T>
-struct MyHash {
-    size_t operator()(const T& value) const {
-        return std::hash<T>{}(value);
-    }
-};
-
-// Specialization for custom type
-struct Point {
-    int x, y;
-};
-
-template<>
-struct MyHash<Point> {
-    size_t operator()(const Point& p) const {
-        // Custom hash combining x and y
-        return std::hash<int>{}(p.x) ^ (std::hash<int>{}(p.y) << 1);
-    }
-};
-
-std::unordered_map<Point, std::string, MyHash<Point>> map;
-```
-
-## Avoid Over-Specialization
-
-```cpp showLineNumbers 
-// Bad: Too many specializations
-template<> void process<int>();
-template<> void process<long>();
-template<> void process<short>();
-template<> void process<unsigned>();
-// ... 20 more specializations
-
-// Better: Use if constexpr or concepts
-template<typename T>
-void process() {
-    if constexpr (std::is_integral_v<T>) {
-        // Handle all integral types
-    } else if constexpr (std::is_floating_point_v<T>) {
-        // Handle all floating types
-    }
+int main() {
+    std::unordered_map<Point, std::string> names{{{0, 0}, "origin"}};
+    return names.contains({0, 0}) ? 0 : 1;
 }
 ```
 
-## Specialization vs Overloading
+Writing `struct std::hash<Point>` at namespace scope (qualified name) has been allowed since C++17;
+before that the specialization had to be written inside `namespace std { ... }`. Specializing a
+standard template for a type you don't own, such as `std::hash<int>`, is undefined behavior, and
+specializing standard **function** templates is not allowed at all since C++20.
 
-**Function templates:** Prefer overloading over specialization:
+## Prefer overloading for function templates
 
-```cpp showLineNumbers 
-// Specialization (can cause surprises)
-template<typename T>
-void func(T value) { std::cout << "Template\n"; }
+A function template specialization does not take part in overload resolution. The compiler first
+picks the best **primary** template among the overloads, and only then checks whether that template
+has a specialization for the deduced arguments. A specialization can therefore lose to an overload
+it was meant to beat:
 
-template<>
-void func<int>(int value) { std::cout << "Specialized\n"; }
+```cpp title="spec_vs_overload.cpp" showLineNumbers
+#include <iostream>
 
-// Better: Overload
-template<typename T>
-void func(T value) { std::cout << "Template\n"; }
+template <typename T> void f(T)  { std::cout << "f(T)\n"; }     // (1)
+template <>           void f(int*) { std::cout << "f<int*>\n"; } // specializes (1)
+template <typename T> void f(T*) { std::cout << "f(T*)\n"; }    // (2) overload
 
-void func(int value) { std::cout << "Overload\n"; }
+int main() {
+    int x = 0;
+    f(&x);   // overload resolution picks (2); the specialization of (1) is never considered
+}
 ```
 
-Overloading participates in normal overload resolution. Specialization doesn't!
+```text
+f(T*)
+```
 
-:::success[Full Specialization Key Points]
+Both primary templates match `int*`; (2) is more specialized, so it wins, and the explicit
+specialization of (1) is ignored. Move the specialization below (2) and it would specialize (2)
+instead: which template a function specialization belongs to depends on what is declared above it.
 
-**Complete override** = entirely new implementation  
-**`template<>`** = syntax for full specialization  
-**All parameters specified** = no template parameters left  
-**Classes and functions** = both can be specialized  
-**Static members** = separate for each specialization  
-**Member functions** = can specialize individually  
-**Type traits** = built using specialization  
-**Prefer overloading** = for function templates  
-**Use sparingly** = if constexpr often better
-:::
+The fix is to write the special case as an ordinary overload, `void f(int*)`. A non-template
+function is preferred over a template when both are equally good matches, and it follows the same
+rules as every other overload ([overloading](../../04-functions-and-call-mechanics/overloading.md)).
+Use specialization for class templates (traits, `std::hash`); use overloads, or `if constexpr` in one
+template, for functions.
+
+## When not to specialize
+
+A long list of specializations for `int`, `long`, `short`, `unsigned`... usually means you want a
+category, not a list of types. One template with `if constexpr (std::is_integral_v<T>)`
+([type traits](../type-traits.md)) or a [concept](../concepts-and-requires.md)-constrained overload
+covers every integral type, including ones you forgot.
+
+## References
+
+- [cppreference: Explicit (full) template specialization](https://en.cppreference.com/w/cpp/language/template_specialization)
+- [cppreference: Extending the namespace std](https://en.cppreference.com/w/cpp/language/extending_std)
+- Herb Sutter, [Why Not Specialize Function Templates?](http://www.gotw.ca/publications/mill17.htm) (C/C++ Users Journal, 2001)
