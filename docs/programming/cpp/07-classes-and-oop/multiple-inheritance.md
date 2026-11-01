@@ -203,15 +203,16 @@ and its vtable records the offset to the virtual base. Reaching a virtual base m
 | `struct Base { int data; }` | none | 4 |
 | `struct NormalDerived : Base { int d; }` | non-virtual | 8 |
 | `struct VirtualDerived : virtual Base { int d; }` | virtual | 16 (vptr + `d` + `Base`) |
-| `Bat` (`Mammal`, `Winged` each `: Animal` with one `int`, plus one `int`) | non-virtual diamond | 20 |
+| `Bat : Mammal, Winged`, where `Mammal` and `Winged` each derive from `Animal`, and `Animal`, `Mammal`, `Winged`, `Bat` each declare one `int` | non-virtual diamond | 20 |
 | Same with `virtual Animal` | virtual diamond | 40 (two vptrs, members, one `Animal`, padding) |
 
 Other costs:
 
 - Converting from a virtual base back down to a derived class cannot use `static_cast`.
   It needs `dynamic_cast`, so the virtual base must be polymorphic.
-- Construction and destruction are harder to follow. Every constructor has two variants (complete
-  object and base subobject), which the Itanium ABI calls C1 and C2.
+- Construction and destruction are harder to follow. The Itanium ABI emits a complete-object (C1)
+  and a base-subobject (C2) variant of every constructor; with virtual bases they stop being
+  identical, because only C1 constructs the virtual bases.
 - Layout is not [standard-layout](./class-layout.md), so no `offsetof` or C interop.
 
 Use virtual inheritance only when a shared base subobject is really what the design needs. The
@@ -222,7 +223,7 @@ standard library uses it in iostreams: `std::basic_iostream` derives from `basic
 
 - **Several interfaces**: bases with only pure virtual functions and no data (`Drawable`,
   `Serializable`). This is the use that causes the fewest problems. Diamonds of stateless interfaces
-  are harmless and rarely need `virtual`.
+  are harmless and rarely need `virtual`, unless code needs to convert to the shared interface (the conversion is ambiguous without it).
 - **Mixins and policies**: small, often empty bases that add one capability, such as a
   [non-copyable](../13-idioms-and-design/04-non-copyable.md) base or a [CRTP](../13-idioms-and-design/03-crtp.md)
   helper. Empty bases usually cost no space (empty base optimization).

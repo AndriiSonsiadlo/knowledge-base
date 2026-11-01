@@ -114,8 +114,7 @@ int main() { Derived d; (void)d; }
 (`class Square final`) it forbids deriving from it. Besides documenting intent, `final` lets the
 compiler call a function directly when it knows no further override can exist
 (see [devirtualization](#devirtualization)). Mark every override with `override` (or `final`) and
-don't repeat `virtual` on it. Clang's `-Winconsistent-missing-override` and GCC's
-`-Wsuggest-override` flag overrides that lack it.
+don't repeat `virtual` on it. `-Wsuggest-override` (GCC and Clang) flags overrides that lack it.
 
 ## Virtual destructors
 
@@ -235,8 +234,9 @@ type:
   `-fwhole-program-vtables` with `-flto`, or GCC with `-flto`), the compiler can see that a virtual
   function has a single implementation.
 
-GCC and Clang also do *speculative* devirtualization: compare the loaded function pointer with a
-likely target and call it directly if they match. None of this is guaranteed. Check the generated
+GCC also does *speculative* devirtualization (`-fdevirtualize-speculatively`): compare the loaded
+function pointer with a likely target and call it directly if they match. Clang gets a similar
+effect mainly through indirect-call promotion with profile data (PGO). None of this is guaranteed. Check the generated
 code if you depend on it.
 
 ## Covariant return types
@@ -306,7 +306,7 @@ Base::hello
 
 Under the Itanium ABI this is literal: each constructor sets the vptr to its own class's vtable
 before running its body, and each destructor resets it. Calling a **pure** virtual function this way
-is undefined behaviour. With GCC's and Clang's runtime libraries it typically aborts with "pure virtual method called". If
+is undefined behaviour. libstdc++ typically aborts with "pure virtual method called" (libc++abi prints a similar message). If
 derived-specific setup must run after construction, use a factory function or a two-phase `init()`
 called by the owner.
 
