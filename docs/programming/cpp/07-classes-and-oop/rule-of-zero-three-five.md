@@ -2,399 +2,305 @@
 id: rule-of-zero-three-five
 title: Rule of 0/3/5
 sidebar_label: Rule of 0/3/5
-sidebar_position: 4
-tags: [c++, special-members, rule-of-five, raii, best-practices]
+sidebar_position: 5
+tags: [c++, special-members, rule-of-five, rule-of-zero, raii]
 ---
 
-# Rule of Zero/Three/Five
+# Rule of 0/3/5
 
-These rules tell you which special member functions to define based on your class's resource management needs.
+The compiler can write six **special member functions** for a class: the default constructor, the
+destructor, and the four copy and move operations. Whether it writes them, and whether what it
+writes is correct, depends on what else you declared. The rules of zero, three and five are the
+guidelines for choosing which ones to declare yourself. This page is the canonical home for that
+decision and for the implicit-generation rules behind it. What copy and move operations *do* is on
+[Copy and Move Semantics](./copy-and-move-semantics.md).
 
-:::info[The Three Rules]
-**Rule of Zero** - Use RAII wrappers, define nothing  
-**Rule of Three** - If you need one, you need all three (C++98)  
-**Rule of Five** - If you need one, you need all five (C++11+)
-:::
+**Prerequisites:** [Copy and Move Semantics](./copy-and-move-semantics.md),
+[constructors and destructors](./constructors-and-destructors.md),
+[RAII](../13-idioms-and-design/01-raii.md).
 
-## The Six Special Members
+## The six special members
 
-C++ can generate up to six special member functions:
-```cpp showLineNumbers
+```cpp title="Fragment: declarations only"
 class Widget {
 public:
-    Widget();                              // Default constructor
-    ~Widget();                             // Destructor
-    Widget(const Widget&);                 // Copy constructor
-    Widget& operator=(const Widget&);      // Copy assignment
-    Widget(Widget&&) noexcept;             // Move constructor
-    Widget& operator=(Widget&&) noexcept;  // Move assignment
+    Widget();                                // default constructor
+    ~Widget();                               // destructor
+    Widget(const Widget&);                   // copy constructor
+    Widget& operator=(const Widget&);        // copy assignment
+    Widget(Widget&&) noexcept;               // move constructor   (C++11)
+    Widget& operator=(Widget&&) noexcept;    // move assignment    (C++11)
 };
 ```
 
-The compiler generates them when needed, but defaults only work for simple cases. When you manage resources, you need custom implementations.
+An implicitly generated member does the obvious member-wise thing: the copy constructor copies each
+base and member, the destructor destroys them, and so on. That is exactly right when every member
+manages itself, and exactly wrong when a member is a raw handle (an owning pointer, a file
+descriptor) whose meaning the compiler cannot know.
 
-## Rule of Zero (Best Case)
+## Implicit generation rules
 
-**If your class doesn't directly manage resources, don't define any special members.**
-```cpp showLineNumbers
-// Rule of Zero - no special members needed
-class Person {
-    std::string name;        // string manages its memory
-    int age;                 // trivial type
-    std::vector<int> scores; // vector manages its memory
-    
-    // Don't define:
-    // - Destructor
-    // - Copy constructor
-    // - Copy assignment
-    // - Move constructor
-    // - Move assignment
-    
-    // Compiler handles everything automatically!
-};
+"User-declared" below includes `= default` and `= delete`. The rows are what you declare; the
+columns are what the compiler then gives you.
 
-Person p1{"Alice", 30, {95, 87, 92}};
-Person p2 = p1;            // Copy works
-Person p3 = std::move(p1); // Move works
-// p1 is now moved-from (empty)
+| You declare | Default ctor | Destructor | Copy ctor | Copy assign | Move ctor | Move assign |
+|---|---|---|---|---|---|---|
+| Nothing | implicit | implicit | implicit | implicit | implicit | implicit |
+| Any constructor | not declared | implicit | implicit | implicit | implicit | implicit |
+| Destructor | implicit | **yours** | implicit, deprecated | implicit, deprecated | not declared | not declared |
+| Copy constructor | not declared | implicit | **yours** | implicit, deprecated | not declared | not declared |
+| Copy assignment | implicit | implicit | implicit, deprecated | **yours** | not declared | not declared |
+| Move constructor | not declared | implicit | deleted | deleted | **yours** | not declared |
+| Move assignment | implicit | implicit | deleted | deleted | not declared | **yours** |
+
+Two consequences matter in practice:
+
+- **"Not declared" move means moves silently copy.** An rvalue then binds to the copy constructor,
+  so `std::move` still compiles. Declaring only a destructor, even `virtual ~Base() = default;`,
+  turns every move of the class into a copy.
+- **"Deprecated" still compiles.** The implicit copy in a class with a user-declared destructor or
+  copy operation was deprecated in C++11 but never removed. GCC warns with `-Wdeprecated-copy-dtor`
+  (not in `-Wall`) and Clang with `-Wdeprecated`.
+
+The rules can be checked with type traits:
+
+```cpp title="generation.cpp" showLineNumbers
+#include <type_traits>
+
+struct DtorOnly { ~DtorOnly() {} };                       // copy still implicit (deprecated), no move
+struct CopyOnly { CopyOnly() = default; CopyOnly(const CopyOnly&) {} };
+struct MoveOnly { MoveOnly() = default; MoveOnly(MoveOnly&&) noexcept {} };
+
+// Moves of DtorOnly and CopyOnly silently fall back to copying:
+static_assert(std::is_move_constructible_v<DtorOnly>);    // satisfied by the copy ctor
+static_assert(!std::is_trivially_move_constructible_v<DtorOnly>);
+static_assert(std::is_move_constructible_v<CopyOnly>);    // also the copy ctor
+// Declaring a move constructor deletes the implicit copy operations
+// and suppresses the implicit move assignment:
+static_assert(!std::is_copy_constructible_v<MoveOnly>);
+static_assert(!std::is_copy_assignable_v<MoveOnly>);
+static_assert(!std::is_move_assignable_v<MoveOnly>);
+
+struct WithCtor { WithCtor(int) {} };                     // no implicit default ctor
+static_assert(!std::is_default_constructible_v<WithCtor>);
+
+int main() {}
 ```
 
-**This is the ideal!** Use smart pointers, containers, and RAII wrappers. Let them handle resource management.
+An implicitly declared member can also end up **defined as deleted** even with nothing declared,
+when a member or base makes it impossible: a `std::unique_ptr` member deletes the copy operations,
+and a `const` or reference member deletes the assignments.
 
-### Prefer RAII Wrappers
-```cpp showLineNumbers
-// Manual resource management (need Rule of 5)
-class BadBuffer {
-    char* data;
-    size_t size;
-    
+## Rule of zero
+
+> If a class does not directly own a resource, declare none of the five (destructor, copy and move
+> operations). Let members that are already correct do the work.
+
+This is the default for almost every class. Wrap each resource in a type that manages exactly that
+resource (a container, a smart pointer, a lock, a file wrapper), and compose classes from those.
+The implicit members then copy, move and destroy correctly, and the moves are `noexcept` whenever
+the members' moves are.
+
+```cpp title="rule_of_zero.cpp" showLineNumbers
+#include <cstddef>
+#include <memory>
+#include <type_traits>
+#include <vector>
+
+class Buffer {                           // rule of zero: vector owns the bytes
 public:
-    BadBuffer(size_t s) : size(s), data(new char[size]) {}
-    ~BadBuffer() { delete[] data; }
-    // Need copy, move, assignment...
+    explicit Buffer(std::size_t n) : data_(n) {}
+    std::size_t size() const { return data_.size(); }
+private:
+    std::vector<char> data_;
 };
 
-// Rule of Zero (standard types handle it)
-class GoodBuffer {
-    std::vector<char> data;
-    
-public:
-    explicit GoodBuffer(size_t s) : data(s) {}
-    // No special members needed!
+class Handle {                           // rule of zero, move-only by composition
+    std::unique_ptr<int> p_ = std::make_unique<int>(0);
 };
+
+static_assert(std::is_copy_constructible_v<Buffer> && std::is_nothrow_move_constructible_v<Buffer>);
+static_assert(!std::is_copy_constructible_v<Handle> && std::is_nothrow_move_constructible_v<Handle>);
+
+int main() {}
 ```
 
-`std::vector` automatically handles copying, moving, and cleanup. Shorter, safer, and easier to maintain.
+`Handle` shows that the rule of zero also covers copy *policy*: a `unique_ptr` member makes the class
+move-only without a single `= delete`. For a non-memory resource, a `unique_ptr` with a custom
+deleter is often enough of a wrapper ([custom
+deleters](../06-pointers-references-and-smart-pointers/custom-deleters.md)).
 
-## Rule of Three (Pre-C++11)
+## Rule of three
 
-**If you define destructor, copy constructor, OR copy assignment, define all three.**
+> If a class needs a user-provided destructor, copy constructor, or copy assignment operator, it
+> almost certainly needs all three.
 
-These operations are intimately related when managing resources.
-```cpp showLineNumbers
-class Buffer {
-    char* data;
-    size_t size;
-    
-public:
-    // Constructor
-    Buffer(size_t s) : size(s), data(new char[size]) {}
-    
-    // 1. Destructor (need it to free memory)
-    ~Buffer() {
-        delete[] data;
-    }
-    
-    // 2. Copy constructor (need deep copy)
-    Buffer(const Buffer& other) 
-        : size(other.size), data(new char[size]) {
-        std::copy(other.data, other.data + size, data);
-    }
-    
-    // 3. Copy assignment (need deep copy)
-    Buffer& operator=(const Buffer& other) {
-        if (this != &other) {  // Self-assignment check
-            delete[] data;     // Free old memory
-            size = other.size;
-            data = new char[size];
-            std::copy(other.data, other.data + size, data);
-        }
-        return *this;
-    }
-};
-```
+The rule dates from C++98. A destructor that releases something means the class owns it, and then
+the implicit member-wise copy is wrong: it copies the handle, not the resource, and both objects
+release it.
 
-:::warning[Why All Three?]
-If you need a destructor to clean up, compiler-generated copy will just copy the pointer, causing **double-delete** bugs!
-:::
-
-### The Double-Delete Problem
-```cpp showLineNumbers
-// Only defined destructor
-class Broken {
+```cpp title="double_free.cpp" showLineNumbers
+struct Broken {
     int* data;
-    
-public:
-    Broken(int v) : data(new int(v)) {}
+    explicit Broken(int v) : data(new int(v)) {}
     ~Broken() { delete data; }
-    
-    // Compiler generates copy that just copies pointer!
 };
-
-Broken b1(42);
-Broken b2 = b1;  // Both point to same memory
-// When b1 destructs: deletes memory
-// When b2 destructs: tries to delete same memory Crash!
+int main() {
+    Broken b1(42);
+    Broken b2 = b1;   // copies the pointer, not the int
+}
 ```
 
-## Rule of Five (C++11+)
+Both destructors delete the same pointer. Built with `-fsanitize=address`, the program stops with
+`AddressSanitizer: attempting double-free`. GCC 15 also flags the copy with
+`-Wdeprecated-copy-dtor`, and Clang 21 with `-Wdeprecated`, which is a reason to enable them.
 
-**If you define any of destructor, copy, or move operations, define or delete all five.**
+## Rule of five
 
-Adding move operations enables efficient resource transfer.
-```cpp showLineNumbers
+> If a class declares any of the destructor or the four copy and move operations, declare all five,
+> using `= default` or `= delete` for the ones whose implicit behavior you want or want removed.
+
+C++11 added the move operations, and the generation table shows why the rule grew from three to
+five: declaring a destructor or copy operation quietly removes the moves. A class that owns a raw
+resource writes all five:
+
+```cpp title="rule_of_five.cpp" showLineNumbers
+#include <algorithm>
+#include <cstddef>
+#include <utility>
+
 class Buffer {
-    char* data;
-    size_t size;
-    
 public:
-    // Constructor
-    Buffer(size_t s) : size(s), data(new char[size]) {}
-    
-    // 1. Destructor
-    ~Buffer() {
-        delete[] data;
+    explicit Buffer(std::size_t n) : size_(n), data_(new char[n]{}) {}
+
+    ~Buffer() { delete[] data_; }                                     // 1
+
+    Buffer(const Buffer& other)                                       // 2
+        : size_(other.size_), data_(new char[other.size_]) {
+        std::copy_n(other.data_, size_, data_);
     }
-    
-    // 2. Copy constructor
-    Buffer(const Buffer& other)
-        : size(other.size), data(new char[size]) {
-        std::copy(other.data, other.data + size, data);
-    }
-    
-    // 3. Copy assignment
-    Buffer& operator=(const Buffer& other) {
+
+    Buffer& operator=(const Buffer& other) {                          // 3
         if (this != &other) {
-            delete[] data;
-            size = other.size;
-            data = new char[size];
-            std::copy(other.data, other.data + size, data);
+            char* fresh = new char[other.size_];   // allocate first: if this throws,
+            std::copy_n(other.data_, other.size_, fresh);   // *this is unchanged
+            delete[] data_;
+            data_ = fresh;
+            size_ = other.size_;
         }
         return *this;
     }
-    
-    // 4. Move constructor
-    Buffer(Buffer&& other) noexcept
-        : size(other.size), data(other.data) {
-        other.data = nullptr;  // Steal resource, nullify source
-        other.size = 0;
-    }
-    
-    // 5. Move assignment
-    Buffer& operator=(Buffer&& other) noexcept {
+
+    Buffer(Buffer&& other) noexcept                                   // 4
+        : size_(std::exchange(other.size_, 0)),
+          data_(std::exchange(other.data_, nullptr)) {}
+
+    Buffer& operator=(Buffer&& other) noexcept {                      // 5
         if (this != &other) {
-            delete[] data;         // Free our old resource
-            data = other.data;     // Steal other's resource
-            size = other.size;
-            other.data = nullptr;  // Leave other valid
-            other.size = 0;
+            delete[] data_;
+            size_ = std::exchange(other.size_, 0);
+            data_ = std::exchange(other.data_, nullptr);
         }
         return *this;
     }
+
+    std::size_t size() const { return size_; }
+
+private:
+    std::size_t size_;   // declared before data_, so initialized first
+    char* data_;
 };
 
-Buffer b1(100);
-Buffer b2 = std::move(b1);  // Move: fast pointer swap
-// b1 is now empty (data = nullptr, size = 0)
+int main() {
+    Buffer a(100), b(10);
+    b = a;
+    Buffer c = std::move(a);
+    a = std::move(c);
+    return static_cast<int>(a.size() + b.size() + c.size()) - 200;   // 0
+}
 ```
 
-**Move semantics** enable efficient transfer without copying. Move = "steal" the resource, leaving the source empty but valid.
+Details that each line above gets right:
 
-### Why noexcept?
-```cpp showLineNumbers
-class Widget {
-public:
-    Widget(Widget&& other) noexcept {  // Mark noexcept!
-        // Move implementation
-    }
+- `size_` is declared before `data_`, because members are initialized in declaration order, not
+  initializer-list order. With the order reversed, `new char[size_]` would read an uninitialized
+  `size_`.
+- Copy assignment allocates before it frees, so a throwing `new` leaves `*this` intact. Deleting
+  first and then allocating would leave a dangling pointer on failure.
+- Both moves are `noexcept` so containers use them ([why](./copy-and-move-semantics.md#why-move-operations-should-be-noexcept)).
+
+A single by-value `operator=(Buffer other)` with a `noexcept` swap can replace both assignment
+operators; that is the [copy-and-swap idiom](../13-idioms-and-design/05-copy-and-swap.md).
+
+### Polymorphic base classes
+
+A base class meant for deletion through a base pointer needs a virtual destructor
+([why](./virtual-functions.md#virtual-destructors)). That destructor is user-declared, so by the
+table above the class loses its implicit moves. The usual fix is to default all five:
+
+```cpp title="polymorphic_base.cpp" showLineNumbers
+#include <string>
+#include <type_traits>
+
+struct Base {                        // declaring the destructor suppresses the implicit moves
+    virtual ~Base() = default;
+    std::string name;
 };
+static_assert(!std::is_nothrow_move_constructible_v<Base>);   // "move" is really the copy
 
-std::vector<Widget> vec;
-vec.push_back(Widget());  // Can use move if noexcept
-// Otherwise uses copy for exception safety
+struct Base5 {                       // default all five to get the moves back
+    virtual ~Base5() = default;
+    Base5() = default;
+    Base5(const Base5&) = default;
+    Base5& operator=(const Base5&) = default;
+    Base5(Base5&&) = default;
+    Base5& operator=(Base5&&) = default;
+    std::string name;
+};
+static_assert(std::is_nothrow_move_constructible_v<Base5>);
+
+int main() {}
 ```
 
-:::success[Always noexcept]
-Move constructors and move assignments should almost always be `noexcept`. This enables optimizations in standard containers.
-:::
+Many polymorphic hierarchies make the copy operations `protected` or deleted instead, to prevent
+[object slicing](./object-slicing.md).
 
-## Explicitly Deleting Operations
+## Deleting operations
 
-Sometimes you want to prevent copying or moving.
-```cpp showLineNumbers
-class Uncopyable {
-    std::mutex mtx;  // Mutexes can't be copied or moved
-    
+When copying or moving makes no sense (a mutex, a type that registers its own address somewhere),
+say so with `= delete`. Deleting the copy operations is enough: a user-declared copy constructor
+already suppresses the implicit moves, so rvalues find the deleted copy and fail to compile.
+
+```cpp title="Fragment: non-copyable, non-movable"
+class Registry {
 public:
-    Uncopyable() = default;
-    ~Uncopyable() = default;
-    
-    // Delete copy operations
-    Uncopyable(const Uncopyable&) = delete;
-    Uncopyable& operator=(const Uncopyable&) = delete;
-    
-    // Delete move operations
-    Uncopyable(Uncopyable&&) = delete;
-    Uncopyable& operator=(Uncopyable&&) = delete;
-};
-
-Uncopyable u1;
-// Uncopyable u2 = u1;  // Error: copy deleted
-// Uncopyable u3 = std::move(u1);  // Error: move deleted
-```
-
-`= delete` is clearer than making functions private and gives better error messages.
-
-## Copy-and-Swap Idiom
-
-A clean way to satisfy the Rule of Five: write a `noexcept` `swap` plus a single **by-value**
-assignment operator. That one function then serves as both copy- *and* move-assignment, with the
-strong exception guarantee, because the copy/move happens when the parameter is constructed.
-
-```cpp showLineNumbers
-void swap(Buffer& o) noexcept { std::swap(data, o.data); std::swap(size, o.size); }
-Buffer& operator=(Buffer other) { swap(other); return *this; }   // 'other' is copied or moved at the call site
-```
-
-The full rationale — why by-value, the exception-safety argument, and the pitfalls — is on the
-dedicated [Copy-and-Swap](../13-idioms-and-design/05-copy-and-swap.md) page.
-
-## Compiler Generation Rules
-
-The compiler's rules for generating these functions are complex.
-```cpp showLineNumbers
-class Example1 {
-public:
-    // Declaring ANY constructor prevents default constructor
-    Example1(int x) {}
-    // Example1 obj;  // Error: no default constructor
-};
-
-class Example2 {
-public:
-    // Declaring destructor doesn't prevent copy/move
-    ~Example2() {}
-    // Copy and move still generated
-};
-
-class Example3 {
-public:
-    // Declaring copy constructor PREVENTS move generation
-    Example3(const Example3&) {}
-    // Move constructor and move assignment NOT generated
-};
-
-class Example4 {
-public:
-    // Declaring move constructor PREVENTS copy generation
-    Example4(Example4&&) noexcept {}
-    // Copy constructor and copy assignment DELETED
+    Registry() = default;
+    Registry(const Registry&) = delete;
+    Registry& operator=(const Registry&) = delete;
+    // moves are not declared, so they are not available either
 };
 ```
 
-:::info[Generation Rules Summary]
-- User-declared destructor → no move operations generated
-- User-declared copy → no move operations generated
-- User-declared move → copy operations deleted
-- This encourages explicitly handling all or none
-:::
+Spelling out all four as deleted is also common and documents intent. A deleted function gives a
+clearer error than the pre-C++11 trick of a private, undefined copy constructor. The trade-offs
+between these forms are on the [non-copyable](../13-idioms-and-design/04-non-copyable.md) page.
 
-## Decision Guide
-```mermaid
-graph TD
-    A[Does class directly manage resources?]
-    A -->|No| B[Rule of Zero<br/>Use RAII wrappers]
-    A -->|Yes| C[Need to prevent copy/move?]
-    C -->|Yes| D[Delete unwanted operations<br/>= delete]
-    C -->|No| E[Rule of Five<br/>Define all 5]
-    
-```
-```cpp showLineNumbers
-// Rule of Zero (BEST)
-class Widget {
-    std::unique_ptr<Resource> resource;
-    std::vector<int> data;
-    // No special members needed!
-};
+## Choosing
 
-// Rule of Five (only if you MUST manage resources)
-class ManualResource {
-    int* ptr;
-    
-public:
-    ~ManualResource();
-    ManualResource(const ManualResource&);
-    ManualResource& operator=(const ManualResource&);
-    ManualResource(ManualResource&&) noexcept;
-    ManualResource& operator=(ManualResource&&) noexcept;
-};
+| The class... | Declare | Example |
+|---|---|---|
+| holds only self-managing members | nothing (rule of zero) | `std::string`, `std::vector`, `std::unique_ptr` members |
+| owns a raw resource directly | all five (rule of five) | a hand-written buffer or handle wrapper |
+| is a polymorphic base | virtual destructor plus the other four as `= default`, `protected`, or `= delete` | interface classes |
+| must never be copied or moved | deleted copy operations | registries, objects whose address is shared |
 
-// Explicit deletion (when copies/moves don't make sense)
-class NonCopyable {
-public:
-    NonCopyable() = default;
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
-};
-```
+Prefer moving the raw resource into a small dedicated wrapper (rule of five, once) so that every
+class using it gets the rule of zero.
 
-## Common Mistakes
+## References
 
-:::danger[Watch Out]
-**Self-Assignment:** Always check `if (this != &other)` in copy assignment
-
-**Resource Leaks:** Delete old resource before acquiring new one in assignment
-
-**Missing noexcept:** Move operations should be `noexcept`
-
-**Shallow Copy:** Compiler-generated copy just copies pointers
-
-**Dangling Pointers:** Leave moved-from objects in valid state (usually nullptr)
-
-**Incomplete Rule:** If you define one, define or delete all
-:::
-
-## Summary
-
-:::info[Rule of Zero (preferred):]
-- Use RAII wrappers (smart pointers, containers)
-- Don't define any special members
-- Safest and simplest approach
-:::
-
-:::info[Rule of Three (C++98):]
-- Destructor, copy constructor, copy assignment
-- All related when managing resources
-- If you need one, you need all three
-:::
-
-:::info[Rule of Five (C++11+):]
-- Add move constructor and move assignment
-- Enables efficient resource transfer
-- If you manage resources, define or delete all five
-:::
-
-:::info[Best practices:]
-- Prefer Rule of Zero whenever possible
-- Mark move operations `noexcept`
-- Check self-assignment: `if (this != &other)`
-- Leave moved-from objects valid (empty/null)
-- Use `= delete` to show intent explicitly
-- Copy-and-swap provides exception safety
-:::
-
-:::info[Generation rules:]
-- Declaring destructor prevents move generation
-- Declaring copy prevents move generation
-- Declaring move deletes copy operations
-:::
+- cppreference: [The rule of three/five/zero](https://en.cppreference.com/w/cpp/language/rule_of_three),
+  [Destructors](https://en.cppreference.com/w/cpp/language/destructor),
+  [Move constructors](https://en.cppreference.com/w/cpp/language/move_constructor)
+- [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines), rules C.20
+  (rule of zero) and C.21 (define or delete all default operations)

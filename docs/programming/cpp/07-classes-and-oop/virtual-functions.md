@@ -2,609 +2,433 @@
 id: virtual-functions-and-vtables
 title: Virtual Functions and vtables
 sidebar_label: Virtual Functions & vtables
-sidebar_position: 8
-tags: [c++, virtual-functions, vtables, polymorphism, dynamic-dispatch]
+sidebar_position: 7
+tags: [c++, virtual-functions, vtables, polymorphism, dynamic-dispatch, override, final]
 ---
 
 # Virtual Functions and vtables
 
-Virtual functions enable runtime polymorphism through dynamic dispatch. Understanding how they work (`vtables`) helps you understand their cost and use them effectively.
+A call through a `Base&` or `Base*` normally runs `Base`'s function, because the compiler picks the
+function from the **static type** of the expression. Declaring the function `virtual` changes that:
+the call runs the version belonging to the **dynamic type**, the type of the complete object the
+reference actually refers to. This is **dynamic dispatch**, and it is how one piece of code can
+operate on many derived types it was compiled without knowing.
 
-:::info[Runtime Polymorphism]
-**Virtual functions** = Call correct function based on actual object type  
-**vtables** = Mechanism that makes virtual functions work  
-**Cost** = Small overhead (~2-3ns per call + 8 bytes per object)
-:::
+This page is the canonical home for virtual functions: overriding, `override` and `final`, abstract
+classes, virtual destructors, how dispatch is implemented with vtables, what it costs, and the
+traps around constructors and default arguments. Choosing between virtual functions and templates
+is on [dynamic vs static polymorphism](./dynamic-vs-static-polymorphism.md).
 
-## Virtual Functions Basics
+**Prerequisites:** [Inheritance](./inheritance.md) (derived-to-base conversion, name hiding).
 
-Virtual functions allow calling the correct function based on the actual object type, not the pointer/reference type.
-```cpp showLineNumbers
-class Animal {
-public:
-    virtual void speak() {  // virtual keyword
-        std::cout << "Animal sound\n";
-    }
-};
+## Overriding and dynamic dispatch
 
-class Dog : public Animal {
-public:
-    void speak() override {  // override base version
-        std::cout << "Woof!\n";
-    }
-};
+```cpp title="shapes.cpp" showLineNumbers
+#include <iostream>
+#include <memory>
+#include <vector>
 
-class Cat : public Animal {
-public:
-    void speak() override {
-        std::cout << "Meow!\n";
-    }
-};
-
-Animal* ptr = new Dog();
-ptr->speak();  // "Woof!" - calls Dog's version!
-delete ptr;
-
-ptr = new Cat();
-ptr->speak();  // "Meow!" - calls Cat's version!
-delete ptr;
-```
-
-The function called depends on what `ptr` actually points to at runtime, not its declared type.
-
-## Without Virtual (Static Binding)
-
-Without `virtual`, the compiler uses the pointer type, not the actual object type.
-```cpp showLineNumbers
-class Animal {
-public:
-    void speak() {  // NOT virtual
-        std::cout << "Animal sound\n";
-    }
-};
-
-class Dog : public Animal {
-public:
-    void speak() {  // Hides, doesn't override
-        std::cout << "Woof!\n";
-    }
-};
-
-Animal* ptr = new Dog();
-ptr->speak();  // "Animal sound" - wrong!
-// Calls Animal::speak because pointer type is Animal*
-
-Dog* dogPtr = new Dog();
-dogPtr->speak();  // "Woof!" - correct (knows it's Dog*)
-```
-
-**Static binding** (compile-time) vs **dynamic binding** (runtime):
-- Without `virtual`: compiler decides at compile-time based on pointer type
-- With `virtual`: decision made at runtime based on actual object
-
-## How vtables Work
-
-`vtables` (virtual tables) are the mechanism behind virtual functions. Each class with virtual functions gets a `vtable`, and each object gets a `vptr` (`vtable` pointer).
-```cpp showLineNumbers
-class Animal {
-public:
-    virtual void speak() { std::cout << "Animal\n"; }
-    virtual void move() { std::cout << "Moving\n"; }
-};
-
-class Dog : public Animal {
-public:
-    void speak() override { std::cout << "Woof\n"; }
-    // move() inherited
-};
-
-// Animal's vtable:        Dog's vtable:
-// [0] → Animal::speak    [0] → Dog::speak (overridden)
-// [1] → Animal::move     [1] → Animal::move (inherited)
-
-Dog d;
-// d's memory layout:
-// [vptr → Dog's vtable][other members...]
-```
-
-**Key components:**
-- `vtable` - table of function pointers (one per class)
-- `vptr` - pointer to `vtable` (one per object)
-
-### Virtual Call Mechanism
-```cpp showLineNumbers
-Animal* ptr = new Dog();
-ptr->speak();
-
-// Compiler generates approximately:
-// 1. Load vptr from object:    vtable_ptr = ptr->vptr
-// 2. Load function pointer:    func = vtable_ptr[0]
-// 3. Call through pointer:     func(ptr)
-```
-
-**Steps:**
-1. Dereference object to get `vptr` (1 memory read)
-2. Index into `vtable` to get function pointer (1 memory read)
-3. Call through function pointer (indirect call)
-
-**vs non-virtual call:**
-```cpp
-ptr->nonVirtual();
-// Just: call Animal::nonVirtual(ptr)
-// Direct call, can be inlined
-```
-
-## vtable Memory Layout
-
-Virtual functions add overhead to object size.
-```cpp showLineNumbers
-class NoVirtual {
-    int data;
-};
-sizeof(NoVirtual);  // 4 bytes
-
-class WithVirtual {
-    int data;
-    virtual void f() {}
-};
-sizeof(WithVirtual);  // 16 bytes (8 vptr + 4 data + 4 padding)
-```
-
-**Memory layout:**
-```
-Object layout:
-[vptr: 8 bytes] → points to vtable
-[data: 4 bytes]
-[padding: 4 bytes]
-Total: 16 bytes
-
-vtable (shared by all objects):
-[0] → &WithVirtual::f
-[RTTI info]
-```
-
-The `vptr` is typically the first member (implementation-defined), allowing safe upcasting and downcasting.
-
-## Override Specifier (C++11)
-
-Use `override` to catch mistakes at compile-time.
-```cpp showLineNumbers
-class Base {
-public:
-    virtual void foo(int x) {}
-    virtual void bar() const {}
-};
-
-class Derived : public Base {
-public:
-    void foo(double x) override {  // Error: doesn't override
-        // Different parameter type!
-    }
-    
-    void bar() override {  // Error: doesn't override
-        // Missing const!
-    }
-    
-    void foo(int x) override {  // Correct override
-    }
-    
-    void bar() const override {  // Correct override
-    }
-};
-```
-
-:::success[Always Use override]
-Catches typos, parameter mismatches, and signature differences. Makes intent clear.
-:::
-
-## Virtual Destructors
-
-Always make base class destructor virtual if you'll delete through a base pointer.
-```cpp showLineNumbers
-class Base {
-public:
-    ~Base() {  // Not virtual!
-        std::cout << "~Base\n";
-    }
-};
-
-class Derived : public Base {
-    int* data;
-public:
-    Derived() : data(new int[100]) {}
-    
-    ~Derived() {
-        delete[] data;
-        std::cout << "~Derived\n";
-    }
-};
-
-Base* ptr = new Derived();
-delete ptr;  // Only calls ~Base! Memory leak!
-// data is never deleted!
-
-// Fix: virtual destructor
-class Base {
-public:
-    virtual ~Base() { std::cout << "~Base\n"; }
-};
-
-// Now delete ptr calls ~Derived, then ~Base
-```
-
-:::danger[Virtual Destructor Rule]
-**If your class has any virtual functions, make the destructor virtual!** Otherwise deleting through base pointer leaks resources.
-:::
-
-## Pure Virtual Functions
-
-Pure virtual functions define an interface without implementation, making the class abstract.
-```cpp showLineNumbers
 class Shape {
 public:
-    virtual void draw() = 0;      // = 0 means pure virtual
-    virtual double area() = 0;
-    
-    virtual ~Shape() = default;   // Virtual destructor
+    virtual ~Shape() = default;
+    virtual double area() const = 0;                       // pure virtual
+    virtual const char* name() const { return "shape"; }   // has a default
 };
-
-// Shape s;  // Error: can't instantiate abstract class
 
 class Circle : public Shape {
-    double radius;
 public:
-    void draw() override {
-        std::cout << "Drawing circle\n";
-    }
-    
-    double area() override {
-        return 3.14159 * radius * radius;
-    }
+    explicit Circle(double r) : r_(r) {}
+    double area() const override { return 3.14159265 * r_ * r_; }
+    const char* name() const override { return "circle"; }
+private:
+    double r_;
 };
 
-Circle c;      // OK: implemented all pure virtuals
-Shape* s = &c; // OK: polymorphic use
-s->draw();     // Calls Circle::draw()
-```
-
-Pure virtual functions create interfaces that derived classes must implement.
-
-## Multiple Inheritance and vtables
-
-Multiple inheritance with virtual functions creates multiple `vtable` pointers.
-```cpp showLineNumbers
-class Base1 {
+class Square final : public Shape {
 public:
-    virtual void f1() {}
+    explicit Square(double s) : s_(s) {}
+    double area() const override { return s_ * s_; }       // keeps Shape::name
+private:
+    double s_;
 };
 
-class Base2 {
-public:
-    virtual void f2() {}
-};
-
-class Derived : public Base1, public Base2 {
-public:
-    void f1() override {}
-    void f2() override {}
-};
-
-sizeof(Derived);  // 16 bytes (two 8-byte vptrs)
-```
-
-**Memory layout:**
-```
-[vptr1: 8 bytes] → Base1's vtable
-[vptr2: 8 bytes] → Base2's vtable
-Total: 16 bytes
-```
-
-Each base class with virtual functions contributes a `vptr`. Pointer conversions may require address adjustment.
-```cpp showLineNumbers
-Derived d;
-Base1* p1 = &d;  // Points to start
-Base2* p2 = &d;  // Points to Base2 subobject (different address!)
-
-// p1 != p2 (pointer adjustment occurs)
-```
-
-## Performance Implications
-
-Virtual functions have small but measurable cost.
-```cpp showLineNumbers
-class Widget {
-public:
-    virtual void process() {  // Virtual call
-        // Implementation
-    }
-    
-    void processNonVirtual() {  // Non-virtual call
-        // Implementation
-    }
-};
-
-// Benchmark: 1 million calls
-Widget w;
-
-// Virtual: ~3ns per call = 3ms total
-for (int i = 0; i < 1000000; ++i) {
-    w.process();  // vtable lookup + indirect call
-}
-
-// Non-virtual: ~1ns per call = 1ms total
-for (int i = 0; i < 1000000; ++i) {
-    w.processNonVirtual();  // direct call, can inline
+int main() {
+    std::vector<std::unique_ptr<Shape>> shapes;
+    shapes.push_back(std::make_unique<Circle>(1.0));
+    shapes.push_back(std::make_unique<Square>(2.0));
+    for (const auto& s : shapes)
+        std::cout << s->name() << ' ' << s->area() << '\n';
 }
 ```
 
-**Costs:**
-- **Memory:** 8 bytes per object (`vptr`)
-- **CPU:** ~2-3ns per virtual call
-- **Cache:** May miss if calling many different types
-- **Inlining:** Virtual calls usually can't be inlined
-
-**When it matters:**
-- Tight loops with millions of calls
-- Embedded systems with limited memory
-- Real-time systems with strict timing
-
-**Usually negligible** for most applications!
-
-## Final Specifier (C++11)
-
-Prevent further overriding of virtual functions.
-```cpp showLineNumbers
-class Base {
-public:
-    virtual void foo() {}
-};
-
-class Derived : public Base {
-public:
-    void foo() final {  // Can't be overridden further
-        std::cout << "Derived::foo\n";
-    }
-};
-
-class MoreDerived : public Derived {
-public:
-    // void foo() override {}  // Error: foo is final
-};
+```text
+circle 3.14159
+shape 4
 ```
 
-`final` also works on classes to prevent inheritance:
-```cpp showLineNumbers
-class Sealed final {
-    // Cannot be inherited from
-};
+A derived function **overrides** a base virtual function when it has the same name, the same
+parameter types, and the same `const`/`volatile` and reference qualifiers. It is then virtual too,
+with or without the keyword. The return type must match, except for
+[covariant returns](#covariant-return-types). Dispatch happens only for calls through a pointer or
+reference. Calling on an object of known type (`Circle c; c.area();`), or with a qualified name
+(`s->Shape::name()`), calls the named function directly.
 
-// class Derived : public Sealed {};  // Error
+`Square` does not override `name()`, so its calls fall back to `Shape::name`. A function that is
+not virtual in the base is never dispatched, even if a derived class declares one with the same
+signature. The derived one only [hides](./inheritance.md#name-lookup-and-name-hiding) it.
+
+## Pure virtual functions and abstract classes
+
+`= 0` declares a **pure virtual** function. A class with at least one pure virtual function, declared
+or inherited and not overridden, is **abstract**: you cannot create objects of it, but you can have
+pointers and references to it. A derived class becomes concrete once every pure virtual function
+has a final overrider. `Shape` above is abstract. `Circle` and `Square` are concrete.
+
+A pure virtual function may still have a definition, written outside the class, which derived
+classes can call as `Shape::area()`. A pure virtual destructor *must* have one, because every
+derived destructor calls it.
+
+## `override` and `final`
+
+`override` *(C++11)* states that the function is meant to override a base virtual function. If it
+doesn't, because of a typo, a different parameter type or a missing `const`, the program is
+ill-formed. Without `override`, the same mistakes silently declare a new function that hides the
+base one.
+
+```cpp title="override.cpp" showLineNumbers
+struct Base {
+    virtual ~Base() = default;
+    virtual void f(int) {}
+    virtual void g() const {}
+};
+struct Derived : Base {
+    void f(int) override {}
+    void g() const override {}
+    // void f(double) override {}   // error: does not override (parameter type)
+    // void g() override {}         // error: does not override (missing const)
+};
+int main() { Derived d; (void)d; }
 ```
 
-## Covariant Return Types
+`final` *(C++11)* on a virtual function forbids further overriding. On a class
+(`class Square final`) it forbids deriving from it. Besides documenting intent, `final` lets the
+compiler call a function directly when it knows no further override can exist
+(see [devirtualization](#devirtualization)). Mark every override with `override` (or `final`) and
+don't repeat `virtual` on it. Clang's `-Winconsistent-missing-override` and GCC's
+`-Wsuggest-override` flag overrides that lack it.
 
-Overriding function can return a more derived type.
-```cpp showLineNumbers
-class Base {
-public:
-    virtual Base* clone() {
-        return new Base(*this);
-    }
+## Virtual destructors
+
+`delete p` where `p` is a `Base*` pointing at a `Derived` object is **undefined behaviour** unless
+`Base`'s destructor is virtual. In practice `~Derived` and the destructors of `Derived`'s members do
+not run, but the standard promises nothing at all.
+
+```cpp title="non_virtual_dtor.cpp" showLineNumbers
+#include <string>
+
+struct Base {
+    virtual void f() {}
+    ~Base() {}                       // non-virtual
+};
+struct Derived : Base {
+    std::string name = "leaks if ~Derived never runs";
 };
 
-class Derived : public Base {
-public:
-    Derived* clone() override {  // Returns Derived*, not Base*
-        return new Derived(*this);
-    }
-};
-
-Derived d;
-Derived* copy = d.clone();  // Returns Derived* directly
-// No cast needed!
+int main() {
+    Base* p = new Derived;
+    delete p;                        // undefined behaviour: ~Derived is not called
+}
 ```
 
-The return type can be more specific (covariant) as long as it's a pointer or reference to a derived class.
+Both compilers warn under `-Wall` (GCC 15: `-Wdelete-non-virtual-dtor`, Clang 21:
+`-Wdelete-non-abstract-non-virtual-dtor`). The same applies
+to `std::unique_ptr<Base>` holding a `Derived`, because its default deleter calls `delete` on a
+`Base*`. `std::shared_ptr<Base>` created from a `Derived*` is the exception: it records the
+deleter for the original type (see [shared_ptr](../06-pointers-references-and-smart-pointers/shared-ptr.md)).
 
-## Virtual Functions in Constructors/Destructors
+The rule for a base class: its destructor should be either **public and virtual**, if objects may be
+deleted through a base pointer, or **protected and non-virtual**, if they must not be (mixins and
+[CRTP](../13-idioms-and-design/03-crtp.md) bases). With a virtual destructor, `delete p` runs
+`~Derived`, then the member destructors, then `~Base`. The order is on
+[constructors and destructors](./constructors-and-destructors.md). Declaring the destructor
+(even `= default`) affects which special members the compiler still generates. See
+[rule of zero/three/five](./rule-of-zero-three-five.md).
 
-Don't call virtual functions in constructors or destructors - they won't dispatch to derived versions.
-```cpp showLineNumbers
-class Base {
-public:
-    Base() {
-        init();  // Calls Base::init, not Derived::init!
-    }
-    
-    virtual void init() { 
-        std::cout << "Base init\n"; 
-    }
-    
-    virtual ~Base() {
-        cleanup();  // Calls Base::cleanup
-    }
-    
-    virtual void cleanup() {
-        std::cout << "Base cleanup\n";
-    }
-};
+## How dispatch is implemented: vtables
 
-class Derived : public Base {
-public:
-    void init() override { 
-        std::cout << "Derived init\n"; 
-    }
-    
-    void cleanup() override {
-        std::cout << "Derived cleanup\n";
-    }
-};
+The standard only specifies what a virtual call does, not how. Every mainstream compiler (GCC and
+Clang with the Itanium C++ ABI, used on Linux and macOS, and MSVC) uses the same basic design:
 
-Derived d;
-// Output: "Base init" (not "Derived init")
-// Destruction: "Base cleanup" (not "Derived cleanup")
-```
+- Each polymorphic class has a **vtable**, a static, read-only array of function pointers with one
+  slot per virtual function, plus RTTI data the Itanium ABI stores next to it. A derived class's
+  vtable starts with the base's slots in the same order. Overridden slots point at the derived
+  functions, and new virtual functions get new slots at the end.
+- Each object of a polymorphic class carries a hidden **vptr** pointing at its class's vtable. With
+  single inheritance it is at offset 0 under the Itanium ABI. The constructor sets it.
 
-**Why?** During construction/destruction, the object's type gradually changes:
-- In Base constructor → object is a Base (Derived part not constructed yet)
-- In Derived constructor → object becomes Derived
-- In Derived destructor → object becomes Base again (Derived part destroyed)
-- In Base destructor → object is a Base
+<Diagram title="Dispatch through a Circle object (Itanium ABI, simplified)" caption="Objects share their class's vtable; only the vptr is per object." accent="violet">
+  <DiagramRow>
+    <DiagramGroup label="Circle object">
+      <DiagramNode title="vptr" accent>8 bytes on x86-64</DiagramNode>
+      <DiagramNode title="r_">double</DiagramNode>
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="points to" />
+    <DiagramGroup label="Circle vtable">
+      <DiagramNode title="~Circle">destructor slots</DiagramNode>
+      <DiagramNode title="Circle::area">overridden</DiagramNode>
+      <DiagramNode title="Circle::name">overridden</DiagramNode>
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
+
+A call `s->area()` through a `Shape*` compiles to roughly:
+
+<Walkthrough title="What s->area() does" accent="violet">
+  <Step title="Load the vptr">
+
+Read the hidden pointer from the object: `vtbl = *(void***)s`. For a `Circle` it now points to
+<StepChange>Circle's vtable</StepChange>.
+
+  </Step>
+  <Step title="Load the slot">
+
+`area` has a fixed slot index known at compile time from `Shape`'s declaration. Load
+`fn = vtbl[index_of_area]`, which is <StepChange>`&Circle::area`</StepChange>.
+
+  </Step>
+  <Step title="Indirect call">
+
+Call `fn(s)`, passing `s` as `this`. The callee is whatever the pointer says, so the compiler
+cannot inline it unless it can [prove the target](#devirtualization).
+
+  </Step>
+</Walkthrough>
+
+Measured with GCC 15 and Clang 21 on x86-64 Linux, adding one virtual function to
+`struct { int data; }` grows it from 4 to 16 bytes: an 8-byte vptr, the `int`, and 4 bytes of tail
+padding. The byte-level layout, including multiple and virtual bases, is on
+[class layout](./class-layout.md) and [object layout](../12-low-level-and-platform/02-object-layout.md).
+
+## What a virtual call costs
+
+- **Space:** one vptr per object (per polymorphic base subobject with multiple inheritance), plus
+  one vtable per class.
+- **Time:** two dependent loads and an indirect call instead of a direct call. On modern CPUs a
+  well-predicted indirect call is cheap. The cost shows up when the target varies unpredictably
+  (branch mispredictions) or when the vtables are cold in cache.
+- **Lost optimisation:** usually the biggest cost. An indirect call blocks inlining, and with it
+  constant propagation and vectorisation across the call. For a tiny function such as a getter in a
+  hot loop, that matters far more than the call itself.
+
+How much this matters depends on the workload. Measure with a profiler before restructuring a
+design to avoid virtual calls.
 
 ## Devirtualization
 
-Compilers can sometimes optimize away virtual calls when the exact type is known.
-```cpp showLineNumbers
-void example1() {
-    Dog d;
-    d.speak();  // Compiler knows exact type: direct call!
-    // No vtable lookup needed
-}
+The compiler turns a virtual call into a direct (and inlinable) call when it can prove the dynamic
+type:
 
-void example2(Animal* a) {
-    a->speak();  // Must use vtable (don't know actual type)
-}
+- the call is on an object, not a pointer or reference (`Circle c; c.area();`);
+- the class or the function is `final`, so a `Square*` or `Square&` can only refer to a `Square`;
+- after inlining, the object's construction is visible (`auto c = Circle{1}; Shape& s = c; s.area();`);
+- with link-time optimisation and whole-program visibility (for example Clang's
+  `-fwhole-program-vtables` with `-flto`, or GCC with `-flto`), the compiler can see that a virtual
+  function has a single implementation.
 
-void example3(Dog& d) {
-    d.speak();  // Might be devirtualized if inlined
+GCC and Clang also do *speculative* devirtualization: compare the loaded function pointer with a
+likely target and call it directly if they match. None of this is guaranteed. Check the generated
+code if you depend on it.
+
+## Covariant return types
+
+An override may return a pointer or reference to a class *derived from* the base function's return
+type. The standard example is `clone()`:
+
+```cpp title="clone.cpp" showLineNumbers
+#include <memory>
+
+struct Shape {
+    virtual ~Shape() = default;
+    virtual Shape* clone() const { return new Shape(*this); }
+};
+
+struct Circle : Shape {
+    Circle* clone() const override { return new Circle(*this); }  // covariant
+};
+
+int main() {
+    Circle c;
+    std::unique_ptr<Circle> copy{c.clone()};   // no cast needed
+    const Shape& s = c;
+    std::unique_ptr<Shape> poly{s.clone()};    // dispatches to Circle::clone
 }
 ```
 
-Modern compilers can devirtualize when:
-- Exact type is known at compile-time
-- Function is inlined and type becomes visible
-- Link-time optimization reveals actual type
+Covariance works only with raw pointers and references. `std::unique_ptr<Circle>` is not
+covariant with `std::unique_ptr<Shape>`. The usual workaround is a public non-virtual `clone()`
+returning a smart pointer that wraps a private virtual one returning a raw pointer.
 
-## Default Arguments Trap
+## Virtual calls during construction and destruction
 
-Virtual functions and default arguments don't mix well.
-```cpp showLineNumbers
-class Base {
-public:
-    virtual void print(int x = 10) {
-        std::cout << "Base: " << x << "\n";
-    }
+While a base-class constructor or destructor runs, the object's dynamic type *is* that base class.
+The derived part is not built yet, or has already been destroyed. Virtual calls made then dispatch
+to the base's version:
+
+```cpp title="ctor_dispatch.cpp" showLineNumbers
+#include <iostream>
+
+struct Base {
+    Base()          { hello(); }        // calls Base::hello
+    virtual ~Base() { hello(); }        // calls Base::hello
+    virtual void hello() const { std::cout << "Base::hello\n"; }
+    void run() const { hello(); }       // ordinary dispatch
 };
 
-class Derived : public Base {
-public:
-    void print(int x = 20) override {
-        std::cout << "Derived: " << x << "\n";
-    }
+struct Derived : Base {
+    Derived()  { hello(); }
+    ~Derived() override { hello(); }
+    void hello() const override { std::cout << "Derived::hello\n"; }
 };
 
-Base* ptr = new Derived();
-ptr->print();  // "Derived: 10"
-// Calls Derived::print (virtual dispatch)
-// But uses Base's default argument (static binding)!
+int main() {
+    Derived d;
+    d.run();
+}
 ```
 
-:::warning[Avoid Different Defaults]
-Don't use different default arguments in overridden functions. Default arguments are bound at compile-time, not runtime.
-:::
-
-## Non-Virtual Interface (NVI) Idiom
-
-Separate the interface (non-virtual public) from customization points (virtual private).
-```cpp showLineNumbers
-class Widget {
-public:
-    // Public non-virtual interface
-    void doWork() {
-        setup();        // Pre-work
-        doWorkImpl();   // Virtual customization point
-        cleanup();      // Post-work
-    }
-    
-private:
-    // Private virtual implementation
-    virtual void doWorkImpl() = 0;
-    
-    void setup() { /* ... */ }
-    void cleanup() { /* ... */ }
-};
-
-class ConcreteWidget : public Widget {
-private:
-    void doWorkImpl() override {
-        // Actual work here
-    }
-};
+```text
+Base::hello
+Derived::hello
+Derived::hello
+Derived::hello
+Base::hello
 ```
 
-**Benefits:**
-- Base class controls the workflow
-- Derived classes only customize implementation
-- Pre/post conditions enforced
-- Interface is stable (non-virtual)
+Under the Itanium ABI this is literal: each constructor sets the vptr to its own class's vtable
+before running its body, and each destructor resets it. Calling a **pure** virtual function this way
+is undefined behaviour. With GCC's and Clang's runtime libraries it typically aborts with "pure virtual method called". If
+derived-specific setup must run after construction, use a factory function or a two-phase `init()`
+called by the owner.
 
-## RTTI and vtables
+## Default arguments are bound statically
 
-Run-Time Type Information uses `vtable` data.
-```cpp showLineNumbers
-class Base {
-public:
+Default arguments come from the **static** type of the call expression, even though the function
+body is picked dynamically:
+
+```cpp title="default_args.cpp" showLineNumbers
+#include <iostream>
+
+struct Base {
     virtual ~Base() = default;
+    virtual void print(int x = 10) const { std::cout << "Base " << x << '\n'; }
 };
 
-class Derived : public Base {};
+struct Derived : Base {
+    void print(int x = 20) const override { std::cout << "Derived " << x << '\n'; }
+};
 
-Base* ptr = new Derived();
-
-// dynamic_cast uses vtable for type checking
-Derived* d = dynamic_cast<Derived*>(ptr);  // Works!
-if (d) {
-    std::cout << "It's a Derived\n";
+int main() {
+    Derived d;
+    const Base& b = d;
+    b.print();   // Derived::print, with Base's default
+    d.print();   // Derived::print, with Derived's default
 }
-
-// typeid uses vtable
-std::cout << typeid(*ptr).name();  // "Derived"
-
-// Only works with polymorphic types (have virtual functions)
 ```
 
-RTTI information is stored with the `vtable`, enabling `dynamic_cast` and `typeid`.
+```text
+Derived 10
+Derived 20
+```
 
-## Summary
+Don't give overrides their own default arguments. Either don't use defaults on virtual functions,
+or put them only on a non-virtual public function (see NVI below). Default arguments in general are
+covered on [default arguments](../04-functions-and-call-mechanics/default-arguments.md).
 
-:::info[Virtual functions]
-- Enable runtime polymorphism (dynamic dispatch)
-- Use `virtual` keyword in base class
-- Use `override` in derived class (catches errors)
-- Call correct function based on actual object type
-:::
+## Non-virtual interface (NVI)
 
-:::info[vtables mechanism]
-- Each class gets one `vtable` (function pointer table)
-- Each object gets one `vptr` (points to class's `vtable`)
-- Virtual call: load `vptr` → index `vtable` → call function
-- 2-3ns overhead per call + 8 bytes per object
-:::
+The **NVI idiom** keeps the public functions non-virtual and makes the virtual hooks `private` (or
+`protected`). The base then controls what happens around every call (checks, logging, locking),
+and derived classes only supply the variable step:
 
-:::info[Best practices]
-- Always use `override` keyword
-- Virtual destructor if base class has virtual functions
-- Pure virtual (`= 0`) for interfaces
-- `final` to prevent further overriding
-- Avoid different default arguments
-:::
+```cpp title="nvi.cpp" showLineNumbers
+#include <iostream>
 
-:::info[Special cases]
-- Multiple inheritance: multiple `vptr`s
-- Covariant return types: can return derived type
-- Don't call virtuals in constructor/destructor
-- Devirtualization when compiler knows exact type
-:::
+class Task {
+public:
+    virtual ~Task() = default;
+    void run() {                        // non-virtual: fixed sequence
+        std::cout << "[start]\n";
+        do_run();
+        std::cout << "[done]\n";
+    }
+private:
+    virtual void do_run() = 0;          // the customisation point
+};
 
-:::info[Costs]
-- Memory: 8 bytes per object (`vptr`)
-- CPU: 2-3ns per call (vs 1ns direct call)
-- Can't inline virtual calls (usually)
-- Usually negligible in practice
-:::
+class Print final : public Task {
+    void do_run() override { std::cout << "printing\n"; }
+};
 
-:::info[Alternatives]
-- Templates (static polymorphism, zero overhead)
-- Function pointers (manual `vtable`)
-- std::variant + std::visit (value-based polymorphism)
-:::
+int main() {
+    Print p;
+    p.run();
+}
+```
+
+```text
+[start]
+printing
+[done]
+```
+
+A derived class can override a `private` virtual function. Access controls who may *call* a name,
+not who may override it.
+
+## RTTI: `dynamic_cast` and `typeid`
+
+Polymorphic classes also carry **run-time type information**. With the Itanium ABI, a pointer to
+the class's `std::type_info` sits just before the vtable's function slots. Two operators use it:
+
+```cpp title="rtti.cpp" showLineNumbers
+#include <iostream>
+#include <typeinfo>
+
+struct Base { virtual ~Base() = default; };
+struct Derived : Base { void only_derived() const { std::cout << "derived\n"; } };
+
+void inspect(const Base& b) {
+    if (auto* d = dynamic_cast<const Derived*>(&b))
+        d->only_derived();
+    std::cout << typeid(b).name() << '\n';   // dynamic type; name is implementation-defined
+}
+
+int main() {
+    Derived d;
+    inspect(d);
+}
+```
+
+```text
+derived
+7Derived
+```
+
+- `dynamic_cast<Derived*>(p)` returns `nullptr` if `*p` is not a `Derived` (the reference form
+  throws `std::bad_cast`). It needs a polymorphic source type, and it can be much slower than a
+  virtual call because it may have to walk the class hierarchy.
+- `typeid(expr)` on a polymorphic lvalue gives the dynamic type. `name()` is implementation-defined:
+  GCC and Clang return the mangled name (`7Derived` above, demangle with `c++filt -t`), MSVC returns
+  a readable one.
+
+Frequent `dynamic_cast` downcasts usually mean an operation belongs in the base interface as a
+virtual function. `-fno-rtti` (GCC/Clang) removes RTTI, which disables both operators on
+polymorphic types but not virtual dispatch.
+
+## References
+
+- [cppreference: virtual function specifier](https://en.cppreference.com/w/cpp/language/virtual)
+- [cppreference: abstract class](https://en.cppreference.com/w/cpp/language/abstract_class)
+- [cppreference: override](https://en.cppreference.com/w/cpp/language/override), [final](https://en.cppreference.com/w/cpp/language/final)
+- [cppreference: dynamic_cast](https://en.cppreference.com/w/cpp/language/dynamic_cast), [typeid](https://en.cppreference.com/w/cpp/language/typeid)
+- [Itanium C++ ABI, virtual table layout](https://itanium-cxx-abi.github.io/cxx-abi/abi.html#vtable)
+- Herb Sutter, [Virtuality](http://www.gotw.ca/publications/mill18.htm) (NVI and destructor guideline)
