@@ -1,426 +1,306 @@
 ---
 id: concepts-and-requires
-title: Concepts and Requires Expressions (C++20)
+title: Concepts and Requires Expressions
 sidebar_label: Concepts & Requires
-sidebar_position: 11
-tags: [c++, cpp20, concepts, requires, constraints]
+sidebar_position: 9
+tags: [c++, cpp20, concepts, requires, constraints, subsumption]
 ---
 
-# Concepts and Requires Expressions (C++20)
+# Concepts and Requires Expressions
 
-Concepts are named requirements for template arguments that replace [SFINAE and `enable_if`](./sfinae-and-enable-if.md) with readable constraints. Requires expressions are the building blocks that check if code compiles at compile-time.
+An unconstrained template accepts any type and fails, deep inside its body, when the type turns out
+not to support some operation. **Concepts** *(C++20)* let a template state its requirements in its
+declaration: `template <std::integral T>` accepts only integral types, and a call with `double` is
+rejected at the call site with a message naming the unsatisfied concept. They replace most uses of
+[SFINAE and `enable_if`](./sfinae-and-enable-if.md), and they add something SFINAE never had: when
+two overloads both match, the more constrained one is chosen automatically. This page is the
+canonical home for concepts, `requires` clauses, `requires` expressions and subsumption.
 
-:::info[Named Constraints with Readable Checks]
-**Concepts** = Named sets of requirements (e.g., `std::integral<T>`)  
-**Requires expressions** = Check if operations are valid at compile-time  
-Together they provide clear, readable template constraints with great error messages
-:::
+**Prerequisites:** [Function templates](./function-templates.md),
+[type traits](./type-traits.md). Knowing [SFINAE](./sfinae-and-enable-if.md) helps to see what
+concepts replace, but is not required.
 
-## Concepts Basics
+## Vocabulary
 
-Concepts are named predicates that constrain template parameters.
-```cpp showLineNumbers
-template<typename T>
-concept Numeric = std::is_arithmetic_v<T>;
+- A **constraint** is a compile-time boolean condition on template arguments.
+- A **concept** is a named constraint: `template <typename T> concept Name = constraint-expression;`.
+  `Name<int>` is a `bool` prvalue, so concepts can be used in `static_assert` and `if constexpr` too.
+- A **requires clause** attaches a constraint to a template: `requires std::integral<T>`.
+- A **requires expression** is a `bool` expression that checks whether some code would compile:
+  `requires (T x) { x.size(); }`.
 
-// Use in templates
-template<Numeric T>
-T add(T a, T b) {
-    return a + b;
-}
+If a template's constraints are not satisfied for the deduced arguments, the template is dropped
+from overload resolution, just as a substitution failure would drop it.
 
-add(5, 10);      // int is Numeric
-add(3.14, 2.71); // double is Numeric
-// add("a", "b");   // Error: const char* doesn't satisfy Numeric
-```
+## Four ways to constrain a function
 
-Much clearer than SFINAE!
+All four declarations below mean the same thing:
 
-## Standard Library Concepts
-
-C++20 provides many concepts in `<concepts>`:
-```cpp showLineNumbers
+```cpp title="constrain_syntax.cpp" showLineNumbers
 #include <concepts>
 
-// Integral types
-template<std::integral T>
-T twice(T value) {
-    return value * 2;
-}
+// 1. Type-constraint in the template head
+template <std::integral T>
+T twice1(T x) { return x * 2; }
 
-// Floating point types
-template<std::floating_point T>
-T half(T value) {
-    return value / 2.0;
-}
+// 2. requires-clause after the template head
+template <typename T>
+    requires std::integral<T>
+T twice2(T x) { return x * 2; }
 
-// Same as another type
-template<typename T>
-requires std::same_as<T, int>
-void process(T value) {
-    // Only accepts int
-}
+// 3. Trailing requires-clause after the declarator
+template <typename T>
+T twice3(T x) requires std::integral<T> { return x * 2; }
 
-// Convertible
-template<typename From, typename To>
-requires std::convertible_to<From, To>
-To convert(From value) {
-    return static_cast<To>(value);
+// 4. Abbreviated function template (C++20): each constrained auto is its own parameter
+auto twice4(std::integral auto x) { return x * 2; }
+
+int main() {
+    return twice1(1) + twice2(1) + twice3(1) + twice4(1) - 8;
+    // twice1(1.5);   // error: constraints not satisfied
 }
 ```
 
-## Four Ways to Use Concepts
+Use the short form (1 or 4) when a single concept constrains a single parameter. Use a `requires`
+clause (2) when the condition involves several parameters or is not a concept,
+`requires std::is_trivially_copyable_v<T> && (sizeof(T) <= 16)`. The trailing form (3) is the only one
+available for a non-template member function of a class template:
 
-All equivalent - choose based on readability:
-```cpp showLineNumbers
-// 1. Template constraint
-template<std::integral T>
-T add(T a, T b) { return a + b; }
+```cpp title="constrained_member.cpp" showLineNumbers
+#include <concepts>
 
-// 2. Trailing requires clause
-template<typename T>
-requires std::integral<T>
-T add(T a, T b) { return a + b; }
-
-// 3. Abbreviated function template (auto)
-auto add(std::integral auto a, std::integral auto b) {
-    return a + b;
-}
-
-// 4. Inline concept check
-template<typename T>
-T add(T a, T b) requires std::integral<T> {
-    return a + b;
-}
-```
-
-## Requires Expressions
-
-Requires expressions check if code compiles without actually compiling it.
-```cpp showLineNumbers
-template<typename T>
-void process(T value) {
-    // Check if T supports these operations
-    requires {
-        value + value;      // Addition
-        value * 2;          // Multiplication with int
-        value < value;      // Comparison
-    };
-    
-    // If requires succeeds, this code runs
-    auto result = value + value;
-}
-```
-
-**Not used directly like this!** Typically used in concepts or requires clauses.
-
-## Requires Clause
-
-Check constraints before function execution:
-```cpp showLineNumbers
-template<typename T>
-requires requires(T x) {  // First = clause, second = expression
-    x + x;
-    x * 2;
-}
-T twice(T value) {
-    return value * 2;
-}
-
-twice(5);      // OK: int supports these ops
-twice(3.14);   // OK: double supports these ops
-// twice("hi");   // Error: const char* doesn't support * 2
-```
-
-## Simple Requirements
-
-Check if expressions are valid (compile):
-```cpp showLineNumbers
-template<typename T>
-requires requires(T x) {
-    x.size();       // Must have .size() method
-    x.begin();      // Must have .begin() method
-    x.end();        // Must have .end() method
-}
-void process(const T& container) {
-    for (const auto& item : container) {
-        std::cout << item;
-    }
-}
-
-process(std::vector<int>{1,2,3});  // Has size, begin, end
-// process(42);  // int doesn't have these methods
-```
-
-## Type Requirements
-
-Check if types exist:
-```cpp showLineNumbers
-template<typename T>
-requires requires {
-    typename T::value_type;     // Must have value_type
-    typename T::iterator;       // Must have iterator
-    typename T::size_type;      // Must have size_type
-}
-void info(const T&) {
-    std::cout << "Container type\n";
-}
-
-info(std::vector<int>{});  // Has all these types
-// info(42);  // int doesn't have these types
-```
-
-## Compound Requirements
-
-Check expressions AND their return types:
-```cpp showLineNumbers
-template<typename T>
-requires requires(T x) {
-    { x.size() } -> std::convertible_to<size_t>;  // size() returns size_t-like
-    { x[0] } -> std::same_as<typename T::value_type&>;  // operator[] returns reference
-}
-void process(T& container) {
-    size_t n = container.size();
-    auto& first = container[0];
-}
-```
-
-**Syntax:** `{ expression } -> concept<type>;`
-
-## Nested Requirements
-
-Check for nested properties:
-```cpp showLineNumbers
-template<typename T>
-requires requires(T x) {
-    requires sizeof(T) <= 8;  // Size constraint
-    requires std::is_trivially_copyable_v<T>;  // Type trait
-    x + x;  // Operation
-}
-void fastProcess(T value) {
-    // Optimized for small, trivially copyable types
-}
-```
-
-## Custom Concepts
-
-Define your own requirements:
-```cpp showLineNumbers
-// Simple concept
-template<typename T>
-concept Incrementable = requires(T x) {
-    { ++x } -> std::same_as<T&>;  // Pre-increment returns reference
-    { x++ } -> std::same_as<T>;   // Post-increment returns value
+template <typename T>
+struct Wrapper {
+    T value;
+    // Constrained member of a class template: exists only for some T.
+    T next() const requires std::integral<T> { return value + 1; }
 };
 
-template<Incrementable T>
-void advance(T& value, int steps) {
-    for (int i = 0; i < steps; ++i) {
-        ++value;
-    }
-}
+template <typename... Ts>
+    requires (std::integral<Ts> && ...)       // fold over a pack of constraints
+auto add_all(Ts... xs) { return (0 + ... + xs); }
 
-// Concept with type checks
-template<typename T>
-concept Container = requires(T c) {
-    typename T::value_type;
-    typename T::iterator;
-    c.begin();
+int main() {
+    Wrapper<int> w{1};
+    Wrapper<double> d{1.0};        // fine: next() is not available, but not needed
+    // d.next();                   // error: constraints not satisfied
+    return w.next() + add_all(1, 2, 3) - 8 + static_cast<int>(d.value) - 1;
+}
+```
+
+Note that the two `auto` parameters in `void f(std::integral auto a, std::integral auto b)` are
+independent template parameters: `f(1, 2L)` deduces `int` and `long`. Write `template <std::integral T> void f(T a, T b)`
+when they must match.
+
+## Requires expressions
+
+A requires expression lists **requirements**. It is `true` if every requirement is satisfied and
+`false` otherwise; an invalid requirement never produces a compile error. There are four kinds:
+
+```cpp title="sized_range.cpp" showLineNumbers
+#include <concepts>
+#include <cstddef>
+#include <list>
+#include <string>
+#include <vector>
+
+template <typename C>
+concept SizedRange = requires(const C& c) {
+    typename C::value_type;                                // type requirement
+    c.begin();                                             // simple requirement
     c.end();
-    c.size();
+    { c.size() } -> std::convertible_to<std::size_t>;      // compound requirement
+    requires std::default_initializable<typename C::value_type>;  // nested requirement
 };
+
+template <SizedRange C>
+auto sum(const C& c) {
+    typename C::value_type total{};
+    for (const auto& x : c) total += x;
+    return total;
+}
+
+static_assert(SizedRange<std::vector<int>>);
+static_assert(SizedRange<std::list<double>>);
+static_assert(!SizedRange<int>);
+
+int main() {
+    return sum(std::vector{1, 2, 3}) == 6 && sum(std::string("ab")) == char('a' + 'b') ? 0 : 1;
+}
 ```
 
-## Combining Concepts
-```cpp showLineNumbers
-// AND (conjunction)
-template<typename T>
-concept SignedIntegral = std::integral<T> && std::signed_integral<T>;
+| Requirement | Syntax | Satisfied when |
+|---|---|---|
+| Simple | `expr;` | `expr` is a valid expression. It is never evaluated, only checked. |
+| Type | `typename T::name;` | The named type exists. |
+| Compound | `{ expr } noexcept(opt) -> Concept<Args>;` | `expr` is valid, is `noexcept` if that is written, and `Concept<decltype((expr)), Args...>` holds. |
+| Nested | `requires bool-constant;` | The constant expression is `true`. |
 
-// OR (disjunction)
-template<typename T>
+Two details trip people up:
+
+- In a compound requirement, the expression's type is inserted as the concept's **first** argument.
+  `{ c.size() } -> std::convertible_to<std::size_t>` checks `std::convertible_to<decltype((c.size())), std::size_t>`.
+  The arrow takes a type-constraint, not a type: `-> std::size_t` is ill-formed.
+- A simple requirement `sizeof(T) <= 8;` only checks that the comparison is a *valid expression*,
+  which is always true. To require the *value*, write the nested form `requires sizeof(T) <= 8;`.
+
+The parameter list `(const C& c)` only introduces names to write expressions with. No objects are
+created.
+
+### Requires expressions outside concepts
+
+A requires expression is an ordinary `bool` constant, so it can drive `if constexpr` directly:
+
+```cpp title="requires_in_if.cpp" showLineNumbers
+#include <concepts>
+#include <cstdio>
+
+// requires-expression used as a value: true/false, never an error.
+template <typename T>
+void show(const T& x) {
+    if constexpr (requires { x.print(); })
+        x.print();
+    else
+        std::puts("(no print)");
+}
+
+struct P { void print() const { std::puts("P"); } };
+
+int main() {
+    show(P{});
+    show(42);
+}
+```
+
+```text
+P
+(no print)
+```
+
+Inside a requires clause you sometimes see `requires requires (T x) { ... }`. The first `requires`
+starts the clause, the second starts an inline requires expression. It works, but naming the
+expression as a concept is easier to read and to reuse.
+
+## Defining concepts
+
+A concept is a template with no body other than its constraint. It cannot be specialized or
+constrained itself, and it can be combined with `&&`, `||` and `!` like any boolean:
+
+```cpp title="fragment"
+template <typename T>
 concept Number = std::integral<T> || std::floating_point<T>;
 
-// NOT (negation)
-template<typename T>
-concept NotPointer = !std::is_pointer_v<T>;
+template <typename T, typename U>
+concept AddableTo = requires(T a, U b) { { a + b } -> std::convertible_to<T>; };
 ```
 
-## Subsumption
+With multiple parameters, the short form fills in the **first** one: `template <AddableTo<int> T>`
+means `AddableTo<T, int>`.
 
-More specific concepts are preferred:
-```cpp showLineNumbers
-template<typename T>
-concept Integral = std::is_integral_v<T>;
+## Subsumption: picking the more constrained overload
 
-template<typename T>
-concept SignedIntegral = Integral<T> && std::is_signed_v<T>;
+When two constrained templates are both viable and otherwise equally good, the compiler picks the
+one whose constraints **subsume** the other's. It decides this by normalizing each constraint into a
+conjunction/disjunction of **atomic constraints** and checking logical implication. Concepts are
+expanded during normalization; everything else, including a trait like `std::is_signed_v<T>`, is an
+opaque atom.
 
-// General version
-template<Integral T>
-void process(T value) {
-    std::cout << "Integral\n";
-}
+```cpp title="subsumption.cpp" showLineNumbers
+#include <concepts>
+#include <iostream>
 
-// Specific version (preferred when both match)
-template<SignedIntegral T>
-void process(T value) {
-    std::cout << "Signed Integral\n";
-}
+template <typename T>
+concept Number = std::integral<T> || std::floating_point<T>;
 
-process(5u);   // "Integral" (unsigned)
-process(5);    // "Signed Integral" (signed - more specific!)
-```
+template <typename T>
+concept SignedNumber = Number<T> && std::is_signed_v<T>;   // refines Number
 
-## Concepts with Multiple Parameters
-```cpp showLineNumbers
-template<typename T, typename U>
-concept Addable = requires(T a, U b) {
-    { a + b } -> std::convertible_to<T>;
-};
+void describe(Number auto)       { std::cout << "number\n"; }
+void describe(SignedNumber auto) { std::cout << "signed number\n"; }
 
-template<typename T, typename U>
-requires Addable<T, U>
-T add(T a, U b) {
-    return a + b;
-}
-
-add(5, 10);      // int + int
-add(3.14, 2);    // double + int
-// add("hello", 5); // const char* + int not addable
-```
-
-## Standard Concepts Overview
-
-**Core language concepts:**
-```cpp showLineNumbers
-std::same_as<T, U>          // T and U are same type
-std::derived_from<T, Base>  // T derives from Base
-std::convertible_to<From, To>  // From converts to To
-std::integral<T>            // int, long, char, etc.
-std::signed_integral<T>     // Signed integral
-std::unsigned_integral<T>   // Unsigned integral
-std::floating_point<T>      // float, double, long double
-```
-
-**Comparison concepts:**
-```cpp showLineNumbers
-std::equality_comparable<T>     // Supports ==
-std::totally_ordered<T>         // Supports <, >, <=, >=
-std::three_way_comparable<T>    // Supports <=>
-```
-
-**Object concepts:**
-```cpp showLineNumbers
-std::movable<T>              // Move constructible/assignable
-std::copyable<T>             // Copy constructible/assignable
-std::semiregular<T>          // Default + move/copy
-std::regular<T>              // Semiregular + equality comparable
-```
-
-**Callable concepts:**
-```cpp showLineNumbers
-std::invocable<F, Args...>   // Can call F with Args
-std::predicate<F, Args...>   // Returns bool
-```
-
-## Concept Refinement
-
-Build concepts on top of others:
-```cpp showLineNumbers
-template<typename T>
-concept Readable = requires(T x) {
-    { x.read() } -> std::same_as<std::string>;
-};
-
-template<typename T>
-concept Writable = requires(T x, std::string s) {
-    { x.write(s) } -> std::same_as<void>;
-};
-
-// Combine both
-template<typename T>
-concept ReadWritable = Readable<T> && Writable<T>;
-
-template<ReadWritable T>
-void processFile(T& file) {
-    auto data = file.read();
-    file.write(data);
+int main() {
+    describe(5u);    // only Number satisfied
+    describe(-5);    // both satisfied; SignedNumber subsumes Number, so it wins
+    describe(2.5);   // double is signed: signed number
 }
 ```
 
-## Better Error Messages
-
-**Without concepts (SFINAE):**
-```
-error: no matching function for call to 'add(const char*)'
-note: candidate template ignored: substitution failure [with T = const char*]:
-no type named 'value' in 'std::is_arithmetic<const char*>'
-[200 lines of template instantiation stack...]
+```text
+number
+signed number
+signed number
 ```
 
-**With concepts:**
-```
-error: no matching function for call to 'add(const char*)'
-note: constraints not satisfied
-note: concept 'Numeric<const char*>' was not satisfied
-```
+<Diagram title="Why SignedNumber subsumes Number" caption="After normalization, SignedNumber is Number plus one more atom, so anything satisfying it satisfies Number." accent="green">
+  <DiagramRow>
+    <DiagramNode title="Number<T>">integral&lt;T&gt; ∨ floating_point&lt;T&gt;</DiagramNode>
+    <DiagramArrow direction="right" label="implied by" />
+    <DiagramNode title="SignedNumber<T>" accent>(integral&lt;T&gt; ∨ floating_point&lt;T&gt;) ∧ is_signed_v&lt;T&gt;</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-Clear and concise!
+Subsumption only sees through **concepts**. Writing the same logic as raw trait expressions gives
+unrelated atoms and an ambiguous call:
 
-## Real-World Example
-```cpp showLineNumbers
-// Generic container algorithm
-template<typename C>
-concept Container = requires(C c) {
-    typename C::value_type;
-    typename C::iterator;
-    { c.begin() } -> std::same_as<typename C::iterator>;
-    { c.end() } -> std::same_as<typename C::iterator>;
-    { c.size() } -> std::convertible_to<size_t>;
-};
+```cpp title="no_subsumption.cpp" showLineNumbers
+#include <type_traits>
 
-template<Container C>
-auto sum(const C& container) {
-    typename C::value_type result{};
-    for (const auto& item : container) {
-        result += item;
-    }
-    return result;
+// Same constraints written as trait expressions: not concepts, so no subsumption.
+template <typename T>
+    requires std::is_integral_v<T>
+int pick(T) { return 1; }
+
+template <typename T>
+    requires std::is_integral_v<T> && std::is_signed_v<T>
+int pick(T) { return 2; }
+
+int main() {
+    // pick(-1);   // error: call of overloaded 'pick(int)' is ambiguous
+    return pick(1u) - 1;
 }
-
-// Works with any container
-std::vector<int> vec{1, 2, 3};
-std::list<double> lst{1.1, 2.2, 3.3};
-sum(vec);  // 6
-sum(lst);  // 6.6
 ```
 
-## Summary
+Atomic constraints are identical only if they are the same expression at the same place in the
+source. The two `std::is_integral_v<T>` atoms are written twice, so the compiler cannot prove that
+either constraint implies the other. Wrapping the shared part in a concept fixes it, which is why
+the rule of thumb is: build refinements from named concepts.
 
-**Concepts:**
-- Named requirements for template arguments
-- Replace SFINAE with readable constraints
-- Provide clear error messages
-- Enable overload resolution via subsumption
-- Four equivalent syntaxes
+## Diagnostics
 
-**Requires expressions:**
-- Check if code compiles at compile-time
-- Simple requirements: check operations
-- Type requirements: check types exist
-- Compound requirements: check operation + return type
-- Nested requirements: check compile-time conditions
+The diagnostic names the concept that failed and the reason. For `twice(1.5)` against
+`template <std::integral T> T twice(T)`, Clang 21 reports (source excerpts trimmed):
 
-**Benefits:**
-- **Readable:** `std::integral<T>` vs complex SFINAE
-- **Self-documenting:** Requirements are explicit
-- **Clear errors:** Shows exactly what failed
-- **Overload resolution:** Subsumption picks best match
-- **Standard library:** Many concepts provided
+```text
+error: no matching function for call to 'twice'
+note: candidate template ignored: constraints not satisfied [with T = double]
+note: because 'double' does not satisfy 'integral'
+note: because 'is_integral_v<double>' evaluated to false
+```
 
-**Common patterns:**
-- Combining with `&&`, `||`, `!`
-- Building complex concepts from simpler ones
-- Using standard concepts from `<concepts>`
-- Custom concepts for domain-specific requirements
+GCC 15 gives the same information as "constraints not satisfied" followed by
+`the expression 'is_integral_v<_Tp> [with _Tp = double]' evaluated to 'false'`. With an
+unconstrained template the error would instead point at `x * 2` or wherever the body first fails.
+
+## The standard concepts
+
+`<concepts>` and `<iterator>` define the vocabulary most code needs. A selection:
+
+| Group | Concepts |
+|---|---|
+| Core language | `same_as`, `derived_from`, `convertible_to`, `common_with`, `integral`, `signed_integral`, `unsigned_integral`, `floating_point`, `assignable_from`, `swappable` |
+| Object | `destructible`, `constructible_from`, `default_initializable`, `move_constructible`, `copy_constructible`, `movable`, `copyable`, `semiregular`, `regular` |
+| Comparison | `equality_comparable`, `totally_ordered`, `three_way_comparable` (`<compare>`) |
+| Callable | `invocable`, `regular_invocable`, `predicate`, `relation`, `strict_weak_order` |
+| Iterators / ranges | `input_iterator`, `forward_iterator`, `random_access_iterator`, `contiguous_iterator`, `std::ranges::range`, `std::ranges::sized_range`, ... |
+
+Standard concepts also carry **semantic requirements** that the compiler cannot check: a type
+satisfying `std::regular` is expected to have copies that compare equal to the original, for
+example. A type that compiles against a concept but breaks its semantics gives undefined behaviour
+in standard algorithms.
+
+## References
+
+- [cppreference: Constraints and concepts](https://en.cppreference.com/w/cpp/language/constraints)
+- [cppreference: Requires expression](https://en.cppreference.com/w/cpp/language/requires)
+- [cppreference: Concepts library](https://en.cppreference.com/w/cpp/concepts)
+- [P0734R0: Wording paper, C++ extensions for Concepts](https://wg21.link/P0734R0)
