@@ -3,245 +3,253 @@ id: function-templates
 title: Function Templates
 sidebar_label: Function Templates
 sidebar_position: 1
-tags: [c++, templates, generic-programming, function-templates]
+tags: [c++, templates, generic-programming, function-templates, instantiation]
 ---
 
 # Function Templates
 
-Function templates let you write one function that works with different types. The compiler generates specific versions for each type you use.
+A **function template** is a pattern from which the compiler generates functions. You write the
+body once with a placeholder type, and each distinct set of template arguments produces a separate
+ordinary function, called a **specialization**. This is how `std::max`, `std::sort` and
+`std::make_unique` work for any type without virtual calls or `void*`. This page is the canonical
+home for declaring function templates, how and when they are instantiated, why definitions live in
+headers, and how templates take part in overload resolution.
 
-:::info[Write Once, Use for Any Type]
-Templates = blueprints. The compiler stamps out type-specific versions as needed.
-:::
+**Prerequisites:** [Function Overloading](../04-functions-and-call-mechanics/overloading.md),
+[Translation Units](../01-toolchain-and-build/translation-units.md).
 
-## Basic Function Template
+How the compiler works out `T` from the call arguments has its own page:
+[Template Argument Deduction](./template-argument-deduction.md). Restricting which types a template
+accepts is covered in [Concepts and Requires](./concepts-and-requires.md).
 
-```cpp showLineNumbers 
-// Template definition
-template<typename T>
-T max(T a, T b) {
-    return (a > b) ? a : b;
+## Declaring a function template
+
+A template declaration starts with a **template parameter list**. `typename` and `class` mean the
+same thing in it.
+
+```cpp title="larger.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+
+template <typename T>
+T larger(T a, T b) {
+    return a < b ? b : a;
 }
 
-// Usage - compiler generates versions automatically
-int x = max(5, 10);           // max<int>
-double y = max(3.14, 2.71);   // max<double>
-std::string s = max("abc", "xyz");  // max<std::string>
-```
-
-**How it works:**
-1. You write one template
-2. Compiler sees `max(5, 10)` and generates `max<int>`
-3. Compiler sees `max(3.14, 2.71)` and generates `max<double>`
-4. Each type gets its own compiled function
-
-## Template Parameters
-
-```cpp showLineNumbers 
-// Type parameter
-template<typename T>
-void print(T value) {
-    std::cout << value << "\n";
-}
-
-// Multiple type parameters
-template<typename T, typename U>
-auto add(T a, U b) {
-    return a + b;
-}
-
-int result = add(5, 3.14);  // T=int, U=double, returns double
-
-// Non-type parameters
-template<typename T, size_t N>
-size_t arraySize(T (&array)[N]) {
-    return N;
-}
-
-int arr[10];
-size_t size = arraySize(arr);  // N=10
-```
-
-**Note:** `typename` and `class` are interchangeable in templates. Modern style prefers `typename`.
-
-## Template Argument Deduction
-
-Compiler figures out template arguments from function arguments:
-
-```cpp showLineNumbers 
-template<typename T>
-T square(T x) {
-    return x * x;
-}
-
-auto result = square(5);      // T deduced as int
-auto result2 = square(3.14);  // T deduced as double
-
-// Explicit template arguments
-auto result3 = square<long>(5);  // Force T to be long
-```
-
-**Deduction rules:**
-- Exact match preferred
-- Reference and const dropped during deduction
-- No implicit conversions between template types
-
-## Multiple Parameters
-
-```cpp showLineNumbers 
-template<typename T, typename U>
-void process(T first, U second) {
-    std::cout << first << ", " << second << "\n";
-}
-
-process(42, "hello");      // T=int, U=const char*
-process(3.14, true);       // T=double, U=bool
-```
-
-Different parameters can have different types. They're independently deduced.
-
-## Return Type Deduction
-
-```cpp showLineNumbers 
-// C++11: Trailing return type
-template<typename T, typename U>
-auto add(T a, U b) -> decltype(a + b) {
-    return a + b;
-}
-
-// C++14: Auto deduction
-template<typename T, typename U>
-auto add(T a, U b) {
-    return a + b;  // Return type deduced from return statement
-}
-
-auto x = add(5, 3.14);  // Returns double
-```
-
-## Template Specialization
-
-Provide specific implementation for certain types:
-
-```cpp showLineNumbers 
-// General template
-template<typename T>
-T max(T a, T b) {
-    return (a > b) ? a : b;
-}
-
-// Specialization for const char*
-template<>
-const char* max(const char* a, const char* b) {
-    return (strcmp(a, b) > 0) ? a : b;
-}
-
-int x = max(5, 10);          // Uses general template
-const char* s = max("abc", "xyz");  // Uses specialization
-```
-
-## Overloading Function Templates
-
-```cpp showLineNumbers 
-// Template version
-template<typename T>
-void print(T value) {
-    std::cout << "Template: " << value << "\n";
-}
-
-// Non-template version (preferred for exact match)
-void print(int value) {
-    std::cout << "Non-template int: " << value << "\n";
-}
-
-print(42);      // "Non-template int: 42" (exact match)
-print(3.14);    // "Template: 3.14" (template version)
-```
-
-**Overload resolution:**
-1. Exact match non-template
-2. Template
-3. Non-template with conversions
-
-## Constraints and Concepts (C++20)
-
-```cpp showLineNumbers 
-// Require type to support operator<
-template<typename T>
-requires std::totally_ordered<T>
-T min(T a, T b) {
-    return (a < b) ? a : b;
-}
-
-// Shorter syntax
-template<std::totally_ordered T>
-T min(T a, T b) {
-    return (a < b) ? a : b;
-}
-
-min(5, 10);     // OK: int is totally_ordered
-min("a", "b");  // OK: const char* is totally_ordered
-// min(std::vector{1}, std::vector{2});  // Error: vector not comparable
-```
-
-Concepts make templates fail with clear error messages instead of cryptic template errors.
-
-## Common Patterns
-
-**Generic swap:**
-```cpp showLineNumbers 
-template<typename T>
-void swap(T& a, T& b) {
-    T temp = std::move(a);
-    a = std::move(b);
-    b = std::move(temp);
+int main() {
+    int i = larger(3, 7);                        // T = int
+    double d = larger(2.5, 1.5);                 // T = double
+    std::string s = larger(std::string("pear"), std::string("apple"));
+    // larger(3, 7.0);                           // error: T deduced as int and as double
+    double m = larger<double>(3, 7.0);           // explicit T: both args convert to double
+    std::printf("%d %.1f %s %.1f\n", i, d, s.c_str(), m);
 }
 ```
 
-**Generic comparison:**
-```cpp showLineNumbers 
-template<typename T>
-bool equal(const T& a, const T& b) {
-    return a == b;
+```text
+7 2.5 pear 7.0
+```
+
+`larger` itself is not a function: you cannot take its address or call it until a `T` is chosen.
+`larger<int>` and `larger<double>` are two unrelated functions with different mangled names (see
+[Name Mangling](../01-toolchain-and-build/name-mangling.md)). The body only requires that `T` be
+copyable and support `<`. Nothing states that requirement until you add a constraint.
+
+## Kinds of template parameters
+
+| Kind | Example | Argument |
+|---|---|---|
+| Type | `template <typename T>` | any type: `int`, `std::string`, `int*` |
+| Non-type (constant) | `template <int N>`, `template <std::size_t N>` | a constant expression of that type. Since C++20 also floating-point and literal class types |
+| Template template | `template <template <typename> class C>` | a class template, see [Class Templates](./class-templates.md#default-arguments-and-template-template-parameters) |
+| Pack | `template <typename... Ts>` | zero or more arguments, see [Variadic Templates](./variadic-templates.md) |
+
+Parameters can have defaults (`template <typename T = int>`), and since C++20 a function parameter
+declared `auto` makes the function an **abbreviated function template**: each `auto` adds an
+invented type parameter.
+
+```cpp title="params.cpp" showLineNumbers
+#include <cstddef>
+#include <cstdio>
+
+template <typename T, std::size_t N>
+constexpr std::size_t length(const T (&)[N]) { return N; }   // N deduced from the array type
+
+template <int Factor>
+int scale(int x) { return x * Factor; }                     // Factor must be given explicitly
+
+auto twice(auto x) { return x + x; }        // C++20: same as template <typename T> auto twice(T x)
+
+int main() {
+    int a[12]{};
+    static_assert(length(a) == 12);
+    std::printf("%d %d %.1f\n", scale<3>(5), twice(4), twice(1.25));
 }
 ```
 
-**Generic algorithm:**
-```cpp showLineNumbers 
-template<typename T>
-T sum(const std::vector<T>& vec) {
-    T result{};
-    for (const auto& val : vec) {
-        result += val;
-    }
-    return result;
+```text
+15 8 2.5
+```
+
+## Instantiation
+
+When a call needs `larger<int>` and no such function exists yet, the compiler **implicitly
+instantiates** it: it substitutes `int` for `T` in the declaration and body, and compiles the result
+as a normal function. Each translation unit that uses `larger<int>` instantiates its own copy. The
+copies are emitted as weak/COMDAT symbols, so the linker keeps one (the same mechanism as
+[inline functions](../04-functions-and-call-mechanics/inline-functions.md)).
+
+<Diagram title="One template, several functions" caption="Each set of template arguments produces its own function. The template itself produces no code." accent="blue">
+  <DiagramNode variant="pill" accent>template &lt;typename T&gt; T larger(T, T)</DiagramNode>
+  <DiagramArrow label="instantiated on use" />
+  <DiagramRow>
+    <DiagramNode title="larger&lt;int&gt;">int larger(int, int)</DiagramNode>
+    <DiagramNode title="larger&lt;double&gt;">double larger(double, double)</DiagramNode>
+    <DiagramNode title="larger&lt;std::string&gt;">std::string larger(std::string, std::string)</DiagramNode>
+  </DiagramRow>
+</Diagram>
+
+### Two-phase checking
+
+A template body is checked twice:
+
+1. **At the definition**, everything that does not depend on `T` is looked up and checked. A call to
+   an undeclared non-dependent function is an error even if the template is never used.
+2. **At instantiation**, everything that depends on `T` is checked with the real type.
+
+```cpp title="two_phase.cpp" showLineNumbers
+template <typename T>
+void bad_nondependent(T) {
+    // undeclared_function();   // error at the definition: not dependent, looked up now
+}
+
+template <typename T>
+void bad_dependent(T t) {
+    t.no_such_member();         // accepted until instantiated with a type lacking it
+}
+
+int main() {
+    bad_nondependent(1);
+    // bad_dependent(1);        // error here: 'int' has no member 'no_such_member'
 }
 ```
 
-## Template Compilation
+This is why template errors often point deep inside a library: the failing expression is in the
+body, and it only fails once your type is substituted. Constraints move that check to the call site.
 
-Templates are compiled when instantiated, not when defined:
+### Why definitions go in headers
 
-```cpp showLineNumbers 
-// header.h
-template<typename T>
-T add(T a, T b) {
-    return a + b;  // Compiled when someone uses it
-}
+To instantiate `larger<char>` the compiler needs the **body** in the translation unit that makes the
+call. If the header only declares the template and the body lives in a `.cpp`, every other
+translation unit compiles fine and the link fails:
 
-// main.cpp
-#include "header.h"
-auto x = add(5, 10);  // NOW template is compiled for int
+```text
+undefined reference to `char larger<char>(char, char)'
 ```
 
-**Important:** Template definitions must be in headers (or same translation unit where used).
+The usual fix is to put the whole template in the header. The alternative is **explicit
+instantiation**: keep the body in one `.cpp` and list the specializations it must emit. Users can
+then only use those.
 
-:::success[Function Template Essentials]
+```cpp title="larger.cpp (fragment)"
+#include "larger.h"   // declares: template <typename T> T larger(T a, T b);
 
-**Generic code** = write once, works for many types  
-**Compiler generates** = separate function for each type used  
-**Type deduction** = automatic from arguments  
-**Specialization** = custom behavior for specific types  
-**Concepts (C++20)** = constrain what types are allowed  
-**Define in headers** = must be visible where used  
-**Explicit instantiation** = `template int add<int>(int, int);`
-:::
+template <typename T> T larger(T a, T b) { return a < b ? b : a; }
+
+template int    larger<int>(int, int);      // explicit instantiation definition
+template double larger(double, double);    // template argument deduced
+```
+
+The opposite tool, `extern template int larger<int>(int, int);` *(C++11)* in a header, tells other
+translation units not to instantiate that specialization themselves because one `.cpp` provides it.
+It saves compile time, not run time. C++20 [modules](../01-toolchain-and-build/modules.md) also
+export templates, but the definition still has to be reachable from the importing code.
+
+## Templates and overloading
+
+Function templates overload with each other and with ordinary functions. For each template,
+deduction produces one candidate specialization, and then normal
+[overload resolution](../04-functions-and-call-mechanics/overloading.md) ranks the candidates by
+their conversions. Two template-specific tie-breakers apply only when conversions are equally good:
+
+1. A **non-template** function beats a template specialization.
+2. Between two templates, the **more specialized** one wins (**partial ordering**). `which(T*)` is
+   more specialized than `which(T)` because every argument that `T*` accepts, `T` also accepts, but
+   not the reverse.
+
+```cpp title="overloads.cpp" showLineNumbers
+#include <cstdio>
+
+template <typename T> const char* which(T)  { return "template T"; }
+template <typename T> const char* which(T*) { return "template T*"; }
+const char* which(int)                      { return "non-template int"; }
+
+int main() {
+    int x = 0;
+    std::puts(which(x));     // exact match everywhere: the non-template wins
+    std::puts(which(&x));    // T* is more specialized than T
+    std::puts(which(2.0));   // only the template is an exact match
+    std::puts(which('a'));   // template T with T = char beats int (a promotion)
+}
+```
+
+```text
+non-template int
+template T*
+template T
+template T
+```
+
+The last line is the common surprise: a non-template is preferred only on a **tie**. A template that
+deduces the exact type beats a non-template that needs a promotion or conversion.
+
+### Overload, don't specialize
+
+To handle one type differently, add an overload. `larger("apple", "pear")` deduces
+`T = const char*` and compares the two **addresses**, which is meaningless. An ordinary overload
+fixes it:
+
+```cpp title="larger_cstr.cpp" showLineNumbers
+#include <cstdio>
+#include <cstring>
+
+template <typename T>
+T larger(T a, T b) { return a < b ? b : a; }
+
+// Overload, not a specialization: compares contents, not addresses.
+inline const char* larger(const char* a, const char* b) {
+    return std::strcmp(a, b) < 0 ? b : a;
+}
+
+int main() {
+    std::puts(larger("apple", "pear"));   // pear
+}
+```
+
+An explicit specialization `template <> const char* larger(const char*, const char*)` would also
+work here, but specializations do not take part in overload ranking: the primary template is chosen
+first and the specialization only replaces its body. That makes them easy to bypass by accident.
+[Full Specialization](./specialization/full-specialization.md) covers when specializing is the right
+tool.
+
+## Pitfalls
+
+- **Conflicting deductions.** `larger(3, 7.0)` fails because `T` cannot be both `int` and `double`.
+  Convert one argument, name `T` explicitly, or use two parameters.
+- **Pointers compare as pointers.** String literals and arrays decay to pointers when passed by
+  value, so generic comparisons compare addresses.
+- **Name clashes with `std`.** A function template called `max` or `swap` in the global namespace
+  can become ambiguous with `std::max`/`std::swap` when argument-dependent lookup also finds the
+  `std` one (for example with `std::string` arguments). Pick distinct names or qualify the call.
+- **Unconstrained templates are greedy.** A template accepts any type that makes the signature
+  valid, then fails inside the body. Constrain it with a
+  [concept](./concepts-and-requires.md) so it drops out of overload resolution instead.
+- **Code size.** Every distinct argument set is a separate function. Many instantiations of a large
+  template increase compile time and binary size.
+
+## References
+
+- [cppreference: Function template](https://en.cppreference.com/w/cpp/language/function_template)
+- [cppreference: Explicit instantiation and `extern template`](https://en.cppreference.com/w/cpp/language/class_template#Explicit_instantiation)
+- [cppreference: Two-phase name lookup (dependent names)](https://en.cppreference.com/w/cpp/language/dependent_name)
+- [cppreference: Abbreviated function template (C++20)](https://en.cppreference.com/w/cpp/language/function_template#Abbreviated_function_template)
