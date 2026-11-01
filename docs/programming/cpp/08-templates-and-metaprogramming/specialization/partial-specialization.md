@@ -3,444 +3,237 @@ id: partial-specialization
 title: Partial Template Specialization
 sidebar_label: Partial Specialization
 sidebar_position: 2
-tags: [c++, templates, partial-specialization, template-specialization]
+tags: [c++, templates, partial-specialization, metaprogramming]
 ---
 
 # Partial Template Specialization
 
-Partial specialization lets you specialize templates for a pattern of types, not just one specific type. It's like "for all pointer types" or "for all pairs of same types."
+A [full specialization](./full-specialization.md) replaces a template for one exact set of
+arguments. A **partial specialization** replaces it for a *pattern*: every pointer type, every pair
+whose two types are equal, every `std::vector<T, A>`. It still has template parameters of its own,
+and the compiler deduces them by matching the pattern against the arguments. This is the mechanism
+behind most of [`<type_traits>`](../type-traits.md) and behind detecting "is this a container of
+something". This page is the canonical home for how partial specializations are written, matched
+and ranked.
 
-:::info[Pattern Matching]
-Partial specialization = specialize for type patterns. Full specialization = one exact type. Partial = whole categories of types.
-:::
+**Prerequisites:** [Class templates](../class-templates.md),
+[template argument deduction](../template-argument-deduction.md).
 
-:::warning[Only class and variable templates]
-**Function templates cannot be partially specialized** — reach for overloading instead. Partial
-specialization applies to class templates (and, since C++14, variable templates). This is exactly the
-machinery behind the standard library's type traits — `std::is_pointer`, `std::remove_reference`,
-iterator traits are all class templates with partial specializations (see [Type Traits](../type-traits.md)).
-:::
+Only **class templates** and **variable templates** *(C++14)* can be partially specialized.
+Function templates cannot; use [overloading](#functions-overload-instead) instead.
 
-## Basic Partial Specialization
+## Writing a pattern
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T, typename U>
-class Pair {
-public:
-    T first;
-    U second;
-    void info() { std::cout << "Different types\n"; }
+The specialization has its own `template <...>` list, and after the template name an argument list
+written in terms of those parameters. That argument list is the pattern.
+
+```cpp title="pair_kind.cpp" showLineNumbers
+#include <iostream>
+
+template <typename T, typename U>
+struct Pair {                       // primary template
+    static constexpr const char* kind = "different types";
 };
 
-// Partial specialization: both same type
-template<typename T>
-class Pair<T, T> {  // Pattern: both parameters same
-public:
-    T first;
-    T second;
-    void info() { std::cout << "Same type\n"; }
-    
-    void swap() {  // Extra functionality
-        std::swap(first, second);
-    }
+template <typename T>
+struct Pair<T, T> {                 // partial specialization: both arguments equal
+    static constexpr const char* kind = "same type";
 };
 
-Pair<int, double> p1;  // Primary template
-p1.info();  // "Different types"
+template <typename T, typename U>
+struct Pair<T*, U*> {               // partial specialization: both pointers
+    static constexpr const char* kind = "two pointers";
+};
 
-Pair<int, int> p2;  // Partial specialization
-p2.info();  // "Same type"
-p2.swap();  // Available!
+int main() {
+    std::cout << Pair<int, double>::kind << '\n'      // different types
+              << Pair<int, int>::kind << '\n'         // same type
+              << Pair<int*, char*>::kind << '\n';     // two pointers
+    // Pair<int*, int*>::kind;  // error: ambiguous, both partial specializations match
+}
 ```
 
-**Pattern:** `T, T` matches any two identical types.
-
-## Specialization for Pointers
-
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class SmartPtr {
-    T value;
-public:
-    void set(T v) { value = v; }
-    T get() { return value; }
-};
-
-// Partial specialization for pointers
-template<typename T>
-class SmartPtr<T*> {  // Pattern: any pointer type
-    T* ptr;
-public:
-    T& operator*() { return *ptr; }
-    T* operator->() { return ptr; }
-    T* get() { return ptr; }
-};
-
-SmartPtr<int> s1;      // Primary template
-s1.set(42);
-
-SmartPtr<int*> s2;     // Pointer specialization
-int x = 42;
-s2 = &x;
-*s2;  // Dereference works
+```text
+different types
+same type
+two pointers
 ```
 
-## Multiple Parameter Patterns
+As with full specialization, each partial specialization is a separate class definition and
+inherits nothing from the primary template. The number of the specialization's own parameters is
+unrelated to the primary's: `Pair<T, T>` has one parameter, `Pair<T*, U*>` two.
 
-```cpp showLineNumbers 
-// Primary: three different types
-template<typename T, typename U, typename V>
-class Triple {
-    void info() { std::cout << "Three different types\n"; }
-};
+## How the compiler picks one
 
-// Partial: first two same
-template<typename T, typename V>
-class Triple<T, T, V> {
-    void info() { std::cout << "First two same\n"; }
-};
+For `Pair<X, Y>` the compiler:
 
-// Partial: all three same
-template<typename T>
-class Triple<T, T, T> {
-    void info() { std::cout << "All same\n"; }
-};
+1. **Matches** every partial specialization against `<X, Y>` by deducing its parameters, exactly as
+   it would deduce a function template's parameters from arguments. Specializations that don't match
+   drop out.
+2. If **none** match, it uses the primary template.
+3. If **one** matches, it uses that.
+4. If **several** match, it uses the **most specialized** one: specialization A is more specialized
+   than B if every argument list A accepts is also accepted by B, but not the other way round. If no
+   single one is more specialized than all the others, the program is ill-formed (ambiguous).
 
-Triple<int, double, char> t1;  // Primary
-Triple<int, int, char> t2;     // First two same
-Triple<int, int, int> t3;      // All same (most specialized!)
+<Walkthrough title="Choosing a definition for Pair<int*, int*>" accent="violet">
+  <Step title="Match each pattern">
+
+| Specialization | Deduction | Matches? |
+|---|---|---|
+| `Pair<T, T>` | `T = int*` | yes |
+| `Pair<T*, U*>` | `T = int`, `U = int` | yes |
+
+  </Step>
+  <Step title="Compare the matches">
+
+Every `Pair<T, T>` is not a pair of pointers, and every `Pair<T*, U*>` does not have two equal types.
+Neither pattern's set contains the other, so neither is more specialized: <StepChange>ambiguous</StepChange>.
+GCC 15: `ambiguous template instantiation for 'struct Pair<int*, int*>'`. Clang 21:
+`ambiguous partial specializations of 'Pair<int *, int *>'`.
+
+  </Step>
+  <Step title="Add a tie-breaker">
+
+Adding `template <typename T> struct Pair<T*, T*>` resolves it. That pattern accepts only pairs that
+both `Pair<T, T>` and `Pair<T*, U*>` accept, so it is more specialized than each and
+<StepChange>wins</StepChange>.
+
+  </Step>
+</Walkthrough>
+
+```cpp title="tie_breaker.cpp" showLineNumbers {4}
+#include <iostream>
+
+template <typename T, typename U> struct Pair     { static constexpr int id = 0; };
+template <typename T>             struct Pair<T, T>   { static constexpr int id = 1; };
+template <typename T, typename U> struct Pair<T*, U*> { static constexpr int id = 2; };
+template <typename T>             struct Pair<T*, T*> { static constexpr int id = 3; };  // more specialized than 1 and 2
+
+int main() { std::cout << Pair<int*, int*>::id << '\n'; }   // 3
 ```
 
-## const Specialization
+## Patterns you can match
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Wrapper {
-public:
-    void modify(T& value) {
-        value = T{};  // Can modify
-    }
+The pattern can take apart any compound type: cv-qualifiers, pointers, references, arrays (deducing
+the bound), function types, and instances of other templates.
+
+```cpp title="describe.cpp" showLineNumbers
+#include <cstddef>
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+template <typename T>
+struct Describe { static void print() { std::cout << "scalar\n"; } };
+
+template <typename T>
+struct Describe<const T> { static void print() { std::cout << "const "; Describe<T>::print(); } };
+
+template <typename T, std::size_t N>
+struct Describe<T[N]> { static void print() { std::cout << "array of " << N << ' '; Describe<T>::print(); } };
+
+template <typename R, typename... Args>
+struct Describe<R(*)(Args...)> {
+    static void print() { std::cout << "function pointer taking " << sizeof...(Args) << " args\n"; }
 };
 
-// Partial specialization for const
-template<typename T>
-class Wrapper<const T> {
-public:
-    void modify(const T& value) {
-        // Cannot modify const value
-        std::cout << "Cannot modify const\n";
-    }
-};
+template <typename T, typename A>
+struct Describe<std::vector<T, A>> { static void print() { std::cout << "vector of "; Describe<T>::print(); } };
 
-Wrapper<int> w1;
-int x = 42;
-w1.modify(x);  // Modifies
+template <typename K, typename V, typename C, typename A>
+struct Describe<std::map<K, V, C, A>> { static void print() { std::cout << "map\n"; } };
 
-Wrapper<const int> w2;
-const int cx = 42;
-w2.modify(cx);  // "Cannot modify const"
+int main() {
+    Describe<int>::print();                    // scalar
+    Describe<const int>::print();              // const scalar
+    Describe<int[4]>::print();                 // array of 4 scalar
+    Describe<void (*)(int, char)>::print();    // function pointer taking 2 args
+    Describe<std::vector<double>>::print();    // vector of scalar
+    Describe<std::map<int, std::string>>::print(); // map
+}
 ```
 
-## Reference Specialization
+Two details in that listing matter in practice:
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Storage {
-    T value;
-public:
-    void set(T v) { value = v; }
-};
+- `std::vector` has two template parameters (element and allocator), so the pattern is
+  `std::vector<T, A>`. Writing `std::vector<T>` also works for the default allocator, because the
+  default argument is filled in before matching, but it misses vectors with a custom allocator.
+- The specializations recurse into `Describe<T>`. Traits are built this way: strip one layer, ask
+  again.
 
-// Partial specialization for references
-template<typename T>
-class Storage<T&> {  // References need special handling
-    T* ptr;  // Store pointer instead
-public:
-    Storage(T& ref) : ptr(&ref) {}
-    void set(T v) { *ptr = v; }
-};
+### Matching any template: template template parameters
 
-int x = 42;
-Storage<int> s1;
-s1.set(100);  // Stores copy
+To match "any class template instantiation" without listing each one, deduce the template itself:
 
-Storage<int&> s2(x);  // Stores reference
-s2.set(200);  // Modifies x!
-std::cout << x;  // 200
+```cpp title="elem.cpp" showLineNumbers
+#include <iostream>
+#include <list>
+#include <vector>
+
+template <typename T>
+struct Elem { static constexpr bool is_container = false; };
+
+template <template <typename...> class C, typename T, typename... Rest>
+struct Elem<C<T, Rest...>> { static constexpr bool is_container = true; using type = T; };
+
+static_assert(Elem<std::vector<int>>::is_container);
+static_assert(Elem<std::list<char>>::is_container);
+static_assert(!Elem<int>::is_container);
+
+// overload instead of partially specializing a function template
+template <typename T> const char* kind(T)  { return "value"; }
+template <typename T> const char* kind(T*) { return "pointer"; }
+
+int main() { int x = 0; std::cout << kind(x) << ' ' << kind(&x) << '\n'; }
 ```
 
-## Array Specialization
+Declaring `C` as `template <typename...> class` lets it match templates with any number of type
+parameters. With `template <typename> class C` and pattern `C<T>`, `std::vector<int>` (really
+`std::vector<int, std::allocator<int>>`) did not match before C++17; since C++17
+([P0522R0](https://wg21.link/p0522r0)) a template with defaulted extra parameters may bind to a
+one-parameter template template parameter, so it does. The pattern still only matches class
+templates whose parameters are all types: `std::array<T, N>` has a non-type parameter and needs its
+own specialization.
 
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Container {
-public:
-    void info() { std::cout << "Generic\n"; }
-};
+## The standard traits are partial specializations
 
-// Partial specialization for arrays
-template<typename T, size_t N>
-class Container<T[N]> {
-    T data[N];
-public:
-    void info() {
-        std::cout << "Array of " << N << " elements\n";
-    }
-    
-    size_t size() const { return N; }
-};
+Most of `<type_traits>` is a primary template that gives the default answer plus partial
+specializations for the matching patterns. Three of them, in full:
 
-Container<int> c1;
-c1.info();  // "Generic"
+```cpp title="mini_traits.cpp" showLineNumbers
+template <typename T> struct remove_ref      { using type = T; };
+template <typename T> struct remove_ref<T&>  { using type = T; };
+template <typename T> struct remove_ref<T&&> { using type = T; };
 
-Container<int[10]> c2;
-c2.info();  // "Array of 10 elements"
-c2.size();  // 10
+template <bool B, typename T, typename F> struct conditional           { using type = T; };
+template <typename T, typename F>         struct conditional<false, T, F> { using type = F; };
+
+template <typename T> constexpr bool is_ptr = false;      // variable template (C++14)
+template <typename T> constexpr bool is_ptr<T*> = true;   // partial specialization of it
+
+static_assert(__is_same(remove_ref<int&&>::type, int));
+static_assert(__is_same(conditional<false, int, double>::type, double));
+static_assert(is_ptr<int*> && !is_ptr<int>);
+
+int main() {}
 ```
 
-## Function Objects vs Function Pointers
+`__is_same` is a GCC/Clang built-in, used here only to keep the example free of `<type_traits>`.
+Real code writes `std::is_same_v`. Note that `conditional<false, T, F>` specializes on a non-type
+argument: patterns can fix values as well as types.
 
-```cpp showLineNumbers 
-template<typename T>
-class Callback {
-public:
-    void info() { std::cout << "Functor\n"; }
-};
+## Functions: overload instead
 
-// Partial specialization for function pointers
-template<typename Ret, typename... Args>
-class Callback<Ret(*)(Args...)> {
-public:
-    void info() { std::cout << "Function pointer\n"; }
-};
+`template <typename T> void kind<T*>(T*)` is a syntax error; function templates cannot be partially
+specialized. The two overloads of `kind` in `elem.cpp` above do the same job: for `kind(&x)` both
+match, and partial ordering of function templates picks `kind(T*)` as more specialized. If the
+behaviour has to live in a class (for example because it needs a nested type), forward the function
+to a static member of a partially specialized class template.
 
-struct Functor {
-    void operator()() {}
-};
+## References
 
-Callback<Functor> c1;
-c1.info();  // "Functor"
-
-Callback<void(*)()> c2;
-c2.info();  // "Function pointer"
-```
-
-## Nested Template Specialization
-
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Outer {
-public:
-    void info() { std::cout << "Generic outer\n"; }
-};
-
-// Partial: specialization for containers
-template<template<typename> class Container, typename T>
-class Outer<Container<T>> {
-public:
-    void info() {
-        std::cout << "Container with element type\n";
-    }
-};
-
-Outer<int> o1;
-o1.info();  // "Generic outer"
-
-Outer<std::vector<int>> o2;
-o2.info();  // "Container with element type"
-```
-
-## Specialization Priority
-
-More specialized templates are chosen:
-
-```cpp showLineNumbers 
-// Primary: most general
-template<typename T, typename U>
-class Widget {
-    void print() { std::cout << "1: General\n"; }
-};
-
-// Partial: pointer pattern
-template<typename T, typename U>
-class Widget<T*, U*> {
-    void print() { std::cout << "2: Both pointers\n"; }
-};
-
-// Partial: same type pattern
-template<typename T>
-class Widget<T, T> {
-    void print() { std::cout << "3: Same types\n"; }
-};
-
-// Partial: both same pointer type
-template<typename T>
-class Widget<T*, T*> {
-    void print() { std::cout << "4: Same pointer types\n"; }
-};
-
-Widget<int, double> w1;    // 1: General
-Widget<int*, double*> w2;  // 2: Both pointers
-Widget<int, int> w3;       // 3: Same types
-Widget<int*, int*> w4;     // 4: Same pointer types (most specialized!)
-```
-
-Compiler picks most specific match!
-
-## Remove Reference Implementation
-
-```cpp showLineNumbers 
-// Primary: does nothing
-template<typename T>
-struct remove_reference {
-    using type = T;
-};
-
-// Partial: remove lvalue reference
-template<typename T>
-struct remove_reference<T&> {
-    using type = T;
-};
-
-// Partial: remove rvalue reference
-template<typename T>
-struct remove_reference<T&&> {
-    using type = T;
-};
-
-remove_reference<int>::type;     // int
-remove_reference<int&>::type;    // int
-remove_reference<int&&>::type;   // int
-```
-
-This is how `std::remove_reference` works!
-
-## Conditional Type Selection
-
-```cpp showLineNumbers 
-// Primary: select first type
-template<bool Condition, typename T, typename F>
-struct conditional {
-    using type = T;
-};
-
-// Partial: when condition is false, select second
-template<typename T, typename F>
-struct conditional<false, T, F> {
-    using type = F;
-};
-
-conditional<true, int, double>::type;   // int
-conditional<false, int, double>::type;  // double
-```
-
-Implementation of `std::conditional`!
-
-## is_same Implementation
-
-```cpp showLineNumbers 
-// Primary: types are different
-template<typename T, typename U>
-struct is_same {
-    static constexpr bool value = false;
-};
-
-// Partial: both types identical
-template<typename T>
-struct is_same<T, T> {
-    static constexpr bool value = true;
-};
-
-is_same<int, int>::value;     // true
-is_same<int, double>::value;  // false
-```
-
-## Complex Pattern Matching
-
-```cpp showLineNumbers 
-// Primary template
-template<typename T>
-class Parser {
-    void info() { std::cout << "Generic parser\n"; }
-};
-
-// Partial: std::pair
-template<typename T, typename U>
-class Parser<std::pair<T, U>> {
-    void info() { std::cout << "Pair parser\n"; }
-};
-
-// Partial: std::vector
-template<typename T>
-class Parser<std::vector<T>> {
-    void info() { std::cout << "Vector parser\n"; }
-};
-
-// Partial: std::map
-template<typename K, typename V>
-class Parser<std::map<K, V>> {
-    void info() { std::cout << "Map parser\n"; }
-};
-
-Parser<int> p1;
-Parser<std::pair<int, int>> p2;
-Parser<std::vector<int>> p3;
-Parser<std::map<int, std::string>> p4;
-```
-
-## Function Templates Can't Be Partially Specialized
-
-```cpp showLineNumbers 
-// Partial specialization not allowed for functions!
-template<typename T>
-void process(T value) { /* ... */ }
-
-// template<typename T>
-// void process<T*>(T* value) { /* Error! */ }
-
-// Solution: Overload or use class template
-template<typename T>
-void process(T value) { /* General */ }
-
-template<typename T>
-void process(T* value) { /* Pointers */ }  // Overload, not specialization
-```
-
-## Avoiding Ambiguity
-
-```cpp showLineNumbers 
-template<typename T, typename U>
-class X;
-
-// Partial 1
-template<typename T>
-class X<T, T*> { /* ... */ };
-
-// Partial 2
-template<typename T>
-class X<T*, T> { /* ... */ };
-
-// X<int*, int*> is ambiguous!
-// Both partials match equally
-// Compilation error
-```
-
-Make sure specializations don't overlap ambiguously.
-
-:::success[Partial Specialization Essentials]
-
-**Pattern matching** = specialize for type categories  
-**Class templates only** = functions can't be partially specialized  
-**More specific wins** = compiler picks best match  
-**Common patterns** = pointers, references, const, arrays  
-**Type traits** = implemented with partial specialization  
-**Template parameters** = some specified, some remain generic  
-**Ambiguity** = avoid overlapping patterns  
-**Use cases** = optimization, type-specific behavior, metaprogramming
-:::
+- [cppreference: Partial template specialization](https://en.cppreference.com/w/cpp/language/partial_specialization)
+- [cppreference: Template template arguments](https://en.cppreference.com/w/cpp/language/template_parameters#Template_template_arguments)
+- [P0522R0: Matching of template template-arguments excludes compatible templates](https://wg21.link/p0522r0)
