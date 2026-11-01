@@ -3,407 +3,234 @@ id: access-control
 title: Access Control
 sidebar_label: Access Control
 sidebar_position: 2
-tags: [c++, classes, access-control, encapsulation, public, private, protected]
+tags: [c++, classes, access-control, encapsulation, friend, inheritance]
 ---
 
 # Access Control
 
-Access control (`public`, `private`, `protected`) enables encapsulation by controlling which code can access class members.
+Access specifiers (`public`, `protected`, `private`) decide which code may **name** a class member.
+They are the language's tool for encapsulation: a class keeps its data private so that only its own
+member functions can change it, which lets the class guarantee its **invariants**, the conditions
+that must hold for every object, such as "the balance is never negative". This page is the canonical
+home for member access, `friend`, and how the access of a base class changes under `public`,
+`protected` and `private` inheritance.
 
-:::info[Three Access Levels]
-**public** = accessible everywhere (interface)  
-**private** = accessible only in class (implementation)  
-**protected** = accessible in class and derived classes (inheritance)
-:::
+**Prerequisites:** [Class memory layout](./class-layout.md) is useful but not required. You should
+know how to declare a class with members.
 
-## The Three Access Levels
+Access control is checked at **compile time** and only on names. It does not change the object's
+layout in memory (apart from the rare standard-layout rule in [Class layout](./class-layout.md#standard-layout-classes)),
+and it is not a security boundary: code that has a pointer to the object can still reach the bytes.
 
-C++ provides three access levels that control member visibility from different contexts.
+## The three access levels
 
-```cpp showLineNumbers 
-class Widget {
+| Specifier | Member functions and friends of the class | Derived classes | Everyone else |
+|---|---|---|---|
+| `public` | yes | yes | yes |
+| `protected` | yes | yes, through the derived type (see below) | no |
+| `private` | yes | no | no |
+
+A specifier applies to every member declared after it, until the next specifier. The only
+difference between `class` and `struct` is the default: members and bases of a `class` are `private`
+unless stated otherwise, those of a `struct` are `public`. A common convention is `struct` for plain
+aggregates of data with no invariant and `class` for types that protect one.
+
+Access is checked **per class, not per object**. A member function may read the private members of
+any object of its own class, which is how copy constructors and comparison functions work.
+
+```cpp title="account.cpp" showLineNumbers
+#include <stdexcept>
+
+class Account {
 public:
-    int publicData;
-    void publicMethod() {}
-    
-protected:
-    int protectedData;
-    void protectedMethod() {}
-    
-private:
-    int privateData;
-    void privateMethod() {}
-};
-
-Widget w;
-w.publicData = 10;      // OK
-// w.protectedData = 10; // Error
-// w.privateData = 10;   // Error
-```
-
-**Access from outside class:**
-- `public` - Accessible
-- `protected` - Not accessible
-- `private` - Not accessible
-
-**Inside class (member functions):**
-- All members accessible regardless of access level
-
-## Default Access
-
-`class` and `struct` have different default access, but are otherwise identical.
-
-```cpp showLineNumbers 
-class MyClass {
-    int x;  // private by default
-};
-
-struct MyStruct {
-    int x;  // public by default
-};
-
-MyClass c;
-// c.x = 10;  // Error: private
-
-MyStruct s;
-s.x = 10;     // OK: public
-```
-
-:::success[class vs struct]
-- `class` - private by default (use for objects with behavior)
-- `struct` - public by default (use for plain data)
-  
-Same otherwise - purely stylistic choice!
-:::
-
-## Encapsulation Pattern
-
-Use access control to protect invariants and hide implementation.
-
-```cpp showLineNumbers
-class BankAccount {
-private:
-    double balance;  // Protected - can't go negative
-    
-public:
-    explicit BankAccount(double initial) : balance(initial) {
-        if (initial < 0) {
-            throw std::invalid_argument("Negative balance");
-        }
+    explicit Account(long cents) : balance_(cents) {
+        if (cents < 0) throw std::invalid_argument("negative balance");
     }
-    
-    bool withdraw(double amount) {
-        if (amount > balance) {
-            return false;  // Insufficient funds
-        }
-        balance -= amount;
+    bool withdraw(long cents) {
+        if (cents < 0 || cents > balance_) return false;   // invariant: balance_ >= 0
+        balance_ -= cents;
         return true;
     }
-    
-    void deposit(double amount) {
-        if (amount < 0) {
-            throw std::invalid_argument("Negative deposit");
-        }
-        balance += amount;
+    long balance() const { return balance_; }
+    bool same_balance(const Account& other) const {
+        return balance_ == other.balance_;   // OK: another Account's private member
     }
-    
-    double getBalance() const { return balance; }
+private:
+    long balance_;
 };
 
-// Cannot corrupt account - balance always valid
+int main() {
+    Account a{1000};
+    a.withdraw(250);
+    // a.balance_ = -5;       // error: 'balance_' is private
+    return a.balance() == 750 ? 0 : 1;
+}
 ```
 
-:::success[Benefits]
-- Invariants protected (balance ≥ 0)
-- Implementation can change without breaking code
-- Clear interface (public methods)
-:::
+Since `balance_` can only change inside `Account`'s own functions, a reader has to check four
+functions, not the whole program, to be sure the balance never goes negative. Making the data
+private also lets the representation change later (to a decimal type, say) without touching
+callers.
 
-## Friend Declarations
+## `friend`: granting access to specific code
 
-Friend grants external functions or classes access to private members.
-```cpp showLineNumbers
-class Secret {
-private:
-    int data;
-    
-    friend void revealSecret(const Secret& s);
-    friend class SecretKeeper;
-    
+A **friend** declaration inside a class gives another function or class the same access as the
+class's own members. It can name a free function, a member function of another class, or a whole
+class. Friendship is granted by the class, never taken. It is not symmetric (`A` befriending `B` does
+not make `A` a friend of `B`), not transitive, and not inherited.
+
+The most common legitimate use is a symmetric operator that must be a non-member, because its left
+operand is not the class type (`std::ostream& << Vec2`) or because both operands should allow
+implicit conversions. Defining the friend inside the class makes it a **hidden friend**: it is found
+only by argument-dependent lookup, which keeps overload sets small. Operator overloading itself is
+covered in [Operator overloading](../02-language-fundamentals/operators/operator-overloading.md).
+
+```cpp title="vec2.cpp" showLineNumbers
+#include <iostream>
+
+class Vec2 {
 public:
-    Secret(int d) : data(d) {}
-};
+    Vec2(double x, double y) : x_(x), y_(y) {}
 
-void revealSecret(const Secret& s) {
-    std::cout << s.data;  // Can access private
-}
-
-class SecretKeeper {
-public:
-    void peek(const Secret& s) {
-        std::cout << s.data;  // Can access private
+    friend Vec2 operator+(const Vec2& a, const Vec2& b) {
+        return {a.x_ + b.x_, a.y_ + b.y_};
     }
-};
-```
-
-:::warning[Use Friends Sparingly]
-- Breaks encapsulation
-- One-way relationship (not symmetric)
-- **Good uses:** Operator overloads, tightly-coupled classes
-- **Bad uses:** Lazy access to internals
-:::
-
-### Friend Member Functions
-
-You can make specific member functions of another class friends, rather than the entire class.
-
-```cpp showLineNumbers 
-class Storage;
-
-class Accessor {
-public:
-    void read(const Storage& s);
-    void write(Storage& s);
-};
-
-class Storage {
+    friend std::ostream& operator<<(std::ostream& os, const Vec2& v) {
+        return os << '(' << v.x_ << ", " << v.y_ << ')';
+    }
 private:
-    int data;
-    
-    friend void Accessor::read(const Storage&);  // Only read is friend
-    // write is not a friend - cannot access data
-    
-public:
-    Storage(int d) : data(d) {}
+    double x_, y_;
 };
 
-void Accessor::read(const Storage& s) {
-    std::cout << s.data;  // OK
-}
-
-void Accessor::write(Storage& s) {
-    // s.data = 100;  // Error: not a friend
-}
+int main() { std::cout << (Vec2{1, 2} + Vec2{3, 4}) << '\n'; }
 ```
 
-This provides fine-grained control, granting access only where needed. It's more restrictive than making the entire class a friend.
+```text
+(4, 6)
+```
 
-## Protected and Inheritance
+To befriend a single member function of another class, that class must be complete first:
+`friend void Reader::read(const Storage&);`. A whole-class friend (`friend class Reader;`) is
+simpler but grants access to every member function `Reader` has now or gains later. Prefer the
+narrowest friendship that works, because each friend is one more piece of code that can break the
+class's invariants.
 
-Protected members are accessible in derived classes, enabling extension while hiding from outside.
+## Protected members and the "through the derived type" rule
 
-```cpp showLineNumbers
+`protected` members are reachable from member functions of derived classes, which lets a base class
+offer hooks to subclasses without making them public. There is one restriction that surprises
+people: a derived class may access a protected **non-static** member only through an object of its
+own type (or a type derived from it), not through an arbitrary `Base`.
+
+```cpp title="protected.cpp" showLineNumbers
 class Base {
 protected:
-    int protectedValue;
-    
-private:
-    int privateValue;
-    
-public:
-    Base(int v) : protectedValue(v), privateValue(v) {}
+    int counter_ = 0;
 };
 
 class Derived : public Base {
 public:
-    void modify() {
-        protectedValue = 100;  // OK
-        // privateValue = 100;  // Error: private
-    }
+    void bump() { ++counter_; }                     // OK: this is a Derived
+    void bump_other(Derived& d) { ++d.counter_; }   // OK: through a Derived
+    // void bump_base(Base& b) { ++b.counter_; }    // error: 'int Base::counter_' is protected
 };
 
-Derived d;
-// d.protectedValue = 100;  // Still protected from outside
+int main() {
+    Derived d, e;
+    d.bump();
+    d.bump_other(e);
+}
 ```
 
-**Access summary:**
-| Member | Same Class | Derived Class | Outside |
-|--------|-----------|---------------|---------|
-| public | Yes | Yes | Yes |
-| protected | Yes | Yes | No |
-| private | Yes | No | No |
+The rule stops one subclass from reaching into the protected state of an unrelated sibling subclass
+through a `Base&`. Protected data members are still widely discouraged: every derived class becomes
+code that can break the base's invariants. Protected member **functions** are the usual compromise.
 
-## Access Control in Inheritance
+## Inheritance access: public, protected, private bases
 
-The inheritance access specifier controls how base members appear in derived class.
-```cpp showLineNumbers
-class Base {
-    public:    int pub;
-    protected: int prot;
-    private:   int priv;
-};
+The access specifier on a base class caps the access of what is inherited. Private members of the
+base are never accessible in the derived class, whatever the specifier. The base's own member
+functions can of course still use them.
 
-// Public inheritance (most common)
-class PublicDerived : public Base {
-    // pub → public
-    // prot → protected
-    // priv → inaccessible
-};
+| Member in `Base` | `: public Base` | `: protected Base` | `: private Base` |
+|---|---|---|---|
+| `public` | public | protected | private |
+| `protected` | protected | protected | private |
+| `private` | not accessible | not accessible | not accessible |
 
-// Protected inheritance (rare)
-class ProtectedDerived : protected Base {
-    // pub → protected
-    // prot → protected
-    // priv → inaccessible
-};
+The specifier also controls who may **convert** a `Derived*` to a `Base*`. With public inheritance
+anyone can, which is what makes `Derived` usable wherever a `Base` is expected: an "is-a"
+relationship. With private inheritance only `Derived` itself (and its friends) can, so outsiders
+cannot treat a `Derived` as a `Base` at all. Private inheritance therefore means "implemented in
+terms of": `Derived` reuses `Base`'s code without exposing its interface. A data member does the same
+job and is usually clearer. Private inheritance is chosen when the derived class must override a
+virtual function of the base or wants the [empty base optimization](./class-layout.md#empty-classes-and-the-empty-base-optimization).
+Protected inheritance is rare in practice. Base/derived relationships in general are covered in
+[Inheritance](./inheritance.md).
 
-// Private inheritance (implementation detail)
-class PrivateDerived : private Base {
-    // pub → private
-    // prot → private
-    // priv → inaccessible
-};
-```
+## Re-exposing members with `using`
 
-:::info[Inheritance Types]
-**public** - "is-a" relationship (maintains interface)  
-**protected** - rarely used  
-**private** - "implemented-in-terms-of" (hides base interface)
-:::
+A `using`-declaration in the derived class redeclares a base member with the access of the section
+it appears in. It is how you re-publish chosen members of a privately inherited base, or widen a
+protected member to public. It cannot reach a member that is private in the base.
 
-### Why Different Inheritance Access?
-
-```cpp showLineNumbers
+```cpp title="using-access.cpp" showLineNumbers
 class Engine {
 public:
     void start() {}
+    void stop() {}
 };
 
-// Public: Car IS-A vehicle with engine
-class Car1 : public Engine {
-    // start() is public
-};
-
-// Private: Car HAS-AN engine (implementation detail)
-class Car2 : private Engine {
-    // start() is private (hidden from users)
+class Car : private Engine {
 public:
-    void ignition() {
-        start();  // Can call privately inherited member
-    }
+    using Engine::start;   // public in Car; stop() stays private
 };
 
-Car1 c1;
-c1.start();  // Public inheritance
-
-Car2 c2;
-// c2.start();  // Private inheritance hides it
-c2.ignition();  // Use public interface
+int main() {
+    Car c;
+    c.start();
+    // c.stop();           // error: stop() is private in Car
+    // Engine& e = c;      // error: 'Engine' is an inaccessible base of 'Car'
+}
 ```
 
-Private inheritance hides the base class interface, making it an implementation detail. This is useful when you want to reuse base class implementation without exposing its interface.
+## Nested classes
 
-## using Declarations for Access
+A nested class is a member of the enclosing class, so since C++11 it has the same access as any other
+member: it can use the enclosing class's private members. The reverse is not true. The enclosing
+class has no special access to the nested class's private members unless the nested class befriends
+it.
 
-You can use `using` to change the accessibility of inherited members.
-
-```cpp showLineNumbers 
-class Base {
-protected:
-    void protectedFunc() {}
-};
-
-class Derived : public Base {
-public:
-    using Base::protectedFunc;  // Make public in Derived
-};
-
-Derived d;
-d.protectedFunc();  // Now accessible (was protected in Base)
-```
-
-This is useful when you want to expose specific base class members that would otherwise be hidden. It's commonly used to restore access to members hidden by private/protected inheritance.
-
-## Nested Classes and Access
-
-Nested classes have access to the enclosing class's private members.
-
-```cpp showLineNumbers 
+```cpp title="nested.cpp" showLineNumbers
 class Outer {
-private:
-    int secret;
-    
-    class Inner {
-    public:
-        void access(Outer& o) {
-            o.secret = 100;  // Can access Outer's private members
-        }
+    int secret_ = 42;
+
+    struct Inner {
+        int peek(const Outer& o) const { return o.secret_; }   // OK: Inner is a member
     };
-    
 public:
-    Outer() : secret(0) {}
-    
-    void useInner() {
-        Inner i;
-        i.access(*this);
-    }
-};
-```
-
-Nested classes are useful for implementation helpers that need full access to the outer class's internals. However, the outer class cannot automatically access the nested class's private members unless specifically granted friendship.
-
-## Static Members and Access
-
-Static members follow the same access rules as non-static members.
-
-```cpp showLineNumbers 
-class Config {
-private:
-    static int privateCounter;
-    
-protected:
-    static int protectedCounter;
-    
-public:
-    static int publicCounter;
-    
-    static void increment() {
-        privateCounter++;    // OK in member function
-        protectedCounter++;
-        publicCounter++;
-    }
+    int read() const { return Inner{}.peek(*this); }
 };
 
-// Config::privateCounter++;     // Error: private
-// Config::protectedCounter++;   // Error: protected
-Config::publicCounter++;         // OK: public
+int main() { return Outer{}.read() == 42 ? 0 : 1; }
 ```
 
-## Summary
+Static members follow the same rules as non-static ones: `Config::private_count` is accessible only
+in `Config`'s member functions and friends.
 
-:::info[Three access levels]
-- `public` - interface (accessible everywhere)
-- `protected` - inheritance (accessible in derived classes)
-- `private` - implementation (accessible only in class)
-:::
+## Design guidelines
 
-:::info[Defaults]
-- `class` defaults to private
-- `struct` defaults to public
-- Choice is stylistic (same otherwise)
-:::
+- Make data members private when the class has an invariant, and provide operations, not a
+  getter/setter pair for every field. A public setter that accepts any value is the same as a
+  public member.
+- Use `struct` with public members when there is no invariant (a point, a config record). Adding
+  trivial accessors to such a type only adds noise.
+- Prefer protected member functions to protected data.
+- Keep friends few and specific. Hidden-friend operators are the standard good case.
 
-:::info[Encapsulation]
-- Protects invariants through controlled access
-- Hides implementation details
-- Provides clear interface
-:::
+## References
 
-:::info[Inheritance access]
-- `public` inheritance - "is-a" relationship
-- `protected` inheritance - rarely used
-- `private` inheritance - implementation detail
-:::
-
-:::info[Friend]
-- Grants access to private members
-- Breaks encapsulation (use sparingly)
-- One-way relationship
-:::
-
-:::info[Best practices]
-- Make data members private
-- Provide public accessor methods
-- Use protected for inheritance needs
-- Friend for operator overloads and tight coupling only
-:::
+- [cppreference: Access specifiers](https://en.cppreference.com/w/cpp/language/access)
+- [cppreference: Friend declaration](https://en.cppreference.com/w/cpp/language/friend)
+- [cppreference: Derived classes, member access](https://en.cppreference.com/w/cpp/language/derived_class)
+- [C++ Core Guidelines C.2, C.9, C.133](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-class)
