@@ -83,7 +83,7 @@ end
 ```
 
 `use_count()` is for diagnostics. Under concurrency the value may be stale the instant you read it,
-and `unique()` (the "count == 1" test) was removed in C++20 for that reason.
+and `unique()` (the "count == 1" test) was deprecated in C++17 and removed in C++20 for that reason.
 
 ## `make_shared` and the two allocations
 
@@ -134,11 +134,13 @@ make_shared:     1 allocation
   is destroyed, but its storage is part of the control block and stays allocated until the last
   `weak_ptr` is gone too. For a large object with long-lived `weak_ptr`s, that memory is held much
   longer than with `shared_ptr(new T)`, where it is freed immediately.
-- **No custom deleter, no class-specific `operator new`.** It always uses `std::allocator` (use
-  `std::allocate_shared` for a custom allocator). If the type needs `delete` through a deleter, or
-  its own `operator new`, construct `shared_ptr` directly.
+- **No custom deleter, no class-specific `operator new`.** It allocates through the global
+  allocation functions, ignoring any class-specific `operator new` (libstdc++ uses `std::allocator`);
+  use `std::allocate_shared` for a custom allocator. If the type needs a custom deleter or its own
+  `operator new`, construct the `shared_ptr` directly.
 - **It needs a public constructor**, like `make_unique`. A private constructor needs the direct form.
-- **Array support** came in C++20: `make_shared<T[]>(n)` and `make_shared<T[N]>()`.
+- **Array support.** `shared_ptr<T[]>` with `operator[]` exists since C++17; `make_shared<T[]>(n)`
+  and `make_shared<T[N]>()` came in C++20.
 
 ## Where the deleter lives
 
@@ -187,7 +189,8 @@ built for `Derived`. With `unique_ptr<Base>` it would be undefined behavior.
 `std::shared_ptr<U>(const shared_ptr<T>& owner, U* ptr)` creates a pointer that **owns** whatever
 `owner` owns but **points at** `ptr`. Typical use: hand out a `shared_ptr` to a member or element
 that keeps the whole parent alive. `ptr` is not deleted separately and is not checked for being
-related to the owned object.
+related to the owned object. If `owner` is empty, the result is empty too, yet `get()` may still be
+non-null. C++20 added an overload taking `owner` as an rvalue, which moves instead of copying.
 
 ```cpp title="aliasing.cpp" showLineNumbers
 #include <cstdio>

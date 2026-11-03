@@ -77,7 +77,7 @@ raw pointer where a `unique_ptr` is expected.
 
 Prefer `make_unique` because it names the type once and avoids a leak that existed before C++17:
 
-```cpp
+```cpp title="fragment: pre-C++17 leak"
 // Before C++17 this could leak: the compiler may run  new Widget -> g() -> unique_ptr ctor,
 // and if g() throws, the Widget is never owned.
 f(std::unique_ptr<Widget>(new Widget(1)), g());
@@ -127,6 +127,11 @@ The parameter type states what the function does with ownership. This is the par
 | May replace what the caller owns | `void reseat(std::unique_ptr<Widget>&)` | `reseat(p)` |
 | Returns ownership (a **factory**) | `std::unique_ptr<Widget> make()` | `auto p = make();` |
 
+`v.emplace_back(new Widget(2))` also compiles, but if the vector must reallocate and that throws, the
+raw pointer was never adopted and leaks. Create the `unique_ptr` first (`make_unique`), then move it in.
+A `unique_ptr<Widget>` returned by a factory also converts to `std::shared_ptr<Widget>` by move
+(`std::shared_ptr<Widget> s = make(3);`) if sharing turns out to be needed.
+
 Taking `const std::unique_ptr<Widget>&` is almost always a mistake: it requires the caller to own
 the object through a `unique_ptr` for no benefit, and it can't take ownership. Use `Widget&` or
 `Widget*` instead (C++ Core Guidelines R.30 and F.7).
@@ -158,7 +163,7 @@ int main() {
 
     std::vector<std::unique_ptr<Widget>> v;
     v.push_back(make(1));           // rvalue: moved in
-    v.emplace_back(new Widget(2));  // constructs the unique_ptr in place from a raw pointer
+    v.push_back(std::make_unique<Widget>(2));   // not emplace_back(new ...): see the note below
     // v.push_back(w);              // error: would copy
     for (const auto& p : v) std::printf("%d ", p->id);
     std::puts("");
@@ -265,8 +270,8 @@ fails with "invalid application of sizeof to incomplete type". The idiom is on
 With the default deleter, `sizeof(std::unique_ptr<T>) == sizeof(T*)` in libstdc++ and libc++ (the
 standard does not require it, but both use an empty-base or `[[no_unique_address]]` trick for the
 stateless deleter), and the destructor is a null check plus `delete`, which inlines to the same code
-as hand-written cleanup. A function-pointer deleter or a capturing-lambda deleter adds its own state
-to the object. Passing a `unique_ptr` **by value** is not free on the common ABIs: because it has a
+as hand-written cleanup. A function-pointer or capturing deleter adds its own state to the object (see
+[custom deleters](./custom-deleters.md#unique_ptr-the-deleter-is-part-of-the-type)). Passing a `unique_ptr` **by value** is not free on the common ABIs: because it has a
 non-trivial destructor it is passed in memory (by hidden reference) rather than in a register under
 the Itanium C++ ABI, so hot paths that only need to look at the object should take `T&` or `T*`.
 
@@ -274,13 +279,9 @@ the Itanium C++ ABI, so hot paths that only need to look at the object should ta
 #include <memory>
 
 struct Widget {};
-struct StatefulDeleter { int tag; void operator()(Widget* p) const { delete p; } };
-void free_fn(Widget* p) { delete p; }
 
 // Holds for libstdc++ and libc++ on 64-bit targets; not guaranteed by the standard.
 static_assert(sizeof(std::unique_ptr<Widget>) == sizeof(Widget*));
-static_assert(sizeof(std::unique_ptr<Widget, StatefulDeleter>) > sizeof(Widget*));
-static_assert(sizeof(std::unique_ptr<Widget, void (*)(Widget*)>) == 2 * sizeof(Widget*));
 
 int main() {}
 ```
