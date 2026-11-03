@@ -3,500 +3,310 @@ id: weak-ptr
 title: std::weak_ptr
 sidebar_label: weak_ptr
 sidebar_position: 7
-tags: [c++, smart-pointers, weak-ptr, reference-counting, cpp11]
+tags: [c++, smart-pointers, weak-ptr, observer, circular-references, cpp11]
 ---
 
 # std::weak_ptr
 
-Non-owning observer of `shared_ptr`-managed objects. Doesn't increase reference count, enables checking if object still exists.
+`std::weak_ptr<T>` *(C++11, `<memory>`)* is a non-owning handle to an object managed by
+[`shared_ptr`](./shared-ptr.md). It does not keep the object alive, and it can tell you whether the
+object still exists. That solves two problems that `shared_ptr` alone can't: **cycles** (two
+objects that own each other never get freed) and **safe observation** (a raw pointer to a
+shared-owned object dangles silently, while a `weak_ptr` knows it expired).
 
-:::info[Non-Owning Observer]
-**Watches without owning** - object can be deleted while weak_ptrs exist
-- Doesn't increase reference count
-- Breaks circular references
-- Must convert to shared_ptr to access
-- Conversion fails safely if object deleted
-:::
+**Prerequisites:** [shared_ptr](./shared-ptr.md), especially its control block and strong/weak
+counts.
 
-## Ownership Model
-```mermaid
-graph TD
-    A[shared_ptr 1] -->|owns count=2| D[Control Block]
-    B[shared_ptr 2] -->|owns count=2| D
-    C[weak_ptr] -.->|observes count=0| D
-    D -->|owns| E[Object]
-    
+## What it is, and what it isn't
+
+A `weak_ptr` holds a pointer to the same control block as the `shared_ptr`s it observes and
+increments the control block's **weak** count. It has no strong count of its own, so it doesn't
+influence when the object is destroyed. It deliberately has no `operator*` or `operator->`: you
+can't touch the object without first proving it is still there.
+
+| Operation | Effect |
+|---|---|
+| `weak_ptr<T> w(sp)`, `w = sp` | observe what `sp` owns (from a `shared_ptr` or another `weak_ptr`, never a raw pointer) |
+| `w.lock()` | returns a `shared_ptr<T>`: owning if the object is alive, **empty** if it is gone |
+| `w.expired()` | `true` if no strong owner remains |
+| `w.use_count()` | current strong count (0 if expired) |
+| `w.reset()` | stop observing |
+| `w.owner_before(x)` | ordering by control block (see below) |
+
+<Walkthrough title="One object, an owner and an observer" caption="Strong owners keep the object alive; the weak observer only keeps the control block." accent="green">
+  <Step title="An owner and an observer">
+
+```cpp
+auto sp = std::make_shared<Widget>();
+std::weak_ptr<Widget> w = sp;
 ```
-```
-Control Block:
-┌────────────────────────┐
-│ Strong refs:  2        │ ← shared_ptrs
-│ Weak refs:    1        │ ← weak_ptrs
-│ Object:       alive    │
-└────────────────────────┘
 
-When strong refs → 0: delete object
-When weak refs → 0: delete control block
+`sp.use_count()` is <StepChange>1</StepChange>. The weak pointer adds nothing to it. `w.expired()` is `false`.
+
+  </Step>
+  <Step title="Lock for the duration of a use">
+
+```cpp
+if (auto locked = w.lock()) { /* use *locked */ }
 ```
 
-## Basic Concept
+Inside the `if`, `locked` is a second strong owner, so the count is <StepChange>2</StepChange>. The object cannot be destroyed while `locked` is in scope, even if `sp` is reset on another thread.
 
-A `weak_ptr` doesn't increase the reference count of the object it observes. The object can be deleted even if `weak_ptr`s still exist.
+  </Step>
+  <Step title="The owner lets go">
 
-```cpp showLineNumbers 
+```cpp
+sp.reset();
+```
+
+The strong count reaches <StepChange>0</StepChange>: the `Widget` is destroyed. The control block lives on because `w` still refers to it.
+
+  </Step>
+  <Step title="The observer finds out">
+
+```cpp
+w.expired();   // true
+w.lock();      // empty shared_ptr
+```
+
+When `w` itself is destroyed, the weak count reaches zero and the control block is freed. With `make_shared`, that is also when the object's storage is returned.
+
+  </Step>
+</Walkthrough>
+
+```cpp title="lifecycle.cpp" showLineNumbers
+#include <cstdio>
 #include <memory>
 
-std::weak_ptr<int> weak;
-
-{
-    auto shared = std::make_shared<int>(42);
-    weak = shared;  // Observe (doesn't increase count)
-    
-    std::cout << shared.use_count();  // 1 (weak_ptr doesn't count)
-    std::cout << weak.use_count();    // 1 (reports shared count)
-}  // shared destroyed, int deleted
-
-// weak now refers to deleted object
-if (weak.expired()) {
-    std::cout << "Object is gone\n";  // This executes
-}
-```
-
-The `weak_ptr` watches the `shared_ptr` but doesn't participate in ownership. When all `shared_ptrs` are destroyed, the object is deleted even if `weak_ptrs` remain. The weak_ptr then becomes "expired."
-
-## Creating weak_ptr
-
-You create `weak_ptr`s from `shared_ptr`s, never from raw pointers or `unique_ptr`s.
-
-```cpp showLineNumbers 
-auto shared = std::make_shared<int>(42);
-
-// Create weak_ptr from shared_ptr
-std::weak_ptr<int> weak1 = shared;
-std::weak_ptr<int> weak2(shared);
-auto weak3 = std::weak_ptr<int>(shared);
-
-// Copy weak_ptr
-std::weak_ptr<int> weak4 = weak1;
-
-std::cout << shared.use_count();  // 1 (weak_ptrs don't increase count)
-```
-
-All these weak_ptrs observe the same object but don't own it. The shared_ptr's reference count remains 1 because weak ownership doesn't count toward keeping the object alive.
-
-## Checking Validity
-
-Before accessing an object through weak_ptr, you must check if it still exists.
-
-```cpp showLineNumbers 
-std::weak_ptr<int> weak;
-
-{
-    auto shared = std::make_shared<int>(42);
-    weak = shared;
-    
-    // Check if object still exists
-    if (!weak.expired()) {
-        std::cout << "Object exists\n";
-    }
-}
-
-// Object deleted
-if (weak.expired()) {
-    std::cout << "Object is gone\n";
-}
-
-// Alternatively, check use_count
-if (weak.use_count() == 0) {
-    std::cout << "No owners left\n";
-}
-```
-
-The `expired()` method checks if the object has been deleted (equivalent to `use_count() == 0`). You must check before attempting to access the object because the `shared_ptr`s might have been destroyed.
-
-## Locking: Converting to shared_ptr
-
-To access the object, convert the `weak_ptr` to `shared_ptr` using `lock()`. This fails safely if the object has been deleted.
-
-```cpp showLineNumbers 
-std::weak_ptr<int> weak;
-
-{
-    auto shared = std::make_shared<int>(42);
-    weak = shared;
-    
-    // Convert to shared_ptr (atomic check + lock)
-    if (auto locked = weak.lock()) {
-        std::cout << *locked;  // 42
-        // locked keeps object alive in this scope
-    } else {
-        std::cout << "Object gone\n";
-    }
-}
-
-// Try to lock after object deleted
-if (auto locked = weak.lock()) {
-    // Won't execute - lock() returns empty shared_ptr
-} else {
-    std::cout << "Lock failed\n";  // This executes
-}
-```
-
-`lock()` returns a `shared_ptr` that either owns the object (if it still exists) or is empty (if object was deleted). This is the safe way to access the object - it's atomic, preventing the object from being deleted between checking and accessing.
-
-### Why lock() Instead of Direct Access
-
-Directly checking and then accessing would have a race condition in multithreaded code.
-
-```cpp showLineNumbers 
-// Race condition (don't do this)
-if (!weak.expired()) {
-    // Another thread might destroy last shared_ptr here!
-    auto shared = weak.lock();  // Might return empty
-}
-
-// Safe: atomic check-and-lock
-if (auto shared = weak.lock()) {
-    // Guaranteed to have valid shared_ptr here
-    *shared = 100;
-}
-```
-
-`lock()` atomically checks if the object exists and creates a `shared_ptr` if it does. This prevents the object from being deleted after checking but before accessing.
-
-## Breaking Circular References
-
-### The Problem
-```cpp showLineNumbers
-class Node {
-public:
-    std::shared_ptr<Node> next;
-    std::shared_ptr<Node> prev;  // Circular reference!
-    ~Node() { std::cout << "~Node\n"; }
+struct Widget {
+    ~Widget() { std::puts("~Widget"); }
 };
 
-auto n1 = std::make_shared<Node>();
-auto n2 = std::make_shared<Node>();
+int main() {
+    auto sp = std::make_shared<Widget>();
+    std::weak_ptr<Widget> w = sp;
+    std::printf("use_count %ld, expired %d\n", w.use_count(), w.expired());
 
-n1->next = n2;  // n1 owns n2
-n2->prev = n1;  // n2 owns n1 (cycle!)
+    if (auto locked = w.lock())
+        std::printf("locked, use_count %ld\n", locked.use_count());
 
-// Memory leak - neither ever deleted
-```
-
-**Cycle diagram:**
-```
-n1 (count=2) ──next──> n2 (count=2)
-      ^                   │
-      │                   │
-      └────────prev───────┘
-```
-
-### The Solution
-
-The primary use case for `weak_ptr` is breaking circular references that would prevent `shared_ptr` from deleting objects.
-
-```cpp showLineNumbers 
-class Node {
-public:
-    std::string data;
-    std::shared_ptr<Node> next;     // Strong reference forward
-    std::weak_ptr<Node> prev;       // Weak reference back (breaks cycle)
-    
-    Node(std::string d) : data(d) {}
-    ~Node() { std::cout << "~Node(" << data << ")\n"; }
-};
-
-auto node1 = std::make_shared<Node>("first");
-auto node2 = std::make_shared<Node>("second");
-
-// Build doubly-linked list
-node1->next = node2;
-node2->prev = node1;  // Weak - doesn't create cycle
-
-// All destructors called correctly when nodes go out of scope!
-```
-
-**Fixed:**
-```
-n1 (count=1) ──next──> n2 (count=2)
-      ^                   │
-      │                   │
-      └·····prev··········┘
-         (weak - doesn't count)
-```
-
-Without `weak_ptr`, the `prev` pointers would be `shared_ptr`s, creating reference cycles where each node keeps the previous one alive, and nothing ever gets deleted. `weak_ptr` allows traversal in both directions without ownership cycles.
-
-## Common Patterns
-
-### Parent-Child Relationships
-
-Parent-child relationships typically use `shared_ptr` from parent to child and `weak_ptr` from child to parent.
-
-```cpp showLineNumbers 
-class Child;
-
-class Parent {
-public:
-    std::vector<std::shared_ptr<Child>> children;  // Owns children
-    ~Parent() { std::cout << "~Parent\n"; }
-};
-
-class Child {
-public:
-    std::weak_ptr<Parent> parent;  // Observes parent, doesn't own
-    ~Child() { std::cout << "~Child\n"; }
-    
-    void notifyParent() {
-        if (auto p = parent.lock()) {
-            std::cout << "Parent exists\n";
-            // Use p safely
-        } else {
-            std::cout << "Parent is gone\n";
-        }
-    }
-};
-
-{
-    auto parent = std::make_shared<Parent>();
-    auto child = std::make_shared<Child>();
-    
-    parent->children.push_back(child);
-    child->parent = parent;
-    
-    child->notifyParent();  // "Parent exists"
-}  // ~Parent, ~Child (correct order)
-```
-
-The parent owns the children (strong references), and children observe the parent (weak reference). This prevents cycles: when the parent is destroyed, it releases its children, and the children can detect that their parent is gone.
-
-:::success[Ownership Rule]
-```
-Parent ──owns──> Child  (shared_ptr)
-Child ·observes· Parent (weak_ptr)
-```
-- Strong references: ownership (parent → child)
-- Weak references: observation (child → parent)
-:::
-
-### Observer Pattern
-
-`weak_ptr` is ideal for implementing observers that should not keep observed objects alive.
-
-```cpp showLineNumbers 
-class Subject {
-    std::vector<std::weak_ptr<Observer>> observers;
-    
-public:
-    void attach(std::shared_ptr<Observer> obs) {
-        observers.push_back(obs);  // Weak reference
-    }
-    
-    void notify() {
-        // Remove expired observers
-        observers.erase(
-            std::remove_if(observers.begin(), observers.end(),
-                [](auto& weak) { return weak.expired(); }),
-            observers.end()
-        );
-        
-        // Notify remaining observers
-        for (auto& weak : observers) {
-            if (auto obs = weak.lock()) {
-                obs->update();
-            }
-        }
-    }
-};
-```
-
-Observers can be destroyed without notifying the subject. The subject doesn't keep observers alive - they're held weakly. When notifying, expired observers are skipped or removed automatically.
-
-:::success[Benefits]
-- Observers can be destroyed without notifying subject
-- Subject doesn't keep observers alive
-- Automatic cleanup of dead observers
-:::
-
-### Caching
-
-`weak_ptr` enables caches that don't prevent cached objects from being deleted.
-
-```cpp showLineNumbers 
-class ResourceCache {
-    std::map<std::string, std::weak_ptr<Resource>> cache;
-    
-public:
-    std::shared_ptr<Resource> get(const std::string& key) {
-        // Check cache
-        auto it = cache.find(key);
-        if (it != cache.end()) {
-            if (auto resource = it->second.lock()) {
-                std::cout << "Cache hit\n";
-                return resource;  // Return cached resource
-            }
-        }
-        
-        // Create new resource
-        std::cout << "Cache miss\n";
-        auto resource = std::make_shared<Resource>(key);
-        cache[key] = resource;  // Store weak reference
-        return resource;
-    }
-};
-```
-
-The cache stores `weak_ptr`s, so it doesn't prevent resources from being deleted when no longer needed. If a resource is still in use elsewhere (has active `shared_ptr`s), the cache can return it. Otherwise, the cache entry is expired and a new resource is created.
-
-:::success[Benefits]
-- Cache doesn't prevent deletion
-- Resources deleted when no longer used
-- Cache automatically cleans up
-:::
-
-## weak_ptr Operations
-
-`weak_ptr` provides several operations for observation and conversion.
-
-```cpp showLineNumbers 
-auto shared = std::make_shared<int>(42);
-std::weak_ptr<int> weak = shared;
-
-// Check if expired
-bool gone = weak.expired();  // false
-
-// Get owner count
-long count = weak.use_count();  // 1
-
-// Lock to shared_ptr
-if (auto locked = weak.lock()) {
-    std::cout << *locked;
-}
-
-// Reset (stop observing)
-weak.reset();
-// weak is now empty
-
-// Check if empty
-if (weak.expired()) {
-    std::cout << "Empty or expired\n";
+    sp.reset();                                           // last strong owner gone
+    std::printf("use_count %ld, expired %d\n", w.use_count(), w.expired());
+    std::printf("lock() %s\n", w.lock() ? "non-empty" : "empty");
 }
 ```
 
-## Thread Safety
-
-Like `shared_ptr`, `weak_ptr`'s control block operations are thread-safe, but the observed object isn't automatically protected.
-
-```cpp showLineNumbers 
-std::shared_ptr<int> shared = std::make_shared<int>(42);
-std::weak_ptr<int> weak = shared;
-
-void thread1() {
-    auto locked = weak.lock();  // Thread-safe lock
-    if (locked) {
-        *locked = 100;  // Data race if thread2 also modifies
-    }
-}
-
-void thread2() {
-    auto locked = weak.lock();  // Thread-safe lock
-    if (locked) {
-        *locked = 200;  // Data race with thread1
-    }
-}
+```text
+use_count 1, expired 0
+locked, use_count 2
+~Widget
+use_count 0, expired 1
+lock() empty
 ```
 
-Creating and destroying weak_ptrs, copying them, and calling `lock()` are all thread-safe. However, if multiple threads lock and access the object simultaneously, you need additional synchronization.
+## `lock()`, not `expired()` then `lock()`
 
-:::info[Thread Safety]
-- `lock()` is thread-safe (atomic)
-- Creating/destroying weak_ptr is thread-safe
-- Object itself needs separate synchronization
-:::
+`lock()` atomically checks that the strong count is non-zero and increments it (conceptually a
+compare-and-swap loop in the implementation), so there is no gap between "is it alive?" and "now I
+own it". Splitting the check from the use opens a race:
 
-## enable_shared_from_this
-
-To get a `weak_ptr` (or `shared_ptr`) to `this` from a member function, inherit from
-`std::enable_shared_from_this` and call `weak_from_this()`. It reuses the existing control block,
-which is the whole point — building a `weak_ptr`/`shared_ptr` from a raw `this` makes a *second*
-control block and double-frees.
-
-```cpp showLineNumbers
-class Widget : public std::enable_shared_from_this<Widget> {
-public:
-    std::weak_ptr<Widget> weakSelf() { return weak_from_this(); }   // safe
-};
-```
-
-The full mechanism and the `shared_from_this` danger are covered on the canonical
-[shared_ptr](./shared-ptr.md#enable_shared_from_this) page.
-
-## Common Pitfall: check-then-lock race
-
-A `weak_ptr` can't be dereferenced directly, and `expired()` is only a snapshot — between an
-`expired()` check and a later `lock()`, the object can be destroyed (especially across threads).
-**Lock first, then test the result**, so the `shared_ptr` keeps the object alive while you use it.
-
-:::danger
 ```cpp
-// WRONG: object may expire between the check and the lock
-if (!weak.expired()) {
-    auto sp = weak.lock();      // sp could be null here
-    sp->doWork();               // possible null deref
+// Racy: another thread may drop the last owner between the two lines.
+if (!w.expired()) {
+    auto sp = w.lock();   // may already be empty
+    sp->use();            // null dereference
 }
 
-// CORRECT: a single atomic lock; the lock keeps it alive inside the block
-if (auto sp = weak.lock()) {
-    sp->doWork();               // guaranteed valid
+// Correct: one call, test the result.
+if (auto sp = w.lock()) {
+    sp->use();
 }
 ```
-:::
 
-## Performance
+`expired()` is only a hint ("it was alive a moment ago") and is fine for cheap pruning of a list of
+observers. Anything that goes on to use the object must use the pointer `lock()` returned. Keep the
+locked `shared_ptr` for the shortest scope that works: while it exists, it is a real owner, and it
+may be the one that ends up running the object's destructor.
 
-`weak_ptr` has minimal overhead - it's essentially a pointer plus a pointer to the control block.
+## Breaking a cycle
 
-```cpp showLineNumbers 
-sizeof(std::weak_ptr<int>) == sizeof(std::shared_ptr<int>)
-// Both: 16 bytes (2 pointers)
+The textbook problem: a parent owns its children and each child points back to its parent. If both
+directions are `shared_ptr`, the parent's count never reaches zero while any child exists, and
+the children's counts never reach zero while the parent exists. Nothing is freed.
 
-// Minimal overhead
-// - No atomic ops when checking/locking
-// - Only when creating/destroying weak_ptr
+```cpp title="cycle.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <vector>
+
+struct LeakyNode {
+    std::shared_ptr<LeakyNode> peer;                 // owning both ways: cycle
+    ~LeakyNode() { std::puts("~LeakyNode"); }
+};
+
+struct Parent;
+struct Child {
+    std::weak_ptr<Parent> parent;                    // non-owning back reference
+    ~Child() { std::puts("~Child"); }
+};
+struct Parent {
+    std::vector<std::shared_ptr<Child>> children;    // the owning direction
+    ~Parent() { std::puts("~Parent"); }
+};
+
+int main() {
+    {   // Leak: this scope ends and ~LeakyNode never runs.
+        auto a = std::make_shared<LeakyNode>();
+        auto b = std::make_shared<LeakyNode>();
+        a->peer = b;
+        b->peer = a;
+    }
+    std::puts("-- after leaky scope (no destructor ran)");
+
+    {   // No leak: ownership is a tree, the back edge is weak.
+        auto p = std::make_shared<Parent>();
+        auto c = std::make_shared<Child>();
+        c->parent = p;
+        p->children.push_back(c);
+    }
+    std::puts("-- after tree scope");
+}
 ```
 
-## Summary
+The leak is real: built with `-fsanitize=address`, LeakSanitizer reports two leaked allocations
+(the two `make_shared` blocks) at exit and the process returns a non-zero status. The output below is
+from a run with `ASAN_OPTIONS=detect_leaks=0`:
 
-:::info[Core features:]
-- Non-owning observer (doesn't increase count)
-- Breaks circular references
-- Safe check if object exists
-- Must lock() to access
-:::
+```text
+-- after leaky scope (no destructor ran)
+~Parent
+~Child
+-- after tree scope
+```
 
-:::info[Key operations:]
-- `weak = shared` - create from shared_ptr
-- `weak.expired()` - check if deleted
-- `weak.lock()` - convert to shared_ptr (atomic)
-- `weak.use_count()` - get strong ref count
-:::
+The rule: **ownership edges form a tree (or DAG) of `shared_ptr`s; every edge that goes "up" or
+"sideways" is a `weak_ptr`**. Parent pointers, observer lists and caches usually fall on the weak
+side. If you can't draw which side owns, the design needs a decision before the smart pointer does.
 
-:::info[Use cases:]
-- Break cycles (linked structures, parent-child)
-- Observer pattern (don't keep observers alive)
-- Caching (don't prevent deletion)
-- Callbacks (object might be destroyed)
-:::
+## Observers and caches
 
-:::info[Guidelines:]
-- Strong forward, weak backward
-- Parent owns child (strong)
-- Child observes parent (weak)
-- Always use `lock()` for atomic check-and-access
-:::
+A `weak_ptr` lets a registry refer to objects without controlling their lifetime. The registry
+checks `lock()` when it needs the object and removes entries that have expired.
 
-:::info[Thread safety:]
-- Control operations are thread-safe
-- Object access needs separate synchronization
-:::
+```cpp title="observers.cpp" showLineNumbers
+#include <algorithm>
+#include <cstdio>
+#include <memory>
+#include <vector>
+
+struct Listener {
+    int id;
+    explicit Listener(int i) : id(i) {}
+    void notify() const { std::printf("listener %d notified\n", id); }
+};
+
+class Subject {
+    std::vector<std::weak_ptr<Listener>> listeners_;
+public:
+    void subscribe(const std::shared_ptr<Listener>& l) { listeners_.push_back(l); }
+
+    void publish() {
+        // erase expired entries, then notify the rest
+        std::erase_if(listeners_, [](const std::weak_ptr<Listener>& w) {
+            if (auto l = w.lock()) { l->notify(); return false; }
+            return true;
+        });
+    }
+    std::size_t size() const { return listeners_.size(); }
+};
+
+int main() {
+    Subject s;
+    auto a = std::make_shared<Listener>(1);
+    {
+        auto b = std::make_shared<Listener>(2);
+        s.subscribe(a);
+        s.subscribe(b);
+        s.publish();                       // both alive
+    }                                      // b destroyed; the subject never owned it
+    s.publish();                           // only a is notified; b's entry is pruned
+    std::printf("%zu subscribed\n", s.size());
+}
+```
+
+```text
+listener 1 notified
+listener 2 notified
+listener 1 notified
+1 subscribed
+```
+
+`std::erase_if` for `std::vector` is C++20. The same shape gives a **cache**: a
+`map<Key, weak_ptr<Value>>` that returns the live object if someone still uses it, and otherwise
+rebuilds it. Entries for dead objects accumulate until you prune them.
+
+Two limits to know:
+
+- **It only observes `shared_ptr`-managed objects.** There is no `weak_ptr` for an object owned by a
+  `unique_ptr`, a stack variable or a container. If the owner is a `unique_ptr`, the observer must
+  rely on a lifetime guarantee instead, or the design needs `shared_ptr`.
+- **A listener must be owned by a `shared_ptr`**, which dictates how callers construct it.
+
+## `enable_shared_from_this`
+
+A class that derives from `std::enable_shared_from_this<T>` carries a hidden `weak_ptr` to itself,
+set by the first `shared_ptr` that takes ownership. That is how `shared_from_this()` and
+`weak_from_this()` *(C++17)* find the control block. Its use, and why `shared_ptr<T>(this)` is wrong,
+is covered on [shared_ptr](./shared-ptr.md#enable_shared_from_this). For callbacks, capture
+`weak_from_this()` so the callback does not keep the object alive:
+
+```cpp
+// fragment: inside a member function of a class deriving enable_shared_from_this<Self>
+schedule([weak = weak_from_this()] {
+    if (auto self = weak.lock()) self->on_timer();   // runs only if still alive
+});
+```
+
+## Ordering and hashing
+
+`weak_ptr` has no `operator<` or `std::hash`, because a `weak_ptr` has no stable pointer value (the
+object may be gone). To use one as a map key, compare by **ownership** with `std::owner_less<>`
+(`owner_before`), which orders by control block and works for `shared_ptr` and `weak_ptr` alike.
+Two pointers compare equivalent if they share a control block, even if their stored pointers
+differ (aliasing). `std::owner_hash` and `std::owner_equal` *(C++26)* do the same for unordered
+containers.
+
+## Thread safety and cost
+
+- `lock()`, `expired()`, copying and destroying `weak_ptr`s that share a control block may be called
+  concurrently on **different `weak_ptr` objects**, like `shared_ptr` copies. A single `weak_ptr`
+  object that one thread modifies while another reads is a data race; `std::atomic<std::weak_ptr<T>>`
+  *(C++20)* covers that.
+- `sizeof(weak_ptr<T>)` equals `sizeof(shared_ptr<T>)`: two pointers in libstdc++.
+- `lock()` costs an atomic compare-and-swap loop, slightly more than copying a `shared_ptr`.
+- A live `weak_ptr` keeps the **control block** allocated. Many long-lived `weak_ptr`s to dead
+  objects mean leaked control blocks; with `make_shared`, that also means the object's storage
+  (see [make_shared](./shared-ptr.md#make_shared-and-the-two-allocations)).
+
+## Pitfalls
+
+- **Check then lock** as two steps. Use `lock()` once and test the result.
+- **Holding the locked `shared_ptr` too long** (for example in a member), turning an observer back
+  into an owner, and recreating the cycle.
+- **Expecting a `weak_ptr` to a stack or `unique_ptr`-owned object.** Not possible.
+- **Never pruning.** Containers of `weak_ptr` grow with dead entries until you remove them.
+- **A weak back edge to an object nobody else owns.** If the `shared_ptr` is destroyed when the
+  creating function returns, the weak pointer was expired from the start.
+
+## Key points
+
+- `weak_ptr` observes without owning: no effect on the strong count, no direct access.
+- `lock()` turns it into a `shared_ptr` or an empty one, atomically.
+- Use it for back references, observers and caches, so that `shared_ptr` ownership stays a tree.
+- It keeps the control block (and, with `make_shared`, the storage) alive until it is destroyed.
+
+## Related
+
+- [shared_ptr](./shared-ptr.md): the owner it observes, control block layout and `make_shared`.
+- [unique_ptr](./unique-ptr.md): when a single owner makes the whole question moot.
+- [Custom deleters](./custom-deleters.md): per-object cleanup that runs when the strong count hits zero.

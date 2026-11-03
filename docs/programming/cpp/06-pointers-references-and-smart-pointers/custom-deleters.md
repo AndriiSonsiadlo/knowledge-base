@@ -3,431 +3,341 @@ id: custom-deleters
 title: Custom Deleters
 sidebar_label: Custom Deleters
 sidebar_position: 8
-tags: [c++, smart-pointers, deleters, resource-management, raii]
+tags: [c++, smart-pointers, deleters, unique-ptr, shared-ptr, raii, resource-management]
 ---
 
 # Custom Deleters
 
-Extend smart pointers to manage any resource requiring special cleanup beyond `delete`. Enable RAII for files, handles, connections, locks - anything needing cleanup.
+A smart pointer's job is "run cleanup when the last owner goes away", and the default cleanup is
+`delete` (or `delete[]` for arrays). A **deleter** replaces that step. It lets
+[`unique_ptr`](./unique-ptr.md) and [`shared_ptr`](./shared-ptr.md) manage anything with an
+acquire/release pair: a `FILE*` closed with `fclose`, memory from `malloc`, a C library handle, an
+object that must be returned to a pool, or an object owned by someone else that must not be freed at
+all. This page is the canonical home for how deleters work in both pointers.
 
-:::info[Beyond delete]
-**Default:** `delete` or `delete[]`  
-**Custom:** Close files, unlock mutexes, release handles, any cleanup
+**Prerequisites:** [unique_ptr](./unique-ptr.md), [shared_ptr](./shared-ptr.md) (control block),
+[RAII](../13-idioms-and-design/01-raii.md).
 
-Smart pointers + custom deleters = RAII for everything
-:::
+## What a deleter is
 
-## The Concept
-```cpp showLineNumbers
-// Default deleter
-auto ptr1 = std::make_unique<int>(42);
-// Calls: delete ptr
+A deleter is any callable that can be invoked with the managed pointer: a function, function
+pointer, functor, or lambda. The smart pointer calls `deleter(ptr)` instead of `delete ptr`. The
+callable should not throw, since it runs in a destructor.
 
-// Custom deleter
-auto deleter = [](FILE* f) {
-    if (f) fclose(f);
-};
+```cpp title="file-closer.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
 
-std::unique_ptr<FILE, decltype(deleter)> file(
-    fopen("data.txt", "r"),
-    deleter
-);
-// Calls: deleter(file) → fclose
-```
-
-The deleter is called when the smart pointer is destroyed, providing automatic cleanup even if exceptions occur. This extends RAII to resources that aren't heap-allocated objects.
-
-## unique_ptr with Custom Deleters
-
-For `unique_ptr`, the deleter type is part of the type signature, affecting the size and interface.
-
-```cpp showLineNumbers 
-// Lambda deleter
-auto deleter = [](int* p) {
-    std::cout << "Custom delete\n";
-    delete p;
-};
-
-std::unique_ptr<int, decltype(deleter)> ptr(new int(42), deleter);
-
-// Function pointer deleter
-void customDelete(int* p) {
-    std::cout << "Function delete\n";
-    delete p;
-}
-
-std::unique_ptr<int, decltype(&customDelete)> ptr2(
-    new int(100),
-    customDelete
-);
-
-// These are DIFFERENT types
-// decltype(ptr) != decltype(ptr2)
-```
-
-:::warning[Type Signature]
-```cpp showLineNumbers
-std::unique_ptr<int, Deleter1> p1;
-std::unique_ptr<int, Deleter2> p2;
-
-// Different types - cannot assign
-// p1 = std::move(p2);  // Error
-
-// Size depends on deleter
-sizeof(p1);  // Varies based on Deleter1
-```
-:::
-
-## shared_ptr with Custom Deleters
-
-Deleter is type-erased, not part of type signature.
-```cpp showLineNumbers
-auto d1 = [](int* p) { delete p; };
-auto d2 = [](int* p) { delete p; };
-
-std::shared_ptr<int> ptr1(new int(1), d1);
-std::shared_ptr<int> ptr2(new int(2), d2);
-
-// Same type despite different deleters
-ptr1 = ptr2;
-
-std::vector<std::shared_ptr<int>> vec = {ptr1, ptr2};
-```
-
-
-The deleter is stored in the control block, not the `shared_ptr` itself. This means all `shared_ptr`s to the same type are interchangeable regardless of deleter. This is more convenient but has a small memory cost (deleter stored in control block).
-
-:::success[Type Erasure Advantage]
-
-`shared_ptr` uses type erasure for deleters, enabling mixing different deleters of the same type.
-
-```cpp showLineNumbers
-// All shared_ptr<T> are same type
-void process(std::shared_ptr<Widget> w) {
-    // Works with any deleter
-}
-
-// Can store in same container
-std::vector<std::shared_ptr<Resource>> resources;
-// Each can have different deleter
-```
-:::
-
-This flexibility makes `shared_ptr` easier to use with custom deleters than `unique_ptr`, at the cost of always storing the deleter in the control block (small memory overhead).
-
-## Common Use Cases
-
-### File Handles
-
-Managing C file handles with RAII using smart pointers.
-
-```cpp showLineNumbers 
-auto fileDeleter = [](FILE* f) {
-    if (f) {
-        std::cout << "Closing file\n";
-        fclose(f);
+struct FileCloser {
+    void operator()(std::FILE* f) const noexcept {
+        std::puts("fclose");
+        std::fclose(f);
     }
 };
 
-std::shared_ptr<FILE> openFile(const char* path, const char* mode) {
-    FILE* f = fopen(path, mode);
-    if (!f) return nullptr;
-    
-    return std::shared_ptr<FILE>(f, fileDeleter);
-}
-
-// Usage
-auto file = openFile("data.txt", "r");
-if (file) {
-    char buffer[256];
-    fgets(buffer, sizeof(buffer), file.get());
-}
-// File automatically closed
+int main() {
+    std::unique_ptr<std::FILE, FileCloser> f(std::fopen("/dev/null", "w"));
+    if (!f) return 1;
+    std::fputs("hello", f.get());
+}   // FileCloser{}(f.get()) runs here, on every path out of main
 ```
 
-The file is automatically closed when the last `shared_ptr` is destroyed, even if exceptions occur. This is much safer than manual `fclose` calls.
+```text
+fclose
+```
 
-### Mutex Unlocking
+The same with a lambda needs the lambda's type, which is only nameable through `decltype`:
 
-Custom deleters can unlock mutexes, though `std::lock_guard` is usually better.
+```cpp title="lambda-deleter.cpp" showLineNumbers
+#include <cstdio>
+#include <cstdlib>
+#include <memory>
 
-```cpp showLineNumbers 
-std::mutex mtx;
+int main() {
+    auto closer = [](std::FILE* f) { std::fclose(f); };
+    std::unique_ptr<std::FILE, decltype(closer)> f(std::fopen("/dev/null", "w"), closer);
 
-void process() {
-    auto unlock = [](std::mutex* m) { m->unlock(); };
-    
-    std::unique_ptr<std::mutex, decltype(unlock)> lock(
-        &mtx,
-        unlock
-    );
-    
-    mtx.lock();
-    
-    // Work with protected data
-    
-    // Mutex automatically unlocked when lock destroyed
-}
-
-// Better: use std::lock_guard
-void better() {
-    std::lock_guard<std::mutex> lock(mtx);
-    // Automatically unlocked
+    // C allocation: free(), not delete
+    std::unique_ptr<int, decltype(&std::free)> buf(
+        static_cast<int*>(std::malloc(4 * sizeof(int))), &std::free);
+    if (f && buf) buf.get()[0] = 1;
 }
 ```
 
-While this demonstrates custom deleters, standard lock management facilities (`lock_guard`, `unique_lock`) are better for mutexes. Use custom deleters for resources without standard RAII wrappers.
+`decltype(&std::free)` is a function pointer type. Taking the address of a standard-library
+function is formally unspecified (the library may add overloads), though it works with every major
+implementation for `std::free` and `std::fclose`. A small functor like `FileCloser` avoids the
+question and is also the smaller object (next section).
 
-### System Resources
+## `unique_ptr`: the deleter is part of the type
 
-Managing operating system resources like file descriptors or handles.
+`unique_ptr<T, D>` has the deleter type `D` as a template parameter and stores a `D` object inside
+the pointer. Consequences:
 
-```cpp showLineNumbers 
-#include <unistd.h>  // Unix file descriptors
+- **Different `D` means a different type.** `unique_ptr<FILE, FileCloser>` cannot be assigned to
+  `unique_ptr<FILE, decltype(&fclose)>`. The type tells readers (and the compiler) how it will be
+  cleaned up.
+- **No allocation, and often no space.** A stateless functor or captureless lambda adds nothing to
+  `sizeof` in libstdc++ and libc++ (they use an empty-base or `[[no_unique_address]]` layout, not
+  required by the standard). A function-pointer deleter or one with captures adds that state.
+- **The deleter is invoked only if the stored pointer is non-null.**
+- **The deleter is moved with the pointer.** Move construction and assignment move it too.
 
-auto fdDeleter = [](int* fd) {
-    if (fd && *fd != -1) {
-        std::cout << "Closing fd " << *fd << "\n";
-        close(*fd);
-        delete fd;
+```cpp title="sizes.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+
+struct Stateless { void operator()(int* p) const { delete p; } };
+struct Counting  { long* counter; void operator()(int* p) const { ++*counter; delete p; } };
+
+// libstdc++ and libc++ on 64-bit; the standard does not guarantee these sizes.
+static_assert(sizeof(std::unique_ptr<int>) == sizeof(void*));
+static_assert(sizeof(std::unique_ptr<int, Stateless>) == sizeof(void*));
+static_assert(sizeof(std::unique_ptr<int, void (*)(int*)>) == 2 * sizeof(void*));
+static_assert(sizeof(std::unique_ptr<int, Counting>) == 2 * sizeof(void*));
+
+int main() {
+    long freed = 0;
+    {
+        std::unique_ptr<int, Counting> a(new int(1), Counting{&freed});
+        auto b = std::move(a);                  // deleter moves along
     }
+    std::printf("freed %ld\n", freed);
+}
+```
+
+```text
+freed 1
+```
+
+### Non-pointer handles with `pointer`
+
+Many C APIs hand out handles that are not pointers: file descriptors, GL object names, `HANDLE`s. If
+the deleter type has a member typedef `pointer`, `unique_ptr` stores *that* type instead of `T*`.
+The type must satisfy **NullablePointer**: default-constructible to a "null" value, comparable with
+`nullptr`, and contextually convertible to `bool`. `unique_ptr<T, D>`'s `get()`, `reset()` and
+`release()` then speak in that type.
+
+```cpp title="handle.cpp" showLineNumbers
+#include <cstddef>
+#include <cstdio>
+#include <memory>
+
+// A fake C API: handles are small integers, 0 means "none".
+using RawHandle = unsigned;
+RawHandle api_open()            { return 7; }
+void      api_close(RawHandle h) { std::printf("api_close(%u)\n", h); }
+
+// A NullablePointer wrapper for the handle.
+struct Handle {
+    RawHandle v = 0;
+    Handle() = default;
+    Handle(RawHandle h) : v(h) {}
+    Handle(std::nullptr_t) {}
+    explicit operator bool() const { return v != 0; }
+    friend bool operator==(Handle a, Handle b) { return a.v == b.v; }
 };
 
-std::shared_ptr<int> openSocket() {
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (fd == -1) return nullptr;
-    
-    return std::shared_ptr<int>(new int(fd), fdDeleter);
-}
-
-auto sock = openSocket();
-// Socket automatically closed
-```
-
-System resources often use integers as handles. Wrapping them in smart pointers with custom deleters provides automatic cleanup and prevents resource leaks.
-
-### Database Connections
-
-Custom deleters work well for managing database connections or transactions.
-
-```cpp showLineNumbers 
-struct Connection {
-    // Database connection handle
-    void* handle;
-    
-    void close() {
-        std::cout << "Closing connection\n";
-        // Close database connection
-    }
+struct HandleCloser {
+    using pointer = Handle;                      // unique_ptr stores a Handle, not Handle*
+    void operator()(Handle h) const { api_close(h.v); }
 };
 
-auto connectionDeleter = [](Connection* conn) {
-    if (conn) {
-        conn->close();
-        delete conn;
-    }
-};
+using UniqueHandle = std::unique_ptr<RawHandle, HandleCloser>;   // T is just a tag here
 
-std::shared_ptr<Connection> openConnection(const std::string& connString) {
-    auto conn = new Connection();
-    // Open connection with connString
-    return std::shared_ptr<Connection>(conn, connectionDeleter);
+int main() {
+    UniqueHandle h(api_open());
+    std::printf("open: %u\n", h.get().v);
+    UniqueHandle empty;                          // null: deleter never runs
 }
 ```
 
-### Arrays with Custom Deletion
+```text
+open: 7
+api_close(7)
+```
 
-When managing arrays allocated with custom allocators.
+Writing the wrapper is the cost of using a non-pointer handle with `unique_ptr`. For one-off cases a
+small dedicated RAII class (see [RAII](../13-idioms-and-design/01-raii.md)) is often clearer. The
+library-fundamentals TS has `std::unique_resource` for this, but it isn't in the standard as of C++23.
 
-```cpp showLineNumbers 
-// Array with custom allocator
-int* allocateArray(size_t size) {
-    std::cout << "Custom allocate " << size << " ints\n";
-    return static_cast<int*>(std::malloc(size * sizeof(int)));
+## `shared_ptr`: the deleter is erased
+
+`shared_ptr` takes the deleter as a **constructor argument** and stores it, type-erased, in the
+control block. It is not a template parameter, so:
+
+- `shared_ptr<FILE>` has one type regardless of how it closes the file.
+- Different deleters can live behind the same type, as in a container of `shared_ptr<Resource>`.
+- Storing the deleter costs nothing in the `shared_ptr` object itself (it is two pointers), and
+  adds to the control block instead. A deleter with state makes that block bigger.
+- The deleter is moved/copied into the control block once. Copies of the `shared_ptr` share it.
+- **The deleter is called even if the stored pointer is null**, whenever the
+  `shared_ptr` was *constructed* with one. That differs from `unique_ptr`. A deleter that cannot
+  handle `nullptr` must check.
+- If the constructor throws (for example, the control block allocation fails), `d(ptr)` is called
+  first, so the resource is not leaked.
+- The deleter can be retrieved with `std::get_deleter<D>(sp)`, which returns `nullptr` if the
+  stored deleter is not of type `D`.
+
+```cpp title="shared-deleter.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+
+struct Conn { int id; };
+
+void close_conn(Conn* c) {
+    std::printf("close_conn(%s)\n", c ? "non-null" : "nullptr");
+    delete c;                                    // delete on nullptr is a no-op
 }
 
-void deallocateArray(int* arr) {
-    std::cout << "Custom deallocate\n";
-    std::free(arr);
+int main() {
+    std::shared_ptr<Conn> a(new Conn{1}, close_conn);
+    std::shared_ptr<Conn> b = a;                 // shares the deleter; same type either way
+
+    std::shared_ptr<Conn> c(nullptr, close_conn);   // null pointer, but the deleter is stored
+    std::unique_ptr<Conn, void (*)(Conn*)> u(nullptr, close_conn);   // deleter will NOT run
+
+    auto lambda = std::shared_ptr<Conn>(new Conn{2}, [](Conn* p) {
+        std::puts("lambda deleter");
+        delete p;
+    });                                          // still std::shared_ptr<Conn>
+    a = lambda;                                  // different deleters, assignable
+    std::puts("end");
 }
-
-std::unique_ptr<int[], void(*)(int*)> arr(
-    allocateArray(10),
-    deallocateArray
-);
-
-arr[0] = 42;
-// Custom deallocate called automatically
 ```
 
-## No-op Deleters
-
-Sometimes you need a smart pointer to non-owned memory that shouldn't be deleted.
-
-```cpp showLineNumbers 
-int global = 42;
-
-// No-op deleter - doesn't delete
-auto noopDeleter = [](int*) { /* do nothing */ };
-
-std::shared_ptr<int> ptr(&global, noopDeleter);
-
-// ptr observes global but won't delete it
-*ptr = 100;
-std::cout << global;  // 100
-
-// Safe: no-op deleter called, nothing happens
+```text
+end
+close_conn(nullptr)
+close_conn(non-null)
+lambda deleter
 ```
 
-**Use case:** Mix owned/non-owned pointers in same container
-```cpp showLineNumbers
-std::vector<std::shared_ptr<Widget>> widgets;
+<Walkthrough title="Who runs which deleter" caption="Follow the strong count of each control block through main." accent="blue">
+  <Step title="a and b share one block">
 
-auto owned = std::make_shared<Widget>();
-Widget stack_widget;
+`a` and `b` share the control block with <StepChange label="deleter">`close_conn`</StepChange> and strong count 2. `c` has its own block, holding a null pointer and `close_conn`. `lambda` has a third block with the lambda deleter.
 
-widgets.push_back(owned);
-widgets.push_back(std::shared_ptr<Widget>(&stack_widget, [](Widget*){}));
-```
+  </Step>
+  <Step title="Assigning a = lambda">
 
-## Deleter with State
+`a` releases its share of the first block, whose count goes <StepChange>2 to 1</StepChange> (`b` still owns it), then shares `lambda`'s block (count 2). No deleter runs.
 
-Capturing state in lambda deleters enables context-aware cleanup.
+  </Step>
+  <Step title="End of main: reverse declaration order">
 
-```cpp showLineNumbers 
-class Logger {
+Destruction order is `lambda`, `u`, `c`, `b`, `a`. `lambda` only drops the lambda block from 2 to 1. `u` holds a null pointer, so its deleter does not run. `c`'s block reaches 0, so `close_conn(nullptr)` runs. `b` was the last owner of the first block, so `close_conn(non-null)` runs. `a` is the last owner of the lambda block, so "lambda deleter" prints last.
+
+  </Step>
+</Walkthrough>
+
+## Comparison
+
+| | `unique_ptr<T, D>` | `shared_ptr<T>` |
+|---|---|---|
+| Where the deleter is given | template argument (and constructor, unless default-constructible) | constructor argument only |
+| Part of the type | yes | no |
+| Where it is stored | inside the pointer object | in the control block |
+| Cost of a stateless deleter | zero (common implementations) | none beyond the control block |
+| Called for a null pointer | no | yes, if constructed with it |
+| Non-pointer handles (`pointer` typedef) | supported | not supported: needs a pointer |
+| Works with `make_*` | `make_unique` uses the default deleter only | `make_shared` uses the default only |
+| Retrieve it | `p.get_deleter()` | `std::get_deleter<D>(sp)` |
+
+Converting `unique_ptr<T, D>` to `shared_ptr<T>` (by move) keeps the deleter, so a factory can return
+a `unique_ptr` with a specific deleter and let the caller decide whether to share it.
+
+## Useful deleters
+
+**Pool return.** The deleter hands the object back instead of destroying it.
+
+```cpp title="pool.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <vector>
+
+struct Buffer { char data[64]; };
+
+class Pool {
+    std::vector<Buffer*> free_;
 public:
-    void log(const std::string& msg) {
-        std::cout << "[LOG] " << msg << "\n";
+    struct Return {
+        Pool* pool;
+        void operator()(Buffer* b) const { pool->free_.push_back(b); }   // recycle, don't delete
+    };
+    using Handle = std::unique_ptr<Buffer, Return>;
+
+    Handle acquire() {
+        Buffer* b;
+        if (free_.empty()) { b = new Buffer; }
+        else { b = free_.back(); free_.pop_back(); }
+        return Handle(b, Return{this});
     }
+    std::size_t idle() const { return free_.size(); }
+    ~Pool() { for (Buffer* b : free_) delete b; }
 };
 
-auto logger = std::make_shared<Logger>();
-
-auto deleter = [logger](int* p) {
-    logger->log("Deleting resource");
-    delete p;
-};
-
-std::shared_ptr<int> resource(new int(42), deleter);
-// When resource destroyed, logs the deletion
+int main() {
+    Pool pool;                                   // must outlive every Handle
+    { auto h = pool.acquire(); }                 // returned to the pool on scope exit
+    std::printf("idle %zu\n", pool.idle());
+    { auto h = pool.acquire(); }                 // reuses the same Buffer
+    std::printf("idle %zu\n", pool.idle());
+}
 ```
 
-The captured logger keeps the logger alive as long as any resources with this deleter exist. This enables logging, statistics, or notifications during cleanup.
-
-## Deleter Comparison
-
-| Feature | unique_ptr | shared_ptr |
-|---------|-----------|------------|
-| **Type signature** | Part of type | Type-erased |
-| **Storage** | Inline (size varies) | Control block (size constant) |
-| **Overhead** | Zero if stateless | Always stored |
-| **Flexibility** | Less (type matters) | More (same type) |
-| **Performance** | Better (no indirection) | Slight overhead |
-```cpp showLineNumbers
-// unique_ptr
-auto d1 = [](int* p) { delete p; };
-sizeof(std::unique_ptr<int, decltype(d1)>);  // 8 (stateless)
-
-auto d2 = [x=42](int* p) { delete p; };
-sizeof(std::unique_ptr<int, decltype(d2)>);  // 12 (captures int)
-
-// shared_ptr
-sizeof(std::shared_ptr<int>);  // Always 16
+```text
+idle 1
+idle 1
 ```
 
-## std::default_delete
+**Arrays.** `unique_ptr<T[]>` already uses `delete[]`. For a `shared_ptr` of an array, use the
+`T[]` specialization *(C++17)*, or pass `std::default_delete<T[]>{}` explicitly. A bare
+`shared_ptr<T>(new T[n])` calls scalar `delete`: undefined behavior.
 
-The default deleter used by `unique_ptr` is available as `std::default_delete` for explicit use.
+**Unlock, close, release.** Any "undo" step fits, but if the only goal is "run this at scope exit",
+a dedicated scope guard or `std::lock_guard` states the intent better than a smart pointer with a
+fake pointee.
 
-```cpp showLineNumbers 
-std::default_delete<int> deleter;
+**No-op deleter for non-owned objects.** `shared_ptr<T>(&obj, [](T*){})` adapts a stack or global
+object to an API that wants a `shared_ptr`. It works, but it hides a lifetime hazard (the
+`shared_ptr` can outlive `obj`), so prefer changing the API to take `T&` or `T*`.
 
-int* p = new int(42);
-deleter(p);  // Equivalent to: delete p;
+## `std::default_delete`
 
-// Array specialization
-std::default_delete<int[]> arrayDeleter;
+`std::default_delete<T>` is the deleter `unique_ptr<T>` uses: it calls `delete`.
+`default_delete<T[]>` calls `delete[]`. It is stateless, so it costs nothing. Both reject incomplete
+types in `operator()` with a `static_assert`, which is why a pimpl class must define its destructor
+where the type is complete (see [unique_ptr](./unique-ptr.md#incomplete-types-and-the-pimpl-idiom)).
+It also converts: `default_delete<Derived>` converts to `default_delete<Base>`, which is what lets
+`unique_ptr<Derived>` convert to `unique_ptr<Base>` (and is also why that needs a virtual destructor).
 
-int* arr = new int[10];
-arrayDeleter(arr);  // Equivalent to: delete[] arr;
+## Pitfalls
 
-// Used implicitly by unique_ptr
-std::unique_ptr<int> ptr(new int(42));
-// Uses std::default_delete<int> internally
-```
+- **Throwing from a deleter.** It runs in a destructor, which is `noexcept` by default; the program
+  terminates. Report errors some other way (for example log, since `fclose` can fail but the caller
+  usually can't act).
+- **Deleter outliving its data.** A deleter that captures a pointer or reference (the pool above)
+  requires that thing to outlive every smart pointer using it.
+- **Mismatched cleanup.** Pointing a default-deleter `unique_ptr` at `malloc` memory or at a
+  `new[]` array. Give the pointer the matching deleter or use the array form.
+- **Assuming `shared_ptr` skips null.** It doesn't if built with a deleter. Check inside the
+  deleter.
+- **Stateful deleters in `unique_ptr`** make the pointer larger, and make two `unique_ptr`s of the
+  same `T` and `D` assignable only if the deleter itself is.
+- **Expecting `make_shared` / `make_unique` to take a deleter.** They don't. Build the pointer
+  directly from the raw pointer.
 
-You rarely need to use `default_delete` explicitly, but it's useful for template code that needs a consistent deleter interface.
+## Key points
 
-## Best Practices
+- A deleter replaces `delete`: it turns `unique_ptr` and `shared_ptr` into general RAII holders.
+- `unique_ptr<T, D>`: deleter in the type and in the object; free if stateless; skipped for null.
+- `shared_ptr<T>`: deleter given at construction, type-erased in the control block; called even for null.
+- The `pointer` typedef lets `unique_ptr` hold non-pointer handles.
+- Deleters must not throw, and anything they capture must outlive the owners.
 
-:::success[DO]
-- **Check null** before cleanup operations
-- **Make deleters noexcept** - no exceptions during cleanup
-- **Capture by value** for lambda deleters (avoid dangling refs)
-- **Use shared_ptr** when deleter type flexibility needed
-- **Prefer standard RAII** (fstream, lock_guard) when available
-:::
+## Related
 
-:::danger[DON'T]
-- **Delete non-owned memory** - use no-op deleter
-- **Throw from deleters** - can terminate program
-- **Forget null checks** - validate pointer before operations
-- **Create circular deps** - captured shared_ptrs can leak
-:::
-
-## Performance Considerations
-
-Custom deleters have different performance implications for `unique_ptr` and `shared_ptr`.
-
-```cpp showLineNumbers 
-// unique_ptr with stateless lambda
-auto d1 = [](int* p) { delete p; };
-sizeof(std::unique_ptr<int, decltype(d1)>);  // 8 bytes
-
-// unique_ptr with capturing lambda
-auto d2 = [logger](int* p) { delete p; };
-sizeof(std::unique_ptr<int, decltype(d2)>);  // 8 + sizeof(logger)
-
-// shared_ptr (always same)
-sizeof(std::shared_ptr<int>);  // 16 bytes
-// Deleter in control block
-```
-
-## Summary
-
-:::info[Core concept:]
-- Extend smart pointers to any resource
-- Not just heap memory (files, handles, locks)
-- RAII for everything
-:::
-
-:::info[`unique_ptr` deleters:]
-- Type part of signature
-- Zero overhead if stateless
-- Requires `decltype` for lambdas
-- Different deleters = different types
-:::
-
-:::info[`shared_ptr` deleters:]
-- Type-erased (stored in control block)
-- All `shared_ptr<T>` same type
-- Small overhead (always stored)
-- More flexible for heterogeneous collections
-:::
-
-:::info[Common patterns:]
-- File handles (fclose)
-- System resources (close fd)
-- Database connections
-- No-op for non-owned memory
-- Stateful deleters (logging, metrics)
-:::
-
-:::info[Guidelines:]
-- Always check null in deleter
-- Make deleters noexcept
-- Prefer standard RAII when available
-- Use `shared_ptr` for deleter flexibility
-- Use `unique_ptr` for zero overhead
-:::
+- [unique_ptr](./unique-ptr.md): sole ownership, `release`, passing and returning.
+- [shared_ptr](./shared-ptr.md): the control block that stores the deleter.
+- [RAII](../13-idioms-and-design/01-raii.md): the idiom, and when a dedicated class beats a smart pointer.
