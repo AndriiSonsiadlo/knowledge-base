@@ -43,8 +43,8 @@ int main() {
 
 Three rules follow from this:
 
-- **A reference must be initialized.** `int& r;` is ill-formed (except for members and parameters,
-  which are bound by the constructor or the call).
+- **A reference must be initialized.** `int& r;` is ill-formed (except for members, parameters and
+  `extern` declarations, which are bound by the constructor, the call or another definition).
 - **A reference cannot be reseated.** Assignment writes through to the referent, as the second
   half of the snippet shows.
 - **There is no null reference.** `int& r = *p;` with a null `p` is already undefined behavior at
@@ -65,8 +65,8 @@ specify this, and it never lets you observe a reference's own storage.
 | `T&&` *(C++11)* | rvalues of type `T` (and, if `T` is a deduced template parameter, forwarding references that bind anything) | move operations, perfect forwarding |
 | `const T&&` | rvalues, including const ones | rare |
 
-The `const T&` row is the one worth understanding: binding it to a temporary extends that temporary's
-lifetime to the reference's. See
+The `const T&` row is the one worth understanding: binding a `const T&` (or a `T&&`) directly to a temporary extends that
+temporary's lifetime to the reference's ([lifetime extension](../05-memory-and-object-lifetime/object-lifetime.md#lifetime-extension)). See
 [how references bind](../03-types-and-values/value-categories/lvalues-rvalues.md#how-references-bind) for the binding rules and
 [reference collapsing](../03-types-and-values/value-categories/reference-collapsing.md) for what
 `T&&` means in templates. Moving from an rvalue reference is on
@@ -172,13 +172,10 @@ changed
 abc
 ```
 
-The commented-out line is the standard trap: lifetime extension applies when a reference is bound
-*directly* to a temporary, and not when the reference passes through a function's return value.
-Compilers can warn (`-Wdangling-reference` in GCC 13 and later, on by default with `-Wall`; Clang
-has `-Wdangling-gsl`), but they cannot catch everything. Range-`for` has a related pitfall before
-C++23: in `for (auto x : f().g())` the temporary returned by `f()` is destroyed before the loop body
-runs if `g()` returns a reference into it. C++23 (P2718R0) extends the lifetimes of temporaries in
-the range-initializer, which fixes this case.
+The commented-out line is the standard trap: lifetime extension applies only when a reference is bound
+*directly* to a temporary, not when it passes through a function's return value. The rules, the
+compiler warnings and the range-`for` pitfall are on
+[lifetime extension](../05-memory-and-object-lifetime/object-lifetime.md#lifetime-extension).
 
 ## Reference members
 
@@ -192,7 +189,8 @@ pointer member (nullable, reassignable) or a value. The usual legitimate use is 
 
 Containers need element types that are copyable and assignable, which references are not, so
 `std::vector<int&>` is ill-formed. `std::reference_wrapper<T>` *(C++11, `<functional>`)* is a
-copyable, assignable object that stores a pointer to a `T` and converts implicitly back to `T&`.
+copyable, assignable object that holds a reference to a `T` and converts implicitly back to `T&`. The
+standard library utilities page covers it in more depth ([utilities](../09-standard-library/utilities.md)).
 `std::ref(x)` and `std::cref(x)` create one. It is also how you pass an argument *by reference* to
 `std::thread` or `std::bind`, which copy their arguments by default.
 
@@ -230,7 +228,7 @@ is the typical use: a sorted or filtered *view* over objects you cannot or do no
 | Can be null | no | yes |
 | Must be initialized | yes | no (but should be) |
 | Can be rebound | no | yes |
-| Can refer to an array of unknown length / do arithmetic | no (array refs keep their size) | yes, see [pointer arithmetic](./pointer-arithmetic.md) |
+| Supports arithmetic / walking an array | no (array refs keep their size) | yes, see [pointer arithmetic](./pointer-arithmetic.md) |
 | Can be stored in a container | not directly (use `reference_wrapper`) | yes |
 | Syntax at the use site | the same as the object | `*p`, `p->` |
 | Overloaded operators | natural (`a + b`) | operate on the address |

@@ -90,7 +90,7 @@ int main() {
 
     int** pp = &p;
     // const int** bad = pp;        // error, and for a good reason (below)
-    const int* const* ok = pp;      // OK: const added at EVERY level to the right of the first
+    const int* const* ok = pp;      // OK: once const is added at one level, every level above it (except the outermost) is const too
     return **ok;
 }
 ```
@@ -115,7 +115,7 @@ every level between it and the outermost pointer. `const int* const*` satisfies 
 `const_cast<T>` is the only cast that removes `const` (or `volatile`). The cast itself is always
 legal. What matters is the object underneath:
 
-- If the object was **defined** `const`, writing to it through any path is **undefined behavior**.
+- If the object was **defined** `const`, writing to it through any path is **undefined behavior** (except to its `mutable` members).
   The compiler may place it in read-only memory or fold reads to the initial value.
 - If the object was not defined `const` and you merely reached it through a `const` path, the write
   is fine.
@@ -211,8 +211,8 @@ conversion: `const int a[3]` decays to `const int*`. A pointer to the whole arra
 The same two-level split exists for [`unique_ptr`](./unique-ptr.md) and
 [`shared_ptr`](./shared-ptr.md), spelled differently. `const std::unique_ptr<T>` is the *const
 pointer* form (can't reseat), while `std::unique_ptr<const T>` is the *pointer to const* form (can't
-modify the pointee). `operator->` and `operator*` on a smart pointer are `const` member functions
-returning `T&`, so a `const std::unique_ptr<T>` still lets you modify the pointee. This is
+modify the pointee). On a smart pointer, `operator*` returns `T&` and `operator->` returns `T*`, both from `const`
+member functions, so a `const std::unique_ptr<T>` still lets you modify the pointee. This is
 **shallow const**, the same as for raw pointers. [`std::propagate_const`](https://en.cppreference.com/w/cpp/experimental/propagate_const)
 (library fundamentals TS v2, not in the standard) gives deep const.
 
