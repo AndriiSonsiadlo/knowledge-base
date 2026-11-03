@@ -87,7 +87,7 @@ For `Pair<X, Y>` the compiler:
   </Step>
   <Step title="Compare the matches">
 
-Every `Pair<T, T>` is not a pair of pointers, and every `Pair<T*, U*>` does not have two equal types.
+Not every `Pair<T, T>` is a pair of pointers, and not every `Pair<T*, U*>` has two equal types.
 Neither pattern's set contains the other, so neither is more specialized: <StepChange>ambiguous</StepChange>.
 GCC 15: `ambiguous template instantiation for 'struct Pair<int*, int*>'`. Clang 21:
 `ambiguous partial specializations of 'Pair<int *, int *>'`.
@@ -102,7 +102,7 @@ both `Pair<T, T>` and `Pair<T*, U*>` accept, so it is more specialized than each
   </Step>
 </Walkthrough>
 
-```cpp title="tie_breaker.cpp" showLineNumbers {4}
+```cpp title="tie_breaker.cpp" showLineNumbers {6}
 #include <iostream>
 
 template <typename T, typename U> struct Pair     { static constexpr int id = 0; };
@@ -168,7 +168,6 @@ Two details in that listing matter in practice:
 To match "any class template instantiation" without listing each one, deduce the template itself:
 
 ```cpp title="elem.cpp" showLineNumbers
-#include <iostream>
 #include <list>
 #include <vector>
 
@@ -182,18 +181,14 @@ static_assert(Elem<std::vector<int>>::is_container);
 static_assert(Elem<std::list<char>>::is_container);
 static_assert(!Elem<int>::is_container);
 
-// overload instead of partially specializing a function template
-template <typename T> const char* kind(T)  { return "value"; }
-template <typename T> const char* kind(T*) { return "pointer"; }
-
-int main() { int x = 0; std::cout << kind(x) << ' ' << kind(&x) << '\n'; }
+int main() {}
 ```
 
 Declaring `C` as `template <typename...> class` lets it match templates with any number of type
 parameters. With `template <typename> class C` and pattern `C<T>`, `std::vector<int>` (really
-`std::vector<int, std::allocator<int>>`) did not match before C++17; since C++17
-([P0522R0](https://wg21.link/p0522r0)) a template with defaulted extra parameters may bind to a
-one-parameter template template parameter, so it does. The pattern still only matches class
+`std::vector<int, std::allocator<int>>`) did not match before C++17; since C++17 it does
+([P0522R0](https://wg21.link/p0522r0), explained in
+[Class Templates](../class-templates.md#default-arguments-and-template-template-parameters)). The pattern still only matches class
 templates whose parameters are all types: `std::array<T, N>` has a non-type parameter and needs its
 own specialization.
 
@@ -226,9 +221,19 @@ argument: patterns can fix values as well as types.
 
 ## Functions: overload instead
 
-`template <typename T> void kind<T*>(T*)` is a syntax error; function templates cannot be partially
-specialized. The two overloads of `kind` in `elem.cpp` above do the same job: for `kind(&x)` both
-match, and partial ordering of function templates picks `kind(T*)` as more specialized. If the
+`template <typename T> void kind<T*>(T*)` is ill-formed; function templates cannot be partially
+specialized. Overload instead:
+
+```cpp title="kind.cpp" showLineNumbers
+#include <iostream>
+
+template <typename T> const char* kind(T)  { return "value"; }
+template <typename T> const char* kind(T*) { return "pointer"; }
+
+int main() { int x = 0; std::cout << kind(x) << ' ' << kind(&x) << '\n'; }   // value pointer
+```
+
+For `kind(&x)` both match, and partial ordering of function templates picks `kind(T*)` as more specialized. If the
 behaviour has to live in a class (for example because it needs a nested type), forward the function
 to a static member of a partially specialized class template.
 

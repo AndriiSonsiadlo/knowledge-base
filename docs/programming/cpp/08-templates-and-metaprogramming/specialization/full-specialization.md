@@ -28,7 +28,6 @@ The specialization starts with an empty parameter list, `template <>`, and names
 all its arguments filled in. The primary template must already be declared.
 
 ```cpp title="type_name.cpp" showLineNumbers
-#include <cstring>
 #include <iostream>
 
 template <typename T>
@@ -85,9 +84,8 @@ members, no base classes, no default member initializers. If `TypeName<int>` for
 
 When only one behaviour differs, specialize just that member instead of copying the class:
 
-```cpp title="member_spec.cpp" showLineNumbers {14-15}
+```cpp title="member_spec.cpp" showLineNumbers {13-14}
 #include <iostream>
-#include <string>
 
 template <typename T>
 struct Printer {
@@ -171,9 +169,11 @@ int main() {
 }
 ```
 
-Writing `struct std::hash<Point>` at namespace scope (qualified name) has been allowed since C++17;
-before that the specialization had to be written inside `namespace std { ... }`. Specializing a
-standard template for a type you don't own, such as `std::hash<int>`, is undefined behavior, and
+Writing `struct std::hash<Point>` at namespace scope (qualified name) is allowed by CWG 374, a
+defect report adopted into C++11; older compilers need the specialization inside
+`namespace std { ... }`. Specializing a standard template for types that are not program-defined,
+such as `std::hash<std::pair<int, int>>`, is undefined behavior (a specialization of a type the
+library already defines, like `std::hash<int>`, is a redefinition error), and
 specializing standard **function** templates is not allowed at all since C++20.
 
 ## Prefer overloading for function templates

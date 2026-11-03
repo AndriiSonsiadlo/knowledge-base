@@ -197,8 +197,7 @@ which makes the intent searchable and lets the compiler reject the ones you didn
 
 User-defined types join this system through converting constructors and conversion operators
 (`operator double() const`). Marking them `explicit` limits them to direct initialization and
-casts. That belongs to class design and is covered with
-[Constructors and Destructors](../07-classes-and-oop/constructors-and-destructors.md).
+casts.
 
 ## Common mistakes
 

@@ -97,7 +97,7 @@ void call() {
 | `std::string_view` | [Strings](../09-standard-library/strings.md) |
 | `std::filesystem` | [Filesystem](../09-standard-library/filesystem.md) |
 | Guaranteed copy elision for prvalues | [glvalue, prvalue, xvalue](../03-types-and-values/value-categories/glvalue-prvalue-xvalue.md) |
-| Class template argument deduction (CTAD): `std::vector v{1, 2, 3};` | [Class Templates](../08-templates-and-metaprogramming/class-templates.md) |
+| Class template argument deduction (CTAD): `std::vector v{1, 2, 3};` | [Template Argument Deduction](../08-templates-and-metaprogramming/template-argument-deduction.md#class-template-argument-deduction-c17) |
 | Parallel algorithms (`std::execution::par`) | [Algorithms](../09-standard-library/algorithms.md) |
 
 ```cpp showLineNumbers
