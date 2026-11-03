@@ -76,15 +76,11 @@ struct Wrapper {
     T next() const requires std::integral<T> { return value + 1; }
 };
 
-template <typename... Ts>
-    requires (std::integral<Ts> && ...)       // fold over a pack of constraints
-auto add_all(Ts... xs) { return (0 + ... + xs); }
-
 int main() {
     Wrapper<int> w{1};
     Wrapper<double> d{1.0};        // fine: next() is not available, but not needed
     // d.next();                   // error: constraints not satisfied
-    return w.next() + add_all(1, 2, 3) - 8 + static_cast<int>(d.value) - 1;
+    return w.next() - 2 + static_cast<int>(d.value) - 1;
 }
 ```
 
@@ -95,7 +91,7 @@ when they must match.
 ## Requires expressions
 
 A requires expression lists **requirements**. It is `true` if every requirement is satisfied and
-`false` otherwise; an invalid requirement never produces a compile error. There are four kinds:
+`false` otherwise. Inside a template, a requirement that is invalid for the given arguments makes the expression `false` instead of causing an error; a requirement that is invalid regardless of the template arguments is still an error. There are four kinds:
 
 ```cpp title="sized_range.cpp" showLineNumbers
 #include <concepts>
@@ -125,7 +121,7 @@ static_assert(SizedRange<std::list<double>>);
 static_assert(!SizedRange<int>);
 
 int main() {
-    return sum(std::vector{1, 2, 3}) == 6 && sum(std::string("ab")) == char('a' + 'b') ? 0 : 1;
+    return sum(std::vector{1, 2, 3}) == 6 && sum(std::list<double>{1.5, 2.5}) == 4.0 ? 0 : 1;
 }
 ```
 
@@ -155,7 +151,7 @@ A requires expression is an ordinary `bool` constant, so it can drive `if conste
 #include <concepts>
 #include <cstdio>
 
-// requires-expression used as a value: true/false, never an error.
+// requires-expression used as a value: true/false for an invalid-for-T requirement, not an error.
 template <typename T>
 void show(const T& x) {
     if constexpr (requires { x.print(); })
@@ -295,8 +291,8 @@ unconstrained template the error would instead point at `x * 2` or wherever the 
 
 Standard concepts also carry **semantic requirements** that the compiler cannot check: a type
 satisfying `std::regular` is expected to have copies that compare equal to the original, for
-example. A type that compiles against a concept but breaks its semantics gives undefined behaviour
-in standard algorithms.
+example. A type that compiles against a concept but breaks its semantics makes the program ill-formed, no diagnostic
+required ([res.on.requirements]) when used with standard algorithms.
 
 ## References
 
