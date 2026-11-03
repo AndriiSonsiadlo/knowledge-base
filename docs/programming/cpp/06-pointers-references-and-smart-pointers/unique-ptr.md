@@ -163,7 +163,7 @@ int main() {
 
     std::vector<std::unique_ptr<Widget>> v;
     v.push_back(make(1));           // rvalue: moved in
-    v.push_back(std::make_unique<Widget>(2));   // not emplace_back(new ...): see the note below
+    v.push_back(std::make_unique<Widget>(2));   // not emplace_back(new ...): see the note above
     // v.push_back(w);              // error: would copy
     for (const auto& p : v) std::printf("%d ", p->id);
     std::puts("");

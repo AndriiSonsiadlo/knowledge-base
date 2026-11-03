@@ -172,8 +172,9 @@ the cleanup automatic is [RAII](../13-idioms-and-design/01-raii.md).
 
 ## Dangling pointers
 
-A pointer is **dangling** when the storage it points into has been released: the memory was freed, or
-its scope exited. The pointer itself is untouched, which is exactly what makes the bug quiet.
+A pointer **dangles** when the object it points to is no longer alive. The usual cause is that the
+object's storage was released: the memory was freed with `delete`, or the object was a local whose
+scope exited. The pointer itself is untouched, which is exactly what makes the bug quiet.
 Dereferencing a dangling pointer is undefined behavior, and since the pointer's *value* becomes an
 **invalid pointer value** once the storage is gone, even copying or comparing it is only
 implementation-defined.
