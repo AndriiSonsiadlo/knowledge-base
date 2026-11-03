@@ -3,240 +3,206 @@ id: pointer-arithmetic
 title: Pointer Arithmetic
 sidebar_label: Pointer Arithmetic
 sidebar_position: 3
-tags: [c++, pointers, arithmetic, arrays, memory]
+tags: [c++, pointers, arithmetic, arrays, undefined-behavior, ptrdiff_t]
 ---
 
 # Pointer Arithmetic
 
-Pointer arithmetic navigates contiguous memory with automatic scaling by type size. Essential for arrays but dangerous without bounds checking.
+Adding an integer to a pointer moves it by that many **elements**, not bytes: for `T* p`, `p + n`
+is the address of the element `n` places further along, which is `n * sizeof(T)` bytes away. This
+is what lets pointers walk arrays, and it is also what the subscript operator is defined in terms
+of. The catch is that the language only defines the arithmetic *inside one array object*. Step
+outside and the behavior is undefined, even if you never read the result.
 
-:::info[Automatic Scaling]
-```cpp
-int arr[5] = {10, 20, 30, 40, 50};
-int* ptr = arr;
+**Prerequisites:** [Raw pointers](./raw-pointers.md) (including array-to-pointer conversion).
 
-ptr + 1;  // Moves by sizeof(int) = 4 bytes, not 1 byte!
-```
+## Scaling by element size
 
-Compiler handles math: `ptr + n` → `ptr + (n * sizeof(type))`
-:::
+```cpp title="scaling.cpp" showLineNumbers
+#include <cstdio>
 
-The scaling is convenient; the danger is precise. Pointer arithmetic is only **defined within a
-single array**, plus the one-past-the-end position (which you may form but not dereference).
-Computing a pointer before the start, or more than one past the end — *even if you never dereference
-it* — is undefined behavior. That missing bounds information is exactly what iterators and
-[`std::span`](../09-standard-library/containers.md) carry for you.
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int* p = arr;
 
-## Memory Layout
-```
-Address    Value    Pointer Position
-0x1000     10       ptr + 0  (arr[0])
-0x1004     20       ptr + 1  (arr[1])
-0x1008     30       ptr + 2  (arr[2])
-0x100C     40       ptr + 3  (arr[3])
-0x1010     50       ptr + 4  (arr[4])
-0x1014     ??       ptr + 5  (out of bounds!)
-```
+    std::printf("%d %d\n", *(p + 1), p[2]);      // p[2] is defined as *(p + 2)
+    ++p;                                          // now &arr[1]
+    p += 2;                                       // now &arr[3]
+    std::printf("%d\n", *p);
 
-## Basic Operations
-```cpp showLineNumbers
-int arr[] = {10, 20, 30, 40, 50};
-int* ptr = arr;
-
-// Addition
-*(ptr + 0);  // 10
-*(ptr + 1);  // 20
-*(ptr + 2);  // 30
-
-// Subscript notation (syntactic sugar)
-ptr[0];      // 10 (same as *(ptr + 0))
-ptr[1];      // 20 (same as *(ptr + 1))
-ptr[2];      // 30 (same as *(ptr + 2))
-
-// Increment/Decrement
-ptr++;       // Move to next element
-*ptr;        // 20
-ptr += 2;    // Move forward 2 elements
-*ptr;        // 40
-```
-
-:::warning[No Bounds Checking]
-```cpp
-int arr[5] = {10, 20, 30, 40, 50};
-int* ptr = arr;
-
-ptr[5];      // Undefined behavior
-ptr[100];    // Undefined behavior
-*(ptr - 1);  // Before array start
-```
-
-Compiler won't stop you - your responsibility!
-:::
-
-## Pointer Subtraction
-```cpp showLineNumbers
-int arr[] = {10, 20, 30, 40, 50};
-int* start = arr;
-int* end = arr + 5;
-
-// Subtraction gives element count (not bytes)
-ptrdiff_t count = end - start;  // 5 elements
-
-int* p1 = arr + 2;  // Points to arr[2]
-int* p2 = arr;      // Points to arr[0]
-ptrdiff_t diff = p1 - p2;  // 2 elements
-```
-
-:::info[Only Same Array]
-Subtraction only valid for pointers into same array!
-```cpp
-int arr1[5], arr2[5];
-int* p1 = arr1;
-int* p2 = arr2;
-p1 - p2;  // Undefined behavior
-```
-:::
-
-## Pointer Comparison
-```cpp showLineNumbers
-int arr[] = {10, 20, 30, 40, 50};
-int* p1 = arr;
-int* p2 = arr + 2;
-int* end = arr + 5;
-
-if (p1 < p2) {       // True: p1 comes before p2
-    std::cout << "Earlier in memory\n";
-}
-
-if (p2 < end) {      // True: p2 before end
-    std::cout << "Within bounds\n";
-}
-
-// One-past-end is valid for comparison
-if (p1 != end) {     // Valid comparison
-    // Don't dereference end!
+    // The byte distance is a multiple of sizeof(int):
+    std::printf("%zu\n", reinterpret_cast<const char*>(&arr[1]) - reinterpret_cast<const char*>(&arr[0]));
 }
 ```
 
-Relational comparison (`<`, `>`, `<=`, `>=`) only makes sense for pointers into the same array or object.
+```text
+20 30
+40
+4
+```
 
-## Array Iteration
-```cpp showLineNumbers
-int arr[] = {10, 20, 30, 40, 50};
-int* end = arr + 5;  // One past last element
+The last line prints 4 on every mainstream platform, but it is `sizeof(int)`, which is
+implementation-defined. The built-in `a[i]` is *defined* as `*(a + i)`, so `2[arr]` also compiles
+and is equal to `arr[2]`; nobody should write it.
 
-// Forward iteration
-for (int* ptr = arr; ptr != end; ++ptr) {
-    std::cout << *ptr << " ";  // 10 20 30 40 50
-}
+<Diagram title="int arr[5], p = arr" caption="Valid positions are 0 to 4 for dereferencing, and 5 (one past the end) for forming and comparing only." accent="blue">
+  <DiagramRow>
+    <DiagramNode title="arr[0]" accent>p + 0</DiagramNode>
+    <DiagramNode title="arr[1]">p + 1</DiagramNode>
+    <DiagramNode title="arr[2]">p + 2</DiagramNode>
+    <DiagramNode title="arr[3]">p + 3</DiagramNode>
+    <DiagramNode title="arr[4]">p + 4</DiagramNode>
+    <DiagramNode title="end" dashed>p + 5, never dereference</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-// Backward iteration
-for (int* ptr = end - 1; ptr >= arr; --ptr) {
-    std::cout << *ptr << " ";  // 50 40 30 20 10
+## What is defined
+
+For a pointer `p` to element `i` of an array of `N` elements (a single object counts as an array of
+one), the standard defines:
+
+| Expression | Result | Condition |
+|---|---|---|
+| `p + n`, `p - n`, `p += n`, `++p`, `--p` | pointer to element `i ± n` | the new index is in `[0, N]` |
+| `p - q` | `std::ptrdiff_t` count of elements between | both point into (or one past) the same array |
+| `p == q`, `p != q` | whether they point at the same place | any two pointers of compatible type |
+| `p < q`, `<=`, `>`, `>=` | position order | same array; otherwise unspecified (use `std::less`) |
+| `*p`, `p[k]` | the element | the index is in `[0, N-1]` |
+
+Index `N` (**one past the end**) may be formed, compared and subtracted, but not dereferenced. It is
+what makes the half-open range `[begin, end)` loop work. Any other result, such as `arr - 1` or
+`arr + 6`, is undefined behavior **at the moment of the computation**. Hardware that doesn't wrap
+is no excuse: a compiler may assume the arithmetic stayed in bounds and fold a later comparison to a
+constant.
+
+Three smaller rules:
+
+- Adding `0` to a null pointer yields null, and `nullptr - nullptr` is `0`. Both are defined in C++
+  (they are not in C before C23).
+- `p - q` has type `std::ptrdiff_t` (signed). The count can be negative. Mixing it with `std::size_t`
+  silently converts a negative number to a huge unsigned one.
+- Arithmetic needs a **complete object type**. `void*` and function pointers have no element size,
+  so `p + 1` is ill-formed. GCC and Clang accept it on `void*` as an extension that treats
+  `sizeof(void)` as 1; `-Wpointer-arith` (part of `-pedantic`) warns. Cast to `std::byte*` or
+  `unsigned char*` for explicit byte offsets.
+
+## Iterating a range
+
+A pair of pointers `[first, last)` is the original form of the iterator range every standard
+algorithm accepts. Pointers into an array or a `std::vector`'s buffer are valid iterators.
+
+```cpp title="range.cpp" showLineNumbers
+#include <algorithm>
+#include <cstddef>
+#include <cstdio>
+#include <iterator>
+
+int main() {
+    int arr[] = {3, 1, 4, 1, 5, 9};
+    const int* first = std::begin(arr);
+    const int* last  = std::end(arr);            // one past the end
+
+    std::ptrdiff_t n = last - first;             // element count, signed
+    std::printf("%td elements\n", n);
+
+    for (const int* p = first; p != last; ++p)   // != rather than <, works for any iterator
+        std::printf("%d ", *p);
+    std::puts("");
+
+    const int* where = std::find(first, last, 4);
+    std::printf("4 is at index %td\n", where - first);
+
+    // Walking backwards: stop BEFORE decrementing past the start.
+    for (const int* p = last; p != first;) {
+        --p;
+        std::printf("%d ", *p);
+    }
+    std::puts("");
 }
 ```
 
-:::success[Modern Alternative]
-```cpp
-// Prefer range-based for
-for (int value : arr) {
-    std::cout << value << " ";
-}
-
-// Or iterators
-for (auto it = vec.begin(); it != vec.end(); ++it) {
-    std::cout << *it << " ";
-}
-```
-:::
-
-## Multi-Dimensional Arrays
-```cpp showLineNumbers
-int matrix[3][4] = {
-    {1,  2,  3,  4},
-    {5,  6,  7,  8},
-    {9, 10, 11, 12}
-};
-
-int* ptr = &matrix[0][0];
-
-// Row-major storage (rows are contiguous)
-*(ptr + 0);   // 1  (matrix[0][0])
-*(ptr + 4);   // 5  (matrix[1][0])
-*(ptr + 8);   // 9  (matrix[2][0])
-
-// Calculate position: row * cols + col
-int row = 1, col = 2;
-*(ptr + row * 4 + col);  // 7 (matrix[1][2])
+```text
+6 elements
+3 1 4 1 5 9 
+4 is at index 2
+9 5 1 4 1 3 
 ```
 
-## Common Dangers
+The reverse loop shows the one-past-the-start trap. `for (p = last - 1; p >= first; --p)` ends by
+computing `first - 1`, which is undefined, and the `>=` test never fails on an unsigned or wrapped
+value. Decrement first, then use.
 
-### Buffer Overflow
-```cpp showLineNumbers
-char buffer[10];
-char* ptr = buffer;
+For new code, prefer a range-`for`, a standard algorithm, or `std::span` *(C++20)*, which keeps the
+pointer and length together and gives bounds-checkable `operator[]` in hardened library modes.
 
-// Writes past buffer
-for (int i = 0; i < 20; ++i) {
-    *(ptr + i) = 'X';  // Undefined after i >= 10
-}
+## Multidimensional arrays
 
-// Safe version
-for (int i = 0; i < 10; ++i) {
-    *(ptr + i) = 'X';
+`int m[2][3]` is an array of 2 elements, each an `int[3]`. So `m[i]` decays to `int*` for row `i`,
+and `m + 1` is a `int (*)[3]` that skips a whole row (3 ints at once).
+
+```cpp title="rows.cpp" showLineNumbers
+#include <cstdio>
+
+int main() {
+    int m[2][3] = {{1, 2, 3}, {4, 5, 6}};
+
+    int (*row)[3] = m;                  // pointer to a row of 3 ints
+    ++row;                              // advances by 3 * sizeof(int)
+    std::printf("%d\n", (*row)[1]);     // 5
+
+    int* r1 = m[1];                     // pointer to the first int of row 1
+    std::printf("%d\n", r1[2]);         // 6, still inside row 1
+
+    // m[0][4] would read "through" row 0 into row 1. Formally undefined (index 4 of an int[3]),
+    // though it works with every compiler at -O0. Don't rely on it.
 }
 ```
 
-### One-Past-End Dereference
-```cpp showLineNumbers
-int arr[5] = {10, 20, 30, 40, 50};
-int* end = arr + 5;
-
-// Valid for comparison
-if (ptr != end) { }
-
-// Invalid to dereference
-*end;  // Undefined behavior
+```text
+5
+6
 ```
 
-### Type Punning
-```cpp showLineNumbers
-int arr[] = {10, 20, 30};
-int* iptr = arr;
+Treating the whole 2D array as a flat `int[6]` through `&m[0][0] + k` for `k >= 3` has the same
+formal problem, because the pointer started inside a 3-element array. It works in practice, and
+sanitizers do not flag it, but it is the kind of code that stops working when an optimizer starts
+exploiting bounds. If you need a flat view, store a `std::vector<int>` or `int[6]` and compute
+`i * cols + j` yourself.
 
-// Treating as different type
-char* cptr = reinterpret_cast<char*>(arr);
-cptr + 1;  // Moves 1 byte, not 1 int!
+## Bytes and unrelated objects
 
-int x = *(int*)(cptr + 1);  // Undefined behavior
-```
+Moving by a byte offset is legitimate for the object representation of any object: convert to
+`unsigned char*`, `char*` or `std::byte*` (an allowed aliasing exception, see
+[strict aliasing](../05-memory-and-object-lifetime/strict-aliasing.md)) and do arithmetic there. That
+is how `std::memcpy`-style code and serializers inspect an object.
 
-## Summary
+What is not allowed is arithmetic that jumps between unrelated objects: `&a + (&b - &a)` is undefined
+even when `a` and `b` are adjacent locals, because they are not elements of one array. Converting
+pointers to `std::uintptr_t` and doing integer arithmetic is the only way to reason about raw
+addresses, and the result converts back to a usable pointer only if it is a value you obtained from
+that conversion in the first place. (Optimizers track *pointer provenance*, which integers don't
+carry; the exact C++ rules are still evolving.)
 
-:::info[Core mechanics]
-- `ptr + n` moves by `n * sizeof(type)` bytes
-- `ptr[i]` is syntactic sugar for `*(ptr + i)`
-- Subtraction gives element count, not bytes
-- Comparison works for same-array pointers
-:::
+## Common mistakes
 
-:::info[Valid operations]
-- Addition: `ptr + n`, `ptr++`, `ptr += n`
-- Subtraction: `ptr - n`, `ptr--`, `ptr1 - ptr2`
-- Comparison: `<`, `>`, `<=`, `>=`, `==`, `!=`
-- Dereference: `*ptr`, `ptr[i]`
-:::
+- **Loop bound off by one.** `i <= n` or `p <= last` reads one past the end.
+- **Pointer to a vector element kept across `push_back`.** Reallocation invalidates every pointer
+  into the old buffer.
+- **Adding to the wrong type.** `char*` steps by 1, `int*` by 4: cast carefully when parsing
+  buffers, and mind [alignment](../05-memory-and-object-lifetime/alignment.md) when you reinterpret
+  the result.
+- **Subtracting pointers into different arrays** to find a "distance".
+- **Mixing signed and unsigned** counts, so that `p - n` becomes `p + huge`.
 
-:::danger[Dangers]
-- No bounds checking (compiler won't stop you)
-- Buffer overflows (security vulnerabilities)
-- One-past-end dereference (valid for comparison only)
-- Type assumptions (arithmetic assumes correct type)
-:::
+## Key points
 
-:::success[Modern practice]
-- Prefer iterators and range-based for
-- Use `std::vector`/`std::array` (bounds checking)
-- Pointer arithmetic for C API interop only
-:::
+- `p + n` moves `n` elements; `p[i]` is `*(p + i)`.
+- Defined only within an array plus one past the end; forming anything else is already undefined.
+- Subtraction gives a signed `std::ptrdiff_t` and requires the same array.
+- Use `[first, last)` ranges, algorithms, or `std::span` instead of hand-rolled bounds.
+
+## Related
+
+- [Raw pointers](./raw-pointers.md): where array decay and dangling pointers are covered.
+- [const and pointers](./const-and-pointers.md): `const int*` as the read-only cursor type.
+- [Iterators](../09-standard-library/iterators.md): the generalization of pointer arithmetic.

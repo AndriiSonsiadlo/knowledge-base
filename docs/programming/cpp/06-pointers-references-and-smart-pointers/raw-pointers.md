@@ -3,358 +3,317 @@ id: raw-pointers
 title: Raw Pointers
 sidebar_label: Raw Pointers
 sidebar_position: 1
-tags: [c++, pointers, memory, addresses, fundamentals]
+tags: [c++, pointers, nullptr, void-pointer, function-pointer, dangling]
 ---
 
 # Raw Pointers
 
-A pointer is a variable that stores a memory address, allowing indirect access to other variables.
+A **raw pointer** is an object whose value is the address of another object or function (or a special
+"points nowhere" value). It is the language's most basic form of indirection: it lets code refer to
+an object it did not create, choose the target at run time, and let an object outlive the scope that
+named it. The price is that a pointer says nothing about whether the target is still alive or who
+must clean it up. Everything else in this section, from [references](./references.md) to the
+[smart pointers](./unique-ptr.md), exists to fix one of those two gaps.
 
-:::info[Core Concept]
-**Pointer = Address**, not the data itself
-- `&` gets address → `&x` gives address of x
-- `*` dereferences → `*ptr` accesses value at address
-- Pointers enable dynamic memory, data structures, polymorphism
-:::
+**Prerequisites:** [Fundamental types](../03-types-and-values/fundamental-types.md),
+[storage duration](../05-memory-and-object-lifetime/storage-duration.md) (what "the object is gone"
+means).
 
-## Memory Representation
-```
-Stack Memory:
-┌─────────────┐
-│ value: 42   │ ← Address: 0x1000
-├─────────────┤
-│ ptr: 0x1000 │ ← Stores address of value
-└─────────────┘
+## Taking an address and following it
 
-*ptr = 42  (dereferences to get value)
-ptr = 0x1000  (the address itself)
-```
+`&x` yields a pointer to `x`; `*p` follows a pointer back to the object it points to. The type of
+`&x` is `T*` when `x` has type `T`. A pointer is itself an object with its own address and storage,
+so there is a pointer-to-pointer type as well.
 
-## Pointer Basics
+```cpp title="basics.cpp" showLineNumbers
+#include <cstdio>
 
-Pointers hold memory addresses as their values. You create pointers using the `*` symbol in the declaration, and you access what they point to using the dereference operator `*`.
+struct Point { int x, y; };
 
-```cpp showLineNumbers
-int value = 42;
-int* ptr = &value;      // ptr stores address of value
+int main() {
+    int value = 42;
+    int* p = &value;          // p holds the address of value
+    *p = 100;                 // writes through p: value is now 100
+    std::printf("%d\n", value);
 
-// Three ways to interact with pointers:
-std::cout << ptr;       // Address: 0x7fff5fbff5ac
-std::cout << *ptr;      // Dereference: 42
-std::cout << &ptr;      // Address of pointer itself
+    Point pt{10, 20};
+    Point* pp = &pt;
+    pp->x = 30;               // same as (*pp).x = 30
+    std::printf("%d %d\n", pt.x, pt.y);
 
-*ptr = 100;             // Modify through pointer
-std::cout << value;     // 100 (changed!)
-```
-
-:::warning[Declaration Syntax]
-```cpp
-int* p1, p2;    // p1 is pointer, p2 is int!
-int *p3, *p4;   // Both are pointers
-int* p5;        // Best: one per line
-int* p6;
-```
-:::
-
-## Null Pointers
-
-A null pointer doesn't point to any valid object. Always check pointers before dereferencing to avoid crashes.
-
-```cpp showLineNumbers 
-int* bad;            // garbage address
-int* ptr = nullptr;  // C++11: null pointer literal
-
-if (ptr) {
-    *ptr = 42;  // Safe: checked first
-}
-*ptr = 42;      // Crash! Dereferencing null pointer
-```
-
-:::warning[Rules]
-- `nullptr` is type-safe null (C++11)
-- Dereferencing null = crash (segmentation fault)
-- Uninitialized pointers are worse (random corruption)
-:::
-
-## Pointer Operations
-
-Pointers support several operations beyond basic dereferencing, including member access and address arithmetic for adjacent memory.
-
-```cpp showLineNumbers 
-struct Point {
-    int x, y;
-};
-
-Point p = {10, 20};
-Point* ptr = &p;
-
-// Member access
-(*ptr).x = 30;      // Dereference then access (verbose)
-ptr->x = 30;        // Arrow operator (preferred)
-
-std::cout << ptr->x;  // Prints 30
-```
-
-### Pointer Comparison
-
-Pointers can be compared to check if they point to the same location or to compare their relative positions in memory.
-
-```cpp showLineNumbers 
-int a = 10, b = 20;
-int* p1 = &a;
-int* p2 = &a;
-int* p3 = &b;
-
-if (p1 == p2) {  // True: both point to a
-    std::cout << "Same address\n";
-}
-
-if (p1 != p3) {  // True: point to different objects
-    std::cout << "Different addresses\n";
+    int** pq = &p;            // a pointer to the pointer
+    **pq = 7;
+    std::printf("%d\n", value);
 }
 ```
 
-## Pointers and Arrays
-
-Array names decay to pointers to their first element in most contexts. This allows passing arrays to functions efficiently but loses size information.
-
-```cpp showLineNumbers 
-int arr[5] = {1, 2, 3, 4, 5};
-int* ptr = arr;  // Decays to pointer to first element
-
-std::cout << *ptr;      // 1 (first element)
-std::cout << *(ptr+1);  // 2 (second element)
-std::cout << ptr[2];    // 3 (subscript works on pointers)
-
-// Array name is (mostly) equivalent to pointer
-arr[2];    // 3
-*(arr+2);  // 3 (same thing)
+```text
+100
+30 20
+7
 ```
 
-### Array vs Pointer Differences
+<Diagram title="Three objects, two levels of indirection" caption="Arrows are addresses. Changing **pq writes to value, not to p." accent="blue">
+  <DiagramRow>
+    <DiagramNode title="pq" icon="pointer">int**</DiagramNode>
+    <DiagramArrow direction="right" label="holds &p" />
+    <DiagramNode title="p" icon="pointer">int*</DiagramNode>
+    <DiagramArrow direction="right" label="holds &value" />
+    <DiagramNode title="value" accent>int, currently 7</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-Despite appearing similar, arrays and pointers are different types with different semantics, particularly regarding `sizeof` and assignment.
+The exact numeric value of a pointer and `sizeof(T*)` are implementation-defined. On x86-64 and
+AArch64 Linux, an ordinary object pointer is 8 bytes and holds a virtual address, but the standard
+promises neither. Printing a pointer with `%p` or `operator<<` shows that address, which differs
+from run to run under address-space randomization, so don't put it in expected output.
 
-```cpp showLineNumbers 
-int arr[5] = {1, 2, 3, 4, 5};
-int* ptr = arr;
-
-sizeof(arr);  // 20 bytes (5 * 4)
-sizeof(ptr);  // 8 bytes (pointer size on 64-bit)
-
-// arr = ptr;  // Error: can't assign to array
-ptr = arr;     // OK: pointer can be reassigned
-```
-
-:::info[Array-Pointer Relationship]
-`ptr[i]` is identical to `*(ptr + i)`
-- Compiler scales by `sizeof(type)` automatically
-- `ptr + 1` moves by 4 bytes for `int*`, not 1 byte
+:::warning[The `*` binds to the name, not the type]
+`int* a, b;` declares `a` as `int*` and `b` as plain `int`. Declare one pointer per statement.
 :::
 
-## Dynamic Memory
+## Null and `nullptr`
 
-Pointers are essential for dynamic memory allocation on the heap, where object lifetimes extend beyond their creating scope.
+A **null pointer** is a pointer that is guaranteed not to point to any object or function. The null
+pointer literal is `nullptr` *(C++11)*, of type `std::nullptr_t`, which converts implicitly to every
+pointer type and to nothing else. It replaces `0` and `NULL`, which are integers and therefore pick
+the wrong overload:
 
-```mermaid
-graph LR
-    A[Stack: ptr] -->|points to| B[Heap: object]
-    B -.->|must manually| C[delete]
-```
+```cpp title="nullptr.cpp" showLineNumbers
+#include <cstdio>
 
-```cpp showLineNumbers
-// Allocation
-int* ptr = new int(42);     // Single object
-int* arr = new int[100];    // Array
+void f(int)   { std::puts("f(int)"); }
+void f(char*) { std::puts("f(char*)"); }
 
-// Usage
-*ptr = 100;
-arr[0] = 10;
-
-// Cleanup - YOUR RESPONSIBILITY
-delete ptr;      // Single object
-delete[] arr;    // Array (must match allocation!)
-```
-
-:::danger[Memory Management Rules]
-- **Every `new` needs matching `delete`**
-- **Every `new[]` needs matching `delete[]`**
-- Missing `delete` = memory leak
-- Wrong delete form = undefined behavior
-- Double delete = crash
-:::
-
-The full `new`/`delete` mechanics (arrays, allocation failure, alignment, placement) are in
-[new and delete](../05-memory-and-object-lifetime/new-and-delete.md). In modern code you rarely call
-them directly — [smart pointers](./unique-ptr.md) own the allocation and delete it for you.
-
-## Common Dangers
-
-### Dangling Pointers
-A dangling pointer points to memory that has been deallocated or is no longer valid. Dereferencing creates undefined behavior.
-
-```cpp showLineNumbers 
-int* dangling = new int(42);
-delete dangling;
-*dangling = 100;  // Undefined behavior: use-after-free
-
-// Set to null after delete to catch errors
-delete dangling;
-dangling = nullptr;
-if (dangling) {
-    *dangling = 100;  // Won't execute
+int main() {
+    f(0);          // calls f(int): 0 is an int
+    f(nullptr);    // calls f(char*)
+    int* p = nullptr;
+    if (!p) std::puts("p is null");   // a pointer converts to bool: false iff null
 }
 ```
 
-### Returning Pointers to Locals
+```text
+f(int)
+f(char*)
+p is null
+```
 
-Returning a pointer to a local variable creates a dangling pointer because locals are destroyed when the function returns.
+`NULL` is an implementation-defined null pointer constant, in practice an integer such as `0` or `0L` (GCC defines it as `__null`), so it takes part in overload resolution as an integer. Prefer `nullptr` everywhere.
 
-```cpp showLineNumbers 
-int* dangerous() {
+Dereferencing a null pointer is **undefined behavior**. On mainstream hosted systems it usually
+ends in a segmentation fault because the OS leaves page zero unmapped, but that is a platform
+habit, not a guarantee: the optimizer may assume the pointer is non-null from the moment you
+dereference it, and delete a later null check.
+
+An **uninitialized** pointer is worse than a null one: it holds an indeterminate value, and merely
+reading it is undefined behavior *(until C++26, which makes it erroneous behavior; the value is still
+unspecified)*. Initialize every pointer, to `nullptr` if nothing better is available.
+
+## Pointers and arrays
+
+An array of `T` converts implicitly to a `T*` pointing at its first element (**array-to-pointer
+conversion**, informally "decay") in nearly every expression. The conversion is why `arr` works where
+a pointer is expected, and also why a function can never receive an array by value: a parameter
+declared `int a[5]` is adjusted to `int* a`, and the size is lost.
+
+```cpp title="decay.cpp" showLineNumbers
+#include <cstdio>
+
+int sum(const int* a, std::size_t n) {          // `const int a[]` means the same thing
+    int s = 0;
+    for (std::size_t i = 0; i < n; ++i) s += a[i];
+    return s;
+}
+
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    int* p = arr;                                // decays: p == &arr[0]
+
+    static_assert(sizeof(arr) == 5 * sizeof(int));   // sizeof sees the array...
+    static_assert(sizeof(p) == sizeof(void*));       // ...but not through the pointer
+
+    std::printf("%d\n", sum(arr, 5));
+    // arr = p;                                  // error: an array is not assignable
+    p = arr + 1;                                 // a pointer is
+    std::printf("%d\n", *p);
+}
+```
+
+```text
+15
+2
+```
+
+The conversion does not happen under `sizeof`, `&arr` (which has type `int (*)[5]`, a pointer to the
+whole array), `decltype`, and when binding to a reference to array. Moving a pointer along the
+array is the subject of [pointer arithmetic](./pointer-arithmetic.md), and `std::span` *(C++20)* is
+the modern way to pass a pointer and a length together.
+
+## Ownership: the question a pointer cannot answer
+
+Nothing in the type `T*` records whether the code holding it must `delete` the target. A function
+that takes `Widget*` might merely look at the widget, take ownership, or stash the pointer for
+later. The convention in modern C++ is to make the owner explicit and leave raw pointers for the
+**non-owning** case:
+
+| Role | Spelling |
+|---|---|
+| Sole owner | [`std::unique_ptr<T>`](./unique-ptr.md) (or a value member) |
+| Shared owner | [`std::shared_ptr<T>`](./shared-ptr.md) |
+| Observes, may be absent | `T*` |
+| Observes, never absent | `T&` ([reference](./references.md)) |
+| Observes a shared object without owning it | [`std::weak_ptr<T>`](./weak-ptr.md) |
+
+A raw `T*` that is the only owner needs a matching `delete` on every path out of the scope,
+including exceptions. How `new`, `delete` and `delete[]` pair up is on
+[new and delete](../05-memory-and-object-lifetime/new-and-delete.md), and the pattern that makes
+the cleanup automatic is [RAII](../13-idioms-and-design/01-raii.md).
+
+## Dangling pointers
+
+A pointer is **dangling** when its target's lifetime has ended: the object was destroyed, its
+storage freed, or its scope exited. The pointer itself is untouched, which is exactly what makes the
+bug quiet. Dereferencing a dangling pointer is undefined behavior, and since C++ treats the *value*
+of such a pointer as **invalid**, even copying or comparing it is only implementation-defined.
+
+Three common sources:
+
+```cpp title="dangling.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+#include <vector>
+
+int* from_local() {
     int x = 42;
-    return &x;  // Dangling: x destroyed when function returns
+    return &x;                       // x dies when the function returns
 }
 
-int* ptr = dangerous();
-*ptr = 100;  // Undefined behavior
+int main() {
+    // 1. Pointer to a returned local (GCC and Clang warn about this one).
+    int* a = from_local();
+    (void)a;                         // using *a here would be undefined behavior
 
-// Correct: return pointer to dynamic memory
-int* safe() {
-    return new int(42);  // Caller must delete
-}
-```
+    // 2. Pointer into a container that reallocates.
+    std::vector<int> v{1, 2, 3};
+    int* first = &v[0];
+    v.push_back(4);                  // may reallocate: `first` may now dangle
+    (void)first;                     // do not dereference it
 
-### Use-After-Free
-```cpp showLineNumbers
-int* ptr = new int(42);
-delete ptr;
-*ptr = 100;     // Undefined behavior
-
-// Solution: nullify after delete
-delete ptr;
-ptr = nullptr;  // Now safe to check
-if (ptr) {
-    *ptr = 100; // Won't execute
+    // 3. Pointer to a temporary's buffer.
+    const char* s = std::string("temporary").c_str();   // string destroyed at the semicolon
+    (void)s;
+    std::puts("none of the pointers above was dereferenced");
 }
 ```
 
-### Memory Leaks
-```cpp showLineNumbers
-void leak() {
-    int* ptr = new int(42);
-    // Never deleted - memory leaked
-}
+Setting a pointer to `nullptr` after `delete` does not fix the general problem, because every *other*
+copy of the pointer still dangles. The fix is structural: give the object a single clear owner
+([RAII](../13-idioms-and-design/01-raii.md)), keep pointers shorter-lived than their targets, and
+use `weak_ptr` where a non-owner must detect that the target is gone. AddressSanitizer
+(`-fsanitize=address`) reports use-after-free and use-after-scope at run time.
 
-void correct() {
-    int* ptr = new int(42);
-    // Use ptr...
-    delete ptr;  // Cleaned up
+## `void*`
+
+Any pointer to an object type converts implicitly to `void*`, which erases the type. A `void*`
+cannot be dereferenced or incremented. Getting a typed pointer back needs an explicit
+`static_cast` to the **original** type (any other type is a strict-aliasing problem, see
+[strict aliasing](../05-memory-and-object-lifetime/strict-aliasing.md)). It survives mainly in C
+APIs and callback "user data" arguments; templates, `std::any` and
+[type erasure](../13-idioms-and-design/06-type-erasure.md) are the typed replacements.
+
+```cpp title="void-ptr.cpp" showLineNumbers
+#include <cstdio>
+
+struct Counter { int n = 0; };
+
+// A C-style callback API: the library stores and returns an opaque void*.
+void call_twice(void (*cb)(void*), void* user) { cb(user); cb(user); }
+
+void bump(void* user) { ++static_cast<Counter*>(user)->n; }   // back to the original type
+
+int main() {
+    Counter c;
+    call_twice(bump, &c);             // &c converts to void* implicitly
+    std::printf("%d\n", c.n);
 }
 ```
 
-:::tip[Every danger above has one fix]
-Dangling pointers, use-after-free, double-delete, and leaks are exactly the bugs that
-[RAII](../13-idioms-and-design/01-raii.md) and [smart pointers](./unique-ptr.md) eliminate — the
-owner's destructor deletes exactly once, on every exit path. Use raw *owning* pointers only at the
-lowest level; raw *non-owning* pointers (just observing) remain fine.
-:::
-
-## Pointer to Pointer
-
-Pointers can point to other pointers, creating multiple levels of indirection useful for modifying pointers themselves or creating 2D structures.
-
-```cpp showLineNumbers 
-int value = 42;
-int* ptr = &value;
-int** ptr_to_ptr = &ptr;  // Pointer to pointer
-
-std::cout << **ptr_to_ptr;  // 42 (double dereference)
-**ptr_to_ptr = 100;         // Modifies value through double indirection
-std::cout << value;         // 100
-
-// Common use: modifying a pointer
-void allocate(int** pp) {
-    *pp = new int(42);  // Modifies caller's pointer
-}
-
-int* p = nullptr;
-allocate(&p);  // p now points to allocated memory
+```text
+2
 ```
 
-Double pointers are particularly useful when you need a function to allocate memory and modify the caller's pointer variable. The function receives the address of the pointer variable itself, allowing it to change where that pointer points.
+Pointers to `const` objects need `const void*`; going back needs `static_cast<const T*>`. Casting
+away `const` is covered on [const and pointers](./const-and-pointers.md).
 
-## Void Pointers
+## Function pointers
 
-A `void*` is a generic pointer that can point to any type but must be cast before dereferencing. It's used for type-agnostic memory operations.
+A function name converts to a pointer to that function, and calling through the pointer is the same
+as calling the function. The declarator syntax is awkward (the `*` and the name sit inside
+parentheses), so name the type with `using`:
 
-```cpp showLineNumbers 
-int x = 42;
-void* vptr = &x;  // Can point to anything
+```cpp title="func-ptr.cpp" showLineNumbers
+#include <cstdio>
+#include <functional>
 
-// *vptr;  // Error: can't dereference void*
-int* iptr = static_cast<int*>(vptr);  // Cast back to specific type
-*iptr = 100;  // OK after cast
-
-// Used in C APIs
-void* memcpy(void* dest, const void* src, size_t n);
-```
-
-## Function Pointers
-
-Pointers can store addresses of functions, enabling callbacks, plugin systems, and strategy patterns.
-
-```cpp showLineNumbers 
 int add(int a, int b) { return a + b; }
-int subtract(int a, int b) { return a - b; }
+int sub(int a, int b) { return a - b; }
 
-// Function pointer declaration
-int (*operation)(int, int);
+using BinOp = int (*)(int, int);       // pointer to function (int, int) -> int
 
-operation = add;
-std::cout << operation(5, 3);  // 8
+int apply(BinOp op, int a, int b) { return op(a, b); }
 
-operation = subtract;
-std::cout << operation(5, 3);  // 2
+int main() {
+    BinOp op = add;                    // same as &add
+    std::printf("%d\n", op(5, 3));
+    op = sub;
+    std::printf("%d\n", apply(op, 5, 3));
 
-// Modern alternative: std::function (better)
-std::function<int(int, int)> op = add;
+    int offset = 10;
+    std::function<int(int)> f = [offset](int v) { return v + offset; };   // captures state
+    std::printf("%d\n", f(1));
+
+    // BinOp bad = [offset](int a, int b) { return a + b + offset; };     // error: capturing
+}
 ```
 
-Function pointer syntax is notoriously difficult to read: `int (*ptr)(int, int)` declares a pointer to a function taking two ints and returning int. Modern C++ prefers `std::function` which provides a cleaner syntax and can store lambdas, not just function pointers.
+```text
+8
+2
+11
+```
 
-:::success[Key Insights]
+A plain function pointer is one machine pointer and cannot carry state. Only a *captureless* lambda
+converts to one. For callables with state use a template parameter (no overhead, and the call can be
+inlined), or `std::function` when the type must be erased (a heap allocation is possible, and the
+call is an indirect one). Function pointers do not convert to `void*` in standard C++; POSIX
+`dlsym` relies on a conditionally-supported conversion. Calls through function pointers are also what
+a [virtual call](../07-classes-and-oop/virtual-functions.md) boils down to, minus the table lookup.
 
-**Memory Address**: Pointers store addresses, not values. The value lives elsewhere.
+## Pitfalls
 
-**Dereferencing**: `*ptr` follows the address to access the actual data.
+- **Dereferencing before checking.** The check must come first, and the optimizer is allowed to
+  treat the dereference as proof that the pointer was non-null.
+- **`delete` on the wrong form.** `new[]` pairs with `delete[]`. See
+  [new and delete](../05-memory-and-object-lifetime/new-and-delete.md).
+- **Comparing unrelated pointers with `<`.** `==` and `!=` work on any two pointers of compatible
+  type. Built-in `<` on pointers into different arrays or objects is unspecified; `std::less`
+  gives a total order for those cases.
+- **Treating `T*` as an array handle.** A pointer does not know its length. Pass a size or a
+  `std::span`.
+- **Two owners.** Two raw pointers that both `delete` the same object is a double free.
 
-**Null Safety**: Always initialize to `nullptr` and check before dereferencing.
+## Key points
 
-**Ownership**: Who `delete`s the memory? Unclear with raw pointers → use smart pointers.
+- A pointer holds an address and nothing else: no lifetime, no length, no ownership.
+- Use `nullptr`, initialize every pointer, never dereference null or dangling values.
+- A raw `T*` in modern code means "non-owning, may be null". Ownership belongs in `unique_ptr` or
+  `shared_ptr`.
+- Arrays decay to pointers; `void*` and function pointers are the type-erased and callback forms.
 
-**Lifetime**: Pointers don't extend object lifetime. Locals die at scope end even if pointers exist.
-:::
+## Related
 
-## Summary
-
-**Core concepts:**
-- Pointer = variable storing memory address
-- `*` dereferences, `&` gets address
-- `nullptr` for null, always initialize
-
-**Memory management:**
-- `new` allocates, `delete` frees
-- `new[]` with `delete[]` for arrays
-- Missing delete = leak, double delete = crash
-
-**Dangers:**
-- Dangling pointers (pointing to destroyed data)
-- Use-after-free (accessing deleted memory)
-- Memory leaks (forgetting to delete)
-- Uninitialized pointers (garbage addresses)
-
-**Modern practice:**
-- Use smart pointers (`unique_ptr`, `shared_ptr`)
-- Raw pointers only for non-owning references
-- Let compiler manage lifetime automatically
+- [Pointer arithmetic](./pointer-arithmetic.md): moving a pointer through an array and where the legal range ends.
+- [const and pointers](./const-and-pointers.md): pointer-to-const versus const pointer.
+- [References](./references.md): the non-null, non-reseatable alternative.
+- [new and delete](../05-memory-and-object-lifetime/new-and-delete.md): the raw allocation that smart pointers wrap.
