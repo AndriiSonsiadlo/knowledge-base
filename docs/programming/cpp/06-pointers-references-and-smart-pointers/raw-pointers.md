@@ -172,10 +172,11 @@ the cleanup automatic is [RAII](../13-idioms-and-design/01-raii.md).
 
 ## Dangling pointers
 
-A pointer is **dangling** when its target's lifetime has ended: the object was destroyed, its
-storage freed, or its scope exited. The pointer itself is untouched, which is exactly what makes the
-bug quiet. Dereferencing a dangling pointer is undefined behavior, and since C++ treats the *value*
-of such a pointer as **invalid**, even copying or comparing it is only implementation-defined.
+A pointer is **dangling** when the storage it points into has been released: the memory was freed, or
+its scope exited. The pointer itself is untouched, which is exactly what makes the bug quiet.
+Dereferencing a dangling pointer is undefined behavior, and since the pointer's *value* becomes an
+**invalid pointer value** once the storage is gone, even copying or comparing it is only
+implementation-defined.
 
 Three common sources:
 
@@ -287,8 +288,9 @@ A plain function pointer is one machine pointer and cannot carry state. Only a *
 converts to one. For callables with state use a template parameter (no overhead, and the call can be
 inlined), or `std::function` when the type must be erased (a heap allocation is possible, and the
 call is an indirect one). Function pointers do not convert to `void*` in standard C++; POSIX
-`dlsym` relies on a conditionally-supported conversion. Calls through function pointers are also what
-a [virtual call](../07-classes-and-oop/virtual-functions.md) boils down to, minus the table lookup.
+`dlsym` relies on a conditionally-supported conversion. On the usual vtable-based implementations (Itanium ABI, MSVC), a
+[virtual call](../07-classes-and-oop/virtual-functions.md) is likewise an indirect call through a pointer
+loaded from a table.
 
 ## Pitfalls
 

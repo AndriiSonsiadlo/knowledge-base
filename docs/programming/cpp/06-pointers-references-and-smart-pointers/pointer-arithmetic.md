@@ -65,7 +65,7 @@ one), the standard defines:
 |---|---|---|
 | `p + n`, `p - n`, `p += n`, `++p`, `--p` | pointer to element `i ± n` | the new index is in `[0, N]` |
 | `p - q` | `std::ptrdiff_t` count of elements between | both point into (or one past) the same array |
-| `p == q`, `p != q` | whether they point at the same place | any two pointers of compatible type |
+| `p == q`, `p != q` | whether they point at the same place | any two pointers of compatible type (a one-past-the-end pointer compared with another object's address is unspecified) |
 | `p < q`, `<=`, `>`, `>=` | position order | same array; otherwise unspecified (use `std::less`) |
 | `*p`, `p[k]` | the element | the index is in `[0, N-1]` |
 
@@ -77,8 +77,9 @@ constant.
 
 Three smaller rules:
 
-- Adding `0` to a null pointer yields null, and `nullptr - nullptr` is `0`. Both are defined in C++
-  (they are not in C before C23).
+- If `p` is a null `T*`, `p + 0` and `p - 0` yield null, and `p - q` for two null `T*` values is `0`
+  (`nullptr - nullptr` on `std::nullptr_t` is ill-formed). These are defined in C++, but not in C
+  before C23.
 - `p - q` has type `std::ptrdiff_t` (signed). The count can be negative. Mixing it with `std::size_t`
   silently converts a negative number to a huge unsigned one.
 - Arithmetic needs a **complete object type**. `void*` and function pointers have no element size,
@@ -129,8 +130,8 @@ int main() {
 ```
 
 The reverse loop shows the one-past-the-start trap. `for (p = last - 1; p >= first; --p)` ends by
-computing `first - 1`, which is undefined, and the `>=` test never fails on an unsigned or wrapped
-value. Decrement first, then use.
+computing `first - 1`, which is undefined, and the comparison that follows is itself meaningless, so
+the optimizer may treat `p >= first` as always true. Decrement first, then use.
 
 For new code, prefer a range-`for`, a standard algorithm, or `std::span` *(C++20)*, which keeps the
 pointer and length together and gives bounds-checkable `operator[]` in hardened library modes.
@@ -138,7 +139,7 @@ pointer and length together and gives bounds-checkable `operator[]` in hardened 
 ## Multidimensional arrays
 
 `int m[2][3]` is an array of 2 elements, each an `int[3]`. So `m[i]` decays to `int*` for row `i`,
-and `m + 1` is a `int (*)[3]` that skips a whole row (3 ints at once).
+and `m + 1` is an `int (*)[3]` that skips a whole row (3 ints at once).
 
 ```cpp title="rows.cpp" showLineNumbers
 #include <cstdio>
@@ -164,8 +165,8 @@ int main() {
 ```
 
 Treating the whole 2D array as a flat `int[6]` through `&m[0][0] + k` for `k >= 3` has the same
-formal problem, because the pointer started inside a 3-element array. It works in practice, and
-sanitizers do not flag it, but it is the kind of code that stops working when an optimizer starts
+formal problem, because the pointer started inside a 3-element array. It works in practice (UBSan's bounds check catches `m[0][4]` but not
+`&m[0][0] + k`), but it is the kind of code that stops working when an optimizer starts
 exploiting bounds. If you need a flat view, store a `std::vector<int>` or `int[6]` and compute
 `i * cols + j` yourself.
 
@@ -187,7 +188,7 @@ carry; the exact C++ rules are still evolving.)
 
 - **Loop bound off by one.** `i <= n` or `p <= last` reads one past the end.
 - **Pointer to a vector element kept across `push_back`.** Reallocation invalidates every pointer
-  into the old buffer.
+  into the old buffer (see [dangling pointers](./raw-pointers.md#dangling-pointers)).
 - **Adding to the wrong type.** `char*` steps by 1, `int*` by 4: cast carefully when parsing
   buffers, and mind [alignment](../05-memory-and-object-lifetime/alignment.md) when you reinterpret
   the result.
