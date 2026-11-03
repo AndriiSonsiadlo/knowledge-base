@@ -159,7 +159,7 @@ api_close(7)
 
 Writing the wrapper is the cost of using a non-pointer handle with `unique_ptr`. For one-off cases a
 small dedicated RAII class (see [RAII](../13-idioms-and-design/01-raii.md)) is often clearer. The
-library-fundamentals TS has `std::unique_resource` for this, but it isn't in the standard as of C++23.
+Library Fundamentals TS v3 has `std::experimental::unique_resource` for this, but it isn't in the standard as of C++23.
 
 ## `shared_ptr`: the deleter is erased
 
@@ -306,8 +306,8 @@ object to an API that wants a `shared_ptr`. It works, but it hides a lifetime ha
 ## `std::default_delete`
 
 `std::default_delete<T>` is the deleter `unique_ptr<T>` uses: it calls `delete`.
-`default_delete<T[]>` calls `delete[]`. It is stateless, so it costs nothing. Both reject incomplete
-types in `operator()` with a `static_assert`, which is why a pimpl class must define its destructor
+`default_delete<T[]>` calls `delete[]`. It is stateless, so it costs nothing. Both make `operator()`
+ill-formed for an incomplete type (libstdc++ and libc++ use a `static_assert`), which is why a pimpl class must define its destructor
 where the type is complete (see [unique_ptr](./unique-ptr.md#incomplete-types-and-the-pimpl-idiom)).
 It also converts: `default_delete<Derived>` converts to `default_delete<Base>`, which is what lets
 `unique_ptr<Derived>` convert to `unique_ptr<Base>` (and is also why that needs a virtual destructor).

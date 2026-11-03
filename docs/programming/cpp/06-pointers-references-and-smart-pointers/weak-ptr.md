@@ -110,7 +110,7 @@ lock() empty
 compare-and-swap loop in the implementation), so there is no gap between "is it alive?" and "now I
 own it". Splitting the check from the use opens a race:
 
-```cpp
+```cpp title="fragment: check-then-lock race"
 // Racy: another thread may drop the last owner between the two lines.
 if (!w.expired()) {
     auto sp = w.lock();   // may already be empty
@@ -283,7 +283,7 @@ containers.
   object that one thread modifies while another reads is a data race; `std::atomic<std::weak_ptr<T>>`
   *(C++20)* covers that.
 - `sizeof(weak_ptr<T>)` equals `sizeof(shared_ptr<T>)`: two pointers in libstdc++.
-- `lock()` costs an atomic compare-and-swap loop, slightly more than copying a `shared_ptr`.
+- In libstdc++ and libc++, `lock()` costs an atomic compare-and-swap loop, slightly more than copying a `shared_ptr`.
 - A live `weak_ptr` keeps the **control block** allocated. Many long-lived `weak_ptr`s to dead
   objects mean leaked control blocks; with `make_shared`, that also means the object's storage
   (see [make_shared](./shared-ptr.md#make_shared-and-the-two-allocations)).
