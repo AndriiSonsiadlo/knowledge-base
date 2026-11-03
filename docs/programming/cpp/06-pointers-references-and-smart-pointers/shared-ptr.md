@@ -3,502 +3,349 @@ id: shared-ptr
 title: std::shared_ptr
 sidebar_label: shared_ptr
 sidebar_position: 6
-tags: [c++, smart-pointers, shared-ptr, reference-counting, cpp11]
+tags: [c++, smart-pointers, shared-ptr, control-block, make-shared, reference-counting, cpp11]
 ---
 
 # std::shared_ptr
 
-Smart pointer with shared ownership via reference counting. Multiple `shared_ptr`s can own the same object, deleted when last owner destroyed.
+`std::shared_ptr<T>` *(C++11, `<memory>`)* is a smart pointer for **shared ownership**: any number
+of `shared_ptr`s can own the same object, and it is destroyed when the last owner goes away. That
+is the right tool when no single owner has a clearly longer lifetime than the others, for example a
+cache entry handed to several consumers, or a node referenced from several threads. It costs more
+than [`unique_ptr`](./unique-ptr.md): a separate heap block, atomic reference counts, and a pointer
+twice the size. If one owner can be named, use `unique_ptr`. A `unique_ptr` also converts to a
+`shared_ptr` by move, so starting with `unique_ptr` never closes a door.
 
-:::info[Reference Counting]
-Each copy increments count, each destruction decrements it.
-**Count reaches zero → automatic deletion**
-```cpp
-auto ptr1 = std::make_shared<int>(42);  // count = 1
-auto ptr2 = ptr1;                        // count = 2
-ptr1.reset();                            // count = 1
-ptr2.reset();                            // count = 0 → delete
-```
-:::
+**Prerequisites:** [unique_ptr](./unique-ptr.md),
+[new and delete](../05-memory-and-object-lifetime/new-and-delete.md).
 
-## Reference Counting Model
-```mermaid
-graph TD
-    A[shared_ptr 1] -->|points to| D[Control Block]
-    B[shared_ptr 2] -->|points to| D
-    C[shared_ptr 3] -->|points to| D
-    D -->|owns| E[Object]
-    D -->|ref count: 3| D
-    
-```
-```
-Control Block contains:
-┌──────────────────────┐
-│ Reference Count: 3   │
-│ Weak Count: 0        │
-│ Deleter              │
-│ Allocator            │
-└──────────────────────┘
-```
+## The control block
 
-## Basic Usage
+A `shared_ptr` is two pointers: one to the object (the **stored pointer**) and one to a **control
+block** holding the bookkeeping. Copies of a `shared_ptr` share a control block, which holds:
 
-Creating and copying `shared_ptr`s is straightforward. All copies share ownership of the same object.
+- the **strong count**: the number of `shared_ptr`s that own the object,
+- the **weak count**: the number of [`weak_ptr`](./weak-ptr.md)s observing it (plus one while any strong
+  owner exists, in the common implementations),
+- the **deleter** and allocator, type-erased, and
+- with `make_shared`, the object itself.
 
-```cpp showLineNumbers 
+<Diagram title="Three owners of one object" caption="Each shared_ptr is a pair (object pointer, control block pointer). The pairs are copied; the control block and the object are not." accent="blue">
+  <DiagramRow>
+    <DiagramGroup label="Owners (16 bytes each on 64-bit libstdc++)">
+      <DiagramNode title="shared_ptr a" />
+      <DiagramNode title="shared_ptr b" />
+      <DiagramNode title="shared_ptr c" />
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="all point to" />
+    <DiagramNode title="Control block" accent>strong = 3, weak count, deleter, allocator</DiagramNode>
+    <DiagramArrow direction="right" label="manages" />
+    <DiagramNode title="Widget" dashed>the object</DiagramNode>
+  </DiagramRow>
+</Diagram>
+
+The control block's exact layout is implementation-defined; libstdc++ uses two
+counters plus a type-erased deleter, and `sizeof(std::shared_ptr<T>)` is two pointers on 64-bit
+targets (the standard does not require either; other libraries may differ).
+
+When the strong count drops to zero the object is destroyed (via the deleter). When the weak count
+also drops to zero the control block is freed. The reason there are two counts is
+[`weak_ptr`](./weak-ptr.md): a weak reference must be able to ask "is the object still alive?",
+which needs the control block to outlive the object.
+
+```cpp title="counts.cpp" showLineNumbers
+#include <cstdio>
 #include <memory>
 
-// Create shared_ptr
-std::shared_ptr<int> ptr1 = std::make_shared<int>(42);
-
-// Copy shares ownership
-auto ptr2 = ptr1;
-std::cout << ptr1.use_count();  // 2
-std::cout << ptr2.use_count();  // 2
-
-// Both point to same object
-*ptr2 = 100;
-std::cout << *ptr1;  // 100
-
-// Last owner deletes
-ptr1.reset();  // count = 1
-ptr2.reset();  // count = 0 → delete
-```
-
-Copying a `shared_ptr` increments the reference count. The object persists as long as any `shared_ptr` owns it. When the last `shared_ptr` is destroyed, the reference count reaches zero and the object is automatically deleted.
-
-### make_shared (C++11)
-
-Always prefer `std::make_shared` over direct `new` for efficiency and exception safety.
-
-```cpp showLineNumbers 
-// Preferred: make_shared (single allocation)
-auto ptr1 = std::make_shared<int>(42);
-auto ptr2 = std::make_shared<std::string>("hello");
-
-// Avoid: direct new (two allocations)
-std::shared_ptr<int> ptr3(new int(42));
-```
-
-`make_shared` allocates the object and control block (containing reference count) in a single memory allocation, which is more efficient than separate allocations. It's also exception-safe, preventing leaks if an exception occurs during construction.
-
-## Reference Counting
-
-`shared_ptr` maintains a reference count tracking how many `shared_ptrs` own the object.
-
-```cpp showLineNumbers 
-auto ptr1 = std::make_shared<int>(42);
-
-// Check owner count
-std::cout << ptr1.use_count();  // 1
-
-{
-    auto ptr2 = ptr1;  // Copy
-    auto ptr3 = ptr1;  // Copy
-    std::cout << ptr1.use_count();  // 3
-    
-    ptr2.reset();      // Decrement
-    std::cout << ptr1.use_count();  // 2
-}  // ptr3 destroyed
-
-std::cout << ptr1.use_count();  // 1
-// Object still alive
-```
-
-Each `shared_ptr` can query the current reference count with `use_count()`. When the count drops to zero, the managed object is deleted. The count is shared across all copies through the control block.
-
-### Thread Safety
-
-Reference count updates are thread-safe (atomic), but the pointed-to object is not automatically protected.
-
-```cpp showLineNumbers 
-std::shared_ptr<int> global_ptr = std::make_shared<int>(42);
-
-void thread1() {
-    auto local = global_ptr;  // Thread-safe copy
-    // Reference count increment is atomic
-}
-
-void thread2() {
-    auto local = global_ptr;  // Thread-safe copy
-    *local = 100;  // Data race if thread1 also modifies!
-}
-```
-
-Copying `shared_ptr`s between threads is safe - the reference count operations are atomic. However, if multiple threads access the pointed-to object, you need additional synchronization (mutex, atomic operations) to protect the data.
-
-:::warning[Thread Safety]
-- Control block operations (ref counting) are atomic
-- Object itself is NOT automatically protected
-- Need mutex/atomics to protect shared data
-:::
-
-## Shared Ownership Patterns
-
-Multiple `shared_ptr`s can own the same object, useful for shared resources and graph structures.
-
-### Multiple Owners
-```cpp showLineNumbers
-class Node {
-public:
-    std::string data;
-    std::vector<std::shared_ptr<Node>> neighbors;
-};
-
-auto node1 = std::make_shared<Node>();
-auto node2 = std::make_shared<Node>();
-auto node3 = std::make_shared<Node>();
-
-// Graph structure
-node1->neighbors.push_back(node2);
-node1->neighbors.push_back(node3);
-node2->neighbors.push_back(node1);  // Multiple owners
-
-std::cout << node1.use_count();  // 2 (node1 + node2->neighbors)
-```
-
-This enables building complex data structures where multiple objects reference the same sub-object. The shared object persists as long as any owner exists.
-
-
-### Cache Pattern
-```cpp showLineNumbers
-class ResourceCache {
-    std::map<std::string, std::shared_ptr<Resource>> cache;
-    
-public:
-    std::shared_ptr<Resource> get(const std::string& key) {
-        auto it = cache.find(key);
-        if (it != cache.end()) {
-            return it->second;  // Return shared ownership
-        }
-        
-        auto resource = std::make_shared<Resource>(key);
-        cache[key] = resource;
-        return resource;
-    }
-};
-```
-
-
-## Key Operations
-```cpp showLineNumbers
-auto ptr = std::make_shared<int>(42);
-
-// Access
-*ptr = 100;
-int* raw = ptr.get();
-
-// Check validity
-if (ptr) {
-    std::cout << *ptr;
-}
-
-// Owner count
-long count = ptr.use_count();
-
-// Reset (release ownership)
-ptr.reset();             // Decrement count
-ptr.reset(new int(200)); // Take new ownership
-
-// Unique ownership check
-if (ptr.use_count() == 1) {
-    // Only owner - can modify safely
-}
-```
-
-## Function Parameters
-
-Different parameter types express different ownership and lifetime requirements.
-
-```cpp showLineNumbers 
-// Observe: doesn't extend lifetime
-void observe(const Widget* w) {
-    w->inspect();
-}
-
-// Use: doesn't affect ownership (preferred)
-void use(const Widget& w) {
-    w->process();
-}
-
-// Share: participates in ownership
-void share(std::shared_ptr<Widget> w) {
-    // Keeps object alive during function
-}
-
-// Observe through shared_ptr (unusual)
-void observe_shared(const std::shared_ptr<Widget>& w) {
-    w->inspect();
-}
-
-auto widget = std::make_shared<Widget>();
-
-observe(widget.get());     // Just observing
-use(*widget);              // Using temporarily
-share(widget);             // Sharing ownership (increment count)
-observe_shared(widget);    // Observing (no count change)
-```
-
-Pass by `raw pointer` or `reference` when the function doesn't need ownership. Pass by `shared_ptr` value when the function should extend the object's lifetime (store it, pass to async operations). Pass by const reference to `shared_ptr` when you need to check/copy the `shared_ptr` itself without affecting ownership.
-
-:::info[Parameter Guidelines]
-| Intent | Type | Overhead |
-|--------|------|----------|
-| Observe | `const T*` or `const T&` | None |
-| Share | `shared_ptr<T>` (by value) | Atomic inc/dec |
-| Check/copy ptr | `const shared_ptr<T>&` | None |
-:::
-
-## Circular References Problem
-
-`shared_ptr` can create circular references that prevent deletion, causing memory leaks.
-
-```cpp showLineNumbers
-class Node {
-public:
-    std::shared_ptr<Node> next;
-    std::shared_ptr<Node> prev;  // Creates cycle!
-    ~Node() { std::cout << "~Node\n"; }
-};
-
-auto node1 = std::make_shared<Node>();
-auto node2 = std::make_shared<Node>();
-
-node1->next = node2;  // node1 → node2
-node2->prev = node1;  // node2 → node1 (cycle!)
-
-// When scope ends:
-// - node1's count: 1 (node2->prev keeps it alive)
-// - node2's count: 1 (node1->next keeps it alive)
-// - Neither ever deleted → MEMORY LEAK!
-```
-
-Each node keeps the other alive through its `shared_ptr`. When the original `shared_ptr`s go out of scope, the reference counts only drop to 1 (the circular reference), never reaching zero. The objects are never deleted - a memory leak despite using smart pointers.
-
-:::danger[Circular Reference Leak]
-```
-node1 (count=2) ──next──> node2 (count=2)
-         ^                   |
-         |                   |
-         └────────prev───────┘
-
-Both keep each other alive → never deleted
-```
-:::
-
-### Breaking Cycles with weak_ptr
-
-Use `weak_ptr` to break circular references (covered in the next section).
-
-```cpp showLineNumbers
-class Node {
-public:
-    std::shared_ptr<Node> next;  // Strong reference forward
-    std::weak_ptr<Node> prev;    // Weak reference back
-    ~Node() { std::cout << "~Node\n"; }
-};
-
-auto node1 = std::make_shared<Node>();
-auto node2 = std::make_shared<Node>();
-
-node1->next = node2;  // Strong: count = 2
-node2->prev = node1;  // Weak: count stays 1
-
-// Destructors called correctly!
-```
-
-## Polymorphism
-
-`shared_ptr` works naturally with inheritance and polymorphism.
-
-```cpp showLineNumbers 
-class Base {
-public:
-    virtual ~Base() { std::cout << "~Base\n"; }
-    virtual void identify() { std::cout << "Base\n"; }
-};
-
-class Derived : public Base {
-public:
-    ~Derived() override { std::cout << "~Derived\n"; }
-    void identify() override { std::cout << "Derived\n"; }
-};
-
-std::shared_ptr<Base> ptr1 = std::make_shared<Derived>();
-ptr1->identify();  // "Derived"
-
-std::shared_ptr<Base> ptr2 = ptr1;  // Share ownership
-std::cout << ptr1.use_count();  // 2
-
-// Proper cleanup: ~Derived, then ~Base
-```
-
-The virtual destructor ensures correct cleanup. All `shared_ptr`s can share ownership of the derived object through base class pointers, and cleanup happens correctly when the last owner is destroyed.
-
-## Containers of shared_ptr
-
-Containers can hold `shared_ptr`s, enabling collections where multiple containers can reference the same objects.
-
-```cpp showLineNumbers 
-class Widget {
-public:
-    int id;
-    Widget(int i) : id(i) {}
-};
-
-std::vector<std::shared_ptr<Widget>> all_widgets;
-std::vector<std::shared_ptr<Widget>> active_widgets;
-
-auto w1 = std::make_shared<Widget>(1);
-auto w2 = std::make_shared<Widget>(2);
-
-all_widgets.push_back(w1);
-all_widgets.push_back(w2);
-
-active_widgets.push_back(w1);  // w1 shared between both vectors
-
-std::cout << w1.use_count();  // 3 (w1 variable + 2 vectors)
-std::cout << w2.use_count();  // 2 (w2 variable + all_widgets)
-```
-
-Objects persist as long as any container holds a `shared_ptr` to them. This enables flexible ownership patterns where objects can be referenced from multiple collections.
-
-## aliasing Constructor
-
-`shared_ptr` supports aliasing - storing one pointer but referencing another, useful for managing members of an object.
-
-```cpp showLineNumbers 
 struct Widget {
-    int value;
-    Widget(int v) : value(v) {}
+    ~Widget() { std::puts("~Widget"); }
 };
 
-auto widget = std::make_shared<Widget>(42);
-
-// Aliased shared_ptr to member
-std::shared_ptr<int> value_ptr(widget, &widget->value);
-
-std::cout << *value_ptr;  // 42
-std::cout << widget.use_count();  // 2 (widget and value_ptr)
-
-value_ptr.reset();
-std::cout << widget.use_count();  // 1
-
-// widget keeps the object alive as long as value_ptr exists
+int main() {
+    auto a = std::make_shared<Widget>();
+    std::printf("1: %ld\n", a.use_count());
+    {
+        auto b = a;                                   // copy: count++
+        std::printf("2: %ld\n", a.use_count());
+        auto c = std::move(a);                        // move: count unchanged, a is empty
+        std::printf("3: %ld %s\n", c.use_count(), a ? "a owns" : "a empty");
+    }                                                 // b and c destroyed: count -> 0
+    std::puts("end");
+}
 ```
 
-The aliased `shared_ptr` shares ownership of the `Widget` but points to its member. This ensures the `Widget` stays alive as long as any pointer to its members exists.
-
-## Custom Deleters
-
-The nuance specific to `shared_ptr`: unlike `unique_ptr`, its deleter is **type-erased** — stored in
-the control block, not in the type. So `shared_ptr<FILE>` with a custom deleter is still just
-`shared_ptr<FILE>`, which makes deleters easy to pass around (it rides along on the control-block
-allocation `shared_ptr` already pays for).
-
-```cpp showLineNumbers
-std::shared_ptr<FILE> f(fopen("data.txt", "r"), [](FILE* p){ if (p) fclose(p); });
+```text
+1: 1
+2: 2
+3: 2 a empty
+~Widget
+end
 ```
 
-See the canonical [Custom Deleters](./custom-deleters.md) page for the full treatment and the
-`unique_ptr`-vs-`shared_ptr` comparison.
+`use_count()` is for diagnostics. Under concurrency the value may be stale the instant you read it,
+and `unique()` (the "count == 1" test) was removed in C++20 for that reason.
 
-## Performance Considerations
+## `make_shared` and the two allocations
 
-`shared_ptr` has overhead compared to `unique_ptr` and raw pointers due to reference counting.
+`std::shared_ptr<T>(new T(args))` performs two allocations: one for the object (your `new`) and one
+for the control block. `std::make_shared<T>(args...)` performs one, placing the control block and
+the object side by side. That is faster, improves locality, and is exception-safe. The following
+program counts calls to the global `operator new`:
 
-```cpp showLineNumbers 
-// Size overhead
-sizeof(std::shared_ptr<int>);  // 16 bytes (2 pointers)
-sizeof(std::unique_ptr<int>);  // 8 bytes (1 pointer)
-sizeof(int*);                  // 8 bytes
+```cpp title="allocs.cpp" showLineNumbers
+#include <cstdio>
+#include <cstdlib>
+#include <memory>
+#include <new>
 
-// Runtime overhead
-// - Atomic reference counting
-// - Control block allocation (unless make_shared)
-// - Indirection through control block
+static int g_allocs = 0;
+void* operator new(std::size_t n) {
+    ++g_allocs;
+    if (void* p = std::malloc(n)) return p;
+    throw std::bad_alloc{};
+}
+void operator delete(void* p) noexcept { std::free(p); }
+void operator delete(void* p, std::size_t) noexcept { std::free(p); }
+
+struct Widget { int v = 0; };
+
+int main() {
+    g_allocs = 0;
+    { std::shared_ptr<Widget> a(new Widget); }
+    std::printf("shared_ptr(new): %d allocations\n", g_allocs);
+
+    g_allocs = 0;
+    { auto b = std::make_shared<Widget>(); }
+    std::printf("make_shared:     %d allocation\n", g_allocs);
+}
 ```
 
-The control block contains the reference count and weak count, requiring extra memory. Atomic increment/decrement operations for thread safety are slower than simple pointer copies. Use `shared_ptr` when you need shared ownership; prefer `unique_ptr` for exclusive ownership (cheaper).
+```text
+shared_ptr(new): 2 allocations
+make_shared:     1 allocation
+```
 
-**Cost breakdown:**
-- Copy: atomic increment (~50 cycles)
-- Destruction: atomic decrement (~50 cycles)
-- Dereference: same as raw pointer
-- Creation: allocation + atomic init
+(Measured with libstdc++ from GCC 15 on x86-64 Linux. The standard only *recommends* that
+`make_shared` use a single allocation, so other library implementations may differ.)
 
-:::warning[When to Avoid]
-Use `unique_ptr` unless you need shared ownership:
-- Faster (no atomic operations)
-- Smaller (8 vs 16 bytes)
-- Clearer ownership semantics
-:::
+`make_shared` has trade-offs, and the second is easy to miss:
 
-## enable_shared_from_this
-```cpp showLineNumbers
-class Widget : public std::enable_shared_from_this<Widget> {
-public:
-    std::shared_ptr<Widget> getShared() {
-        return shared_from_this();  // Safe
-    }
-    
-    void registerCallback() {
-        auto self = shared_from_this();
-        callbacks.push_back([self]() {
-            self->doWork();  // Keeps Widget alive
-        });
+- **Object memory is freed with the control block.** After the last `shared_ptr` is gone the object
+  is destroyed, but its storage is part of the control block and stays allocated until the last
+  `weak_ptr` is gone too. For a large object with long-lived `weak_ptr`s, that memory is held much
+  longer than with `shared_ptr(new T)`, where it is freed immediately.
+- **No custom deleter, no class-specific `operator new`.** It always uses `std::allocator` (use
+  `std::allocate_shared` for a custom allocator). If the type needs `delete` through a deleter, or
+  its own `operator new`, construct `shared_ptr` directly.
+- **It needs a public constructor**, like `make_unique`. A private constructor needs the direct form.
+- **Array support** came in C++20: `make_shared<T[]>(n)` and `make_shared<T[N]>()`.
+
+## Where the deleter lives
+
+The deleter is stored in the control block with its type erased, so it is **not part of the
+`shared_ptr`'s type**: `shared_ptr<File>` is the same type whether it closes with `fclose` or
+`delete`. A second consequence is that a `shared_ptr<Base>` created from a `Derived*` remembers how
+to delete a `Derived`, so a virtual destructor isn't strictly required for correctness. (Add one
+anyway if anything else can `delete` through a `Base*`.) The deleter mechanics are on
+[custom deleters](./custom-deleters.md).
+
+```cpp title="erased-deleter.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+
+struct Base { ~Base() { std::puts("~Base"); } };           // note: non-virtual
+struct Derived : Base { ~Derived() { std::puts("~Derived"); } };
+
+int main() {
+    std::shared_ptr<Base> p(new Derived);   // deleter remembers "delete (Derived*)"
+}                                           // runs ~Derived, then ~Base
+```
+
+```text
+~Derived
+~Base
+```
+
+With `make_shared<Derived>()` converted to `shared_ptr<Base>`, the same holds: the control block was
+built for `Derived`. With `unique_ptr<Base>` it would be undefined behavior.
+
+## Ownership operations
+
+| Operation | Effect |
+|---|---|
+| copy construct / assign | shares ownership, strong count + 1 |
+| move construct / assign | transfers ownership, count unchanged, source empty |
+| `reset()` / `reset(p)` | release this ownership / own `p` through a new control block |
+| `get()` | stored raw pointer, no ownership change |
+| `use_count()` | strong count (approximate under concurrency) |
+| `weak_ptr<T>(sp)` | observer; does not change the strong count |
+| `swap` | exchange pointers |
+| aliasing constructor | `shared_ptr<U>(owner, ptr)`: shares `owner`'s control block, points at `ptr` |
+
+### The aliasing constructor
+
+`std::shared_ptr<U>(const shared_ptr<T>& owner, U* ptr)` creates a pointer that **owns** whatever
+`owner` owns but **points at** `ptr`. Typical use: hand out a `shared_ptr` to a member or element
+that keeps the whole parent alive. `ptr` is not deleted separately and is not checked for being
+related to the owned object.
+
+```cpp title="aliasing.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <string>
+
+struct Config {
+    std::string name = "prod";
+    int retries = 3;
+    ~Config() { std::puts("~Config"); }
+};
+
+std::shared_ptr<int> retries_of(const std::shared_ptr<Config>& c) {
+    return std::shared_ptr<int>(c, &c->retries);   // points into *c, shares c's control block
+}
+
+int main() {
+    std::shared_ptr<int> r;
+    {
+        auto cfg = std::make_shared<Config>();
+        r = retries_of(cfg);
+        std::printf("count %ld\n", cfg.use_count());
+    }                                              // cfg is gone, but r still owns the Config
+    std::printf("retries %d\n", *r);
+}
+```
+
+```text
+count 2
+retries 3
+~Config
+```
+
+## Never create two owners from one raw pointer
+
+Each `shared_ptr` constructed from a raw pointer makes its **own** control block with a count of 1.
+Two of them would delete the same object twice:
+
+```cpp title="fragment: double ownership (bug)"
+Widget* raw = new Widget;
+std::shared_ptr<Widget> a(raw);
+std::shared_ptr<Widget> b(raw);   // second control block: double delete when both die
+```
+
+Always copy a `shared_ptr` to share, or create it once with `make_shared`.
+`std::enable_shared_from_this` solves the case where an object needs to hand out `shared_ptr`s to
+itself.
+
+### `enable_shared_from_this`
+
+Inherit publicly from `std::enable_shared_from_this<T>` and call `shared_from_this()` instead of
+`shared_ptr<T>(this)`. The base class holds a `weak_ptr` that the first `shared_ptr` constructed
+for the object initializes, so every pointer produced shares one control block.
+
+```cpp title="from-this.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <vector>
+
+struct Task : std::enable_shared_from_this<Task> {
+    void schedule(std::vector<std::shared_ptr<Task>>& queue) {
+        queue.push_back(shared_from_this());       // not shared_ptr<Task>(this)
     }
 };
 
-// Correct usage
-auto w = std::make_shared<Widget>();
-auto shared = w->getShared();
+int main() {
+    std::vector<std::shared_ptr<Task>> queue;
+    auto t = std::make_shared<Task>();
+    t->schedule(queue);
+    std::printf("count %ld\n", t.use_count());
 
-// Wrong - creates second control block
-std::shared_ptr<Widget> bad(this);  // DISASTER!
-```
-
-:::danger[Never Create from this]
-```cpp
-class Bad {
-    std::shared_ptr<Bad> getPtr() {
-        return std::shared_ptr<Bad>(this);  // Second control block!
+    Task on_stack;
+    try {
+        on_stack.schedule(queue);                  // no shared_ptr owns it yet
+    } catch (const std::bad_weak_ptr&) {
+        std::puts("bad_weak_ptr");
     }
-};
-
-auto ptr1 = std::make_shared<Bad>();
-auto ptr2 = ptr1->getPtr();  // Two control blocks → double delete!
+}
 ```
-:::
 
-## Summary
+```text
+count 2
+bad_weak_ptr
+```
 
-**Core features:**
-- Shared ownership (multiple owners)
-- Reference counting (automatic)
-- Thread-safe counting (atomic operations)
-- Last owner deletes object
+Calling `shared_from_this()` on an object not yet owned by a `shared_ptr` throws
+`std::bad_weak_ptr` *(since C++17; undefined behavior before)*. In particular, don't call it in the
+constructor, because the owning `shared_ptr` does not exist yet. C++17 also added `weak_from_this()`.
 
-**Key operations:**
-- `make_shared<T>(args)` - create (preferred)
-- `ptr.use_count()` - check owner count
-- `ptr.reset()` - release ownership
-- Copy shares ownership (count++)
+## Thread safety
 
-**Circular references:**
-- `shared_ptr` cycles cause leaks
-- Use `weak_ptr` to break cycles
-- Parent→child: strong
-- Child→parent: weak
+The standard guarantees these separately:
 
-**Performance:**
-- 16 bytes (vs 8 for `unique_ptr`)
-- Atomic operations overhead
-- Use only when truly need shared ownership
+- **The control block is thread-safe.** Copying, destroying and `use_count` on different
+  `shared_ptr` *objects* that share a control block may run concurrently from different threads
+  without a race on the counts. libstdc++ on Linux selects atomic or plain counter updates at run time
+  depending on whether the program uses threads; MSVC and libc++ use atomic operations.
+- **The pointee is not protected.** Two threads writing the same `Widget` through different
+  `shared_ptr`s race unless you synchronize.
+- **A single `shared_ptr` object is not thread-safe.** One thread reassigning `p` while another
+  copies `p` is a data race on `p`, even though each is fine on its own. `std::atomic<std::shared_ptr<T>>`
+  *(C++20)* is the supported way to share a `shared_ptr` variable. The `std::atomic_load(&p)` free
+  functions are deprecated in C++20.
 
-**Best practices:**
-- Prefer `unique_ptr` by default
-- Use `make_shared` for efficiency
-- Break cycles with `weak_ptr`
-- `enable_shared_from_this` for `this` sharing
-- Pass by const& to observe without cost
+The atomic increment on every copy is the main cost of `shared_ptr`: it is a cache-line
+read-modify-write that contends when many threads copy the same pointer. Don't copy in hot loops
+that only read.
+
+## Passing a `shared_ptr`
+
+Passing by value costs an atomic increment and decrement. Choose the parameter by what the callee
+does with ownership (C++ Core Guidelines R.34 to R.37):
+
+| The function... | Parameter |
+|---|---|
+| uses the object | `Widget&` or `Widget*` (pass `*sp`) |
+| shares or stores ownership | `std::shared_ptr<Widget>` by value |
+| may or may not keep a copy | `const std::shared_ptr<Widget>&` |
+| reseats the caller's pointer | `std::shared_ptr<Widget>&` |
+
+The caller must guarantee the borrowed reference stays valid during the call, which is easy when its
+own `shared_ptr` outlives the call and impossible if the callee could reset that same pointer
+through some other path.
+
+## Conversions and casts
+
+`shared_ptr<Derived>` converts implicitly to `shared_ptr<Base>`. For downcasts and `const` changes
+use `std::static_pointer_cast`, `std::dynamic_pointer_cast`, `std::const_pointer_cast` and
+`std::reinterpret_pointer_cast` *(C++17)*: they return a `shared_ptr` that shares the control
+block. Casting the raw pointer out and into a new `shared_ptr` would create a second control block
+(see above). `dynamic_pointer_cast` returns an empty pointer if the dynamic type doesn't match.
+
+## Pitfalls
+
+- **Cycles leak.** If `A` holds a `shared_ptr<B>` and `B` holds a `shared_ptr<A>`, neither count
+  reaches zero. Make the back reference a [`weak_ptr`](./weak-ptr.md).
+- **Overuse.** `shared_ptr` everywhere makes lifetimes hard to reason about (the object dies at an
+  unpredictable point, possibly on another thread) and costs atomic traffic. Start from
+  `unique_ptr` and value members.
+- **Constructing from `this` or a raw pointer twice**, covered above.
+- **Concurrent reassignment of one `shared_ptr` variable**, covered above.
+- **`make_shared` plus long-lived `weak_ptr`s** pins the object's memory.
+- **Destruction cascades.** Dropping the last reference to the head of a long `shared_ptr` list
+  destroys nodes recursively and can overflow the stack. Unlink iteratively in the destructor.
+- **Callbacks that capture `shared_ptr` of their owner** create cycles. Capture a `weak_ptr` and
+  `lock()` it inside the callback.
+
+## Key points
+
+- Shared ownership via a control block with strong and weak counts; the object dies with the last strong owner.
+- Two pointers wide; copying is an atomic increment.
+- Prefer `make_shared`, unless you need a custom deleter or must free the memory before the last `weak_ptr` goes.
+- The deleter is type-erased; it is not part of the type.
+- Never build two `shared_ptr`s from one raw pointer; use `enable_shared_from_this`.
+- The counts are thread-safe; the pointee and a single `shared_ptr` object are not.
+
+## Related
+
+- [weak_ptr](./weak-ptr.md): the non-owning observer that breaks cycles and checks liveness.
+- [Custom deleters](./custom-deleters.md): per-object cleanup, and how it differs from `unique_ptr`.
+- [unique_ptr](./unique-ptr.md): the cheaper default when one owner is enough.
