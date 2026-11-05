@@ -57,7 +57,7 @@ once and the two results may have different types, which is what allows [sentine
 Categories say which operations an iterator supports, and therefore which algorithms can use it.
 They form a hierarchy: each adds to the one before.
 
-<Diagram title="Iterator category hierarchy" caption="Output is a separate branch: it only writes. C++20 adds contiguous." accent="blue">
+<Diagram title="Iterator category hierarchy" caption="Output is a separate branch: it only writes. Contiguous refines random access." accent="blue">
   <DiagramRow>
     <DiagramNode title="Input">read once, single pass</DiagramNode>
     <DiagramArrow direction="right" />
@@ -78,7 +78,7 @@ They form a hierarchy: each adds to the one before.
 | Forward | multi-pass: copy it, advance both, both still valid and equal | `std::forward_list`, `unordered_*` |
 | Bidirectional | `--it` | `std::list`, `set`, `map` |
 | Random access | `it + n`, `it - n`, `it[n]`, `<`, `it2 - it1` in O(1) | `std::deque` |
-| Contiguous *(C++17)* | element addresses are `&*it + n`, adjacent in memory | `std::vector`, `std::array`, `std::string`, pointers |
+| Contiguous *(C++17 requirement; tag and concept in C++20)* | element addresses are `&*it + n`, adjacent in memory | `std::vector`, `std::array`, `std::string`, pointers |
 
 Multi-pass is the property algorithms like `std::adjacent_find` or `std::is_sorted` rely on, and
 the one a single-pass input stream cannot give.
@@ -169,7 +169,7 @@ int main() {
 
 ## Adaptor iterators
 
-These are output iterators that turn an assignment into an operation on a container or stream.
+These adaptors and stream iterators turn an assignment (or a read) into an operation on a container or stream.
 Each is created with a helper function (or by CTAD since C++17).
 
 | Iterator | `*it = x` does | Needs |
@@ -228,11 +228,10 @@ required.
 
 class CountIter {
 public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_concept  = std::forward_iterator_tag;   // what the C++20 concepts see
+    using iterator_category = std::input_iterator_tag;     // what legacy code sees: operator* returns a prvalue
     using value_type        = int;
     using difference_type   = std::ptrdiff_t;
-    using pointer           = const int*;
-    using reference         = int;                   // prvalue: so, strictly, input per legacy rules
 
     CountIter() = default;
     explicit CountIter(int v) : v_(v) {}
@@ -264,9 +263,9 @@ int main() {
 0 1 2 3 4 
 ```
 
-(Returning `int` by value is fine for the C++20 `std::forward_iterator` concept, but the legacy
-forward requirements demand a real reference, so pre-C++20 generic code may treat this type as an
-input iterator. Return `const int&` into stored elements when you need full legacy compatibility.)
+(Because `operator*` returns a prvalue, the type is a legacy input iterator but a C++20 forward
+iterator, exactly like `views::iota`'s. Return a real reference to stored elements if you need it to be a
+legacy forward iterator too.)
 Deriving from `std::iterator` is deprecated since C++17: define
 the five typedefs yourself.
 
