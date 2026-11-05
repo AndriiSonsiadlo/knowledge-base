@@ -113,13 +113,55 @@ semantics (copyable, comparable, no decay to a pointer). It is an aggregate, so
 
 `deque` keeps elements in fixed-size blocks, so growing at either end never moves existing
 elements, and `operator[]` costs a little more than `vector`'s because of the two-level lookup. The
-block size is implementation-defined (libstdc++ uses 512-byte blocks; libc++ uses larger ones).
+block size is implementation-defined (libstdc++ uses 512-byte blocks; libc++ uses 4096-byte blocks for small elements, from its source, not tested here).
 
 `list` and `forward_list` allocate a node per element. Their selling point is not "fast insertion":
 it is that **insertion, erasure and `splice` never move elements and never invalidate other
 iterators**, and `splice`, `merge`, `reverse` and `remove` relink nodes. Searching a list is still
 linear, and each step chases a pointer, so a `vector` often beats a `list` even for middle
 insertion on small to medium sizes. Measure before choosing a list for speed.
+
+### `std::span` *(C++20)* \{#std-span\}
+
+`std::span<T, Extent>` (`<span>`) is **not a container**: it is a non-owning `{pointer, size}` view of
+contiguous elements owned by someone else (a `vector`, `array`, C array, or another span). Elements
+are accessed and modified through it, and copying a span copies two words. The default
+`Extent = std::dynamic_extent` stores the size at run time; `std::span<T, 4>` fixes it in the type and
+stores only the pointer. `std::span<const T>` is the read-only form, and it is the natural
+parameter type for "a sequence of `T`, however it is stored", accepting a `vector`, an `array` and a
+C array with no template and no copy.
+
+```cpp title="span.cpp" showLineNumbers
+#include <array>
+#include <iostream>
+#include <span>
+#include <vector>
+
+int sum(std::span<const int> data) {
+    int total = 0;
+    for (int x : data) total += x;
+    return total;
+}
+
+int main() {
+    std::vector<int> v{1, 2, 3, 4};
+    std::array<int, 3> a{10, 20, 30};
+    int raw[]{100, 200};
+    std::cout << sum(v) << ' ' << sum(a) << ' ' << sum(raw) << '\n';
+    std::cout << sum(std::span{v}.subspan(1, 2)) << ' ' << sum(std::span{v}.first(1)) << '\n';
+}
+```
+
+```text
+10 60 300
+5 1
+```
+
+`first(n)`, `last(n)` and `subspan(offset, count)` return sub-views in O(1); `operator[]` is not
+bounds-checked. Because a span borrows, it has the same lifetime hazard as
+[`string_view`](./strings.md#stdstring_view-c17): it dangles if the owner dies, or if a `vector`
+reallocates (see the invalidation table below). Never return a span of a local array, and do not
+store one in a long-lived object unless you control the owner's lifetime.
 
 ## Ordered associative containers
 
@@ -200,7 +242,7 @@ a chained hash table; open-addressing tables such as `absl::flat_hash_map` are n
 replacements.
 
 The container **rehashes** when `size() > bucket_count() * max_load_factor()` (the default maximum
-load factor is 1.0). `reserve(n)` sizes the table up front so that `n` insertions cannot rehash.
+load factor is 1.0). `reserve(n)` sizes the table up front so that the container can hold `n` elements in total without rehashing.
 
 A custom key type needs a hash and an equality, passed as template arguments or via a `std::hash`
 specialization. Equal keys must have equal hashes.
