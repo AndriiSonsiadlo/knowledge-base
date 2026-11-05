@@ -19,13 +19,12 @@ initialization always ends with a defined value: zero for scalars, and a constru
 
 ## The rules
 
-What value initialization does depends on the type, in this order (C++11 wording, as refined by
-C++20):
+What value initialization does depends on the type, in this order. The rules took their current
+shape with CWG 1301 and 1368 (C++14), and the aggregate case of `T{}` with CWG 1467:
 
 | `T` is | Effect |
 |---|---|
-| Class with **no default constructor** (only other constructors) | Ill-formed for `T()`. For `T{}` an aggregate would be aggregate-initialized instead. |
-| Class with a **user-provided** default constructor | Call it. No zeroing first. |
+| Class with no default constructor, or a **user-provided** or **deleted** one | [Default-initialize](./default-initialization.md): call it, or ill-formed if there is none or it is deleted. No zeroing first. For `T{}` the braced-list rules apply first, see [uniform initialization](./uniform-initialization.md). |
 | Class with an implicit, defaulted, or `= default` on first declaration default constructor, no user-provided one | **Zero-initialize** the object, then, if the default constructor is non-trivial, call it. |
 | Array | Value-initialize each element. |
 | Anything else (`int`, pointer, enum, `double`) | **Zero-initialize.** |

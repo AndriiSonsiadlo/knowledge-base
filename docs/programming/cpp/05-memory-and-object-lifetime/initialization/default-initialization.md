@@ -9,8 +9,7 @@ tags: [c++, initialization, default-init, indeterminate-value, constructors]
 # Default Initialization
 
 **Default initialization** is what happens when an object is created with **no initializer at all**:
-`T x;`, `new T`, a member or base missing from a constructor's member-initializer list, or an array
-element beyond the ones given. The rule splits sharply by type. A class type runs its **default
+`T x;`, `new T`, or a member or base missing from a constructor's member-initializer list. The rule splits sharply by type. A class type runs its **default
 constructor**. A non-class type, such as `int`, a pointer or an array of them, is left with an
 **indeterminate value**, whatever bytes were in that storage before. This page owns that rule. The
 other three pages cover the forms that avoid it: [value](./value-initialization.md),
@@ -67,7 +66,7 @@ why this page prints none.
 :::info[C++26: erroneous behavior]
 C++26 (P2795R5) changes the rule for automatic variables: reading one that was not initialized is no
 longer plain undefined behavior but **erroneous behavior**. The implementation gives the bytes a
-fixed, implementation-defined value and may diagnose the read. `[[indeterminate]]` opts a variable
+fixed value of its choosing and may diagnose the read. `[[indeterminate]]` opts a variable
 out. Until your compiler implements it, treat every uninitialized read as undefined behavior.
 :::
 
@@ -152,14 +151,15 @@ S s;                   // error: S's implicit default constructor is deleted
 
 A class gets an implicitly **deleted** default constructor when a member or base cannot be
 default-initialized: a reference member without a default member initializer, a `const` member
-without one, or a member or base type that itself has no usable default constructor. Declaring any
+without one whose type is not itself const-default-constructible (a `const std::string` member is
+fine), a variant member in some cases, or a member or base type that itself has no usable default constructor. Declaring any
 constructor also suppresses the implicit one, so adding `Foo(int)` to a class makes `Foo f;` an error
 unless you also write `Foo() = default;`.
 
 ### `const` objects
 
 A `const` object must be initialized, and default-initializing it is only allowed when the type is
-**const-default-constructible**: a class whose every member has a default member initializer or is
+**const-default-constructible**: a class whose every member and base class has a default member initializer or is
 itself const-default-constructible (C++17, CWG 253), or a class with a user-provided default
 constructor.
 
@@ -231,7 +231,7 @@ else, initialize.
 - No initializer means default initialization: a class runs its default constructor, everything else
   stays indeterminate.
 - Static and thread storage objects are zeroed first. Automatic and dynamic ones are not.
-- Reading an indeterminate value is undefined behavior (erroneous behavior in C++26, still a bug).
+- Reading an indeterminate value is undefined behavior (erroneous behavior for automatic variables in C++26, still a bug).
 - A class with no usable default constructor cannot be default-initialized, and a `const` object can
   be only if every member is initialized by something.
 - Default member initializers remove the indeterminate-member problem for every constructor at once.
