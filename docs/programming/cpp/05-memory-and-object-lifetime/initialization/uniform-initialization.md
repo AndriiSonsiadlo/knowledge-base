@@ -3,235 +3,199 @@ id: uniform-initialization
 title: Uniform Initialization
 sidebar_label: Uniform Initialization
 sidebar_position: 4
-tags: [c++, initialization, uniform-init, cpp11, braces]
+tags: [c++, initialization, brace-init, list-initialization, narrowing, initializer-list]
 ---
 
 # Uniform Initialization
 
-C++11 brace initialization `{}` - one syntax for all types. Consistent, safe (prevents narrowing), solves gotchas.
+C++11 added **list initialization**: initializing with a braced list, `T x{args}` or `T x = {args}`.
+It was marketed as "uniform" because the same syntax works for scalars, aggregates, containers and
+classes with constructors. The syntax is uniform, the semantics are not: braces pick *different
+initialization forms* depending on the type, and they carry two special rules, a **ban on narrowing
+conversions** and a strong **preference for `std::initializer_list` constructors**. This page owns
+those rules. The forms braces dispatch to are on the other pages of this section.
 
-:::success[One Syntax, Everywhere]
-Braces `{}` work for any type: fundamentals, aggregates, classes, arrays, containers. Prevents narrowing conversions.
-:::
+**Prerequisites:** [Default](./default-initialization.md), [value](./value-initialization.md) and
+[aggregate](./aggregate-initialization.md) initialization.
 
-## Motivation: Multiple Syntaxes → One
-```cpp showLineNumbers
-// Pre-C++11: confusing variety
-int a = 5;
-int b(5);
-int c[] = {1, 2, 3};
-Widget w(10);
-std::vector<int> v; v.push_back(1);
+## What braces do
 
-// C++11: uniform braces
-int a{5};
-int b{5};
-int c[]{1, 2, 3};
-Widget w{10};
-std::vector<int> v{1, 2, 3};  // Direct!
+For `T x{...}` the compiler picks the first row that applies (C++20 wording, simplified):
+
+| Condition | Result |
+|---|---|
+| `T` is an aggregate and the list is one element of the same or derived type | Copy/initialize from that element (CWG 1467) |
+| Empty braces and `T` has a default constructor | [Value-initialization](./value-initialization.md) |
+| `T` is an aggregate | [Aggregate initialization](./aggregate-initialization.md) |
+| `T` has `std::initializer_list` constructors | Try those first, with the whole list as one argument |
+| Otherwise, `T` is a class | Overload resolution over all constructors with the list elements as arguments |
+| `T` is a scalar with one element | Initialize from it, but narrowing is an error |
+| `T` is a scalar with an empty list | Value-initialization: zero |
+
+Direct-list-initialization is `T x{...}`, copy-list-initialization is `T x = {...}`. They differ only
+in that copy-list-initialization is ill-formed if the selected constructor is `explicit`.
+
+## Narrowing is an error \{#narrowing\}
+
+A **narrowing conversion** is an implicit conversion that can lose information. Inside braces it is
+ill-formed, where parentheses and `=` accept it silently:
+
+```cpp title="narrowing.cpp" showLineNumbers
+#include <iostream>
+
+int main() {
+    double d = 3.9;
+    int a = d;              // OK: truncates to 3, silently
+    int b(d);               // OK: same
+    // int c{d};            // error: narrowing double -> int
+    int e{static_cast<int>(d)};   // explicit cast: OK
+
+    constexpr int big = 300;
+    char ok{65};            // OK: constant that fits in char
+    // char no{big};        // error: 300 does not fit in char
+    float f{1};             // OK: int constant 1 fits float exactly
+
+    std::cout << a << b << e << ' ' << int(ok) << ' ' << f << '\n';
+}
 ```
 
-## Basic Syntax
-```cpp showLineNumbers
-int x{42};
-double d{3.14};
-std::string s{"hello"};
-int arr[]{1, 2, 3, 4, 5};
-std::vector<int> vec{1, 2, 3};
-Widget w{10, 20};
+```text
+333 65 1
 ```
 
-**Rule**: Braces work everywhere, same syntax.
+The cases that count as narrowing: floating to integer; `long double` to `double` or `float`, or
+`double` to `float`, unless the source is a constant that fits (in range, even if inexact); integer
+to floating type unless a constant that is exactly representable; integer to a narrower integer, or
+signed/unsigned change, unless a constant that fits. Compilers may report it only as a warning
+(GCC does for non-constants, with `-Wnarrowing`), but the standard requires a diagnostic and Clang
+makes it an error. Treat it as an error.
 
-## Prevents Narrowing Conversions
+## Braces and `std::initializer_list`
 
-Catches silent data loss at compile-time.
-```cpp showLineNumbers
-// Old style: silent truncation
-int x = 3.14;    // OK but x = 3 (data loss)
-double d = 1000000;
-int i = d;       // OK but dangerous
+If a class has a constructor taking `std::initializer_list<E>` as its first parameter, braces try it
+**first**, before any other constructor, even when another constructor would be a better match:
 
-// Braces: compile error
-int y{3.14};     // Error: narrowing
-int j{d};        // Error: narrowing
+```cpp title="init-list.cpp" showLineNumbers
+#include <initializer_list>
+#include <iostream>
+#include <vector>
 
-char c = 1000;   // OK but truncated
-char d{1000};    // Error: narrowing
-```
-
-**Benefit**: Catches bugs at compile-time, not runtime.
-
-## Safe Zero Initialization
-
-Empty braces = value-initialization (zero for fundamentals).
-```cpp showLineNumbers
-int x{};        // 0
-double d{};     // 0.0
-bool b{};       // false
-int* ptr{};     // nullptr
-
-std::string s{};       // Default constructor
-std::vector<int> v{};  // Default constructor
-```
-
-**Safe**: No indeterminate values, explicit intent.
-
-## Solves Most Vexing Parse
-```cpp showLineNumbers
-// Pre-C++11
-Widget w();  // Function declaration, not object!
-
-// C++11
-Widget w{};  // Unambiguous: creates object
-```
-
-**Fix**: Braces cannot declare functions, always create objects.
-
-## STL Containers
-```cpp showLineNumbers
-// Direct initialization with values
-std::vector<int> v{1, 2, 3, 4, 5};
-std::set<std::string> names{"Alice", "Bob"};
-std::map<int, std::string> m{{1, "one"}, {2, "two"}};
-
-// vs Pre-C++11 verbosity
-std::vector<int> old;
-old.push_back(1);
-old.push_back(2);
-// ...
-```
-
-## Initializer List Priority
-
-Braces prefer `std::initializer_list` constructor.
-```cpp showLineNumbers
-std::vector<int> v1(10);     // 10 zeros
-std::vector<int> v2{10};     // One element: 10
-
-std::vector<int> v3(10, 5);  // 10 elements, each = 5
-std::vector<int> v4{10, 5};  // Two elements: 10, 5
-```
-
-**Important**: Braces create element lists, parentheses call constructors.
-
-### Constructor Overload Priority
-```cpp showLineNumbers
-class Widget {
-public:
-    Widget(int x, int y) {
-        std::cout << "Regular: " << x << ", " << y << "\n";
-    }
-    
-    Widget(std::initializer_list<int> list) {
-        std::cout << "List: " << list.size() << " elements\n";
-    }
+struct Widget {
+    Widget(int, int)                       { std::cout << "Widget(int, int)\n"; }
+    Widget(std::initializer_list<int>)     { std::cout << "Widget(initializer_list)\n"; }
 };
 
-Widget w1(10, 20);   // Regular: 10, 20
-Widget w2{10, 20};   // List: 2 elements (prefers initializer_list!)
+struct Plain {
+    Plain(int, int) { std::cout << "Plain(int, int)\n"; }
+};
+
+int main() {
+    Widget a(1, 2);                 // parentheses: constructor (int, int)
+    Widget b{1, 2};                 // braces: initializer_list wins
+    Widget c = {1, 2};              // same
+    Plain  d{1, 2};                 // no initializer_list ctor: ordinary overload resolution
+
+    std::vector<int> v1(3, 7);      // 3 elements, all 7
+    std::vector<int> v2{3, 7};      // 2 elements: 3 and 7
+    std::cout << v1.size() << v2.size() << '\n';
+}
 ```
 
-**Rule**: Braces always prefer `initializer_list` constructor when available.
-
-## When to Use Each
-
-| Syntax | Use For |
-|--------|---------|
-| `{}` braces | Default choice (safe, consistent) |
-| `()` parens | Container sizing, avoid `initializer_list` |
-```cpp showLineNumbers
-// Prefer braces (safety)
-int x{42};
-std::string s{"hello"};
-std::vector<int> v{1, 2, 3};  // Element list
-
-// Use parentheses for sizing
-std::vector<int> v(100);      // 100 zeros
-std::string s(10, 'x');       // "xxxxxxxxxx"
-
-// Avoid initializer_list constructor
-Widget w(10, 20);  // Call Widget(int, int)
+```text
+Widget(int, int)
+Widget(initializer_list)
+Widget(initializer_list)
+Plain(int, int)
+32
 ```
 
-## Copy List Initialization
-```cpp showLineNumbers
-int x = {42};
-std::string s = {"hello"};
-std::vector<int> v = {1, 2, 3};
+The preference is strong. If the `initializer_list` constructor is viable at all, even after a
+conversion, it wins. If it is viable only through a narrowing conversion, the program is ill-formed
+rather than falling back to another constructor. Only when no `initializer_list` constructor is
+viable at all does overload resolution continue with the others.
 
-// Still prevents narrowing
-int y = {3.14};  // Error
+Empty braces are the exception: `Widget e{};` calls the **default constructor**, not an
+`initializer_list` one with zero elements.
+
+The practical consequence is for library types: `std::vector<int>{3, 7}` and
+`std::vector<int>(3, 7)` build different things. Use parentheses when you mean "size, value".
+
+## What the braces buy you
+
+**Containers.** Braces are how you give a standard container its elements:
+
+```cpp title="containers.cpp" showLineNumbers
+#include <iostream>
+#include <map>
+#include <string>
+#include <vector>
+
+int main() {
+    std::vector<int> v{1, 2, 3};
+    std::map<std::string, int> m{{"a", 1}, {"b", 2}};
+    std::cout << v.size() << m.size() << m.at("b") << '\n';
+}
 ```
 
-## Quick Decision Guide
-```mermaid
-graph TD
-    A[Need initialization?] -->|Safety| B["Use braces {}"]
-    B -->|Exception 1| C[Container sizing]
-    B -->|Exception 2| D[Avoid initializer_list]
-    
-    C --> E[Use parentheses]
-    D --> E
-    
+```text
+322
 ```
 
-## Key Benefits Summary
+**The most vexing parse.** `Widget w();` declares a function. `Widget w{};` cannot be read that way,
+and it also value-initializes:
 
-| Feature | Benefit |
-|---------|---------|
-| **Uniform syntax** | Works everywhere |
-| **Narrowing prevention** | Catches type errors |
-| **Zero initialization** | Safe defaults with `{}` |
-| **Most vexing parse** | Solved |
-| **STL containers** | Direct initialization |
+```cpp title="vexing.cpp" showLineNumbers
+struct Timer { Timer() {} };
+struct Clock { Clock(Timer) {} };
 
-## Common Gotchas
-```cpp showLineNumbers
-// 1. Initializer list priority
-std::vector<int> v{10};  // ONE element, not size!
+Clock c1(Timer());      // declares a function taking a function! (most vexing parse)
+Clock c2{Timer{}};      // an object
 
-// 2. Narrowing errors (feature, not bug)
-int x{3.14};  // Error (this is good!)
-
-// 3. Empty braces call default constructor
-Widget w{};  // Calls Widget(), not Widget(initializer_list)
+int main() {
+    Timer t();          // declares a function
+    Timer u{};          // an object
+    (void)c2; (void)u;
+}
 ```
 
-## Summary
+**Returning and passing.** A braced list can initialize a return value or argument when the target
+type is known: `return {1, 2};`, `f({1, 2})`. With `explicit` constructors, this is rejected, which is
+usually the point.
 
-:::info[Uniform Initialization - Key Points]
-**One Syntax for All Types:**
-- Fundamentals: `int x{42};`
-- Arrays: `int arr[]{1, 2, 3};`
-- Classes: `Widget w{10, 20};`
-- Containers: `std::vector<int> v{1, 2, 3};`
-- Empty braces: `int x{};` → zero-initialized
+## `auto` and braces
 
-**Key Safety Features:**
-- **Prevents narrowing**: `int x{3.14};` → compile error
-- Catches data loss at compile-time (not runtime)
-- Forces explicit casts for type conversions
-- Safer than traditional `=` or `()` syntax
+`auto x{1}` deduces `int` and `auto x = {1}` deduces `std::initializer_list<int>` (C++17 rules,
+N3922, applied retroactively as a defect report). The rules, and why `auto x{1, 2}` is an error, are
+in [auto](../../03-types-and-values/type-deduction/auto.md#braced-initializers).
 
-**Solves Language Gotchas:**
-- **Most vexing parse**: `Widget w{};` unambiguously creates object
-- Traditional: `Widget w();` declares function
-- **Direct container init**: No more verbose push_back loops
+## Choosing a form
 
-**Initializer List Priority:**
-- Braces prefer `std::initializer_list` constructor
-- `vector<int> v{10}` → one element (10), not size
-- `vector<int> v(10)` → ten zeros
-- Use parentheses to avoid initializer_list constructor
+| You want | Write | Note |
+|---|---|---|
+| Zero or default object | `T x{};` | Value-initialization, no most vexing parse |
+| Specific scalar value, no silent loss | `int n{expr};` | Narrowing is rejected |
+| Aggregate | `Point p{1, 2};` or `.x = 1` designators (C++20) | [Aggregate page](./aggregate-initialization.md) |
+| Container with elements | `std::vector<int> v{1, 2, 3};` | Uses `initializer_list` |
+| Container with size and fill | `std::vector<int> v(n, 0);` | Braces would mean two elements |
+| Class with an explicit single-argument constructor | `T x{arg};` | `T x = {arg};` is an error |
+| Hot generic code that must accept narrowing | `T x(args)` | Parentheses |
 
-**When to Use Each:**
-- **Braces `{}`**: Default choice (safe, consistent)
-- **Parentheses `()`**: Container sizing, avoid initializer_list
-- **Assignment `=`**: Legacy code, simple cases
+## Pitfalls
 
-**Common Gotchas:**
-- Empty braces call default ctor, not initializer_list
-- Narrowing errors are features, not bugs
-- Vector sizing requires parentheses: `vector<int>(100)`
-  :::
+| Mistake | Why it is wrong | Fix |
+|---|---|---|
+| `std::vector<int> v{10, 0}` meaning ten zeros | Braces mean the two elements `10` and `0` | `std::vector<int> v(10, 0)` |
+| Adding an `initializer_list` constructor to an existing class | Every `T{a, b}` call site silently re-targets | Audit braced call sites, or keep both forms explicit |
+| `int n{x}` with `double x` | Narrowing: ill-formed | Cast deliberately, or use `=` if truncation is intended |
+| `T x = {a}` with an `explicit` constructor | Copy-list-initialization rejects `explicit` constructors | `T x{a};` |
+| Expecting `Widget{}` to call the `initializer_list` constructor | Empty braces select the default constructor | Pass an explicit empty list: `Widget{std::initializer_list<int>{}}` |
+| `auto v = {1, 2}` expecting a vector | Deduces `std::initializer_list<int>` | Name the type |
+| Storing an `initializer_list` returned from a function | Its backing array is a temporary and dies at the end of the full-expression (or with the variable it initialized) | Copy into a container |
+
+## Key points
+
+- Braces select the form: value, aggregate, `initializer_list` constructor, or ordinary constructor.
+- Narrowing conversions inside braces are ill-formed. Constants that fit are allowed.
+- `std::initializer_list` constructors win over all others when braces are used, except for `{}`.
+- `std::vector<int>{3, 7}` and `std::vector<int>(3, 7)` are different objects.
+- Empty braces call the default constructor, which also avoids the most vexing parse.
