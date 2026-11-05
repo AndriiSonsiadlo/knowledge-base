@@ -14,15 +14,14 @@ declared or created. It decides when the object is initialized, when it is destr
 order relative to other objects. Getting the order wrong is the cause of the "static initialization
 order fiasco" and of crashes at program exit.
 
-**Prerequisites:** [Process memory overview](./memory-model-overview.md) (where each duration is
-usually stored).
+**Prerequisites:** [Memory model overview](./memory-model-overview.md) (objects, storage and bytes).
 
 ## The four durations
 
 | Duration | Declared as | Storage exists | Typical location |
 |---|---|---|---|
 | Automatic | Block-scope variable without `static`/`thread_local`/`extern`; function parameters | From block entry to block exit | Stack (or registers) |
-| Static | Namespace-scope variable; any variable declared `static` or `extern` | Whole program run | `.data` / `.bss` |
+| Static | Namespace-scope variable; block-scope `static` local; `static` data member; block-scope `extern` declaration (names an object defined elsewhere) | Whole program run | `.data` / `.bss` |
 | Thread *(C++11)* | Any variable declared `thread_local` | Lifetime of the thread | Per-thread TLS block |
 | Dynamic | Object created by a `new`-expression or by an allocator | Until it is explicitly released | Heap |
 
@@ -33,6 +32,106 @@ storage duration, even though the characters it owns are on the heap with dynami
 Storage existing does not mean the object exists. An object's lifetime starts when its
 initialization finishes and ends when its destructor starts, which is a shorter span inside the
 storage duration. See [Object lifetime](./object-lifetime.md).
+
+## Linkage is not storage duration
+
+Storage duration is about **lifetime**: how long the object exists. **Linkage** is about **names**:
+whether a declaration in another translation unit refers to the same entity (see
+[Translation units](../01-toolchain-and-build/translation-units.md)). The two are independent.
+
+- A namespace-scope variable always has static duration. `static` there only gives it **internal
+  linkage**; the object is the same kind of object, just invisible to other files. An unnamed
+  namespace has the same effect, and is the preferred spelling.
+- A namespace-scope `const` (non-`inline`, non-`extern`) variable has internal linkage and static
+  duration. `extern const int n = 1;` gives it external linkage.
+- A variable with external linkage is shared by name across files; other files declare it with
+  `extern`. `extern int n;` is a declaration only, with no definition.
+- `inline` variables *(C++17)* have external linkage and exactly one object program-wide, even if
+  defined in a header included by many files. Without `inline`, a non-const header variable would
+  violate the one definition rule.
+- `static` therefore means two things: at namespace scope it selects linkage, at block scope it
+  selects static duration (`static int id` inside a function; the name has no linkage).
+
+```cpp title="linkage.cpp" showLineNumbers
+static int hidden = 1;          // static duration, internal linkage
+namespace { int also_hidden = 2; }   // same
+const int limit = 3;            // static duration, internal linkage (const)
+inline int shared = 4;          // static duration, external linkage, one object (C++17)
+int visible = 5;                // static duration, external linkage
+
+int f() { static int calls = 0; return ++calls; }   // static duration, no linkage
+
+int main() { return hidden + also_hidden + limit + shared + visible + f() - 16; }   // returns 0
+```
+
+## Where implementations put each duration
+
+The standard defines the four durations and says nothing about a stack, a heap or segments. The
+layout below is what you get on Linux with an ELF executable on x86-64. Other platforms use the same
+ideas with different names and addresses.
+
+<Diagram title="Typical process address space (high addresses at the top)" caption="Typical for Linux/ELF, not mandated by the standard. Each thread gets its own stack. Shared libraries and memory-mapped files sit in the gap between heap and stack." accent="blue">
+  <DiagramNode icon="layers" title="Stack" accent>Automatic storage: locals, parameters, return addresses. Grows down. One per thread.</DiagramNode>
+  <DiagramArrow label="free gap: mmap regions, shared libraries" dashed />
+  <DiagramNode icon="boxes" title="Heap">Dynamic storage: `new`, `malloc`, container buffers. Grows up.</DiagramNode>
+  <DiagramGroup label="Static storage (from the executable file)">
+    <DiagramNode icon="binary" title=".bss">Zero-initialized statics. Takes no space in the file.</DiagramNode>
+    <DiagramNode icon="file-text" title=".data">Statics with a non-zero initial value.</DiagramNode>
+    <DiagramNode icon="lock" title=".rodata">String literals, constant tables. Read-only.</DiagramNode>
+  </DiagramGroup>
+  <DiagramNode icon="cpu" title=".text">Machine code. Read-only and executable, shared between processes running the same file.</DiagramNode>
+</Diagram>
+
+| Duration | Usually placed in | Created | Released |
+|---|---|---|---|
+| Automatic | Stack, or a register | Function entry or declaration reached | Scope exit |
+| Static, zero or no initializer | `.bss` | Load time, zero-filled by the loader | Process exit |
+| Static, non-zero constant initializer | `.data` (or `.rodata` if `const`) | Load time, copied from the file | Process exit |
+| Static, dynamic initializer | `.bss`, filled by startup code | Before `main` (or at first use for a local) | Process exit |
+| Thread | Per-thread TLS block | Thread start or first use | Thread exit |
+| Dynamic | Heap (allocator, which gets pages from the OS) | `new`, `malloc` | `delete`, `free` |
+
+String literals are themselves static objects, normally in `.rodata`; a `const char*` that points
+to one is a separate object with its own storage.
+
+### Stack and heap
+
+Most day-to-day decisions are between automatic and dynamic storage.
+
+| | Stack | Heap |
+|---|---|---|
+| Allocation | Adjusting the stack pointer, once per call for all locals | A call into the allocator (`operator new`, `malloc`) that searches its free lists, may take a lock, and may ask the OS for pages |
+| Release | Automatic at scope exit, reverse order | Explicit (`delete`) or by an owner such as `std::unique_ptr` or `std::vector` |
+| Size limit | Small and fixed per thread: the Linux main thread's limit is `ulimit -s`, 8 MiB by default; MSVC links a 1 MiB default | Limited by available virtual memory |
+| Size known | At compile time (VLAs are not standard C++) | At run time |
+| Lifetime control | Tied to the scope | Any lifetime you arrange |
+| Failure mode | Stack overflow, usually `SIGSEGV` | `std::bad_alloc` (or `nullptr` with `std::nothrow`) |
+| Typical bugs | Pointer or reference to a returned local | Leaks, double `delete`, use after free |
+
+Heap allocation costs more than stack allocation, but by how much depends on the allocator, the
+size and the access pattern, so measure rather than assume a ratio. Default to automatic storage.
+Use dynamic storage when the size is known only at run time or is too large for the stack, when the
+object must outlive its scope, or when its dynamic type is chosen at run time, and let an owning
+type manage it.
+
+The addresses below show the layout on a typical Linux run. Absolute values change every run
+(address-space layout randomization); the relative order is what to look at.
+
+```cpp title="regions.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+
+int initialized = 42;          // .data
+int zeroed;                    // .bss
+
+int main() {
+    int local = 1;                          // stack
+    auto heap = std::make_unique<int>(2);   // the int is on the heap, `heap` itself on the stack
+    std::printf("data  %p\nbss   %p\nheap  %p\nstack %p\n",
+                static_cast<void*>(&initialized), static_cast<void*>(&zeroed),
+                static_cast<void*>(heap.get()), static_cast<void*>(&local));
+}
+```
 
 ## Automatic storage
 
@@ -72,9 +171,9 @@ Namespace-scope variables, `static` data members and `static` locals all have st
 duration. They are initialized in two phases:
 
 1. **Static initialization**, done before any other code runs. Every static object is first
-   **zero-initialized** (see [Value initialization](./initialization/value-initialization.md#zero-initialization)).
-   If its initializer is a constant expression, it gets **constant initialization** instead, and
-   the value is usually baked into `.data` by the compiler.
+   **zero-initialized** (see [Value initialization](./initialization/value-initialization.md)).
+   Then, if the object has a constant initializer, **constant initialization** gives it that
+   value, usually baked into `.data` by the compiler.
 2. **Dynamic initialization** for the rest: initializers that call non-`constexpr` functions or
    constructors run at run time, before the first use of anything in their translation unit (in
    practice, before `main` for ordinary globals).
@@ -295,7 +394,7 @@ global destroyed
 
 ## Key points
 
-- Four durations: automatic (scope), static (program), thread (thread), dynamic (until `delete`).
+- Four durations: automatic (scope), static (program), thread (thread), dynamic (until `delete`). Stack, heap and `.data`/`.bss` are how typical implementations provide them, not part of the standard.
 - Statics are zero-initialized first, then constant or dynamic initialized. Only dynamic
   initialization has ordering problems.
 - `constinit` *(C++20)* and function-local statics remove cross-file order dependencies.
