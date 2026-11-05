@@ -3,446 +3,224 @@ id: ranges
 title: Ranges Library
 sidebar_label: Ranges
 sidebar_position: 4
-tags: [c++, stl, ranges, cpp20, views, algorithms, pipelines]
+tags: [c++, c++20, c++23, ranges, views, pipelines, lazy-evaluation, projections, sentinels]
 ---
 
-# Ranges
+# Ranges Library
 
-**Ranges** (C++20) is a modern library that provides composable, lazy-evaluated operations on sequences. It replaces traditional iterator pairs with range objects and introduces **views** for efficient data transformation pipelines.
+A **range** is anything you can iterate with `begin()` and `end()`. C++20 turns that informal
+idea into concepts, adds algorithms that take the whole range instead of an iterator pair, and adds
+**views**: lazy, non-owning adaptors that you chain with `|` to build a pipeline without writing
+intermediate containers. This page is the canonical home for `<ranges>`, `std::ranges::` algorithms,
+and the C++23 additions. The underlying iterator machinery is on [Iterators](./iterators.md) and
+the classic iterator-pair algorithms are on [Algorithms](./algorithms.md).
 
-## Why Ranges?
+**Prerequisites:** [Iterators](./iterators.md), [Algorithms](./algorithms.md),
+[concepts](../08-templates-and-metaprogramming/concepts-and-requires.md),
+[lambdas](../07-classes-and-oop/lambdas.md).
 
-Traditional STL algorithms require iterator pairs, which is verbose and error-prone. Ranges simplify this:
-```cpp showLineNumbers 
-#include <vector>
+## Range concepts
+
+`std::ranges::range<R>` holds when `std::ranges::begin(r)` and `std::ranges::end(r)` are valid. The
+end may be a [sentinel](./iterators.md#sentinels-c20) of a different type than the iterator. Refinements
+mirror the iterator categories: `input_range`, `forward_range`, `bidirectional_range`,
+`random_access_range`, `contiguous_range`. Orthogonal ones:
+
+| Concept | Meaning |
+|---|---|
+| `sized_range` | `ranges::size(r)` is available in O(1) |
+| `common_range` | iterator and sentinel have the same type (needed to call legacy iterator-pair APIs) |
+| `view` | cheap to copy/move (O(1)), and non-owning in the typical case |
+| `borrowed_range` | iterators stay valid after the range object dies (`string_view`, `span`, `subrange`) |
+
+`std::ranges::begin`/`end`/`size`/`empty`/`data` are customization point objects: they work on
+containers, C arrays and anything with member or free `begin`/`end`.
+
+## Range algorithms
+
+`std::ranges::sort`, `find`, `copy`, `count_if` and so on live in `<algorithm>` and mirror the classic
+ones, with three differences:
+
+1. They take a range (`std::ranges::sort(v)`) or an iterator/sentinel pair.
+2. They accept **projections**: a callable applied to each element before the comparison or predicate.
+3. They are constrained with concepts, so misuse fails with a readable "constraint not satisfied"
+   message rather than deep template errors, and they are function objects, so ADL does not apply.
+
+They return richer results (for example `ranges::find` returns an iterator, and `ranges::copy`
+returns `{in, out}`), and passing a temporary range to an algorithm that returns an iterator yields
+`std::ranges::dangling` instead of a dangling iterator, unless the range is a `borrowed_range`.
+
+```cpp title="projection.cpp" showLineNumbers
 #include <algorithm>
-#include <ranges>
-
-std::vector<int> nums = {1, 2, 3, 4, 5};
-
-// Old way: iterator pairs
-std::sort(nums.begin(), nums.end());
-
-// New way: ranges
-std::ranges::sort(nums);
-```
-
-:::success[**Benefits:**]
-- More concise syntax
-- Composable operations (pipelines)
-- Lazy evaluation (no intermediate containers)
-- Better compile-time error messages
-  :::
-
-## Range Concepts
-
-Ranges are defined by **concepts** that specify requirements:
-```mermaid
-graph TD
-    A[range] --> B[input_range]
-    B --> C[forward_range]
-    C --> D[bidirectional_range]
-    D --> E[random_access_range]
-    E --> F[contiguous_range]
-    
-    A --> G[output_range]
-    E --> H[sized_range]
-```
-```cpp showLineNumbers 
-#include <ranges>
+#include <iostream>
+#include <string>
 #include <vector>
-#include <list>
 
-template<std::ranges::range R>
-void process(R&& r) {
-    // Works with any range
+struct Person { std::string name; int age; };
+
+int main() {
+    std::vector<Person> p{{"Ann", 30}, {"Bob", 25}, {"Cy", 41}};
+
+    std::ranges::sort(p, std::less{}, &Person::age);         // projection: member pointer
+    auto it = std::ranges::find(p, "Cy", &Person::name);     // compares p[i].name == "Cy"
+
+    for (const auto& x : p) std::cout << x.name << ' ';
+    std::cout << '\n' << (it != p.end() ? it->age : -1) << '\n';
 }
-
-// Different range types
-std::vector<int> vec;        // random_access_range
-std::list<int> lst;          // bidirectional_range
-std::istream_iterator<int> it; // input_range
 ```
+
+```text
+Bob Ann Cy 
+41
+```
+
+The projection changes what is compared, not what is moved: the elements stay whole `Person`s.
 
 ## Views
 
-**Views** are lightweight, lazy-evaluated range adaptors. They don't own data and operations are performed on-demand.
+A **view** describes a transformation of another range and does nothing until you iterate it. It
+stores the underlying range by reference or by cheap copy, so building a view does not
+copy elements. Elements are produced on demand, one at a time, as you pull from the end of the pipeline.
 
-### Basic Views
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
+<Diagram title="A lazy pipeline: one element flows through at a time" accent="blue">
+  <DiagramRow>
+    <DiagramNode title="vector">1 2 3 4 5 6</DiagramNode>
+    <DiagramArrow direction="right" label="filter: even" />
+    <DiagramNode title="filter view" accent>no storage</DiagramNode>
+    <DiagramArrow direction="right" label="transform: x*x" />
+    <DiagramNode title="transform view" accent>no storage</DiagramNode>
+    <DiagramArrow direction="right" label="for loop pulls" />
+    <DiagramNode title="4, 16, 36" />
+  </DiagramRow>
+</Diagram>
+
+```cpp title="pipeline.cpp" showLineNumbers
 #include <iostream>
-
-void basicViews() {
-    std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    
-    // Filter: select elements
-    auto evens = nums | std::views::filter([](int n) { return n % 2 == 0; });
-    
-    // Transform: modify elements
-    auto squared = nums | std::views::transform([](int n) { return n * n; });
-    
-    // Take: first N elements
-    auto first3 = nums | std::views::take(3);
-    
-    // Drop: skip first N elements
-    auto skip2 = nums | std::views::drop(2);
-    
-    // Views are lazy - no computation yet!
-    for (int n : evens) {
-        std::cout << n << ' ';  // 2 4 6 8 10
-    }
-}
-```
-
-:::info
-Views are **lazy** - they only compute values when iterated. This means no intermediate allocations!
-:::
-
-### View Composition (Pipelines)
-
-The power of ranges comes from **composing** multiple views:
-```cpp showLineNumbers 
 #include <ranges>
 #include <vector>
 
-void pipelineExample() {
-    std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    
-    // Chain multiple operations
-    auto result = nums
-        | std::views::filter([](int n) { return n % 2 == 0; })  // Keep evens
-        | std::views::transform([](int n) { return n * n; })     // Square them
-        | std::views::take(3);                                   // First 3
-    
-    // Prints: 4 16 36
-    for (int n : result) {
-        std::cout << n << ' ';
-    }
+namespace rv = std::views;       // std::views is an alias for std::ranges::views
+
+int main() {
+    std::vector<int> v{1, 2, 3, 4, 5, 6};
+
+    auto squares = v | rv::filter([](int x) { return x % 2 == 0; })
+                     | rv::transform([](int x) { return x * x; });
+
+    for (int x : squares) std::cout << x << ' ';
+    std::cout << '\n';
+
+    for (int x : rv::iota(1) | rv::take(5)) std::cout << x << ' ';   // infinite, cut by take
+    std::cout << '\n';
 }
 ```
 
-### Common Views
+```text
+4 16 36 
+1 2 3 4 5 
+```
 
-| View | Purpose | Example |
-|------|---------|---------|
-| `filter` | Select elements by predicate | Evens only |
-| `transform` | Apply function to each element | Square values |
-| `take` | First N elements | First 5 items |
-| `take_while` | Take until condition fails | While < 100 |
-| `drop` | Skip first N elements | Skip header |
-| `drop_while` | Skip until condition fails | Skip negatives |
-| `reverse` | Reverse order | Backwards |
-| `keys` | Extract keys from pairs | Map keys |
-| `values` | Extract values from pairs | Map values |
-```cpp showLineNumbers 
-#include <ranges>
+### The standard views
+
+| Adaptor (`std::views::`) | Produces | Since |
+|---|---|---|
+| `all`, `ref_view`, `owning_view` | view of a whole range | C++20 (`owning_view`: C++20, P2415) |
+| `filter(pred)` | elements satisfying `pred` | C++20 |
+| `transform(f)` | `f(element)` | C++20 |
+| `take(n)`, `take_while(p)`, `drop(n)`, `drop_while(p)` | prefix / suffix | C++20 |
+| `reverse` | reversed (bidirectional input) | C++20 |
+| `elements<N>`, `keys`, `values` | N-th tuple member (map keys/values) | C++20 |
+| `split(delim)`, `lazy_split`, `join` | split into subranges / flatten | C++20 |
+| `common` | adapts to equal iterator and sentinel types | C++20 |
+| `counted(it, n)`, `subrange` | a window from an iterator and a count | C++20 |
+| `iota(a[, b])`, `empty<T>`, `single(x)` | factories (no underlying range) | C++20 |
+| `istream_view<T>` | values read from a stream | C++20 |
+| `zip`, `zip_transform`, `enumerate`, `adjacent`, `pairwise`, `chunk`, `slide`, `stride`, `chunk_by`, `cartesian_product`, `join_with`, `repeat`, `as_rvalue`, `as_const` | tuples of neighbours or parallel ranges, windows, strides, and so on | C++23 |
+
+`std::ranges::to<Container>()` *(C++23)* is the terminal step that materializes a pipeline:
+
+```cpp title="to-and-zip.cpp"
+// compile: g++ -std=c++23
+#include <iostream>
 #include <map>
-
-void commonViewsExample() {
-    std::map<int, std::string> data = {{1, "one"}, {2, "two"}, {3, "three"}};
-    
-    // Extract keys
-    auto keys = data | std::views::keys;
-    
-    // Extract values
-    auto values = data | std::views::values;
-    
-    // Reverse iteration
-    std::vector<int> nums = {1, 2, 3, 4, 5};
-    auto reversed = nums | std::views::reverse;
-}
-```
-
-## Range Factories
-
-Create ranges from scratch without underlying containers:
-```cpp showLineNumbers 
-#include <ranges>
-#include <iostream>
-
-void rangeFactories() {
-    // iota: sequence of incrementing values
-    auto numbers = std::views::iota(1, 11);  // 1, 2, ..., 10
-    
-    // Infinite range (be careful!)
-    auto infinite = std::views::iota(0);  // 0, 1, 2, 3, ...
-    auto first10 = infinite | std::views::take(10);
-    
-    // single: single-element range
-    auto one = std::views::single(42);
-    
-    // empty: empty range
-    auto nothing = std::views::empty<int>;
-    
-    // repeat: same value N times (C++23)
-    // auto fives = std::views::repeat(5, 10);  // 5, 5, 5, ... (10 times)
-}
-```
-
-:::warning
-`std::views::iota()` without a second argument creates an **infinite range**. Always use `take()` or similar to limit it!
-:::
-
-## Range Algorithms
-
-C++20 adds range-based versions of all STL algorithms:
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
-#include <algorithm>
-
-void rangeAlgorithms() {
-    std::vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6};
-    
-    // Sort entire range
-    std::ranges::sort(nums);
-    
-    // Find element
-    auto it = std::ranges::find(nums, 5);
-    
-    // Count occurrences
-    auto count = std::ranges::count(nums, 1);
-    
-    // Copy with projection
-    std::vector<int> dest(nums.size());
-    std::ranges::copy(nums, dest.begin());
-    
-    // Unique elements
-    auto [first, last] = std::ranges::unique(nums);
-    nums.erase(first, last);
-}
-```
-
-### Projections
-
-Projections allow you to specify how to extract values for comparison:
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
-#include <algorithm>
-
-struct Person {
-    std::string name;
-    int age;
-};
-
-void projectionExample() {
-    std::vector<Person> people = {
-        {"Alice", 30},
-        {"Bob", 25},
-        {"Charlie", 35}
-    };
-    
-    // Sort by age using projection
-    std::ranges::sort(people, {}, &Person::age);
-    
-    // Sort by name
-    std::ranges::sort(people, {}, &Person::name);
-    
-    // Find person by age
-    auto it = std::ranges::find(people, 25, &Person::age);
-}
-```
-
-:::success[Projections]
-
-**Projections** eliminate the need for custom comparators in many cases!
-:::
-
-## Practical Examples
-
-### Example 1: Processing Text Lines
-```cpp showLineNumbers 
 #include <ranges>
 #include <string>
 #include <vector>
-#include <iostream>
 
-void processTextLines() {
-    std::vector<std::string> lines = {
-        "  hello  ",
-        "world",
-        "",
-        "  C++20  ",
-        "ranges"
-    };
-    
-    auto result = lines
-        | std::views::filter([](const auto& s) { return !s.empty(); })
-        | std::views::transform([](auto s) {
-              // Trim spaces (simplified)
-              return s;
-          })
-        | std::views::take(3);
-    
-    for (const auto& line : result) {
-        std::cout << line << '\n';
-    }
+int main() {
+    std::vector<int> v{1, 2, 3, 4, 5, 6};
+    auto evens = v | std::views::filter([](int x) { return x % 2 == 0; })
+                   | std::ranges::to<std::vector>();           // C++23
+
+    std::vector<std::string> names{"a", "b", "c"};
+    for (auto [i, s] : std::views::enumerate(names))           // C++23
+        std::cout << i << s << ' ';
+    for (auto [x, y] : std::views::zip(v, names))              // C++23, stops at the shorter
+        std::cout << x << y << ' ';
+    std::cout << evens.size() << '\n';
 }
 ```
 
-### Example 2: Mathematical Operations
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
-#include <numeric>
+```text
+0a 1b 2c 1a 2b 3c 3
+```
 
-void mathOperations() {
-    std::vector<int> nums = {1, 2, 3, 4, 5};
-    
-    // Sum of squares of even numbers
-    auto sum = std::ranges::fold_left(
-        nums 
-        | std::views::filter([](int n) { return n % 2 == 0; })
-        | std::views::transform([](int n) { return n * n; }),
-        0,
-        std::plus{}
-    );  // 4 + 16 = 20
+These C++23 pieces were compiled here with g++ 15.2 and clang++ 21.1 (using libstdc++) at `-std=c++23`. Older
+libraries lack some of them; test the feature-test macros (`__cpp_lib_ranges_to_container`,
+`__cpp_lib_ranges_zip`, `__cpp_lib_ranges_enumerate`) before relying on them.
+
+## Laziness, caching and lifetime
+
+Lazy has consequences you need to know:
+
+- **Evaluation happens on every traversal.** Iterating a `transform` view twice calls the function
+  twice per element. Materialize with `ranges::to` (or a loop) if the work is expensive or has side effects.
+- **`filter` caches `begin()`.** The first call to `begin()` scans to the first match and stores
+  it, so `filter` is not a `const`-iterable view. Modifying an element through the view so that it
+  no longer satisfies the predicate is undefined behavior. `drop_while` caches in the same way. Do
+  not take a `filter` view by `const&`: take it by value or by forwarding reference.
+- **Views do not own.** A view over a vector that is destroyed, reallocated or resized dangles, the
+  same hazard as [`string_view`](./strings.md) or [`span`](./containers.md#complexity-and-invalidation).
+  A pipeline that starts from an rvalue container is a different case: since P2415 (applied to
+  C++20), `views::all` wraps an rvalue container in an `owning_view`, which moves the container
+  into the view, while an lvalue becomes a `ref_view`. The returned view is then self-contained.
+```cpp title="dangling.cpp"
+// fragment: what not to do (needs <ranges> and <vector>)
+auto bad() {
+    std::vector<int> v{1, 2, 3};
+    return v | std::views::transform([](int x) { return x + 1; });   // refers to v, which is destroyed
 }
 ```
 
-### Example 3: Zip and Enumerate
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
+- **Modifying a pipeline's source while iterating it** follows the container invalidation rules
+  ([Containers](./containers.md#complexity-and-invalidation)).
 
-void zipEnumerate() {
-    std::vector<std::string> names = {"Alice", "Bob", "Charlie"};
-    std::vector<int> scores = {95, 87, 92};
-    
-    // Zip two ranges (C++23)
-    // for (auto [name, score] : std::views::zip(names, scores)) {
-    //     std::cout << name << ": " << score << '\n';
-    // }
-    
-    // Enumerate with indices (C++23)
-    // for (auto [idx, name] : std::views::enumerate(names)) {
-    //     std::cout << idx << ". " << name << '\n';
-    // }
-}
-```
+## Writing your own range
 
-## Range Adaptors
+A class with `begin()` and `end()` is already a range. To make it work with `|` and the view
+concepts, derive from `std::ranges::view_interface` and make it cheap to copy. Since C++23
+`std::generator` (`<generator>`) is the easiest way to produce a lazy range with
+[coroutines](../11-concurrency-and-memory-model/09-coroutines.md).
 
-Create custom views for specific needs:
-```cpp showLineNumbers 
-#include <ranges>
+## When to use which
 
-// Custom view: chunk (group elements)
-void customAdaptor() {
-    std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    
-    // chunk is available in C++23
-    // auto chunks = nums | std::views::chunk(3);
-    // Each chunk: {1,2,3}, {4,5,6}, {7,8,9}
-}
-```
+- Use `std::ranges::` algorithms in new C++20 code for the call syntax, projections and diagnostics.
+- Use views to express "filter then map then take" and iterate it once. Use a plain loop or an
+  algorithm when the pipeline is traversed repeatedly or when debugging matters.
+- Pass ranges as `std::ranges::input_range auto&&` (or constrained templates), and use `std::span`
+  for contiguous data, rather than taking `const std::vector<T>&`.
+- There is no free lunch in speed: pipelines of simple views are usually inlined well by optimizers,
+  but this depends on the compiler, and some adaptors (`join`, `split`, `filter`) add overhead.
+  Measure before assuming.
 
-## Performance Considerations
-```mermaid
-graph LR
-    A[Traditional] -->|Copy| B[Intermediate Vector]
-    B -->|Copy| C[Result]
-    
-    D[Ranges/Views] -->|Lazy| E[Direct Result]
-    
-```
+## Related
 
-:::success[**Performance Benefits:**]
-- No intermediate allocations
-- Lazy evaluation - only compute what's needed
-- Better optimization opportunities for compilers
-  :::
-```cpp showLineNumbers 
-#include <ranges>
-#include <vector>
+- [Iterators](./iterators.md): iterator categories, sentinels, and `iter_value_t`
+- [Algorithms](./algorithms.md): the classic algorithms the `ranges::` versions mirror
+- [Concepts and requires](../08-templates-and-metaprogramming/concepts-and-requires.md): how `std::ranges::range` and friends are written
+- [Strings](./strings.md): `string_view`, a borrowed range, and `views::split` on text
 
-void performanceComparison() {
-    std::vector<int> data(1'000'000);
-    
-    // Traditional: creates intermediate vectors
-    std::vector<int> temp1, temp2, result;
-    std::copy_if(data.begin(), data.end(), std::back_inserter(temp1), 
-                 [](int n) { return n % 2 == 0; });
-    std::transform(temp1.begin(), temp1.end(), std::back_inserter(temp2),
-                   [](int n) { return n * n; });
-    std::copy_n(temp2.begin(), 100, std::back_inserter(result));
-    
-    // Ranges: no intermediate allocations, lazy evaluation
-    auto result_view = data
-        | std::views::filter([](int n) { return n % 2 == 0; })
-        | std::views::transform([](int n) { return n * n; })
-        | std::views::take(100);
-    
-    std::vector<int> result2(result_view.begin(), result_view.end());
-}
-```
+## References
 
-## Common Patterns
-
-### Pattern 1: Filter-Transform-Collect
-```cpp showLineNumbers 
-std::vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-
-auto result = nums
-    | std::views::filter([](int n) { return n > 5; })
-    | std::views::transform([](int n) { return n * 2; });
-
-std::vector<int> vec(result.begin(), result.end());
-```
-
-### Pattern 2: Flat Map (C++23)
-```cpp showLineNumbers 
-std::vector<std::vector<int>> nested = {{1, 2}, {3, 4}, {5, 6}};
-
-// auto flat = nested | std::views::join;  // {1, 2, 3, 4, 5, 6}
-```
-
-### Pattern 3: Infinite Sequences
-```cpp showLineNumbers 
-// Generate infinite Fibonacci-like sequence
-auto fibonacci = std::views::iota(0)
-    | std::views::transform([](int n) { /* compute fib(n) */ return n; })
-    | std::views::take(10);
-```
-
-## Best Practices
-
-:::success[**DO:**]
-- Use views for lazy, composable operations
-- Prefer range algorithms over iterator-based ones
-- Use projections instead of custom comparators
-- Chain operations with `|` operator for readability
-  :::
-
-:::danger
-**DON'T:**
-- Store views long-term (they don't own data)
-- Modify underlying containers while iterating views
-- Forget to limit infinite ranges with `take()`
-- Use views when you need materialized results multiple times
-  :::
-
-## Migration from Traditional STL
-```cpp showLineNumbers 
-// Before (C++17)
-std::vector<int> nums = {1, 2, 3, 4, 5};
-std::vector<int> evens;
-std::copy_if(nums.begin(), nums.end(), std::back_inserter(evens),
-             [](int n) { return n % 2 == 0; });
-std::transform(evens.begin(), evens.end(), evens.begin(),
-               [](int n) { return n * n; });
-
-// After (C++20)
-auto result = nums
-    | std::views::filter([](int n) { return n % 2 == 0; })
-    | std::views::transform([](int n) { return n * n; });
-```
-
-## Related Topics
-
-- **[Algorithms](algorithms.md)** - STL algorithms
-- **[Iterators](iterators.md)** - Iterator concepts
-- **[Containers](containers.md)** - Data structures
+- [Ranges library, cppreference](https://en.cppreference.com/w/cpp/ranges)
+- ISO C++ [ranges]
