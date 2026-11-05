@@ -138,9 +138,10 @@ then the constructor body. Destruction runs exactly in reverse. The rules and ex
 
 ## Temporaries
 
-A temporary (the result of a prvalue that has to exist in memory, like `std::string("x")` passed to a
-`const std::string&`) is destroyed at the end of the **full-expression** that created it, roughly at
-the next `;`. Using it within that expression is fine:
+A temporary is an object that exists only because an expression needed one: a prvalue that gets
+materialized (`std::string("x")` passed to a `const std::string&`, or a call result you take a member
+of). It is destroyed at the end of the **full-expression** that created it, roughly at the next `;`.
+Using it within that expression is fine:
 
 ```cpp
 std::size_t n = std::string("hello").size();   // the temporary lives until the ';'
@@ -148,36 +149,129 @@ std::size_t n = std::string("hello").size();   // the temporary lives until the 
 
 ### Lifetime extension
 
-Binding a temporary directly to a `const T&` or a `T&&` **extends** its lifetime to that of the
-reference. The rule applies only to the reference the temporary is bound to directly, and it does
-not carry through functions.
+Binding a temporary to a reference **extends** its lifetime to that of the reference: a `const T&` or
+a `T&&` variable, in the same way for a reference to a subobject or member of the temporary (`const
+int& v = Noisy(2).id;` keeps all of `Noisy(2)` alive). The rule is about the *direct binding of a
+prvalue*. It is lost as soon as the reference passes through something else. The program below traces
+each case with a type that prints when it is built and destroyed.
 
 ```cpp title="extension.cpp" showLineNumbers
-#include <string>
-#include <utility>
+#include <cstdio>
 
-std::string make() { return "temp"; }
-const std::string& pass(const std::string& s) { return s; }
+struct Noisy {
+    int id;
+    explicit Noisy(int i) : id(i) { std::printf("  Noisy(%d)\n", id); }
+    ~Noisy() { std::printf("  ~Noisy(%d)\n", id); }
+    const Noisy& self() const { return *this; }
+};
+
+struct Holder { const Noisy& ref; };                                    // aggregate
+struct Member { const Noisy& ref; Member(int i) : ref(Noisy(i)) {} };   // BUG: dangles
+
+const Noisy& pass(const Noisy& n) { return n; }
 
 int main() {
-    const std::string& a = make();      // extended: lives as long as `a`
-    std::string&& b = make();           // extended as well
-    const std::string& c = pass(make()); // NOT extended: the temporary dies at ';'
-    // c.size() here would read a destroyed string: undefined behavior
-    (void)c;
-    return static_cast<int>(a.size() + b.size()) - 8;   // returns 0
+    std::puts("direct bind:");
+    { const Noisy& a = Noisy(1); std::puts("  in scope"); (void)a; }
+    std::puts("member of temporary:");
+    { const int& v = Noisy(2).id; std::printf("  v=%d\n", v); }
+    std::puts("aggregate member:");
+    { Holder h{Noisy(3)}; std::printf("  h.ref=%d\n", h.ref.id); }
+    std::puts("through a function:");
+    { const Noisy& c = pass(Noisy(4)); std::puts("  after ;  (c dangles)"); (void)c; }
+    std::puts("through a member function:");
+    { const Noisy& d = Noisy(5).self(); std::puts("  after ;  (d dangles)"); (void)d; }
+    std::puts("reference member initialised in a constructor:");
+    { Member m(6); std::puts("  ctor done (m.ref dangles)"); (void)m; }
 }
 ```
 
-The `c` line is a dangling reference. The compiler sees `pass` returning some reference, not the
-temporary, so nothing is extended. GCC 15 warns with `-Wdangling-reference` (enabled by `-Wall`).
-The same trap appears with `std::max(a, b)` on temporaries, `std::string_view sv = std::string(...)`
-(a view does not extend anything), and member functions returning references into `*this` called on
-a temporary.
+Output with g++ 15 (`-std=c++20`):
 
-C++23 fixed one common case. In a range-based `for`, temporaries created in the range expression now
-live until the end of the loop *(C++23, P2718)*, so `for (char c : make().substr(1))` is safe.
-Before C++23 only the outermost temporary was extended.
+```text
+direct bind:
+  Noisy(1)
+  in scope
+  ~Noisy(1)
+member of temporary:
+  Noisy(2)
+  v=2
+  ~Noisy(2)
+aggregate member:
+  Noisy(3)
+  h.ref=3
+  ~Noisy(3)
+through a function:
+  Noisy(4)
+  ~Noisy(4)
+  after ;  (c dangles)
+through a member function:
+  Noisy(5)
+  ~Noisy(5)
+  after ;  (d dangles)
+reference member initialised in a constructor:
+  Noisy(6)
+  ~Noisy(6)
+  ctor done (m.ref dangles)
+```
+
+In the extended cases the destructor runs at the end of the block, together with the reference. In the
+others it runs before the next statement. GCC warned about the `Member` case (`-Wextra`: "only
+persists until the constructor exits") and, with `-Wdangling-reference` (part of `-Wall` in GCC 13
+and later), about `c` and `d`. The cases where extension does **not** apply:
+
+| Binding | Lifetime of the temporary |
+|---|---|
+| `const T& r = T();`, `T&& r = T();` | Extended to the end of `r`'s scope |
+| `const int& v = T().member;`, `static_cast<const T&>(T())` | Extended (the whole temporary) |
+| `Holder h{T()};` (aggregate initialization of a reference member) | Extended to the end of `h`. With parentheses, `Holder h(T());` *(C++20)*, it is **not** |
+| `pass(T())` where `pass` returns a reference | Dies at the end of the full-expression. A function call is not a direct binding |
+| Reference **member** in a constructor's member initializer list | Dies when the constructor exits |
+| `return T();` from a function returning `const T&` | Dies at the return. The caller gets a dangling reference |
+| Reference parameter `f(T())` | Lives until the end of the full-expression containing the call, not beyond the call |
+| Initializer of a `new` expression with a reference member (`new Holder{T()}`) | Dies at the end of the full-expression |
+
+Extended or not, a reference to a `const` lvalue that you obtained from a function is only as good as
+the object it refers to. Typical real-world traps: `std::max(a, b)` on temporaries, `std::string_view
+sv = std::string("x");` (a view owns nothing, so nothing is extended), and member functions that
+return a reference into `*this` called on a temporary.
+
+In a range-based `for`, the range expression is bound to `auto&&`, which extends only the outermost
+temporary. C++23 *(P2718)* extends **all** temporaries created in the range expression to the end of
+the loop. This is the difference:
+
+```cpp title="range-for.cpp" showLineNumbers
+#include <cstdio>
+#include <string>
+
+struct W {
+    std::string s = "abc";
+    std::string& get() { return s; }     // reference into the temporary W
+    ~W() { std::puts("~W"); }
+};
+W make() { return {}; }
+
+int main() {
+    for (char c : make().get()) std::putchar(c);   // C++20: dangling. C++23: fine
+    std::putchar('\n');
+}
+```
+
+Compiled with g++ 15, `-std=c++20` prints `~W` **before** `abc` (the `W` was already destroyed when
+the loop started, so reading `s` is undefined behavior and only happens to work), while `-std=c++23`
+prints `abc` and then `~W`. Support for P2718 starts with GCC 15 and Clang 19. Earlier compilers behave as C++20 even with
+`-std=c++23`.
+
+## Dangling references and pointers
+
+A reference or pointer **dangles** when the object it designates is no longer alive. The storage may
+still hold the old bytes, which is why such code often appears to work. Causes you meet most:
+
+- **Scope ended**: returning a reference or pointer to a local ([automatic storage](./storage-duration.md#automatic-storage)).
+- **Destroyed or freed**: `delete p;` then `p->f()`, or `std::destroy_at(p)` then use.
+- **Temporary expired**: the table above.
+- **Invalidated by a container**: `push_back` reallocation destroys the old elements.
+- **Captured by reference** in a lambda that outlives the captured locals.
 
 ## Moved-from objects are alive
 
@@ -187,46 +281,103 @@ unspecified" state: you may assign to them, destroy them, or call member functio
 preconditions (`clear()`, `empty()`), but you should not rely on their value. See
 [move semantics](../07-classes-and-oop/copy-and-move-semantics.md).
 
+## Reusing storage: `std::launder`
+
+Ending an object's lifetime and constructing another in the same storage is legal. The
+[placement new page](./placement-new.md) covers the mechanics, the "transparently replaceable" rule
+that decides whether old pointers and names still refer to the new object, and
+[`std::launder`](./placement-new.md#stdlaunder-c17) *(C++17)*. The lifetime-side summary: after storage reuse,
+a pointer or reference obtained *before* the reuse refers to the new object only if the replaceable
+rule holds. Otherwise use the pointer returned by the placement new, or `std::launder` of the
+address. `std::launder` does not start a lifetime. It only returns a pointer to an object that
+already lives at that address, and it is undefined behavior if there is none.
+
 ## Implicit object creation *(C++20)*
 
-C code routinely does `struct P* p = malloc(sizeof *p); p->x = 1;`. For years this was technically
-undefined behavior in C++: `malloc` returns storage, not an object, and nothing started a `P`'s
-lifetime. P0593 (adopted for C++20 and applied as a defect report to earlier standards) made it
-defined. Certain operations **implicitly create objects** of **implicit-lifetime types**, as many as
-needed to make the program's behavior defined.
+C code routinely does `struct P* p = malloc(sizeof *p); p->x = 1;`. Before this was addressed it was
+technically undefined behavior in C++: `malloc` returns storage, not an object, and nothing started a
+`P`'s lifetime. P0593 fixed this. It was adopted as a defect report, so compilers apply it in all
+language modes. Certain operations **implicitly create objects** of **implicit-lifetime types** in
+their storage, as many as needed (and with whatever lifetimes) to give the program defined behavior.
 
-| Implicit-lifetime types | Operations that implicitly create objects |
-|---|---|
-| Scalars (`int`, `double`, pointers, enums) | `std::malloc`, `calloc`, `realloc`, `std::aligned_alloc` |
-| Arrays of any type | `operator new` / `operator new[]` (the allocation functions, not `new T`) |
-| Aggregates whose destructor is not user-provided | `std::allocator<T>::allocate` |
-| Classes with a trivial eligible constructor and a trivial, non-deleted destructor | `std::memcpy`, `std::memmove`, `std::bit_cast` |
-| | Starting the lifetime of an `unsigned char` or `std::byte` array |
+An **implicit-lifetime type** is a scalar type, an array type, an aggregate class whose destructor is
+not user-provided, or a class with at least one trivial eligible constructor and a trivial,
+non-deleted destructor. `std::string`, containers and anything with a user-provided constructor and
+destructor are not.
+
+The operations that implicitly create objects are:
+
+- the allocation functions `std::malloc`, `calloc`, `realloc`, `std::aligned_alloc`, and
+  `operator new` / `operator new[]` (the functions, not the `new T` expression, which creates a `T`
+  explicitly);
+- `std::allocator<T>::allocate` (which creates an array of `T`, without constructing elements);
+- `std::memcpy` and `std::memmove`, which implicitly create objects in the destination, and in the
+  source too if needed to give the result its value;
+- starting the lifetime of an array of `unsigned char`, `std::byte`,
+  which implicitly creates objects in that array. This is also what makes it work when a placement-new
+  buffer is a plain byte array.
 
 ```cpp title="malloc.cpp" showLineNumbers
 #include <cstdlib>
+#include <cstring>
 
 struct Point { int x, y; };   // aggregate: implicit-lifetime type
 
 int main() {
     auto* p = static_cast<Point*>(std::malloc(sizeof(Point)));  // a Point is implicitly created
     if (!p) return 1;
-    p->x = 1;                 // defined since C++20 (and as a DR before)
+    p->x = 1;                 // defined
     p->y = 2;
     int sum = p->x + p->y;
     std::free(p);
-    return sum - 3;           // returns 0
+
+    alignas(Point) unsigned char buf[sizeof(Point)] = {};
+    Point q;
+    std::memcpy(&q, buf, sizeof q);   // the bytes become a Point's value
+    return sum - 3 + q.x;             // returns 0
 }
 ```
 
-This does **not** help with a type that has a non-trivial constructor such as `std::string`. Its
-objects must still be created explicitly with `new` or `std::construct_at`.
+Two limits are worth remembering:
 
-To reinterpret bytes that already hold a valid representation (a buffer filled by `read()` from a
-file or socket), C++23 adds `std::start_lifetime_as<T>(p)`. It starts the lifetime of a `T` at `p`
-with the existing bytes as its value. As of GCC 15 / libstdc++ the feature-test macro
-`__cpp_lib_start_lifetime_as` is not defined, so the portable choice today is still `std::memcpy`
-into a real `T` (see [strict aliasing](./strict-aliasing.md#safe-type-punning)).
+- A type with a non-trivial constructor (`std::string`, anything owning a resource) is never
+  created implicitly. Use `new`, placement new or `std::construct_at`.
+- The creation is "as needed to make behavior defined". That means `static_cast<Point*>(malloc(...))`
+  points at the created `Point`. It does not mean every pointer cast on arbitrary memory is
+  now valid. A cast between unrelated types on an *existing* object is still an aliasing violation
+  ([strict aliasing](./strict-aliasing.md)).
+
+## `std::start_lifetime_as` *(C++23)*
+
+Implicit creation only happens at the operations above. A buffer filled by `read()` or `recv()` is
+different: the bytes have a defined representation, but no operation created a `Pkt` there.
+`std::start_lifetime_as<T>(p)` (header `<memory>`, P2590R2) starts the lifetime of a `T` (or an array of
+`T`) at `p` **and keeps the existing bytes** as its value, for implicit-lifetime `T`. It returns a
+pointer to that object. Compared with `placement new T{}`, it does not re-initialize the storage.
+
+```cpp title="start_lifetime_as.cpp (fragment, needs C++23 library support)"
+alignas(Pkt) unsigned char buf[sizeof(Pkt)];
+read_into(buf);                                   // bytes now hold a valid Pkt representation
+const Pkt* p = std::start_lifetime_as<Pkt>(buf);  // a Pkt now lives in buf; p->a is readable
+```
+
+**Support is limited.** In this environment, g++ 15.2 with libstdc++ and Clang 21.1 both
+leave `__cpp_lib_start_lifetime_as` undefined, and `std::start_lifetime_as` fails to compile
+with "not a member of std" under `-std=c++23`. The snippet above is therefore **not compiled** here. Check the
+[cppreference compiler support table](https://en.cppreference.com/w/cpp/compiler_support/23) for the current status of
+your toolchain, and test the macro before use:
+
+```cpp
+#include <memory>
+#ifdef __cpp_lib_start_lifetime_as
+// std::start_lifetime_as is available
+#endif
+```
+
+Until it is, the portable way to read a value out of raw bytes is `std::memcpy` into an object of
+the right type, which compilers optimize to a plain load ([safe type punning](./strict-aliasing.md#safe-type-punning)).
+Casting the buffer with `reinterpret_cast<Pkt*>(buf)` and reading through it remains undefined behavior
+in C++ even though it works in practice on many compilers. See [strict aliasing](./strict-aliasing.md).
 
 ## Pitfalls
 
@@ -235,8 +386,10 @@ into a real `T` (see [strict aliasing](./strict-aliasing.md#safe-type-punning)).
 | `int& r = v[0]; v.push_back(1); r = 2;` | Reallocation destroys the old elements and frees their storage. `r` dangles. | Re-fetch after operations that invalidate (see container docs), or store an index. |
 | `std::string_view sv = get_name();` where `get_name` returns `std::string` | The string temporary dies at `;`. `sv` points into freed memory. | Keep the `std::string`: `auto name = get_name();` |
 | Returning `const T&` from a function argument that may be a temporary | Lifetime extension does not pass through functions. | Return by value. |
+| Reference member initialized from a temporary in a constructor | The temporary dies when the constructor exits. | Store by value, or take the object by reference parameter. |
 | Lambda captures `[&]` and is stored or run later | The captured locals may be gone when it runs. | Capture by value, or make sure the lambda does not outlive the scope. |
 | `delete p; p->f();` or use after `std::destroy_at` | Lifetime has ended. Often "works" until the memory is reused. | Use owning types. Build tests with AddressSanitizer. |
+| `for (x : make().get())` before C++23 | Only the outermost temporary is extended. | Name the temporary first, or use C++23. |
 | Calling a virtual function in a constructor expecting the derived override | During construction the dynamic type is the class being constructed. | Call the virtual function after construction, from a factory. |
 
 AddressSanitizer (`-fsanitize=address`) catches use after free, use after return
@@ -247,8 +400,11 @@ AddressSanitizer (`-fsanitize=address`) catches use after free, use after return
 
 - Storage outlives the object at both ends: lifetime is from the end of construction to the start
   of destruction.
-- A temporary dies at the end of its full-expression unless bound directly to a reference. Extension
-  never passes through a function call.
+- A temporary dies at the end of its full-expression unless a reference is bound directly to it.
+  Extension never passes through a function call or a constructor's member initializer.
 - A moved-from object is alive. It will be destroyed normally.
-- Since C++20, `malloc` and `memcpy` create implicit-lifetime objects (scalars, arrays, trivial
-  aggregates) automatically. Everything else needs a constructor call.
+- Since C++20 (as a defect report), `malloc`, `operator new` and `memcpy` implicitly create
+  implicit-lifetime objects (scalars, arrays, trivial aggregates). Everything else needs a
+  constructor call.
+- `std::launder` (C++17) finds the object after storage reuse. `std::start_lifetime_as` (C++23) is
+  for bytes that already hold a valid object, but neither GCC 15 nor Clang 21 ships it yet.
