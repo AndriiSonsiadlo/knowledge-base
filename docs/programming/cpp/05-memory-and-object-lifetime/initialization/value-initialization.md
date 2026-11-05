@@ -8,222 +8,202 @@ tags: [c++, initialization, value-init, zero-initialization]
 
 # Value Initialization
 
-Explicitly request **zero-initialization** for fundamentals, **default construction** for classes. Safer than default initialization.
+**Value initialization** is what you get when you ask for an object with an **empty initializer**:
+`T()`, `T{}`, `T x{};`, `new T()`, or a member named in a member-initializer list with `()` or `{}`.
+It is the "give me a sensible, fully defined object" form. Where
+[default initialization](./default-initialization.md) can leave a scalar indeterminate, value
+initialization always ends with a defined value: zero for scalars, and a constructor call for classes.
 
-:::success[Guaranteed Zero]
-Value initialization ensures fundamentals are zeroed, not indeterminate. Always safe to read.
+**Prerequisites:** [Default initialization](./default-initialization.md),
+[storage duration](../storage-duration.md).
+
+## The rules
+
+What value initialization does depends on the type, in this order (C++11 wording, as refined by
+C++20):
+
+| `T` is | Effect |
+|---|---|
+| Class with **no default constructor** (only other constructors) | Ill-formed for `T()`. For `T{}` an aggregate would be aggregate-initialized instead. |
+| Class with a **user-provided** default constructor | Call it. No zeroing first. |
+| Class with an implicit, defaulted, or `= default` on first declaration default constructor, no user-provided one | **Zero-initialize** the object, then, if the default constructor is non-trivial, call it. |
+| Array | Value-initialize each element. |
+| Anything else (`int`, pointer, enum, `double`) | **Zero-initialize.** |
+
+Two details are easy to miss. A constructor is *user-provided* if it is not defaulted or deleted on
+its first declaration, so `T() = default;` inside the class is **not** user-provided, but
+`T();` declared in the class and defined as `T::T() = default;` outside it **is**. And with
+`T{}`, an aggregate (see [aggregate initialization](./aggregate-initialization.md)) is
+aggregate-initialized and every member then gets its default member initializer or is
+value-initialized, which gives the same effect for ordinary structs.
+
+## Zero-initialization
+
+Zero-initialization is a *step*, not a syntax you can write. It sets an object to the zero value of
+its type:
+
+- scalars: the integer `0`, `0.0`, a null pointer, or the value `0` converted to an enum type;
+- classes: every non-static member and base subobject zero-initialized, and **padding bits set to zero**;
+- unions: the first non-static named member (and padding bits);
+- arrays: every element.
+
+It happens in two situations. [Static and thread storage](../storage-duration.md) objects get it
+before any other initialization, which is why `static int n;` reads as `0`. And value initialization
+performs it explicitly, as the table above shows. You cannot request zero-initialization of an
+automatic object on its own: `int x{};` and `int x = 0;` both do it via value initialization or
+copy-initialization from `0`.
+
+## Scalars
+
+```cpp title="scalars.cpp" showLineNumbers
+#include <iostream>
+
+int main() {
+    int a{};                // value-init: 0
+    int b = int();          // value-init: 0
+    double d{};             // 0.0
+    int* p{};               // nullptr
+    bool flag{};            // false
+    char buf[4]{};          // each element 0
+
+    std::cout << a << ' ' << b << ' ' << d << ' ' << (p == nullptr) << ' ' << flag
+              << ' ' << int(buf[0]) + int(buf[3]) << '\n';
+}
+```
+
+```text
+0 0 0 1 0 0
+```
+
+Compare `int a;`, which is indeterminate, with `int a{};`, which is `0`. For one variable that costs
+one store, and it removes a whole class of bugs.
+
+## Classes: it depends on the constructor
+
+The third row of the table is the interesting one, because the *same* member can come out defined or
+indeterminate depending on how the default constructor is declared:
+
+```cpp title="class-value.cpp" showLineNumbers
+#include <iostream>
+
+struct Implicit { int x; };               // implicit default constructor
+struct Defaulted { Defaulted() = default; int x; };   // defaulted on first declaration
+struct UserProvided { UserProvided() {} int x; };     // user-provided, does not touch x
+
+int main() {
+    Implicit    a{};         // aggregate: x value-initialized -> 0
+    Implicit    b = Implicit();   // zero-initialized, then trivial ctor: x == 0
+    Defaulted   c{};         // zero-initialized first: x == 0
+    UserProvided u1{};       // calls the constructor only: x is indeterminate
+    UserProvided u2 = UserProvided();   // same
+
+    std::cout << a.x << ' ' << b.x << ' ' << c.x << '\n';
+    (void)u1; (void)u2;      // reading u1.x or u2.x would be undefined behavior
+}
+```
+
+```text
+0 0 0
+```
+
+The practical rule: with `T()` or `T{}`, a class that relies on the compiler-generated constructor
+gets zeroed first. A class with a hand-written default constructor gets **only** what that
+constructor does. If you write the constructor, initialize every scalar member in it, or give the
+members default member initializers.
+
+:::note[C++20]
+Since C++20 a class with *any* user-declared constructor (including `= default` and `= delete`) is
+not an aggregate, so `Defaulted{}` above value-initializes via the rule in the table. Before C++20
+`Defaulted{}` was aggregate initialization, which also produced `x == 0`. The result is the same for
+this example, but the path differs and matters for classes with `= delete`d constructors.
 :::
 
-## Syntax
+## Arrays and members
 
-Empty parentheses or braces trigger value initialization.
-```cpp showLineNumbers
-int x{};        // 0
-int y = int();  // 0
-double d{};     // 0.0
-bool b{};       // false
-int* ptr{};     // nullptr
+```cpp title="members.cpp" showLineNumbers
+#include <iostream>
+#include <string>
 
-std::cout << x;    // Safe: 0
-std::cout << ptr;  // Safe: nullptr
-```
+struct Config {
+    int retries;
+    double timeout;
+    std::string name;
+};
 
-**Key**: Zero-initialization happens **before** any construction.
+struct Holder {
+    int n;
+    std::string s;
+    Holder() : n(), s() {}          // n() value-initializes: 0
+};
 
-## Fundamental Types
-```cpp showLineNumbers
-void function() {
-    // Default initialization (dangerous)
-    int a;       // Indeterminate
-    double b;    // Indeterminate
-    char* c;     // Indeterminate
-    
-    // Value initialization (safe)
-    int x{};     // 0
-    double y{};  // 0.0
-    char* z{};   // nullptr
+int main() {
+    Config c{};                     // all members value-initialized
+    int arr[3]{};                   // {0, 0, 0}
+    Holder h;
+    std::cout << c.retries << ' ' << c.timeout << " [" << c.name << "] "
+              << arr[2] << ' ' << h.n << '\n';
 }
 ```
 
-## Comparison Table
-
-| Type | Default Init | Value Init |
-|------|-------------|-----------|
-| `int` (local) | Indeterminate No | 0 Yes |
-| `double` (local) | Indeterminate No | 0.0 Yes |
-| `pointer` (local) | Indeterminate No | nullptr Yes |
-| `int` (static) | 0 Yes | 0 Yes |
-| Class with ctor | Calls ctor Yes | Calls ctor Yes |
-| Class without ctor | Members indeterminate No | Members zeroed Yes |
-
-## Class Types
-
-### With User-Defined Constructor
-```cpp showLineNumbers
-class Widget {
-    int value;
-public:
-    Widget() : value(42) {}
-};
-
-Widget w1;    // Default init → calls Widget()
-Widget w2{};  // Value init → also calls Widget()
-
-// Identical when constructor exists
+```text
+0 0 [] 0 0
 ```
 
-**Rule**: User-defined constructor = same behavior for both.
+In a member-initializer list, `n()` or `n{}` value-initializes `n`; leaving `n` out of the list would
+default-initialize it. See
+[constructors and destructors](../../07-classes-and-oop/constructors-and-destructors.md) for the list
+itself.
 
-### Without User-Defined Constructor
+## Dynamic allocation
 
-This is where value initialization shines.
-```cpp showLineNumbers
-struct Point {
-    int x, y;
-    // No constructor
-};
+```cpp title="dynamic.cpp" showLineNumbers
+#include <iostream>
+#include <memory>
+#include <vector>
 
-Point p1;    // Default init: x, y indeterminate
-Point p2{};  // Value init: x=0, y=0
+int main() {
+    int* a = new int();             // 0
+    int* b = new int{};             // 0
+    int* arr = new int[4]();        // four zeros
+    auto up = std::make_unique<int[]>(4);   // value-initializes: zeros
+    std::vector<int> v(4);          // elements value-initialized: zeros
 
-std::cout << p1.x;  // UB
-std::cout << p2.x;  // Safe: 0
-```
-
-**Benefit**: Simple aggregates safely zeroed with `{}`.
-
-## Arrays
-```cpp showLineNumbers
-int arr1[5];     // Indeterminate
-int arr2[5]{};   // All zeros
-
-std::cout << arr1[0];  // UB
-std::cout << arr2[0];  // Safe: 0
-
-// Multi-dimensional
-int matrix[3][3]{};  // All zeros
-```
-
-## Dynamic Allocation
-```cpp showLineNumbers
-int* p1 = new int;      // Indeterminate
-int* p2 = new int();    // 0
-int* p3 = new int{};    // 0
-
-std::cout << *p1;  // UB
-std::cout << *p2;  // Safe: 0
-
-delete p1; delete p2; delete p3;
-
-// Arrays
-int* arr1 = new int[10];     // Indeterminate
-int* arr2 = new int[10]();   // All zeros
-int* arr3 = new int[10]{};   // All zeros
-
-delete[] arr1; delete[] arr2; delete[] arr3;
-```
-
-**Critical**: Always use `()` or `{}` with `new` for fundamentals.
-
-## Member Initialization
-```cpp showLineNumbers
-class Container {
-    int value;
-    double ratio;
-    int* ptr;
-    
-public:
-    Container() 
-        : value{},    // 0
-          ratio{},    // 0.0
-          ptr{}       // nullptr
-    {}
-};
-```
-
-**Pattern**: Value-initialize all members for guaranteed valid state.
-
-## Quick Decision Guide
-```mermaid
-graph TD
-    A[Need initialization?] --> B{Type?}
-    
-    B -->|Fundamental| C[Value init]
-    B -->|Class with ctor| D[Both same]
-    B -->|Class without ctor| C
-    
-    C --> E["Always safe"]
-    D --> F["Calls constructor"]
-```
-
-## Performance
-```cpp showLineNumbers
-void compare() {
-    // Default: no cost, but dangerous
-    int arr1[1000000];  // Instant, but garbage
-    
-    // Value: small cost, but safe
-    int arr2[1000000]{};  // ~microseconds, all zeros
+    std::cout << *a << *b << arr[3] << up[3] << v[3] << '\n';
+    delete a; delete b; delete[] arr;
 }
 ```
 
-**Reality**: Cost is negligible vs safety benefit. Modern CPUs efficiently zero memory.
-
-## When to Use Each
-
-| Scenario                  | Use                             |
-|---------------------------|---------------------------------|
-| **Local fundamental**     | Value init `{}` (safe)          |
-| **Immediately assigning** | Default init (performance)      |
-| **Class with ctor**       | Either (same result)            |
-| **Aggregate**             | Value init `{}` (zeros members) |
-| **Dynamic allocation**    | Value init `()` or `{}`         |
-
-## Common Patterns
-```cpp showLineNumbers
-// Safe patterns
-int x{};                    // Zero
-int* p = new int{};         // Zero on heap
-int arr[10]{};              // All zeros
-struct Point { int x, y; };
-Point p{};                  // x=0, y=0
-
-// Dangerous patterns
-int x;                      // Indeterminate
-int* p = new int;           // Indeterminate
-int arr[10];                // All indeterminate
-Point p;                    // x, y indeterminate
+```text
+00000
 ```
 
-## Summary
+`new int` (no parentheses) is default initialization and leaves the value indeterminate. The
+difference of two characters is the most common source of "works in debug, garbage in release" bugs
+with heap scalars. `std::make_unique<int[]>(n)` and `std::vector<int>(n)` both zero for you. The
+`new` expression itself is covered in [new and delete](../new-and-delete.md).
 
-:::info[Value Initialization - Key Points]
-**Guaranteed Safety:**
-- **Fundamentals**: Always zero (0, 0.0, false, nullptr)
-- **Classes with constructor**: Calls default constructor
-- **Classes without constructor**: All members zeroed
-- **Arrays**: All elements zeroed
+## Cost
 
-**Syntax Triggers:**
-- Empty braces: `int x{};`
-- Empty parentheses: `int x = int();`
-- With `new`: `new int()` or `new int{}`
-- Member init: `value{}` in initializer list
+Zeroing is one store per scalar, or a `memset` for arrays, and for a small object it is usually
+free. For a large buffer that you are about to overwrite, it is wasted work: use
+`std::make_unique_for_overwrite<T[]>(n)` *(C++20)* or `new T[n]` deliberately, and write the intent
+in a comment.
 
-**vs Default Initialization:**
-- Default (local): Indeterminate
-- Value: Always zero
-- Classes with ctor: Same behavior
-- Classes without ctor: Value zeros members
+## Pitfalls
 
-**When to Use:**
-- Default choice for fundamentals (always safe)
-- Dynamic allocation: `new int{}` not `new int`
-- Member initialization for guaranteed valid state
-- Aggregates without constructors
+| Mistake | Why it is wrong | Fix |
+|---|---|---|
+| `T x();` | Declares a function returning `T` (most vexing parse) | `T x{};` or `T x;` |
+| `new int` where you meant `new int()` | Indeterminate, not zero | `new int()` or `new int{}` |
+| Expecting `T{}` to zero a class with a user-provided default constructor | Only the constructor runs | Initialize members in the constructor or with default member initializers |
+| Relying on zeroed padding bytes after `T{}` | Copies of the object and compiler optimizations are free to change padding | Do not compare objects with `memcmp` |
 
-**Performance:**
-- Tiny cost (~nanoseconds) to zero memory
-- Modern CPUs optimize zeroing efficiently
-- Safety benefit far outweighs minimal cost
-  :::
+## Key points
+
+- An empty initializer (`()` or `{}`) value-initializes: scalars become zero, arrays go element by
+  element, and classes depend on their default constructor.
+- Zero-initialization is the step that sets everything to zero. Static storage gets it automatically,
+  and value initialization does it for classes without a user-provided default constructor.
+- A user-provided default constructor is the only thing that runs for such a class. Members it ignores
+  stay indeterminate.
+- `new T()` and `new T{}` are value-initialized. `new T` is not.

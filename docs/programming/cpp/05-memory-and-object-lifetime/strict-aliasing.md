@@ -32,15 +32,18 @@ other type is undefined behavior, apart from this list:
 
 | Allowed access type | Example for an object of dynamic type `int` |
 |---|---|
-| The dynamic type itself, possibly with added cv-qualifiers | `int`, `const int`, `volatile int` |
-| The signed or unsigned counterpart of the dynamic type | `unsigned int` |
-| An aggregate or union type that has the dynamic type among its members (recursively, including subobjects) | `struct S { int a; }` or `union U { int i; float f; }` accessing the member |
-| A base class of the dynamic type | `Base` for an object of type `Derived` |
+| The dynamic type itself | `int` |
+| The signed or unsigned type corresponding to the dynamic type | `unsigned int` |
 | `char`, `unsigned char`, `std::byte` | byte-wise reads and writes of any object |
 
-The standard's wording says the access type must be *similar* to one of these; for the purposes of
-this page that means "differs at most in cv-qualification, including at each pointer level". So
-`int*` and `float*` are unrelated, while `int*` and `const int*` are not.
+Each row applies to a type that is merely *similar* to the listed one. Roughly, similar types differ
+only in cv-qualification at each level (see cppreference, "Similar types", for the full definition,
+which also covers arrays of known and unknown bound). So `const int` and `volatile int` are covered by
+the first row, `int*` and `const int*` are similar, and `int*` and `float*` are unrelated.
+
+Earlier standards (C++17) also listed aggregate/union types containing the dynamic type and base
+classes of it as separate bullets; the current draft has only the three above. Accessing a member or a
+base-class subobject is an access to that subobject's own type, so ordinary code is unaffected.
 
 Things that are **not** exceptions, despite folklore:
 
@@ -108,8 +111,8 @@ one.
 
 `std::memcpy` copies bytes between two objects, and byte access is always allowed. The destination
 must be a real object of the target type (here a local `std::uint32_t`), and both types must be
-trivially copyable. Compilers turn it
-into a register move, there is no call.
+trivially copyable. With optimisation on, GCC and Clang turn a fixed-size `memcpy` like this into a
+plain move; there is no call.
 
 ### `std::bit_cast` *(C++20, `<bit>`)*
 
@@ -163,8 +166,9 @@ expressions.
 ### Unions are not a portable alternative
 
 Writing one union member and reading another is undefined in ISO C++ (only the common initial
-sequence of standard-layout members is exempt). GCC documents that it supports this pattern as an
-extension, and Clang follows it, but code that relies on it is not portable C++. Use `bit_cast` or
+sequence of standard-layout members is exempt). GCC documents that it allows this when the memory is
+accessed through the union type (GCC manual, `-fstrict-aliasing`), but that is a compiler extension,
+not C++, and this page makes no claim about other compilers. Use `bit_cast` or
 `memcpy`. The [undefined behavior](../10-error-handling-and-safety/06-undefined-behavior.md) page lists
 this among the common UB sources.
 
@@ -203,8 +207,13 @@ ever accessed as its real type. Casting a suitably aligned byte buffer to `T*` i
   `-Wstrict-aliasing=2` reported "dereferencing type-punned pointer will break strict-aliasing rules".
   It misses violations that cross function boundaries, so do not rely on it to find them.
 - **UBSan has no strict-aliasing check.** `-fsanitize=undefined` on `alias.cpp` (g++ 15.2.0, `-O2`)
-  still printed `1` with no report. The practical detection is differential testing: compare results at
-  `-O0`, `-O2` and with `-fno-strict-aliasing`.
+  still printed `1` with no report. Differential testing (compare `-O0`, `-O2` and
+  `-fno-strict-aliasing`) is the portable way to detect violations.
+- **Clang's TypeSanitizer** (`-fsanitize=type`, experimental, Clang only) does check this. On
+  `alias.cpp`, clang++ 21.1.8 with `-O1 -fsanitize=type` reported
+  `type-aliasing-violation ... WRITE of size 4 ... with type float accesses an existing object of type int`.
+  See the Clang TypeSanitizer documentation for its limits (it cannot be combined with other
+  sanitizers such as ASan).
 
 ## Pitfalls
 
@@ -218,11 +227,11 @@ ever accessed as its real type. Casting a suitably aligned byte buffer to `T*` i
 
 ## Key points
 
-- You may access an object only through its own type (plus cv), its signed/unsigned counterpart,
-  an enclosing aggregate/union, a base class, or a byte type (`char`, `unsigned char`, `std::byte`).
+- You may access an object only through a type similar to its own, to its signed/unsigned counterpart,
+  or to a byte type (`char`, `unsigned char`, `std::byte`).
 - `void*` is not an exception, and same-size integer types do not alias.
 - The compiler uses the rule for type-based alias analysis; with a violation, `-O0` and `-O2` can
   disagree (shown above), and neither answer is guaranteed.
 - Punning: `std::bit_cast` (C++20) or `std::memcpy`. Not pointer casts, not unions.
 - `-fno-strict-aliasing` is a workaround for legacy code, not a fix. UBSan and `-Wstrict-aliasing`
-  will not reliably catch violations.
+  will not reliably catch violations; Clang's experimental TypeSanitizer can.
