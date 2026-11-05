@@ -2,561 +2,246 @@
 id: filesystem
 title: Filesystem Library
 sidebar_label: Filesystem
-sidebar_position: 6
-tags: [c++, stl, filesystem, cpp17, files, directories]
+sidebar_position: 8
+tags: [c++, c++17, filesystem, path, directory-iterator, error-code, permissions, symlink]
 ---
 
-# Filesystem
+# Filesystem Library
 
-The **filesystem** library (C++17) provides portable facilities for manipulating files and directories. It replaces platform-specific APIs and C-style file operations with a modern, type-safe interface.
+`<filesystem>` *(C++17)* gives portable names to the things every program does with files and
+directories: build and take apart paths, ask whether something exists and what it is, create, copy,
+rename and delete, and walk a directory tree. It is a thin layer over the operating system, so many
+results (case sensitivity, symlinks, permissions, timestamps) still depend on the platform. Reading
+and writing a file's *contents* is not this library's job; use [IOStreams](./iostreams.md).
 
-## Basic Concepts
+**Prerequisites:** [Strings](./strings.md) (`path` converts to and from strings),
+[Containers](./containers.md) and [Iterators](./iterators.md) (directory iterators are input
+iterators), [Chrono](./chrono.md) (timestamps).
 
-The library revolves around **paths** and **filesystem operations**:
-```mermaid
-graph TD
-    A[std::filesystem::path] --> B[File Operations]
-    A --> C[Directory Operations]
-    A --> D[Status Queries]
-    
-    B --> E[copy, remove, rename]
-    C --> F[create, iterate, remove]
-    D --> G[exists, is_directory, file_size]
-```
+All names are in `std::filesystem`; the usual alias is `namespace fs = std::filesystem;`. With GCC 8 and older, and with libc++ before 9, you had to link `-lstdc++fs` / `-lc++fs`.
 
-## Paths
+## `path`: a string with structure
 
-`std::filesystem::path` represents filesystem paths in a portable way:
-```cpp showLineNumbers 
+`fs::path` stores a pathname as text in the platform's native encoding (`char` with UTF-8 on Linux;
+`wchar_t` UTF-16 on Windows) and offers *lexical* operations that never touch the disk. Decomposition:
+
+| Call | For `/home/ann/report.tar.gz` |
+|---|---|
+| `root_path()`, `root_directory()` | `/` |
+| `parent_path()` | `/home/ann` |
+| `filename()` | `report.tar.gz` |
+| `stem()` | `report.tar` |
+| `extension()` | `.gz` (the part from the **last** dot) |
+| `relative_path()` | `home/ann/report.tar.gz` |
+
+`operator/` joins components and inserts the separator; `operator+=` appends text with no separator.
+A subtle rule: **if the right-hand side is absolute, `/` replaces the left side**, so
+`fs::path("/data") / "/etc"` is `/etc`.
+
+```cpp title="path.cpp" showLineNumbers
 #include <filesystem>
 #include <iostream>
 
 namespace fs = std::filesystem;
 
-void pathBasics() {
-    // Construction
-    fs::path p1 = "/usr/local/bin";
-    fs::path p2 = "C:\\Windows\\System32";  // Windows
-    fs::path p3 = "../relative/path.txt";
-    
-    // Path components
-    std::cout << p1.root_name() << '\n';       // "" on Unix, "C:" on Windows
-    std::cout << p1.root_directory() << '\n';  // "/"
-    std::cout << p1.parent_path() << '\n';     // "/usr/local"
-    std::cout << p1.filename() << '\n';        // "bin"
-    std::cout << p1.stem() << '\n';            // "file" from "file.txt"
-    std::cout << p1.extension() << '\n';       // ".txt"
+int main() {
+    fs::path p = "/home/ann/report.tar.gz";
+    std::cout << p.parent_path() << ' ' << p.filename() << ' ' << p.stem() << ' ' << p.extension() << '\n';
+
+    fs::path q = fs::path("/data") / "logs" / "a.txt";
+    q.replace_extension(".csv");
+    std::cout << q.string() << '\n';
+
+    std::cout << (fs::path("/data") / "/etc").string() << '\n';             // absolute rhs wins
+    std::cout << fs::path("a/./b/../c//d").lexically_normal().string() << '\n';
+    std::cout << fs::path("/a/b/c").lexically_relative("/a/x").string() << '\n';
+
+    for (const auto& part : fs::path("/usr/local/bin"))                     // iterates components
+        std::cout << '[' << part.string() << ']';
+    std::cout << '\n';
 }
 ```
 
-:::info
-Paths are **portable** - the library handles platform differences (\ vs /) automatically.
-:::
-
-### Path Operations
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-void pathOperations() {
-    fs::path p = "/home/user/file.txt";
-    
-    // Concatenation
-    fs::path p2 = p.parent_path() / "other.txt";  // "/home/user/other.txt"
-    
-    // Modification
-    p.replace_extension(".cpp");     // "/home/user/file.cpp"
-    p.replace_filename("new.txt");   // "/home/user/new.txt"
-    
-    // Comparison
-    if (p == p2) { /* equal */ }
-    if (p < p2) { /* lexicographic */ }
-    
-    // String conversion
-    std::string str = p.string();
-    std::wstring wstr = p.wstring();
-}
+```text
+"/home/ann" "report.tar.gz" "report.tar" ".gz"
+/data/logs/a.csv
+/etc
+a/c/d
+../b/c
+[/][usr][local][bin]
 ```
 
-## Checking File Status
+(`operator<<` on a `path` prints it in quotes with escapes; use `.string()` for plain text.)
 
-Query file properties without reading contents:
-```cpp showLineNumbers 
-#include <filesystem>
-#include <iostream>
+- `lexically_normal`, `lexically_relative` and `lexically_proximate` look only at the text. They do
+  not resolve symlinks or `..` through a link, so they can give the wrong answer on a real
+  disk. For that, use `fs::canonical` (resolves, path must exist), `fs::weakly_canonical`
+  (resolves the part that exists), or `fs::absolute` (no symlink resolution).
+- `path` is not `std::string`: converting needs `string()`, `u8string()` (a `std::u8string` since C++20),
+  or `native()`. Building a path from a `std::u8string` or `char8_t` data is how you say "this is UTF-8"
+  portably. Using `std::string` that holds UTF-8 on Windows is a bug because it is interpreted
+  in the ANSI code page.
+- Comparison is component-wise and lexical: `fs::path("a/b") == "a//b"` is `true`, and `fs::equivalent(a, b)`
+  asks the OS whether two paths name the same file.
 
-namespace fs = std::filesystem;
+## Querying files
 
-void fileStatus() {
-    fs::path p = "example.txt";
-    
-    // Existence
-    if (fs::exists(p)) {
-        std::cout << "File exists\n";
-    }
-    
-    // Type checks
-    if (fs::is_regular_file(p)) { /* regular file */ }
-    if (fs::is_directory(p)) { /* directory */ }
-    if (fs::is_symlink(p)) { /* symbolic link */ }
-    
-    // Size
-    std::uintmax_t size = fs::file_size(p);  // in bytes
-    
-    // Modification time
-    auto ftime = fs::last_write_time(p);
-    
-    // Permissions (Unix-style)
-    fs::perms permissions = fs::status(p).permissions();
-}
-```
+`fs::status(p)` follows symlinks and `fs::symlink_status(p)` does not; both return a `file_status` with
+`type()` (`regular`, `directory`, `symlink`, `not_found`, ...) and `permissions()`. The shortcuts:
+`fs::exists`, `is_regular_file`, `is_directory`, `is_symlink`, `is_empty`, `file_size` (regular files
+only; bytes), `last_write_time` (a `file_time_type`, whose clock `file_clock` has an unspecified
+epoch before C++20), `fs::space(p)` (capacity, free, available), and `fs::equivalent`.
 
-:::warning
-`file_size()` throws if the file doesn't exist or isn't a regular file. Check with `exists()` first or use error code version.
-:::
+Exists-then-act sequences are **racy**: another process can create or delete the file between
+the check and the use (a time-of-check/time-of-use bug). Prefer to attempt the operation and handle
+the error, or use the single call that does both.
 
-## File Operations
+## Changing the filesystem
 
-### Creating and Removing Files
-```cpp showLineNumbers 
+| Function | Behavior |
+|---|---|
+| `create_directory(p)` | one level; returns `false` (no error) if it already exists |
+| `create_directories(p)` | like `mkdir -p`; returns `true` if something was created |
+| `remove(p)` | one file or empty directory; returns `false` if it does not exist |
+| `remove_all(p)` | recursive; returns the number of items removed. **No undo; check the path** |
+| `rename(from, to)` | atomic on POSIX on the same filesystem; replaces an existing file, not portable across volumes |
+| `copy_file(from, to, options)` | one regular file; fails if `to` exists unless `copy_options::overwrite_existing` or `skip_existing` / `update_existing` |
+| `copy(from, to, options)` | files or directories; `copy_options::recursive` copies a tree |
+| `create_symlink`, `create_hard_link`, `read_symlink`, `resize_file`, `permissions` | as named |
+| `current_path()`, `temp_directory_path()` | process working directory / a temp directory |
+
+There is no function that creates a unique temporary file or directory; `temp_directory_path()`
+returns only the base. Create a name with a random or counter suffix (and handle collisions), or use
+`mkstemp` on POSIX. Do not rely on `std::tmpnam`.
+
+## Iterating directories
+
+`fs::directory_iterator(p)` yields the entries of one directory, and `fs::recursive_directory_iterator(p)`
+walks the whole tree. Both are **input iterators** (single pass) over `directory_entry` objects, in an
+**unspecified order** that differs between filesystems; sort the results if you need a stable order.
+`directory_entry` caches attributes, so `entry.is_directory()` or `entry.file_size()` may avoid an extra
+system call. Both iterators are usable with range-based `for`, and with `std::ranges` algorithms
+(they are `borrowed_range`s since C++20).
+
+```cpp title="walk.cpp" showLineNumbers
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-
-namespace fs = std::filesystem;
-
-void fileOps() {
-    // Create file
-    std::ofstream("new_file.txt") << "content";
-    
-    // Copy file
-    fs::copy_file("source.txt", "dest.txt");
-    
-    // Copy with options
-    fs::copy_file("source.txt", "backup.txt", 
-                  fs::copy_options::overwrite_existing);
-    
-    // Move/rename
-    fs::rename("old_name.txt", "new_name.txt");
-    
-    // Remove
-    fs::remove("file.txt");
-    
-    // Remove if exists
-    if (fs::remove("maybe_file.txt")) {
-        std::cout << "File was removed\n";
-    }
-}
-```
-
-### Copying with Options
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-void copyOptions() {
-    fs::copy_options opts = 
-        fs::copy_options::overwrite_existing |
-        fs::copy_options::recursive;
-    
-    // Copy directory recursively
-    fs::copy("source_dir", "dest_dir", opts);
-}
-```
-
-## Directory Operations
-
-### Creating Directories
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-void directoryCUD() {
-    // Create single directory
-    fs::create_directory("new_dir");
-    
-    // Create directory tree
-    fs::create_directories("path/to/nested/dir");
-    
-    // Check if created
-    bool created = fs::create_directory("maybe_exists");  // false if already exists
-    
-    // Remove empty directory
-    fs::remove("empty_dir");
-    
-    // Remove directory and contents
-    std::uintmax_t removed = fs::remove_all("dir_with_contents");
-    std::cout << "Removed " << removed << " items\n";
-}
-```
-
-### Iterating Directories
-```cpp showLineNumbers 
-#include <filesystem>
 #include <iostream>
-
-namespace fs = std::filesystem;
-
-void iterateDirectory() {
-    // Non-recursive iteration
-    for (const auto& entry : fs::directory_iterator(".")) {
-        std::cout << entry.path() << '\n';
-        
-        if (entry.is_regular_file()) {
-            std::cout << "  Size: " << entry.file_size() << " bytes\n";
-        }
-    }
-    
-    // Recursive iteration
-    for (const auto& entry : fs::recursive_directory_iterator("./src")) {
-        if (entry.path().extension() == ".cpp") {
-            std::cout << entry.path() << '\n';
-        }
-    }
-}
-```
-
-:::success[`recursive_directory_iterator`]
-
-Use `recursive_directory_iterator` to walk entire directory trees easily!
-:::
-
-### Filtering Directory Entries
-```cpp showLineNumbers 
-#include <filesystem>
-#include <vector>
-
-namespace fs = std::filesystem;
-
-std::vector<fs::path> findFiles(const fs::path& dir, const std::string& ext) {
-    std::vector<fs::path> result;
-    
-    for (const auto& entry : fs::recursive_directory_iterator(dir)) {
-        if (entry.is_regular_file() && entry.path().extension() == ext) {
-            result.push_back(entry.path());
-        }
-    }
-    
-    return result;
-}
-
-void usage() {
-    auto cpp_files = findFiles("./src", ".cpp");
-    auto headers = findFiles("./include", ".h");
-}
-```
-
-## Working Paths
-
-### Current Directory
-```cpp showLineNumbers 
-#include <filesystem>
-#include <iostream>
-
-namespace fs = std::filesystem;
-
-void currentDirectory() {
-    // Get current path
-    fs::path cwd = fs::current_path();
-    std::cout << "Current: " << cwd << '\n';
-    
-    // Change current path
-    fs::current_path("/tmp");
-    
-    // Restore
-    fs::current_path(cwd);
-}
-```
-
-### Absolute and Relative Paths
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-void pathConversion() {
-    fs::path rel = "subdir/file.txt";
-    
-    // Convert to absolute
-    fs::path abs = fs::absolute(rel);
-    std::cout << abs << '\n';  // "/current/dir/subdir/file.txt"
-    
-    // Canonical path (resolves symlinks, .., .)
-    fs::path canonical = fs::canonical(rel);  // throws if doesn't exist
-    
-    // Weakly canonical (doesn't require existence)
-    fs::path weak = fs::weakly_canonical("nonexistent/../file.txt");
-    
-    // Relative path between two paths
-    fs::path rel_path = fs::relative("/home/user/docs/file.txt", 
-                                     "/home/user");
-    // Result: "docs/file.txt"
-}
-```
-
-## Temporary Files
-```cpp showLineNumbers 
-#include <filesystem>
-#include <fstream>
-
-namespace fs = std::filesystem;
-
-void temporaryFile() {
-    // Get temp directory
-    fs::path temp_dir = fs::temp_directory_path();
-    std::cout << "Temp: " << temp_dir << '\n';
-    
-    // Create unique temp file
-    fs::path temp_file = temp_dir / "myapp_XXXXXX.txt";
-    std::ofstream(temp_file) << "temporary data";
-    
-    // Use file...
-    
-    // Cleanup
-    fs::remove(temp_file);
-}
-```
-
-## Error Handling
-
-Filesystem operations can use exceptions or error codes:
-```cpp showLineNumbers 
-#include <filesystem>
-#include <iostream>
-
-namespace fs = std::filesystem;
-
-void errorHandling() {
-    // Exception version
-    try {
-        fs::remove("nonexistent.txt");  // throws
-    } catch (const fs::filesystem_error& e) {
-        std::cerr << "Error: " << e.what() << '\n';
-        std::cerr << "Path1: " << e.path1() << '\n';
-        std::cerr << "Path2: " << e.path2() << '\n';
-    }
-    
-    // Error code version (noexcept)
-    std::error_code ec;
-    fs::remove("nonexistent.txt", ec);
-    if (ec) {
-        std::cerr << "Error: " << ec.message() << '\n';
-    }
-}
-```
-
-:::success[Error Code Versions]
-
-Prefer **error code versions** in performance-critical code to avoid exception overhead.
-:::
-
-## Space Information
-
-Query disk space:
-```cpp showLineNumbers 
-#include <filesystem>
-#include <iostream>
-
-namespace fs = std::filesystem;
-
-void diskSpace() {
-    fs::space_info info = fs::space("/");
-    
-    std::cout << "Capacity:  " << info.capacity << " bytes\n";
-    std::cout << "Free:      " << info.free << " bytes\n";
-    std::cout << "Available: " << info.available << " bytes\n";
-    
-    // Convert to GB
-    double gb_free = static_cast<double>(info.free) / (1024 * 1024 * 1024);
-    std::cout << "Free: " << gb_free << " GB\n";
-}
-```
-
-## Practical Examples
-
-### Example 1: Find All Files by Extension
-```cpp showLineNumbers 
-#include <filesystem>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace fs = std::filesystem;
 
-std::vector<fs::path> findByExtension(
-    const fs::path& root,
-    const std::string& ext)
-{
-    std::vector<fs::path> result;
-    
-    if (!fs::exists(root) || !fs::is_directory(root)) {
-        return result;
-    }
-    
-    for (const auto& entry : fs::recursive_directory_iterator(root)) {
-        if (entry.is_regular_file() && entry.path().extension() == ext) {
-            result.push_back(entry.path());
+int main() {
+    fs::path root = fs::temp_directory_path() / "kb_fs_demo";
+    fs::remove_all(root);                                   // start clean (returns count removed)
+    fs::create_directories(root / "sub" / "deep");
+    std::ofstream(root / "a.txt") << "hello";
+    std::ofstream(root / "sub" / "b.txt") << "world!";
+    std::ofstream(root / "sub" / "deep" / "c.log") << "x";
+
+    std::vector<std::string> txt;
+    std::uintmax_t bytes = 0;
+    for (const auto& e : fs::recursive_directory_iterator(root)) {
+        if (e.is_regular_file()) {
+            bytes += e.file_size();
+            if (e.path().extension() == ".txt")
+                txt.push_back(fs::relative(e.path(), root).generic_string());
         }
     }
-    
-    return result;
+    std::sort(txt.begin(), txt.end());                      // iteration order is unspecified
+    for (const auto& s : txt) std::cout << s << '\n';
+    std::cout << bytes << " bytes\n";
+
+    fs::remove_all(root);
+    std::cout << fs::exists(root) << '\n';
 }
 ```
 
-### Example 2: Backup Directory
-```cpp showLineNumbers 
-#include <filesystem>
-#include <chrono>
-#include <sstream>
-#include <iomanip>
-
-namespace fs = std::filesystem;
-
-void backupDirectory(const fs::path& source, const fs::path& backup_root) {
-    // Create timestamped backup dir
-    auto now = std::chrono::system_clock::now();
-    auto time_t = std::chrono::system_clock::to_time_t(now);
-    
-    std::ostringstream oss;
-    oss << "backup_" << std::put_time(std::localtime(&time_t), "%Y%m%d_%H%M%S");
-    
-    fs::path backup_dir = backup_root / oss.str();
-    
-    // Copy recursively
-    fs::copy(source, backup_dir, 
-             fs::copy_options::recursive | 
-             fs::copy_options::overwrite_existing);
-    
-    std::cout << "Backed up to: " << backup_dir << '\n';
-}
+```text
+a.txt
+sub/b.txt
+12 bytes
+0
 ```
 
-### Example 3: Clean Old Files
-```cpp showLineNumbers 
+By default `recursive_directory_iterator` does not follow directory symlinks (set
+`directory_options::follow_directory_symlink` to do so, and beware loops). Erasing or creating
+entries while iterating is not safe: collect first, then change. A modification during iteration
+gives an unspecified result about whether the new entry is visited.
+
+## Error handling: two overload sets
+
+Every function that touches the OS comes in two forms. The plain one throws
+`fs::filesystem_error` (derived from `std::system_error`, with `path1()`, `path2()` and `code()`).
+The overload with a trailing `std::error_code& ec` never throws for filesystem errors; it sets
+`ec` (and clears it on success). Use error codes when failure is routine (probing, cleanup),
+and exceptions where failure is exceptional. See
+[error codes](../10-error-handling-and-safety/03-error-codes.md) for `std::error_code` itself.
+
+Note that "not found" is not always an error: `fs::remove` returns `false` rather than throwing when
+the file does not exist, and `fs::exists(p, ec)` returns `false` with `ec` set only for real failures.
+
+```cpp title="errors.cpp" showLineNumbers
 #include <filesystem>
-#include <chrono>
+#include <iostream>
+#include <system_error>
 
 namespace fs = std::filesystem;
 
-void cleanOldFiles(const fs::path& dir, std::chrono::hours max_age) {
-    auto now = fs::file_time_type::clock::now();
-    
-    for (const auto& entry : fs::directory_iterator(dir)) {
-        if (entry.is_regular_file()) {
-            auto ftime = fs::last_write_time(entry);
-            auto age = std::chrono::duration_cast<std::chrono::hours>(now - ftime);
-            
-            if (age > max_age) {
-                std::cout << "Removing: " << entry.path() << '\n';
-                fs::remove(entry);
-            }
-        }
+int main() {
+    fs::path missing = "/no/such/dir/file.txt";
+
+    std::cout << fs::remove(missing) << '\n';              // 0: nothing to remove, no error
+
+    try {
+        (void)fs::file_size(missing);                           // throws: file_size needs it to exist
+    } catch (const fs::filesystem_error& e) {
+        std::cout << "threw, path1=" << e.path1() << " code=" << (e.code() == std::errc::no_such_file_or_directory) << '\n';
     }
-}
 
-void usage() {
-    cleanOldFiles("/tmp/cache", std::chrono::hours(24 * 7));  // 7 days
-}
-```
-
-### Example 4: Calculate Directory Size
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-std::uintmax_t directorySize(const fs::path& dir) {
-    std::uintmax_t size = 0;
-    
-    for (const auto& entry : fs::recursive_directory_iterator(dir)) {
-        if (entry.is_regular_file()) {
-            std::error_code ec;
-            size += fs::file_size(entry, ec);
-            // Ignore errors (e.g., permission denied)
-        }
-    }
-    
-    return size;
+    std::error_code ec;
+    auto n = fs::file_size(missing, ec);                    // does not throw
+    std::cout << (ec == std::errc::no_such_file_or_directory) << ' ' << n << '\n';
 }
 ```
+
+```text
+0
+threw, path1="/no/such/dir/file.txt" code=1
+1 18446744073709551615
+```
+
+On failure the error-code `file_size` returns `static_cast<uintmax_t>(-1)`.
 
 ## Permissions
 
-Work with file permissions (Unix-style):
-```cpp showLineNumbers 
-#include <filesystem>
+`fs::permissions(p, perms::owner_all | perms::group_read, fs::perm_options::add)` sets or changes POSIX-style
+permission bits (`replace`, `add`, `remove`). On Windows only the read-only attribute is meaningful.
+The bits are the file mode; they do not tell you whether *this process* may access the file, and
+the answer can change at any moment, so try the operation and handle the failure.
 
-namespace fs = std::filesystem;
+## Pitfalls
 
-void permissions() {
-    fs::path p = "file.txt";
-    
-    // Set permissions
-    fs::permissions(p, fs::perms::owner_all | fs::perms::group_read);
-    
-    // Add permissions
-    fs::permissions(p, fs::perms::others_read, fs::perm_options::add);
-    
-    // Remove permissions
-    fs::permissions(p, fs::perms::owner_write, fs::perm_options::remove);
-    
-    // Get permissions
-    fs::file_status status = fs::status(p);
-    fs::perms perms = status.permissions();
-    
-    if ((perms & fs::perms::owner_write) != fs::perms::none) {
-        std::cout << "Owner can write\n";
-    }
-}
-```
+- **Check-then-act races**: see above; handle the error instead.
+- **`remove_all(path)` with a wrong or empty path** can delete far more than you meant. Build
+  the path from a known base and validate it.
+- **Encoding**: on Windows, build paths from wide or `u8` strings; on POSIX the bytes are opaque.
+  Filenames need not be valid UTF-8.
+- **Iteration order** is unspecified; sort before comparing results or writing tests.
+- **Case sensitivity and separators** are platform choices: `generic_string()` gives a form
+  with `/` for output you compare or store.
+- **Symlinks**: `status` follows them, `symlink_status` does not; `remove` deletes the link, not the target.
 
-## Best Practices
+## Related
 
-:::success[**DO:**]
-- Use `fs::path` for all path manipulation
-- Prefer error code versions in performance-critical code
-- Check `exists()` before file operations
-- Use `recursive_directory_iterator` for tree traversal
-- Use `/` operator for path concatenation
-  :::
+- [IOStreams](./iostreams.md): `std::ifstream` / `std::ofstream` take a `path` to read and write contents
+- [Chrono](./chrono.md): `file_time_type` and converting it to `system_clock`
+- [Error codes](../10-error-handling-and-safety/03-error-codes.md): `std::error_code` and `std::errc`
+- [Strings](./strings.md): `string_view` and UTF-8 text handling for path components
 
-:::danger
-**DON'T:**
-- Hardcode path separators (/ or \)
-- Assume paths are UTF-8 strings
-- Forget error handling (files can disappear!)
-- Mix string and path operations
-  :::
+## References
 
-## Performance Tips
-```cpp showLineNumbers 
-#include <filesystem>
-
-namespace fs = std::filesystem;
-
-void performanceOptimization() {
-    // Cache directory_entry for multiple queries
-    for (const auto& entry : fs::directory_iterator(".")) {
-        // Efficient: queries cached in entry
-        if (entry.is_regular_file()) {
-            auto size = entry.file_size();
-            auto time = entry.last_write_time();
-        }
-        
-        // Inefficient: separate system calls
-        // if (fs::is_regular_file(entry.path())) { ... }
-    }
-    
-    // Use error code version to avoid exceptions
-    std::error_code ec;
-    bool exists = fs::exists("file.txt", ec);
-    if (!ec && exists) { /* ... */ }
-}
-```
-
-## Related Topics
-
-- **[IOStreams](iostreams.md)** - File I/O operations
-- **[Strings](strings.md)** - Path string manipulation
-- **[Chrono](chrono.md)** - File time operations
+- [Filesystem library, cppreference](https://en.cppreference.com/w/cpp/filesystem)
+- ISO C++ [filesystems]

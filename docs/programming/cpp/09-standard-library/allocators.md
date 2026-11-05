@@ -2,7 +2,7 @@
 id: allocators
 title: Allocators
 sidebar_label: Allocators
-sidebar_position: 9
+sidebar_position: 10
 tags: [c++, stl, allocators, memory, custom-allocation]
 ---
 

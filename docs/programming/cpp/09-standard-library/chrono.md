@@ -2,605 +2,236 @@
 id: chrono
 title: Chrono Library (Time)
 sidebar_label: Chrono
-sidebar_position: 3
-tags: [c++, stl, chrono, time, duration, cpp11, cpp20]
+sidebar_position: 7
+tags: [c++, chrono, duration, time-point, clocks, steady-clock, system-clock, calendar, time-zones]
 ---
 
-# Chrono
+# Chrono Library (Time)
 
-The **chrono** library provides type-safe time utilities for durations, time points, and clocks. It's designed to prevent common time-related bugs through strong typing.
+`<chrono>` is a type-safe way to talk about time. It has three ideas: a **duration** (an amount of
+time, such as 250 ms), a **time point** (a duration since a clock's epoch), and a **clock** (a source
+of "now" with a stated epoch and properties). Making the unit part of the type removes the classic bug
+of passing seconds to a function that wants milliseconds, and conversions are checked at compile time.
+C++20 adds calendar dates, time-of-day, time zones and `std::format` support to the same library.
 
-## Core Concepts
-```mermaid
-graph TD
-    A[std::chrono] --> B[Duration]
-    A --> C[Time Point]
-    A --> D[Clock]
-    
-    B --> E[hours, minutes, seconds, ...]
-    C --> F[Specific moment in time]
-    D --> G[system_clock, steady_clock, ...]
-```
+**Prerequisites:** [Class templates](../08-templates-and-metaprogramming/class-templates.md),
+[operator overloading](../02-language-fundamentals/operators/operator-overloading.md).
+
+<Diagram title="The three concepts" accent="blue">
+  <DiagramRow>
+    <DiagramNode title="clock" icon="clock">epoch, tick period, <code>now()</code></DiagramNode>
+    <DiagramArrow direction="right" label="now() returns" />
+    <DiagramNode title="time_point" accent>duration since the clock's epoch</DiagramNode>
+    <DiagramArrow direction="right" label="difference of two" />
+    <DiagramNode title="duration">count of ticks of a period</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
 ## Durations
 
-`std::chrono::duration` represents a time span:
-```cpp showLineNumbers 
+`std::chrono::duration<Rep, Period>` stores a count of type `Rep` of ticks, where each tick is
+`Period` seconds (a `std::ratio`, so `std::milli` is 1/1000). The named types are
+`nanoseconds`, `microseconds`, `milliseconds`, `seconds`, `minutes`, `hours` (C++11) and `days`,
+`weeks`, `months`, `years` (C++20). The first six use signed integers of at least 64, 55, 45, 35,
+29 and 23 bits respectively. `months` and `years` are averages (the length of a Gregorian year: 365.2425
+days), not calendar units.
+
+```cpp title="durations.cpp" showLineNumbers
 #include <chrono>
 #include <iostream>
 
-using namespace std::chrono;
+using namespace std::chrono_literals;     // 5s, 250ms, 2h  (C++14)
 
-void durationBasics() {
-    // Pre-defined durations
-    hours h{2};
-    minutes m{30};
-    seconds s{45};
-    milliseconds ms{500};
-    microseconds us{1000};
-    nanoseconds ns{1000000};
-    
-    // Arithmetic
-    auto total = h + m;              // 2h 30min
-    auto diff = m - seconds{60};     // 29min
-    
-    // Conversion (implicit narrowing not allowed)
-    seconds sec = minutes{5};         // OK: 300 seconds
-    // minutes min = seconds{90};     // Error: narrowing
-    minutes min = duration_cast<minutes>(seconds{90});  // OK: 1 minute
-    
-    // Count underlying value
-    long long count = ms.count();     // 500
+int main() {
+    auto a = 1500ms;                      // std::chrono::milliseconds
+    std::chrono::seconds s = 2s;
+    auto total = a + s;                   // common type: milliseconds
+    std::cout << total.count() << "ms\n"; // count() is the raw tick count
+
+    // Widening is implicit, narrowing needs an explicit cast that truncates
+    // std::chrono::seconds bad = a;      // error: would lose precision
+    auto trunc = std::chrono::duration_cast<std::chrono::seconds>(total);   // 3 (truncates toward zero)
+    auto rnd   = std::chrono::round<std::chrono::seconds>(total);           // 4 (C++17: floor, ceil, round)
+
+    // Floating-point representation: no truncation, fractional seconds are allowed
+    std::chrono::duration<double> frac = a;           // 1.5 seconds
+    std::cout << trunc.count() << ' ' << rnd.count() << ' ' << frac.count() << '\n';
 }
 ```
 
-:::info
-Conversions from coarser to finer granularity are implicit (hours → seconds), but finer to coarser require `duration_cast`.
-:::
-
-### Duration Arithmetic
-```cpp showLineNumbers 
-#include <chrono>
-
-using namespace std::chrono;
-
-void durationArithmetic() {
-    seconds s1{10};
-    seconds s2{5};
-    
-    // Addition/Subtraction
-    auto sum = s1 + s2;              // 15s
-    auto diff = s1 - s2;             // 5s
-    
-    // Multiplication/Division
-    auto doubled = s1 * 2;           // 20s
-    auto half = s1 / 2;              // 5s
-    
-    // Modulo
-    auto remainder = s1 % s2;        // 0s
-    
-    // Comparison
-    bool less = s1 < s2;             // false
-    bool equal = s1 == s2;           // false
-}
+```text
+3500ms
+3 4 1.5
 ```
 
-### Custom Durations
-```cpp showLineNumbers 
-#include <chrono>
-#include <ratio>
+- Arithmetic between durations picks the **common type** (the coarsest period that can represent
+  both exactly). `+`, `-`, `*` by a number, `/` by a number, and `%` all work.
+- Implicit conversion is allowed only when it cannot lose information: integer duration to a finer
+  integer duration, or anything to a floating-point duration. Otherwise use `duration_cast`
+  (truncates toward zero), or `floor`, `ceil`, `round` *(C++17)*.
+- Overflow of the integer representation is signed overflow, which is undefined behavior; for very long
+  spans use a larger `Rep`.
+- `std::chrono::duration<int, std::ratio<1, 60>>` is a frame at 60 Hz, a typical custom duration.
 
-// Custom duration: 1/100th of a second (centisecond)
-using centiseconds = std::chrono::duration<long long, std::centi>;
+## Clocks and time points
 
-// Days (available in C++20 as std::chrono::days)
-using days = std::chrono::duration<int, std::ratio<86400>>;
+`std::chrono::time_point<Clock, Duration>` is a `Duration` since the `Clock`'s epoch. Subtracting two
+time points of the same clock gives a duration; you cannot mix time points of different clocks.
+The standard defines these clocks:
 
-void customDurations() {
-    centiseconds cs{150};            // 1.5 seconds
-    days d{7};                       // 1 week
-    
-    // Convert
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(cs);
-    std::cout << seconds.count() << "s\n";  // 1s
-}
-```
+| Clock | Use | Properties |
+|---|---|---|
+| `system_clock` | wall-clock time, converts to `time_t` | **can jump** when the system time is adjusted; epoch is Unix epoch since C++20 |
+| `steady_clock` | measuring intervals and timeouts | `is_steady == true`: never goes backwards; epoch unspecified |
+| `high_resolution_clock` | alias for one of the above, depends on the library | libstdc++ makes it `system_clock`; avoid it |
+| `utc_clock`, `tai_clock`, `gps_clock`, `file_clock` | *(C++20)* UTC with leap seconds, atomic time, GPS, filesystem timestamps | |
 
-## Time Points
+The rule: **use `steady_clock` for elapsed time and timeouts, `system_clock` only for timestamps
+you show to people or store**. Measuring with `system_clock` gives wrong, even negative, durations when
+NTP or the user steps the clock.
 
-`std::chrono::time_point` represents a specific moment in time:
-```cpp showLineNumbers 
-#include <chrono>
-#include <iostream>
-
-using namespace std::chrono;
-
-void timePointBasics() {
-    // Get current time
-    auto now = system_clock::now();
-    
-    // Time point arithmetic
-    auto future = now + hours{24};        // 24 hours from now
-    auto past = now - minutes{30};        // 30 minutes ago
-    
-    // Duration between time points
-    auto diff = future - now;
-    auto hours_diff = duration_cast<hours>(diff).count();
-    std::cout << hours_diff << " hours\n";  // 24
-}
-```
-
-### Time Since Epoch
-```cpp showLineNumbers 
-#include <chrono>
-#include <iostream>
-
-using namespace std::chrono;
-
-void epochTime() {
-    auto now = system_clock::now();
-    
-    // Get duration since epoch
-    auto since_epoch = now.time_since_epoch();
-    
-    // Convert to seconds
-    auto sec = duration_cast<seconds>(since_epoch).count();
-    std::cout << "Seconds since epoch: " << sec << '\n';
-    
-    // Convert to milliseconds
-    auto ms = duration_cast<milliseconds>(since_epoch).count();
-    std::cout << "Milliseconds since epoch: " << ms << '\n';
-}
-```
-
-## Clocks
-
-Chrono provides three standard clocks:
-
-### system_clock
-
-Represents the system-wide real-time clock (wall-clock time):
-```cpp showLineNumbers 
-#include <chrono>
-#include <ctime>
-#include <iostream>
-
-void systemClockExample() {
-    auto now = std::chrono::system_clock::now();
-    
-    // Convert to time_t for C-style formatting
-    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    std::cout << "Current time: " << std::ctime(&now_c);
-    
-    // Back to time_point
-    auto tp = std::chrono::system_clock::from_time_t(now_c);
-}
-```
-
-:::warning
-`system_clock` can jump backwards (e.g., daylight saving time, NTP adjustment). Don't use for measuring elapsed time!
-:::
-
-### steady_clock
-
-Monotonic clock that never decreases:
-```cpp showLineNumbers 
-#include <chrono>
-#include <iostream>
-
-void steadyClockExample() {
-    auto start = std::chrono::steady_clock::now();
-    
-    // Do some work...
-    performTask();
-    
-    auto end = std::chrono::steady_clock::now();
-    
-    // Measure elapsed time
-    auto elapsed = end - start;
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-    std::cout << "Task took: " << ms.count() << "ms\n";
-}
-```
-
-:::success[`steady_clock` for Timing]
-
-Always use `steady_clock` for **measuring durations** and **benchmarking**!
-:::
-
-### high_resolution_clock
-
-The clock with the shortest tick period available (usually an alias to `steady_clock` or `system_clock`):
-```cpp showLineNumbers 
-#include <chrono>
-
-void highResolutionExample() {
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    // Precise measurement
-    expensiveOperation();
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    std::cout << "Duration: " << duration.count() << "ns\n";
-}
-```
-
-## Measuring Execution Time
-```cpp showLineNumbers 
+```cpp title="timing.cpp" showLineNumbers
 #include <chrono>
 #include <iostream>
 #include <thread>
 
-template<typename Func>
-auto measureTime(Func&& func) {
-    auto start = std::chrono::steady_clock::now();
-    
-    func();
-    
-    auto end = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-}
+int main() {
+    using namespace std::chrono;
+    using namespace std::chrono_literals;
 
-void example() {
-    auto duration = measureTime([]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds{100});
-    });
-    
-    std::cout << "Took: " << duration.count() << "ms\n";
+    auto t0 = steady_clock::now();
+    std::this_thread::sleep_for(50ms);                         // at least 50 ms, not exactly
+    auto elapsed = steady_clock::now() - t0;
+
+    std::cout << (elapsed >= 50ms) << '\n';                    // 1: sleep_for never wakes early
+    std::cout << duration_cast<milliseconds>(elapsed).count() / 1000 << '\n';   // 0 (well under 1 s)
+    std::cout << steady_clock::is_steady << '\n';
+
+    auto deadline = steady_clock::now() + 2s;                  // time point + duration
+    std::this_thread::sleep_until(deadline - 1990ms);          // absolute-time sleep avoids drift
 }
 ```
 
-## Chrono Literals (C++14)
-
-Convenient syntax for durations:
-```cpp showLineNumbers 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
-void literalsExample() {
-    auto h = 2h;              // 2 hours
-    auto m = 30min;           // 30 minutes
-    auto s = 45s;             // 45 seconds
-    auto ms = 500ms;          // 500 milliseconds
-    auto us = 100us;          // 100 microseconds
-    auto ns = 50ns;           // 50 nanoseconds
-    
-    // Mixed arithmetic
-    auto total = 1h + 30min + 45s;
-    
-    // Sleep
-    std::this_thread::sleep_for(100ms);
-}
+```text
+1
+0
+1
 ```
 
-:::success[Chrono Literals]
+`sleep_for` has a lower bound only: the OS scheduler can add delay. For a periodic task, compute the next
+deadline from the previous **deadline** and use `sleep_until`, so errors do not accumulate. Resolution
+and the cost of `now()` are platform dependent (libstdc++ on Linux builds `steady_clock` on `CLOCK_MONOTONIC`;
+an implementation detail).
 
-Always use chrono literals (e.g., `100ms`) instead of raw numbers for readability and type safety!
-:::
+Converting `system_clock` to a calendar form: `system_clock::to_time_t(tp)` gives a `time_t` for
+the C APIs (`std::localtime` is not thread-safe; prefer the C++20 types below or `localtime_r`/`localtime_s`).
 
-## Calendar and Time Zones (C++20)
+## Calendar types *(C++20)*
 
-C++20 adds extensive calendar and time zone support:
+C++20 adds calendar types that do not depend on the C library:
 
-### Dates
-```cpp showLineNumbers 
+- `year`, `month`, `day`, `weekday`; combinations `year_month_day`, `year_month_weekday`;
+  literals `2024y`, `std::chrono::March`, `15d`, and the operator `/` to build dates: `2024y/3/15`
+  or `March/15/2024`.
+- `sys_days` is a `time_point<system_clock, days>`: the bridge between a calendar date and an
+  instant. `year_month_day` converts to `sys_days` and back, and `ok()` tells you if the date exists.
+- `hh_mm_ss<Duration>` splits a duration into hours, minutes, seconds and sub-seconds.
+- `last` (e.g. `2024y/2/last`) names the last day or weekday of a month.
+
+```cpp title="calendar.cpp" showLineNumbers
 #include <chrono>
 #include <iostream>
 
-using namespace std::chrono;
+int main() {
+    using namespace std::chrono;
 
-void dateExample() {
-    // Create dates
-    auto today = year_month_day{2024y, January, 15d};
-    auto date2 = 2024y/January/15d;         // Alternative syntax
-    auto date3 = January/15d/2024y;         // Another alternative
-    
-    // Date arithmetic
-    auto tomorrow = sys_days{today} + days{1};
-    auto next_week = sys_days{today} + weeks{1};
-    
-    // Components
-    auto y = today.year();
-    auto m = today.month();
-    auto d = today.day();
-    
-    // Day of week
-    auto weekday = year_month_weekday{today}.weekday();
-    std::cout << weekday << '\n';  // e.g., "Mon"
-    
-    // Last day of month
-    auto last = year_month_day_last{2024y, February/last};
+    year_month_day d = 2024y / February / 29;
+    std::cout << d.ok() << ' ' << (2023y / February / 29).ok() << '\n';
+
+    year_month_day next = d + years{1};                        // 2025-02-29 does not exist
+    std::cout << next.ok() << '\n';                            // 0: check ok() or normalize via sys_days
+
+    sys_days sd = sys_days{d} + days{1};
+    std::cout << weekday{sd}.c_encoding() << '\n';             // 0 = Sunday ... 6 = Saturday: 2024-03-01 is a Friday (5)
+
+    hh_mm_ss hms{3h + 25min + 7s};
+    std::cout << hms.hours().count() << ':' << hms.minutes().count() << ':' << hms.seconds().count() << '\n';
 }
 ```
 
-### Time of Day
-```cpp showLineNumbers 
-#include <chrono>
-
-using namespace std::chrono;
-
-void timeOfDayExample() {
-    // Create time of day
-    auto time = 14h + 30min + 45s;
-    
-    // Hours, minutes, seconds
-    auto hms = hh_mm_ss{time};
-    std::cout << hms.hours().count() << ":"
-              << hms.minutes().count() << ":"
-              << hms.seconds().count() << '\n';  // 14:30:45
-}
+```text
+1 0
+0
+5
+3:25:7
 ```
 
-### Time Zones
-```cpp showLineNumbers 
-#include <chrono>
-#include <iostream>
+Adding `years` or `months` to a `year_month_day` can produce a day that does not exist (Feb 29
+plus a year). The result is stored as is and `ok()` returns `false`; you decide whether to clamp
+(`year_month_day_last`) or convert through `sys_days`.
 
-using namespace std::chrono;
+### Time zones *(C++20)*
 
-void timeZoneExample() {
-    // Get current time with time zone
-    auto now = system_clock::now();
-    auto local = zoned_time{current_zone(), now};
-    auto utc = zoned_time{"UTC", now};
-    
-    std::cout << "Local: " << local << '\n';
-    std::cout << "UTC:   " << utc << '\n';
-    
-    // Convert between time zones
-    auto ny_time = zoned_time{"America/New_York", now};
-    auto tokyo_time = zoned_time{"Asia/Tokyo", now};
-    
-    // Time zone info
-    auto tz = current_zone();
-    std::cout << "Current zone: " << tz->name() << '\n';
-}
+`std::chrono::zoned_time` pairs a time point with a `time_zone` taken from the IANA database
+(`std::chrono::locate_zone("Europe/Warsaw")`, or `current_zone()`). Needs a tz database at run
+time, which Linux builds usually read from the system `tzdata`. The database lookups can throw
+`std::chrono::nonexistent_local_time` or `ambiguous_local_time` for local times that a DST
+change skips or repeats. Library support for time zones and for `<format>` of chrono types arrived later than the calendar
+types and differs between libstdc++, libc++ and MSVC, so check yours before relying on it.
+
+```cpp
+// fragment: needs a C++20 library with tzdb support and installed tzdata
+auto now = std::chrono::system_clock::now();
+std::chrono::zoned_time warsaw{"Europe/Warsaw", now};
+std::cout << std::format("{:%F %T %Z}", warsaw) << '\n';   // e.g. 2025-06-01 14:03:20 CEST
 ```
 
-## Formatting and Parsing (C++20)
-```cpp showLineNumbers 
+## Formatting and parsing *(C++20)*
+
+`std::format("{}", tp)` and `std::format("{:%Y-%m-%d %H:%M}", tp)` print time points, durations and calendar
+types, with `strftime`-like specifiers (`<format>` support in your library is required).
+`std::chrono::from_stream` / `std::chrono::parse` read them back. Durations print their unit:
+
+```cpp title="format.cpp"
+// compile: g++ -std=c++20
 #include <chrono>
 #include <format>
 #include <iostream>
 
-using namespace std::chrono;
-
-void formattingExample() {
-    auto now = system_clock::now();
-    
-    // Format time point
-    std::cout << std::format("{:%Y-%m-%d %H:%M:%S}", now) << '\n';
-    std::cout << std::format("{:%A, %B %d, %Y}", now) << '\n';
-    
-    // Format duration
-    auto dur = 125s;
-    std::cout << std::format("{:%M:%S}", dur) << '\n';  // 02:05
+int main() {
+    using namespace std::chrono_literals;
+    std::cout << std::format("{} {} {}\n", 90s, 1500ms, 2h);
+    std::cout << std::format("{:%Y-%m-%d}\n", std::chrono::year_month_day{2024y / 3 / 15});
 }
 ```
 
-## Practical Examples
-
-### Example 1: Timeout Handler
-```cpp showLineNumbers 
-#include <chrono>
-
-using namespace std::chrono;
-
-class TimeoutHandler {
-    steady_clock::time_point deadline_;
-    
-public:
-    TimeoutHandler(milliseconds timeout)
-        : deadline_(steady_clock::now() + timeout) {}
-    
-    bool hasExpired() const {
-        return steady_clock::now() >= deadline_;
-    }
-    
-    milliseconds remaining() const {
-        auto now = steady_clock::now();
-        if (now >= deadline_) return milliseconds{0};
-        return duration_cast<milliseconds>(deadline_ - now);
-    }
-};
-
-void usage() {
-    TimeoutHandler timeout{5000ms};  // 5 seconds
-    
-    while (!timeout.hasExpired()) {
-        // Do work
-        if (workComplete()) break;
-    }
-}
+```text
+90s 1500ms 2h
+2024-03-15
 ```
 
-### Example 2: Rate Limiter
-```cpp showLineNumbers 
-#include <chrono>
-#include <deque>
+## Pitfalls
 
-using namespace std::chrono;
+- **Using `system_clock` to measure intervals.** Use `steady_clock`.
+- **Integer division in conversions**: `duration_cast<seconds>(1999ms)` is 1, not 2. Use
+  `round`, or a `duration<double>`.
+- **Mixing `count()` and unit-less numbers**: `sleep_for(std::chrono::milliseconds(n))` is
+  explicit, whereas `.count()` loses the unit. Keep values in duration types until the
+  last moment (for example, when calling a C API).
+- **Timing one tiny operation**: `now()` itself costs time and the clock has finite resolution. Time
+  many iterations and divide.
+- **`high_resolution_clock`** can be an alias of `system_clock` (so not steady). Use `steady_clock`.
+- **Benchmarking**: the compiler may delete code whose result is unused; see [perf tools](../14-debugging-and-profiling/06-perf-tools.md).
 
-class RateLimiter {
-    size_t max_requests_;
-    milliseconds window_;
-    std::deque<steady_clock::time_point> timestamps_;
-    
-public:
-    RateLimiter(size_t max_requests, milliseconds window)
-        : max_requests_(max_requests), window_(window) {}
-    
-    bool allow() {
-        auto now = steady_clock::now();
-        
-        // Remove old timestamps
-        while (!timestamps_.empty() && 
-               now - timestamps_.front() > window_) {
-            timestamps_.pop_front();
-        }
-        
-        // Check limit
-        if (timestamps_.size() >= max_requests_) {
-            return false;
-        }
-        
-        timestamps_.push_back(now);
-        return true;
-    }
-};
+## Related
 
-void usage() {
-    RateLimiter limiter{10, 1000ms};  // 10 requests per second
-    
-    if (limiter.allow()) {
-        processRequest();
-    }
-}
-```
+- [Threads](../11-concurrency-and-memory-model/04-threads.md): `sleep_for`, `sleep_until`, `wait_for`
+  and `wait_until` take durations and time points
+- [Filesystem](./filesystem.md): `file_time_type` is a `time_point<file_clock>`
+- [Strings](./strings.md): `std::format`, and converting numbers to text
+- [Algorithms](./algorithms.md): `std::chrono` durations work with `std::accumulate` and friends
 
-### Example 3: Periodic Task
-```cpp showLineNumbers 
-#include <chrono>
-#include <thread>
+## References
 
-using namespace std::chrono;
-
-void periodicTask(milliseconds interval, int iterations) {
-    auto next = steady_clock::now() + interval;
-    
-    for (int i = 0; i < iterations; ++i) {
-        // Do work
-        performTask();
-        
-        // Sleep until next iteration
-        std::this_thread::sleep_until(next);
-        next += interval;  // Schedule next iteration
-    }
-}
-
-void usage() {
-    periodicTask(100ms, 10);  // Every 100ms, 10 times
-}
-```
-
-### Example 4: Performance Profiler
-```cpp showLineNumbers 
-#include <chrono>
-#include <iostream>
-#include <string>
-#include <map>
-
-using namespace std::chrono;
-
-class Profiler {
-    struct Stats {
-        size_t count = 0;
-        nanoseconds total{0};
-        nanoseconds min{nanoseconds::max()};
-        nanoseconds max{0};
-    };
-    
-    std::map<std::string, Stats> stats_;
-    
-public:
-    class Scope {
-        Profiler& profiler_;
-        std::string name_;
-        steady_clock::time_point start_;
-        
-    public:
-        Scope(Profiler& p, std::string name)
-            : profiler_(p), name_(std::move(name))
-            , start_(steady_clock::now()) {}
-        
-        ~Scope() {
-            auto duration = steady_clock::now() - start_;
-            profiler_.record(name_, duration);
-        }
-    };
-    
-    void record(const std::string& name, nanoseconds duration) {
-        auto& s = stats_[name];
-        s.count++;
-        s.total += duration;
-        s.min = std::min(s.min, duration);
-        s.max = std::max(s.max, duration);
-    }
-    
-    void report() const {
-        for (const auto& [name, stats] : stats_) {
-            auto avg = stats.total / stats.count;
-            std::cout << name << ":\n"
-                      << "  Count: " << stats.count << "\n"
-                      << "  Total: " << duration_cast<milliseconds>(stats.total).count() << "ms\n"
-                      << "  Avg:   " << duration_cast<microseconds>(avg).count() << "us\n"
-                      << "  Min:   " << duration_cast<microseconds>(stats.min).count() << "us\n"
-                      << "  Max:   " << duration_cast<microseconds>(stats.max).count() << "ms\n";
-        }
-    }
-};
-
-void usage() {
-    Profiler profiler;
-    
-    {
-        Profiler::Scope scope{profiler, "database_query"};
-        executeDatabaseQuery();
-    }
-    
-    {
-        Profiler::Scope scope{profiler, "network_request"};
-        sendNetworkRequest();
-    }
-    
-    profiler.report();
-}
-```
-
-## Best Practices
-
-:::success[**DO:**]
-- Use `steady_clock` for measuring durations
-- Use `system_clock` for wall-clock time
-- Use chrono literals (`100ms`, `5s`) for readability
-- Prefer `duration_cast` for explicit conversions
-- Use strong typing to avoid unit confusion
-  :::
-
-:::danger
-**DON'T:**
-- Use `system_clock` for performance measurement
-- Mix raw numbers with durations (use literals)
-- Assume `high_resolution_clock` is different from `steady_clock`
-- Forget to handle potential negative durations
-  :::
-
-## Common Patterns
-```cpp showLineNumbers 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
-// Sleep
-std::this_thread::sleep_for(100ms);
-std::this_thread::sleep_until(steady_clock::now() + 1s);
-
-// Timeout
-auto deadline = steady_clock::now() + 5s;
-while (steady_clock::now() < deadline && !done()) {
-    // work
-}
-
-// Benchmark
-auto start = steady_clock::now();
-doWork();
-auto elapsed = steady_clock::now() - start;
-```
-
-## Related Topics
-
-[//]: # (- **[Threads]&#40;../11-concurrency-and-memory-model/threads.md&#41;** - Thread sleep and timing)
-- **[Filesystem](filesystem.md)** - File time operations
-- **[Utilities](utilities.md)** - Time-related utilities
+- [Date and time library, cppreference](https://en.cppreference.com/w/cpp/chrono)
+- ISO C++ [time]
