@@ -72,13 +72,16 @@ struct Widget {
     ~Widget() { std::printf("~Widget()\n"); }
 };
 
+Widget* volatile sink;    // makes the pointer escape, so -O2 cannot elide the allocation
+
 int main() {
     Widget* w = new Widget;   // allocate, then construct
+    sink = w;
     delete w;                 // destroy, then deallocate
 }
 ```
 
-<Walkthrough title="new Widget and delete w" caption="g++ 15 and clang++ 21 on x86-64, -std=c++23. Both call the sized operator delete." accent="amber">
+<Walkthrough title="new Widget and delete w" caption="g++ 15 and clang++ 21 on x86-64, -std=c++20, with the pointer stored in a volatile so -O2 gives the same output. Both call the sized operator delete." accent="amber">
   <Step title="Allocate">
 
 ```text
@@ -86,7 +89,7 @@ operator new(8)
 ```
 
 The compiler calls `operator new(sizeof(Widget))`. It returns <StepChange>raw storage</StepChange>:
-8 bytes, aligned to at least `__STDCPP_DEFAULT_NEW_ALIGNMENT__` (16 on x86-64 Linux). No `Widget`
+8 bytes, aligned for any object of that size (glibc's `malloc`, used here, gives 16 bytes on x86-64). No `Widget`
 exists yet. If allocation fails, `operator new` throws `std::bad_alloc` and nothing else happens.
 
   </Step>
@@ -127,7 +130,7 @@ released</StepChange>, and `w` is now dangling.
 The `new T[n]` forms work the same way through `operator new[]`, then construct `n` elements in order.
 `delete[]` destroys them in reverse order before calling `operator delete[]`. To know how many
 destructors to run, implementations typically store the element count in front of the array when the
-element type has a non-trivial destructor. The Itanium C++ ABI (GCC, Clang on Linux) calls this an
+element type has a non-trivial destructor (or a sized class-specific `operator delete[]`). The Itanium C++ ABI (GCC, Clang on Linux) calls this an
 "array cookie"; the layout is not specified by the C++ standard. GCC and Clang on x86-64 Linux store a
 `std::size_t` just before the returned pointer, and the pointer you get back from `new[]` is therefore
 not the address `operator new[]` returned. That is why `delete` on a `new[]` pointer breaks: it passes
@@ -138,7 +141,7 @@ The three layers, in the order the compiler uses them:
 
 <Diagram>
   <DiagramRow>
-    <DiagramNode icon="code" title="new-expression">Language construct: allocate, then construct. Fixed.</DiagramNode>
+    <DiagramNode icon="braces" title="new-expression">Language construct: allocate, then construct. Fixed.</DiagramNode>
     <DiagramArrow label="calls" />
     <DiagramNode icon="boxes" title="operator new">Allocation function: returns raw storage or fails. Replaceable.</DiagramNode>
     <DiagramArrow label="defaults to" />
@@ -167,13 +170,14 @@ The default `operator new` does not return null. It loops:
 1. Try to allocate. On success, return.
 2. On failure, call the current **new-handler** (installed with `std::set_new_handler`).
 3. If there is no handler, throw `std::bad_alloc`. If there is one, it must free memory and return
-   (so the loop retries), install a different handler, or throw or terminate.
+   (so the loop retries), install a different handler, throw `std::bad_alloc` (or a derived type), or terminate.
 
 ```cpp title="new-handler.cpp" showLineNumbers
 #include <cstdio>
 #include <new>
 
 static int attempts = 0;
+char* volatile sink;   // makes the pointer escape, so -O2 cannot elide the allocation
 void on_fail() {
     std::printf("new_handler call %d\n", ++attempts);
     if (attempts == 3) std::set_new_handler(nullptr);   // next failure throws bad_alloc
@@ -183,6 +187,7 @@ int main() {
     std::set_new_handler(on_fail);
     try {
         char* p = new char[1ull << 60];   // far more than any machine has
+        sink = p;
         delete[] p;
     } catch (const std::bad_alloc&) {
         std::puts("bad_alloc after handler removed");
@@ -190,7 +195,7 @@ int main() {
 }
 ```
 
-Output (g++ 15 and clang++ 21, x86-64 Linux, `-std=c++20`):
+Output (g++ 15 and clang++ 21, x86-64 Linux, `-std=c++20`, same at `-O0` and `-O2`; without the `sink` store an optimizer may elide the allocation, see [allocation elision](#allocation-elision)):
 
 ```text
 new_handler call 1
@@ -205,15 +210,17 @@ The **nothrow** form reports failure with a null pointer instead of an exception
 #include <cstdio>
 #include <new>
 
+char* volatile sink;   // makes the pointer escape, so -O2 cannot elide the allocation
+
 int main() {
     char* p = new (std::nothrow) char[1ull << 60];
+    sink = p;
     std::puts(p ? "allocated" : "nullptr");   // nullptr
     delete[] p;                               // deleting nullptr is a no-op
 }
 ```
 
-`std::nothrow` only makes the *allocation function* non-throwing. The new-handler still runs first
-(and may throw), and the constructor can still throw. You release the result with an ordinary
+`std::nothrow` only makes the *allocation function* non-throwing. The new-handler still runs first (if it throws `bad_alloc`, the nothrow form still returns null), and the constructor can still throw. You release the result with an ordinary
 `delete`.
 
 On Linux, overcommit means that ordinary-sized requests usually succeed even when memory is short,
@@ -294,7 +301,7 @@ and accept null.
   called.
 - **Aligned allocation** *(C++17)*: when `alignof(T)` exceeds `__STDCPP_DEFAULT_NEW_ALIGNMENT__`, the
   `new`-expression selects the `std::align_val_t` overloads, and the `delete`-expression selects the
-  matching aligned deallocation. Before C++17, such types were silently under-aligned. The worked
+  matching aligned deallocation. Before C++17, such types could be silently under-aligned. The worked
   example is in [alignment](./alignment.md#over-aligned-types-and-new). If you replace allocation
   functions, replace the aligned ones as well, or aligned types bypass your allocator.
 
@@ -303,8 +310,8 @@ and accept null.
 Since C++14, an implementation may omit a call to a replaceable allocation function made by a
 new-expression, or merge several into one larger allocation, and may do the same for the matching
 deallocations. So a `new` that is created and deleted within a function can disappear entirely, and
-counting calls to `operator new` is not a reliable way to measure how many objects you made. The
-allocation is not "observable behavior" unless the pointer escapes.
+counting calls to `operator new` is not a reliable way to measure how many objects you made. In practice, compilers do this when the
+pointer does not escape the function.
 
 ## Deleting through a base pointer
 
@@ -352,7 +359,7 @@ Ownership semantics are covered in
 
 - `new` = `operator new` (allocate) + constructor. `delete` = destructor + `operator delete`
   (deallocate).
-- If a constructor throws inside `new`, the memory is freed for you.
+- If a constructor throws inside `new`, the memory is freed for you (provided a matching `operator delete` exists, which is always the case for plain `new`).
 - Match `new`/`delete`, `new[]`/`delete[]`, `malloc`/`free`, never across.
 - Write `new` only inside owning types. Everywhere else use `make_unique`, `make_shared` and
   containers.
