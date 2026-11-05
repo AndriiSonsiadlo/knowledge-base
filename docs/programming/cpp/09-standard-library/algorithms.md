@@ -31,9 +31,9 @@ complexity the category allows. This page covers the classic iterator-pair algor
   predicate and call the copies in any order, so it must not depend on its own mutable state, and
   must not modify the elements it examines.
 - **Comparators** passed to sorting, searching and set algorithms must be a **strict weak ordering**:
-  irreflexive (`comp(a, a)` false), asymmetric, and with transitive equivalence. `<=` is not one,
-  and a comparator that violates this is undefined behavior; in practice `std::sort` can read
-  out of bounds.
+  irreflexive (`comp(a, a)` false), transitive, and with transitive equivalence (incomparability). `<=` is
+  not one, and a comparator that violates this is undefined behavior; in practice `std::sort` can read
+  out of bounds (observed with libstdc++'s unguarded insertion sort).
 - **Output ranges** must have room, and must not overlap the input unless the algorithm says so.
 
 ## Searching and counting
@@ -127,8 +127,10 @@ int main() {
 1 3 4 5 | 1 2 3 1 | 1 2 4 5 
 ```
 
-`std::erase` and `std::erase_if` *(C++20)* are non-member functions for every standard container,
-and do the whole job; for `std::list` the member `list::remove` / `remove_if` is equivalent.
+`std::erase(c, value)` and `std::erase_if(c, pred)` *(C++20)* do the whole job as non-member functions.
+`erase` exists for the sequence containers (`vector`, `deque`, `list`, `forward_list`) and `basic_string`;
+`erase_if` also covers the ordered and unordered associative containers. Neither exists for `std::array`.
+For for `std::list` the member `list::remove` / `remove_if` is equivalent.
 `unique` only removes *adjacent* equal elements, so sort first to deduplicate globally.
 Both algorithms are O(N); `std::erase` on a `vector` is therefore O(N) in total, where erasing
 elements one at a time in a loop is O(N^2).
@@ -183,7 +185,7 @@ compare with `std::tie(a.x, a.y) < std::tie(b.x, b.y)` or use `<=>` *(C++20)*.
 
 These require the range to be **partitioned** with respect to the value (in practice: sorted by the
 same comparator). They do O(log N) comparisons; with a non-random-access iterator the comparisons
-stay logarithmic but the iterator steps are O(N), so for `list` and `set` use the container's member
+stay logarithmic but the iterator steps are O(N), so for `set` and `map` use the container's member
 functions.
 
 | Function | Returns |
@@ -219,8 +221,8 @@ int main() {
 
 On **sorted** ranges: `merge`, `inplace_merge`, `includes`, `set_union`, `set_intersection`,
 `set_difference`, `set_symmetric_difference`. Each writes the result in sorted order to an output
-iterator and does at most 2 x (N1 + N2) - 1 comparisons (`inplace_merge` uses extra memory when
-available, else N log N). They treat equal elements as multisets: if a value appears 3 times in
+iterator. `merge` does at most N1 + N2 - 1 comparisons, and the other set operations at most
+2 x (N1 + N2) - 1 (`inplace_merge` uses extra memory when available, else N log N). They treat equal elements as multisets: if a value appears 3 times in
 one input and 2 in the other, `set_intersection` outputs 2.
 
 ## Heaps

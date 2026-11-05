@@ -180,17 +180,18 @@ Lazy has consequences you need to know:
   no longer satisfies the predicate is undefined behavior. `drop_while` caches in the same way. Do
   not take a `filter` view by `const&`: take it by value or by forwarding reference.
 - **Views do not own.** A view over a vector that is destroyed, reallocated or resized dangles, the
-  same hazard as [`string_view`](./strings.md) or [`span`](./containers.md#complexity-and-invalidation).
+  same hazard as [`string_view`](./strings.md) or [`span`](./containers.md#std-span).
   A pipeline that starts from an rvalue container is a different case: since P2415 (applied to
   C++20), `views::all` wraps an rvalue container in an `owning_view`, which moves the container
   into the view, while an lvalue becomes a `ref_view`. The returned view is then self-contained.
-```cpp title="dangling.cpp"
-// fragment: what not to do (needs <ranges> and <vector>)
-auto bad() {
-    std::vector<int> v{1, 2, 3};
-    return v | std::views::transform([](int x) { return x + 1; });   // refers to v, which is destroyed
-}
-```
+
+  ```cpp title="dangling.cpp"
+  // fragment: what not to do (needs <ranges> and <vector>)
+  auto bad() {
+      std::vector<int> v{1, 2, 3};
+      return v | std::views::transform([](int x) { return x + 1; });   // refers to v, which is destroyed
+  }
+  ```
 
 - **Modifying a pipeline's source while iterating it** follows the container invalidation rules
   ([Containers](./containers.md#complexity-and-invalidation)).
