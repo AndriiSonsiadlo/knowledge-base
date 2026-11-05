@@ -127,7 +127,7 @@ With a plain `Widget w(7);` the compiler does steps 1 to 5 for you.
 
 For an ordinary automatic variable, steps 1 and 5 are the stack frame and steps 2 and 4 are the
 constructor and destructor. For `new`/`delete`, steps 1 and 5 are `operator new` and
-`operator delete` ([new and delete](./new-and-delete.md#what-a-new-expression-does)).
+`operator delete` ([new and delete](./new-and-delete.md#expression-versus-function)).
 
 ## Subobjects: bases and members
 
@@ -166,7 +166,6 @@ struct Noisy {
 };
 
 struct Holder { const Noisy& ref; };                                    // aggregate
-struct Member { const Noisy& ref; Member(int i) : ref(Noisy(i)) {} };   // BUG: dangles
 
 const Noisy& pass(const Noisy& n) { return n; }
 
@@ -181,8 +180,6 @@ int main() {
     { const Noisy& c = pass(Noisy(4)); std::puts("  after ;  (c dangles)"); (void)c; }
     std::puts("through a member function:");
     { const Noisy& d = Noisy(5).self(); std::puts("  after ;  (d dangles)"); (void)d; }
-    std::puts("reference member initialised in a constructor:");
-    { Member m(6); std::puts("  ctor done (m.ref dangles)"); (void)m; }
 }
 ```
 
@@ -209,25 +206,19 @@ through a member function:
   Noisy(5)
   ~Noisy(5)
   after ;  (d dangles)
-reference member initialised in a constructor:
-  Noisy(6)
-  ~Noisy(6)
-  ctor done (m.ref dangles)
 ```
 
 In the extended cases the destructor runs at the end of the block, together with the reference. In the
-others it runs before the next statement. GCC warned about the `Member` case (`-Wextra`: "only
-persists until the constructor exits") and, with `-Wdangling-reference` (part of `-Wall` in GCC 13
-and later), about `c` and `d`. The cases where extension does **not** apply:
+others it runs before the next statement. GCC warned, with `-Wdangling-reference` (part of `-Wall` in GCC 13 and later), about `c` and `d`. The cases where extension does **not** apply:
 
 | Binding | Lifetime of the temporary |
 |---|---|
 | `const T& r = T();`, `T&& r = T();` | Extended to the end of `r`'s scope |
 | `const int& v = T().member;`, `static_cast<const T&>(T())` | Extended (the whole temporary) |
-| `Holder h{T()};` (aggregate initialization of a reference member) | Extended to the end of `h`. With parentheses, `Holder h(T());` *(C++20)*, it is **not** |
+| `Holder h{T()};` (aggregate initialization of a reference member) | Extended to the end of `h`. With parentheses, `Holder h(T{});` *(C++20)*, it is **not** |
 | `pass(T())` where `pass` returns a reference | Dies at the end of the full-expression. A function call is not a direct binding |
-| Reference **member** in a constructor's member initializer list | Dies when the constructor exits |
-| `return T();` from a function returning `const T&` | Dies at the return. The caller gets a dangling reference |
+| Reference **member** initialized from a temporary in a constructor's member initializer list | Ill-formed since C++14 (CWG 1696, [class.base.init]). Clang rejects it, GCC only warns. Never extended |
+| `return T();` from a function returning `const T&` | Dies at the return, so the caller gets a dangling reference. Ill-formed since C++26 (P2748R5) |
 | Reference parameter `f(T())` | Lives until the end of the full-expression containing the call, not beyond the call |
 | Initializer of a `new` expression with a reference member (`new Holder{T()}`) | Dies at the end of the full-expression |
 
@@ -259,8 +250,7 @@ int main() {
 
 Compiled with g++ 15, `-std=c++20` prints `~W` **before** `abc` (the `W` was already destroyed when
 the loop started, so reading `s` is undefined behavior and only happens to work), while `-std=c++23`
-prints `abc` and then `~W`. Support for P2718 starts with GCC 15 and Clang 19. Earlier compilers behave as C++20 even with
-`-std=c++23`.
+prints `abc` and then `~W`. Compilers that predate P2718 behave as C++20 even with `-std=c++23`; check the cppreference compiler support table.
 
 ## Dangling references and pointers
 
@@ -311,9 +301,8 @@ The operations that implicitly create objects are:
   `operator new` / `operator new[]` (the functions, not the `new T` expression, which creates a `T`
   explicitly);
 - `std::allocator<T>::allocate` (which creates an array of `T`, without constructing elements);
-- `std::memcpy` and `std::memmove`, which implicitly create objects in the destination, and in the
-  source too if needed to give the result its value;
-- starting the lifetime of an array of `unsigned char`, `std::byte`,
+- `std::memcpy` and `std::memmove`, which implicitly create objects in the destination;
+- starting the lifetime of an array of `unsigned char` or `std::byte`,
   which implicitly creates objects in that array. This is also what makes it work when a placement-new
   buffer is a plain byte array.
 
@@ -361,9 +350,7 @@ read_into(buf);                                   // bytes now hold a valid Pkt 
 const Pkt* p = std::start_lifetime_as<Pkt>(buf);  // a Pkt now lives in buf; p->a is readable
 ```
 
-**Support is limited.** In this environment, g++ 15.2 with libstdc++ and Clang 21.1 both
-leave `__cpp_lib_start_lifetime_as` undefined, and `std::start_lifetime_as` fails to compile
-with "not a member of std" under `-std=c++23`. The snippet above is therefore **not compiled** here. Check the
+**Support is limited.** Test the feature-test macro `__cpp_lib_start_lifetime_as` (shown below) rather than assuming the library has it. When this page was written, g++ 15.2 with libstdc++ and Clang 21.1 did not define it, so the snippet above was **not compiled**. Check the
 [cppreference compiler support table](https://en.cppreference.com/w/cpp/compiler_support/23) for the current status of
 your toolchain, and test the macro before use:
 
@@ -386,7 +373,7 @@ in C++ even though it works in practice on many compilers. See [strict aliasing]
 | `int& r = v[0]; v.push_back(1); r = 2;` | Reallocation destroys the old elements and frees their storage. `r` dangles. | Re-fetch after operations that invalidate (see container docs), or store an index. |
 | `std::string_view sv = get_name();` where `get_name` returns `std::string` | The string temporary dies at `;`. `sv` points into freed memory. | Keep the `std::string`: `auto name = get_name();` |
 | Returning `const T&` from a function argument that may be a temporary | Lifetime extension does not pass through functions. | Return by value. |
-| Reference member initialized from a temporary in a constructor | The temporary dies when the constructor exits. | Store by value, or take the object by reference parameter. |
+| Reference member initialized from a temporary in a constructor | Ill-formed since C++14 (CWG 1696); Clang rejects it, GCC warns. The temporary would die when the constructor exits. | Store by value, or take the object by reference parameter. |
 | Lambda captures `[&]` and is stored or run later | The captured locals may be gone when it runs. | Capture by value, or make sure the lambda does not outlive the scope. |
 | `delete p; p->f();` or use after `std::destroy_at` | Lifetime has ended. Often "works" until the memory is reused. | Use owning types. Build tests with AddressSanitizer. |
 | `for (x : make().get())` before C++23 | Only the outermost temporary is extended. | Name the temporary first, or use C++23. |
@@ -401,10 +388,10 @@ AddressSanitizer (`-fsanitize=address`) catches use after free, use after return
 - Storage outlives the object at both ends: lifetime is from the end of construction to the start
   of destruction.
 - A temporary dies at the end of its full-expression unless a reference is bound directly to it.
-  Extension never passes through a function call or a constructor's member initializer.
+  Extension never passes through a function call. Binding a reference member to a temporary in a mem-initializer is ill-formed since C++14 (CWG 1696); Clang rejects, GCC warns.
 - A moved-from object is alive. It will be destroyed normally.
 - Since C++20 (as a defect report), `malloc`, `operator new` and `memcpy` implicitly create
   implicit-lifetime objects (scalars, arrays, trivial aggregates). Everything else needs a
   constructor call.
 - `std::launder` (C++17) finds the object after storage reuse. `std::start_lifetime_as` (C++23) is
-  for bytes that already hold a valid object, but neither GCC 15 nor Clang 21 ships it yet.
+  for bytes that already hold a valid object, but check library support first (`__cpp_lib_start_lifetime_as`).

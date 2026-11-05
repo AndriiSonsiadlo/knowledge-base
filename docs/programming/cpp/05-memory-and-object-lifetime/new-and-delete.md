@@ -10,7 +10,8 @@ tags: [c++, new, delete, dynamic-memory, heap, operator-new]
 
 A `new`-expression creates an object with dynamic storage duration: it allocates memory **and**
 constructs the object in it. A `delete`-expression does the reverse: it destroys the object **and**
-frees the memory. Each half calls a separate function you can see and replace, which is what
+frees the memory. The *expression* is built into the language and cannot be changed. The memory half is a call to an
+`operator new` / `operator delete` *function*, which you can call directly, replace, or overload. That split is what
 [placement new](./placement-new.md), custom allocators, and memory-leak checkers build on. In
 application code you rarely write `new` directly: `std::make_unique`, `std::make_shared`, and the
 containers do it for you. You still need to know what they do.
@@ -44,9 +45,9 @@ no initializer means default initialization, which leaves scalars indeterminate.
 `new T` must be paired with `delete`, and `new T[n]` with `delete[]`. Mixing them is undefined
 behavior. For arrays, prefer `std::vector<T>` or `std::make_unique<T[]>(n)`.
 
-## What a new-expression does
+## Expression versus function
 
-A `new`-expression is not a function call. The compiler expands it into two steps: a call to an
+A `new`-expression is not a call to `operator new`. The compiler expands it into two steps: a call to an
 **allocation function** named `operator new`, then construction in the returned storage.
 
 ```cpp title="expansion.cpp" showLineNumbers
@@ -123,48 +124,187 @@ released</StepChange>, and `w` is now dangling.
   </Step>
 </Walkthrough>
 
-`new T[n]` works the same way through `operator new[]`, then constructs `n` elements in order, and
-`delete[]` destroys them in reverse order before calling `operator delete[]`. For element types with
-a non-trivial destructor, implementations store the element count in front of the array (the Itanium
-C++ ABI calls it an "array cookie"), which is how `delete[]` knows how many destructors to run. That
-is also why `delete` on a `new[]` pointer breaks things: it passes the wrong address and runs only
-one destructor.
+The `new T[n]` forms work the same way through `operator new[]`, then construct `n` elements in order.
+`delete[]` destroys them in reverse order before calling `operator delete[]`. To know how many
+destructors to run, implementations typically store the element count in front of the array when the
+element type has a non-trivial destructor. The Itanium C++ ABI (GCC, Clang on Linux) calls this an
+"array cookie"; the layout is not specified by the C++ standard. GCC and Clang on x86-64 Linux store a
+`std::size_t` just before the returned pointer, and the pointer you get back from `new[]` is therefore
+not the address `operator new[]` returned. That is why `delete` on a `new[]` pointer breaks: it passes
+the wrong address to the deallocator and runs one destructor. Mixing the forms is undefined behavior
+even for types with trivial destructors, where it may appear to work.
 
-Types that need more alignment than `__STDCPP_DEFAULT_NEW_ALIGNMENT__` get an aligned
-`operator new(std::size_t, std::align_val_t)` overload *(C++17)*. See
-[alignment](./alignment.md#over-aligned-types-and-new).
+The three layers, in the order the compiler uses them:
+
+<Diagram>
+  <DiagramRow>
+    <DiagramNode icon="code" title="new-expression">Language construct: allocate, then construct. Fixed.</DiagramNode>
+    <DiagramArrow label="calls" />
+    <DiagramNode icon="boxes" title="operator new">Allocation function: returns raw storage or fails. Replaceable.</DiagramNode>
+    <DiagramArrow label="defaults to" />
+    <DiagramNode icon="server" title="malloc-like allocator">Library or OS memory.</DiagramNode>
+  </DiagramRow>
+</Diagram>
+
+You can call the allocation function yourself, which is how containers and
+[placement new](./placement-new.md) users get raw storage without constructing anything:
+
+```cpp title="raw-calls.cpp" showLineNumbers
+#include <new>
+
+int main() {
+    void* raw = ::operator new(sizeof(int));   // storage only; no object exists
+    int* p = ::new (raw) int{7};               // construct (placement new)
+    (void)p;                                   // an int needs no destructor call
+    ::operator delete(raw);                    // deallocate only
+}
+```
 
 ## When allocation fails
 
-```cpp title="failure.cpp" showLineNumbers
+The default `operator new` does not return null. It loops:
+
+1. Try to allocate. On success, return.
+2. On failure, call the current **new-handler** (installed with `std::set_new_handler`).
+3. If there is no handler, throw `std::bad_alloc`. If there is one, it must free memory and return
+   (so the loop retries), install a different handler, or throw or terminate.
+
+```cpp title="new-handler.cpp" showLineNumbers
+#include <cstdio>
+#include <new>
+
+static int attempts = 0;
+void on_fail() {
+    std::printf("new_handler call %d\n", ++attempts);
+    if (attempts == 3) std::set_new_handler(nullptr);   // next failure throws bad_alloc
+}
+
+int main() {
+    std::set_new_handler(on_fail);
+    try {
+        char* p = new char[1ull << 60];   // far more than any machine has
+        delete[] p;
+    } catch (const std::bad_alloc&) {
+        std::puts("bad_alloc after handler removed");
+    }
+}
+```
+
+Output (g++ 15 and clang++ 21, x86-64 Linux, `-std=c++20`):
+
+```text
+new_handler call 1
+new_handler call 2
+new_handler call 3
+bad_alloc after handler removed
+```
+
+The **nothrow** form reports failure with a null pointer instead of an exception:
+
+```cpp title="nothrow.cpp" showLineNumbers
 #include <cstdio>
 #include <new>
 
 int main() {
-    try {
-        auto* huge = new char[1ull << 60];        // far more than any machine has
-        delete[] huge;
-    } catch (const std::bad_alloc&) {
-        std::puts("bad_alloc");
-    }
-
-    char* p = new (std::nothrow) char[1ull << 60];   // returns nullptr instead of throwing
-    std::puts(p ? "allocated" : "nullptr");
-    delete[] p;                                     // deleting nullptr is a no-op
+    char* p = new (std::nothrow) char[1ull << 60];
+    std::puts(p ? "allocated" : "nullptr");   // nullptr
+    delete[] p;                               // deleting nullptr is a no-op
 }
 ```
 
-Output:
-
-```text
-bad_alloc
-nullptr
-```
+`std::nothrow` only makes the *allocation function* non-throwing. The new-handler still runs first
+(and may throw), and the constructor can still throw. You release the result with an ordinary
+`delete`.
 
 On Linux, overcommit means that ordinary-sized requests usually succeed even when memory is short,
-and the process is killed by the OOM killer later when it touches the pages. Do not rely on
-`bad_alloc` as an out-of-memory detector there. The `std::nothrow` form only makes the
-*allocation* non-throwing. The constructor can still throw.
+and the OOM killer ends the process later when it touches the pages. Do not rely on `bad_alloc` as
+an out-of-memory detector there.
+
+## Constructor throws: the matching deallocation
+
+If the constructor throws, the compiler calls the deallocation function that **matches** the
+allocation function it used, then lets the exception propagate. For a plain `new T` that is the
+ordinary `operator delete`. For a placement-style `new (args) T` it is the `operator delete` with the
+same extra parameters, if one exists; if none exists, the memory is not released. This is why a
+custom `operator new(std::size_t, Arg)` should come with a matching `operator delete(void*, Arg)`.
+
+## Replacing and overloading
+
+**Replaceable (global).** The library provides these in the global namespace, and a program may
+define its own version of each in exactly one translation unit (no `static`, no `inline`):
+
+| Function | Default behavior |
+|---|---|
+| `operator new(size_t)`, `operator new[](size_t)` | Allocate; loop with the new-handler; throw `bad_alloc`. `new[]` calls `new` by default. |
+| `operator new(size_t, nothrow_t)` and `[]` | Call the throwing form and catch `bad_alloc`, returning null. |
+| `operator new(size_t, align_val_t)` and `[]`, plus nothrow forms *(C++17)* | Aligned counterparts. |
+| `operator delete(void*)`, `operator delete[](void*)` | Free. `delete[]` calls `delete` by default. |
+| `operator delete(void*, size_t)` and `[]` *(C++14)* | Sized forms. Call the unsized form by default. |
+| `operator delete(void*, align_val_t)` and `[]`, and sized versions *(C++17)* | Aligned counterparts. |
+
+Because of the defaults, replacing just `operator new(size_t)` and `operator delete(void*)` is usually
+enough to route every ordinary allocation (including `std::vector`, `std::string`, and
+`make_unique`) through your code. This is how leak counters and tracking allocators work.
+
+**Class-specific.** Declare `static void* operator new(std::size_t)` and
+`static void operator delete(void*, std::size_t)` inside a class. Lookup for `new T` finds the
+class's functions first, and if it finds any named `operator new` there, they **hide** the global
+ones (including the global placement and nothrow forms). Derived classes inherit them. With a virtual destructor, a
+`delete` through a base pointer passes the size of the dynamic type to a sized class-specific
+`operator delete`, so the allocator knows how much it is freeing.
+
+```cpp title="class-specific.cpp" showLineNumbers
+#include <cstddef>
+#include <cstdio>
+#include <new>
+
+struct Pooled {
+    int x = 0;
+    static void* operator new(std::size_t n) {
+        std::printf("Pooled::operator new(%zu)\n", n);
+        return ::operator new(n);                        // fall back to the global one
+    }
+    static void operator delete(void* p, std::size_t n) noexcept {
+        std::printf("Pooled::operator delete(%zu)\n", n);
+        ::operator delete(p);
+    }
+};
+
+int main() {
+    Pooled* p = new Pooled;
+    delete p;
+}
+```
+
+```text
+Pooled::operator new(4)
+Pooled::operator delete(4)
+```
+
+Rules for any replacement: `operator new` must return suitably aligned storage and either succeed,
+throw `bad_alloc`, or (for the nothrow form) return null. `operator delete` must be `noexcept`
+and accept null.
+
+## Sized and aligned deallocation
+
+- **Sized deallocation** *(C++14)* gives `operator delete` the size of the object being freed, which
+  the compiler already knows from the type. Allocators can skip a size lookup. Support is by compiler:
+  GCC enables it by default in C++14 and later, while older Clang releases required
+  `-fsized-deallocation`. Check your toolchain version if you depend on the sized overload being
+  called.
+- **Aligned allocation** *(C++17)*: when `alignof(T)` exceeds `__STDCPP_DEFAULT_NEW_ALIGNMENT__`, the
+  `new`-expression selects the `std::align_val_t` overloads, and the `delete`-expression selects the
+  matching aligned deallocation. Before C++17, such types were silently under-aligned. The worked
+  example is in [alignment](./alignment.md#over-aligned-types-and-new). If you replace allocation
+  functions, replace the aligned ones as well, or aligned types bypass your allocator.
+
+## Allocation elision
+
+Since C++14, an implementation may omit a call to a replaceable allocation function made by a
+new-expression, or merge several into one larger allocation, and may do the same for the matching
+deallocations. So a `new` that is created and deleted within a function can disappear entirely, and
+counting calls to `operator new` is not a reliable way to measure how many objects you made. The
+allocation is not "observable behavior" unless the pointer escapes.
 
 ## Deleting through a base pointer
 
