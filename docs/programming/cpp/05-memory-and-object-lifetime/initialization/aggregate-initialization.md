@@ -33,8 +33,8 @@ The constructor condition changed over time, and old tutorials disagree:
 | C++17 | None user-provided, `explicit`, or inherited. Public non-virtual **base classes allowed**. |
 | C++20 | **None user-declared**. `Foo() = default;` and `Foo() = delete;` now make a class a non-aggregate. |
 
-Default member initializers are allowed since C++14. Members may be `const` or references as long as
-every such member gets an initializer.
+Default member initializers are allowed since C++14. Reference members must get an initializer
+(explicit or a default member initializer). An omitted `const` member is value-initialized.
 
 ```cpp title="is-aggregate.cpp" showLineNumbers
 #include <string>
@@ -105,7 +105,8 @@ well-defined.
 
 ### Narrowing still applies
 
-Each element is initialized by a list-initialization, so narrowing conversions are errors:
+Aggregate initialization is a form of list-initialization, so narrowing conversions in the element
+initializers are errors:
 `Point p{1.5, 2};` does not compile. The rule is explained in
 [uniform initialization](./uniform-initialization.md#narrowing).
 

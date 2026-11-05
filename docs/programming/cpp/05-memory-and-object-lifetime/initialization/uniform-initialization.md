@@ -20,16 +20,18 @@ those rules. The forms braces dispatch to are on the other pages of this section
 
 ## What braces do
 
-For `T x{...}` the compiler picks the first row that applies (C++20 wording, simplified):
+For `T x{...}` the compiler picks the first row that applies (C++20 wording, simplified). Before CWG 1467 (C++14) the empty-list row came first, so `T{}` on an
+aggregate value-initialized it:
 
 | Condition | Result |
 |---|---|
 | `T` is an aggregate and the list is one element of the same or derived type | Copy/initialize from that element (CWG 1467) |
+| `T` is an aggregate | [Aggregate initialization](./aggregate-initialization.md) (this also covers `T{}`) |
 | Empty braces and `T` has a default constructor | [Value-initialization](./value-initialization.md) |
-| `T` is an aggregate | [Aggregate initialization](./aggregate-initialization.md) |
 | `T` has `std::initializer_list` constructors | Try those first, with the whole list as one argument |
 | Otherwise, `T` is a class | Overload resolution over all constructors with the list elements as arguments |
 | `T` is a scalar with one element | Initialize from it, but narrowing is an error |
+| `T` is an enumeration with a fixed underlying type, one integer element *(C++17)* | Initialize the enum from it, if not narrowing |
 | `T` is a scalar with an empty list | Value-initialization: zero |
 
 Direct-list-initialization is `T x{...}`, copy-list-initialization is `T x = {...}`. They differ only
@@ -66,7 +68,9 @@ int main() {
 The cases that count as narrowing: floating to integer; `long double` to `double` or `float`, or
 `double` to `float`, unless the source is a constant that fits (in range, even if inexact); integer
 to floating type unless a constant that is exactly representable; integer to a narrower integer, or
-signed/unsigned change, unless a constant that fits. Compilers may report it only as a warning
+signed/unsigned change, unless a constant that fits; an unscoped enumeration to an integer type that
+cannot hold all its values; and, since C++20 (P1957), a pointer or pointer-to-member to `bool`. The
+list is simplified. Compilers may report it only as a warning
 (GCC does for non-constants, with `-Wnarrowing`), but the standard requires a diagnostic and Clang
 makes it an error. Treat it as an error.
 
@@ -141,7 +145,7 @@ int main() {
 322
 ```
 
-**The most vexing parse.** `Widget w();` declares a function. `Widget w{};` cannot be read that way,
+**The most vexing parse** (canonical home: [function declarations](../../04-functions-and-call-mechanics/function-declarations.md)). `Widget w();` declares a function. `Widget w{};` cannot be read that way,
 and it also value-initializes:
 
 ```cpp title="vexing.cpp" showLineNumbers
@@ -178,7 +182,7 @@ in [auto](../../03-types-and-values/type-deduction/auto.md#braced-initializers).
 | Container with elements | `std::vector<int> v{1, 2, 3};` | Uses `initializer_list` |
 | Container with size and fill | `std::vector<int> v(n, 0);` | Braces would mean two elements |
 | Class with an explicit single-argument constructor | `T x{arg};` | `T x = {arg};` is an error |
-| Hot generic code that must accept narrowing | `T x(args)` | Parentheses |
+| Generic code that must accept narrowing conversions | `T x(args)` | Parentheses |
 
 ## Pitfalls
 
