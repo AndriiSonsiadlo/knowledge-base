@@ -3,541 +3,311 @@ id: algorithms
 title: STL Algorithms
 sidebar_label: Algorithms
 sidebar_position: 3
-tags: [c++, stl, algorithms, sort, find, transform]
+tags: [c++, stl, algorithms, sort, find, erase-remove, binary-search, numeric, execution-policy]
 ---
 
 # Standard Library Algorithms
 
-STL algorithms are generic functions that work with any container through iterators. They provide tested, optimized implementations of common operations. Never write your own sort or search - use the STL!
+The algorithms in `<algorithm>` and `<numeric>` are function templates that work on a pair of
+[iterators](./iterators.md) `[first, last)` and never see the container. The same `std::find`
+searches a `vector`, a `list` or an input stream, and each algorithm states the weakest iterator
+category it needs and the number of operations it may perform. Using them says what you mean
+(`std::count_if`) where a hand-written loop says how, and they are specified to give the best
+complexity the category allows. This page covers the classic iterator-pair algorithms. The C++20
+`std::ranges::` versions with projections and views are on [Ranges](./ranges.md).
 
-:::info[Algorithms + Iterators = Generic Code]
-Algorithms work on ranges defined by iterators. One algorithm works with vector, list, array, or any container providing compatible iterators.
-:::
+**Prerequisites:** [Iterators](./iterators.md), [Containers](./containers.md),
+[lambdas](../07-classes-and-oop/lambdas.md) (for predicates).
 
-## Non-Modifying Sequence Operations
+## How the algorithms are shaped
 
-### std::find - Linear Search
+- **They never change a container's size.** `std::remove` cannot erase, `std::copy` cannot grow
+  its destination. To add elements, write through an inserter (`std::back_inserter`).
+- **Naming conventions.** `_if` takes a predicate instead of a value (`find_if`); `_n` takes a
+  count (`copy_n`); `_copy` writes the result to a new range instead of in place (`reverse_copy`,
+  `remove_copy_if`).
+- **Callable arguments** (predicates, comparators, transforms) are copied by value, so pass
+  cheap function objects or lambdas, or wrap a stateful one in `std::ref`. Algorithms may copy a
+  predicate and call the copies in any order, so it must not depend on its own mutable state, and
+  must not modify the elements it examines.
+- **Comparators** passed to sorting, searching and set algorithms must be a **strict weak ordering**:
+  irreflexive (`comp(a, a)` false), asymmetric, and with transitive equivalence. `<=` is not one,
+  and a comparator that violates this is undefined behavior; in practice `std::sort` can read
+  out of bounds.
+- **Output ranges** must have room, and must not overlap the input unless the algorithm says so.
 
-```cpp showLineNumbers 
+## Searching and counting
+
+| Algorithm | Returns | Complexity |
+|---|---|---|
+| `find(f, l, v)`, `find_if`, `find_if_not` | iterator to first match, or `l` | at most N applications of `==` or the predicate |
+| `count(f, l, v)`, `count_if` | number of matches | exactly N |
+| `all_of`, `any_of`, `none_of` | `bool` (stop early) | at most N |
+| `adjacent_find` | first position where two neighbours match | at most N-1 |
+| `search(f, l, f2, l2)` | first occurrence of a subsequence | at most N x M |
+| `equal`, `mismatch` | whole-range comparison / first difference | at most N |
+| `min_element`, `max_element`, `minmax_element` | iterator to extreme | N-1 (about 3N/2 for `minmax_element`) |
+| `for_each(f, l, fn)` | `fn` (by value, so you can read its final state) | exactly N applications |
+
+`all_of` on an empty range is `true`; `any_of` is `false`. `std::find` on a sorted range is wasted
+work: use a [binary search](#binary-search-on-sorted-ranges). Containers with their own `find`
+(`set`, `map`, `unordered_*`) have a faster member, so prefer that to `std::find`. `std::search`
+may be given a searcher object (`std::boyer_moore_searcher`) *(C++17)*.
+
+## Copying, transforming and filling
+
+```cpp title="transform.cpp" showLineNumbers
 #include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <numeric>
 #include <vector>
 
-std::vector<int> vec = {1, 2, 3, 4, 5};
+int main() {
+    std::vector<int> src(5);
+    std::iota(src.begin(), src.end(), 1);                    // 1 2 3 4 5
 
-auto it = std::find(vec.begin(), vec.end(), 3);
-if (it != vec.end()) {
-    std::cout << "Found at position: " << std::distance(vec.begin(), it);
-} else {
-    std::cout << "Not found";
+    std::vector<int> sq;
+    std::transform(src.begin(), src.end(), std::back_inserter(sq),
+                   [](int x) { return x * x; });              // exactly N applications
+
+    std::vector<int> evens;
+    std::copy_if(sq.begin(), sq.end(), std::back_inserter(evens),
+                 [](int x) { return x % 2 == 0; });
+
+    for (int x : evens) std::cout << x << ' ';
+    std::cout << '\n';
 }
-
-// find_if with predicate
-auto it2 = std::find_if(vec.begin(), vec.end(), [](int x) {
-    return x > 3;  // Find first element > 3
-});
-
-// find_if_not (first not matching)
-auto it3 = std::find_if_not(vec.begin(), vec.end(), [](int x) {
-    return x < 3;  // Find first element >= 3
-});
 ```
 
-**Complexity:** $O(n)$
-
-### std::count - Count Elements
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 2, 5, 2};
-
-// Count occurrences
-int count = std::count(vec.begin(), vec.end(), 2);  // 3
-
-// Count with predicate
-int even_count = std::count_if(vec.begin(), vec.end(), [](int x) {
-    return x % 2 == 0;  // Count even numbers
-});
+```text
+4 16 
 ```
 
-### std::all_of, any_of, none_of
+Other members of the family: `copy`/`copy_n`/`copy_backward` (use `copy_backward` when the output
+overlaps the input from the right), `move` (the algorithm, element-wise move; `<algorithm>`, unrelated
+to `std::move` the cast), `fill`/`fill_n`, `generate`/`generate_n`, `replace`/`replace_if`, `swap_ranges`.
+`std::transform` has a two-input form `transform(f1, l1, f2, out, binary_op)`. Library implementations commonly lower `std::copy`
+to `memmove` for trivially copyable types (not guaranteed).
 
-```cpp showLineNumbers 
-std::vector<int> vec = {2, 4, 6, 8};
+## Removing, uniquifying and reordering
 
-// All satisfy predicate?
-bool all_even = std::all_of(vec.begin(), vec.end(), [](int x) {
-    return x % 2 == 0;
-});  // true
+`std::remove`, `remove_if` and `unique` **do not shrink the container**. They shift the elements
+to keep towards the front, preserving their order, and return the new logical end; what lies after
+that iterator is valid but unspecified (moved-from) values. You must then call the container's
+`erase` to drop the tail. This is the **erase-remove idiom**:
 
-// Any satisfy predicate?
-bool any_greater_5 = std::any_of(vec.begin(), vec.end(), [](int x) {
-    return x > 5;
-});  // true
+```cpp title="erase-remove.cpp" showLineNumbers
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
-// None satisfy predicate?
-bool none_odd = std::none_of(vec.begin(), vec.end(), [](int x) {
-    return x % 2 != 0;
-});  // true
+int main() {
+    std::vector<int> v{1, 2, 3, 2, 4, 2, 5};
+
+    // Pre-C++20:
+    v.erase(std::remove(v.begin(), v.end(), 2), v.end());
+
+    std::vector<int> w{1, 1, 2, 2, 2, 3, 1};
+    w.erase(std::unique(w.begin(), w.end()), w.end());        // removes *consecutive* duplicates
+
+    std::vector<int> x{1, 2, 3, 4, 5, 6};
+    std::erase_if(x, [](int n) { return n % 3 == 0; });       // C++20 for all std containers
+
+    for (int n : v) std::cout << n << ' ';
+    std::cout << "| ";
+    for (int n : w) std::cout << n << ' ';
+    std::cout << "| ";
+    for (int n : x) std::cout << n << ' ';
+    std::cout << '\n';
+}
 ```
 
-### std::for_each - Apply Function
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 4, 5};
-
-// Apply function to each element
-std::for_each(vec.begin(), vec.end(), [](int x) {
-    std::cout << x << " ";
-});
-
-// Modify elements (need reference)
-std::for_each(vec.begin(), vec.end(), [](int& x) {
-    x *= 2;  // vec becomes {2, 4, 6, 8, 10}
-});
-
-// Return function object
-auto sum_func = [total = 0](int x) mutable { return total += x; };
-auto final_func = std::for_each(vec.begin(), vec.end(), sum_func);
-// Can access accumulated value from final_func
+```text
+1 3 4 5 | 1 2 3 1 | 1 2 4 5 
 ```
 
-## Modifying Sequence Operations
+`std::erase` and `std::erase_if` *(C++20)* are non-member functions for every standard container,
+and do the whole job; for `std::list` the member `list::remove` / `remove_if` is equivalent.
+`unique` only removes *adjacent* equal elements, so sort first to deduplicate globally.
+Both algorithms are O(N); `std::erase` on a `vector` is therefore O(N) in total, where erasing
+elements one at a time in a loop is O(N^2).
 
-### std::copy - Copy Elements
+Reordering without removal: `reverse`, `rotate` (a left rotation in O(N) that is also the way to
+move a block of a range), `shuffle` *(C++11, needs a random engine; `random_shuffle` was removed
+in C++17)*, `partition` (elements satisfying the predicate first), `stable_partition`,
+`is_partitioned`.
 
-```cpp showLineNumbers 
-std::vector<int> src = {1, 2, 3, 4, 5};
-std::vector<int> dst(5);
+## Sorting and selecting
 
-// Copy range
-std::copy(src.begin(), src.end(), dst.begin());
+| Algorithm | Guarantee |
+|---|---|
+| `sort(f, l)` | O(N log N) comparisons (guaranteed worst case since C++11); **not stable**; needs random access |
+| `stable_sort` | O(N log N) comparisons if there is enough extra memory, otherwise O(N log^2 N); equal elements keep their order |
+| `partial_sort(f, mid, l)` | sorts the smallest `mid - f` elements into front, about N log M comparisons |
+| `nth_element(f, nth, l)` | O(N) on average; afterwards `*nth` is what a full sort would put there, with no larger element before and no smaller after |
+| `is_sorted`, `is_sorted_until` | at most N-1 comparisons |
 
-// copy_if with predicate
-std::vector<int> even;
-std::copy_if(src.begin(), src.end(), std::back_inserter(even), [](int x) {
-    return x % 2 == 0;
-});  // even = {2, 4}
+`std::list` has no random access, so use the member `list::sort` (stable, O(N log N), relinks nodes).
+Sorting with a comparator:
 
-// copy_n - copy n elements
-std::vector<int> first_three(3);
-std::copy_n(src.begin(), 3, first_three.begin());  // {1, 2, 3}
+```cpp title="sort.cpp" showLineNumbers
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+
+struct Person { std::string name; int age; };
+
+int main() {
+    std::vector<Person> p{{"Ann", 30}, {"Bob", 25}, {"Cy", 30}, {"Di", 25}};
+
+    // By age; ties keep their original order only because the sort is stable
+    std::stable_sort(p.begin(), p.end(),
+                     [](const Person& a, const Person& b) { return a.age < b.age; });
+
+    for (const auto& x : p) std::cout << x.name << ' ';
+    std::cout << '\n';
+}
 ```
 
-### std::move - Move Elements
-
-```cpp showLineNumbers 
-std::vector<std::string> src = {"one", "two", "three"};
-std::vector<std::string> dst(3);
-
-// Move elements (src elements left in valid but unspecified state)
-std::move(src.begin(), src.end(), dst.begin());
-// dst = {"one", "two", "three"}
-// src = {?, ?, ?} (moved-from)
+```text
+Bob Di Ann Cy 
 ```
 
-### std::transform - Apply Function and Store Result
+Never write `a.age <= b.age` as the comparator: it breaks the strict weak ordering and makes the
+behavior undefined, and it can crash `std::sort` on equal elements. To sort by several fields,
+compare with `std::tie(a.x, a.y) < std::tie(b.x, b.y)` or use `<=>` *(C++20)*.
 
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 4, 5};
-std::vector<int> result(5);
+## Binary search on sorted ranges
 
-// Unary transform
-std::transform(vec.begin(), vec.end(), result.begin(), [](int x) {
-    return x * x;  // Square each element
-});  // result = {1, 4, 9, 16, 25}
+These require the range to be **partitioned** with respect to the value (in practice: sorted by the
+same comparator). They do O(log N) comparisons; with a non-random-access iterator the comparisons
+stay logarithmic but the iterator steps are O(N), so for `list` and `set` use the container's member
+functions.
 
-// Binary transform (combine two ranges)
-std::vector<int> vec2 = {10, 20, 30, 40, 50};
-std::transform(vec.begin(), vec.end(), vec2.begin(), result.begin(),
-    [](int a, int b) {
-        return a + b;
-    });  // result = {11, 22, 33, 44, 55}
+| Function | Returns |
+|---|---|
+| `lower_bound(f, l, v)` | first element **not less than** `v` |
+| `upper_bound(f, l, v)` | first element **greater than** `v` |
+| `equal_range(f, l, v)` | `[lower_bound, upper_bound)` as a pair |
+| `binary_search(f, l, v)` | `bool` only: is there an equivalent element |
+
+```cpp title="bound.cpp" showLineNumbers
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
+int main() {
+    std::vector<int> v{1, 2, 4, 4, 4, 7, 9};
+
+    auto lo = std::lower_bound(v.begin(), v.end(), 4);
+    auto hi = std::upper_bound(v.begin(), v.end(), 4);
+    std::cout << (lo - v.begin()) << ' ' << (hi - v.begin()) << '\n';   // [2, 5)
+
+    v.insert(std::lower_bound(v.begin(), v.end(), 5), 5);               // sorted insert
+    std::cout << std::binary_search(v.begin(), v.end(), 7) << ' ' << v[5] << '\n';
+}
 ```
 
-### std::fill and std::generate
-
-```cpp showLineNumbers 
-std::vector<int> vec(10);
-
-// Fill with value
-std::fill(vec.begin(), vec.end(), 42);  // All elements = 42
-
-// Fill with generated values
-int counter = 0;
-std::generate(vec.begin(), vec.end(), [&counter]() {
-    return counter++;  // 0, 1, 2, ..., 9
-});
+```text
+2 5
+1 5
 ```
 
-### std::replace - Replace Elements
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 2, 5, 2};
-
-// Replace all 2s with 99
-std::replace(vec.begin(), vec.end(), 2, 99);
-// vec = {1, 99, 3, 99, 5, 99}
-
-// replace_if with predicate
-std::replace_if(vec.begin(), vec.end(), [](int x) {
-    return x % 2 == 0;  // Replace even numbers
-}, 0);
-```
-
-### std::remove - Remove Elements
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 2, 5, 2};
-
-// Remove all 2s (doesn't actually delete!)
-auto new_end = std::remove(vec.begin(), vec.end(), 2);
-vec.erase(new_end, vec.end());  // Actually delete
-// vec = {1, 3, 5}
-
-// Or in one line (C++20)
-std::erase(vec, 2);  // Combines remove + erase
-
-// remove_if with predicate
-auto new_end2 = std::remove_if(vec.begin(), vec.end(), [](int x) {
-    return x % 2 == 0;
-});
-vec.erase(new_end2, vec.end());
-```
-
-**Important:** `remove` doesn't actually delete elements, just moves them to end!
-
-### std::unique - Remove Consecutive Duplicates
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 1, 2, 2, 2, 3, 3, 1};
-
-// Must be sorted for full deduplication!
-std::sort(vec.begin(), vec.end());  // {1, 1, 1, 2, 2, 2, 3, 3}
-
-auto new_end = std::unique(vec.begin(), vec.end());
-vec.erase(new_end, vec.end());
-// vec = {1, 2, 3}
-```
-
-### std::reverse - Reverse Range
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 4, 5};
-
-std::reverse(vec.begin(), vec.end());
-// vec = {5, 4, 3, 2, 1}
-
-// reverse_copy - copy reversed
-std::vector<int> reversed(5);
-std::reverse_copy(vec.begin(), vec.end(), reversed.begin());
-```
-
-### std::rotate - Rotate Elements
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 4, 5};
-
-// Rotate left (move first element to end)
-std::rotate(vec.begin(), vec.begin() + 1, vec.end());
-// vec = {2, 3, 4, 5, 1}
-
-// Rotate right (move last to beginning)
-std::rotate(vec.rbegin(), vec.rbegin() + 1, vec.rend());
-// vec = {1, 2, 3, 4, 5}
-```
-
-## Sorting and Related Operations
-
-### std::sort - Sort Range
-
-```cpp showLineNumbers 
-std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
-
-// Sort ascending
-std::sort(vec.begin(), vec.end());
-// vec = {1, 1, 2, 3, 4, 5, 6, 9}
-
-// Sort descending
-std::sort(vec.begin(), vec.end(), std::greater<int>());
-
-// Custom comparator
-std::vector<std::string> words = {"apple", "zoo", "cat", "dog"};
-std::sort(words.begin(), words.end(), [](const auto& a, const auto& b) {
-    return a.length() < b.length();  // Sort by length
-});
-```
-
-**Complexity:** $O(n \log n)$ average  
-**Note:** Not stable (equal elements may be reordered)
-
-### std::stable_sort - Stable Sort
-
-```cpp showLineNumbers 
-struct Person {
-    std::string name;
-    int age;
-};
-
-std::vector<Person> people = {
-    {"Alice", 30}, {"Bob", 25}, {"Charlie", 30}
-};
-
-// Stable sort preserves relative order of equal elements
-std::stable_sort(people.begin(), people.end(), [](const auto& a, const auto& b) {
-    return a.age < b.age;
-});
-// Alice and Charlie (both 30) stay in original order
-```
-
-### std::partial_sort - Partially Sort
-
-```cpp showLineNumbers 
-std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
-
-// Sort first 4 elements, rest can be in any order
-std::partial_sort(vec.begin(), vec.begin() + 4, vec.end());
-// vec = {1, 1, 2, 3, ...(rest unsorted)}
-```
-
-**Use case:** Finding top N elements efficiently
-
-### std::nth_element - Find Nth Element
-
-```cpp showLineNumbers 
-std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
-
-// Partition so vec[4] is in correct sorted position
-std::nth_element(vec.begin(), vec.begin() + 4, vec.end());
-// Elements before vec[4] are <= vec[4]
-// Elements after vec[4] are >= vec[4]
-// But not fully sorted
-
-// Use case: Finding median
-size_t mid = vec.size() / 2;
-std::nth_element(vec.begin(), vec.begin() + mid, vec.end());
-int median = vec[mid];
-```
-
-**Complexity:** $O(n)$ average - faster than sorting!
-
-## Binary Search (on sorted ranges)
-
-### std::binary_search - Check if Element Exists
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-bool found = std::binary_search(vec.begin(), vec.end(), 5);  // true
-```
-
-**Complexity:** $O(\log n)$  
-**Requirement:** Range must be sorted!
-
-### std::lower_bound - First >= Value
-
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 4, 4, 4, 6, 7};
-
-auto it = std::lower_bound(vec.begin(), vec.end(), 4);
-// Points to first 4
-int index = std::distance(vec.begin(), it);  // 2
-```
-
-### std::upper_bound - First > Value
-
-```cpp showLineNumbers 
-auto it = std::upper_bound(vec.begin(), vec.end(), 4);
-// Points to 6 (first element > 4)
-```
-
-### std::equal_range - Range of Equal Elements
-
-```cpp showLineNumbers 
-auto [lower, upper] = std::equal_range(vec.begin(), vec.end(), 4);
-// lower points to first 4
-// upper points to 6
-// Range [lower, upper) contains all 4s
-
-int count = std::distance(lower, upper);  // 3 (three 4s)
-```
-
-## Set Operations (on sorted ranges)
-
-```cpp showLineNumbers 
-std::vector<int> v1 = {1, 2, 3, 4, 5};
-std::vector<int> v2 = {3, 4, 5, 6, 7};
-std::vector<int> result;
-
-// Union (all elements from both)
-std::set_union(v1.begin(), v1.end(), v2.begin(), v2.end(),
-               std::back_inserter(result));
-// result = {1, 2, 3, 4, 5, 6, 7}
-
-// Intersection (common elements)
-result.clear();
-std::set_intersection(v1.begin(), v1.end(), v2.begin(), v2.end(),
-                     std::back_inserter(result));
-// result = {3, 4, 5}
-
-// Difference (in v1 but not v2)
-result.clear();
-std::set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
-                   std::back_inserter(result));
-// result = {1, 2}
-
-// Symmetric difference (in one but not both)
-result.clear();
-std::set_symmetric_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
-                             std::back_inserter(result));
-// result = {1, 2, 6, 7}
-```
-
-## Heap Operations
-
-```cpp showLineNumbers 
-std::vector<int> vec = {3, 1, 4, 1, 5, 9};
-
-// Make heap (max heap by default)
-std::make_heap(vec.begin(), vec.end());
-// vec = {9, 5, 4, 1, 1, 3} (heap property satisfied)
-
-// Push to heap
-vec.push_back(7);
-std::push_heap(vec.begin(), vec.end());
-
-// Pop from heap
-std::pop_heap(vec.begin(), vec.end());
-vec.pop_back();  // Actually remove
-
-// Sort heap
-std::sort_heap(vec.begin(), vec.end());
-// vec is now sorted
-```
-
-## Min/Max Operations
-
-```cpp showLineNumbers 
-std::vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6};
-
-// Min/max element
-auto min_it = std::min_element(vec.begin(), vec.end());
-auto max_it = std::max_element(vec.begin(), vec.end());
-
-std::cout << "Min: " << *min_it;  // 1
-std::cout << "Max: " << *max_it;  // 9
-
-// Min and max together
-auto [min, max] = std::minmax_element(vec.begin(), vec.end());
-
-// Min/max of values
-int smaller = std::min(5, 10);
-int larger = std::max(5, 10);
-auto [a, b] = std::minmax(5, 10);  // {5, 10}
-```
+## Set operations and merging
+
+On **sorted** ranges: `merge`, `inplace_merge`, `includes`, `set_union`, `set_intersection`,
+`set_difference`, `set_symmetric_difference`. Each writes the result in sorted order to an output
+iterator and does at most 2 x (N1 + N2) - 1 comparisons (`inplace_merge` uses extra memory when
+available, else N log N). They treat equal elements as multisets: if a value appears 3 times in
+one input and 2 in the other, `set_intersection` outputs 2.
+
+## Heaps
+
+A **binary heap** laid out in a random-access range gives you the largest element at the front
+(`std::less` ordering) at the cost of O(log N) per insertion or removal. It is what
+`std::priority_queue` wraps. The primitives: `make_heap` (O(N)), `push_heap` (call after
+`push_back`; O(log N)), `pop_heap` (moves the max to the back; call `pop_back` after; O(log N)),
+`sort_heap` (O(N log N)), `is_heap`. Use the adapter unless you need to access the underlying array.
+
+## Min, max and clamp
+
+`std::min`/`std::max` of two values or an `initializer_list`, `std::minmax`, `std::clamp(v, lo, hi)`
+*(C++17; undefined behavior if `hi < lo`)*. Both of the two-argument forms return a **reference**:
+`const auto& m = std::max(a, 3);` dangles when one argument is a temporary that dies at the end of
+the full expression.
 
 ## Permutations
 
-```cpp showLineNumbers 
-std::vector<int> vec = {1, 2, 3};
+`next_permutation(f, l)` rearranges into the next lexicographic order and returns `false` (and
+resets to sorted order) after the last; start from a sorted range to enumerate all N! arrangements.
+`prev_permutation`, `is_permutation` (quadratic without help), and `rotate` complete the family.
 
-// Next permutation
-do {
-    for (int x : vec) std::cout << x << " ";
-    std::cout << "\n";
-} while (std::next_permutation(vec.begin(), vec.end()));
+## Numeric algorithms (`<numeric>`)
 
-// Prints all permutations:
-// 1 2 3
-// 1 3 2
-// 2 1 3
-// 2 3 1
-// 3 1 2
-// 3 2 1
+| Algorithm | Computes | Note |
+|---|---|---|
+| `accumulate(f, l, init, op = +)` | left fold | result type is the type of `init` |
+| `reduce(f, l, init, op = +)` *(C++17)* | fold in **unspecified order** | `op` must be associative and commutative; can be parallel |
+| `transform_reduce` *(C++17)* | map then reduce (inner product) | |
+| `inner_product`, `partial_sum`, `adjacent_difference` | classic sequential forms | |
+| `inclusive_scan`, `exclusive_scan` *(C++17)* | prefix sums, parallelizable | |
+| `iota(f, l, start)` | start, start+1, ... | |
+| `gcd`, `lcm` *(C++17)*, `midpoint`, `lerp` *(C++20)* | scalar helpers | |
 
-// Previous permutation
-std::prev_permutation(vec.begin(), vec.end());
-```
+The classic accumulate trap: the accumulator takes the type of `init`.
 
-## Numeric Algorithms
-
-```cpp showLineNumbers 
+```cpp title="accumulate.cpp" showLineNumbers
+#include <iostream>
 #include <numeric>
+#include <vector>
 
-std::vector<int> vec = {1, 2, 3, 4, 5};
-
-// Sum (accumulate)
-int sum = std::accumulate(vec.begin(), vec.end(), 0);  // 15
-
-// Product
-int product = std::accumulate(vec.begin(), vec.end(), 1, std::multiplies<>());
-
-// Custom operation
-int result = std::accumulate(vec.begin(), vec.end(), 0, [](int acc, int x) {
-    return acc + x * x;  // Sum of squares
-});  // 55
-
-// Inner product
-std::vector<int> vec2 = {1, 2, 3, 4, 5};
-int dot = std::inner_product(vec.begin(), vec.end(), vec2.begin(), 0);
-// 1*1 + 2*2 + 3*3 + 4*4 + 5*5 = 55
-
-// Partial sum
-std::vector<int> partial(5);
-std::partial_sum(vec.begin(), vec.end(), partial.begin());
-// partial = {1, 3, 6, 10, 15}
-
-// Adjacent difference
-std::vector<int> diff(5);
-std::adjacent_difference(vec.begin(), vec.end(), diff.begin());
-// diff = {1, 1, 1, 1, 1}
-
-// iota - fill with incrementing values
-std::vector<int> seq(10);
-std::iota(seq.begin(), seq.end(), 0);
-// seq = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+int main() {
+    std::vector<double> v{0.5, 0.5, 0.5};
+    std::cout << std::accumulate(v.begin(), v.end(), 0) << '\n';     // int accumulator: 0
+    std::cout << std::accumulate(v.begin(), v.end(), 0.0) << '\n';   // double: 1.5
+}
 ```
 
-## C++17 Parallel Algorithms
+```text
+0
+1.5
+```
 
-```cpp showLineNumbers 
+With `int` init, each partial sum is converted back to `int`, truncating 0.5 to 0 on each step.
+`reduce` with floating-point values can give a slightly different result than `accumulate`,
+because floating-point addition is not associative and the order is unspecified.
+
+## Execution policies *(C++17)*
+
+Most algorithms have an overload taking a policy as first argument, from `<execution>`:
+`std::execution::seq`, `par`, `par_unseq` (and `unseq` *(C++20)*). Using `par` permits the
+implementation to run the callback on several threads; `par_unseq` additionally allows
+vectorization.
+
+```cpp
+#include <algorithm>
 #include <execution>
-
-std::vector<int> vec(1000000);
-
-// Sequential
-std::sort(vec.begin(), vec.end());
-
-// Parallel
-std::sort(std::execution::par, vec.begin(), vec.end());
-
-// Parallel unsequenced (most aggressive)
-std::sort(std::execution::par_unseq, vec.begin(), vec.end());
-
-// Works with many algorithms:
-std::for_each(std::execution::par, vec.begin(), vec.end(), [](int& x) {
-    x *= 2;
-});
-
-std::transform(std::execution::par, vec.begin(), vec.end(), vec.begin(), 
-    [](int x) { return x * x; });
+std::sort(std::execution::par, v.begin(), v.end());   // fragment: v is a large std::vector<int>
 ```
 
-:::success[Algorithm Quick Reference]
-
-**Finding**: find, find_if, count, count_if  
-**Copying**: copy, copy_if, move  
-**Transforming**: transform, replace, fill, generate  
-**Removing**: remove, remove_if, unique  
-**Sorting**: sort, stable_sort, partial_sort, nth_element  
-**Searching**: binary_search, lower_bound, upper_bound  
-**Set ops**: set_union, set_intersection, set_difference  
-**Min/Max**: min_element, max_element  
-**Numeric**: accumulate, inner_product, partial_sum  
-**Always $O(n \log n)$ or better** when sorted  
-**Parallel (C++17)** = add execution policy for speedup
-:::
+The rules that matter: your callbacks must not cause data races, and with `par_unseq` they must
+not take locks or otherwise block. Exceptions thrown from a callback call `std::terminate`, and
+iterators must be at least forward. The standard only *permits* parallel execution:
+whether you get a speedup depends on the library (libstdc++ needs Intel TBB installed and `-ltbb`
+to run in parallel; MSVC has its own backend) and on the amount of work per element. Measure.
 
 ## Related
 
-- [Iterators](./iterators.md) — algorithms operate on iterator ranges
-- [Ranges](./ranges.md) — the C++20 range-based form (`std::ranges::sort(v)`), no `begin()/end()` pairs
-- [Containers](./containers.md) — what supplies the iterators
+- [Ranges](./ranges.md): `std::ranges::sort(v)`, projections, and lazy views over the same algorithms
+- [Iterators](./iterators.md): the categories each algorithm requires
+- [Containers](./containers.md): member `sort`/`remove`/`find` that beat the generic ones, and `erase_if`
+- [Lambdas](../07-classes-and-oop/lambdas.md): the usual predicate and comparator
+- [Data races](../11-concurrency-and-memory-model/03-data-races.md): what parallel policies require of your callbacks
+
+## References
+
+- [Algorithms library, cppreference](https://en.cppreference.com/w/cpp/algorithm)
+- [Numeric library, cppreference](https://en.cppreference.com/w/cpp/numeric)
+- ISO C++ [algorithms], [numerics]
