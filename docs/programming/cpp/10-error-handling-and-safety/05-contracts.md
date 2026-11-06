@@ -39,8 +39,9 @@ What this means in practice:
 
 - The syntax and semantics below are those of P2900 as described on cppreference. They **may change**
   before C++26 is published, or the feature could be removed from it.
-- Compiler support is early. GCC 16 was reported to include an experimental implementation
-  (enabled with `-fcontracts` together with `-std=c++26`), and Clang had no upstream support at the
+- Compiler support is early. GCC 16 implements P2900R14 (listed as "Contracts (PR119061)" on
+  [gcc.gnu.org/gcc-16/changes.html](https://gcc.gnu.org/gcc-16/changes.html)). The flag to enable
+  it is reportedly `-fcontracts` with `-std=c++26`, which that page does not confirm. Clang had no upstream support at the
   time of writing. Flag names and behaviour are implementation-specific; read your compiler's
   documentation. The snippets on this page were **not compiled**, because the toolchains available when
   this page was written (g++ 15.2, clang++ 21.1) do not implement contracts.
@@ -107,7 +108,7 @@ ill-formed.
 </Diagram>
 
 The handler is a function `void handle_contract_violation(const std::contracts::contract_violation&)`
-(optionally `noexcept`). The implementation supplies a default that prints a diagnostic; whether a
+(optionally `noexcept`). The implementation supplies a default, which the standard recommends should print a diagnostic; whether a
 program may replace it is implementation-defined. The `contract_violation` object (header
 `<contracts>`) carries details such as the kind of assertion, the source location and the evaluation
 semantic (member names per the standard, not verified against a release here).

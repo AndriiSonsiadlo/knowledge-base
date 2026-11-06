@@ -33,7 +33,7 @@ but the compiler is not obliged to tell you. Examples include certain
 
 UB is not confined to the line that triggers it. Because the standard places no requirement on a program
 that executes UB, the compiler's earlier transformations may already have "used" the fact, which is what
-people mean by UB *time travel*. 
+people mean by UB *time travel*.
 
 ## Why UB exists
 
@@ -65,7 +65,7 @@ At `-O2` on x86-64, g++ 15.2 compiles `always` to `movl $1, %eax; ret`: it retur
 looking at `x`. `always_u` keeps the comparison (`cmpl $-1, %edi; setne %al`), since the unsigned
 result really depends on `x`. For `contains`, g++ 15.2 `-O2` emits the equivalent of `return true;`
 (the loop can only exit by finding a match without touching `table[4]`, so the compiler assumes it
-does), while clang++ 21.1 `-O2` vectorizes a four-element comparison and ignores the fifth iteration.
+does), while clang++ 21.1 `-O2` vectorizes the first four comparisons and then loads `table[4]`, one past the end.
 Neither compiler is wrong. These are results of particular compiler versions on one target and
 will differ elsewhere, which is the point: the standard allows both. `-fwrapv` (GCC/Clang) makes signed
 overflow wrap, turning `always` back into a real comparison, but that is a dialect flag, not portable C++.
@@ -113,7 +113,7 @@ int read(int* p) {
 Optimizers routinely drop the later test, since `*p` already committed to a non-null pointer. A
 null-pointer dereference is therefore not guaranteed to be a segmentation fault, and reordering the
 statements (check first) is the fix. This is a representative example; the actual codegen depends on the
-compiler and flags such as `-fdelete-null-pointer-checks` (default at `-O2` in GCC on most targets).
+compiler and flags such as `-fdelete-null-pointer-checks` (enabled by default on most targets per the GCC manual).
 
 ## Detecting UB
 
@@ -122,7 +122,7 @@ Nothing detects all UB. Combine several layers.
 | Tool | Catches | Flags |
 |---|---|---|
 | **Compiler warnings** | Some obvious cases: missing return, uninitialized use, unsequenced access | `-Wall -Wextra -Wuninitialized -Wreturn-type -Wsequence-point` (GCC) |
-| **Constant evaluation** | *Every* UB reached while evaluating a `constexpr` expression is a compile error | `constexpr` variables, `static_assert` |
+| **Constant evaluation** | Core-language UB reached during constant evaluation is a compile error (library UB need not be diagnosed) | `constexpr` variables, `static_assert` |
 | **UBSan** | Signed overflow, bad shifts, null dereference, out-of-bounds on arrays of known size, misaligned access, invalid enum/bool loads | `-fsanitize=undefined` (GCC, Clang) |
 | **ASan** | Heap/stack/global overflow, use-after-free, use-after-scope | `-fsanitize=address` |
 | **TSan** | Data races | `-fsanitize=thread` |
@@ -171,7 +171,7 @@ initialized by a constant expression`.
 - **Compile with warnings and sanitizers in CI**, and run tests under ASan and UBSan.
 - **Harden the standard library** (`-D_GLIBCXX_ASSERTIONS`, libc++ hardening modes) for bounds and
   precondition checks in production builds, accepting a small cost (measure it for your workload).
-- **Keep UB out of `constexpr` code**, which gives you a free checker.
+- **Keep UB out of `constexpr` code**, which gives you a free checker for core-language UB.
 - **Don't test for overflow after the fact** (`if (a + b < a)` is UB for signed). Check with
   `a > INT_MAX - b`, or use builtins such as `__builtin_add_overflow` (GCC/Clang), or compare in a wider type.
 
