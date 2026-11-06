@@ -13,7 +13,7 @@ program has a bug, and the right response is to stop loudly at the point of the 
 continue with corrupt state. C++ has two built-in mechanisms: `static_assert`, checked at compile
 time, and the `assert` macro, checked at run time and removable. Assertions are for *programmer
 errors*. Failures that can happen in a correct program (bad input, a missing file) belong to
-[exceptions](./01-exceptions.md) or [error codes](./03-error-codes.md). C++26 adds language-level
+[exceptions](./01-exceptions.md) or [error codes](./03-error-codes.md). C++26 proposes language-level
 [contracts](./05-contracts.md) that cover the same ground; this page is about what exists today in
 every compiler.
 
@@ -53,10 +53,10 @@ network boundary, `std::is_*` properties a template relies on, enum-count checks
 the function's interface and take part in overload resolution; use `static_assert` when you want a
 hard error with a custom message after overload resolution has chosen.
 
-`static_assert(false, "...")` in a template branch that is never instantiated is rejected by compilers
-before C++23, because a template with no valid instantiation is ill-formed. Make the condition depend
-on a template parameter instead, for example `static_assert(sizeof(T) == 0, "unsupported T")`. Newer
-compilers accept the plain form as a C++23 change; check your compiler version.
+Before CWG2518 / P2593R1 (a defect report applied to all standard versions since C++11; GCC 13+ and
+Clang 17+ implement it), compilers rejected `static_assert(false, "...")` even in a template branch
+that is never instantiated. On older toolchains make the condition depend on a template parameter,
+for example `static_assert(sizeof(T) == 0, "unsupported T")`.
 
 ## assert: run-time checks
 
@@ -155,7 +155,7 @@ in `do { ... } while (0)`, and stringify with `#expr`.
 ```
 
 C++20's `std::source_location` can replace `__FILE__`/`__LINE__` in a function, but not the stringified
-expression, so a macro is still needed to capture it. Contracts in C++26 remove this need.
+expression, so a macro is still needed to capture it. Contracts, proposed for C++26 (status unsettled, see [Contracts](./05-contracts.md)), would remove this need.
 
 ## assert versus exceptions
 
@@ -177,4 +177,4 @@ instead. Whichever you pick, state the rule in the function's documentation.
 - `assert` aborts on failure and is removed entirely, with its argument unevaluated, under `NDEBUG`.
 - Never rely on side effects in an assertion, and never use assertions for run-time input errors.
 - Parenthesize commas in `assert` arguments until C++26.
-- C++26 contracts supersede ad hoc macros; see [Contracts](./05-contracts.md).
+- Contracts, proposed for C++26 (status unsettled), may eventually replace ad hoc macros; see [Contracts](./05-contracts.md).
