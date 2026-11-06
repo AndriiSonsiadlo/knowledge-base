@@ -122,8 +122,8 @@ defaults to `is_empty<A>`):
 | `propagate_on_container_swap` (POCS) | `swap` also swaps the allocators |
 | `is_always_equal` | all instances compare equal (stateless), so storage can be stolen freely |
 
-Consequences worth knowing: moving a `vector` steals its buffer only if the allocators are equal
-(or POCMA is true); with unequal non-propagating allocators the elements are moved one by one into
+Consequences worth knowing: move-*assigning* a `vector` steals its buffer only if the allocators are equal
+(or POCMA is true), while move *construction* always moves the allocator and steals the buffer; with unequal non-propagating allocators the elements are moved one by one into
 storage from the destination's allocator. `swap` of containers with unequal allocators that don't
 propagate is **undefined behavior**. A copy-constructed container uses
 `select_on_container_copy_construction(alloc)`, which by default copies the allocator. The default
@@ -205,9 +205,10 @@ allocator. `std::pmr::polymorphic_allocator::construct` does this automatically,
 Costs and caveats: a `pmr` container is one pointer bigger, each allocation goes through a virtual call, and
 a **monotonic resource never reuses freed memory**, so a long-lived container that grows and
 shrinks inside one will use more and more memory. The resource must outlive every container using it,
-and `pmr` containers do not copy the resource on copy assignment (the destination keeps its own,
-since `polymorphic_allocator` does not propagate on assignment), which you should expect when copying
-between containers on different arenas. Whether pmr is faster than the default depends on the
+and `pmr` containers do not carry the resource along on copies. Copy assignment keeps the destination's
+resource (`polymorphic_allocator` does not propagate), and copy *construction* uses
+`select_on_container_copy_construction`, which returns the **default** resource, so a copy of an arena
+vector lands on `get_default_resource()` unless you pass a resource explicitly. Whether pmr is faster than the default depends on the
 allocation pattern, so measure.
 
 ## When to write an allocator
