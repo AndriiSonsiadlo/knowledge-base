@@ -89,8 +89,8 @@ a/c/d
 `fs::status(p)` follows symlinks and `fs::symlink_status(p)` does not; both return a `file_status` with
 `type()` (`regular`, `directory`, `symlink`, `not_found`, ...) and `permissions()`. The shortcuts:
 `fs::exists`, `is_regular_file`, `is_directory`, `is_symlink`, `is_empty`, `file_size` (regular files
-only; bytes), `last_write_time` (a `file_time_type`, whose clock `file_clock` has an unspecified
-epoch before C++20), `fs::space(p)` (capacity, free, available), and `fs::equivalent`.
+only; bytes), `last_write_time` (a `file_time_type`; its clock is `file_clock` in C++20 and an implementation-defined clock
+before, and the epoch is unspecified, so convert with `clock_cast` or `file_clock::to_sys`), `fs::space(p)` (capacity, free, available), and `fs::equivalent`.
 
 Exists-then-act sequences are **racy**: another process can create or delete the file between
 the check and the use (a time-of-check/time-of-use bug). Prefer to attempt the operation and handle
@@ -125,6 +125,7 @@ system call. Both iterators are usable with range-based `for`, and with `std::ra
 
 ```cpp title="walk.cpp" showLineNumbers
 #include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>

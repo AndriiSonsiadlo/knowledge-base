@@ -222,7 +222,7 @@ you share between machines, write each field with a fixed width and a chosen byt
 
 `std::ostringstream` builds text with the stream's formatting, and `str()` returns a copy. `std::istringstream`
 parses text with `>>`, as in the loop above. `std::stringstream` does both. They allocate and are
-slower than `std::format`, `std::to_chars` or `std::from_chars` (see [Strings](./strings.md)); use
+typically slower than `std::format`, `std::to_chars` or `std::from_chars` (see [Strings](./strings.md)); use
 them when you need stream formatting or parsing with manipulators.
 
 ## Making your type streamable
@@ -275,7 +275,7 @@ should not leave the stream in `hex` mode.
   `std::cin.tie(nullptr)` stops flushing `cout` before every read.
 - Avoid `std::endl` in loops; avoid reading a file character by character through `operator>>`.
 - To read a whole file, `std::ifstream` + `std::istreambuf_iterator<char>` or `read` into a sized string
-  (use `file_size`) is much faster than line-by-line when you do not need lines.
+  (use `file_size`) is typically faster than line-by-line when you do not need lines.
 - Whether streams are "slow" depends on the library and the workload; measure your case.
 
 ## Related
