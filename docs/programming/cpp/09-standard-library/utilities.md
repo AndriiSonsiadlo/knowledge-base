@@ -144,7 +144,7 @@ int main() {
         [](int i)                { std::cout << "int " << i << '\n'; },
         [](double d)             { std::cout << "double " << d << '\n'; },
         [](const std::string& s) { std::cout << "string " << s << '\n'; },
-    }, v);                                                   // missing a case: compile error
+    }, v);       // a missing case is an error only if no other lambda accepts the type by conversion
 
     std::cout << v.index() << ' ' << std::holds_alternative<std::string>(v) << '\n';
     if (auto* s = std::get_if<std::string>(&v)) std::cout << s->size() << '\n';  // pointer or null
@@ -161,8 +161,15 @@ wrong type
 
 - A default-constructed `variant` holds its **first** alternative, which must therefore be
   default-constructible; use `std::monostate` as the first alternative to get an "empty" state.
-- `std::visit` forces you to handle every alternative at compile time, which is the main advantage over a
-  `switch` on a tag you maintain by hand. The visitor must return the same type for all alternatives.
+- `std::visit` requires the visitor to be callable with **every** alternative, which is the advantage over a
+  `switch` on a hand-kept tag. "Callable" includes implicit conversions: delete the `double` lambda above and
+  the program still compiles, and a `double` alternative would silently go to the `int` overload and truncate.
+  To make a missing case an error, add a catch-all as the last lambda,
+  `[](auto x) { static_assert(always_false<decltype(x)>); }` with
+  `template <class> inline constexpr bool always_false = false;`: a non-template lambda that matches
+  exactly beats the template, so only alternatives with no exact overload instantiate it and fail to
+  compile (checked with g++ 15 and clang++ 21). The visitor must
+  return the same type for all alternatives.
 - `std::get<T>(v)` throws `std::bad_variant_access` on a mismatch; `std::get_if<T>(&v)` returns a pointer or `nullptr`.
 - **`valueless_by_exception`**: if constructing the new alternative during assignment throws, the variant
   can end up holding nothing (`v.valueless_by_exception()` is `true`, `index()` is `variant_npos`). It is

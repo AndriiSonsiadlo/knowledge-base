@@ -149,10 +149,10 @@ Also, `std::string + string_view` has no `operator+` before C++26 (P2591), so bu
 
 | Direction | Tool | Notes |
 |---|---|---|
-| number to string | `std::to_string(x)` | locale-dependent for floating point, `%f` format: `to_string(1.5)` is `"1.500000"` |
+| number to string | `std::to_string(x)` | floating point uses `%f` and the C locale's formatting until C++26 (P2587 changes it to match `std::format`): `to_string(1.5)` is `"1.500000"` before that |
 | number to string | `std::format("{}", x)` *(C++20)* | locale-independent by default, shortest round-trip for floats |
 | string to number | `std::stoi/stol/stoll/stod...` | throw `std::invalid_argument` / `std::out_of_range`; skip leading whitespace; stop at the first invalid char; take an optional `size_t* pos` |
-| string to number | `std::from_chars` / `std::to_chars` *(C++17, `<charconv>`)* | no exceptions, no allocation, no locale; the fastest option |
+| string to number | `std::from_chars` / `std::to_chars` *(C++17, `<charconv>`)* | no exceptions, no allocation, no locale: designed for speed |
 
 `std::from_chars(first, last, value)` returns a `from_chars_result{ptr, ec}`: on success `ec` is
 default and `ptr` points past the last character consumed. It does not skip whitespace and does not

@@ -174,14 +174,14 @@ plus a year). The result is stored as is and `ok()` returns `false`; you decide 
 
 `std::chrono::zoned_time` pairs a time point with a `time_zone` taken from the IANA database
 (`std::chrono::locate_zone("Europe/Warsaw")`, or `current_zone()`). Needs a tz database at run
-time, which Linux builds usually read from the system `tzdata`. The database lookups can throw
-`std::chrono::nonexistent_local_time` or `ambiguous_local_time` for local times that a DST
-change skips or repeats. Library support for time zones and for `<format>` of chrono types arrived later than the calendar
+time, which Linux builds usually read from the system `tzdata`. `locate_zone` throws `std::runtime_error` for an unknown name. Converting a `local_time` to an
+instant (`to_sys`, or building a `zoned_time` from a `local_time`) throws `nonexistent_local_time` or
+`ambiguous_local_time` when a DST change skips or repeats that time. Library support for time zones and for `<format>` of chrono types arrived later than the calendar
 types and differs between libstdc++, libc++ and MSVC, so check yours before relying on it.
 
 ```cpp
 // fragment: needs a C++20 library with tzdb support and installed tzdata
-auto now = std::chrono::system_clock::now();
+auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now());
 std::chrono::zoned_time warsaw{"Europe/Warsaw", now};
 std::cout << std::format("{:%F %T %Z}", warsaw) << '\n';   // e.g. 2025-06-01 14:03:20 CEST
 ```
