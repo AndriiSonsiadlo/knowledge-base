@@ -25,10 +25,10 @@ themselves are on the linked page.
 | **No guarantee** | Anything: leaks, broken invariants | Raw `new`/`delete` with no cleanup |
 | **Basic** | No leaks, all invariants hold, but the state may have changed | `vector::insert` in the middle |
 | **Strong** | Program state is exactly as before the call (commit or rollback) | `vector::push_back`, `std::swap`-based assignment |
-| **No-throw** | The function never throws | Destructors, `swap`, moves of standard types, `size()` |
+| **No-throw** | The function never throws | Destructors, `swap`, most moves of standard types, `size()` |
 
-The levels are cumulative: strong implies basic. Neither requires the object to hold the *same
-value*, except the strong one. "Basic" never means "leak or corrupt": a basic-guarantee function
+The levels are cumulative: strong implies basic. Only the strong guarantee requires the original
+value to be preserved. "Basic" never means "leak or corrupt": a basic-guarantee function
 that leaks is not exception-safe at all.
 
 ## Basic versus strong, measured
@@ -46,6 +46,7 @@ struct Bomb {                       // the 3rd copy throws
     int v;
     explicit Bomb(int x) : v(x) {}
     Bomb(const Bomb& o) : v(o.v) { if (++copies == 3) throw std::runtime_error("copy failed"); }
+    Bomb& operator=(const Bomb&) = default;     // keep clang -Wextra quiet (deprecated-copy)
 };
 
 class Bag {

@@ -66,10 +66,11 @@ allocates, and `explicit operator bool` is true when the value is non-zero, i.e.
 - `std::make_error_code(std::errc::no_such_file_or_directory)` builds a portable one.
 - The text returned by `message()` comes from the implementation and the OS, so don't compare it.
 
-Many standard functions have overloads taking `std::error_code&` instead of throwing, notably
-[`<filesystem>`](../09-standard-library/filesystem.md) and `std::from_chars`/`std::to_chars` (which
-return an `errc`). Those without such an overload throw `std::system_error`, which wraps an
-`error_code`.
+Many standard functions have overloads taking `std::error_code&` instead of throwing, notably the
+OS-facing [`<filesystem>`](../09-standard-library/filesystem.md) functions. The non-`error_code`
+overloads there throw `std::filesystem::filesystem_error`, which derives from `std::system_error`
+and wraps an `error_code`. `std::from_chars`/`std::to_chars` take no `error_code&` at all: they
+return a result struct holding an `errc`.
 
 ### error_code versus error_condition
 
@@ -138,7 +139,7 @@ ADL, so it must live in the enum's namespace (the global one here).
 
 `std::expected<T, E>` *(C++23, `<expected>`)* holds either a `T` (the expected result) or an `E` (the
 error), never both and never empty. Unlike `std::optional` it says *why* there is no value. Library
-support: libstdc++ 12+, libc++ 16+, MSVC 19.33+ for the core type. The monadic operations (`and_then` and others) arrived in later releases in some libraries, so check yours.
+support: libstdc++ 12+, libc++ 16+, MSVC 19.33+ for the core type. The monadic operations (`and_then`, `transform`, ...) need libstdc++ 13, libc++ 17 or MSVC 19.36 (cppreference, P2505R5).
 
 ```cpp title="expected.cpp" showLineNumbers
 #include <charconv>
@@ -208,7 +209,7 @@ Access and composition:
 `if (!r) return std::unexpected(r.error());` is the idiom.
 
 C++23 `expected` has a `void` specialization (`expected<void, E>`) for operations that return nothing on
-success. Before C++23, `tl::expected` and `boost::outcome` offer the same shape.
+success. Before C++23, `tl::expected` and `boost::outcome_v2::result` offer the same shape.
 
 ### Pitfalls
 

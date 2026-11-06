@@ -125,8 +125,7 @@ handler exits.
 
 Two consequences follow:
 
-- **Destructors run during unwinding, so a destructor that lets an exception escape while another is
-  already active calls `std::terminate`.** Destructors are `noexcept` by default for this reason.
+- **Destructors run during unwinding, so a destructor that lets an exception escape during stack unwinding calls `std::terminate`.** Destructors are `noexcept` by default for this reason.
 - **If no handler is found**, or an exception reaches a `noexcept` boundary, `std::terminate` is
   called. Whether the stack is unwound first in the no-handler case is implementation-defined, so
   never rely on destructors running for an uncaught exception.
@@ -306,7 +305,7 @@ never occur.
 - **Empty `catch (...) {}`** that hides failures. At minimum log and rethrow.
 - **Handlers in the wrong order**: a `catch (const std::exception&)` before a derived-type handler
   makes the later one unreachable.
-- **Throwing across a language or ABI boundary** (a C callback, a `extern "C"` function, a shared
+- **Throwing across a language or ABI boundary** (a C callback, an `extern "C"` function, a shared
   library compiled with a different runtime). Catch everything at the boundary and translate.
 - **Using exceptions for normal control flow**, such as ending a loop.
 
