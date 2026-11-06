@@ -138,7 +138,7 @@ ADL, so it must live in the enum's namespace (the global one here).
 
 `std::expected<T, E>` *(C++23, `<expected>`)* holds either a `T` (the expected result) or an `E` (the
 error), never both and never empty. Unlike `std::optional` it says *why* there is no value. Library
-support: libstdc++ 12+, libc++ 16+, MSVC 19.33+ (verify for your toolchain).
+support: libstdc++ 12+, libc++ 16+, MSVC 19.33+ for the core type. The monadic operations (`and_then` and others) arrived in later releases in some libraries, so check yours.
 
 ```cpp title="expected.cpp" showLineNumbers
 #include <charconv>

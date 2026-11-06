@@ -3,734 +3,178 @@ id: assertions
 title: Assertions and static_assert
 sidebar_label: Assertions
 sidebar_position: 4
-tags: [cpp, assertions, debugging, assert, static-assert, preconditions]
+tags: [cpp, assertions, assert, static-assert, ndebug, preconditions]
 ---
 
 # Assertions and static_assert
 
-**Assertions** are runtime or compile-time checks that verify program invariants and assumptions. They help catch bugs early during development and document expected conditions in code.
+An **assertion** states something that must be true if the program is correct. If it is false, the
+program has a bug, and the right response is to stop loudly at the point of the mistake rather than
+continue with corrupt state. C++ has two built-in mechanisms: `static_assert`, checked at compile
+time, and the `assert` macro, checked at run time and removable. Assertions are for *programmer
+errors*. Failures that can happen in a correct program (bad input, a missing file) belong to
+[exceptions](./01-exceptions.md) or [error codes](./03-error-codes.md). C++26 adds language-level
+[contracts](./05-contracts.md) that cover the same ground; this page is about what exists today in
+every compiler.
 
-## Types of Assertions
-```mermaid
-graph TD
-    A[Assertions] --> B[Runtime Assertions]
-    A --> C[Compile-Time Assertions]
-    
-    B --> D[assert macro]
-    B --> E[Custom assertions]
-    
-    C --> F[static_assert]
-    C --> G[Concept constraints]
-```
+**Prerequisites:** [Exceptions](./01-exceptions.md) for the contrast between bugs and expected failures.
 
-## Runtime Assertions (assert)
+## static_assert: compile-time checks
 
-The `assert` macro checks conditions at runtime in debug builds:
-```cpp
-#include <cassert>
-#include <vector>
+`static_assert(constant-expression, message)` *(C++11)* fails compilation when the expression is
+false. It costs nothing at run time and works in any scope, including inside templates, where the
+check happens at instantiation. The message must be a string literal in C++11/14; it is optional since
+C++17.
 
-void processElement(const std::vector<int>& vec, size_t index) {
-    // Precondition: index must be valid
-    assert(index < vec.size());
-    
-    int value = vec[index];
-    
-    // Postcondition: value should be positive
-    assert(value > 0);
-    
-    // Process value...
-}
-
-void invariantExample() {
-    int* ptr = allocateMemory();
-    
-    // Invariant: allocation must succeed
-    assert(ptr != nullptr);
-    
-    // Use ptr...
-    
-    delete ptr;
-}
-```
-
-:::warning
-`assert` is **disabled** in release builds (when `NDEBUG` is defined). Use it only for conditions that should never fail in correct code.
-:::
-
-## assert Behavior
-```cpp
-#include <cassert>
-
-void assertBehavior() {
-    int x = 5;
-    
-    // If condition is false:
-    // 1. Prints error message with file, line, and condition
-    // 2. Calls std::abort()
-    // 3. Program terminates
-    assert(x > 10);  // Assertion failed: x > 10, file.cpp:42
-}
-
-// Disable assertions in release builds
-// Compile with: g++ -DNDEBUG program.cpp
-#ifdef NDEBUG
-    // assert becomes a no-op
-#endif
-```
-
-### Assert vs Exception
-```cpp
-#include <cassert>
-#include <stdexcept>
-
-// Assert: programmer error (bug)
-void assertExample(int* ptr) {
-    assert(ptr != nullptr);  // Should never happen in correct code
-    *ptr = 42;
-}
-
-// Exception: runtime error (expected failure)
-void exceptionExample(const std::string& filename) {
-    std::ifstream file(filename);
-    if (!file) {
-        throw std::runtime_error("Cannot open file");  // Expected failure
-    }
-}
-```
-
-| Assertion | Exception |
-|-----------|-----------|
-| **Programmer error** | **Runtime error** |
-| Debug builds only | Always active |
-| Documents assumptions | Handles failures |
-| Terminates program | Recoverable |
-| Preconditions/postconditions | Error handling |
-
-## Assertion Categories
-
-### Preconditions
-
-Conditions that must be true before a function executes:
-```cpp
-#include <cassert>
-
-double sqrt(double x) {
-    // Precondition: x must be non-negative
-    assert(x >= 0.0);
-    
-    // Implementation...
-}
-
-void processArray(int* arr, size_t size) {
-    // Preconditions
-    assert(arr != nullptr);
-    assert(size > 0);
-    
-    // Process array...
-}
-```
-
-### Postconditions
-
-Conditions that must be true after a function executes:
-```cpp
-#include <cassert>
-
-int* allocateBuffer(size_t size) {
-    assert(size > 0);  // Precondition
-    
-    int* buffer = new int[size];
-    
-    assert(buffer != nullptr);  // Postcondition
-    return buffer;
-}
-
-std::vector<int> sortVector(std::vector<int> vec) {
-    std::sort(vec.begin(), vec.end());
-    
-    // Postcondition: vector is sorted
-    assert(std::is_sorted(vec.begin(), vec.end()));
-    
-    return vec;
-}
-```
-
-### Invariants
-
-Conditions that must always be true for an object:
-```cpp
-#include <cassert>
-
-class BankAccount {
-    double balance_;
-    
-    void checkInvariant() const {
-        // Invariant: balance cannot be negative
-        assert(balance_ >= 0.0);
-    }
-    
-public:
-    BankAccount() : balance_(0.0) {
-        checkInvariant();
-    }
-    
-    void deposit(double amount) {
-        assert(amount > 0.0);  // Precondition
-        
-        balance_ += amount;
-        
-        checkInvariant();  // Check invariant after modification
-    }
-    
-    void withdraw(double amount) {
-        assert(amount > 0.0);  // Precondition
-        assert(balance_ >= amount);  // Precondition
-        
-        balance_ -= amount;
-        
-        checkInvariant();  // Check invariant
-    }
-};
-```
-
-## static_assert (Compile-Time)
-
-`static_assert` checks conditions at compile time:
-```cpp
+```cpp title="static_assert.cpp" showLineNumbers
+#include <cstdint>
 #include <type_traits>
 
-// Check type properties
-template<typename T>
-class Container {
-    static_assert(std::is_copy_constructible_v<T>, 
-                  "T must be copy constructible");
-    static_assert(sizeof(T) <= 1024, 
-                  "T is too large (max 1024 bytes)");
-    
-    // Implementation...
-};
+struct Header { std::uint32_t magic; std::uint16_t version; std::uint16_t flags; };
+static_assert(sizeof(Header) == 8, "Header must be 8 bytes");   // layout assumption
+static_assert(std::is_trivially_copyable_v<Header>);            // message optional since C++17
 
-// Check constants
-constexpr int BUFFER_SIZE = 256;
-static_assert(BUFFER_SIZE > 0, "Buffer size must be positive");
-static_assert(BUFFER_SIZE % 64 == 0, "Buffer size must be multiple of 64");
-
-// Check sizes
-static_assert(sizeof(int) == 4, "This code assumes 32-bit ints");
-static_assert(sizeof(void*) == 8, "This code requires 64-bit pointers");
-
-// Usage
-void compileTimeChecks() {
-    Container<int> c1;           // OK
-    // Container<std::mutex> c2;  // Error: not copy constructible
+template <class T>
+T twice(T x) {
+    static_assert(std::is_arithmetic_v<T>, "twice() needs an arithmetic type");
+    return x + x;
 }
+int main() { return twice(2) - 4; }
 ```
 
-:::success[`static_assert`]
+This compiles with no warnings under `g++ -std=c++20 -Wall -Wextra` and clang++. Calling
+`twice(std::true_type{})` fails with
+`error: static assertion failed: twice() needs an arithmetic type`
+(g++ 15.2), usually followed by unrelated follow-on errors.
 
-`static_assert` provides **compile-time** guarantees with zero runtime cost. Use it for type checks, constants, and platform assumptions.
-:::
+Use it for assumptions the build must guarantee: sizes and alignments of types that cross a file or
+network boundary, `std::is_*` properties a template relies on, enum-count checks. In C++20, prefer a
+[concept](../08-templates-and-metaprogramming/concepts-and-requires.md) when the check should be part of
+the function's interface and take part in overload resolution; use `static_assert` when you want a
+hard error with a custom message after overload resolution has chosen.
 
-## static_assert with Concepts (C++20)
-```cpp
-#include <concepts>
+`static_assert(false, "...")` in a template branch that is never instantiated is rejected by compilers
+before C++23, because a template with no valid instantiation is ill-formed. Make the condition depend
+on a template parameter instead, for example `static_assert(sizeof(T) == 0, "unsupported T")`. Newer
+compilers accept the plain form as a C++23 change; check your compiler version.
 
-// Concept-based constraints
-template<typename T>
-concept Numeric = std::integral<T> || std::floating_point<T>;
+## assert: run-time checks
 
-template<typename T>
-void processNumeric(T value) {
-    static_assert(Numeric<T>, "T must be numeric type");
-    // Or better: use concept directly
-    // template<Numeric T> void processNumeric(T value) { ... }
-}
+`assert(expr)` is a macro from `<cassert>`. If the macro `NDEBUG` is **not** defined when `<cassert>` is
+included, it evaluates `expr` and, when false, prints a diagnostic (the expression, file, line,
+and usually the function) to `stderr` and calls `std::abort()`. If `NDEBUG` is defined, it expands to
+`((void)0)`: **the expression is not evaluated at all.**
 
-// Compile-time size check
-template<typename T>
-struct Padded {
-    static_assert(sizeof(T) < 256, "Type too large for padding");
-    
-    T data;
-    char padding[256 - sizeof(T)];
-};
-```
-
-## Custom Assertion Macros
-```cpp
-#include <iostream>
-#include <cstdlib>
-
-// Custom assert with custom message
-#define ASSERT(condition, message) \
-    do { \
-        if (!(condition)) { \
-            std::cerr << "Assertion failed: " << #condition << "\n" \
-                      << "Message: " << message << "\n" \
-                      << "File: " << __FILE__ << "\n" \
-                      << "Line: " << __LINE__ << "\n"; \
-            std::abort(); \
-        } \
-    } while(0)
-
-// Verify macro (always active, even in release)
-#define VERIFY(condition, message) \
-    do { \
-        if (!(condition)) { \
-            std::cerr << "Verification failed: " << message << "\n"; \
-            std::abort(); \
-        } \
-    } while(0)
-
-void customAssertions() {
-    int x = 5;
-    
-    ASSERT(x > 0, "x must be positive");
-    VERIFY(x < 100, "x out of expected range");
-}
-```
-
-### Release-Mode Assertions
-```cpp
-#include <iostream>
-
-// Assertion that works in both debug and release
-#define RELEASE_ASSERT(condition, message) \
-    do { \
-        if (!(condition)) { \
-            std::cerr << "Critical error: " << message << "\n" \
-                      << "At " << __FILE__ << ":" << __LINE__ << "\n"; \
-            std::terminate(); \
-        } \
-    } while(0)
-
-void criticalCheck() {
-    int* ptr = getCriticalResource();
-    
-    // This check runs in release builds too
-    RELEASE_ASSERT(ptr != nullptr, "Failed to acquire critical resource");
-    
-    // Use ptr...
-}
-```
-
-## Assertion Levels
-```cpp
-// Level 0: Cheap checks (always enabled)
-#define ASSERT_LEVEL_0(cond) assert(cond)
-
-// Level 1: Moderate checks (debug only)
-#if defined(DEBUG) && ASSERTION_LEVEL >= 1
-    #define ASSERT_LEVEL_1(cond) assert(cond)
-#else
-    #define ASSERT_LEVEL_1(cond) ((void)0)
-#endif
-
-// Level 2: Expensive checks (verbose debug only)
-#if defined(DEBUG) && ASSERTION_LEVEL >= 2
-    #define ASSERT_LEVEL_2(cond) assert(cond)
-#else
-    #define ASSERT_LEVEL_2(cond) ((void)0)
-#endif
-
-void multilevelAssertions(const std::vector<int>& vec) {
-    ASSERT_LEVEL_0(!vec.empty());                      // Cheap
-    ASSERT_LEVEL_1(vec.size() < 1000);                 // Moderate
-    ASSERT_LEVEL_2(std::is_sorted(vec.begin(), vec.end()));  // Expensive
-}
-```
-
-## Assertion Patterns
-
-### Unreachable Code
-```cpp
+```cpp title="assert.cpp" showLineNumbers
 #include <cassert>
+#include <cstdio>
 
-enum class Color { Red, Green, Blue };
+int calls = 0;
+bool tick() { ++calls; return true; }
 
-std::string colorToString(Color c) {
-    switch (c) {
-        case Color::Red:   return "Red";
-        case Color::Green: return "Green";
-        case Color::Blue:  return "Blue";
-    }
-    
-    assert(false && "Unreachable: all enum values handled");
-    return "Unknown";  // Suppress compiler warning
-}
-
-// C++23: std::unreachable
-#if __cplusplus >= 202302L
-    #include <utility>
-    
-    std::string colorToString(Color c) {
-        switch (c) {
-            case Color::Red:   return "Red";
-            case Color::Green: return "Green";
-            case Color::Blue:  return "Blue";
-        }
-        std::unreachable();  // Undefined behavior if reached
-    }
-#endif
-```
-
-### Range Checks
-```cpp
-#include <cassert>
-
-template<typename T>
-class BoundedValue {
-    T value_;
-    T min_;
-    T max_;
-    
-    void checkInvariant() const {
-        assert(value_ >= min_);
-        assert(value_ <= max_);
-    }
-    
-public:
-    BoundedValue(T value, T min, T max)
-        : value_(value), min_(min), max_(max) {
-        assert(min <= max);
-        checkInvariant();
-    }
-    
-    void setValue(T value) {
-        assert(value >= min_ && value <= max_);
-        value_ = value;
-        checkInvariant();
-    }
-    
-    T getValue() const {
-        checkInvariant();
-        return value_;
-    }
-};
-```
-
-### Null Pointer Checks
-```cpp
-#include <cassert>
-#include <memory>
-
-template<typename T>
-class NotNull {
-    T* ptr_;
-    
-public:
-    explicit NotNull(T* ptr) : ptr_(ptr) {
-        assert(ptr != nullptr && "Pointer cannot be null");
-    }
-    
-    NotNull(std::nullptr_t) = delete;  // Prevent null assignment
-    
-    T* get() const {
-        assert(ptr_ != nullptr);  // Invariant
-        return ptr_;
-    }
-    
-    T& operator*() const {
-        assert(ptr_ != nullptr);
-        return *ptr_;
-    }
-    
-    T* operator->() const {
-        assert(ptr_ != nullptr);
-        return ptr_;
-    }
-};
-
-void usage() {
-    int x = 42;
-    NotNull<int> ptr(&x);
-    
-    // NotNull<int> invalid(nullptr);  // Compilation error
-    
-    std::cout << *ptr << '\n';  // Safe dereference
+int main() {
+    assert(tick());                         // BUG: the side effect vanishes under -DNDEBUG
+    std::printf("calls=%d\n", calls);
 }
 ```
 
-## Practical Examples
-
-### Example 1: Circular Buffer
-```cpp
-#include <cassert>
-#include <vector>
-
-template<typename T>
-class CircularBuffer {
-    std::vector<T> buffer_;
-    size_t head_ = 0;
-    size_t tail_ = 0;
-    size_t size_ = 0;
-    
-    void checkInvariant() const {
-        assert(buffer_.capacity() > 0);
-        assert(head_ < buffer_.capacity());
-        assert(tail_ < buffer_.capacity());
-        assert(size_ <= buffer_.capacity());
-    }
-    
-public:
-    explicit CircularBuffer(size_t capacity) {
-        assert(capacity > 0);
-        buffer_.resize(capacity);
-        checkInvariant();
-    }
-    
-    void push(const T& item) {
-        assert(!isFull() && "Buffer is full");
-        
-        buffer_[tail_] = item;
-        tail_ = (tail_ + 1) % buffer_.capacity();
-        ++size_;
-        
-        checkInvariant();
-    }
-    
-    T pop() {
-        assert(!isEmpty() && "Buffer is empty");
-        
-        T item = buffer_[head_];
-        head_ = (head_ + 1) % buffer_.capacity();
-        --size_;
-        
-        checkInvariant();
-        return item;
-    }
-    
-    bool isEmpty() const {
-        checkInvariant();
-        return size_ == 0;
-    }
-    
-    bool isFull() const {
-        checkInvariant();
-        return size_ == buffer_.capacity();
-    }
-};
+```text
+$ g++ -std=c++20 -O2 assert.cpp && ./a.out
+calls=1
+$ g++ -std=c++20 -O2 -DNDEBUG assert.cpp && ./a.out
+calls=0
 ```
 
-### Example 2: Matrix Class
-```cpp
-#include <cassert>
-#include <vector>
+Same on g++ 15.2 and clang++ 21.1. Typical build systems define `NDEBUG` in release configurations
+(CMake's `Release` and `RelWithDebInfo`), so a release build silently drops every check.
 
-class Matrix {
-    std::vector<double> data_;
-    size_t rows_;
-    size_t cols_;
-    
-    void checkInvariant() const {
-        assert(rows_ > 0);
-        assert(cols_ > 0);
-        assert(data_.size() == rows_ * cols_);
-    }
-    
-public:
-    Matrix(size_t rows, size_t cols)
-        : data_(rows * cols), rows_(rows), cols_(cols) {
-        assert(rows > 0 && cols > 0);
-        checkInvariant();
-    }
-    
-    double& operator()(size_t row, size_t col) {
-        assert(row < rows_);
-        assert(col < cols_);
-        checkInvariant();
-        return data_[row * cols_ + col];
-    }
-    
-    Matrix operator*(const Matrix& other) const {
-        assert(cols_ == other.rows_ && "Incompatible matrix dimensions");
-        
-        Matrix result(rows_, other.cols_);
-        
-        // Matrix multiplication...
-        
-        result.checkInvariant();
-        return result;
-    }
-};
+A failed assertion looks like this (the format is the C library's, here glibc, and differs elsewhere):
+
+```text
+f: fail.cpp:2: int main(): Assertion `x == 4 && "x must be 4"' failed.
+Aborted (core dumped)
 ```
 
-### Example 3: State Machine
-```cpp
-#include <cassert>
+The `&& "message"` idiom puts a human explanation into that text, because a non-empty string literal is
+always true.
 
-enum class State { Idle, Running, Paused, Stopped };
+### Pitfalls
 
-class StateMachine {
-    State state_ = State::Idle;
-    
-    void assertValidTransition(State from, State to) const {
-        switch (from) {
-            case State::Idle:
-                assert(to == State::Running || to == State::Stopped);
-                break;
-            case State::Running:
-                assert(to == State::Paused || to == State::Stopped);
-                break;
-            case State::Paused:
-                assert(to == State::Running || to == State::Stopped);
-                break;
-            case State::Stopped:
-                assert(to == State::Idle);
-                break;
-        }
-    }
-    
-public:
-    void start() {
-        assertValidTransition(state_, State::Running);
-        state_ = State::Running;
-    }
-    
-    void pause() {
-        assertValidTransition(state_, State::Paused);
-        state_ = State::Paused;
-    }
-    
-    void stop() {
-        assertValidTransition(state_, State::Stopped);
-        state_ = State::Stopped;
-    }
-    
-    void reset() {
-        assertValidTransition(state_, State::Idle);
-        state_ = State::Idle;
-    }
-};
-```
+- **Side effects inside `assert`.** Never put work in the expression (`assert(close(fd) == 0)`).
+- **Commas outside parentheses.** `assert(std::is_same<int, int>::value)` fails to compile before C++26
+  because the preprocessor sees two macro arguments (g++ 15.2 with glibc: "macro 'assert' passed 2
+  arguments, but takes just 1"). Add parentheses. C++26 makes `assert` variadic.
+- **`assert` is usable in constant expressions**: while the condition holds it has no effect, and a failure
+  makes the evaluation non-constant, which is a compile error (per LWG 2234, applied to C++11).
+- **Using it to validate input.** Anything an external caller can trigger must be handled in release
+  builds too.
+- **Silent undefined behavior after removal.** Code written as `assert(p != nullptr); *p = 1;` becomes an
+  unchecked dereference in release builds. See [Undefined Behavior](./06-undefined-behavior.md).
 
-## Debug vs Release Builds
-```cpp
-// Debug build: g++ -g program.cpp
-// - Assertions enabled
-// - No optimization
-// - Debug symbols
+## What to assert
 
-// Release build: g++ -O3 -DNDEBUG program.cpp
-// - Assertions disabled
-// - Full optimization
-// - No debug symbols
+Assert conditions that are the caller's or your own responsibility, never environmental ones.
 
-void buildModes() {
-    int x = calculateValue();
-    
-    #ifdef NDEBUG
-        // Release mode
-        if (x < 0) {
-            handleError();  // Explicit error handling
-        }
-    #else
-        // Debug mode
-        assert(x >= 0);  // Catch bugs during development
-    #endif
-}
-```
+| Kind | Meaning | Example |
+|---|---|---|
+| Precondition | What the caller must guarantee on entry | `assert(!v.empty());` in `front_or_die` |
+| Postcondition | What the function guarantees on exit | `assert(is_sorted(out.begin(), out.end()));` |
+| Invariant | What always holds for an object or loop | `assert(size_ <= capacity_);` |
+| Unreachable | A branch that cannot happen | `default: assert(false && "bad enum");` |
 
-## Assertion Best Practices
+Checks that are themselves expensive (an `is_sorted` over a million elements) change the complexity of
+the function in debug builds. Keep them for debug or use a project-level level switch.
 
-:::success[**DO:**]
-- Use assertions to document assumptions
-- Check preconditions, postconditions, and invariants
-- Assert impossible conditions to catch bugs
-- Use `static_assert` for compile-time checks
-- Keep assertion conditions side-effect free
-- Write meaningful assertion messages
-  :::
+Standard library hardening is a related but distinct mechanism: libstdc++ `-D_GLIBCXX_ASSERTIONS` and
+libc++ hardening modes add precondition checks (such as `operator[]` bounds) to the library and abort on
+violation. Their exact coverage is implementation-specific; see your library's documentation.
 
-:::danger
-**DON'T:**
-- Use assertions for error handling (use exceptions or error codes)
-- Put important logic inside assertions (disabled in release!)
-- Assert conditions that can legitimately fail at runtime
-- Use assertions to validate user input
-- Rely on assertions for security checks
-  :::
+For paths the compiler may be told are unreachable, C++23 provides `std::unreachable()` in `<utility>`.
+Unlike `assert(false)` it is *undefined behavior* if reached, in every build, so use it only after the
+guard is proven.
 
-## Common Mistakes
-```cpp
-// WRONG: Side effect in assertion
-int count = 0;
-assert(++count > 0);  // count not incremented in release build!
+## Custom assertion macros
 
-// CORRECT: Side-effect free
-int count = getValue();
-assert(count > 0);
-
-// WRONG: Validating user input
-void setAge(int age) {
-    assert(age >= 0);  // User input needs runtime check!
-    age_ = age;
-}
-
-// CORRECT: Runtime validation
-void setAge(int age) {
-    if (age < 0) {
-        throw std::invalid_argument("Age cannot be negative");
-    }
-    age_ = age;
-}
-
-// WRONG: Security check
-void authenticate(const std::string& password) {
-    assert(password == correctPassword);  // Disabled in release!
-}
-
-// CORRECT: Always-active check
-void authenticate(const std::string& password) {
-    if (password != correctPassword) {
-        throw std::runtime_error("Authentication failed");
-    }
-}
-```
-
-## Assertions as poor-man's contracts
-
-Until language-level contracts land (C++26), `assert` is the standard way to check **preconditions**
-and **postconditions** inline:
+A project often wraps `assert` to keep checks in some builds (release with logging), print more, or
+route to a crash reporter. Keep these rules: evaluate the expression exactly once, wrap the macro body
+in `do { ... } while (0)`, and stringify with `#expr`.
 
 ```cpp showLineNumbers
-double sqrt_checked(double x) {
-    assert(x >= 0);                       // precondition
-    double r = /* ... compute ... */;
-    assert(std::abs(r * r - x) < 1e-9);   // postcondition
-    return r;
-}
+// ...  (fragment)
+#include <cstdio>
+#include <cstdlib>
+
+#define MY_ASSERT(expr)                                                      \
+    do {                                                                     \
+        if (!(expr)) {                                                       \
+            std::fprintf(stderr, "%s:%d: assertion failed: %s\n",            \
+                         __FILE__, __LINE__, #expr);                         \
+            std::abort();                                                    \
+        }                                                                    \
+    } while (0)
 ```
 
-For the full Design-by-Contract story — preconditions, postconditions, invariants, contract levels,
-and the C++26 `pre` / `post` / `contract_assert` syntax — see [Contracts](./05-contracts.md).
+C++20's `std::source_location` can replace `__FILE__`/`__LINE__` in a function, but not the stringified
+expression, so a macro is still needed to capture it. Contracts in C++26 remove this need.
 
-## Performance Considerations
-```cpp
-#include <cassert>
-#include <algorithm>
+## assert versus exceptions
 
-void performanceSensitive(std::vector<int>& vec) {
-    // Cheap assertion: OK even in hot path
-    assert(!vec.empty());
-    
-    // Expensive assertion: use ASSERT_LEVEL_2
-    #if ASSERTION_LEVEL >= 2
-        assert(std::is_sorted(vec.begin(), vec.end()));
-    #endif
-    
-    // Critical path code...
-}
-```
+| | `assert` | Exception / error code |
+|---|---|---|
+| Detects | Bugs in the program | Conditions a correct program can face |
+| Release builds | Usually removed | Always active |
+| Recoverable | No, it aborts | Yes |
+| Caller can test for it | No | Yes |
 
-:::info
-**Assertions are free in release builds** (with `NDEBUG` defined), but can be expensive in debug builds. Use assertion levels for expensive checks.
-:::
+An exception for a precondition violation lets tests observe it, but invites callers to catch and
+ignore a bug and requires the function to be non-`noexcept`; many codebases choose assert-and-abort
+instead. Whichever you pick, state the rule in the function's documentation.
 
-## Related Topics
+## Key points
 
-- **[Exceptions](01-exceptions.md)** - Runtime error handling
-- **[Error Codes](03-error-codes.md)** - Alternative error handling
-- **[Contracts](05-contracts.md)** - Formal contract programming
-- **[Undefined Behavior](06-undefined-behavior.md)** - What happens when assertions fail
+- `static_assert` is free, compile-time, and ideal for layout and type assumptions. The message is
+  optional from C++17.
+- `assert` aborts on failure and is removed entirely, with its argument unevaluated, under `NDEBUG`.
+- Never rely on side effects in an assertion, and never use assertions for run-time input errors.
+- Parenthesize commas in `assert` arguments until C++26.
+- C++26 contracts supersede ad hoc macros; see [Contracts](./05-contracts.md).
