@@ -3,415 +3,288 @@ id: threads
 title: Thread Management
 sidebar_label: Threads
 sidebar_position: 4
-tags: [cpp, concurrency, threads, threading, parallelism]
+tags: [cpp, concurrency, threads, jthread, stop-token, thread-local]
 ---
 
 # Thread Management
 
-**Threads** allow programs to perform multiple operations concurrently. C++11 introduced `std::thread` for portable threading.
+`std::thread` (C++11, `<thread>`) wraps one OS thread. Creating one starts the function immediately; the
+object is a handle that you must either wait for or give up. C++20 adds `std::jthread`, which waits for
+itself and supports cooperative cancellation, and is what you should reach for first. This page is the canonical
+home for `std::thread` and `std::jthread` lifetimes, argument passing, stop tokens and thread
+identity. What threads can safely share is in [Data races](./03-data-races.md).
 
-:::danger[Join or detach — always]
-A `std::thread` must be **joined** (wait for it to finish) or **detached** (let it run independently)
-before it is destroyed. A still-joinable thread that goes out of scope calls `std::terminate` and
-kills the whole process. C++20's `std::jthread` fixes this with RAII — it **auto-joins** in its
-destructor and carries a `stop_token` for cooperative cancellation, so prefer it.
-:::
+**Prerequisites:** [C++ memory model](./01-cpp-memory-model.md) (thread start and join are synchronization points),
+[Lambdas](../07-classes-and-oop/lambdas.md) (captures).
 
-## Basic Thread Creation
-```cpp
-#include <iostream>
-#include <thread>
+On Linux with GCC or Clang, link with `-pthread`; MSVC needs no flag.
 
-void hello() {
-    std::cout << "Hello from thread!\n";
-}
+## Starting a thread and passing arguments
 
-int main() {
-    std::thread t(hello);  // Create and start thread
-    t.join();              // Wait for thread to finish
-    return 0;
-}
-```
+`std::thread t(callable, args...)` starts a new thread running `callable(args...)`. The arguments are
+**copied (or moved) into storage owned by the thread** first, then passed as rvalues to the callable. Three
+consequences:
 
-## Thread Lifecycle
-```mermaid
-graph LR
-    A[Created] --> B[Running]
-    B --> C[join/detach]
-    C --> D[Finished]
-    
-```
-```cpp
-#include <thread>
+- A function taking `int&` does not compile when you pass `n`: the copy is an rvalue and cannot bind to a
+  non-const lvalue reference. Wrap it in `std::ref(n)` to opt into sharing, and then make sure `n` outlives
+  the thread and the accesses are synchronized.
+- Pointers and references captured by a lambda (`[&]`) are shared as is: nothing is copied.
+- Member functions need the object: `std::thread t(&Worker::run, &w, 3)`.
 
-void task() {
-    // Do work
-}
-
-int main() {
-    std::thread t(task);
-    
-    // Must either join or detach before destruction!
-    if (t.joinable()) {
-        t.join();      // Wait for completion
-        // OR
-        // t.detach();  // Run independently
-    }
-    
-    // t.~thread() would call std::terminate if not joined/detached
-}
-```
-
-:::danger
-A `std::thread` object must be either **joined** or **detached** before destruction, or `std::terminate()` is called!
-:::
-
-## Passing Arguments
-```cpp
-#include <thread>
+```cpp title="start_thread.cpp"
+#include <cstdio>
+#include <functional>
 #include <string>
-
-void printMessage(int id, const std::string& msg) {
-    std::cout << "Thread " << id << ": " << msg << '\n';
-}
-
-int main() {
-    std::thread t1(printMessage, 1, "Hello");
-    std::thread t2(printMessage, 2, "World");
-    
-    t1.join();
-    t2.join();
-}
-```
-
-### Passing by Reference
-```cpp
 #include <thread>
 
-void increment(int& value) {
-    ++value;
+void greet(const std::string& name, int& out) {
+    out = static_cast<int>(name.size());
 }
 
-int main() {
-    int counter = 0;
-    
-    // Must use std::ref for references
-    std::thread t(increment, std::ref(counter));
-    t.join();
-    
-    std::cout << counter << '\n';  // 1
-}
-```
-
-### Passing Member Functions
-```cpp
-#include <thread>
-
-class Worker {
-public:
-    void doWork(int param) {
-        // Work
-    }
+struct Worker {
+    int id = 7;
+    void run(int n) { std::printf("worker %d got %d\n", id, n); }
 };
 
 int main() {
+    int len = 0;
+    std::thread t1(greet, std::string("threads"), std::ref(len));   // args copied; ref needs std::ref
+    t1.join();
+    std::printf("len=%d\n", len);                                   // join orders the write before this read
+
     Worker w;
-    std::thread t(&Worker::doWork, &w, 42);
-    t.join();
-}
-```
-
-## Lambdas with Threads
-```cpp
-#include <thread>
-#include <vector>
-
-int main() {
-    std::vector<std::thread> threads;
-    
-    for (int i = 0; i < 5; ++i) {
-        threads.emplace_back([i]() {
-            std::cout << "Thread " << i << '\n';
-        });
-    }
-    
-    for (auto& t : threads) {
-        t.join();
-    }
-}
-```
-
-## Thread Management
-
-### join() - Wait for Completion
-```cpp
-std::thread t(task);
-t.join();  // Block until thread finishes
-// Thread resources are cleaned up
-```
-
-### detach() - Independent Execution
-```cpp
-std::thread t(task);
-t.detach();  // Thread runs independently
-// Cannot join later, thread manages its own lifetime
-```
-
-### joinable() - Check State
-```cpp
-std::thread t(task);
-
-if (t.joinable()) {
-    t.join();  // Safe to join
-}
-
-// After join/detach, no longer joinable
-assert(!t.joinable());
-```
-
-## Thread IDs
-```cpp
-#include <thread>
-#include <iostream>
-
-void printThreadId() {
-    std::cout << "Thread ID: " << std::this_thread::get_id() << '\n';
-}
-
-int main() {
-    std::thread t1(printThreadId);
-    std::thread t2(printThreadId);
-    
-    std::cout << "Main thread ID: " << std::this_thread::get_id() << '\n';
-    std::cout << "t1 ID: " << t1.get_id() << '\n';
-    std::cout << "t2 ID: " << t2.get_id() << '\n';
-    
-    t1.join();
+    std::thread t2(&Worker::run, &w, 3);                            // member function + object pointer
     t2.join();
+
+    std::thread t3([] { /* runs concurrently */ });
+    std::printf("joinable before join: %d\n", t3.joinable());
+    t3.join();
+    std::printf("joinable after join: %d\n", t3.joinable());
 }
 ```
 
-## Thread-Local Storage
-```cpp
+```text
+len=7
+worker 7 got 3
+joinable before join: 1
+joinable after join: 0
+```
+
+Output identical with g++ and clang++ at `-O0` and `-O2`, and clean under `-fsanitize=thread`.
+
+## A thread must be joined or detached
+
+A `std::thread` is **joinable** when it owns a running or finished thread of execution. Destroying (or
+assigning over) a joinable `std::thread` calls `std::terminate`: the whole process aborts. So every path
+out of the scope, including exceptions, must call one of:
+
+- **`join()`** blocks until the thread finishes. It synchronizes-with the thread's completion, so
+  everything the thread wrote is visible afterwards. After it returns, `joinable()` is `false`.
+- **`detach()`** lets the thread run on its own; you can no longer wait for it or learn its result.
+  A detached thread must not touch anything that may be destroyed before it finishes (locals of the
+  starting function, `main`'s objects at exit). Use it rarely, and only with data the thread owns
+  (e.g. moved in or `shared_ptr`).
+
+```cpp title="forgot_to_join.cpp"
+// Dangerous by design: destroying a joinable std::thread calls std::terminate.
 #include <thread>
-#include <iostream>
-
-thread_local int counter = 0;  // Each thread has its own copy
-
-void increment() {
-    ++counter;
-    std::cout << "Thread " << std::this_thread::get_id() 
-              << ": counter = " << counter << '\n';
-}
-
 int main() {
-    std::thread t1(increment);
-    std::thread t2(increment);
-    
-    t1.join();
-    t2.join();
-    
-    std::cout << "Main counter: " << counter << '\n';  // 0 (separate copy)
-}
+    std::thread t([] {});
+}   // t still joinable -> std::terminate
 ```
 
-## Hardware Concurrency
-```cpp
-#include <thread>
-#include <iostream>
+Running that aborts with `terminate called without an active exception` (libstdc++ on Linux; the text and
+exit code are implementation-specific, `SIGABRT` here).
 
-int main() {
-    unsigned int numThreads = std::thread::hardware_concurrency();
-    std::cout << "Hardware threads: " << numThreads << '\n';
-    
-    // Create optimal number of threads
-    std::vector<std::thread> workers;
-    for (unsigned int i = 0; i < numThreads; ++i) {
-        workers.emplace_back(doWork);
-    }
-    
-    for (auto& t : workers) {
-        t.join();
-    }
-}
-```
+## `std::jthread` (C++20) \{#jthread\}
 
-## Practical Examples
+`std::jthread` is `std::thread` with two additions: the destructor **requests stop and then joins**, so a
+scope exit or an exception cannot terminate the program, and it carries a stop request
+state for **cooperative cancellation**. If the callable's first parameter is a `std::stop_token`, the
+`jthread` passes its token in automatically.
 
-### Example 1: Parallel Sum
-```cpp
-#include <thread>
-#include <vector>
-#include <numeric>
-
-void partialSum(const std::vector<int>& data, size_t start, size_t end, 
-                long long& result) {
-    result = std::accumulate(data.begin() + start, 
-                            data.begin() + end, 0LL);
-}
-
-long long parallelSum(const std::vector<int>& data) {
-    size_t numThreads = std::thread::hardware_concurrency();
-    size_t chunkSize = data.size() / numThreads;
-    
-    std::vector<std::thread> threads;
-    std::vector<long long> results(numThreads);
-    
-    for (size_t i = 0; i < numThreads; ++i) {
-        size_t start = i * chunkSize;
-        size_t end = (i == numThreads - 1) ? data.size() : (i + 1) * chunkSize;
-        
-        threads.emplace_back(partialSum, std::cref(data), start, end, 
-                            std::ref(results[i]));
-    }
-    
-    for (auto& t : threads) {
-        t.join();
-    }
-    
-    return std::accumulate(results.begin(), results.end(), 0LL);
-}
-```
-
-### Example 2: RAII Thread Wrapper
-```cpp
-#include <thread>
-
-class ThreadGuard {
-    std::thread& thread_;
-    
-public:
-    explicit ThreadGuard(std::thread& t) : thread_(t) {}
-    
-    ~ThreadGuard() {
-        if (thread_.joinable()) {
-            thread_.join();
-        }
-    }
-    
-    ThreadGuard(const ThreadGuard&) = delete;
-    ThreadGuard& operator=(const ThreadGuard&) = delete;
-};
-
-void usage() {
-    std::thread t(task);
-    ThreadGuard guard(t);
-    
-    // If exception thrown, guard ensures thread is joined
-    riskyOperation();
-    
-}  // guard destructor joins thread
-```
-
-### Example 3: Scoped Thread (C++20)
-```cpp
-#include <thread>
-
-class ScopedThread {
-    std::thread thread_;
-    
-public:
-    template<typename... Args>
-    explicit ScopedThread(Args&&... args) 
-        : thread_(std::forward<Args>(args)...) {}
-    
-    ~ScopedThread() {
-        if (thread_.joinable()) {
-            thread_.join();
-        }
-    }
-    
-    ScopedThread(const ScopedThread&) = delete;
-    ScopedThread& operator=(const ScopedThread&) = delete;
-};
-
-void usage() {
-    ScopedThread t(task);  // Automatically joined on scope exit
-}
-```
-
-## Sleep and Yield
-```cpp
-#include <thread>
+```cpp title="jthread_stop.cpp"
 #include <chrono>
-
-void sleepExample() {
-    // Sleep for duration
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    
-    // Sleep until time point
-    auto wakeup = std::chrono::system_clock::now() + std::chrono::seconds(1);
-    std::this_thread::sleep_until(wakeup);
-    
-    // Yield to other threads
-    std::this_thread::yield();
-}
-```
-
-## Exception Handling
-```cpp
+#include <cstdio>
+#include <stop_token>
 #include <thread>
-#include <exception>
-
-void riskyTask() {
-    try {
-        // May throw
-        throw std::runtime_error("Error!");
-    }
-    catch (const std::exception& e) {
-        // Handle in thread
-        std::cerr << "Thread exception: " << e.what() << '\n';
-    }
-}
 
 int main() {
-    std::thread t(riskyTask);
-    t.join();
-    // Exception handled in thread, doesn't propagate to main
+    std::jthread worker([](std::stop_token st) {
+        int ticks = 0;
+        while (!st.stop_requested()) {
+            ++ticks;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        std::printf("stopped, ticked: %s\n", ticks > 0 ? "yes" : "no");
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    worker.request_stop();
+    // destructor: request_stop() (already done) then join()
 }
 ```
 
-## Best Practices
-
-:::success[**DO:**]
-- Always join or detach threads before destruction
-- Use RAII wrappers for automatic joining
-- Consider hardware_concurrency() for thread count
-- Handle exceptions within threads
-- Use thread-local storage for per-thread data
-  :::
-
-:::danger
-**DON'T:**
-- Create too many threads (use thread pools instead)
-- Forget to join/detach (causes std::terminate)
-- Share data without synchronization
-- Assume thread execution order
-- Ignore thread lifetime issues
-  :::
-
-## Common Patterns
-```cpp
-// Pattern 1: Fire and forget (detach)
-std::thread([]{ logToFile("message"); }).detach();
-
-// Pattern 2: Collect results with join
-std::vector<std::thread> workers;
-for (int i = 0; i < n; ++i) {
-    workers.emplace_back(processChunk, i);
-}
-for (auto& t : workers) {
-    t.join();
-}
-
-// Pattern 3: Move threads into containers
-std::vector<std::thread> threads;
-threads.push_back(std::thread(task));  // Move construction
+```text
+stopped, ticked: yes
 ```
 
-## Related Topics
+The pieces:
 
-- **[Mutexes](05-mutexes.md)** - Thread synchronization
-- **[Condition Variables](06-condition-variables.md)** - Thread coordination
-- **[Thread Pools](08-thread-pools.md)** - Efficient thread management
-- **[Data Races](03-data-races.md)** - Avoiding race conditions
+| Type | Role |
+|---|---|
+| `std::stop_source` | Owns the shared state; `request_stop()` sets it (the first call wins). `jthread::get_stop_source()` returns it. |
+| `std::stop_token` | Read-only view: `stop_requested()`, `stop_possible()`. Cheap to copy into workers. |
+| `std::stop_callback` | RAII registration of a callable that runs when stop is requested. |
+
+Stop is a request, not a kill: the worker must poll the token (or use a `stop_callback`, or a
+`condition_variable_any::wait` overload that takes one, see
+[Condition variables](./06-condition-variables.md)) and return. A `stop_callback` runs synchronously inside
+`request_stop()`, on the calling thread, or immediately in the constructor if stop was already requested:
+
+```cpp title="stop_callback.cpp"
+#include <chrono>
+#include <cstdio>
+#include <stop_token>
+#include <thread>
+
+int main() {
+    const auto main_id = std::this_thread::get_id();
+    std::jthread t([main_id](std::stop_token st) {
+        std::stop_callback cb(st, [main_id] {
+            // runs synchronously inside request_stop(), on the thread that called it
+            std::printf("callback on requesting thread: %s\n",
+                        std::this_thread::get_id() == main_id ? "yes" : "no");
+        });
+        while (!st.stop_requested()) std::this_thread::yield();
+    });
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    t.request_stop();
+}
+```
+
+Prints `callback on requesting thread: yes` (both compilers, `-O0`/`-O2`, TSan clean).
+
+A `jthread` can still be `detach()`ed or `join()`ed manually. It is movable, not copyable, like `std::thread`.
+
+## Moving and storing threads
+
+`std::thread` and `std::jthread` are move-only, so they can live in a `std::vector`, be returned from a
+function, and be transferred between owners. A fixed set of workers, each owning one chunk of data and
+joined at the end of a block (`jthread`s join when the vector is destroyed):
+
+```cpp title="parallel_sum.cpp"
+#include <algorithm>
+#include <cstdio>
+#include <numeric>
+#include <thread>
+#include <vector>
+
+int main() {
+    std::vector<int> data(1000);
+    std::iota(data.begin(), data.end(), 1);
+
+    unsigned n = std::max(1u, std::thread::hardware_concurrency());
+    std::vector<long> sums(n, 0);
+    {
+        std::vector<std::jthread> pool;                  // jthreads join when `pool` is destroyed
+        std::size_t chunk = (data.size() + n - 1) / n;
+        for (unsigned i = 0; i < n; ++i) {
+            pool.emplace_back([&, i] {
+                std::size_t b = i * chunk, e = std::min(data.size(), b + chunk);
+                for (std::size_t k = b; k < e; ++k) sums[i] += data[k];   // each thread owns sums[i]
+            });
+        }
+    }                                                    // all joined here
+    std::printf("%ld\n", std::accumulate(sums.begin(), sums.end(), 0L));
+}
+```
+
+Prints `500500` regardless of core count. `std::thread::hardware_concurrency()` is only a hint: it may return `0`
+when it cannot be determined, hence the `std::max`. Creating a thread per task does not scale; for many small
+tasks see [Thread pools](./08-thread-pools.md). For a single result, see [`std::async` and futures](./07-futures-and-promises.md).
+
+## Exceptions do not cross threads
+
+An exception that escapes the thread's function calls `std::terminate`; it is **not** delivered to whoever
+started the thread. Catch inside the thread and hand the error back via `std::exception_ptr`
+(or use `std::promise`/`std::async`, which do this for you):
+
+```cpp title="exception_ptr.cpp"
+#include <cstdio>
+#include <exception>
+#include <stdexcept>
+#include <thread>
+
+int main() {
+    std::exception_ptr err;
+    std::thread t([&err] {
+        try {
+            throw std::runtime_error("worker failed");
+        } catch (...) {
+            err = std::current_exception();   // only this thread writes err
+        }
+    });
+    t.join();                                 // join orders the write before the read below
+    if (err) {
+        try { std::rethrow_exception(err); }
+        catch (const std::exception& e) { std::printf("caught: %s\n", e.what()); }
+    }
+}
+```
+
+Output: `caught: worker failed`. See [Exceptions](../10-error-handling-and-safety/01-exceptions.md) for `exception_ptr`.
+
+## Thread identity, sleeping, yielding
+
+- `std::this_thread::get_id()` and `t.get_id()` return a `std::thread::id`: comparable, hashable, printable;
+  a default-constructed id means "no thread". Its text form is not specified.
+- `std::this_thread::sleep_for(duration)` / `sleep_until(time_point)` block the calling thread; they
+  take [`<chrono>`](../09-standard-library/chrono.md) types. Sleeping is not synchronization: never use it to
+  "wait until the other thread is done".
+- `std::this_thread::yield()` hints that the scheduler may run another thread. It is a hint; do not
+  build waiting logic on it (use [condition variables](./06-condition-variables.md) or atomics' `wait`).
+- Native handles (`native_handle()`) give access to priority and affinity APIs; they are platform-specific and not portable.
+
+## Thread-local storage
+
+`thread_local` gives each thread its own instance of a variable, so there is nothing to synchronize. The
+storage-duration rules (when it is constructed and destroyed) are owned by
+[Storage duration](../05-memory-and-object-lifetime/storage-duration.md#thread-storage); here is only the effect:
+
+```cpp title="thread_local.cpp"
+#include <cstdio>
+#include <thread>
+
+thread_local int calls = 0;
+
+int main() {
+    ++calls;
+    std::thread t([] { ++calls; ++calls; std::printf("thread: %d\n", calls); });
+    t.join();
+    std::printf("main: %d\n", calls);
+}
+```
+
+```text
+thread: 2
+main: 1
+```
+
+## Pitfalls
+
+- **Dangling references.** `std::thread t([&]{ use(local); }); t.detach();` outlives `local`. Capture by
+  value or move the data in.
+- **Passing a pointer to a temporary.** The thread's copy of a `const char*` argument is converted to
+  `std::string` *inside the new thread* if the parameter is a `std::string`; if the char array was a local that
+  is gone by then, it dangles. Build the `std::string` at the call site.
+- **Too many threads.** More runnable threads than cores adds context-switch cost without more throughput
+  for CPU-bound work.
+- **Use `jthread` unless you need the old semantics.** A manual `join()` is skipped by an early `return` or a
+  thrown exception.
+
+## References
+
+- [`std::thread` (cppreference)](https://en.cppreference.com/w/cpp/thread/thread)
+- [`std::jthread` (cppreference)](https://en.cppreference.com/w/cpp/thread/jthread)
+- [Cooperative cancellation: `std::stop_token` (cppreference)](https://en.cppreference.com/w/cpp/thread/stop_token)
+- [Thread support library, \[thread\]](https://eel.is/c++draft/thread)
