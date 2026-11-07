@@ -1,298 +1,213 @@
 ---
 id: volatile
-title: volatile Keyword
+title: volatile
 sidebar_label: volatile
 sidebar_position: 5
-tags: [cpp, volatile, hardware, optimization, memory-mapped]
+tags: [cpp, volatile, memory-mapped-io, signals, deprecated, embedded]
 ---
 
-# volatile Keyword
+# `volatile`
 
-`volatile` tells compiler that a variable can change unexpectedly (hardware, interrupts, other threads). Prevents certain optimizations. **Not for thread synchronization** - use atomics instead.
+`volatile` is a type qualifier that tells the compiler an object's accesses have effects it cannot see:
+reading may return a different value each time, and writing may do something besides storing. The
+compiler must therefore perform every access the program text asks for, in program order relative to other
+`volatile` accesses. That is exactly what memory-mapped hardware registers need. It is **not** what
+shared data between threads needs: `volatile` gives no atomicity and no ordering with other memory, and a
+program that races on a `volatile` object has undefined behaviour just like one that races on an
+`int`. This page defines what `volatile` guarantees, where it is the right tool, and which uses C++20 deprecated.
 
-:::danger[Not for Threading]
-`volatile` ≠ thread-safe. Use `std::atomic` for multi-threading. `volatile` is for hardware/interrupts only.
-:::
+**Prerequisites:** [cv-qualifiers](../03-types-and-values/cv-qualifiers.md) (how qualifiers attach to types
+and pointers). The atomic alternative is on [Atomics and fences](../11-concurrency-and-memory-model/02-atomics-and-fences.md).
 
-The reason is precise: `volatile` guarantees each access actually *happens* and isn't reordered
-relative to *other volatile accesses* — but it provides **no atomicity** and **no ordering** against
-ordinary (non-volatile) memory, which are exactly the two guarantees thread synchronisation needs.
-For state shared between threads use [`std::atomic`](../11-concurrency-and-memory-model/02-atomics-and-fences.md);
-keep `volatile` for memory-mapped hardware, interrupt handlers, and signal-touched variables.
+## What the compiler must do
 
-## What volatile Does
-```cpp showLineNumbers
-volatile int hardware_register;
+The standard treats an access (read or write) to a `volatile` glvalue as part of the program's
+**observable behavior**: the abstract machine performs it, with its value, in the order the program
+specifies relative to other `volatile` accesses and to I/O. An optimiser may not remove, merge, duplicate or reorder them.
+The same two functions with and without `volatile`, compiled with g++ 15.2 `-std=c++20 -O2 -S -masm=intel`
+on x86-64:
 
-// Without volatile: compiler might optimize away "redundant" reads
-int x = hardware_register;
-int y = hardware_register;  // Compiler might reuse x (wrong!)
+```cpp title="vopt.cpp" showLineNumbers
+volatile int reg;
+int twice()       { int a = reg; int b = reg; return a + b; }   // two loads required
+void two_writes() { reg = 1; reg = 2; }                          // two stores required
 
-// With volatile: forces actual reads
-volatile int hardware_register;
-int x = hardware_register;  // Read from hardware
-int y = hardware_register;  // Read again (different value possible)
+int plain_g;
+void two_plain()  { plain_g = 1; plain_g = 2; }                  // first store is dead
 ```
 
-**Guarantee**: Every access actually touches memory - no optimization.
-
-## volatile Prevents
-
-### Optimization Away
-```cpp showLineNumbers
-// Without volatile
-int status;
-while (status == 0) {
-    // Wait
-}
-// Compiler: "status never changes in loop, optimize to infinite loop"
-// while (true) {} 
-
-// With volatile
-volatile int status;
-while (status == 0) {
-    // Compiler must read status each iteration
-}
+```text
+twice:       mov eax, DWORD PTR reg[rip]        two_writes:  mov DWORD PTR reg[rip], 1
+             mov edx, DWORD PTR reg[rip]                     mov DWORD PTR reg[rip], 2
+             add eax, edx                       two_plain:   mov DWORD PTR plain_g[rip], 2
 ```
 
-### Read/Write Reordering
-```cpp showLineNumbers
-volatile int* port = (int*)0x40000000;
+(Instructions trimmed to the memory operations; the register names are an artifact of this compiler.)
+The `volatile` version keeps both loads and both stores. For the plain variable the first store disappears.
 
-*port = 1;
-*port = 2;
+What the compiler does *not* have to do:
 
-// Compiler must not:
-// - Eliminate first write
-// - Reorder writes
-// Both writes happen in order
-```
+| Not guaranteed | Consequence |
+|---|---|
+| **Atomicity** | A `volatile long long` store on a 32-bit target may be two instructions. Nothing says a `volatile` access is one machine access of the object's width. The choice of access width is implementation-defined |
+| **Ordering against non-volatile accesses** | The compiler may move ordinary loads and stores across a `volatile` access |
+| **CPU-level ordering** | No fence or barrier instruction is emitted. The processor and the interconnect may still reorder accesses |
+| **Freedom from data races** | Two threads touching one `volatile` object without synchronisation is still a [data race](../11-concurrency-and-memory-model/03-data-races.md): undefined behaviour |
 
-### Register Caching
-```cpp showLineNumbers
-// Without volatile
-int sensor_value;
-for (int i = 0; i < 1000; ++i) {
-    if (sensor_value > 100) break;
-}
-// Compiler caches sensor_value in register
+Because of the first three rows, `volatile` is the wrong tool for flags, counters or any shared state in a
+program with threads. Use `std::atomic`, which supplies all three. The reasoning behind that
+is on [the C++ memory model](../11-concurrency-and-memory-model/01-cpp-memory-model.md).
 
-// With volatile
-volatile int sensor_value;
-for (int i = 0; i < 1000; ++i) {
-    if (sensor_value > 100) break;  // Reads from memory each time
-}
-```
+## Where `volatile` is the right tool
 
-## Use Cases
+### Memory-mapped I/O
 
-### 1. Memory-Mapped I/O
-```cpp showLineNumbers
-// Hardware register at fixed address
-volatile uint32_t* const UART_STATUS = (uint32_t*)0x40001000;
-volatile uint32_t* const UART_DATA   = (uint32_t*)0x40001004;
+A device register is not memory: reading a status register can clear a flag, and two writes to a command register
+are two commands. On bare-metal and embedded targets you map the register block onto a struct of `volatile`
+members at a fixed address:
 
-void send_byte(uint8_t byte) {
-    while (*UART_STATUS & 0x01) {  // Wait for ready
-        // Must read UART_STATUS each iteration
-    }
-    *UART_DATA = byte;  // Write to hardware
-}
-```
+```cpp title="uart.cpp (fragment: the address is device-specific)" showLineNumbers
+#include <cstdint>
 
-### 2. Interrupt Service Routines (ISR)
-```cpp showLineNumbers
-volatile bool data_ready = false;
-
-void interrupt_handler() {
-    // Called by hardware
-    data_ready = true;  // ISR modifies
-}
-
-void main_loop() {
-    while (!data_ready) {
-        // Wait for interrupt
-        // Must read data_ready each time
-    }
-    process_data();
-}
-```
-
-### 3. Signal Handlers (POSIX)
-```cpp showLineNumbers
-#include <signal.h>
-
-volatile sig_atomic_t interrupted = 0;
-
-void signal_handler(int sig) {
-    interrupted = 1;  // Signal handler modifies
-}
-
-int main() {
-    signal(SIGINT, signal_handler);
-    
-    while (!interrupted) {
-        // Do work
-        // Must read interrupted each iteration
-    }
-}
-```
-
-## What volatile Does NOT Do
-
-### Not Thread-Safe
-```cpp showLineNumbers
-// WRONG: volatile doesn't make this thread-safe!
-volatile int counter = 0;
-
-void thread_func() {
-    for (int i = 0; i < 1000; ++i) {
-        counter++;  // RACE CONDITION!
-    }
-}
-
-// CORRECT: Use atomic
-std::atomic<int> counter{0};
-
-void thread_func() {
-    for (int i = 0; i < 1000; ++i) {
-        counter++;  // Thread-safe
-    }
-}
-```
-
-### No Memory Barriers
-```cpp showLineNumbers
-// volatile doesn't prevent reordering across variables
-volatile int flag;
-int data;
-
-void producer() {
-    data = 42;       // These can be reordered!
-    flag = 1;
-}
-
-// Atomic provides proper synchronization
-std::atomic<int> flag;
-int data;
-
-void producer() {
-    data = 42;
-    flag.store(1, std::memory_order_release);  // Proper sync
-}
-```
-
-### No Atomicity Guarantee
-```cpp showLineNumbers
-// Not atomic on all platforms
-volatile long long value;
-value = 0x123456789ABCDEF0;  // May be two separate writes!
-
-// Guaranteed atomic
-std::atomic<long long> value;
-value = 0x123456789ABCDEF0;  // Atomic write
-```
-
-## volatile vs atomic vs mutex
-
-| Need | Use |
-|------|-----|
-| **Hardware registers** | `volatile` |
-| **ISR to main communication** | `volatile` + `sig_atomic_t` |
-| **Multi-threading** | `std::atomic` |
-| **Complex critical sections** | `std::mutex` |
-```cpp showLineNumbers
-// Hardware I/O
-volatile uint32_t* hardware = (uint32_t*)0x40000000;
-
-// Thread communication
-std::atomic<bool> ready{false};
-
-// Complex data structure
-std::mutex mtx;
-std::vector<int> shared_data;
-```
-
-## volatile Pointer vs Pointer to volatile
-```cpp showLineNumbers
-// Pointer to volatile data
-volatile int* ptr;
-// *ptr is volatile, ptr is not
-// ptr can be cached, *ptr cannot
-
-// Volatile pointer
-int* volatile ptr;
-// ptr is volatile, *ptr is not
-// *ptr can be cached, ptr cannot
-
-// Both volatile
-volatile int* volatile ptr;
-// Neither can be cached
-
-// Common usage
-volatile uint32_t* const hw_register = (uint32_t*)0x40000000;
-// hw_register address is constant
-// *hw_register is volatile
-```
-
-## Real-World Example: Embedded System
-```cpp showLineNumbers
-// Hardware registers
-struct UART {
-    volatile uint32_t STATUS;
-    volatile uint32_t DATA;
-    volatile uint32_t CONTROL;
+struct Uart {
+    volatile std::uint32_t status;
+    volatile std::uint32_t data;
 };
 
-volatile UART* const uart = (UART*)0x40001000;
-
-void uart_send(const char* str) {
-    while (*str) {
-        // Wait for transmit ready
-        while (!(uart->STATUS & 0x01)) {
-            // Must read STATUS each time
-        }
-        
-        // Send character
-        uart->DATA = *str++;
-    }
+inline Uart& uart() {
+    return *reinterpret_cast<Uart*>(0x4000'1000);    // an address from the device's data sheet
 }
 
-void uart_receive(char* buffer, size_t size) {
-    for (size_t i = 0; i < size; ++i) {
-        // Wait for receive ready
-        while (!(uart->STATUS & 0x02)) {
-            // Must read STATUS each time
-        }
-        
-        // Read character
-        buffer[i] = uart->DATA;
-    }
+void send(std::uint8_t byte) {
+    while ((uart().status & 0x1) == 0) { }           // each iteration re-reads status
+    uart().data = byte;
 }
 ```
 
-## C++ Memory Model Position
-```cpp showLineNumbers
-// C++ standard: volatile has no thread synchronization semantics
-// C#: volatile has memory barrier semantics (different!)
+Notes that the language does not cover but hardware work depends on:
 
-// C++: Don't use for threading
-volatile bool flag;
+- **Read-only registers**: declare `const volatile std::uint32_t status;`. The object may not be written by
+  the program (`const`) but is changed by the device (`volatile`).
+- **Width**: the data sheet may require 32-bit accesses. A `volatile std::uint32_t` normally compiles to one, but
+  the standard does not promise it. Check the generated assembly for the target.
+- **Ordering between registers and with memory**: `volatile` orders only against other `volatile` accesses at
+  the compiler level. If the device must see a write to RAM before a doorbell register write, you also need a
+  hardware barrier or a compiler fence. For those, use the platform's barrier or an intrinsic
+  ([Inline assembly](./06-inline-assembly.md) shows the memory clobber), or
+  `std::atomic_thread_fence` where its guarantees fit.
+- The `reinterpret_cast` from an integer constant is an implementation-defined conversion, valid on the
+  targets this idiom is used for. It does not create an object in the C++ sense. That is the
+  idiom's accepted limitation, see [object lifetime](../05-memory-and-object-lifetime/object-lifetime.md).
 
-// C++: Use atomic for threading
-std::atomic<bool> flag;
+### Signal handlers
 
-// volatile only for hardware
-volatile int* hardware_register;
+The only object a portable signal handler may write is a `volatile std::sig_atomic_t` (or a lock-free
+`std::atomic`, in C++11 and later). `std::sig_atomic_t` (`<csignal>`) is an integer type whose reads and writes are
+not torn by the arrival of a signal; `volatile` stops the main code from caching the flag:
+
+```cpp title="sigint.cpp" showLineNumbers
+#include <csignal>
+#include <cstdio>
+
+volatile std::sig_atomic_t stop = 0;
+
+extern "C" void on_sigint(int) { stop = 1; }
+
+int main() {
+    std::signal(SIGINT, on_sigint);
+    std::raise(SIGINT);               // deliver the signal to ourselves
+    while (!stop) { }                 // re-reads stop each iteration
+    std::puts("stopped");
+}
 ```
 
-## Summary
+```text
+stopped
+```
 
-:::info[Volatile]
-`volatile` prevents compiler from optimizing away memory accesses - forces actual reads/writes every time.
-- Memory aid: "Hardware Only, Not Threads"
-- Use for: Hardware registers, ISRs, signal handlers
-- Don't use for: Threading (use std::atomic)
-- Prevents: Read/write optimization, caching, reordering
-- Doesn't provide: Atomicity, memory barriers, thread safety
-:::
+(g++ 15 and clang++ 21, `-std=c++20`, `-O0` and `-O2`, x86-64 Linux.) This is the one case where `volatile` communicates between two
+flows of control, and it works because a signal handler interrupts the *same thread*; no other thread is
+involved, so there is no race. The single-thread restriction is the point.
+
+### Other, rarer uses
+
+- `setjmp`/`longjmp`: a local modified after `setjmp` and read after `longjmp` has an indeterminate value
+  unless it is `volatile`.
+- Preventing a benchmark loop's work from being deleted. This is a pragmatic compiler-dependent trick, and
+  libraries such as Google Benchmark provide `DoNotOptimize` for it. `volatile` is not defined for this purpose.
+
+## What `volatile` does to types
+
+`volatile` is a cv-qualifier and follows the same placement rules as `const`: `volatile int* p` is a
+pointer to a volatile `int` (the pointee is volatile, the pointer is not), `int* volatile p` is a volatile
+pointer, and `volatile int* const p` is a constant pointer to a volatile `int`, the usual register-pointer shape. A
+non-`volatile` pointer cannot point at a `volatile` object without a cast, and casting the qualifier away
+and accessing the object is undefined behaviour.
+
+A member function can be `volatile`-qualified (`void poke() volatile;`), and a `volatile` object may call
+only such functions. Standard-library containers and algorithms are not `volatile`-aware, so
+`std::memcpy(dst, volatile_src, n)` and range-for over a volatile array do not compile or are wrong. Copy
+element by element with explicit volatile reads.
+
+## What C++20 deprecated, and what C++23 restored
+
+Code that treats `volatile` like an ordinary variable (`++counter`, `a = b = c`) tends to hide how many
+reads and writes happen: does `v += 1` do one volatile read and one volatile write, or an atomic
+update? The language never promised the latter. [P1152R4](https://wg21.link/p1152r4) deprecated several
+such uses in C++20. The wording, read from the C++20 (N4861) and C++23 (N4950) drafts, [depr.volatile.type]:
+
+| Use | C++20 | C++23 |
+|---|---|---|
+| `++v`, `v++`, `--v`, `v--` on a volatile arithmetic or pointer lvalue | Deprecated | Still deprecated |
+| Compound assignment `v += x`, `v \|= x`, ... on a volatile non-class lvalue | Deprecated | **Not deprecated** (P2327R1 removed it) |
+| Simple assignment `v = x` used as a *statement*, or in an unevaluated operand | Not deprecated | Not deprecated |
+| A simple assignment whose *result is used*, such as `a = v = x` | Deprecated | Still deprecated |
+| A function parameter or return type that is volatile-qualified (`void f(volatile int)`) | Deprecated | Still deprecated |
+| A structured binding declared `volatile` | Deprecated | Still deprecated |
+
+Pointers to volatile in parameters (`void f(volatile int*)`) are fine. Deprecated here means "compilers may warn"; it does not
+mean ill-formed. In practice, g++ 15 (`-Wvolatile`) and clang++ 21 (`-Wdeprecated-volatile`), given this:
+
+```cpp title="vol.cpp" showLineNumbers
+volatile int g;
+int main() {
+    g++;            // deprecated
+    g += 1;         // C++20: deprecated. C++23: fine
+    int x = g = 1;  // result of a volatile assignment used: deprecated
+    g = 2;          // fine
+    return x;
+}
+```
+
+warn on the `g++` and the chained assignment under `-std=c++20` and `-std=c++23` alike and say nothing under
+`-std=c++17`. They did **not** warn about `g += 1` even with `-std=c++20`, so those compilers apply the C++23 rule
+to C++20 mode as well. Write the two-step form (`g = g + 1`) when you want it to be obvious that the read and write
+are separate accesses.
+
+## Pitfalls
+
+| Mistake | Why it is wrong | Fix |
+|---|---|---|
+| `volatile bool done;` set by another thread | Data race, undefined behaviour. The loop may spin forever or see stale state | `std::atomic<bool>` |
+| `volatile int counter; ++counter;` from threads | Load, add and store are separate and unsynchronised | `std::atomic<int>` or a mutex |
+| Using `volatile` as a barrier between normal stores | It orders only against other volatile accesses, and emits no fence | `std::atomic` with a memory order, or a hardware barrier |
+| `volatile` on ordinary data "to stop the optimiser" | Defeats optimisation without defining behaviour | Fix the real problem, or use a benchmark library's escape hatch |
+| Assuming a `volatile` register access is one bus access | Width is implementation-defined | Check the generated code on the target |
+| Writing a handler that sets a non-`sig_atomic_t` or non-lock-free-atomic object | Undefined behaviour unless the handler restrictions are met | `volatile std::sig_atomic_t` |
+
+## Key points
+
+- `volatile` makes each access an observable side effect that is performed in order with other volatile accesses. It
+  does not add atomicity, CPU ordering or thread safety.
+- Right for memory-mapped registers (`const volatile` for read-only ones) and for flags a signal handler sets in the
+  same thread (`volatile std::sig_atomic_t`).
+- Wrong for communicating between threads: use `std::atomic`.
+- C++20 deprecated `++`/`--`, compound assignment, chained assignment, volatile parameters/returns and volatile
+  structured bindings. C++23 un-deprecated compound assignment; the rest stays deprecated.
+
+## References
+
+- [cppreference: `volatile`, cv type qualifiers](https://en.cppreference.com/w/cpp/language/cv)
+- [P1152R4: Deprecating `volatile`](https://wg21.link/p1152r4)
+- [C++23 draft N4950, [depr.volatile.type]](https://timsong-cpp.github.io/cppwp/n4950/depr.volatile.type)
+- [cppreference: `std::sig_atomic_t`](https://en.cppreference.com/w/cpp/utility/program/sig_atomic_t)
