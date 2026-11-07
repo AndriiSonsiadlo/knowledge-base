@@ -99,15 +99,19 @@ int main() {
 400000
 ```
 
-No race (distinct elements), the output is always `400000` (g++ and clang++, `-O0`/`-O2`, clean under
+No race (distinct elements of a `std::vector<long>`, which the container rule above allows), the output is always `400000` (g++ and clang++, `-O0`/`-O2`, clean under
 `-fsanitize=thread`). Adjacent `long`s do share a cache line, so this can be slow because of false
 sharing; pad each element if it matters ([Alignment](../05-memory-and-object-lifetime/alignment.md#avoiding-false-sharing)).
 
 ### Standard containers
 
-Calling `const` member functions on a standard container from several threads is safe; calling any
-non-`const` member (such as `push_back`) concurrently with anything else on the same container is a
-data race. Distinct containers are independent. The `std::vector::push_back` pair below races on
+The library's rule ([container.reqmts], "Data races") is: member functions that only read, and a short list
+that the standard treats as `const` for this purpose (`begin`, `end`, `rbegin`, `rend`, `front`, `back`, `data`,
+`find`, `lower_bound`, `upper_bound`, `equal_range`, `at`, and `operator[]` except on associative and unordered
+containers), may run concurrently. **Different elements of one container may be modified concurrently**, with the
+exception of `std::vector<bool>`, whose elements share bytes. Anything that changes the container's structure
+(`push_back`, `insert`, `erase`, `resize`, `reserve`, `clear`, `operator[]` on a map) is a data race with any
+other access to the same container. Distinct containers are independent. The `push_back` pair below races on
 size, capacity and the buffer:
 
 ```cpp title="racy_vector.cpp"
