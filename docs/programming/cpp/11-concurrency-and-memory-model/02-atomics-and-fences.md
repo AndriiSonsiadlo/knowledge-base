@@ -3,389 +3,272 @@ id: atomics-and-fences
 title: Atomics and Memory Fences
 sidebar_label: Atomics & Fences
 sidebar_position: 2
-tags: [cpp, concurrency, atomics, fences, memory-barriers, lock-free]
+tags: [cpp, concurrency, atomics, fences, memory-order, lock-free, compare-exchange]
 ---
 
 # Atomics and Memory Fences
 
-Atomic operations execute as single, indivisible steps with no interference from other threads. Memory fences (barriers) establish ordering constraints between operations.
+`std::atomic<T>` (header `<atomic>`) gives a variable operations that no other thread can observe half
+done, and lets each operation say how much ordering it also provides. This page is the canonical home
+for the `std::atomic` API, choosing a `memory_order`, and fences. What the orders *mean*
+(synchronizes-with, happens-before) is in the [C++ memory model](./01-cpp-memory-model.md); why
+you need atomics at all is in [Data races](./03-data-races.md).
 
-:::info[Lock-Free Synchronization]
-**Atomics** = indivisible operations (read/write/modify)  
-**Fences** = ordering guarantees for surrounding operations  
-Together they enable lock-free programming and fine-grained synchronization
-:::
+**Prerequisites:** [C++ memory model](./01-cpp-memory-model.md).
 
-## Atomic Operations
+## The operations
 
-Atomic operations are indivisible - no other thread can observe them half-complete.
-```cpp showLineNumbers
+An atomic operation is indivisible: no other thread sees a torn value or an intermediate step.
+`std::atomic<T>` works for any trivially copyable `T`; integral, pointer and (C++20) floating-point
+specializations add arithmetic.
+
+| Operation | What it does |
+|---|---|
+| `load()`, `store(v)` | Read / write. `=` and the conversion operator are `seq_cst` versions of these. |
+| `exchange(v)` | Store `v`, return the old value. |
+| `compare_exchange_strong/weak(expected, desired)` | If the value equals `expected`, store `desired` and return `true`; otherwise copy the current value into `expected` and return `false`. |
+| `fetch_add/sub/and/or/xor(v)` | Read-modify-write, return the old value (integers; `add`/`sub` also on pointers and, C++20, floats). |
+| `++`, `--`, `+=`, ... | The same, returning the new value; always `seq_cst`. |
+| `wait(old)`, `notify_one/all()` | C++20: block until the value is not `old`; wake waiters. |
+| `is_lock_free()`, `is_always_lock_free` | Whether operations avoid an internal lock (see below). |
+
+Each member takes an optional `std::memory_order` argument (default `seq_cst`); the operator forms cannot.
+
+A counter shared by four threads, with no ordering needed beyond atomicity:
+
+```cpp title="counter.cpp"
 #include <atomic>
+#include <cstdio>
+#include <thread>
+#include <vector>
 
-std::atomic<int> counter{0};
+std::atomic<long> hits{0};
 
-void increment() {
-    ++counter;  // Atomic: read-modify-write as one operation
+void count_hits() {
+    for (int i = 0; i < 100000; ++i)
+        hits.fetch_add(1, std::memory_order_relaxed);
 }
 
-void read() {
-    int value = counter;  // Atomic read
+int main() {
+    std::vector<std::thread> ts;
+    for (int i = 0; i < 4; ++i) ts.emplace_back(count_hits);
+    for (auto& t : ts) t.join();                 // join synchronizes-with, so this read is ordered
+    std::printf("%ld\n", hits.load());
 }
 ```
 
-### The Non-Atomic Problem
-```cpp showLineNumbers
-// WITHOUT atomics - DATA RACE!
-int counter = 0;
-
-// Thread 1          Thread 2
-counter++;           counter++;
-// Load: 0           Load: 0
-// Add: 1            Add: 1  
-// Store: 1          Store: 1
-// Result: counter = 1 (should be 2!)
+```text
+400000
 ```
 
-Without atomics, the three operations (load, add, store) can interleave, causing lost updates.
+The output is always `400000` (built with `g++` and `clang++ -std=c++20 -pthread`, at `-O0` and `-O2`; clean
+under `-fsanitize=thread`). The same loop on a plain `long` would be a [data race](./03-data-races.md).
 
-## Basic Atomic Operations
-```cpp showLineNumbers
+## Compare-and-swap loops \{#compare-and-swap\}
+
+`compare_exchange` is the building block for any update that is not one of the built-in
+read-modify-writes. The pattern: read the current value, compute the new one, try to install it, and
+retry if someone changed it meanwhile.
+
+```cpp title="update_max.cpp"
 #include <atomic>
+#include <cstdio>
+#include <thread>
+#include <vector>
 
-std::atomic<int> x{0};
+// Atomic maximum (C++26 adds fetch_max; before that, a CAS loop).
+void update_max(std::atomic<int>& target, int value) {
+    int cur = target.load(std::memory_order_relaxed);
+    while (cur < value &&
+           !target.compare_exchange_weak(cur, value, std::memory_order_relaxed)) {
+        // on failure `cur` was reloaded with the current value; the loop re-checks it
+    }
+}
 
-// Read
-int val = x.load();         // Explicit load
-int val2 = x;               // Implicit load
-
-// Write
-x.store(42);                // Explicit store
-x = 42;                     // Implicit store
-
-// Read-modify-write
-int old = x.exchange(10);   // Swap value, return old
-
-// Increment/decrement
-x++;                        // Atomic increment
-++x;                        // Atomic increment
-x--;                        // Atomic decrement
-int prev = x.fetch_add(5);  // Add 5, return old value
-int prev2 = x.fetch_sub(3); // Subtract 3, return old value
-```
-
-## Compare-and-Swap (CAS)
-
-The fundamental operation for lock-free algorithms.
-```cpp showLineNumbers
-std::atomic<int> value{10};
-
-int expected = 10;
-int desired = 20;
-
-// If value==expected, set value=desired; return true
-// Otherwise, set expected=value; return false
-bool success = value.compare_exchange_strong(expected, desired);
-
-if (success) {
-    // value is now 20
-} else {
-    // value was not 10, expected now contains actual value
+int main() {
+    std::atomic<int> peak{0};
+    std::vector<std::thread> ts;
+    for (int i = 1; i <= 4; ++i)
+        ts.emplace_back([&peak, i] { for (int k = 0; k < 1000; ++k) update_max(peak, i * 1000 + k); });
+    for (auto& t : ts) t.join();
+    std::printf("%d\n", peak.load());
 }
 ```
 
-### Strong vs Weak CAS
-```cpp showLineNumbers
-// Strong: only fails if value != expected
-value.compare_exchange_strong(expected, desired);
-
-// Weak: may spuriously fail even if value == expected
-// Faster on some architectures
-value.compare_exchange_weak(expected, desired);
-
-// Typical usage of weak in loop
-while (!value.compare_exchange_weak(expected, desired)) {
-    // Retry if spurious failure
-}
+```text
+4999
 ```
 
-Weak CAS is faster but can fail spuriously. Use in loops where retry is acceptable.
+Why `expected` is passed by reference: on failure it is overwritten with the value actually seen, so the
+next iteration needs no extra `load`.
 
-## Lock-Free Stack Example
-```cpp showLineNumbers
-template<typename T>
-class LockFreeStack {
-    struct Node {
-        T data;
-        Node* next;
-    };
-    
-    std::atomic<Node*> head_{nullptr};
-    
-public:
-    void push(T value) {
-        Node* newNode = new Node{value, nullptr};
-        newNode->next = head_.load();
-        
-        // Keep trying until successful
-        while (!head_.compare_exchange_weak(newNode->next, newNode)) {
-            // If head changed, newNode->next updated automatically
-        }
-    }
-    
-    bool pop(T& result) {
-        Node* oldHead = head_.load();
-        
-        while (oldHead && 
-               !head_.compare_exchange_weak(oldHead, oldHead->next)) {
-            // Retry if head changed
-        }
-        
-        if (oldHead) {
-            result = oldHead->data;
-            delete oldHead;  // Unsafe - ABA problem!
-            return true;
-        }
-        return false;
-    }
-};
-```
+**Strong vs weak.** `compare_exchange_weak` is allowed to fail spuriously (return `false` even though the
+value matched); on some CPUs (LL/SC architectures like ARM and POWER) that lets it compile to cheaper code.
+Use `weak` inside a retry loop, `strong` when a single attempt should be reliable.
 
-## Memory Fences
+**ABA.** CAS only checks that the value is *equal*, not that nothing happened in between. If a pointer goes
+`A -> B -> A` another thread's CAS succeeds on stale assumptions. This is the main trap when writing
+lock-free containers (for example freeing a popped node while another thread still holds its address), and
+the reason such structures are better taken from a vetted library than written by hand.
 
-Fences establish ordering constraints between non-atomic and relaxed atomic operations.
+## Choosing a memory order \{#memory-order-choices\}
 
-### Without Fences - Problem
-```cpp showLineNumbers
+| Situation | Order | Why |
+|---|---|---|
+| Not sure | default `seq_cst` | Simplest to reason about; the single total order removes surprises. |
+| Independent counter or statistic, read after `join` or by a tolerant observer | `relaxed` | Atomicity only. Nothing else depends on it. |
+| A flag that publishes other data (producer sets, consumer reads) | `release` store, `acquire` load | Creates the synchronizes-with edge ([example](./01-cpp-memory-model.md#synchronizes-with-and-happens-before)). |
+| Read-modify-write that both consumes and publishes (lock-like, reference-count drop) | `acq_rel` | Acquire the previous owner's writes, release yours. |
+| Spin lock acquire / release | `acquire` on the successful `test_and_set`/`exchange`; `release` on unlock | Critical section stays between them. |
+| Two or more atomics where all threads must agree on a global order (Dekker/Peterson style) | `seq_cst` | Acquire/release does not give that, see [store buffering](./01-cpp-memory-model.md#what-sequential-consistency-adds). |
+
+Restrictions: a `load` cannot use `release` or `acq_rel`, a `store` cannot use `acquire` or `acq_rel`.
+`compare_exchange` takes two orders, one for success and one for failure; the failure order is a load and
+cannot be `release`/`acq_rel`. (Before C++17 the failure order could not be stronger than the success one;
+that restriction was removed.) Do not use `consume`.
+
+Relaxed is easy to get wrong because correctness may depend on no other code: start from `seq_cst` and
+relax only a hot spot you have measured. Cycle counts quoted for each order vary by CPU and
+compiler and are not given here.
+
+## Fences \{#fences\}
+
+`std::atomic_thread_fence(order)` orders surrounding operations without being tied to one atomic
+object. A release fence followed (in program order) by an atomic store, and an atomic load followed
+by an acquire fence, produce the same synchronizes-with edge as release/acquire on the atomic itself,
+even when the atomic accesses are `relaxed`:
+
+```cpp title="fence_pair.cpp"
+#include <atomic>
+#include <cstdio>
+#include <thread>
+
+int x = 0, y = 0;
 std::atomic<bool> ready{false};
-int data = 0;
 
 void writer() {
-    data = 42;                                      // (1)
-    ready.store(true, std::memory_order_relaxed);   // (2)
-}
-
-void reader() {
-    while (!ready.load(std::memory_order_relaxed)); // (3)
-    assert(data == 42);  // NOT GUARANTEED with relaxed!
-}
-```
-
-With relaxed ordering, there's no guarantee `data = 42` happens before `ready = true`.
-
-### With Fences - Solution
-```cpp showLineNumbers
-void writer() {
-    data = 42;                                      // (1)
-    std::atomic_thread_fence(std::memory_order_release);  // Fence!
-    ready.store(true, std::memory_order_relaxed);   // (2)
-}
-
-void reader() {
-    while (!ready.load(std::memory_order_relaxed)); // (3)
-    std::atomic_thread_fence(std::memory_order_acquire);  // Fence!
-    assert(data == 42);  // Now guaranteed!
-}
-```
-
-The release fence ensures all prior writes complete before the store. The acquire fence ensures all subsequent reads see those writes.
-
-## Fence Types
-```cpp showLineNumbers
-// Acquire fence: prevents later reads/writes from moving before
-std::atomic_thread_fence(std::memory_order_acquire);
-
-// Release fence: prevents earlier reads/writes from moving after
-std::atomic_thread_fence(std::memory_order_release);
-
-// Full fence: both acquire and release
-std::atomic_thread_fence(std::memory_order_acq_rel);
-
-// Sequential consistency fence: strongest ordering
-std::atomic_thread_fence(std::memory_order_seq_cst);
-```
-
-## Fence Usage Pattern
-
-Protecting multiple variables with relaxed atomics:
-```cpp showLineNumbers
-std::atomic<bool> ready{false};
-int x = 0, y = 0, z = 0;
-
-void producer() {
     x = 1;
     y = 2;
-    z = 3;
     std::atomic_thread_fence(std::memory_order_release);
     ready.store(true, std::memory_order_relaxed);
 }
 
-void consumer() {
-    while (!ready.load(std::memory_order_relaxed));
+void reader() {
+    while (!ready.load(std::memory_order_relaxed)) {
+    }
     std::atomic_thread_fence(std::memory_order_acquire);
-    // All writes to x, y, z are visible
-    assert(x == 1 && y == 2 && z == 3);
+    std::printf("%d %d\n", x, y);       // 1 2
+}
+
+int main() {
+    std::thread r(reader), w(writer);
+    w.join();
+    r.join();
 }
 ```
 
-## Atomic Counter Example
-```cpp showLineNumbers
+This is correct and prints `1 2`. Both fences are required, and they only work through the atomic that
+carries the value from one side to the other.
+
+When to prefer a fence: when one release publishes many writes and several relaxed loads need only one
+acquire after the loop, or when the order depends on a branch. Otherwise the per-operation form is clearer.
+
+:::warning[ThreadSanitizer does not model standalone fences]
+`-fsanitize=thread` does not understand `std::atomic_thread_fence`. GCC 15 warns (`-Wtsan`:
+"`atomic_thread_fence` is not supported with `-fsanitize=thread`") and clang 21 reports a false data
+race on `x` for the program above, which is correct code. If you use fences, prefer release/acquire on
+the atomic itself where possible, so the tool can verify it. See [Data races](./03-data-races.md#finding-races-with-threadsanitizer).
+:::
+
+`atomic_signal_fence` is the compiler-only variant, for ordering against a signal handler in the
+same thread; it emits no hardware barrier.
+
+## `std::atomic_flag` and the C++20 additions
+
+`std::atomic_flag` is the one type guaranteed lock-free in every implementation. It holds a bool-like
+state with `test_and_set` and `clear`; C++20 adds `test()` and `wait/notify`, and makes a default-constructed flag
+clear (`ATOMIC_FLAG_INIT` is deprecated in C++20). A spin lock, with `wait` so a loser sleeps instead of burning CPU:
+
+```cpp title="spinlock.cpp"
 #include <atomic>
+#include <cstdio>
+#include <thread>
 
-class AtomicCounter {
-    std::atomic<int> count_{0};
-    
-public:
-    void increment() {
-        count_.fetch_add(1, std::memory_order_relaxed);
-    }
-    
-    int get() const {
-        return count_.load(std::memory_order_relaxed);
-    }
-};
-```
-
-Relaxed ordering is sufficient for simple counters where exact ordering doesn't matter.
-
-## std::atomic_flag
-
-The only guaranteed lock-free atomic type.
-```cpp showLineNumbers
-std::atomic_flag flag = ATOMIC_FLAG_INIT;
-
-// Test and set
-if (!flag.test_and_set()) {
-    // First time, flag is now set
-}
-
-// Clear
-flag.clear();
-
-// Simple spinlock
 class Spinlock {
-    std::atomic_flag locked_ = ATOMIC_FLAG_INIT;
-    
+    std::atomic_flag flag_;                       // C++20: starts clear
 public:
     void lock() {
-        while (locked_.test_and_set(std::memory_order_acquire)) {
-            // Spin
+        while (flag_.test_and_set(std::memory_order_acquire)) {
+            flag_.wait(true, std::memory_order_relaxed);   // block until the flag changes
         }
     }
-    
     void unlock() {
-        locked_.clear(std::memory_order_release);
+        flag_.clear(std::memory_order_release);
+        flag_.notify_one();
     }
 };
-```
 
-## Checking Lock-Free Support
-```cpp showLineNumbers
-std::atomic<int> x;
-std::atomic<double> y;
-std::atomic<MyLargeStruct> z;
+Spinlock lk;
+long total = 0;                                   // protected by lk
 
-// Check if lock-free at compile-time
-static_assert(std::atomic<int>::is_always_lock_free);
-
-// Check at runtime
-if (x.is_lock_free()) {
-    std::cout << "int atomic is lock-free\n";
-}
-
-if (y.is_lock_free()) {
-    std::cout << "double atomic is lock-free\n";
-}
-
-// Large types might not be lock-free
-if (!z.is_lock_free()) {
-    std::cout << "MyLargeStruct uses locks\n";
+int main() {
+    auto work = [] { for (int i = 0; i < 100000; ++i) { lk.lock(); ++total; lk.unlock(); } };
+    std::thread a(work), b(work);
+    a.join(); b.join();
+    std::printf("%ld\n", total);                  // 200000
 }
 ```
 
-## Performance Comparison
-```cpp showLineNumbers
-// Relaxed: fastest, no ordering
-counter.fetch_add(1, std::memory_order_relaxed);
+Passes under `-fsanitize=thread` with both compilers. In real code use [`std::mutex`](./05-mutexes.md): it
+blocks in the OS under contention instead of burning CPU, and it is the standard, reviewed primitive.
 
-// Acquire/Release: medium, synchronization
-flag.store(true, std::memory_order_release);
+Other C++20 types: `std::atomic_ref<T>` applies atomic operations to an ordinary object
+(which must stay suitably aligned and must not be accessed non-atomically while any `atomic_ref` to it
+exists), and `std::atomic<std::shared_ptr<T>>` / `atomic<weak_ptr<T>>` are the supported way to
+share a smart pointer; see [shared_ptr](../06-pointers-references-and-smart-pointers/shared-ptr.md).
 
-// Sequential: slowest, full ordering
-flag.store(true, std::memory_order_seq_cst);  // Default
-```
+## Is it really lock-free?
 
-**Typical latency:**
-- Relaxed: ~1-2 cycles
-- Acquire/Release: ~5-10 cycles
-- Sequential consistency: ~10-20 cycles
+`std::atomic<T>` for a `T` the hardware cannot handle in one instruction falls back to a lock hidden in the
+library. `is_always_lock_free` (C++17, a `static constexpr`) answers at compile time; `is_lock_free()` at
+run time. Both are implementation-specific. On the platform and compilers tested here (x86-64 Linux, GCC 15
+and clang 21), `atomic<int>` and `atomic<void*>` are always lock-free and a 64-byte struct is not:
 
-## Producer-Consumer with Fences
-```cpp showLineNumbers
+```cpp title="lock_free_check.cpp"
 #include <atomic>
-#include <vector>
+#include <cstdio>
 
-class MessageQueue {
-    std::vector<int> buffer_;
-    std::atomic<size_t> writePos_{0};
-    std::atomic<size_t> readPos_{0};
-    
-public:
-    void push(int value) {
-        size_t pos = writePos_.load(std::memory_order_relaxed);
-        buffer_[pos] = value;
-        
-        std::atomic_thread_fence(std::memory_order_release);
-        writePos_.store(pos + 1, std::memory_order_relaxed);
-    }
-    
-    bool pop(int& result) {
-        size_t pos = readPos_.load(std::memory_order_relaxed);
-        if (pos >= writePos_.load(std::memory_order_relaxed)) {
-            return false;
-        }
-        
-        std::atomic_thread_fence(std::memory_order_acquire);
-        result = buffer_[pos];
-        readPos_.store(pos + 1, std::memory_order_relaxed);
-        return true;
-    }
-};
+struct Big { char bytes[64]; };
+
+int main() {
+    static_assert(std::atomic<int>::is_always_lock_free);   // true on mainstream targets, not guaranteed everywhere
+    std::atomic<Big> big;
+    std::printf("%d\n", big.is_lock_free() ? 1 : 0);          // 0 here
+    std::printf("%d\n", std::atomic<void*>::is_always_lock_free ? 1 : 0);   // 1 here
+}
 ```
 
-## Best Practices
+Output `0` then `1`. Link with `-latomic`: the lock-based fallback for `atomic<Big>` lives in libatomic,
+and without it the link fails (`undefined reference to '__atomic_is_lock_free'`). That fallback also
+means such an atomic may not be address-free, so don't place it in memory shared between processes.
 
-:::success[DO]
-- Use atomics for simple shared counters/flags
-- Use relaxed ordering for independent operations
-- Check `is_lock_free()` for critical paths
-- Profile before optimizing memory orders
-- Start with sequential consistency, optimize if needed
-  :::
+## Pitfalls
 
-:::danger[DON'T]
-- Use atomics for complex data structures (use mutexes)
-- Mix atomic and non-atomic access to same variable
-- Assume all atomic operations are lock-free
-- Use relaxed ordering without understanding memory model
-- Over-optimize memory ordering prematurely
-  :::
+- **Atomic operations don't compose.** `if (a.load() == 0) a.store(1);` is two operations and races with
+  another thread; use `compare_exchange` or a mutex.
+- **Two atomics are not one atomic.** Updating `count` and `sum` separately lets another thread see one new
+  and one old. Put related state under a [mutex](./05-mutexes.md).
+- **Mixing atomic and plain access** to the same object is a data race.
+- **Relaxed publication.** Setting a `relaxed` flag and then reading plain data in another thread is a race;
+  the flag needs release/acquire ([example](./01-cpp-memory-model.md#synchronizes-with-and-happens-before)).
+- **False sharing.** Atomics next to each other in memory contend for a cache line; see
+  [Alignment](../05-memory-and-object-lifetime/alignment.md) for `alignas` and `hardware_destructive_interference_size`.
+- **Hand-written lock-free containers** are rarely worth it; correctness (ABA, memory reclamation) is
+  hard, and a mutex is often fast enough.
 
-## Summary
+## References
 
-**Atomic operations:**
-- Indivisible read/write/modify operations
-- No data races, no torn reads/writes
-- Support lock-free algorithms
-- `load()`, `store()`, `exchange()`, CAS
-
-**Memory fences:**
-- Establish ordering between operations
-- Release fence: prior writes complete before fence
-- Acquire fence: subsequent reads see prior writes
-- Allow relaxed atomics with ordering guarantees
-
-**Use cases:**
-- **Atomics:** Simple counters, flags, lock-free structures
-- **Fences:** Protecting multiple variables with relaxed atomics
-- **Sequential consistency:** When in doubt (default, safe)
-- **Relaxed:** Independent counters, statistics
+- [`std::atomic` (cppreference)](https://en.cppreference.com/w/cpp/atomic/atomic)
+- [`std::atomic_thread_fence` (cppreference)](https://en.cppreference.com/w/cpp/atomic/atomic_thread_fence)
+- [`std::atomic_flag` (cppreference)](https://en.cppreference.com/w/cpp/atomic/atomic_flag)
+- [Atomic operations library, \[atomics\]](https://eel.is/c++draft/atomics)
