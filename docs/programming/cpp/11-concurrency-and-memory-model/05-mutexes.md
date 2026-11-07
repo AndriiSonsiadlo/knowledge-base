@@ -310,8 +310,11 @@ Output: `init ran`, `99`, `Logger built`, each exactly once.
   thread that wants it.
 - **A mutex protects code only if all accesses use it.** One unlocked read elsewhere is still a
   [data race](./03-data-races.md).
-- **Locking a temporary:** `std::lock_guard<std::mutex>(m);` (no variable name) creates and immediately
-  destroys an unnamed lock, protecting nothing. Name the variable.
+- **Forgetting to name the lock.** `std::lock_guard<std::mutex>{m};` creates a temporary that locks and unlocks
+  at the end of the statement, protecting nothing. Worse, `std::unique_lock<std::mutex>(m);` is parsed as a
+  *declaration* of a new, unlocked `unique_lock` called `m` that shadows the mutex, and
+  `std::lock_guard<std::mutex>(m);` does not compile for the same reason (no default constructor). Always
+  write `std::lock_guard lock(m);`.
 - **Spurious wake-ups and lost notifications** are a [condition variable](./06-condition-variables.md) topic, not a mutex one.
 - **Never use `volatile` or a plain `bool` instead of a lock.**
 

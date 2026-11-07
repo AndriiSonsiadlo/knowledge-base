@@ -39,7 +39,7 @@ the consumer sees everything the producer wrote before setting it; no extra lock
   </DiagramRow>
 </Diagram>
 
-`future::get()` can be called **once**; after that `valid()` is `false` and further calls are an error. A `future` is
+`future::get()` can be called **once**; after that `valid()` is `false` and calling `get()` again is undefined behaviour (implementations are encouraged to throw `std::future_error`). A `future` is
 move-only. `wait()` blocks without consuming; `wait_for` / `wait_until` return a `std::future_status`
 (`ready`, `timeout`, or `deferred`).
 
@@ -83,7 +83,7 @@ waits on never runs.
 
 ### A future from `async` blocks in its destructor \{#async-destructor\}
 
-The destructor of the last future referring to a shared state **created by `std::async`** blocks until the task finishes.
+The destructor of the last future referring to a shared state **created by `std::async` with `std::launch::async`** blocks until the task finishes (a deferred task never runs, so there is nothing to wait for).
 Futures from `promise` or `packaged_task` do not. The consequence is that a discarded `async` result is silently
 synchronous:
 
@@ -104,8 +104,8 @@ int main() {
 }
 ```
 
-Prints `blocked at least 150 ms: 1`. Both compilers also mark `async` `[[nodiscard]]`, and a bare
-`std::async(...);` statement gets a warning for this reason. If you want fire-and-forget, use a
+Prints `blocked at least 150 ms: 1`. Since C++20 `std::async` is declared `[[nodiscard]]`, and both compilers warn on a bare
+`std::async(...);` statement for this reason. If you want fire-and-forget, use a
 thread you manage ([Threads](./04-threads.md)), not `async`.
 
 ## `std::promise`: setting the value yourself
@@ -248,7 +248,7 @@ Output: `timeout: 1`, `ready: 1`, `deferred status: 1`, `3`. Timed waits can ret
 The standard future has no `then()` continuation, no cancellation, no combinators such as "when any of these is ready", and
 `async` has no scheduler or pool you control (the standard has no thread pool; see [Thread pools](./08-thread-pools.md)).
 The Concurrency TS added `then`/`when_all` in `std::experimental`, but it was not adopted into the standard;
-the standardized direction is C++26 `std::execution` (senders/receivers). Check that your standard library ships it before relying on it.
+the standardization direction is `std::execution` (senders/receivers), in the C++26 draft. Check that your standard library ships it before relying on it.
 
 ## Pitfalls
 
