@@ -105,7 +105,7 @@ sharing; pad each element if it matters ([Alignment](../05-memory-and-object-lif
 
 ### Standard containers
 
-The library's rule ([container.reqmts], "Data races") is: member functions that only read, and a short list
+The library's rule ([container.requirements.dataraces](https://eel.is/c++draft/container.requirements.dataraces)) is: member functions that only read, and a short list
 that the standard treats as `const` for this purpose (`begin`, `end`, `rbegin`, `rend`, `front`, `back`, `data`,
 `find`, `lower_bound`, `upper_bound`, `equal_range`, `at`, and `operator[]` except on associative and unordered
 containers), may run concurrently. **Different elements of one container may be modified concurrently**, with the

@@ -104,7 +104,7 @@ int main() {
 }
 ```
 
-Prints `blocked at least 150 ms: 1`. Since C++20 `std::async` is declared `[[nodiscard]]`, and both compilers warn on a bare
+Prints `blocked at least 150 ms: 1`. The standard library declares `std::async` `[[nodiscard]]` (from C++20; check later standards if it matters), and both compilers warn on a bare
 `std::async(...);` statement for this reason. If you want fire-and-forget, use a
 thread you manage ([Threads](./04-threads.md)), not `async`.
 
