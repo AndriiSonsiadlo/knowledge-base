@@ -63,43 +63,11 @@ For `C`, g++ reports this vtable (`Vtable for C`, 6 entries):
 | 32 | `&typeinfo for C` | RTTI pointer |
 | 40 | `B::fb` | slot used through the `B`-in-`C` vptr |
 
-The offset-to-top entry is what `dynamic_cast<void*>` and a virtual destructor called through a `B*`
-use to find the start of the whole object. When `fb` is overridden in `C`, the second table holds a
+The offset-to-top entry is what `dynamic_cast<void*>` (and `dynamic_cast` to the most-derived type) uses to find the start of the whole object. When `fb` is overridden in `C`, the second table holds a
 small **thunk** instead of `C::fb` directly, which subtracts 16 from `this` before jumping, because
 `C::fb` expects a `C*`, not a `B*`.
 
-<Diagram title="struct C : A, B on x86-64 Itanium (32 bytes)" caption="Two vptrs because B cannot share A's. A B* into a C points at offset 16." accent="blue">
-  <DiagramRow>
-    <DiagramNode title="A subobject" accent>offset 0: vptr (shared with C), offset 8: int a</DiagramNode>
-    <DiagramNode title="B subobject">offset 16: vptr, offset 24: int b</DiagramNode>
-    <DiagramNode title="C::c">offset 28</DiagramNode>
-  </DiagramRow>
-</Diagram>
-
-This is the layout that the program below confirms: on both compilers and both optimisation levels
-`sizeof(C)` is 32 and converting `C*` to `B*` adds 16 (the printing uses `char*` arithmetic on the two
-addresses, which is well-defined for pointers into the same complete object).
-
-```cpp title="offsets.cpp" showLineNumbers
-#include <cstdio>
-
-struct A { virtual void fa() {} int a = 1; };
-struct B { virtual void fb() {} int b = 2; };
-struct C : A, B { int c = 3; };
-
-int main() {
-    C obj;
-    char* base = reinterpret_cast<char*>(&obj);
-    std::printf("sizeof(C)=%zu  B* offset=%td\n", sizeof(C),
-                reinterpret_cast<char*>(static_cast<B*>(&obj)) - base);
-}
-```
-
-```text
-sizeof(C)=32  B* offset=16
-```
-
-(g++ 15 and clang++ 21, `-std=c++20`, `-O0` and `-O2`, x86-64 Linux.)
+`sizeof(C)` is 32 and the `B` subobject (with its own vptr) sits at offset 16, so a `B*` into a `C` points 16 bytes in. The pointer-adjustment demo with the diagram is on [Class layout](../07-classes-and-oop/class-layout.md#base-classes-are-subobjects). Here the same numbers were confirmed with both compilers' layout dumps and with a program (g++ 15 and clang++ 21, `-O0` and `-O2`, x86-64 Linux).
 
 ### Microsoft ABI
 
@@ -132,8 +100,7 @@ struct D2 : NonPodBase { char d; };   // d fits in the padding on Itanium
 
 Both Itanium numbers (12 and 8) were also printed by a program under both compilers at `-O0` and `-O2`. The
 consequence is that you cannot compute a derived class's size from the `sizeof` of its base: `sizeof(D2)`
-equals `sizeof(NonPodBase)` here. It also means that a bytewise copy of a base-class subobject
-can overwrite a derived member sitting in that padding, one more reason not to `memcpy` non-trivially-copyable types.
+equals `sizeof(NonPodBase)` here. It also means that a bytewise copy of a base-class subobject can overwrite a derived member sitting in that padding. This is one reason the standard excludes potentially-overlapping subobjects (bases, `[[no_unique_address]]` members) from the `memcpy` guarantee, even for trivially copyable types.
 
 ## Empty base optimization across ABIs
 

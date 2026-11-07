@@ -88,7 +88,7 @@ struct Widget { int value; };
 int get_value(const Widget* w);          // defined in the .so: return w->value;
 ```
 
-```cpp title="v2: the client is rebuilt against a header with a new member, the .so is not"
+```cpp title="v2 (fragment): the client is rebuilt against a header with a new member, the .so is not"
 // widget.h  (v2)
 struct Widget { int id; int value; };    // new member BEFORE value: offset of value changes 0 -> 4
 
@@ -111,7 +111,7 @@ Changes that commonly break an Itanium-ABI binary interface (for clients compile
 | Add, remove or reorder virtual functions | Vtable slots move. Calls through the old slot number reach the wrong function |
 | Change the base classes, or make a base virtual | Subobject offsets and the vtable change |
 | Change a function's parameter types | The mangled name changes, so old clients fail to link. With `extern "C"` there is no such check and the call is simply wrong |
-| Add a default argument value | Default arguments are inlined at call sites, so old clients keep the old value (no link error) |
+| Change a default argument value | Default arguments are inlined at call sites, so old clients keep the old value (no link error) |
 | Change an inline function's body | Old clients keep the old inlined copy |
 | Change a type's trivial-ness, for example adding a destructor | Can change how the type is passed or returned. On Itanium, a class with a non-trivial copy constructor or destructor is passed by invisible reference rather than in registers |
 

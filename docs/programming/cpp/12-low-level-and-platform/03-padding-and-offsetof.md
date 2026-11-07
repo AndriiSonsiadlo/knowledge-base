@@ -32,29 +32,12 @@ category whose layout the language pins down enough for C interop (the condition
 |---|---|
 | Standard-layout class | Defined |
 | Other class (virtual functions, mixed access control, ...) | *Conditionally-supported* since C++17 (undefined before). g++ warns with `-Winvalid-offsetof`: "offsetof within non-standard-layout type is conditionally-supported" |
-| Bit-field | Ill-formed |
-| Static member, member function | Not allowed |
+| Bit-field, static member, member function | Undefined (GCC and Clang reject it with an error) |
 
-Use `static_assert` so a layout you depend on cannot change unnoticed:
-
-```cpp title="header.cpp" showLineNumbers
-#include <cstddef>
-#include <cstdint>
-#include <type_traits>
-
-struct Header {
-    std::uint32_t magic;
-    std::uint16_t version;
-    std::uint16_t flags;
-};
-static_assert(std::is_standard_layout_v<Header>);
-static_assert(offsetof(Header, flags) == 6 && sizeof(Header) == 8);
-
-int main() {}
-```
-
-This compiles with both compilers. Fixed-width types matter here: `unsigned long` would be 8 bytes on
-x86-64 Linux and 4 on Windows x64 (see [ABI](./01-abi.md)), changing the offsets.
+Pin the layouts you depend on with `static_assert(offsetof(...) == N && sizeof(T) == M)`, as shown on
+[Alignment and offsetof](../03-types-and-values/alignment-and-offsetof.md#offsetof), and use fixed-width
+members: `unsigned long` is 8 bytes on x86-64 Linux and 4 on Windows x64 (see [ABI](./01-abi.md)), which
+changes every later offset.
 
 ### Getting from a member back to its owner
 
@@ -112,7 +95,7 @@ struct Padded { char c; int i; char c2; };    // 1 + 3 hole + 4 + 1 + 3 tail = 1
 - **The layout dumps** from [Object layout](./02-object-layout.md#ask-the-compiler).
 - **`std::has_unique_object_representations_v<T>`** *(C++17, `<type_traits>`)* is true only if every
   byte of a `T` takes part in its value, i.e. there is no padding and no member whose equal values
-  can have different bytes. `Header` above satisfies it, `Padded` does not.
+  can have different bytes. A struct of `std::uint32_t, std::uint16_t, std::uint16_t` satisfies it, `Padded` above does not.
 
 ### Why padding bytes matter
 
@@ -133,8 +116,7 @@ That output is what these compilers happened to do, not a guarantee. The consequ
   is ABI-dependent. Serialise field by field into a byte buffer instead ([Endianness](./04-endianness.md)
   shows how), and `static_assert` the layout where you do copy a struct as-is, such as memory-mapped
   register blocks or a file format you control on one platform.
-- Reading padding is not undefined behaviour when done through `unsigned char`/`std::byte`, but what
-  you read is unspecified.
+- Padding is unspecified after a `memset`, as above. In an uninitialised object it is indeterminate, and there only copying the bytes is allowed; using the value (before C++26) is undefined behaviour.
 
 ## Packing
 
@@ -182,7 +164,7 @@ differs in size from the previous one starts a new unit. Same source, two sizes.
 
 - Never use bit-fields to describe a wire format or a hardware register layout that has to be portable.
   Extract fields with shifts and masks on a fixed-width integer instead.
-- `offsetof` of a bit-field is ill-formed, and you cannot take its address or bind a non-`const`
+- `offsetof` of a bit-field is undefined (compilers reject it), and you cannot take its address or bind a non-`const`
   reference.
 - Adjacent bit-fields are one *memory location* for data-race purposes, so two threads writing
   different bit-fields of the same word race. See
