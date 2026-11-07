@@ -133,8 +133,7 @@ int main() {
 ```
 
 (g++ 15 and clang++ 21, `-std=c++20`, `-O0` and `-O2`; a `static_assert` of the same round trip also holds
-at compile time.) Note the `std::uint32_t{p[0]}` before the shift: a bare `p[0] << 24` promotes to `int`
-and shifts into the sign bit for bytes of 0x80 and above, which is undefined before C++20 (C++20 made left shifts of signed values well-defined). Keep the unsigned type.
+at compile time.) Note the `std::uint32_t{p[0]}` before the shift: a bare `p[0] << 24` is done in `int`, giving a negative value for bytes of 0x80 and above (implementation-defined before C++20) and undefined behaviour once the shift exceeds the width, as in a 64-bit variant. Keep the unsigned type.
 
 The same pattern with `<<` swapped for loops handles 16 and 64 bits and little-endian formats. Write the
 load/store pair once per width and use it for every field; do not `memcpy` a whole struct.
