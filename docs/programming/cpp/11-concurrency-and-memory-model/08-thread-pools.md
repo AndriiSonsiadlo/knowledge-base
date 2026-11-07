@@ -15,7 +15,7 @@ overload the machine. The pool caps the number of threads and reuses them.
 :::info[There is no standard thread pool]
 As of C++23 the standard library has no thread pool, executor or task scheduler. `std::async` is not one:
 it gives you no control over thread count, and implementations are free to start a thread per call. The
-standardized direction is `std::execution` (senders/receivers, adopted for C++26), but do not assume your
+standardized direction is `std::execution` (senders/receivers, in the C++26 draft), but do not assume your
 standard library ships it yet. In the meantime you write a small pool (below), use a library
 (for example Boost.Asio's `thread_pool`, oneTBB, or your platform's), or use the parallel algorithms
 (`std::for_each(std::execution::par, ...)`, C++17; see [Algorithms](../09-standard-library/algorithms.md)).
@@ -151,14 +151,6 @@ while the pool is being destroyed), no task priorities, no work stealing, one sh
 the contention point at high task rates), and a task that blocks waiting for another task in the same pool can
 deadlock it when all workers are busy waiting. Do not wait on pool futures from inside pool tasks unless
 the pool has spare workers.
-
-:::note[TSan and exception_ptr]
-In an earlier variant of this example, one task threw, and ThreadSanitizer with GCC 15 intermittently
-(2 of about 300 runs) reported a data race inside libstdc++'s `std::exception_ptr` release between the worker
-and the thread calling `get()`. It was not confirmed whether that is a real race or a TSan limitation with the
-uninstrumented library's reference counting, so treat reports with `exception_ptr` frames in them with
-suspicion and re-check, and don't assume either way. The version shown has no throwing task and ran clean.
-:::
 
 ## Choosing the size
 
