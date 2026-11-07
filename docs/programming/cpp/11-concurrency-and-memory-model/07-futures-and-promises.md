@@ -3,402 +3,265 @@ id: futures-and-promises
 title: Futures and Promises
 sidebar_label: Futures & Promises
 sidebar_position: 7
-tags: [cpp, concurrency, futures, promises, async, threading]
+tags: [cpp, concurrency, future, promise, async, packaged-task, shared-future]
 ---
 
 # Futures and Promises
 
-**Futures** and **promises** provide a mechanism for asynchronous computation: one thread computes a value and another retrieves it later.
+A **future** is a handle to a value that will exist later, possibly produced by another thread. It
+replaces "start a thread, join, read a shared variable" with a single object that carries the result
+(or the exception) and does the synchronization for you. This page is the canonical home for
+`std::future`, `std::promise`, `std::packaged_task`, `std::shared_future` and `std::async` (header `<future>`).
 
-## Basic Concepts
-```mermaid
-graph LR
-    A[Promise] -->|set_value| B[Shared State]
-    B -->|get| C[Future]
-    
-    D[Producer Thread] --> A
-    C --> E[Consumer Thread]
-```
-```cpp
+**Prerequisites:** [Threads](./04-threads.md), [Data races](./03-data-races.md).
+
+## One channel, two ends
+
+Producer and consumer share a **shared state**. The producing end writes it once: a `std::promise`
+(you set it), a `std::packaged_task` (it runs a function and sets it), or `std::async` (it starts the function
+for you). The consuming end is a `std::future`, whose `get()` waits until the state is ready and then returns
+the value or rethrows the stored exception. Setting the value synchronizes-with the `get()` that returns it, so
+the consumer sees everything the producer wrote before setting it; no extra lock is needed.
+
+<Diagram title="Shared state between producer and consumer" caption="The value is written once and read once through a future." accent="violet">
+  <DiagramRow>
+    <DiagramGroup label="Producer side">
+      <DiagramNode title="std::promise / packaged_task / async">set_value, set_exception, or return/throw</DiagramNode>
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="writes once" />
+    <DiagramGroup label="Shared state">
+      <DiagramNode title="value or exception" accent>ready flag</DiagramNode>
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="get() waits, returns" />
+    <DiagramGroup label="Consumer side">
+      <DiagramNode title="std::future&lt;T&gt;">single use, movable</DiagramNode>
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
+
+`future::get()` can be called **once**; after that `valid()` is `false` and further calls are an error. A `future` is
+move-only. `wait()` blocks without consuming; `wait_for` / `wait_until` return a `std::future_status`
+(`ready`, `timeout`, or `deferred`).
+
+## `std::async`
+
+`std::async(policy, f, args...)` runs `f(args...)` and returns a `std::future` for its result. Arguments are copied like
+for [`std::thread`](./04-threads.md#starting-a-thread-and-passing-arguments), so use `std::ref`/`std::cref` to share.
+
+```cpp title="async_sum.cpp"
+#include <cstdio>
 #include <future>
+#include <numeric>
+#include <vector>
 
-void producer(std::promise<int> prom) {
-    // Compute value
-    int result = 42;
-    prom.set_value(result);  // Make available to future
-}
-
-void consumer() {
-    std::promise<int> prom;
-    std::future<int> fut = prom.get_future();
-    
-    std::thread t(producer, std::move(prom));
-    
-    int value = fut.get();  // Blocks until value available
-    std::cout << "Result: " << value << '\n';
-    
-    t.join();
-}
-```
-
-## std::async
-
-Easier way to run async tasks:
-```cpp
-#include <future>
-
-int compute() {
-    return 42;
+long sum(const std::vector<int>& v, std::size_t b, std::size_t e) {
+    return std::accumulate(v.begin() + b, v.begin() + e, 0L);
 }
 
 int main() {
-    // Launch async task
-    std::future<int> result = std::async(std::launch::async, compute);
-    
-    // Do other work...
-    
-    // Get result (blocks if not ready)
-    std::cout << "Result: " << result.get() << '\n';
+    std::vector<int> v(1000);
+    std::iota(v.begin(), v.end(), 1);
+    auto lo = std::async(std::launch::async, sum, std::cref(v), 0, 500);
+    auto hi = std::async(std::launch::async, sum, std::cref(v), 500, 1000);
+    std::printf("%ld\n", lo.get() + hi.get());       // get() waits and returns the value (once)
 }
 ```
 
-### Launch Policies
-```cpp
-#include <future>
+Prints `500500` (both compilers, `-O0`/`-O2`, TSan clean).
 
-// async: definitely runs in separate thread
-auto fut1 = std::async(std::launch::async, compute);
+### Launch policies
 
-// deferred: runs in calling thread when get() called
-auto fut2 = std::async(std::launch::deferred, compute);
+| Policy | Meaning |
+|---|---|
+| `std::launch::async` | Run on a new thread of execution, immediately. |
+| `std::launch::deferred` | Run lazily, in the thread that calls `get()` or `wait()`. No new thread. |
+| default (`async \| deferred`) | The implementation chooses. Do not rely on either behaviour. |
 
-// async | deferred: implementation chooses (default)
-auto fut3 = std::async(std::launch::async | std::launch::deferred, compute);
-auto fut4 = std::async(compute);  // Same as above
-```
+Because the default may defer, a `wait_for` on such a future can return `future_status::deferred` forever without
+the task running. Specify `std::launch::async` when you need concurrency. A deferred task that nobody
+waits on never runs.
 
-## std::promise and std::future
+### A future from `async` blocks in its destructor \{#async-destructor\}
 
-### Basic Promise/Future
-```cpp
+The destructor of the last future referring to a shared state **created by `std::async`** blocks until the task finishes.
+Futures from `promise` or `packaged_task` do not. The consequence is that a discarded `async` result is silently
+synchronous:
+
+```cpp title="async_dtor.cpp"
+#include <chrono>
+#include <cstdio>
 #include <future>
 #include <thread>
 
-void asyncTask(std::promise<std::string> prom) {
-    try {
-        // Do work
-        std::string result = "Success!";
-        prom.set_value(result);
-    }
-    catch (...) {
-        // Communicate exception
-        prom.set_exception(std::current_exception());
-    }
+int main() {
+    using namespace std::chrono;
+    auto t0 = steady_clock::now();
+    {
+        auto f = std::async(std::launch::async, [] { std::this_thread::sleep_for(milliseconds(200)); });
+    }                                           // ~future blocks here until the task finishes
+    auto ms = duration_cast<milliseconds>(steady_clock::now() - t0).count();
+    std::printf("blocked at least 150 ms: %d\n", ms >= 150);
 }
+```
+
+Prints `blocked at least 150 ms: 1`. Both compilers also mark `async` `[[nodiscard]]`, and a bare
+`std::async(...);` statement gets a warning for this reason. If you want fire-and-forget, use a
+thread you manage ([Threads](./04-threads.md)), not `async`.
+
+## `std::promise`: setting the value yourself
+
+A `std::promise<T>` is the writing end. Obtain its future once with `get_future()`, hand the promise to the producer, and
+call exactly one of `set_value`, `set_exception` (a second call throws `std::future_error`). If the promise is destroyed
+without either, the future's `get()` throws `std::future_error` with code `broken_promise`, so a waiting consumer
+is not stuck forever.
+
+```cpp title="promise_future.cpp"
+#include <cstdio>
+#include <future>
+#include <stdexcept>
+#include <string>
+#include <thread>
 
 int main() {
-    std::promise<std::string> prom;
-    std::future<std::string> fut = prom.get_future();
-    
-    std::thread t(asyncTask, std::move(prom));
-    
-    try {
-        std::string result = fut.get();
-        std::cout << result << '\n';
+    std::promise<std::string> p;
+    std::future<std::string> f = p.get_future();
+    std::thread t([&p] { p.set_value("result"); });
+    std::printf("%s\n", f.get().c_str());
+    t.join();
+
+    std::promise<int> p2;
+    auto f2 = p2.get_future();
+    std::thread t2([&p2] {
+        try { throw std::runtime_error("boom"); }
+        catch (...) { p2.set_exception(std::current_exception()); }
+    });
+    try { f2.get(); }
+    catch (const std::exception& e) { std::printf("caught: %s\n", e.what()); }
+    t2.join();
+
+    std::future<int> f3;
+    {
+        std::promise<int> p3;
+        f3 = p3.get_future();
+    }                                           // promise destroyed without a value
+    try { f3.get(); }
+    catch (const std::future_error& e) {
+        std::printf("broken promise: %d\n", e.code() == std::future_errc::broken_promise);
     }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << '\n';
-    }
-    
+}
+```
+
+```text
+result
+caught: boom
+broken promise: 1
+```
+
+This is the answer to "exceptions do not cross threads" from [Threads](./04-threads.md#exceptions-do-not-cross-threads):
+the exception is stored and rethrown by `get()` in the consumer. `std::async` and `packaged_task` do
+the catch-and-store for you, so a throwing task surfaces at `get()`.
+
+## `std::packaged_task`: a callable bound to a future
+
+A `std::packaged_task<R(Args...)>` wraps any callable. Invoking it runs the callable and fulfils its future with the
+result or exception. It is the piece that lets you decide *where* the call runs: on a thread, in a pool, or
+later. It is move-only.
+
+```cpp title="packaged_task.cpp"
+#include <cstdio>
+#include <future>
+#include <thread>
+
+int main() {
+    std::packaged_task<int(int, int)> task([](int a, int b) { return a * b; });
+    std::future<int> f = task.get_future();
+    std::thread t(std::move(task), 6, 7);       // run it wherever you like
+    std::printf("%d\n", f.get());               // 42
     t.join();
 }
 ```
 
-### Promise Operations
-```cpp
-std::promise<int> prom;
+A thread pool is mostly a queue of such tasks; see [Thread pools](./08-thread-pools.md).
 
-// Set value (can only be called once)
-prom.set_value(42);
+## `std::shared_future`: many consumers
 
-// Set exception
-prom.set_exception(std::make_exception_ptr(std::runtime_error("Error")));
+A plain `future` has one consumer. Call `.share()` (or construct from a future) to get a `std::shared_future<T>`,
+which is copyable, and whose `get()` may be called many times and from many threads, returning a `const T&`.
+Give each thread **its own copy** of the `shared_future`: concurrent `get()` on copies is safe, but calling non-const
+operations on one shared object from several threads is a data race.
 
-// Set value at thread exit
-prom.set_value_at_thread_exit(42);
-
-// Get future
-std::future<int> fut = prom.get_future();
-```
-
-### Future Operations
-```cpp
-std::future<int> fut = std::async(compute);
-
-// Get value (blocks, can only call once)
-int value = fut.get();
-
-// Check if ready (non-blocking)
-if (fut.valid()) {
-    // Future has shared state
-}
-
-// Wait for result
-fut.wait();
-
-// Wait with timeout
-if (fut.wait_for(std::chrono::seconds(1)) == std::future_status::ready) {
-    int value = fut.get();
-}
-
-// Wait until time point
-auto deadline = std::chrono::system_clock::now() + std::chrono::seconds(5);
-fut.wait_until(deadline);
-```
-
-## std::shared_future
-
-Multiple threads can wait on same result:
-```cpp
+```cpp title="shared_future.cpp"
+#include <cstdio>
 #include <future>
-
-int compute() {
-    return 42;
-}
-
-int main() {
-    std::shared_future<int> shared = std::async(compute).share();
-    
-    // Multiple threads can call get()
-    std::thread t1([shared] {
-        std::cout << "T1: " << shared.get() << '\n';
-    });
-    
-    std::thread t2([shared] {
-        std::cout << "T2: " << shared.get() << '\n';
-    });
-    
-    t1.join();
-    t2.join();
-}
-```
-
-## std::packaged_task
-
-Wraps callable object with future:
-```cpp
-#include <future>
-
-int multiply(int a, int b) {
-    return a * b;
-}
-
-int main() {
-    std::packaged_task<int(int, int)> task(multiply);
-    std::future<int> result = task.get_future();
-    
-    // Run task (can be in another thread)
-    task(6, 7);
-    
-    std::cout << "Result: " << result.get() << '\n';  // 42
-}
-```
-
-### Packaged Task with Thread
-```cpp
-std::packaged_task<int()> task([]{ return 42; });
-std::future<int> result = task.get_future();
-
-std::thread t(std::move(task));  // Run in thread
-
-std::cout << result.get() << '\n';
-t.join();
-```
-
-## Practical Examples
-
-### Example 1: Parallel Computation
-```cpp
-#include <future>
+#include <thread>
 #include <vector>
-#include <numeric>
-
-long long parallelSum(const std::vector<int>& data) {
-    size_t mid = data.size() / 2;
-    
-    // Compute first half async
-    auto fut = std::async(std::launch::async, [&] {
-        return std::accumulate(data.begin(), data.begin() + mid, 0LL);
-    });
-    
-    // Compute second half in current thread
-    long long sum2 = std::accumulate(data.begin() + mid, data.end(), 0LL);
-    
-    // Get first half result
-    long long sum1 = fut.get();
-    
-    return sum1 + sum2;
-}
-```
-
-### Example 2: Timeout Pattern
-```cpp
-#include <future>
-#include <chrono>
-
-template<typename F>
-auto withTimeout(F func, std::chrono::seconds timeout) {
-    auto fut = std::async(std::launch::async, func);
-    
-    if (fut.wait_for(timeout) == std::future_status::timeout) {
-        throw std::runtime_error("Operation timed out");
-    }
-    
-    return fut.get();
-}
-
-// Usage
-try {
-    auto result = withTimeout(expensiveComputation, std::chrono::seconds(5));
-}
-catch (const std::runtime_error& e) {
-    std::cerr << e.what() << '\n';
-}
-```
-
-### Example 3: Pipeline Pattern
-```cpp
-#include <future>
-
-int stage1(int input) {
-    return input * 2;
-}
-
-int stage2(int input) {
-    return input + 10;
-}
-
-int stage3(int input) {
-    return input * input;
-}
-
-int pipeline(int input) {
-    auto fut1 = std::async(std::launch::async, stage1, input);
-    auto fut2 = std::async(std::launch::async, stage2, fut1.get());
-    auto fut3 = std::async(std::launch::async, stage3, fut2.get());
-    
-    return fut3.get();
-}
-```
-
-### Example 4: Exception Propagation
-```cpp
-#include <future>
-
-int riskyComputation() {
-    if (/* error condition */) {
-        throw std::runtime_error("Computation failed");
-    }
-    return 42;
-}
 
 int main() {
-    auto fut = std::async(std::launch::async, riskyComputation);
-    
-    try {
-        int result = fut.get();  // Exception propagated here
-        std::cout << "Result: " << result << '\n';
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Caught: " << e.what() << '\n';
-    }
+    std::promise<int> p;
+    std::shared_future<int> sf = p.get_future().share();
+    std::vector<std::jthread> readers;
+    for (int i = 0; i < 3; ++i)
+        readers.emplace_back([sf] { (void)sf.get(); });   // each thread has its OWN copy of sf
+    p.set_value(5);
+    readers.clear();
+    std::printf("%d valid: %d\n", sf.get(), sf.valid());   // 5 valid: 1
 }
 ```
 
-## std::async vs std::thread
+## Waiting with a timeout
 
-| `std::async` | `std::thread` |
-|-------------|---------------|
-| Returns future with result | No return value |
-| Automatic exception propagation | Manual exception handling |
-| Can defer execution | Always runs immediately |
-| Easier to use | More control |
-```cpp
-// async: automatic result handling
-auto result = std::async(compute).get();
+```cpp title="wait_for.cpp"
+#include <chrono>
+#include <cstdio>
+#include <future>
+#include <thread>
 
-// thread: manual result handling
-int result;
-std::thread t([&result] { result = compute(); });
-t.join();
-```
+int main() {
+    std::promise<int> p;
+    auto f = p.get_future();
+    auto st = f.wait_for(std::chrono::milliseconds(20));
+    std::printf("timeout: %d\n", st == std::future_status::timeout);
+    p.set_value(1);
+    std::printf("ready: %d\n", f.wait_for(std::chrono::seconds(1)) == std::future_status::ready);
 
-## Waiting Strategies
-```cpp
-std::future<int> fut = std::async(compute);
-
-// 1. Blocking wait
-int result = fut.get();
-
-// 2. Check if ready
-if (fut.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
-    int result = fut.get();
-}
-
-// 3. Timed wait
-auto status = fut.wait_for(std::chrono::seconds(1));
-if (status == std::future_status::ready) {
-    // Ready
-} else if (status == std::future_status::timeout) {
-    // Not ready yet
+    auto d = std::async(std::launch::deferred, [] { return 3; });
+    std::printf("deferred status: %d\n", d.wait_for(std::chrono::seconds(0)) == std::future_status::deferred);
+    std::printf("%d\n", d.get());               // runs the task here, in this thread
 }
 ```
 
-## Best Practices
+Output: `timeout: 1`, `ready: 1`, `deferred status: 1`, `3`. Timed waits can return later than requested
+(scheduling); never use them as a precise timer.
 
-:::success[**DO:**]
-- Use `std::async` for simple async operations
-- Handle exceptions from futures
-- Check `valid()` before calling `get()`
-- Use `shared_future` for multiple waiters
-- Consider timeouts for long operations
-  :::
+## async vs thread vs packaged_task
 
-:::danger
-**DON'T:**
-- Call `get()` multiple times (only once!)
-- Forget to call `get()` or `wait()` on futures from `async`
-- Assume `async` always creates new thread
-- Ignore exceptions from futures
-- Use promise after calling `set_value()`
-  :::
+| Need | Use |
+|---|---|
+| One result (or exception) from a background computation | `std::async(std::launch::async, ...)` |
+| The result of work you schedule yourself (a pool, a specific thread) | `std::packaged_task` + your executor |
+| Hand a value from one place in the code to another, set from a callback or an event | `std::promise` |
+| A long-lived worker, no single result | [`std::jthread`](./04-threads.md#jthread) |
+| Many results over time | A [blocking queue](./06-condition-variables.md#blocking-queue), or (C++20) a coroutine generator, see [Coroutines](./09-coroutines.md) |
 
-## Common Patterns
-```cpp
-// Pattern 1: Fire-and-forget with error handling
-auto fut = std::async(std::launch::async, riskyTask);
-// Later: check for errors
-try { fut.get(); } catch (...) { }
+## Limits of std::future
 
-// Pattern 2: Multiple async tasks
-std::vector<std::future<int>> futures;
-for (int i = 0; i < 10; ++i) {
-    futures.push_back(std::async(compute, i));
-}
-for (auto& f : futures) {
-    results.push_back(f.get());
-}
+The standard future has no `then()` continuation, no cancellation, no combinators such as "when any of these is ready", and
+`async` has no scheduler or pool you control (the standard has no thread pool; see [Thread pools](./08-thread-pools.md)).
+The Concurrency TS added `then`/`when_all` in `std::experimental`, but it was not adopted into the standard;
+the standardized direction is C++26 `std::execution` (senders/receivers). Check that your standard library ships it before relying on it.
 
-// Pattern 3: Promise for one-time notification
-std::promise<void> signal;
-auto fut = signal.get_future();
-// In another thread:
-signal.set_value();  // Signal ready
-```
+## Pitfalls
 
-## Related Topics
+- **Calling `get()` twice** on a `std::future` (it is single-use; use `shared_future`).
+- **Ignoring the returned future** from `async`: it blocks right there, and loses exceptions.
+- **A default-policy `async` that is secretly deferred**, so `wait_for` never completes. Name the policy.
+- **Forgetting a `promise` must be fulfilled** on every path, including error paths; otherwise the consumer gets `broken_promise`.
+- **Dangling captures** into an `async` task are no different from a thread: the referenced objects must outlive the call.
 
-- **[Threads](04-threads.md)** - Thread basics
-- **[Thread Pools](08-thread-pools.md)** - Managed async execution
-- **[Condition Variables](06-condition-variables.md)** - Thread coordination
-- **[std::async](https://en.cppreference.com/w/cpp/thread/async)** - Reference
+## References
+
+- [`std::future` (cppreference)](https://en.cppreference.com/w/cpp/thread/future)
+- [`std::async` (cppreference)](https://en.cppreference.com/w/cpp/thread/async)
+- [`std::promise` (cppreference)](https://en.cppreference.com/w/cpp/thread/promise)
+- [`std::packaged_task` (cppreference)](https://en.cppreference.com/w/cpp/thread/packaged_task)
+- [Futures, \[futures\]](https://eel.is/c++draft/futures)
