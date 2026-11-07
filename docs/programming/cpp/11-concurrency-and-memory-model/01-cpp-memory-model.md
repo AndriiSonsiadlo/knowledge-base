@@ -120,7 +120,7 @@ always so); it states which *other* operations it orders relative to it.
 | `consume` | Like acquire but only for operations that carry a data dependency from the load. | load |
 
 On `consume`: since C++17 the standard says its specification is being revised and its use is
-discouraged, and mainstream compilers implement it as `acquire`. Do not use it. Which order to pick for a given job, and
+discouraged, mainstream compilers implement it as `acquire`, and C++26 deprecates it. Do not use it. Which order to pick for a given job, and
 the exact operations each applies to, is in [Atomics and fences](./02-atomics-and-fences.md#memory-order-choices).
 
 Two further rules matter in practice:
@@ -135,7 +135,7 @@ Two further rules matter in practice:
 ## What sequential consistency adds
 
 With `seq_cst` every thread agrees on one global order of the `seq_cst` operations, and that order is
-consistent with each thread's program order. Acquire/release alone does not promise that. The classic
+consistent with each thread's program order. Acquire/release alone does not promise that. (Since C++20 the rules are subtler still: a program that mixes `seq_cst` with acquire/release operations on the same objects can observe outcomes that contradict the single total order. Keep the operations that must agree all `seq_cst`.) The classic
 case is the store-buffering pattern:
 
 ```cpp title="store_buffering.cpp"

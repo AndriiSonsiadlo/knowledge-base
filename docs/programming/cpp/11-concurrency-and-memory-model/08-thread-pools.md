@@ -3,444 +3,193 @@ id: thread-pools
 title: Thread Pools
 sidebar_label: Thread Pools
 sidebar_position: 8
-tags: [cpp, concurrency, thread-pools, threading, parallelism]
+tags: [cpp, concurrency, thread-pool, task-queue, packaged-task, jthread]
 ---
 
 # Thread Pools
 
-A **thread pool** manages a fixed set of worker threads that execute tasks from a queue, avoiding the overhead of creating and destroying threads repeatedly.
+A **thread pool** is a fixed set of worker threads that take tasks from a shared queue. It exists because
+creating a thread per task costs a system call and a stack each time, and because unbounded thread counts
+overload the machine. The pool caps the number of threads and reuses them.
 
-## Why Thread Pools?
-```mermaid
-graph TD
-    A[Task Queue] --> B[Worker 1]
-    A --> C[Worker 2]
-    A --> D[Worker 3]
-    A --> E[Worker N]
-    
-    B --> F[Execute Task]
-    C --> F
-    D --> F
-    E --> F
-```
+:::info[There is no standard thread pool]
+As of C++23 the standard library has no thread pool, executor or task scheduler. `std::async` is not one:
+it gives you no control over thread count, and implementations are free to start a thread per call. The
+standardized direction is `std::execution` (senders/receivers, adopted for C++26), but do not assume your
+standard library ships it yet. In the meantime you write a small pool (below), use a library
+(for example Boost.Asio's `thread_pool`, oneTBB, or your platform's), or use the parallel algorithms
+(`std::for_each(std::execution::par, ...)`, C++17; see [Algorithms](../09-standard-library/algorithms.md)).
+:::
 
-**Benefits:**
-- Reuse threads (avoid creation overhead)
-- Limit concurrency (prevent resource exhaustion)
-- Efficient task distribution
-- Better cache locality
+**Prerequisites:** [Threads](./04-threads.md) (`jthread`, stop tokens),
+[Condition variables](./06-condition-variables.md#blocking-queue) (the blocking queue this builds on),
+[Futures](./07-futures-and-promises.md) (`packaged_task`).
 
-## Simple Thread Pool
-```cpp
-#include <vector>
-#include <queue>
-#include <thread>
-#include <mutex>
+## The design
+
+<Diagram title="Pool structure" caption="Submitters push tasks; workers pop and run them. The mutex guards only the queue." accent="violet">
+  <DiagramRow>
+    <DiagramGroup label="Callers">
+      <DiagramNode title="submit(f)">returns a future</DiagramNode>
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="push + notify" />
+    <DiagramGroup label="Shared">
+      <DiagramNode title="task queue" accent>mutex + condition variable</DiagramNode>
+    </DiagramGroup>
+    <DiagramArrow direction="right" label="pop, run outside the lock" />
+    <DiagramGroup label="Workers">
+      <DiagramNode title="jthread 1..N">loop until stop and queue empty</DiagramNode>
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
+
+Decisions the code makes explicit:
+
+- **Workers are `std::jthread`s.** Destroying the pool requests stop on each and the destructor of the
+  `jthread` joins, so shutdown cannot be forgotten.
+- **A `condition_variable_any` with a stop token**: `wait(lock, stop_token, pred)` wakes when work arrives
+  *or* stop is requested ([Condition variables](./06-condition-variables.md#cancellable-waits-condition_variable_any-and-stop-tokens-c20)).
+- **Drain on shutdown.** A worker exits only when stop was requested *and* the queue is empty, so submitted tasks are not lost.
+- **Tasks run outside the lock**, otherwise the pool is serial.
+- **Results via `packaged_task`.** `submit` returns a `std::future`; exceptions thrown by the task are stored and
+  rethrown by `get()` ([Futures](./07-futures-and-promises.md)). `packaged_task` is move-only but `std::function`
+  needs a copyable callable, so the example shares it through a `shared_ptr`. With C++23 use
+  `std::move_only_function<void()>` for the queue's element type and drop the `shared_ptr`.
+- **Member order matters**: `workers_` is declared last so it is destroyed first, while the queue and mutex the workers use still exist.
+
+## A minimal pool
+
+```cpp title="thread_pool.cpp"
 #include <condition_variable>
+#include <cstdio>
 #include <functional>
-
-class ThreadPool {
-    std::vector<std::thread> workers_;
-    std::queue<std::function<void()>> tasks_;
-    
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    bool stop_ = false;
-    
-public:
-    explicit ThreadPool(size_t numThreads) {
-        for (size_t i = 0; i < numThreads; ++i) {
-            workers_.emplace_back([this] {
-                while (true) {
-                    std::function<void()> task;
-                    
-                    {
-                        std::unique_lock<std::mutex> lock(mutex_);
-                        cv_.wait(lock, [this] {
-                            return stop_ || !tasks_.empty();
-                        });
-                        
-                        if (stop_ && tasks_.empty()) {
-                            return;
-                        }
-                        
-                        task = std::move(tasks_.front());
-                        tasks_.pop();
-                    }
-                    
-                    task();
-                }
-            });
-        }
-    }
-    
-    template<typename F>
-    void enqueue(F&& f) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            tasks_.emplace(std::forward<F>(f));
-        }
-        cv_.notify_one();
-    }
-    
-    ~ThreadPool() {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            stop_ = true;
-        }
-        cv_.notify_all();
-        
-        for (auto& worker : workers_) {
-            worker.join();
-        }
-    }
-};
-
-// Usage
-ThreadPool pool(4);  // 4 worker threads
-
-for (int i = 0; i < 10; ++i) {
-    pool.enqueue([i] {
-        std::cout << "Task " << i << " on thread " 
-                  << std::this_thread::get_id() << '\n';
-    });
-}
-```
-
-## Thread Pool with Futures
-```cpp
 #include <future>
 #include <memory>
+#include <mutex>
+#include <queue>
+#include <stop_token>
+#include <thread>
+#include <type_traits>
+#include <vector>
 
 class ThreadPool {
-    std::vector<std::thread> workers_;
-    std::queue<std::function<void()>> tasks_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    bool stop_ = false;
-    
 public:
-    explicit ThreadPool(size_t numThreads) {
-        for (size_t i = 0; i < numThreads; ++i) {
-            workers_.emplace_back([this] {
-                while (true) {
-                    std::function<void()> task;
-                    
-                    {
-                        std::unique_lock<std::mutex> lock(mutex_);
-                        cv_.wait(lock, [this] {
-                            return stop_ || !tasks_.empty();
-                        });
-                        
-                        if (stop_ && tasks_.empty()) return;
-                        
-                        task = std::move(tasks_.front());
-                        tasks_.pop();
-                    }
-                    
-                    task();
-                }
-            });
-        }
+    explicit ThreadPool(std::size_t n) {
+        for (std::size_t i = 0; i < n; ++i)
+            workers_.emplace_back([this](std::stop_token st) { run(st); });
     }
-    
-    template<typename F, typename... Args>
-    auto enqueue(F&& f, Args&&... args) 
-        -> std::future<typename std::invoke_result_t<F, Args...>>
-    {
-        using ReturnType = typename std::invoke_result_t<F, Args...>;
-        
-        auto task = std::make_shared<std::packaged_task<ReturnType()>>(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
-        );
-        
-        std::future<ReturnType> result = task->get_future();
-        
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            tasks_.emplace([task]() { (*task)(); });
-        }
-        
-        cv_.notify_one();
-        return result;
-    }
-    
+
+    // Destruction: request stop on every worker, let them drain the queue, then jthread joins.
     ~ThreadPool() {
+        for (auto& w : workers_) w.request_stop();
+    }
+
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+
+    template <class F>
+    auto submit(F f) -> std::future<std::invoke_result_t<F>> {
+        using R = std::invoke_result_t<F>;
+        // packaged_task is move-only but std::function needs a copyable callable: share it.
+        auto task = std::make_shared<std::packaged_task<R()>>(std::move(f));
+        auto fut = task->get_future();
         {
-            std::lock_guard<std::mutex> lock(mutex_);
-            stop_ = true;
-        }
-        cv_.notify_all();
-        
-        for (auto& worker : workers_) {
-            worker.join();
-        }
-    }
-};
-
-// Usage with results
-ThreadPool pool(4);
-
-auto result1 = pool.enqueue([](int x) { return x * x; }, 5);
-auto result2 = pool.enqueue([](int x, int y) { return x + y; }, 3, 7);
-
-std::cout << "Result 1: " << result1.get() << '\n';  // 25
-std::cout << "Result 2: " << result2.get() << '\n';  // 10
-```
-
-## Practical Examples
-
-### Example 1: Parallel Processing
-```cpp
-#include <vector>
-#include <numeric>
-
-std::vector<int> processData(const std::vector<int>& input) {
-    ThreadPool pool(std::thread::hardware_concurrency());
-    
-    std::vector<std::future<int>> futures;
-    
-    for (int value : input) {
-        futures.push_back(pool.enqueue([value] {
-            return expensiveComputation(value);
-        }));
-    }
-    
-    std::vector<int> results;
-    for (auto& fut : futures) {
-        results.push_back(fut.get());
-    }
-    
-    return results;
-}
-```
-
-### Example 2: Map-Reduce
-```cpp
-template<typename Iterator, typename MapFunc, typename ReduceFunc>
-auto mapReduce(Iterator first, Iterator last, 
-               MapFunc mapFunc, ReduceFunc reduceFunc)
-{
-    ThreadPool pool(std::thread::hardware_concurrency());
-    
-    // Map phase
-    std::vector<std::future<decltype(mapFunc(*first))>> futures;
-    for (auto it = first; it != last; ++it) {
-        futures.push_back(pool.enqueue(mapFunc, *it));
-    }
-    
-    // Collect mapped values
-    std::vector<decltype(mapFunc(*first))> mapped;
-    for (auto& fut : futures) {
-        mapped.push_back(fut.get());
-    }
-    
-    // Reduce phase
-    return std::accumulate(mapped.begin(), mapped.end(), 
-                          mapped.front(), reduceFunc);
-}
-
-// Usage
-std::vector<int> data = {1, 2, 3, 4, 5};
-auto sum = mapReduce(
-    data.begin(), data.end(),
-    [](int x) { return x * x; },        // Map: square
-    [](int a, int b) { return a + b; }  // Reduce: sum
-);
-```
-
-### Example 3: Priority Queue
-```cpp
-class PriorityThreadPool {
-    struct Task {
-        int priority;
-        std::function<void()> func;
-        
-        bool operator<(const Task& other) const {
-            return priority < other.priority;  // Higher priority first
-        }
-    };
-    
-    std::vector<std::thread> workers_;
-    std::priority_queue<Task> tasks_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    bool stop_ = false;
-    
-public:
-    explicit PriorityThreadPool(size_t numThreads) {
-        for (size_t i = 0; i < numThreads; ++i) {
-            workers_.emplace_back([this] {
-                while (true) {
-                    std::function<void()> task;
-                    
-                    {
-                        std::unique_lock<std::mutex> lock(mutex_);
-                        cv_.wait(lock, [this] {
-                            return stop_ || !tasks_.empty();
-                        });
-                        
-                        if (stop_ && tasks_.empty()) return;
-                        
-                        task = std::move(tasks_.top().func);
-                        tasks_.pop();
-                    }
-                    
-                    task();
-                }
-            });
-        }
-    }
-    
-    template<typename F>
-    void enqueue(int priority, F&& f) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            tasks_.push({priority, std::forward<F>(f)});
+            std::lock_guard lk(m_);
+            q_.push([task] { (*task)(); });
         }
         cv_.notify_one();
+        return fut;
     }
-    
-    ~PriorityThreadPool() {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            stop_ = true;
-        }
-        cv_.notify_all();
-        
-        for (auto& worker : workers_) {
-            worker.join();
-        }
-    }
-};
 
-// Usage
-PriorityThreadPool pool(4);
-
-pool.enqueue(1, lowPriorityTask);
-pool.enqueue(10, highPriorityTask);  // Executes first
-```
-
-## Dynamic Thread Pool
-```cpp
-class DynamicThreadPool {
-    std::vector<std::thread> workers_;
-    std::queue<std::function<void()>> tasks_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
-    
-    size_t minThreads_;
-    size_t maxThreads_;
-    std::atomic<size_t> activeThreads_{0};
-    bool stop_ = false;
-    
-public:
-    DynamicThreadPool(size_t minThreads, size_t maxThreads)
-        : minThreads_(minThreads), maxThreads_(maxThreads) {
-        
-        for (size_t i = 0; i < minThreads_; ++i) {
-            addWorker();
-        }
-    }
-    
-    template<typename F>
-    void enqueue(F&& f) {
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-            tasks_.emplace(std::forward<F>(f));
-            
-            // Spawn new worker if needed
-            if (tasks_.size() > activeThreads_ && 
-                workers_.size() < maxThreads_) {
-                addWorker();
-            }
-        }
-        cv_.notify_one();
-    }
-    
 private:
-    void addWorker() {
-        workers_.emplace_back([this] {
-            while (true) {
-                std::function<void()> task;
-                
-                {
-                    std::unique_lock<std::mutex> lock(mutex_);
-                    cv_.wait(lock, [this] {
-                        return stop_ || !tasks_.empty();
-                    });
-                    
-                    if (stop_ && tasks_.empty()) return;
-                    
-                    task = std::move(tasks_.front());
-                    tasks_.pop();
-                    ++activeThreads_;
-                }
-                
-                task();
-                --activeThreads_;
+    void run(std::stop_token st) {
+        for (;;) {
+            std::function<void()> job;
+            {
+                std::unique_lock lk(m_);
+                cv_.wait(lk, st, [this] { return !q_.empty(); });
+                if (q_.empty()) return;            // stop requested and nothing left
+                job = std::move(q_.front());
+                q_.pop();
             }
-        });
+            job();                                 // run outside the lock
+        }
     }
+
+    std::mutex m_;
+    std::condition_variable_any cv_;
+    std::queue<std::function<void()>> q_;
+    std::vector<std::jthread> workers_;            // declared last: destroyed (joined) first
 };
-```
 
-## Best Practices
-
-:::success[**DO:**]
-- Size pool based on `hardware_concurrency()`
-- Use futures for results
-- Handle task exceptions gracefully
-- Implement graceful shutdown
-- Consider task priorities for different workloads
-  :::
-
-:::danger
-**DON'T:**
-- Create too many threads (overhead)
-- Block worker threads with I/O
-- Forget to join/stop pool on destruction
-- Submit blocking tasks (use separate I/O threads)
-- Assume task execution order
-  :::
-
-## Performance Tuning
-```cpp
-// Optimal thread count
-size_t optimalThreads() {
-    // CPU-bound: number of cores
-    return std::thread::hardware_concurrency();
-    
-    // I/O-bound: more threads
-    return std::thread::hardware_concurrency() * 2;
-    
-    // Mixed: tune based on profiling
-}
-
-// Task granularity
-void efficientBatching() {
-    ThreadPool pool(4);
-    
-    // BAD: Too fine-grained
-    for (int i = 0; i < 1000000; ++i) {
-        pool.enqueue([i] { process(i); });
-    }
-    
-    // GOOD: Batch tasks
-    size_t batchSize = 10000;
-    for (size_t i = 0; i < 1000000; i += batchSize) {
-        pool.enqueue([i, batchSize] {
-            for (size_t j = i; j < i + batchSize; ++j) {
-                process(j);
-            }
-        });
-    }
+int main() {
+    std::vector<std::future<long>> parts;
+    {
+        ThreadPool pool(4);
+        for (int c = 0; c < 8; ++c)
+            parts.push_back(pool.submit([c] {
+                long s = 0;
+                for (int i = c * 1000 + 1; i <= (c + 1) * 1000; ++i) s += i;
+                return s;
+            }));
+    }                                              // pool destroyed: queue drained, workers joined
+    long total = 0;
+    for (auto& f : parts) total += f.get();        // futures outlive the pool
+    std::printf("%ld\n", total);
 }
 ```
 
-## Related Topics
+```text
+32004000
+```
 
-- **[Threads](04-threads.md)** - Thread basics
-- **[Futures and Promises](07-futures-and-promises.md)** - Async results
-- **[Condition Variables](06-condition-variables.md)** - Thread coordination
-- **[Mutexes](05-mutexes.md)** - Synchronization
+That is the sum of 1 to 8000, and it is the output with g++ 15 and clang++ 21 at `-O0` and `-O2`; ThreadSanitizer
+reported nothing in 150 runs with each compiler on the final version.
+
+Limits of this pool, deliberately: no way to submit after destruction begins (do not call `submit`
+while the pool is being destroyed), no task priorities, no work stealing, one shared queue (so a single mutex is
+the contention point at high task rates), and a task that blocks waiting for another task in the same pool can
+deadlock it when all workers are busy waiting. Do not wait on pool futures from inside pool tasks unless
+the pool has spare workers.
+
+:::note[TSan and exception_ptr]
+In an earlier variant of this example, one task threw, and ThreadSanitizer with GCC 15 intermittently
+(2 of about 300 runs) reported a data race inside libstdc++'s `std::exception_ptr` release between the worker
+and the thread calling `get()`. It was not confirmed whether that is a real race or a TSan limitation with the
+uninstrumented library's reference counting, so treat reports with `exception_ptr` frames in them with
+suspicion and re-check, and don't assume either way. The version shown has no throwing task and ran clean.
+:::
+
+## Choosing the size
+
+Pick the thread count from the workload, then measure:
+
+- **CPU-bound** tasks gain nothing past the number of hardware threads. `std::thread::hardware_concurrency()` is a hint and may
+  return `0`.
+- **Blocking** tasks (I/O, waiting on locks) can profit from more threads than cores, because most of them are asleep.
+  There is no universal multiplier; measure.
+- Mixing both in one pool lets slow tasks hold all the workers; separate pools per kind of work avoid it.
+
+## Task granularity
+
+Each task costs a lock, a heap allocation (the `std::function` and `packaged_task`) and a wakeup. If the work
+per task is comparable to that cost, the pool is slower than a plain loop. Batch many small items into one
+task (a chunk of a range) so each task does a worthwhile amount of work. How large "worthwhile" is depends on your
+machine; profile ([Debugging and profiling](../14-debugging-and-profiling/01-debugging-basics.md)).
+
+## Pitfalls
+
+- **Task exceptions vanish if nobody calls `get()`**: they are stored in the future, never reported.
+- **Dangling captures.** The task runs later, on another thread: capture by value or ensure the referenced
+  objects outlive it.
+- **Submit after shutdown.** Decide what it means (reject, throw) and enforce it.
+- **Blocking on futures inside the pool** can deadlock, as above.
+- **Hard cancellation does not exist.** A stop request only reaches tasks that check the token themselves. A pool task cannot be
+  killed.
+- **Shared mutable state between tasks** is still a [data race](./03-data-races.md); the pool changes who runs the code, not the rules.
+
+## References
+
+- [`std::jthread` (cppreference)](https://en.cppreference.com/w/cpp/thread/jthread)
+- [`std::condition_variable_any::wait` with stop_token (cppreference)](https://en.cppreference.com/w/cpp/thread/condition_variable_any/wait)
+- [P2300, `std::execution`](https://wg21.link/p2300)
