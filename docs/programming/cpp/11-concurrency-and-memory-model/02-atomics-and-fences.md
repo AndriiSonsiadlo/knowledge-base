@@ -185,9 +185,9 @@ same thread; it emits no hardware barrier.
 
 ## `std::atomic_flag` and the C++20 additions
 
-`std::atomic_flag` is the one type guaranteed lock-free in every hosted implementation (C++20 also adds `std::atomic_signed_lock_free` and `std::atomic_unsigned_lock_free`, aliases for an always-lock-free integer type). It holds a bool-like
+`std::atomic_flag` is the one type guaranteed lock-free in every implementation, freestanding included. (C++20 hosted implementations also provide `std::atomic_signed_lock_free` and `std::atomic_unsigned_lock_free`, always-lock-free integer atomics that are optional in freestanding.) It holds a bool-like
 state with `test_and_set` and `clear`; C++20 adds `test()` and `wait/notify`, and makes a default-constructed flag
-clear (`ATOMIC_FLAG_INIT` is no longer needed but still valid; it was kept for C compatibility, while `ATOMIC_VAR_INIT` and `atomic_init` are the deprecated ones). A spin lock, with `wait` so a loser sleeps instead of burning CPU:
+clear (`ATOMIC_FLAG_INIT` is no longer needed but still valid, while `ATOMIC_VAR_INIT` and `atomic_init` are the deprecated ones). A spin lock, with `wait` so a loser sleeps instead of burning CPU:
 
 ```cpp title="spinlock.cpp"
 #include <atomic>
