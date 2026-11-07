@@ -17,7 +17,7 @@ from different threads yourself.
 
 **Prerequisites:** [Threads](./04-threads.md) (for the last section),
 [Object lifetime](../05-memory-and-object-lifetime/object-lifetime.md). Compile with `-std=c++20`
-(`-std=c++23` for `std::generator`); no extra flags on GCC 10+ or Clang with libstdc++.
+(`-std=c++23` for `std::generator`); GCC 11 or later needs no extra flag (GCC 10 needed `-fcoroutines`).
 
 :::warning[C++20 gives the mechanism, not the types]
 C++20 standardised the language support (`co_await`, `co_yield`, `co_return`, `std::coroutine_handle`, the
@@ -37,7 +37,7 @@ A function is a coroutine if its body contains any of:
 | `co_return [value]` | Finish the coroutine, optionally with a result. |
 
 The return type decides which library protocol applies, through a nested `promise_type`. A coroutine cannot use
-plain `return`, variadic arguments or a placeholder return type (`auto`), and it cannot be `constexpr`/`consteval`, `main`,
+plain `return`, C-style varargs (`...`) or a placeholder return type (`auto`), and it cannot be `constexpr`/`consteval`, `main`,
 or a constructor or destructor.
 
 ## The coroutine frame
@@ -303,8 +303,7 @@ square runs
 Lazy start is visible: `created` prints before any coroutine body runs. The two `square(...)` temporaries
 live until the end of the full expression, which spans the suspensions, so they are alive when resumed. This `run()`
 only works because nothing here ever suspends for real. A real task needs a scheduler or event loop to
-resume it when I/O completes, plus more care (cancellation, allocation, exceptions, resumption on the right thread). In C++26 `std::execution` and
-its `task` aim to standardize this; for now use a library rather than extending this sketch.
+resume it when I/O completes, plus more care (cancellation, allocation, exceptions, resumption on the right thread). The C++26 draft's `std::execution` aims to standardize this; for now use a library rather than extending this sketch.
 
 ### Which thread resumes?
 
@@ -315,12 +314,10 @@ everything in the frame must then follow the usual rules: state shared with othe
 [synchronization](./01-cpp-memory-model.md), and the resumed code runs in a different thread from the one that started it
 (`thread_local` values and thread-affine locks such as a held `std::mutex` do not carry over).
 
-:::caution[Unverified on GCC 15]
-A small test awaiter whose `await_suspend` started a `std::jthread` that called `h.resume()` was run under
-`-fsanitize=thread`. Clang 21 was clean; GCC 15 reported a data race on the coroutine frame between
-the suspending thread and the resumed one. It was not determined whether this is a TSan false positive or a code-generation issue
-(the standard requires the coroutine to be considered suspended before `await_suspend` is called), so this page shows no
-cross-thread resumption code. Test any such awaiter under your own compiler and TSan.
+:::caution[Test cross-thread resumption under TSan]
+GCC 15's ThreadSanitizer has reported data races on the coroutine frame when an awaiter resumes the coroutine from
+another thread, while Clang's did not on the same code. This page shows no cross-thread resumption code; if you
+write such an awaiter, test it with your own compiler and `-fsanitize=thread`.
 :::
 
 ## Pitfalls
@@ -338,7 +335,7 @@ cross-thread resumption code. Test any such awaiter under your own compiler and 
 - **Lambda coroutines and captures.** The closure object is not copied into the frame; only the arguments are. A
   capturing lambda that is a coroutine and is destroyed (or is a temporary) before the coroutine finishes leaves it
   with dangling captures. Pass what you need as parameters, or keep the lambda alive until completion.
-- **Never resuming, or resuming twice.** Resuming a coroutine that is not suspended, or one that has finished, is undefined behaviour.
+- **Resuming wrongly.** Resuming a coroutine that is not suspended, or one that has finished, is undefined behaviour. A coroutine that is never resumed (or destroyed) leaks its frame.
 - **Leaking frames.** Whoever holds the `coroutine_handle` must call `destroy()` exactly once (or let the coroutine destroy
   itself at `final_suspend`, using `suspend_never`).
 - **Exceptions.** An exception escaping the body goes to `unhandled_exception()`; if you leave that empty, the exception is swallowed. Store it and rethrow

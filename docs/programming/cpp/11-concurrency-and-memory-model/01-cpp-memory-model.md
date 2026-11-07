@@ -135,7 +135,7 @@ Two further rules matter in practice:
 ## What sequential consistency adds
 
 With `seq_cst` every thread agrees on one global order of the `seq_cst` operations, and that order is
-consistent with each thread's program order. Acquire/release alone does not promise that. (Since C++20 the rules are subtler still: a program that mixes `seq_cst` with acquire/release operations on the same objects can observe outcomes that contradict the single total order. Keep the operations that must agree all `seq_cst`.) The classic
+consistent with each thread's program order. Acquire/release alone does not promise that. (Since C++20, once `seq_cst` is mixed with acquire/release operations, the single total order need no longer agree with happens-before, which gives surprising results. Keep the operations that must agree all `seq_cst`.) The classic
 case is the store-buffering pattern:
 
 ```cpp title="store_buffering.cpp"
