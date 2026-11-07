@@ -232,7 +232,7 @@ int main() {
 }
 ```
 
-Output: `caught: worker failed`. See [Exceptions](../10-error-handling-and-safety/01-exceptions.md) for `exception_ptr`.
+Output: `caught: worker failed`. See [`std::exception_ptr` (cppreference)](https://en.cppreference.com/w/cpp/error/exception_ptr).
 
 ## Thread identity, sleeping, yielding
 
