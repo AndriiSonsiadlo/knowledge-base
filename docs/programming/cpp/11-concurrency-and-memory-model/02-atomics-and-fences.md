@@ -76,7 +76,7 @@ retry if someone changed it meanwhile.
 #include <thread>
 #include <vector>
 
-// Atomic maximum (C++26 adds fetch_max; before that, a CAS loop).
+// Atomic maximum as a CAS loop (the standard has no fetch_max before C++26).
 void update_max(std::atomic<int>& target, int value) {
     int cur = target.load(std::memory_order_relaxed);
     while (cur < value &&
@@ -167,8 +167,8 @@ int main() {
 }
 ```
 
-This is correct and prints `1 2`. Both fences are required, and they only work through the atomic that
-carries the value from one side to the other.
+This is correct and prints `1 2`. Both fences are needed in this program, and they only work through the atomic that
+carries the value from one side to the other. (A release fence can also pair with an acquire *load*, and a release *store* with an acquire fence; each combination synchronizes if the load reads the stored value.)
 
 When to prefer a fence: when one release publishes many writes and several relaxed loads need only one
 acquire after the loop, or when the order depends on a branch. Otherwise the per-operation form is clearer.
@@ -185,9 +185,9 @@ same thread; it emits no hardware barrier.
 
 ## `std::atomic_flag` and the C++20 additions
 
-`std::atomic_flag` is the one type guaranteed lock-free in every implementation. It holds a bool-like
+`std::atomic_flag` is the one type guaranteed lock-free in every hosted implementation (C++20 also adds `std::atomic_signed_lock_free` and `std::atomic_unsigned_lock_free`, aliases for an always-lock-free integer type). It holds a bool-like
 state with `test_and_set` and `clear`; C++20 adds `test()` and `wait/notify`, and makes a default-constructed flag
-clear (`ATOMIC_FLAG_INIT` is deprecated in C++20). A spin lock, with `wait` so a loser sleeps instead of burning CPU:
+clear (`ATOMIC_FLAG_INIT` is no longer needed but still valid; it was kept for C compatibility, while `ATOMIC_VAR_INIT` and `atomic_init` are the deprecated ones). A spin lock, with `wait` so a loser sleeps instead of burning CPU:
 
 ```cpp title="spinlock.cpp"
 #include <atomic>
