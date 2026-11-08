@@ -1,519 +1,200 @@
 ---
 id: pimpl
-title: Pimpl (Pointer to Implementation)
+title: Pimpl
 sidebar_label: Pimpl
 sidebar_position: 2
-tags: [cpp, pimpl, idioms, design-patterns, compilation, encapsulation]
+tags: [c++, pimpl, idioms, compilation, encapsulation, abi]
 ---
 
-# Pimpl (Pointer to Implementation)
+# Pimpl
 
-**Pimpl** (Pointer to Implementation) separates a class's interface from its implementation by moving private members into a separate implementation class. This reduces compilation dependencies and provides better encapsulation.
+**Pimpl** (pointer to implementation, also the "compiler firewall") moves a class's private data
+and helper types out of its header into a hidden `Impl` struct defined in the `.cpp` file. The
+public class keeps one pointer to it. Clients that include the header no longer see, or depend on,
+anything in `Impl`.
 
-## The Problem
+**Prerequisites:** [Headers and Includes](../01-toolchain-and-build/headers-and-includes.md),
+[`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md) (especially
+[incomplete types](../06-pointers-references-and-smart-pointers/unique-ptr.md#incomplete-types-and-the-pimpl-idiom)),
+[Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md).
 
-Without Pimpl, changing private members forces recompilation of all files that include the header, even though they can't access those members.
-```cpp
-// widget.h - WITHOUT Pimpl
-#include "detail.h"        // Implementation dependency
-#include "helper.h"        // Leaked to users
-#include <vector>
+## The problem
 
-class Widget {
-public:
-    void doSomething();
-    
-private:
-    Detail detail_;         // Exposes Detail to users
-    Helper helper_;         // Exposes Helper to users
-    std::vector<int> data_; // Forces vector recompilation
-};
+A class definition lists every non-static data member, so its header must include whatever those
+members' types need. Every file that includes the header then:
 
-// Any change to private members requires recompiling all users!
-```
+- recompiles when any private member or its header changes, even though callers cannot touch it;
+- sees (and may accidentally depend on) third-party or platform headers that were only an
+  implementation detail;
+- has `sizeof(Widget)` and member offsets baked in. For a shared library, adding a private member
+  changes the size, so clients must be recompiled to stay correct.
 
-## The Solution
+Pimpl cuts all three by making the class a fixed-size handle.
 
-Pimpl hides implementation details behind an opaque pointer, making the interface header independent of implementation changes.
-```cpp
-// widget.h - WITH Pimpl
+## The idiom
+
+```cpp title="widget.h" showLineNumbers
+#pragma once
 #include <memory>
+#include <string>
 
 class Widget {
 public:
-    Widget();
-    ~Widget();
-    
-    // Rule of Five needed with Pimpl
+    explicit Widget(std::string name);
+    ~Widget();                                   // defined where Impl is complete
     Widget(Widget&&) noexcept;
     Widget& operator=(Widget&&) noexcept;
-    Widget(const Widget&);
+    Widget(const Widget&);                       // deep copy, user-provided
     Widget& operator=(const Widget&);
-    
-    void doSomething();
-    
-private:
-    struct Impl;  // Forward declaration
-    std::unique_ptr<Impl> pImpl_;
-};
 
-// widget.cpp
+    void rename(std::string name);
+    const std::string& name() const;
+    int renames() const;
+
+private:
+    struct Impl;                                 // declared, not defined
+    std::unique_ptr<Impl> impl_;
+};
+```
+
+```cpp title="widget.cpp" showLineNumbers
 #include "widget.h"
-#include "detail.h"   // Only needed in .cpp
-#include "helper.h"   // Only needed in .cpp
-#include <vector>
+#include <utility>
 
-struct Widget::Impl {
-    Detail detail;
-    Helper helper;
-    std::vector<int> data;
+struct Widget::Impl {                            // complete only in this file
+    std::string name;
+    int renames = 0;
 };
 
-Widget::Widget() : pImpl_(std::make_unique<Impl>()) {}
+Widget::Widget(std::string name) : impl_(std::make_unique<Impl>(Impl{std::move(name), 0})) {}
 Widget::~Widget() = default;
 Widget::Widget(Widget&&) noexcept = default;
 Widget& Widget::operator=(Widget&&) noexcept = default;
-
-Widget::Widget(const Widget& other)
-    : pImpl_(std::make_unique<Impl>(*other.pImpl_)) {}
-
-Widget& Widget::operator=(const Widget& other) {
-    *pImpl_ = *other.pImpl_;
+Widget::Widget(const Widget& o) : impl_(std::make_unique<Impl>(*o.impl_)) {}
+Widget& Widget::operator=(const Widget& o) {
+    if (this != &o) *impl_ = *o.impl_;           // assumes o has an Impl (not moved-from)
     return *this;
 }
 
-void Widget::doSomething() {
-    pImpl_->helper.help();
-    pImpl_->data.push_back(42);
+void Widget::rename(std::string name) { impl_->name = std::move(name); ++impl_->renames; }
+const std::string& Widget::name() const { return impl_->name; }
+int Widget::renames() const { return impl_->renames; }
+```
+
+```cpp title="main.cpp"
+#include "widget.h"
+#include <cstdio>
+#include <utility>
+
+int main() {
+    Widget a("alpha");
+    Widget b = a;                 // deep copy
+    b.rename("beta");
+    Widget c = std::move(b);
+    std::printf("%s %d | %s %d\n", a.name().c_str(), a.renames(), c.name().c_str(), c.renames());
 }
 ```
 
-:::info
-The destructor must be defined in the `.cpp` file where `Impl` is complete, otherwise `unique_ptr` can't delete it.
-:::
+Built with `g++` 15 and `clang++` 21, `-std=c++20 -Wall -Wextra`, at `-O0` and `-O2`, the output is
+`alpha 0 | beta 1`.
 
-## Benefits
+<Diagram title="What a client sees" caption="The header exposes only a pointer; the definition of Impl and its dependencies stay in widget.cpp." accent="blue">
+  <DiagramRow>
+    <DiagramGroup label="widget.h (included by clients)">
+      <DiagramNode icon="package" title="Widget">one pointer: <code>unique_ptr&lt;Impl&gt;</code></DiagramNode>
+    </DiagramGroup>
+    <DiagramGroup label="widget.cpp only">
+      <DiagramNode icon="lock" title="Widget::Impl" accent>data members, helper types, third-party includes</DiagramNode>
+    </DiagramGroup>
+  </DiagramRow>
+</Diagram>
 
-Pimpl provides several compile-time and design advantages.
+### Why the special members are declared in the header and defined in the .cpp
 
-### Faster Compilation
+`std::unique_ptr<Impl>`'s default deleter needs `Impl` complete wherever the destructor is
+instantiated. If you leave `~Widget()` implicit, the compiler defines it inline in every file that
+needs it, where `Impl` is only declared:
 
-Only the implementation file needs recompilation when private members change, not all users of the class.
-```cpp
-// Changing Widget::Impl only requires recompiling widget.cpp
-// All files that include widget.h don't need recompilation
+```text
+error: invalid application of 'sizeof' to incomplete type 'Impl'
 ```
 
-### Better Encapsulation
-
-Implementation details are completely hidden from users - they can't even see the types used internally.
-```cpp
-// widget.h - users can't see Detail, Helper, or vector
-class Widget {
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-```
-
-### ABI Stability
-
-The class layout doesn't change when private members change, maintaining binary compatibility across library versions.
-```cpp
-// Adding members to Impl doesn't break ABI
-// Widget's memory layout stays the same
-```
-
-### Reduced Header Dependencies
-
-Implementation headers are only included in `.cpp` files, reducing transitive includes for users.
-```cpp
-// widget.h - minimal includes
-#include <memory>  // Only this needed
-
-// widget.cpp - heavy includes hidden
-#include "complex_implementation.h"
-#include "third_party_library.h"
-```
-
-## Implementation Patterns
-
-Different use cases require different Pimpl implementations.
-
-### Basic Pimpl (Move-Only)
-
-Simplest form - no copying, only moving, reduces boilerplate code.
-```cpp
-// widget.h
-class Widget {
-public:
-    Widget();
-    ~Widget();
-    Widget(Widget&&) noexcept;
-    Widget& operator=(Widget&&) noexcept;
-    
-private:
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-
-// widget.cpp
-struct Widget::Impl {
-    // Implementation members
-};
-
-Widget::Widget() : pImpl_(std::make_unique<Impl>()) {}
-Widget::~Widget() = default;
-Widget::Widget(Widget&&) noexcept = default;
-Widget& Widget::operator=(Widget&&) noexcept = default;
-```
-
-### Copyable Pimpl
-
-Enables copying by implementing copy constructor and assignment with deep copy.
-```cpp
-// widget.h
-class Widget {
-public:
-    Widget();
-    ~Widget();
-    
-    Widget(const Widget& other);
-    Widget& operator=(const Widget& other);
-    
-    Widget(Widget&&) noexcept;
-    Widget& operator=(Widget&&) noexcept;
-    
-private:
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-
-// widget.cpp
-Widget::Widget(const Widget& other)
-    : pImpl_(std::make_unique<Impl>(*other.pImpl_)) {}
-
-Widget& Widget::operator=(const Widget& other) {
-    if (this != &other) {
-        *pImpl_ = *other.pImpl_;
-    }
-    return *this;
-}
-```
-
-### Shared Pimpl
-
-Multiple objects can share the same implementation using reference counting.
-```cpp
-// widget.h
-class Widget {
-public:
-    Widget();
-    // Compiler-generated copy/move work correctly
-    
-private:
-    struct Impl;
-    std::shared_ptr<Impl> pImpl_;
-};
-
-// widget.cpp
-Widget::Widget() : pImpl_(std::make_shared<Impl>()) {}
-```
-
-### Fast Pimpl (Inline Storage)
-
-Avoids heap allocation by using inline storage, trading header changes for performance.
-```cpp
-// widget.h
-class Widget {
-public:
-    Widget();
-    ~Widget();
-    
-private:
-    static constexpr size_t STORAGE_SIZE = 64;
-    alignas(std::max_align_t) std::byte storage_[STORAGE_SIZE];
-    
-    struct Impl;
-    Impl* pImpl_;
-};
-
-// widget.cpp
-struct Widget::Impl {
-    // Must fit in STORAGE_SIZE
-};
-
-Widget::Widget() {
-    static_assert(sizeof(Impl) <= STORAGE_SIZE);
-    pImpl_ = new(storage_) Impl();
-}
-
-Widget::~Widget() {
-    pImpl_->~Impl();
-}
-```
-
-## Practical Examples
-
-### Example 1: Network Client
-
-Network implementation details are hidden, allowing protocol changes without recompiling users.
-```cpp
-// client.h
-#include <memory>
-#include <string>
-
-class NetworkClient {
-public:
-    NetworkClient(const std::string& host, int port);
-    ~NetworkClient();
-    
-    NetworkClient(NetworkClient&&) noexcept;
-    NetworkClient& operator=(NetworkClient&&) noexcept;
-    
-    bool connect();
-    void send(const std::string& data);
-    std::string receive();
-    
-private:
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-
-// client.cpp
-#include "client.h"
-#include <sys/socket.h>  // Not leaked to users
-#include <netinet/in.h>  // Not leaked to users
-#include <vector>
-
-struct NetworkClient::Impl {
-    int sockfd;
-    sockaddr_in serverAddr;
-    std::vector<char> buffer;
-    
-    Impl(const std::string& host, int port);
-    ~Impl();
-};
-
-NetworkClient::NetworkClient(const std::string& host, int port)
-    : pImpl_(std::make_unique<Impl>(host, port)) {}
-
-NetworkClient::~NetworkClient() = default;
-NetworkClient::NetworkClient(NetworkClient&&) noexcept = default;
-NetworkClient& NetworkClient::operator=(NetworkClient&&) noexcept = default;
-
-bool NetworkClient::connect() {
-    return ::connect(pImpl_->sockfd, 
-                    (sockaddr*)&pImpl_->serverAddr,
-                    sizeof(pImpl_->serverAddr)) == 0;
-}
-```
-
-### Example 2: Database Connection
-
-Database-specific headers are isolated, preventing pollution of user code with database types.
-```cpp
-// database.h
-#include <memory>
-#include <string>
-#include <vector>
-
-class Database {
-public:
-    Database(const std::string& connectionString);
-    ~Database();
-    
-    bool connect();
-    void execute(const std::string& query);
-    std::vector<std::string> fetchResults();
-    
-private:
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-
-// database.cpp
-#include "database.h"
-#include <libpq-fe.h>  // PostgreSQL - not leaked
-
-struct Database::Impl {
-    PGconn* conn;
-    PGresult* result;
-    std::string connString;
-    
-    Impl(const std::string& cs) : conn(nullptr), result(nullptr), connString(cs) {}
-    
-    ~Impl() {
-        if (result) PQclear(result);
-        if (conn) PQfinish(conn);
-    }
-};
-
-Database::Database(const std::string& connectionString)
-    : pImpl_(std::make_unique<Impl>(connectionString)) {}
-
-Database::~Database() = default;
-
-bool Database::connect() {
-    pImpl_->conn = PQconnectdb(pImpl_->connString.c_str());
-    return PQstatus(pImpl_->conn) == CONNECTION_OK;
-}
-```
-
-### Example 3: GUI Widget
-
-Platform-specific GUI code is hidden, enabling cross-platform interfaces without exposing platform details.
-```cpp
-// button.h
-#include <memory>
-#include <string>
-#include <functional>
-
-class Button {
-public:
-    Button(const std::string& text);
-    ~Button();
-    
-    void setText(const std::string& text);
-    void setOnClick(std::function<void()> callback);
-    void show();
-    
-private:
-    struct Impl;
-    std::unique_ptr<Impl> pImpl_;
-};
-
-// button_windows.cpp (Windows platform)
-#include "button.h"
-#include <windows.h>  // Not leaked to users
-
-struct Button::Impl {
-    HWND hwnd;
-    std::function<void()> onClick;
-    
-    Impl(const std::string& text) {
-        hwnd = CreateWindow("BUTTON", text.c_str(), 
-                           WS_VISIBLE | WS_CHILD,
-                           10, 10, 100, 30, NULL, NULL, NULL, NULL);
-    }
-    
-    ~Impl() {
-        DestroyWindow(hwnd);
-    }
-};
-
-// button_linux.cpp (Linux platform)
-#include "button.h"
-#include <gtk/gtk.h>  // Not leaked to users
-
-struct Button::Impl {
-    GtkWidget* widget;
-    std::function<void()> onClick;
-    
-    Impl(const std::string& text) {
-        widget = gtk_button_new_with_label(text.c_str());
-    }
-    
-    ~Impl() {
-        gtk_widget_destroy(widget);
-    }
-};
-```
-
-## Performance Considerations
-
-Pimpl has trade-offs between compilation time and runtime performance.
-
-### Extra Indirection
-
-Every access through pImpl requires pointer dereference, adding slight overhead.
-```cpp
-// One extra indirection
-void Widget::doSomething() {
-    pImpl_->data.push_back(42);  // pImpl_ -> data -> push_back
-}
-
-// vs direct access
-void Widget::doSomething() {
-    data_.push_back(42);  // data_ -> push_back
-}
-```
-
-### Heap Allocation
-
-Creating a Pimpl object requires heap allocation, which is slower than stack allocation.
-```cpp
-// Heap allocation
-Widget w;  // Allocates Impl on heap
-
-// Can be mitigated with inline storage
-// or object pools
-```
-
-### Cache Locality
-
-Implementation data is not contiguous with the object, potentially affecting cache performance.
-```cpp
-// Poor cache locality
-std::vector<Widget> widgets(1000);
-for (auto& w : widgets) {
-    w.doSomething();  // Each access jumps to different heap location
-}
-```
-
-## When to Use Pimpl
-
-Pimpl is most beneficial in specific scenarios, not everywhere.
-
-:::success[**Use Pimpl When:**]
-- Class has complex private implementation
-- Reducing compilation dependencies is important
-- Providing stable ABI for library interface
-- Hiding platform-specific implementation
-- Private members change frequently
-  :::
-
-:::warning
-**Avoid Pimpl When:**
-- Performance is critical (hot path code)
-- Class is header-only template
-- Implementation is simple (few dependencies)
-- Creating many short-lived objects
-- Overhead outweighs compilation benefits
-  :::
-
-## Best Practices
-
-Follow these guidelines for effective Pimpl usage.
-
-:::success[**DO:**]
-- Define destructor in `.cpp` file
-- Use `unique_ptr` for exclusive ownership
-- Forward declare Impl in header
-- Include Impl definition only in `.cpp`
-- Implement Rule of Five if needed
-  :::
-
-:::danger
-**DON'T:**
-- Define destructor inline in header
-- Use Pimpl for every class
-- Expose Impl pointer to users
-- Forget to implement copy operations
-- Mix Pimpl and inline implementations
-  :::
-
-## Pimpl Variants
-
-Different pointer types provide different semantics and performance characteristics.
-
-| Variant | Pointer Type   | Semantics           | Copy Behavior          |
-|---------|----------------|---------------------|------------------------|
-| Unique  | `unique_ptr`   | Exclusive ownership | Move-only or deep copy |
-| Shared  | `shared_ptr`   | Shared ownership    | Shallow copy           |
-| Fast    | Inline storage | No allocation       | Complex copy           |
-
-## Related Topics
-
-- **[Smart Pointers](../06-pointers-references-and-smart-pointers/unique-ptr.md)** - Ownership management
-- **[Rule of Five](../07-classes-and-oop/rule-of-zero-three-five.md)** - Special members
-- **[Forward Declarations](../01-toolchain-and-build/headers-and-includes.md)** - Compilation dependencies
+(g++ 15 and clang++ 21 both report this for a class with an implicit destructor and an incomplete
+`Impl`.) The same applies to move assignment, which destroys the old object. So declare the
+destructor and the move operations in the header and define them, even as `= default`, in the
+`.cpp` after `Impl` is complete. The rule is explained with the deleter on the
+[`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md#incomplete-types-and-the-pimpl-idiom)
+page.
+
+### Copy semantics are your choice
+
+`unique_ptr` makes `Widget` move-only by default, and declaring the moves suppresses the implicit
+copies. If the class should be copyable, write a deep copy as above. A moved-from `Widget` has a
+null `impl_`; any member function called on it dereferences null, so either document that only
+destruction and assignment are valid on a moved-from object, or have the move constructor allocate a
+fresh `Impl`. `shared_ptr<const Impl>` gives cheap copies with shared immutable state, which is a
+different semantics, not a free copy.
+
+### `const` does not propagate
+
+In a `const` member function `impl_` is a `const unique_ptr<Impl>`, so `impl_->name` is still
+mutable: constness stops at the pointer. The discipline is to treat `Impl` as part of the object and
+keep `const` member functions honest by hand, or wrap the pointer in `std::experimental::propagate_const`
+(Library Fundamentals TS v2, available in libstdc++ and libc++ but not in `std`).
+
+## Costs
+
+- **An extra indirection on every member access** and, normally, **one heap allocation per object**
+  (two if `Impl` holds containers; copies allocate again). Whether this matters depends on the call
+  rate and cache behavior; measure in your own code. For a rarely-constructed class with coarse
+  operations the cost is negligible; for a small value type used in a tight loop it is the wrong tool.
+- **Member functions cannot be inlined across translation units** without LTO, since their
+  bodies live in the `.cpp`.
+- **Boilerplate:** forwarding functions, and the special-member declarations above.
+- **Debugging** takes one more hop to see state.
+
+## What pimpl buys
+
+- **Build time.** Changing `Impl` rebuilds only `widget.cpp`; clients relink. Dependencies of `Impl`
+  (platform headers, third-party libraries) leave the client's include graph. The size of the gain is
+  project-specific; it is largest for widely included headers.
+- **Binary compatibility (library authors).** `sizeof(Widget)` and its member offsets are fixed by
+  the single pointer, so adding or reordering private state in `Impl` does not change the class
+  layout that clients compiled against. This holds for the layout of `Widget` only: any change to
+  the public interface, to virtual functions, or to inline code in the header is still an ABI
+  change, and the effect on symbol mangling and layout is compiler- and ABI-specific. See
+  [class layout](../07-classes-and-oop/class-layout.md) for what determines `sizeof`.
+- **Encapsulation.** Private members are not just inaccessible but invisible.
+
+## Alternatives
+
+| Technique | Hides data? | Cost | Use when |
+|---|---|---|---|
+| Pimpl | yes | pointer + allocation per object | a concrete value-like class with a stable public interface |
+| Abstract interface + factory (`std::unique_ptr<Base> make()`) | yes | virtual call + allocation | clients only use the object through a polymorphic interface anyway ([virtual functions](../07-classes-and-oop/virtual-functions.md)) |
+| C++20 modules | only partially | none at run time | the goal is build time, not ABI: a module interface does not leak private includes into importers, though the class definition (and so its layout) is still part of the interface |
+| Plain header with private members | no | none | internal code where rebuild cost is acceptable |
+
+A "fast pimpl" stores `Impl` inline in an aligned buffer to avoid the allocation. It reintroduces
+the size dependency (the buffer must be at least `sizeof(Impl)`), which defeats the ABI benefit, so
+guard it with a `static_assert(sizeof(Impl) <= Size)` in the `.cpp` and use it only when the
+allocation is measured to matter.
+
+## Pitfalls
+
+- **Forgetting to define the destructor in the .cpp:** the "incomplete type" error above.
+- **Putting `Impl` in the header "just for now":** every client depends on it again.
+- **Using Pimpl on everything:** it trades run-time cost and boilerplate for build time and
+  stability; apply it at module boundaries, not to small helper classes.
+
+## Related
+
+- [`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md): the owning pointer and its incomplete-type rule.
+- [Non-Copyable](./04-non-copyable.md): the alternative when a pimpl class should be move-only.
+- [Copy-and-Swap](./05-copy-and-swap.md): a strong-guarantee copy assignment for the deep-copy case.
+
+## References
+
+- [cppreference: `std::unique_ptr` (incomplete types)](https://en.cppreference.com/w/cpp/memory/unique_ptr)
+- [cppreference: `std::experimental::propagate_const`](https://en.cppreference.com/w/cpp/experimental/propagate_const)
+- [C++ Core Guidelines: I.27](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i27-for-stable-library-abi-consider-the-pimpl-idiom)

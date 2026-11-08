@@ -1,618 +1,195 @@
 ---
 id: crtp
-title: CRTP (Curiously Recurring Template Pattern)
+title: CRTP
 sidebar_label: CRTP
 sidebar_position: 3
-tags: [cpp, crtp, templates, design-patterns, static-polymorphism]
+tags: [c++, crtp, templates, mixins, static-polymorphism]
 ---
 
-# CRTP (Curiously Recurring Template Pattern)
+# CRTP
 
-CRTP is a template pattern where a class `Derived` inherits from a template base class `Base<Derived>`, passing itself as a template argument. This enables compile-time polymorphism without virtual functions.
+The **curiously recurring template pattern** has a class derive from a template instantiated with
+the class itself: `struct D : Base<D>`. The base is then compiled knowing the exact derived type, so
+it can call derived members, return derived references and add per-derived state, all resolved at
+compile time. Its practical job is the **mixin**: write a piece of behavior once and stamp it onto
+many classes without virtual functions.
 
-:::info[Static Polymorphism]
-CRTP provides polymorphic behavior at compile-time through templates rather than runtime through virtual functions. Zero overhead, but less flexible than dynamic polymorphism.
-:::
+How CRTP compares with virtual functions, `std::variant` and concepts as a way to get polymorphism
+is owned by [Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md#crtp-a-base-class-interface-without-virtual-calls),
+which also has the minimal example. This page covers what that page leaves out: mixins, the rules
+the pattern depends on, its traps, and the C++23 replacement.
 
-## Basic CRTP Pattern
+**Prerequisites:** [Class Templates](../08-templates-and-metaprogramming/class-templates.md),
+[Inheritance](../07-classes-and-oop/inheritance.md).
 
-```cpp showLineNumbers
-// Base class takes derived type as template parameter
-template<typename Derived>
-class Base {
-public:
-    void interface() {
-        // Call derived implementation
-        static_cast<Derived*>(this)->implementation();
-    }
-    
-    void implementation() {
-        std::cout << "Base implementation\n";
-    }
-};
+## How it works
 
-// Derived class passes itself to base
-class Derived : public Base<Derived> {
-public:
-    void implementation() {
-        std::cout << "Derived implementation\n";
-    }
-};
+`Base<D>` is instantiated when `D` is named as a base, and `D` is still an incomplete type at that
+point. That has one consequence for everything below: the body of a **member function** of `Base<D>`
+may use `D`'s members, because member function bodies are instantiated only when called, after `D`
+is complete. The **declarations** of `Base<D>` (data members, member signatures, nested typedefs)
+may not.
 
-int main() {
-    Derived d;
-    d.interface();  // Calls Derived::implementation()
-}
+```cpp title="Fragment: the incomplete-type rule"
+template <typename D> struct Base { typename D::inner x; };   // error
+struct Der : Base<Der> { using inner = int; };
 ```
 
-The base class can access derived class methods through the template parameter and `static_cast`.
-
-## How CRTP Works
-
-```mermaid
-graph TD
-    A[Derived : Base&lt;Derived&gt;] --> B[Base&lt;Derived&gt;]
-    B -->|static_cast| C[Derived::implementation]
-    
+```text
+error: invalid use of incomplete type 'struct Der'      (g++ 15)
 ```
 
-**Mechanism:**
-1. `Derived` inherits from `Base<Derived>`
-2. `Base` receives `Derived` as template parameter
-3. `Base` can `static_cast<Derived*>(this)` to access derived methods
-4. Resolved at compile-time - no virtual table overhead
+Inside a member function, `static_cast<D&>(*this)` is the downcast to the derived object. It is
+well-defined as long as the object really is a `D`.
 
-## CRTP vs Virtual Functions
+## Mixin 1: derive operators from one
 
-```cpp showLineNumbers
-// Virtual functions (runtime polymorphism)
-class BaseVirtual {
+A mixin supplies several operations from a few the derived class provides. Here `Relational` gives
+`>`, `<=` and `>=` from a user-written `<`. (In C++20, defaulting or writing `operator<=>` replaces
+this particular example; the point is the shape.)
+
+```cpp title="mixin.cpp" showLineNumbers
+#include <cstdio>
+
+template <typename Derived>
+struct Relational {
+    friend bool operator>(const Derived& a, const Derived& b) { return b < a; }
+    friend bool operator<=(const Derived& a, const Derived& b) { return !(b < a); }
+    friend bool operator>=(const Derived& a, const Derived& b) { return !(a < b); }
+private:
+    Relational() = default;
+    friend Derived;                 // only Derived can construct the base
+};
+
+struct Version : Relational<Version> {
+    int major, minor;
+    Version(int a, int b) : major(a), minor(b) {}
+    friend bool operator<(const Version& a, const Version& b) {
+        return a.major != b.major ? a.major < b.major : a.minor < b.minor;
+    }
+};
+
+template <typename Derived>
+class Counted {                     // per-derived state: each Derived has its own counter
 public:
-    virtual void process() = 0;
-    virtual ~BaseVirtual() = default;
-};
-
-class DerivedVirtual : public BaseVirtual {
-public:
-    void process() override {
-        std::cout << "Virtual process\n";
-    }
-};
-
-void useVirtual(BaseVirtual& obj) {
-    obj.process();  // Runtime dispatch
-}
-
-// CRTP (compile-time polymorphism)
-template<typename Derived>
-class BaseCRTP {
-public:
-    void process() {
-        static_cast<Derived*>(this)->processImpl();
-    }
-};
-
-class DerivedCRTP : public BaseCRTP<DerivedCRTP> {
-public:
-    void processImpl() {
-        std::cout << "CRTP process\n";
-    }
-};
-
-template<typename T>
-void useCRTP(BaseCRTP<T>& obj) {
-    obj.process();  // Compile-time resolution
-}
-```
-
-| Feature | Virtual Functions | CRTP |
-|---------|------------------|------|
-| **Dispatch** | Runtime | Compile-time |
-| **Overhead** | Virtual table lookup | None |
-| **Flexibility** | Can change type at runtime | Type fixed at compile-time |
-| **Syntax** | Natural polymorphism | Template-based |
-| **Use case** | Dynamic behavior | Performance-critical static behavior |
-
-## Common CRTP Use Cases
-
-### 1. Static Interface Enforcement
-
-Ensure derived classes implement required methods:
-
-```cpp showLineNumbers
-template<typename Derived>
-class Drawable {
-public:
-    void draw() const {
-        static_cast<const Derived*>(this)->drawImpl();
-    }
-    
-    void move(int x, int y) {
-        auto& derived = static_cast<Derived&>(*this);
-        derived.x_ += x;
-        derived.y_ += y;
-    }
-};
-
-class Circle : public Drawable<Circle> {
-    int x_ = 0, y_ = 0, radius_ = 10;
-    
-    friend class Drawable<Circle>;  // Allow access to private
-    
-    void drawImpl() const {
-        std::cout << "Circle at (" << x_ << "," << y_ 
-                  << ") radius=" << radius_ << "\n";
-    }
-};
-
-class Rectangle : public Drawable<Rectangle> {
-    int x_ = 0, y_ = 0, width_ = 20, height_ = 10;
-    
-    friend class Drawable<Rectangle>;
-    
-    void drawImpl() const {
-        std::cout << "Rectangle at (" << x_ << "," << y_ 
-                  << ") " << width_ << "x" << height_ << "\n";
-    }
-};
-```
-
-If derived class forgets `drawImpl()`, you get a compile error when calling `draw()`.
-
-### 2. Providing Common Functionality
-
-Add generic operations to all derived classes:
-
-```cpp showLineNumbers
-template<typename Derived>
-class Equality {
-public:
-    friend bool operator!=(const Derived& lhs, const Derived& rhs) {
-        return !(lhs == rhs);
-    }
-};
-
-class Point : public Equality<Point> {
-    int x_, y_;
-    
-public:
-    Point(int x, int y) : x_(x), y_(y) {}
-    
-    // Only need to implement ==
-    friend bool operator==(const Point& lhs, const Point& rhs) {
-        return lhs.x_ == rhs.x_ && lhs.y_ == rhs.y_;
-    }
-    
-    // != automatically provided by CRTP base
-};
-
-int main() {
-    Point p1(1, 2), p2(3, 4);
-    
-    if (p1 == p2) { /* ... */ }
-    if (p1 != p2) { /* ... */ }  // Free, from CRTP
-}
-```
-
-### 3. Counting Instances
-
-Track how many objects of each type exist:
-
-```cpp showLineNumbers
-template<typename Derived>
-class Counted {
-    inline static int count_ = 0;
-    
+    static int alive() { return count_; }
 protected:
     Counted() { ++count_; }
     Counted(const Counted&) { ++count_; }
     ~Counted() { --count_; }
-    
-public:
-    static int count() { return count_; }
+private:
+    inline static int count_ = 0;
 };
 
-class Widget : public Counted<Widget> {
-    // ...
-};
-
-class Gadget : public Counted<Gadget> {
-    // ...
-};
+struct A : Counted<A> {};
+struct B : Counted<B> {};
 
 int main() {
-    Widget w1, w2;
-    Gadget g1;
-    
-    std::cout << "Widgets: " << Widget::count() << "\n";  // 2
-    std::cout << "Gadgets: " << Gadget::count() << "\n";  // 1
+    Version v1{1, 2}, v2{1, 10};
+    std::printf("%d %d %d\n", v2 > v1, v1 >= v2, v1 <= v2);
+    {
+        A a1, a2; B b1;
+        A a3 = a1;
+        std::printf("A=%d B=%d\n", A::alive(), B::alive());
+    }
+    std::printf("A=%d B=%d\n", A::alive(), B::alive());
 }
 ```
 
-Each derived class gets its own `count_` due to template instantiation.
+Output (g++ 15 and clang++ 21, `-std=c++23`, `-O0` and `-O2` identical):
 
-### 4. Method Chaining
-
-Enable fluent interfaces:
-
-```cpp showLineNumbers
-template<typename Derived>
-class Chainable {
-public:
-    Derived& setName(std::string name) {
-        static_cast<Derived*>(this)->name_ = std::move(name);
-        return static_cast<Derived&>(*this);
-    }
-    
-    Derived& setAge(int age) {
-        static_cast<Derived*>(this)->age_ = age;
-        return static_cast<Derived&>(*this);
-    }
-};
-
-class Person : public Chainable<Person> {
-    friend class Chainable<Person>;
-    std::string name_;
-    int age_ = 0;
-    
-public:
-    Person& setAddress(std::string addr) {
-        address_ = std::move(addr);
-        return *this;
-    }
-    
-private:
-    std::string address_;
-};
-
-int main() {
-    Person p;
-    p.setName("Alice")
-     .setAge(30)
-     .setAddress("123 Main St");  // All chain together
-}
+```text
+1 0 1
+A=3 B=1
+A=0 B=0
 ```
 
-### 5. Performance-Critical Operations
+Two details do real work. The private constructor plus `friend Derived;` makes
+constructing an `Oops` declared as `struct Oops : Relational<Version>` fail to compile (see the next section). And `Counted<A>` and
+`Counted<B>` are different classes, so they have separate `count_` statics; that is something a
+plain non-template base cannot give you. The same mechanism makes `Counted` the standard way to
+count instances per class.
 
-Avoid virtual function overhead:
+## Traps
 
-```cpp showLineNumbers
-template<typename Derived>
-class Algorithm {
-public:
-    void run() {
-        auto& d = static_cast<Derived&>(*this);
-        
-        d.initialize();
-        
-        while (!d.isDone()) {
-            d.step();
-        }
-        
-        d.finalize();
-    }
+- **Naming the wrong class.** `struct Circle : Shape<Square>` compiles. A call that does
+  `static_cast<const Square&>(*this)` on a `Circle` is then undefined behavior. The defense is to
+  make the base's constructor private and `friend Derived` (as above), so only `Derived` can derive
+  from it; or add `static_assert(std::is_base_of_v<Base<D>, D>)` in a member function.
+- **Using `D` in the base's declarations.** The incomplete-type rule above. To expose a derived
+  member type, read it inside a member function or through a trait specialized on `D`; a return type
+  of `typename D::value_type` on a member declaration fails the same way. (C++14 `auto` return types
+  deduced in the body are a common workaround.)
+- **No common base.** `Base<A>` and `Base<B>` are unrelated types, so CRTP gives no
+  `std::vector<Base*>`. If you need a heterogeneous collection, use virtual functions, `std::variant`,
+  or [type erasure](./06-type-erasure.md).
+- **Slicing and public non-virtual bases.** A CRTP base is not meant to be deleted through, so make
+  its destructor `protected` and non-virtual, and do not store base pointers.
+- **Error messages** from deep mixin stacks are long. Concepts on the derived class's required
+  members (`requires` on a function in the base, or `static_assert(requires { ... })` in the body)
+  localize them.
+- **Code size.** One base instantiation per derived class; for a few tiny mixins that is nothing, but
+  a large base class template duplicated across many types grows the binary. No general
+  figure applies; measure.
+
+## Static interface and dispatch
+
+When the base calls `static_cast<const D&>(*this).area()`, the call is a direct call that the
+compiler can inline, with no vtable or vptr. That is the entire "cost" argument for CRTP; how large the
+effect is depends on the call, the inliner and whether a virtual call could have been devirtualized
+anyway. This page gives no speedup figure because none holds generally. The trade-off table is on
+the [polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md) page.
+
+## The C++23 alternative: explicit object parameters
+
+C++23 explicit object parameters (`this auto&& self`, P0847) let a plain base class write a member
+function that sees the derived type, which removes the template and the downcast:
+
+```cpp title="deducing_this.cpp (-std=c++23)" showLineNumbers
+#include <cstdio>
+
+template <typename Derived>
+struct Shape {
+    double describe() const { return static_cast<const Derived&>(*this).area() + 1; }
 };
+struct Sq : Shape<Sq> { double area() const { return 4; } };
 
-class FastAlgorithm : public Algorithm<FastAlgorithm> {
-public:
-    void initialize() { /* ... */ }
-    bool isDone() const { return iteration_ >= maxIter_; }
-    void step() { ++iteration_; /* compute */ }
-    void finalize() { /* ... */ }
-    
-private:
-    int iteration_ = 0;
-    int maxIter_ = 1000;
+struct Shape23 {
+    double describe(this const auto& self) { return self.area() + 1; }   // self is deduced as Sq23
 };
+struct Sq23 : Shape23 { double area() const { return 4; } };
 
-// No virtual function overhead - all inlined
-FastAlgorithm algo;
-algo.run();  // Fully optimized at compile-time
+int main() { std::printf("%g %g\n", Sq{}.describe(), Sq23{}.describe()); }
 ```
 
-## Advanced CRTP Patterns
-
-### Multiple CRTP Bases
-
-```cpp showLineNumbers
-template<typename Derived>
-class Printable {
-public:
-    void print() const {
-        std::cout << static_cast<const Derived*>(this)->toString();
-    }
-};
-
-template<typename Derived>
-class Serializable {
-public:
-    std::string serialize() const {
-        return static_cast<const Derived*>(this)->toJson();
-    }
-};
-
-class MyClass : public Printable<MyClass>, 
-                public Serializable<MyClass> {
-public:
-    std::string toString() const {
-        return "MyClass instance";
-    }
-    
-    std::string toJson() const {
-        return R"({"type":"MyClass"})";
-    }
-};
+```text
+5 5
 ```
 
-### CRTP with Additional Base Class
+(g++ 15 and clang++ 21, `-std=c++23`, `-O0` and `-O2`.) `Shape23` is an ordinary class, so it
+cannot be misnamed, adds no template parameter to the type, and its derived classes need no
+`: Base<Derived>` spelling. It does not replace CRTP where the base needs the derived type in its
+declarations (per-derived statics like `Counted`, or member types), because the explicit object
+parameter only exists inside the function.
 
-```cpp showLineNumbers
-class CommonBase {
-public:
-    virtual ~CommonBase() = default;
-    void commonMethod() { /* ... */ }
-};
+## When to use it
 
-template<typename Derived>
-class CRTPMixin : public CommonBase {
-public:
-    void crtp_method() {
-        static_cast<Derived*>(this)->specific_impl();
-    }
-};
+Use CRTP for mixins that need the derived type or per-derived state: instance counting,
+operator generation before C++20, `std::enable_shared_from_this<T>` (a standard-library CRTP base),
+`std::ranges::view_interface<D>` (C++20), which gives a view its `empty()`, `front()`, `operator[]` and so on from just `begin()`
+and `end()`. In C++23 code, prefer an explicit object parameter when only member-function bodies
+need the derived type. Reach for virtual functions or a concept instead if you need a heterogeneous
+collection or only a compile-time interface check.
 
-class Final : public CRTPMixin<Final> {
-public:
-    void specific_impl() { /* ... */ }
-};
-```
+## Related
 
-## CRTP Helper for Safer Casting
+- [Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md): the comparison and decision table.
+- [Concepts and requires](../08-templates-and-metaprogramming/concepts-and-requires.md): checking an interface without a base class.
+- [Policy-Based Design](./07-policy-based-design.md): the sibling pattern that composes behavior from template parameters.
 
-```cpp showLineNumbers
-template<typename Derived>
-class CRTP {
-protected:
-    Derived& derived() {
-        return static_cast<Derived&>(*this);
-    }
-    
-    const Derived& derived() const {
-        return static_cast<const Derived&>(*this);
-    }
-    
-private:
-    CRTP() = default;
-    friend Derived;  // Only derived can construct
-};
+## References
 
-template<typename Derived>
-class Base : private CRTP<Derived> {
-    using CRTP<Derived>::derived;
-    
-public:
-    void interface() {
-        derived().implementation();
-    }
-};
-
-class Derived : public Base<Derived> {
-    friend class Base<Derived>;
-    
-    void implementation() {
-        std::cout << "Implementation\n";
-    }
-};
-```
-
-## Checking Method Existence
-
-```cpp showLineNumbers
-#include <type_traits>
-
-template<typename T, typename = void>
-struct has_toString : std::false_type {};
-
-template<typename T>
-struct has_toString<T, std::void_t<
-    decltype(std::declval<T>().toString())
->> : std::true_type {};
-
-template<typename Derived>
-class Base {
-public:
-    void print() const {
-        if constexpr (has_toString<Derived>::value) {
-            std::cout << static_cast<const Derived*>(this)->toString();
-        } else {
-            std::cout << "No toString available\n";
-        }
-    }
-};
-```
-
-## Performance Comparison
-
-```cpp showLineNumbers
-#include <chrono>
-
-// Virtual
-class BaseVirtual {
-public:
-    virtual int compute(int x) = 0;
-    virtual ~BaseVirtual() = default;
-};
-
-class DerivedVirtual : public BaseVirtual {
-public:
-    int compute(int x) override { return x * x; }
-};
-
-// CRTP
-template<typename Derived>
-class BaseCRTP {
-public:
-    int compute(int x) {
-        return static_cast<Derived*>(this)->computeImpl(x);
-    }
-};
-
-class DerivedCRTP : public BaseCRTP<DerivedCRTP> {
-public:
-    int computeImpl(int x) { return x * x; }
-};
-
-// Benchmark
-void benchmarkVirtual() {
-    DerivedVirtual d;
-    BaseVirtual* ptr = &d;
-    
-    auto start = std::chrono::high_resolution_clock::now();
-    long long sum = 0;
-    for (int i = 0; i < 100000000; ++i) {
-        sum += ptr->compute(i);
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    
-    std::cout << "Virtual: " 
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                  end - start).count() << "ms\n";
-}
-
-void benchmarkCRTP() {
-    DerivedCRTP d;
-    
-    auto start = std::chrono::high_resolution_clock::now();
-    long long sum = 0;
-    for (int i = 0; i < 100000000; ++i) {
-        sum += d.compute(i);
-    }
-    auto end = std::chrono::high_resolution_clock::now();
-    
-    std::cout << "CRTP: " 
-              << std::chrono::duration_cast<std::chrono::milliseconds>(
-                  end - start).count() << "ms\n";
-}
-
-// Typical results: CRTP is 2-3x faster (fully inlined)
-```
-
-## Common Mistakes
-
-### Forgetting to Inherit from Base
-
-```cpp showLineNumbers
-template<typename Derived>
-class Base {
-    // ...
-};
-
-// Wrong - Derived doesn't inherit
-class Derived {
-    // Won't work with Base<Derived>
-};
-
-// Correct
-class Derived : public Base<Derived> {
-    // ...
-};
-```
-
-### Incomplete Type Issues
-
-```cpp showLineNumbers
-template<typename Derived>
-class Base {
-public:
-    // Problem: Derived incomplete here
-    void problem() {
-        Derived d;  // Error: incomplete type
-    }
-    
-    // OK: Only casting pointer
-    void okay() {
-        static_cast<Derived*>(this)->method();
-    }
-};
-```
-
-The derived class is incomplete during base class definition. Only pointer/reference operations allowed.
-
-## Best Practices
-
-:::success[DO]
-- Use CRTP for zero-overhead static polymorphism
-- Provide clear interface expectations in base
-- Use `friend` for cleaner derived class API
-- Document required methods in derived class
-- Consider concepts (C++20) for better error messages
-  :::
-
-:::danger[DON'T]
-- Mix CRTP and virtual functions unnecessarily
-- Create deep CRTP hierarchies (compile-time cost)
-- Use CRTP when runtime polymorphism needed
-- Forget that derived type is incomplete in base
-  :::
-
-## C++20 Concepts with CRTP
-
-```cpp showLineNumbers
-template<typename T>
-concept Drawable = requires(T t) {
-    { t.drawImpl() } -> std::same_as<void>;
-};
-
-template<Drawable Derived>
-class DrawableCRTP {
-public:
-    void draw() const {
-        static_cast<const Derived*>(this)->drawImpl();
-    }
-};
-
-class Circle : public DrawableCRTP<Circle> {
-public:
-    void drawImpl() const {
-        std::cout << "Drawing circle\n";
-    }
-};
-
-// Better error messages with concepts
-```
-
-## Summary
-
-CRTP enables compile-time polymorphism by having derived classes pass themselves as template parameters to base classes:
-
-**Pattern:**
-```cpp
-template<typename Derived>
-class Base {
-    void interface() {
-        static_cast<Derived*>(this)->implementation();
-    }
-};
-
-class Derived : public Base<Derived> {
-    void implementation() { /* ... */ }
-};
-```
-
-**Use cases:**
-- Static interface enforcement
-- Adding common functionality
-- Zero-overhead polymorphism
-- Method chaining
-- Instance counting
-
-**When to use:**
-- Performance-critical code
-- Compile-time dispatch sufficient
-- Static type relationships known
-
-**When NOT to use:**
-- Need runtime polymorphism
-- Dynamic type switching required
-- Simple inheritance works better
+- [cppreference: Curiously recurring template pattern](https://en.cppreference.com/w/cpp/language/crtp)
+- [cppreference: Explicit object parameter](https://en.cppreference.com/w/cpp/language/member_functions#Explicit_object_member_functions)
+- [cppreference: `std::ranges::view_interface`](https://en.cppreference.com/w/cpp/ranges/view_interface)
+- [cppreference: `std::enable_shared_from_this`](https://en.cppreference.com/w/cpp/memory/enable_shared_from_this)
