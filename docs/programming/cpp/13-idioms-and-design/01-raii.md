@@ -181,9 +181,9 @@ rollback
 ```
 
 The callable passed to a guard must not throw, for the same reason a destructor must not. The
-standard library has no scope guard in C++23; `std::scope_exit` and friends are in the Library
-Fundamentals TS v3 (`<experimental/scope>`) and not generally available, so teams write the
-template above or use a library one.
+standard has no scope guard in C++23. `std::experimental::scope_exit` (Library Fundamentals TS v3,
+`<experimental/scope>`) is shipped by libstdc++ but not by MSVC's STL, so portable code writes the
+template above or uses a library one.
 
 ## What RAII does not cover
 
