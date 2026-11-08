@@ -162,8 +162,9 @@ empty: bad_function_call
 A type-erased wrapper must put the stored object somewhere. Always allocating is simple but slow to
 construct and copy, so most implementations keep a small inline buffer and allocate only for larger
 objects: the **small buffer optimization** (SBO). The standard requires nothing about this for
-`std::function` beyond a recommendation to avoid allocation for function pointers and
-`reference_wrapper`s, so the threshold is implementation-specific. You can observe it by counting
+`std::function` beyond this: the constructor may not throw for function pointers and
+`reference_wrapper`s (so no allocation there), and implementations are encouraged to avoid allocation
+for other small callables. The threshold is implementation-specific. You can observe it by counting
 calls to `operator new` while assigning a closure of a given size:
 
 ```cpp title="sbo.cpp (observes libstdc++; not portable)" showLineNumbers
