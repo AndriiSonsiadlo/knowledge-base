@@ -157,7 +157,7 @@ such uses in C++20. The wording, read from the C++20 (N4861) and C++23 (N4950) d
 | Use | C++20 | C++23 |
 |---|---|---|
 | `++v`, `v++`, `--v`, `v--` on a volatile arithmetic or pointer lvalue | Deprecated | Still deprecated |
-| Compound assignment `v += x`, `v \|= x`, ... used as a statement | Deprecated as first published; the DRs below remove it | **Not deprecated**: P2327R1 for the bitwise operators `\|=`, `&=`, `^=`, CWG 2654 for the rest. Both are defect reports against C++20 |
+| Compound assignment `v += x`, `v \|= x`, ... used as a statement | Deprecated as first published; the DRs below remove it | **Not deprecated**: P2327R1 for the bitwise operators `\|=`, `&=`, `^=`, CWG 2654 for the rest. Both were adopted as defect reports, so compilers apply them in C++20 mode |
 | Simple assignment `v = x` used as a *statement*, or in an unevaluated operand | Not deprecated | Not deprecated |
 | Any assignment, simple or compound, whose *result is used*: `a = v = x`, `a = (v += 1)` | Deprecated | Still deprecated ([expr.ass]/5) |
 | A function parameter or return type that is volatile-qualified (`void f(volatile int)`) | Deprecated | Still deprecated |

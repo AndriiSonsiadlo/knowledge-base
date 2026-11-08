@@ -104,8 +104,7 @@ A=3 B=1
 A=0 B=0
 ```
 
-Two details do real work. The private constructor plus `friend Derived;` makes
-makes `struct Oops : Relational<Version>` fail to compile when an `Oops` is constructed (see the next section). And `Counted<A>` and
+Two details do real work. The private constructor plus `friend Derived;` makes `struct Oops : Relational<Version>` fail to compile when an `Oops` is constructed (see the next section). And `Counted<A>` and
 `Counted<B>` are different classes, so they have separate `count_` statics; that is something a
 plain non-template base cannot give you. The same mechanism makes `Counted` the standard way to
 count instances per class.

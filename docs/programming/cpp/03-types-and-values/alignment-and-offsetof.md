@@ -14,9 +14,9 @@ you three tools for it: `alignof` *(C++11)* to query it, `alignas` *(C++11)* to 
 the `offsetof` macro to see where a member landed after the compiler inserted padding. This page is
 the reference for those three tools.
 
-Why padding exists and how to order members to avoid it, cache-line and SIMD alignment, and packing
+Why padding exists and how to order members to avoid it, and cache-line and SIMD alignment
 are on the canonical [Memory Alignment](../05-memory-and-object-lifetime/alignment.md) page. Layout
-as a binary contract (serialization, bit-fields) is on
+as a binary contract (serialization, bit-fields, packing) is on
 [Padding and offsetof](../12-low-level-and-platform/03-padding-and-offsetof.md).
 
 **Prerequisites:** [Fundamental Types](./fundamental-types.md)
@@ -139,7 +139,7 @@ Rules:
 - `alignas` can only strengthen. If the strictest `alignas` on a declaration is weaker than the
   type's natural alignment, the program is ill-formed. Clang 21 rejects `alignas(1) int x;`; GCC 15
   accepts it without a diagnostic and places `x` at an odd address, so don't rely on it. To reduce
-  alignment, use a compiler extension such as `#pragma pack`, described on the canonical page.
+  alignment, use a compiler extension such as `#pragma pack`, described on [Padding and offsetof](../12-low-level-and-platform/03-padding-and-offsetof.md#packing).
 
 ## Key points
 

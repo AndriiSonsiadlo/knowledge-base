@@ -200,9 +200,9 @@ template above or uses a library one.
 
 ## Pitfalls
 
-- **Unnamed temporaries.** `std::lock_guard<std::mutex>{m};` creates a temporary that is destroyed at
-  the semicolon, so the lock is released at once. (Without braces, `std::lock_guard<std::mutex>(m);`
-  parses as a declaration of a variable named `m`.) Name the guard: `std::lock_guard lock(m);`.
+- **Unnamed temporaries.** A guard that is not named is destroyed at the semicolon and protects nothing;
+  see [Mutexes: pitfalls](../11-concurrency-and-memory-model/05-mutexes.md#pitfalls) for the exact cases.
+  Name the guard.
 - **Handing the raw handle out.** `get()` is fine for passing to a C API; storing it beyond the
   wrapper's lifetime reintroduces dangling handles.
 - **Copying a handle by accident.** A wrapper with a raw-handle member and no declared copy

@@ -198,6 +198,7 @@ allocation is measured to matter.
 ## Related
 
 - [`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md): the owning pointer and its incomplete-type rule.
+- [ABI](../12-low-level-and-platform/01-abi.md): what makes a change binary-compatible or not.
 - [Non-Copyable](./04-non-copyable.md): the alternative when a pimpl class should be move-only.
 - [Copy-and-Swap](./05-copy-and-swap.md): a strong-guarantee copy assignment for the deep-copy case.
 

@@ -205,34 +205,10 @@ tasks see [Thread pools](./08-thread-pools.md). For a single result, see [`std::
 
 ## Exceptions do not cross threads
 
-An exception that escapes the thread's function calls `std::terminate`; it is **not** delivered to whoever
-started the thread. Catch inside the thread and hand the error back via `std::exception_ptr`
-(or use `std::promise`/`std::async`, which do this for you):
-
-```cpp title="exception_ptr.cpp"
-#include <cstdio>
-#include <exception>
-#include <stdexcept>
-#include <thread>
-
-int main() {
-    std::exception_ptr err;
-    std::thread t([&err] {
-        try {
-            throw std::runtime_error("worker failed");
-        } catch (...) {
-            err = std::current_exception();   // only this thread writes err
-        }
-    });
-    t.join();                                 // join orders the write before the read below
-    if (err) {
-        try { std::rethrow_exception(err); }
-        catch (const std::exception& e) { std::printf("caught: %s\n", e.what()); }
-    }
-}
-```
-
-Output: `caught: worker failed`. See [`std::exception_ptr` (cppreference)](https://en.cppreference.com/w/cpp/error/exception_ptr).
+An exception that escapes the thread's function calls `std::terminate`; it is **not** delivered to whoever started the thread.
+Catch inside the thread and hand the error back with `std::exception_ptr`, as shown in
+[Exceptions](../10-error-handling-and-safety/01-exceptions.md#moving-an-exception-between-threads), or use
+`std::promise`/`std::async` ([futures](./07-futures-and-promises.md)), which do it for you.
 
 ## Thread identity, sleeping, yielding
 
