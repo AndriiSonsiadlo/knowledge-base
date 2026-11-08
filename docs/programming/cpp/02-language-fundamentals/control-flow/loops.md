@@ -112,7 +112,7 @@ v.erase(std::remove_if(v.begin(), v.end(), is_bad), v.end());   // before C++20
 ```
 
 A range-`for` uses iterators internally, so adding or removing elements inside one is the same bug.
-Rules per container: [Iterators](../../09-standard-library/iterators.md).
+Rules per container: [Containers](../../09-standard-library/containers.md#complexity-and-invalidation).
 
 **Counting down with an unsigned index.** `for (std::size_t i = n - 1; i >= 0; --i)` never ends:
 an unsigned value is always `>= 0`, and `0 - 1` wraps to the largest value. Test before decrementing:

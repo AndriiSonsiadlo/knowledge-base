@@ -130,7 +130,7 @@ int main() {
 `std::erase(c, value)` and `std::erase_if(c, pred)` *(C++20)* do the whole job as non-member functions.
 `erase` exists for the sequence containers (`vector`, `deque`, `list`, `forward_list`) and `basic_string`;
 `erase_if` also covers the ordered and unordered associative containers. Neither exists for `std::array`.
-For for `std::list` the member `list::remove` / `remove_if` is equivalent.
+For `std::list` the member `list::remove` / `remove_if` is equivalent.
 `unique` only removes *adjacent* equal elements, so sort first to deduplicate globally.
 Both algorithms are O(N); `std::erase` on a `vector` is therefore O(N) in total, where erasing
 elements one at a time in a loop is O(N^2).

@@ -66,7 +66,6 @@ struct NoLock {
     void lock() noexcept {}
     void unlock() noexcept {}
 };
-using MutexLock = std::mutex;       // lock()/unlock() already match the policy interface
 
 template <typename L>
 concept Lockable = requires(L l) { l.lock(); l.unlock(); };
