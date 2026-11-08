@@ -1,587 +1,168 @@
 ---
 id: non-copyable
-title: Non-Copyable Idiom
+title: Non-Copyable
 sidebar_label: Non-Copyable
 sidebar_position: 4
-tags: [cpp, non-copyable, idioms, raii, move-only]
+tags: [c++, non-copyable, move-only, idioms, deleted-functions]
 ---
 
-# Non-Copyable Idiom
+# Non-Copyable
 
-The non-copyable idiom prevents objects from being copied, ensuring unique ownership of resources. Essential for RAII types managing exclusive resources like file handles, mutexes, or database connections.
+A **non-copyable** type is one whose copies would be wrong: duplicating a file handle, a lock or a
+unique owner either double-releases a resource or breaks an invariant. The idiom is to make the
+mistake a compile error instead of a runtime bug. In modern C++ that is one line, `= delete`.
 
-:::info[Move-Only Types]
-Non-copyable types can still be moved, allowing transfer of ownership without duplication. Common pattern for resource-owning types.
-:::
+Which special members a class should declare, and the implicit-generation table that explains why
+declaring one suppresses another, is owned by
+[Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md#deleting-operations). This page is
+the idiom: the forms, when each fits, and the pitfalls.
 
-## Why Non-Copyable?
+**Prerequisites:** [Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md),
+[Copy and Move Semantics](../07-classes-and-oop/copy-and-move-semantics.md), [RAII](./01-raii.md).
 
-Some resources should not or cannot be copied:
+## When a type should not be copyable
 
-```cpp showLineNumbers
-// Copying these would be problematic
-class FileHandle {
-    int fd_;  // File descriptor
-    // Copying fd_ would create two handles to same file!
+- It owns a resource with a single owner: a file descriptor, a socket, a heap object (`unique_ptr`).
+- Its identity is its address or registration: a mutex, an atomic, an object registered in a table
+  by pointer.
+- Copying has no sensible meaning: a thread, a scope guard.
+
+If copies *can* be made meaningful (deep copy, reference count), prefer that and keep the type a
+value. Make the type non-copyable when no copy semantics are correct, not merely because copying is
+expensive; an expensive copy can be left available and made visible with an explicit `clone()`.
+
+## The three forms
+
+```cpp title="nc.cpp" showLineNumbers
+#include <cstdio>
+#include <mutex>
+#include <type_traits>
+#include <utility>
+
+struct Handle {                            // move-only: deleting the copies is enough
+    Handle() = default;
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
+    Handle(Handle&&) noexcept { std::puts("moved"); }
+    Handle& operator=(Handle&&) noexcept = default;
 };
 
-class Mutex {
-    pthread_mutex_t mutex_;
-    // Copying mutex internals is nonsensical
+struct Pinned {                            // neither copyable nor movable
+    Pinned() = default;
+    Pinned(Pinned&&) = delete;             // deleting the move ctor also suppresses the copies
+    Pinned& operator=(Pinned&&) = delete;
 };
 
-class Database {
-    ConnectionPtr conn_;
-    // Two objects managing same connection = trouble
-};
-```
-
-## Basic Non-Copyable Implementation
-
-### C++11+ Way (Delete Functions)
-
-```cpp showLineNumbers
-class NonCopyable {
-public:
-    NonCopyable() = default;
-    
-    // Delete copy operations
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
-    
-    // Allow move operations (optional)
-    NonCopyable(NonCopyable&&) = default;
-    NonCopyable& operator=(NonCopyable&&) = default;
+struct Holder {                            // rule of zero: the member decides
+    std::mutex m;
+    int n = 0;
 };
 
-int main() {
-    NonCopyable a;
-    NonCopyable b = a;      // Error: deleted copy constructor
-    NonCopyable c;
-    c = a;                  // Error: deleted copy assignment
-    
-    NonCopyable d = std::move(a);  // OK: moved
-}
-```
+Pinned make() { return Pinned{}; }         // C++17: the prvalue initializes the result directly
 
-**Explicit deletion** makes intent clear and provides better error messages.
-
-### Pre-C++11 Way (Private Methods)
-
-```cpp showLineNumbers
-class NonCopyable {
-public:
-    NonCopyable() {}
-    
-private:
-    // Private and unimplemented
-    NonCopyable(const NonCopyable&);
-    NonCopyable& operator=(const NonCopyable&);
-};
-
-// Attempting to copy gives linker error
-```
-
-This technique is obsolete; use `= delete` in modern C++.
-
-## CRTP Non-Copyable Base
-
-Reusable base class for making types non-copyable:
-
-```cpp showLineNumbers
-template<typename T>
-class NonCopyable {
-protected:
-    NonCopyable() = default;
-    ~NonCopyable() = default;
-    
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
-};
-
-// Usage: inherit from NonCopyable<Derived>
-class FileHandle : NonCopyable<FileHandle> {
-    int fd_;
-    
-public:
-    explicit FileHandle(const char* path) {
-        fd_ = open(path, O_RDONLY);
-    }
-    
-    ~FileHandle() {
-        if (fd_ >= 0) close(fd_);
-    }
-    
-    // Automatically non-copyable
-};
-
-// Boost style (no template parameter needed)
-class NonCopyableBase {
+struct NonCopyableBase {
 protected:
     NonCopyableBase() = default;
     ~NonCopyableBase() = default;
-    
-private:
     NonCopyableBase(const NonCopyableBase&) = delete;
     NonCopyableBase& operator=(const NonCopyableBase&) = delete;
 };
+struct Derived : private NonCopyableBase { int x = 1; };
 
-class MyClass : private NonCopyableBase {
-    // Inheriting privately prevents copying
-};
-```
-
-## Move-Only Types
-
-Non-copyable but movable - common pattern for resource owners:
-
-```cpp showLineNumbers
-class UniqueResource {
-    int* data_;
-    
-public:
-    explicit UniqueResource(int value) 
-        : data_(new int(value)) {}
-    
-    ~UniqueResource() {
-        delete data_;
-    }
-    
-    // Delete copy
-    UniqueResource(const UniqueResource&) = delete;
-    UniqueResource& operator=(const UniqueResource&) = delete;
-    
-    // Enable move
-    UniqueResource(UniqueResource&& other) noexcept 
-        : data_(other.data_) {
-        other.data_ = nullptr;  // Steal resource
-    }
-    
-    UniqueResource& operator=(UniqueResource&& other) noexcept {
-        if (this != &other) {
-            delete data_;           // Clean up our resource
-            data_ = other.data_;    // Steal other's resource
-            other.data_ = nullptr;  // Nullify other
-        }
-        return *this;
-    }
-    
-    int get() const { return *data_; }
-};
+static_assert(!std::is_copy_constructible_v<Handle> && std::is_move_constructible_v<Handle>);
+static_assert(!std::is_copy_constructible_v<Pinned> && !std::is_move_constructible_v<Pinned>);
+static_assert(!std::is_copy_constructible_v<Holder> && !std::is_move_constructible_v<Holder>);
+static_assert(!std::is_copy_constructible_v<Derived>);
 
 int main() {
-    UniqueResource r1(42);
-    
-    UniqueResource r2 = r1;           // Error: deleted copy
-    UniqueResource r3 = std::move(r1); // OK: moved
-    
-    // r1 is now in valid but unspecified state (data_ == nullptr)
-    // r3 owns the resource
+    Handle a;
+    Handle b = std::move(a);
+    Pinned p = make();
+    (void)b; (void)p;
 }
 ```
 
-This is exactly how `std::unique_ptr` works.
+Output with g++ 15 and clang++ 21, `-std=c++20 -Wall -Wextra`, `-O0` and `-O2`: `moved` (once).
+All the `static_assert`s hold.
 
-## Real-World Examples
+### 1. Delete the copies: move-only
 
-### File Handle Wrapper
+`Handle` above. The deleted copy operations make the type move-only, and a user-declared copy
+operation already suppresses the implicit moves, so write the moves yourself (or `= default` them).
+This is the form for owning handles; `unique_ptr`, `std::thread`, `std::fstream` and
+`std::unique_lock` are move-only in the standard library.
 
-```cpp showLineNumbers
-class File {
-    FILE* file_;
-    
-public:
-    explicit File(const char* path, const char* mode) {
-        file_ = fopen(path, mode);
-        if (!file_) throw std::runtime_error("Failed to open file");
-    }
-    
-    ~File() {
-        if (file_) fclose(file_);
-    }
-    
-    // Non-copyable
-    File(const File&) = delete;
-    File& operator=(const File&) = delete;
-    
-    // Movable
-    File(File&& other) noexcept : file_(other.file_) {
-        other.file_ = nullptr;
-    }
-    
-    File& operator=(File&& other) noexcept {
-        if (this != &other) {
-            if (file_) fclose(file_);
-            file_ = other.file_;
-            other.file_ = nullptr;
-        }
-        return *this;
-    }
-    
-    void write(const std::string& data) {
-        fwrite(data.data(), 1, data.size(), file_);
-    }
-    
-    FILE* get() const { return file_; }
-};
+Using a deleted function is an error at the call site, with the function named:
 
-// Usage
-void writeLog(const std::string& message) {
-    File log("app.log", "a");  // RAII
-    log.write(message);
-}  // Automatically closed
+```text
+error: use of deleted function 'H::H(const H&)'          (g++ 15)
+error: call to deleted constructor of 'H'                 (clang++ 21)
 ```
 
-### Thread Wrapper
+Convention is to declare deleted functions `public`, where the intent is visible in the class
+interface. Both compilers above report a deleted function as deleted even when it is declared `private`,
+so access does not change the message.
 
-```cpp showLineNumbers
-class Thread {
-    std::thread thread_;
-    
-public:
-    template<typename F, typename... Args>
-    explicit Thread(F&& f, Args&&... args)
-        : thread_(std::forward<F>(f), std::forward<Args>(args)...) {}
-    
-    ~Thread() {
-        if (thread_.joinable()) {
-            thread_.join();
-        }
-    }
-    
-    // Non-copyable (threads cannot be copied)
-    Thread(const Thread&) = delete;
-    Thread& operator=(const Thread&) = delete;
-    
-    // Movable
-    Thread(Thread&&) = default;
-    Thread& operator=(Thread&&) = default;
-};
+### 2. Delete the moves: non-copyable and non-movable
 
-// Usage
-Thread worker([]{ 
-    std::cout << "Working...\n"; 
-});  // Automatically joins on destruction
-```
+`Pinned`. Deleting the move constructor is enough, because a user-declared move constructor causes
+the copy operations to be implicitly deleted (see the table in
+[Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md#implicit-generation-rules)).
+Use it for types that must stay at one address (mutexes, atomics, self-registering objects).
 
-### Mutex Wrapper
+Since C++17, guaranteed copy elision means a function can still *return* such an object by prvalue,
+as `make()` does, because no move or copy is involved. A named local (`Pinned p; return p;`) cannot be
+returned; see [copy elision](../07-classes-and-oop/copy-and-move-semantics.md#copy-elision).
 
-```cpp showLineNumbers
-class Mutex {
-    std::mutex mutex_;
-    
-public:
-    Mutex() = default;
-    
-    // Mutexes are fundamentally non-copyable
-    Mutex(const Mutex&) = delete;
-    Mutex& operator=(const Mutex&) = delete;
-    
-    // Also non-movable (moving a locked mutex is problematic)
-    Mutex(Mutex&&) = delete;
-    Mutex& operator=(Mutex&&) = delete;
-    
-    void lock() { mutex_.lock(); }
-    void unlock() { mutex_.unlock(); }
-    bool try_lock() { return mutex_.try_lock(); }
-    
-    std::mutex& get() { return mutex_; }
-};
-```
+Do not delete only the copies "to be safe" and then rely on the move for a type whose address
+matters; that makes it movable.
 
-### Database Connection
+### 3. Let a member decide (rule of zero)
 
-```cpp showLineNumbers
-class DatabaseConnection {
-    void* connection_;  // Opaque handle
-    
-public:
-    explicit DatabaseConnection(const std::string& connString) {
-        connection_ = db_connect(connString.c_str());
-        if (!connection_) {
-            throw std::runtime_error("Connection failed");
-        }
-    }
-    
-    ~DatabaseConnection() {
-        if (connection_) {
-            db_disconnect(connection_);
-        }
-    }
-    
-    // Non-copyable: one connection per object
-    DatabaseConnection(const DatabaseConnection&) = delete;
-    DatabaseConnection& operator=(const DatabaseConnection&) = delete;
-    
-    // Movable: transfer connection ownership
-    DatabaseConnection(DatabaseConnection&& other) noexcept 
-        : connection_(other.connection_) {
-        other.connection_ = nullptr;
-    }
-    
-    DatabaseConnection& operator=(DatabaseConnection&& other) noexcept {
-        if (this != &other) {
-            if (connection_) db_disconnect(connection_);
-            connection_ = other.connection_;
-            other.connection_ = nullptr;
-        }
-        return *this;
-    }
-    
-    void execute(const std::string& query) {
-        db_execute(connection_, query.c_str());
-    }
-};
+`Holder` declares nothing. Its `std::mutex` member is non-copyable and non-movable, so the
+implicitly generated copy and move operations of `Holder` are defined as deleted. That is usually the
+best way to get a non-copyable class: write no special members and let a member's type carry the
+property. It is also the reason a class can silently become non-copyable after a member changes;
+a `static_assert(!std::is_copy_constructible_v<T>)` documents the intent.
 
-// Usage
-DatabaseConnection getConnection() {
-    return DatabaseConnection("host=localhost;db=mydb");
-}
+## The base-class variant
 
-void processData() {
-    auto conn = getConnection();  // Move from function return
-    conn.execute("SELECT * FROM users");
-}
-```
+`NonCopyableBase` (the old `boost::noncopyable` shape) puts the deleted operations in a base so any
+class gets them by inheriting. It dates from before `= delete` (C++11), when the only way to block copying was a
+private, undefined copy constructor. Today it saves a few lines per class at a cost:
 
-## Standard Library Examples
+- It must be inherited **privately**, or `Derived*` converts to `NonCopyableBase*` publicly for no reason.
+- The base's constructor and destructor should be `protected` and non-virtual so it cannot be used
+  as a standalone type or deleted through.
+- Whether an empty base adds to `sizeof` depends on the empty base optimization: a single empty base
+  usually costs nothing, but the rule is ABI- and layout-dependent (see
+  [class layout](../07-classes-and-oop/class-layout.md)).
 
-Many standard library types are non-copyable:
+Prefer the explicit `= delete` lines: they are local, greppable and have no ABI footprint.
 
-```cpp showLineNumbers
-#include <memory>
-#include <thread>
-#include <fstream>
-#include <mutex>
+## Pitfalls
 
-// std::unique_ptr - move-only
-std::unique_ptr<int> p1 = std::make_unique<int>(42);
-std::unique_ptr<int> p2 = p1;            // Error
-std::unique_ptr<int> p3 = std::move(p1); // OK
+- **Declaring a destructor and expecting deletion.** A user-declared destructor does not delete the
+  copy operations (their implicit generation is deprecated, not removed), so an owning class that
+  forgets to delete them is silently copyable and double-frees. Delete or define them.
+- **Containers.** `std::vector` growth needs the element type to be move-insertable (even for
+  `emplace_back`), so a non-movable type cannot live in a `vector`; use `std::deque`, `std::list` or
+  a vector of `unique_ptr`. For a movable type, mark the moves `noexcept` so reallocation moves rather
+  than copies ([why](../07-classes-and-oop/copy-and-move-semantics.md#why-move-operations-should-be-noexcept)).
+- **Passing by value.** A move-only parameter type forces callers to write `std::move`, which is the
+  desired ownership signal. A non-movable type cannot be passed by value at all; take a reference.
+- **Singletons are not an excuse.** Deleting the copies of a singleton prevents duplicates, but a
+  global instance is a design choice with its own costs; the idiom is separate from it.
 
-// std::thread - move-only
-std::thread t1([]{ /* work */ });
-std::thread t2 = t1;            // Error
-std::thread t3 = std::move(t1); // OK
+## Related
 
-// std::ifstream - move-only (C++11+)
-std::ifstream f1("file.txt");
-std::ifstream f2 = f1;            // Error
-std::ifstream f3 = std::move(f1); // OK
+- [Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md): why declaring one special member affects the others.
+- [RAII](./01-raii.md): the usual reason a type is move-only.
+- [Copy-and-Swap](./05-copy-and-swap.md): the other branch, when copies are allowed and must be exception-safe.
+- [`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md): the standard move-only owner.
 
-// std::mutex - non-copyable, non-movable
-std::mutex m1;
-std::mutex m2 = m1;            // Error
-std::mutex m3 = std::move(m1); // Error
-```
+## References
 
-## Checking Copyability
-
-```cpp showLineNumbers
-#include <type_traits>
-
-class Copyable {};
-
-class NonCopyable {
-public:
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
-};
-
-class MoveOnly {
-public:
-    MoveOnly(const MoveOnly&) = delete;
-    MoveOnly& operator=(const MoveOnly&) = delete;
-    MoveOnly(MoveOnly&&) = default;
-    MoveOnly& operator=(MoveOnly&&) = default;
-};
-
-static_assert(std::is_copy_constructible_v<Copyable>);
-static_assert(!std::is_copy_constructible_v<NonCopyable>);
-static_assert(!std::is_copy_constructible_v<MoveOnly>);
-
-static_assert(std::is_move_constructible_v<MoveOnly>);
-static_assert(!std::is_move_constructible_v<std::mutex>);
-```
-
-## Rule of Five
-
-Non-copyable types often implement the Rule of Five:
-
-```cpp showLineNumbers
-class Resource {
-    int* data_;
-    
-public:
-    // 1. Constructor
-    explicit Resource(int value) : data_(new int(value)) {}
-    
-    // 2. Destructor
-    ~Resource() { delete data_; }
-    
-    // 3. Copy constructor - DELETED
-    Resource(const Resource&) = delete;
-    
-    // 4. Copy assignment - DELETED
-    Resource& operator=(const Resource&) = delete;
-    
-    // 5. Move constructor
-    Resource(Resource&& other) noexcept : data_(other.data_) {
-        other.data_ = nullptr;
-    }
-    
-    // 6. Move assignment
-    Resource& operator=(Resource&& other) noexcept {
-        if (this != &other) {
-            delete data_;
-            data_ = other.data_;
-            other.data_ = nullptr;
-        }
-        return *this;
-    }
-};
-```
-
-## Design Considerations
-
-### When to Make Non-Copyable
-
-```cpp showLineNumbers
-// SHOULD be non-copyable:
-class FileDescriptor;     // System resource
-class MutexLock;          // Lock state
-class ThreadPool;         // Manages threads
-class NetworkSocket;      // Network connection
-class DatabaseTransaction; // Transaction state
-
-// Should probably be copyable:
-class Point { int x, y; };          // Simple value
-class std::string;                  // Value semantics
-class std::vector<int>;             // Container
-class Color { int r, g, b, a; };    // Value type
-```
-
-**Rule of thumb:** If copying doesn't make semantic sense or would be expensive/dangerous, make it non-copyable.
-
-### Composition with Non-Copyable Members
-
-```cpp showLineNumbers
-class Container {
-    std::unique_ptr<Data> data_;  // Non-copyable member
-    std::mutex mutex_;            // Non-copyable member
-    
-    // Container automatically becomes non-copyable!
-    // Compiler implicitly deletes copy operations
-};
-
-// Equivalent to:
-class Container {
-    std::unique_ptr<Data> data_;
-    std::mutex mutex_;
-    
-public:
-    Container(const Container&) = delete;
-    Container& operator=(const Container&) = delete;
-};
-```
-
-If any member is non-copyable, the containing class automatically becomes non-copyable.
-
-## Best Practices
-
-:::success[DO]
-- Delete copy operations explicitly for clarity
-- Implement move operations for transferable resources
-- Use `= default` for move when applicable
-- Make resource-owning types non-copyable
-- Document why a type is non-copyable
-  :::
-
-:::danger[DON'T]
-- Make types non-copyable "just because"
-- Forget to consider move semantics
-- Inherit non-copyability in value-like types
-- Mix copy and move semantics incorrectly
-  :::
-
-## Common Patterns
-
-### Singleton (Non-Copyable)
-
-```cpp showLineNumbers
-class Singleton {
-    static Singleton* instance_;
-    
-    // Private constructor
-    Singleton() = default;
-    
-public:
-    // Non-copyable
-    Singleton(const Singleton&) = delete;
-    Singleton& operator=(const Singleton&) = delete;
-    
-    static Singleton& getInstance() {
-        if (!instance_) {
-            instance_ = new Singleton();
-        }
-        return *instance_;
-    }
-};
-```
-
-### Scoped Lock (Non-Copyable, Non-Movable)
-
-```cpp showLineNumbers
-class ScopedLock {
-    std::mutex& mutex_;
-    
-public:
-    explicit ScopedLock(std::mutex& m) : mutex_(m) {
-        mutex_.lock();
-    }
-    
-    ~ScopedLock() {
-        mutex_.unlock();
-    }
-    
-    // Non-copyable, non-movable (holds active lock)
-    ScopedLock(const ScopedLock&) = delete;
-    ScopedLock& operator=(const ScopedLock&) = delete;
-    ScopedLock(ScopedLock&&) = delete;
-    ScopedLock& operator=(ScopedLock&&) = delete;
-};
-```
-
-## Summary
-
-Non-copyable idiom prevents object copying by deleting copy operations:
-
-**Basic pattern:**
-```cpp
-class NonCopyable {
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
-};
-```
-
-**Move-only pattern:**
-```cpp
-class MoveOnly {
-    MoveOnly(const MoveOnly&) = delete;
-    MoveOnly& operator=(const MoveOnly&) = delete;
-    MoveOnly(MoveOnly&&) = default;
-    MoveOnly& operator=(MoveOnly&&) = default;
-};
-```
-
-**Use for:**
-- Resource-owning types (files, connections, handles)
-- RAII wrappers
-- Unique ownership semantics
-- Types where copying doesn't make sense
-
-**Remember:**
-- Explicitly delete copy operations for clarity
-- Consider whether moving makes sense
-- Compiler auto-deletes if member is non-copyable
-- Standard library has many non-copyable types
+- [cppreference: Deleted functions](https://en.cppreference.com/w/cpp/language/function#Deleted_functions)
+- [cppreference: Copy elision](https://en.cppreference.com/w/cpp/language/copy_elision)
+- [C++ Core Guidelines: C.81, C.67](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#c81-use-delete-when-you-want-to-disable-default-behavior-without-wanting-an-alternative)
