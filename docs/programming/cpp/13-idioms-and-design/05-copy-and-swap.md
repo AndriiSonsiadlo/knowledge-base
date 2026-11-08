@@ -183,7 +183,7 @@ Copy-and-swap optimizes for correctness and brevity, not for every case:
   self-test would slow every other assignment, so the usual advice is not to.
 - **It needs a cheap, `noexcept` swap.** A type with no non-throwing swap (for example one whose
   members include a throwing-move type) cannot give the strong guarantee this way.
-- **It does not help with already-valid state.** It guarantees "all or nothing" for the object,
+- **It covers only `*this`.** It guarantees "all or nothing" for the object,
   not for other objects the assignment might touch.
 - **It is the wrong tool for a class that follows the rule of zero.** If every member already
   manages itself, the compiler-generated assignment is already correct; do not write one.

@@ -150,7 +150,7 @@ Prefer the explicit `= delete` lines: they are local, greppable and have no ABI 
   a vector of `unique_ptr`. For a movable type, mark the moves `noexcept` so reallocation moves rather
   than copies ([why](../07-classes-and-oop/copy-and-move-semantics.md#why-move-operations-should-be-noexcept)).
 - **Passing by value.** A move-only parameter type forces callers to write `std::move`, which is the
-  desired ownership signal. A non-movable type cannot be passed by value at all; take a reference.
+  desired ownership signal. A non-movable type cannot be passed by value from an lvalue (only from a prvalue, C++17); take a reference.
 - **Singletons are not an excuse.** Deleting the copies of a singleton prevents duplicates, but a
   global instance is a design choice with its own costs; the idiom is separate from it.
 
