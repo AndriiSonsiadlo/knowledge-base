@@ -145,9 +145,7 @@ non-`volatile` pointer cannot point at a `volatile` object without a cast, and c
 and accessing the object is undefined behaviour.
 
 A member function can be `volatile`-qualified (`void poke() volatile;`), and a `volatile` object may call
-only such functions. Standard-library containers and algorithms are not `volatile`-aware, so
-`std::memcpy(dst, volatile_src, n)` and range-for over a volatile array do not compile or are wrong. Copy
-element by element with explicit volatile reads.
+only such functions. Standard-library facilities are not `volatile`-aware: `std::memcpy` does not accept a pointer to `volatile`, and standard algorithms do not promise one access per element. Copy element by element with explicit volatile reads.
 
 ## What C++20 deprecated, and what C++23 restored
 
@@ -159,9 +157,9 @@ such uses in C++20. The wording, read from the C++20 (N4861) and C++23 (N4950) d
 | Use | C++20 | C++23 |
 |---|---|---|
 | `++v`, `v++`, `--v`, `v--` on a volatile arithmetic or pointer lvalue | Deprecated | Still deprecated |
-| Compound assignment `v += x`, `v \|= x`, ... on a volatile non-class lvalue | Deprecated | **Not deprecated** (P2327R1 removed it) |
+| Compound assignment `v += x`, `v \|= x`, ... used as a statement | Deprecated as first published; the DRs below remove it | **Not deprecated**: P2327R1 for the bitwise operators `\|=`, `&=`, `^=`, CWG 2654 for the rest. Both are defect reports against C++20 |
 | Simple assignment `v = x` used as a *statement*, or in an unevaluated operand | Not deprecated | Not deprecated |
-| A simple assignment whose *result is used*, such as `a = v = x` | Deprecated | Still deprecated |
+| Any assignment, simple or compound, whose *result is used*: `a = v = x`, `a = (v += 1)` | Deprecated | Still deprecated ([expr.ass]/5) |
 | A function parameter or return type that is volatile-qualified (`void f(volatile int)`) | Deprecated | Still deprecated |
 | A structured binding declared `volatile` | Deprecated | Still deprecated |
 
@@ -172,17 +170,19 @@ mean ill-formed. In practice, g++ 15 (`-Wvolatile`) and clang++ 21 (`-Wdeprecate
 volatile int g;
 int main() {
     g++;            // deprecated
-    g += 1;         // C++20: deprecated. C++23: fine
+    g += 1;         // statement: fine (DR against C++20)
+    int y = (g += 1);  // result used: deprecated
     int x = g = 1;  // result of a volatile assignment used: deprecated
     g = 2;          // fine
-    return x;
+    return x + y;
 }
 ```
 
 warn on the `g++` and the chained assignment under `-std=c++20` and `-std=c++23` alike and say nothing under
-`-std=c++17`. They did **not** warn about `g += 1` even with `-std=c++20`, so those compilers apply the C++23 rule
-to C++20 mode as well. Write the two-step form (`g = g + 1`) when you want it to be obvious that the read and write
-are separate accesses.
+`-std=c++17`. They did **not** warn about `g += 1`, even with `-std=c++20`, because P2327R1 and CWG 2654 are defect
+reports against C++20 and compilers apply them in C++20 mode too. Using the result of a compound assignment,
+`int y = (g += 1);`, is still deprecated: g++ 15 warned on it in both modes, clang++ 21 did not (g++ 15.2 and clang++ 21.1, x86-64 Linux).
+Write the two-step form (`g = g + 1`) when you want it obvious that the read and write are separate accesses.
 
 ## Pitfalls
 
@@ -203,7 +203,7 @@ are separate accesses.
   same thread (`volatile std::sig_atomic_t`).
 - Wrong for communicating between threads: use `std::atomic`.
 - C++20 deprecated `++`/`--`, compound assignment, chained assignment, volatile parameters/returns and volatile
-  structured bindings. C++23 un-deprecated compound assignment; the rest stays deprecated.
+  structured bindings. Compound assignment used as a statement is no longer deprecated (P2327R1 for `|=` `&=` `^=`, CWG 2654 for the rest, both DRs against C++20); using the result of any assignment, `++`/`--`, volatile parameters/returns and volatile structured bindings stay deprecated.
 
 ## References
 
