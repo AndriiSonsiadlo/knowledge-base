@@ -133,7 +133,7 @@ void rename_first(std::string s) {
 
 This is more fragile than prepare-and-commit: every added step needs its own undo. For several
 resources, a small scope guard (run a lambda on scope exit unless dismissed) keeps rollback next to the
-action; `scope_fail` and friends exist only as `std::experimental` facilities in the Library Fundamentals TS v3, not in the standard.
+action (see [Scope guards](../13-idioms-and-design/01-raii.md#scope-guards-cleanup-without-a-resource-type)); `scope_fail` and friends exist only as `std::experimental` facilities in the Library Fundamentals TS v3, not in the standard.
 
 ## Choosing a level
 

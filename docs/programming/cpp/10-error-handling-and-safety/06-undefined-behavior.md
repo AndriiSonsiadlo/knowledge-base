@@ -77,7 +77,7 @@ Each rule below has a canonical home; this table is the index. Cause, then how t
 | Source | Why it is UB | Avoid with | Details |
 |---|---|---|---|
 | Signed integer overflow | Result not representable in the type | Check before, widen, use unsigned deliberately, `<numeric>` saturating helpers *(C++26)* | [Signed and unsigned types](../03-types-and-values/signedness.md#overflow) |
-| Shift by negative or ≥ width | Count out of range for the promoted type | Mask or check the count | [Operators](../02-language-fundamentals/operators/arithmetic.md) |
+| Shift by negative or ≥ width | Count out of range for the promoted type | Mask or check the count | [Bitwise operators](../02-language-fundamentals/operators/bitwise.md) |
 | Division or modulo by zero (and `INT_MIN / -1`) | No result | Check divisor | [Operators](../02-language-fundamentals/operators/arithmetic.md) |
 | Out-of-bounds access, pointer past `end()` | Pointer arithmetic leaves the array | `at()`, `std::span`, ranges, hardened library | [Pointer arithmetic](../06-pointers-references-and-smart-pointers/pointer-arithmetic.md) |
 | Null or dangling pointer dereference | No object at that address | Smart pointers, ownership discipline | [Object lifetime](../05-memory-and-object-lifetime/object-lifetime.md), [raw pointers](../06-pointers-references-and-smart-pointers/raw-pointers.md) |
@@ -89,7 +89,7 @@ Each rule below has a canonical home; this table is the index. Cause, then how t
 | Data race | Unsynchronized conflicting accesses | Mutexes, atomics | [Data races](../11-concurrency-and-memory-model/03-data-races.md) |
 | Modifying a `const` object or a string literal | Object is in read-only storage, or the program promised not to | Use `std::string`, `const` correctness | [Const and pointers](../06-pointers-references-and-smart-pointers/const-and-pointers.md) |
 | Invalid `static_cast`/`reinterpret_cast`/`dynamic_cast` result used | Object is not of the target type | Prefer `dynamic_cast` with checks | [Casts](../03-types-and-values/conversions-and-promotions.md) |
-| Flowing off the end of a non-`void` function | No value returned | Enable `-Wreturn-type`; `-Werror=return-type` | [Function declarations](../04-functions-and-call-mechanics/function-declarations.md) |
+| Flowing off the end of a non-`void` function | No value returned | Enable `-Wreturn-type`; `-Werror=return-type` | — |
 | Violating the ODR | Two different definitions of one entity | Headers, `inline`, anonymous namespaces | [Translation units](../01-toolchain-and-build/translation-units.md) |
 | Calling `std::unreachable()` or a library function with its precondition violated | Documented as UB | Check the documentation | [Assertions](./04-assertions.md) |
 

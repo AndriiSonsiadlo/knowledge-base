@@ -29,7 +29,7 @@ ends with how to choose a standard and select it in your build.
 | C++17 | 14882:2017 | Practical library and language additions | C++1z |
 | C++20 | 14882:2020 | Major revision: concepts, ranges, coroutines, modules | C++2a |
 | C++23 | 14882:2024 | Library-heavy refinements. The current published standard. | C++2b |
-| C++26 | — | Technical work completed March 2026. Not yet published by ISO (as of October 2026). | C++2c |
+| C++26 | — | Technical work completed March 2026; the ISO DIS ballot (closed October 2026) was not approved, mainly over contracts. Not published; next step to be decided (as of November 2026). | C++2c |
 
 Working names use a placeholder digit because the release year wasn't fixed during development.
 C++0x was expected in the 2000s and shipped in 2011. C++23 is named for the year its technical work
@@ -128,7 +128,7 @@ void print_ages(const std::map<std::string, int>& ages) {
 | Three-way comparison `<=>` | [Operator Overloading](../02-language-fundamentals/operators/operator-overloading.md) |
 | `consteval`, `constinit`, more `constexpr` (including `std::vector` and `std::string` during constant evaluation) | [constexpr Functions](../04-functions-and-call-mechanics/constexpr-functions.md) |
 | Designated initializers | [Aggregate Initialization](../05-memory-and-object-lifetime/initialization/aggregate-initialization.md) |
-| `std::span` | [Containers](../09-standard-library/containers.md) |
+| `std::span` | [Containers](../09-standard-library/containers.md#std-span) |
 | `std::jthread`, `std::stop_token` | [Threads](../11-concurrency-and-memory-model/04-threads.md) |
 | `<chrono>` calendars and time zones | [Chrono](../09-standard-library/chrono.md) |
 | `std::format` | — (the [fmt](../../fmt/readme.md) library it was standardised from) |
@@ -189,14 +189,15 @@ int main() {
 }
 ```
 
-## C++26: finished, awaiting publication
+## C++26: technical work done, publication pending
 
-WG21 completed C++26's technical content in March 2026. ISO had not published it as of October
-2026, and compilers implement its features one at a time. The headline additions:
+WG21 completed C++26's technical content in March 2026. The ISO DIS ballot closed in October 2026
+without approval, mainly over contracts, and ISO had not published the standard as of November 2026.
+Compilers implement its features one at a time. The headline additions:
 
 - **Static reflection**: inspecting types, members and enumerators at compile time.
-- **Contracts**: `pre`, `post` and `contract_assert`. See
-  [Contracts](../10-error-handling-and-safety/05-contracts.md).
+- **Contracts** (`pre`, `post`, `contract_assert`): status unsettled after the failed DIS ballot; see
+  [Contracts](../10-error-handling-and-safety/05-contracts.md#status).
 - **`std::execution`**: a standard framework for asynchronous and parallel work (senders and
   receivers).
 - **Safety changes**: reading an uninitialised variable becomes *erroneous behaviour* (defined but
@@ -254,3 +255,5 @@ whole standard, use the feature-test macros: `__cpp_concepts` for language featu
   `__cpp_*` macros.
 - Herb Sutter, [C++26 is done!](https://herbsutter.com/2026/03/29/c26-is-done-trip-report-march-2026-iso-c-standards-meeting-london-croydon-uk/)
   (March 2026): the C++26 completion trip report.
+- Andreas Fertig, [C++26 DIS failed: how does C++ survive?](https://andreasfertig.com/blog/2026/11/cpp26-dis-failed-how-does-cpp-survive/)
+  (November 2026): the failed DIS ballot.

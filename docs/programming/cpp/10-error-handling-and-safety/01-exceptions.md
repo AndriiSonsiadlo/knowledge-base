@@ -16,8 +16,8 @@ standard hierarchy, and carrying exceptions across boundaries. How to keep data 
 function exits by exception is on [Exception Safety](./02-noexcept-and-strong-guarantee.md), and when
 to prefer return values over exceptions is on [Error Codes](./03-error-codes.md).
 
-**Prerequisites:** [Constructors and destructors](../07-classes-and-oop/constructors-and-destructors.md),
-[noexcept](../04-functions-and-call-mechanics/noexcept.md) for the specifier and what happens when
+**Prerequisites:** [Constructors and destructors](../07-classes-and-oop/constructors-and-destructors.md).
+See [noexcept](../04-functions-and-call-mechanics/noexcept.md) for the specifier and what happens when
 an exception reaches one.
 
 ## throw and catch
