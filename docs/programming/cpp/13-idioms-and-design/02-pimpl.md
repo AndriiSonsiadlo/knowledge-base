@@ -70,9 +70,13 @@ Widget::Widget(std::string name) : impl_(std::make_unique<Impl>(Impl{std::move(n
 Widget::~Widget() = default;
 Widget::Widget(Widget&&) noexcept = default;
 Widget& Widget::operator=(Widget&&) noexcept = default;
-Widget::Widget(const Widget& o) : impl_(std::make_unique<Impl>(*o.impl_)) {}
+Widget::Widget(const Widget& o)
+    : impl_(o.impl_ ? std::make_unique<Impl>(*o.impl_) : nullptr) {}
 Widget& Widget::operator=(const Widget& o) {
-    if (this != &o) *impl_ = *o.impl_;           // assumes o has an Impl (not moved-from)
+    if (this == &o) return *this;
+    if (!o.impl_)      impl_.reset();                       // source is moved-from
+    else if (!impl_)   impl_ = std::make_unique<Impl>(*o.impl_);   // target is moved-from
+    else               *impl_ = *o.impl_;
     return *this;
 }
 
@@ -92,11 +96,14 @@ int main() {
     b.rename("beta");
     Widget c = std::move(b);
     std::printf("%s %d | %s %d\n", a.name().c_str(), a.renames(), c.name().c_str(), c.renames());
+    b = a;                        // b is moved-from (null impl_): assignment re-creates it
+    std::printf("%s\n", b.name().c_str());
 }
 ```
 
 Built with `g++` 15 and `clang++` 21, `-std=c++20 -Wall -Wextra`, at `-O0` and `-O2`, the output is
-`alpha 0 | beta 1`.
+`alpha 0 | beta 1` then `alpha`. The last two lines of `main` assign to a moved-from `Widget`; the copy
+assignment handles that case, where a plain `*impl_ = *o.impl_` would dereference null and abort.
 
 <Diagram title="What a client sees" caption="The header exposes only a pointer; the definition of Impl and its dependencies stay in widget.cpp." accent="blue">
   <DiagramRow>
@@ -131,7 +138,8 @@ page.
 `unique_ptr` makes `Widget` move-only by default, and declaring the moves suppresses the implicit
 copies. If the class should be copyable, write a deep copy as above. A moved-from `Widget` has a
 null `impl_`; any member function called on it dereferences null, so either document that only
-destruction and assignment are valid on a moved-from object, or have the move constructor allocate a
+destruction, assignment and copying are valid on a moved-from object (the operations above are written to
+allow exactly that), or have the move constructor allocate a
 fresh `Impl`. `shared_ptr<const Impl>` gives cheap copies with shared immutable state, which is a
 different semantics, not a free copy.
 
@@ -140,7 +148,7 @@ different semantics, not a free copy.
 In a `const` member function `impl_` is a `const unique_ptr<Impl>`, so `impl_->name` is still
 mutable: constness stops at the pointer. The discipline is to treat `Impl` as part of the object and
 keep `const` member functions honest by hand, or wrap the pointer in `std::experimental::propagate_const`
-(Library Fundamentals TS v2, available in libstdc++ and libc++ but not in `std`).
+(Library Fundamentals TS v2, not in `std`; libstdc++ ships it, other libraries vary, and MSVC's STL does not, so check yours).
 
 ## Costs
 
@@ -172,7 +180,7 @@ keep `const` member functions honest by hand, or wrap the pointer in `std::exper
 |---|---|---|---|
 | Pimpl | yes | pointer + allocation per object | a concrete value-like class with a stable public interface |
 | Abstract interface + factory (`std::unique_ptr<Base> make()`) | yes | virtual call + allocation | clients only use the object through a polymorphic interface anyway ([virtual functions](../07-classes-and-oop/virtual-functions.md)) |
-| C++20 modules | only partially | none at run time | the goal is build time, not ABI: a module interface does not leak private includes into importers, though the class definition (and so its layout) is still part of the interface |
+| C++20 modules | only partially | none at run time | the goal is build time, not ABI: importers see only exported declarations, so private dependencies stop affecting their name lookup, though an exported class definition (and so its layout) is still part of the interface |
 | Plain header with private members | no | none | internal code where rebuild cost is acceptable |
 
 A "fast pimpl" stores `Impl` inline in an aligned buffer to avoid the allocation. It reintroduces
