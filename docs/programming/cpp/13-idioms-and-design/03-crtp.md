@@ -105,7 +105,7 @@ A=0 B=0
 ```
 
 Two details do real work. The private constructor plus `friend Derived;` makes
-constructing an `Oops` declared as `struct Oops : Relational<Version>` fail to compile (see the next section). And `Counted<A>` and
+makes `struct Oops : Relational<Version>` fail to compile when an `Oops` is constructed (see the next section). And `Counted<A>` and
 `Counted<B>` are different classes, so they have separate `count_` statics; that is something a
 plain non-template base cannot give you. The same mechanism makes `Counted` the standard way to
 count instances per class.
@@ -114,8 +114,10 @@ count instances per class.
 
 - **Naming the wrong class.** `struct Circle : Shape<Square>` compiles. A call that does
   `static_cast<const Square&>(*this)` on a `Circle` is then undefined behavior. The defense is to
-  make the base's constructor private and `friend Derived` (as above), so only `Derived` can derive
-  from it; or add `static_assert(std::is_base_of_v<Base<D>, D>)` in a member function.
+  make the base's constructor private and `friend Derived` (as above), so only `Derived` can construct
+  the base and `struct Circle : Shape<Square>` fails as soon as a `Circle` is constructed. (A
+  `static_assert(std::is_base_of_v<Base<D>, D>)` does not help: it is true, since `Square` really does
+  derive from `Shape<Square>`.)
 - **Using `D` in the base's declarations.** The incomplete-type rule above. To expose a derived
   member type, read it inside a member function or through a trait specialized on `D`; a return type
   of `typename D::value_type` on a member declaration fails the same way. (C++14 `auto` return types
