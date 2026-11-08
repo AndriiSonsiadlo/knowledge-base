@@ -3,688 +3,212 @@ id: policy-based-design
 title: Policy-Based Design
 sidebar_label: Policy-Based Design
 sidebar_position: 7
-tags: [cpp, policy-based-design, templates, design-patterns, generic-programming]
+tags: [c++, policy-based-design, templates, concepts, generic-programming]
 ---
 
 # Policy-Based Design
 
-Policy-based design decomposes complex behaviors into independent policy classes combined through templates. Each policy defines one aspect of behavior, and policies are mixed together to create flexible, reusable components.
+**Policy-based design** builds a class from a few independent behaviors, each chosen by a template
+parameter. The class (the **host**) implements the algorithm; each **policy** is a small type that
+supplies one decision: how to check bounds, how to lock, how to allocate, how to compare. Because the
+choice is made at compile time, an unused or empty policy costs nothing, and every combination is
+its own concrete type.
 
-:::info[Compile-Time Strategy Pattern]
-Think of policies as compile-time strategy patterns. Instead of runtime polymorphism with virtual functions, policies provide compile-time composition of behaviors with zero runtime overhead.
-:::
+It is the compile-time cousin of the Strategy pattern. The comparison with run-time and CRTP-based
+polymorphism is on
+[Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md).
 
-## The Problem
+**Prerequisites:** [Class Templates](../08-templates-and-metaprogramming/class-templates.md),
+[Concepts and requires](../08-templates-and-metaprogramming/concepts-and-requires.md).
 
-```cpp showLineNumbers
-// Traditional approach: inheritance explosion
-class SmartPtr { /* ... */ };
-class SmartPtrWithRefCounting : public SmartPtr { /* ... */ };
-class SmartPtrWithCopyCounting : public SmartPtr { /* ... */ };
-class SmartPtrWithThreadSafe : public SmartPtr { /* ... */ };
-class SmartPtrWithRefCountingAndThreadSafe : public SmartPtr { /* ... */ };
-// Combinatorial explosion of classes!
+## The problem
 
-// Policy-based approach: compose behaviors
-template<typename T, 
-         typename OwnershipPolicy,
-         typename CheckingPolicy,
-         typename StoragePolicy>
-class SmartPtr { /* ... */ };
-// Policies combine independently!
-```
+A container that might be checked or unchecked, locked or not, is awkward to write as one class.
+Flags and `if`s add run-time cost and code to every instance. Inheritance hierarchies explode:
+`CheckedArray`, `UncheckedArray`, `LockedCheckedArray`, and so on, one class per combination.
+Policies make each decision a separate, reusable piece and let the host combine them.
 
-## Basic Policy Pattern
+## The idiom
 
-```cpp showLineNumbers
-// Policy 1: Storage policy
-template<typename T>
-struct DefaultStorage {
-    using PointerType = T*;
-    using ReferenceType = T&;
-    
-protected:
-    PointerType ptr_ = nullptr;
-    
-    PointerType get() const { return ptr_; }
-    void set(PointerType p) { ptr_ = p; }
-};
-
-// Policy 2: Checking policy
-struct NoChecking {
-    template<typename T>
-    static void check(T*) { }  // No-op
-};
-
-struct EnforceNotNull {
-    template<typename T>
-    static void check(T* ptr) {
-        if (!ptr) throw std::runtime_error("Null pointer!");
-    }
-};
-
-// Smart pointer using policies
-template<typename T,
-         template<typename> class CheckingPolicy = NoChecking,
-         template<typename> class StoragePolicy = DefaultStorage>
-class SmartPtr : private StoragePolicy<T> {
-    using Storage = StoragePolicy<T>;
-    using Checker = CheckingPolicy<T>;
-    
-public:
-    explicit SmartPtr(T* ptr = nullptr) {
-        Storage::set(ptr);
-    }
-    
-    T& operator*() const {
-        Checker::check(Storage::get());
-        return *Storage::get();
-    }
-    
-    T* operator->() const {
-        Checker::check(Storage::get());
-        return Storage::get();
-    }
-};
-
-// Usage
-SmartPtr<int> p1(new int(42));  // No checking
-SmartPtr<int, EnforceNotNull> p2(new int(42));  // With null check
-
-*p1;  // OK
-*p2;  // Throws if null
-```
-
-## Real-World Example: Thread-Safe Container
-
-```cpp showLineNumbers
-// Locking policies
-struct NoLock {
-    void lock() { }
-    void unlock() { }
-};
-
-struct MutexLock {
-    std::mutex mutex_;
-    
-    void lock() { mutex_.lock(); }
-    void unlock() { mutex_.unlock(); }
-};
-
-struct SpinLock {
-    std::atomic_flag flag_ = ATOMIC_FLAG_INIT;
-    
-    void lock() {
-        while (flag_.test_and_set(std::memory_order_acquire));
-    }
-    
-    void unlock() {
-        flag_.clear(std::memory_order_release);
-    }
-};
-
-// Container with locking policy
-template<typename T, typename LockingPolicy = NoLock>
-class ThreadSafeContainer : private LockingPolicy {
-    std::vector<T> data_;
-    
-public:
-    void push(T value) {
-        this->lock();
-        data_.push_back(std::move(value));
-        this->unlock();
-    }
-    
-    T pop() {
-        this->lock();
-        T value = std::move(data_.back());
-        data_.pop_back();
-        this->unlock();
-        return value;
-    }
-    
-    size_t size() const {
-        this->lock();
-        size_t result = data_.size();
-        this->unlock();
-        return result;
-    }
-};
-
-// Usage
-ThreadSafeContainer<int, NoLock> singleThreaded;  // No overhead
-ThreadSafeContainer<int, MutexLock> multiThreaded;  // With mutex
-ThreadSafeContainer<int, SpinLock> lowContention;  // With spinlock
-```
-
-Each variant compiled optimally - no virtual function overhead!
-
-## Multiple Policies Example
-
-```cpp showLineNumbers
-// Allocation policies
-template<typename T>
-struct NewAllocator {
-    static T* allocate() {
-        return new T();
-    }
-    
-    static void deallocate(T* ptr) {
-        delete ptr;
-    }
-};
-
-template<typename T>
-struct MallocAllocator {
-    static T* allocate() {
-        void* p = std::malloc(sizeof(T));
-        return new (p) T();  // Placement new
-    }
-    
-    static void deallocate(T* ptr) {
-        ptr->~T();
-        std::free(ptr);
-    }
-};
-
-// Ownership policies
-template<typename T>
-struct RefCounted {
-    int* count_;
-    
-    RefCounted() : count_(new int(1)) {}
-    
-    void acquire(T*) {
-        ++(*count_);
-    }
-    
-    bool release(T*) {
-        return --(*count_) == 0;
-    }
-    
-    ~RefCounted() {
-        if (count_ && *count_ == 0) {
-            delete count_;
-        }
-    }
-};
-
-template<typename T>
-struct Unique {
-    void acquire(T*) { }
-    
-    bool release(T*) {
-        return true;  // Always delete
-    }
-};
-
-// Smart pointer with multiple policies
-template<typename T,
-         template<typename> class OwnershipPolicy,
-         template<typename> class AllocationPolicy>
-class CustomPtr : private OwnershipPolicy<T> {
-    using Ownership = OwnershipPolicy<T>;
-    using Allocator = AllocationPolicy<T>;
-    
-    T* ptr_;
-    
-public:
-    CustomPtr() : ptr_(Allocator::allocate()) {
-        Ownership::acquire(ptr_);
-    }
-    
-    ~CustomPtr() {
-        if (Ownership::release(ptr_)) {
-            Allocator::deallocate(ptr_);
-        }
-    }
-    
-    T& operator*() { return *ptr_; }
-    T* operator->() { return ptr_; }
-};
-
-// Usage - mix and match policies
-using UniqueNew = CustomPtr<Widget, Unique, NewAllocator>;
-using SharedNew = CustomPtr<Widget, RefCounted, NewAllocator>;
-using UniqueMalloc = CustomPtr<Widget, Unique, MallocAllocator>;
-```
-
-## Policy Classes vs Policy Templates
-
-### Policy Classes
-
-```cpp showLineNumbers
-// Policy is a complete class
-struct UpperCase {
-    static std::string transform(const std::string& s) {
-        std::string result = s;
-        std::transform(result.begin(), result.end(), 
-                      result.begin(), ::toupper);
-        return result;
-    }
-};
-
-template<typename TransformPolicy>
-class StringProcessor {
-public:
-    std::string process(const std::string& input) {
-        return TransformPolicy::transform(input);
-    }
-};
-
-StringProcessor<UpperCase> processor;
-```
-
-### Policy Templates
-
-```cpp showLineNumbers
-// Policy is a template
-template<typename T>
-struct DefaultDeleter {
-    void operator()(T* ptr) const {
-        delete ptr;
-    }
-};
-
-template<typename T, template<typename> class DeleterPolicy>
-class SmartPtr {
-    T* ptr_;
-    DeleterPolicy<T> deleter_;
-    
-public:
-    ~SmartPtr() {
-        deleter_(ptr_);
-    }
-};
-```
-
-## Policy Inheritance vs Composition
-
-### Private Inheritance (Empty Base Optimization)
-
-```cpp showLineNumbers
-template<typename LockingPolicy>
-class Container : private LockingPolicy {  // EBO applies
-    std::vector<int> data_;
-    
-public:
-    void push(int value) {
-        this->lock();  // From LockingPolicy
-        data_.push_back(value);
-        this->unlock();
-    }
-};
-
-// If LockingPolicy is NoLock (empty class), no storage overhead
-```
-
-### Composition
-
-```cpp showLineNumbers
-template<typename LockingPolicy>
-class Container {
-    std::vector<int> data_;
-    LockingPolicy lock_;  // Member variable
-    
-public:
-    void push(int value) {
-        lock_.lock();
-        data_.push_back(value);
-        lock_.unlock();
-    }
-};
-```
-
-Private inheritance preferred for empty policies (saves space via EBO).
-
-## Destructors in Policies
-
-```cpp showLineNumbers
-// Non-virtual destructor (OK for policies used as base classes)
-template<typename T>
-struct RefCounted {
-    int* count_;
-    
-    RefCounted() : count_(new int(1)) {}
-    
-    // No virtual destructor - policy never deleted polymorphically
-    ~RefCounted() {
-        if (count_ && --(*count_) == 0) {
-            delete count_;
-        }
-    }
-};
-
-template<typename T, typename OwnershipPolicy>
-class SmartPtr : private OwnershipPolicy {  // Private inheritance
-    T* ptr_;
-    
-public:
-    ~SmartPtr() {
-        // OwnershipPolicy::~OwnershipPolicy() called automatically
-        // No polymorphic deletion, so no virtual destructor needed
-    }
-};
-```
-
-## Policy Constraints (C++20 Concepts)
-
-```cpp showLineNumbers
+```cpp title="policy.cpp" showLineNumbers
 #include <concepts>
+#include <cstddef>
+#include <cstdio>
+#include <mutex>
+#include <stdexcept>
+#include <thread>
+#include <vector>
 
-// Define requirements for a locking policy
-template<typename T>
-concept LockingPolicy = requires(T lock) {
-    { lock.lock() } -> std::same_as<void>;
-    { lock.unlock() } -> std::same_as<void>;
+// --- Bounds policies: static functions, no state -------------------------------------
+struct Unchecked {
+    static void check(std::size_t, std::size_t) noexcept {}
+};
+struct Throwing {
+    static void check(std::size_t i, std::size_t n) {
+        if (i >= n) throw std::out_of_range("index out of range");
+    }
 };
 
-// Define requirements for allocator policy
-template<typename T, typename U>
-concept AllocatorPolicy = requires(T alloc, U* ptr) {
-    { T::allocate() } -> std::same_as<U*>;
-    { T::deallocate(ptr) } -> std::same_as<void>;
-};
+template <typename P>
+concept BoundsPolicy = requires(std::size_t i, std::size_t n) { P::check(i, n); };
 
-// Container with constrained policy
-template<typename T, LockingPolicy Lock = NoLock>
-class Container : private Lock {
-    std::vector<T> data_;
-    
+template <typename T, std::size_t N, BoundsPolicy Bounds = Throwing>
+class Array {
 public:
-    void push(T value) {
-        this->lock();
-        data_.push_back(std::move(value));
-        this->unlock();
-    }
-};
-
-// Compile error if policy doesn't satisfy concept
-Container<int, int> bad;  // Error: int doesn't satisfy LockingPolicy
-```
-
-## Logger Example
-
-```cpp showLineNumbers
-// Output policies
-struct ConsoleOutput {
-    void write(const std::string& msg) {
-        std::cout << msg << std::endl;
-    }
-};
-
-struct FileOutput {
-    std::ofstream file_;
-    
-    FileOutput() : file_("log.txt", std::ios::app) {}
-    
-    void write(const std::string& msg) {
-        file_ << msg << std::endl;
-    }
-};
-
-// Timestamp policies
-struct NoTimestamp {
-    std::string format(const std::string& msg) {
-        return msg;
-    }
-};
-
-struct ISOTimestamp {
-    std::string format(const std::string& msg) {
-        auto now = std::chrono::system_clock::now();
-        auto time = std::chrono::system_clock::to_time_t(now);
-        std::stringstream ss;
-        ss << std::put_time(std::localtime(&time), "[%Y-%m-%d %H:%M:%S] ");
-        ss << msg;
-        return ss.str();
-    }
-};
-
-// Logger combining policies
-template<typename OutputPolicy, typename TimestampPolicy>
-class Logger : private OutputPolicy, private TimestampPolicy {
-public:
-    void log(const std::string& message) {
-        std::string formatted = TimestampPolicy::format(message);
-        OutputPolicy::write(formatted);
-    }
-};
-
-// Usage
-Logger<ConsoleOutput, NoTimestamp> simpleLogger;
-simpleLogger.log("Simple message");
-// Output: Simple message
-
-Logger<FileOutput, ISOTimestamp> fileLogger;
-fileLogger.log("Timestamped message");
-// Output to file: [2024-02-28 10:30:45] Timestamped message
-```
-
-## Policy-Based Smart Pointer
-
-Complete example combining multiple policies:
-
-```cpp showLineNumbers
-// Storage policy
-template<typename T>
-struct DefaultStorage {
-    using PointerType = T*;
-    using ReferenceType = T&;
-    
-protected:
-    PointerType ptr_;
-    
-    DefaultStorage(PointerType p = nullptr) : ptr_(p) {}
-    PointerType get() const { return ptr_; }
-    void set(PointerType p) { ptr_ = p; }
-};
-
-// Checking policy
-template<typename T>
-struct AssertCheck {
-    static void check(T* ptr) {
-        assert(ptr != nullptr && "Null pointer dereference");
-    }
-};
-
-template<typename T>
-struct NoCheck {
-    static void check(T*) { }
-};
-
-// Ownership policy
-template<typename T>
-struct DeepCopy {
-    static T* clone(const T* ptr) {
-        return ptr ? new T(*ptr) : nullptr;
-    }
-};
-
-template<typename T>
-struct NoCopy {
-    static T* clone(const T*) = delete;
-};
-
-// Complete smart pointer
-template<typename T,
-         template<typename> class StoragePolicy = DefaultStorage,
-         template<typename> class CheckingPolicy = NoCheck,
-         template<typename> class OwnershipPolicy = DeepCopy>
-class SmartPointer : private StoragePolicy<T> {
-    using Storage = StoragePolicy<T>;
-    using Checker = CheckingPolicy<T>;
-    using Owner = OwnershipPolicy<T>;
-    
-public:
-    explicit SmartPointer(T* p = nullptr) {
-        Storage::set(p);
-    }
-    
-    ~SmartPointer() {
-        delete Storage::get();
-    }
-    
-    // Copy (uses OwnershipPolicy)
-    SmartPointer(const SmartPointer& other) {
-        Storage::set(Owner::clone(other.get()));
-    }
-    
-    // Dereference (uses CheckingPolicy)
-    T& operator*() const {
-        Checker::check(Storage::get());
-        return *Storage::get();
-    }
-    
-    T* operator->() const {
-        Checker::check(Storage::get());
-        return Storage::get();
-    }
-    
-    T* get() const {
-        return Storage::get();
-    }
-};
-
-// Usage with different policy combinations
-SmartPointer<int> ptr1(new int(42));  // Default: no check, deep copy
-SmartPointer<int, DefaultStorage, AssertCheck> ptr2(new int(42));  // With assert
-```
-
-## Host Class Pattern
-
-Policy classes can be templated on the host:
-
-```cpp showLineNumbers
-template<typename Host>
-struct ThreadSafePolicy {
-    void operation() {
-        mutex_.lock();
-        static_cast<Host*>(this)->do_operation();
-        mutex_.unlock();
-    }
-    
+    T& operator[](std::size_t i) { Bounds::check(i, N); return data_[i]; }
+    const T& operator[](std::size_t i) const { Bounds::check(i, N); return data_[i]; }
 private:
-    std::mutex mutex_;
+    T data_[N]{};
 };
 
-template<typename ThreadingPolicy>
-class MyClass : private ThreadingPolicy<MyClass<ThreadingPolicy>> {
-    using Base = ThreadingPolicy<MyClass>;
-    
+// --- Locking policies: may carry state, so the host stores one ------------------------
+struct NoLock {
+    void lock() noexcept {}
+    void unlock() noexcept {}
+};
+using MutexLock = std::mutex;       // lock()/unlock() already match the policy interface
+
+template <typename L>
+concept Lockable = requires(L l) { l.lock(); l.unlock(); };
+
+template <Lockable Lock = std::mutex>
+class Counter {
 public:
-    void public_operation() {
-        Base::operation();
+    void increment() {
+        std::lock_guard<Lock> g(lock_);
+        ++value_;
     }
-    
+    long value() const { return value_; }
 private:
-    friend ThreadingPolicy<MyClass>;
-    
-    void do_operation() {
-        // Actual work
-    }
-};
-```
-
-## Performance Comparison
-
-```cpp showLineNumbers
-// Virtual functions (runtime polymorphism)
-class Base {
-public:
-    virtual void operation() = 0;
-    virtual ~Base() = default;
+    [[no_unique_address]] mutable Lock lock_;   // empty policies take no space
+    long value_ = 0;
 };
 
-class Derived : public Base {
-public:
-    void operation() override { /* ... */ }
-};
+static_assert(sizeof(Counter<NoLock>) == sizeof(long));    // holds on Itanium ABI compilers tested
 
-void use_virtual(Base* ptr) {
-    ptr->operation();  // Virtual dispatch: ~5-10ns overhead
+int main() {
+    Array<int, 3> safe;
+    try { safe[3] = 1; } catch (const std::out_of_range& e) { std::printf("caught: %s\n", e.what()); }
+
+    Array<int, 3, Unchecked> fast;
+    fast[2] = 7;
+    std::printf("%d\n", fast[2]);
+
+    Counter<std::mutex> shared;                 // safe to share between threads
+    std::vector<std::thread> ts;
+    for (int t = 0; t < 4; ++t)
+        ts.emplace_back([&] { for (int i = 0; i < 1000; ++i) shared.increment(); });
+    for (auto& t : ts) t.join();
+    std::printf("%ld\n", shared.value());
+
+    Counter<NoLock> local;                      // single-threaded: no locking cost, no mutex member
+    for (int i = 0; i < 1000; ++i) local.increment();
+    std::printf("%ld\n", local.value());
 }
-
-// Policy-based (compile-time polymorphism)
-template<typename Policy>
-class PolicyBased : private Policy {
-public:
-    void operation() {
-        Policy::operation();  // Inlined: 0ns overhead
-    }
-};
-
-template<typename T>
-void use_policy(PolicyBased<T>& obj) {
-    obj.operation();  // Direct call, fully optimized
-}
-
-// Policy-based is faster but less flexible
 ```
 
-## Best Practices
+Output (g++ 15 and clang++ 21, `-std=c++20 -Wall -Wextra -pthread`, `-O0` and `-O2` identical):
 
-:::success[DO]
-- Use policies for orthogonal concerns
-- Name policies clearly (e.g., `LockingPolicy`, `StoragePolicy`)
-- Use private inheritance with EBO for empty policies
-- Document policy requirements clearly
-- Use concepts (C++20) to constrain policies
-  :::
-
-:::danger[DON'T]
-- Over-engineer with too many policies
-- Mix policies with runtime polymorphism unnecessarily
-- Forget to document policy interfaces
-- Make policies stateful without clear reason
-- Use policies for tightly coupled behaviors
-  :::
-
-## When to Use Policy-Based Design
-
-**Use when:**
-- Behaviors are orthogonal and independent
-- Need compile-time polymorphism
-- Performance critical (no virtual overhead)
-- Want to avoid inheritance explosion
-- Building generic libraries
-
-**Don't use when:**
-- Need runtime type switching
-- Behaviors are tightly coupled
-- Simple inheritance suffices
-- Compile time doesn't matter
-
-## Summary
-
-Policy-based design decomposes behaviors into independent policy classes:
-
-**Pattern:**
-```cpp
-template<typename Policy1, typename Policy2>
-class Host : private Policy1, private Policy2 {
-    void operation() {
-        Policy1::do_something();
-        Policy2::do_something_else();
-    }
-};
+```text
+caught: index out of range
+7
+4000
+1000
 ```
 
-**Benefits:**
-- Compile-time composition
-- Zero runtime overhead
-- Highly configurable
-- Avoids inheritance explosion
-- Excellent performance
+The `static_assert` on `sizeof` held with both compilers on x86-64 Linux (Itanium C++ ABI);
+`[[no_unique_address]]` is an optimization the compiler may apply, not a guarantee of the standard, and
+MSVC ignores the attribute (it provides `[[msvc::no_unique_address]]`).
 
-**Trade-offs:**
-- More complex than inheritance
-- Compile-time only (no runtime flexibility)
-- Can lead to long template names
-- Increased compile time
+<Diagram title="Host plus policies" caption="Array and Counter fix the algorithm; the policies supply the variable decision. Each combination is a separate type." accent="blue">
+  <DiagramRow>
+    <DiagramNode icon="settings" title="Host" accent>Array&lt;T, N, Bounds&gt;<br/>Counter&lt;Lock&gt;</DiagramNode>
+    <DiagramNode icon="shield-check" title="Policy A">Throwing, std::mutex</DiagramNode>
+    <DiagramNode icon="zap" title="Policy B">Unchecked, NoLock</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-**Use cases:**
-- Smart pointers (ownership, checking, storage)
-- Containers (locking, allocation)
-- Loggers (output, formatting)
-- Generic algorithms
+Parts of the idiom:
+
+- **A policy has an interface, not a base class.** `Bounds::check(i, n)` and `lock()/unlock()` are the
+  contracts. Any type that provides them works: `std::mutex` is a lock policy without knowing it.
+  A concept (`BoundsPolicy`, `Lockable`) states the contract and turns a wrong policy into a short
+  error at the host instead of a long one inside it.
+- **Stateless policies use static functions** (`Bounds::check`), so the host stores nothing.
+  **Stateful policies are stored as members** (`lock_`). Marking the member `[[no_unique_address]]`
+  (C++20) lets an empty policy share storage with its neighbors.
+- **Defaults** (`Bounds = Throwing`) make the common case a one-word type, `Array<int, 3>`.
+- `Array<int, 3, Unchecked>` is a different type from `Array<int, 3>`: they cannot be assigned to
+  each other or mixed in a container, and cost nothing at run time for being different.
+
+### Policy as base class or as member
+
+Older code inherits from policies (often privately) to get the empty base optimization and to let
+the policy add members to the host's interface. In C++20, a `[[no_unique_address]]` member gives the same
+space saving with composition and no name-lookup surprises, so prefer it. If you do inherit
+from a policy, give the policy a `protected`, non-virtual destructor so no one can delete a host
+through a policy pointer. Inheriting is still the right choice when the policy must contribute
+public members, which a member cannot do; that mixin form is the [CRTP](./03-crtp.md) variant of the same idea.
+
+### Template-template policies
+
+A policy that is itself a template over the host's element type (`template <typename> class Check`)
+can be passed as a template-template parameter, so the host writes `Check<T>`. This was common in early
+policy libraries. It couples the host to a particular template shape: a policy with an extra
+parameter does not fit. Passing the already-instantiated type (`Check<T>`) or a policy that takes
+`T` in its member functions (as above) is more flexible.
+
+## Policies in the standard library
+
+The idiom is everywhere, mostly under other names:
+
+| Class | Policy parameter | Decision |
+|---|---|---|
+| `std::vector<T, Alloc>`, `std::map<K, V, Cmp, Alloc>` | allocator ([Allocators](../09-standard-library/allocators.md)), comparator | memory source, ordering |
+| `std::unique_ptr<T, D>` | deleter ([Custom Deleters](../06-pointers-references-and-smart-pointers/custom-deleters.md)) | how to release; stateless deleters add no size |
+| `std::basic_string<C, Traits, Alloc>` | `char_traits` | character comparison and copying |
+| `std::unordered_map<K, V, Hash, Eq, Alloc>` | hash, equality | key identity |
+| `std::priority_queue<T, C, Cmp>` | container, comparator | storage and priority |
+
+## Policies versus the alternatives
+
+| Approach | When chosen | Switch at run time? | Cost |
+|---|---|---|---|
+| Policy (template parameter) | compile time | no | none for the choice itself; one instantiation per combination |
+| Virtual strategy object | run time | yes | pointer, indirect call, usually allocation |
+| Callable member (`std::function`) | run time | yes | [type-erased](./06-type-erasure.md) call |
+| `if constexpr` on a flag | compile time | no | fine for one binary choice, not for open extension |
+| Runtime flag | run time | yes | a branch per use and a field per object |
+
+Pick a policy when the decision is known per use site and never changes during the program, when
+you want zero overhead for the unused option, and when users should be able to add their own
+policies. Pick a run-time strategy when the behavior must be chosen from configuration or changed
+while the object lives.
+
+## Pitfalls
+
+- **Type explosion.** Each combination is a distinct type with its own code. Many policies with many
+  values bloat compile time and the binary, and generic code that takes the host must be a template too.
+- **Long error messages and type names.** Concepts on policies are the mitigation; a `using` alias
+  gives the common configurations a name.
+- **Policies that need to know the host.** If a policy must call back into the host, it becomes
+  [CRTP](./03-crtp.md), with that pattern's incomplete-type rules.
+- **Orthogonality is on you.** Policies that depend on each other (a lock policy that assumes a particular
+  storage policy) are not independent; fold them into one policy or give the host a
+  combined one.
+- **Thread safety is the policy's, not the host's.** In the example, `Counter::value()` does not lock,
+  and is only safe to call once the writers are finished; a locked policy protects the operations
+  that use it, not the whole class.
+
+## Related
+
+- [CRTP](./03-crtp.md): policies that need the host type, and mixins.
+- [Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md): choosing between compile-time and run-time selection.
+- [Type Erasure](./06-type-erasure.md): when the policy must change at run time without a hierarchy.
+- [Concepts and requires](../08-templates-and-metaprogramming/concepts-and-requires.md): stating policy requirements.
+
+## References
+
+- [cppreference: `[[no_unique_address]]`](https://en.cppreference.com/w/cpp/language/attributes/no_unique_address)
+- [cppreference: Concepts library](https://en.cppreference.com/w/cpp/concepts)
+- [cppreference: `std::char_traits`](https://en.cppreference.com/w/cpp/string/char_traits)

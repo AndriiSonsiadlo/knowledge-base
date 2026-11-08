@@ -1,599 +1,204 @@
 ---
 id: copy-and-swap
-title: Copy-and-Swap Idiom
+title: Copy-and-Swap
 sidebar_label: Copy-and-Swap
 sidebar_position: 5
-tags: [cpp, copy-and-swap, idioms, exception-safety, assignment]
+tags: [c++, copy-and-swap, idioms, exception-safety, assignment-operator]
 ---
 
-# Copy-and-Swap Idiom
+# Copy-and-Swap
 
-Copy-and-swap is an elegant technique for implementing assignment operators that provides strong exception safety and eliminates code duplication by leveraging the copy constructor and a non-throwing swap function.
+**Copy-and-swap** writes an assignment operator in two steps: build a copy of the source (which may
+throw), then swap it with `*this` (which cannot). If the copy fails, `*this` was never touched. The
+old state ends up in the copy, whose destructor releases it. One function gives you the strong
+exception guarantee, self-assignment safety, and (with a by-value parameter) both copy and move
+assignment.
 
-:::info[Exception-Safe Assignment]
-Copy-and-swap guarantees strong exception safety: if an exception occurs during assignment, the object remains unchanged. The idiom unifies copy and move assignment into a single function.
-:::
+What the copy and move operations must do is owned by
+[Copy and Move Semantics](../07-classes-and-oop/copy-and-move-semantics.md), and which of them to
+declare by [Rule of 0/3/5](../07-classes-and-oop/rule-of-zero-three-five.md). The exception
+guarantee levels are defined on
+[noexcept and the strong guarantee](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md).
+This page is the idiom itself.
 
-## The Problem with Naive Assignment
+**Prerequisites:** [Copy and Move Semantics](../07-classes-and-oop/copy-and-move-semantics.md),
+[`noexcept`](../04-functions-and-call-mechanics/noexcept.md), [RAII](./01-raii.md).
 
-```cpp showLineNumbers
-class Widget {
-    int* data_;
-    size_t size_;
-    
-public:
-    // Problematic assignment
-    Widget& operator=(const Widget& other) {
-        if (this == &other) return *this;  // Self-assignment check
-        
-        delete[] data_;  // If next line throws, object is broken!
-        
-        size_ = other.size_;
-        data_ = new int[size_];  // May throw!
-        std::copy(other.data_, other.data_ + size_, data_);
-        
-        return *this;
-    }
-};
+## The problem with the obvious operator
 
-// Problem: If 'new' throws, we've deleted our data but failed to copy
-// Object is in invalid state!
-```
-
-## Copy-and-Swap Pattern
-
-```cpp showLineNumbers
-class Widget {
-    int* data_;
-    size_t size_;
-    
-public:
-    // Constructor
-    Widget(size_t size) 
-        : data_(new int[size]), size_(size) {}
-    
-    // Destructor
-    ~Widget() {
-        delete[] data_;
-    }
-    
-    // Copy constructor
-    Widget(const Widget& other)
-        : data_(new int[other.size_]), size_(other.size_) {
-        std::copy(other.data_, other.data_ + size_, data_);
-    }
-    
-    // Copy-and-swap assignment
-    Widget& operator=(Widget other) {  // Pass by value - copies implicitly
-        swap(*this, other);             // Non-throwing swap
-        return *this;                   // Temp 'other' destroyed, takes old data
-    }
-    
-    // Swap function
-    friend void swap(Widget& first, Widget& second) noexcept {
-        using std::swap;
-        swap(first.data_, second.data_);
-        swap(first.size_, second.size_);
-    }
-};
-```
-
-**How it works:**
-1. Assignment parameter passed **by value** → invokes copy constructor
-2. If copy throws, our object is unchanged (exception safety!)
-3. Swap our contents with the copy (non-throwing)
-4. Copy (holding our old data) destroyed automatically
-
-## Step-by-Step Example
-
-```cpp showLineNumbers
-Widget w1(10);  // data1, size=10
-Widget w2(20);  // data2, size=20
-
-w1 = w2;  // What happens?
-
-// Step 1: Parameter 'other' created (copy constructor)
-//   other.data_ = new copy of w2.data_
-//   other.size_ = 20
-
-// Step 2: Swap w1 and other
-//   w1.data_ now points to copied data
-//   w1.size_ = 20
-//   other.data_ points to old w1.data_
-//   other.size_ = 10
-
-// Step 3: other destroyed (destructor)
-//   Deletes old w1.data_
-
-// Result: w1 has w2's data, old w1 data cleaned up
-```
-
-## Unified Copy and Move Assignment
-
-The same function handles both copy and move:
-
-```cpp showLineNumbers
-class Widget {
-    int* data_;
-    size_t size_;
-    
-public:
-    Widget(size_t size) 
-        : data_(new int[size]), size_(size) {}
-    
-    ~Widget() { delete[] data_; }
-    
-    // Copy constructor
-    Widget(const Widget& other)
-        : data_(new int[other.size_]), size_(other.size_) {
-        std::copy(other.data_, other.data_ + size_, data_);
-    }
-    
-    // Move constructor
-    Widget(Widget&& other) noexcept
-        : data_(other.data_), size_(other.size_) {
-        other.data_ = nullptr;
-        other.size_ = 0;
-    }
-    
-    // Unified assignment (handles both copy and move!)
-    Widget& operator=(Widget other) noexcept {
-        swap(*this, other);
-        return *this;
-    }
-    
-    friend void swap(Widget& a, Widget& b) noexcept {
-        using std::swap;
-        swap(a.data_, b.data_);
-        swap(a.size_, b.size_);
-    }
-};
-
-int main() {
-    Widget w1(10);
-    Widget w2(20);
-    
-    // Copy assignment
-    w1 = w2;  // Calls copy constructor to create 'other'
-    
-    // Move assignment  
-    w1 = std::move(w2);  // Calls move constructor to create 'other'
-    
-    // Same operator= handles both!
+```cpp title="Fragment: naive copy assignment"
+Buffer& Buffer::operator=(const Buffer& o) {
+    delete[] data_;                          // old state destroyed first
+    size_ = o.size_;
+    data_ = new int[size_];                  // may throw: *this now points at freed memory
+    std::copy(o.data_, o.data_ + size_, data_);
+    return *this;
 }
 ```
 
-**Why it works:**
-- `w1 = w2` → `Widget other(w2)` → copy constructor
-- `w1 = std::move(w2)` → `Widget other(std::move(w2))` → move constructor
+If `new` throws, `data_` dangles (and `size_` is already updated), so the object is not even valid.
+`b = b` is worse: it frees the data and then copies from the freed array. Fixing these with an
+`if (this == &o)` test and reordering is possible, but each fix is another thing to get right in
+every class. Copy-and-swap makes the correct order the only order.
 
-## Complete Implementation
+## The idiom
 
-```cpp showLineNumbers
+```cpp title="cas.cpp" showLineNumbers
 #include <algorithm>
-#include <cstring>
+#include <cstddef>
+#include <cstdio>
+#include <utility>
 
-class String {
-    char* data_;
-    size_t size_;
-    
+class Buffer {
 public:
-    // Constructor
-    String(const char* str = "") {
-        size_ = std::strlen(str);
-        data_ = new char[size_ + 1];
-        std::strcpy(data_, str);
+    explicit Buffer(std::size_t n = 0) : size_(n), data_(n ? new int[n]() : nullptr) {}
+    Buffer(const Buffer& o) : size_(o.size_), data_(o.size_ ? new int[o.size_] : nullptr) {
+        std::copy(o.data_, o.data_ + size_, data_);
     }
-    
-    // Destructor
-    ~String() {
-        delete[] data_;
-    }
-    
-    // Copy constructor
-    String(const String& other) 
-        : size_(other.size_), data_(new char[other.size_ + 1]) {
-        std::strcpy(data_, other.data_);
-    }
-    
-    // Move constructor
-    String(String&& other) noexcept
-        : data_(other.data_), size_(other.size_) {
-        other.data_ = nullptr;
-        other.size_ = 0;
-    }
-    
-    // Unified assignment (copy-and-swap)
-    String& operator=(String other) noexcept {
+    Buffer(Buffer&& o) noexcept : Buffer() { swap(*this, o); }   // move = default-construct + swap
+    ~Buffer() { delete[] data_; }
+
+    Buffer& operator=(Buffer other) noexcept {   // by value: the copy (or move) happens here
         swap(*this, other);
-        return *this;
+        return *this;                             // other's destructor frees the old state
     }
-    
-    // Non-throwing swap
-    friend void swap(String& first, String& second) noexcept {
+
+    friend void swap(Buffer& a, Buffer& b) noexcept {
         using std::swap;
-        swap(first.data_, second.data_);
-        swap(first.size_, second.size_);
-    }
-    
-    // Accessors
-    const char* c_str() const { return data_; }
-    size_t size() const { return size_; }
-};
-
-// Usage
-int main() {
-    String s1("Hello");
-    String s2("World");
-    
-    s1 = s2;              // Copy assignment
-    s1 = String("Test");  // Move assignment
-    s1 = s1;              // Self-assignment (works correctly!)
-}
-```
-
-## Why It's Exception-Safe
-
-```cpp showLineNumbers
-Widget w1(10);  // Original data
-Widget w2(20);
-
-try {
-    w1 = w2;
-    // Step 1: Create temporary 'other' by copying w2
-    //   If copy constructor throws → w1 unchanged
-    
-    // Step 2: Swap w1 with other (no-throw)
-    //   Always succeeds
-    
-    // Step 3: Destroy temp (no-throw)
-    //   Always succeeds
-} catch (...) {
-    // w1 is either completely unchanged (if copy threw)
-    // or successfully updated (if copy succeeded)
-    // Never in broken state!
-}
-```
-
-**Strong exception guarantee:** Operation either succeeds completely or has no effect.
-
-## Self-Assignment Safety
-
-```cpp showLineNumbers
-String s("Hello");
-s = s;  // Self-assignment
-
-// What happens with copy-and-swap?
-// Step 1: Create temp copy of s
-//   temp.data_ = copy of s.data_
-// Step 2: Swap s with temp
-//   Now s.data_ points to new copy
-//   temp.data_ points to old data
-// Step 3: Destroy temp
-//   Old data deleted
-
-// Result: s contains copy of itself (correct!)
-// No explicit self-assignment check needed!
-```
-
-Traditional implementation needs explicit check; copy-and-swap handles it automatically.
-
-## Performance Considerations
-
-### When Copy-and-Swap Is Good
-
-```cpp showLineNumbers
-class ResourceHolder {
-    std::unique_ptr<ExpensiveResource> resource_;
-    
-public:
-    // Copy-and-swap shines here
-    ResourceHolder& operator=(ResourceHolder other) noexcept {
-        swap(*this, other);
-        return *this;
-    }
-    
-    friend void swap(ResourceHolder& a, ResourceHolder& b) noexcept {
-        using std::swap;
-        swap(a.resource_, b.resource_);  // Just pointer swap!
-    }
-};
-```
-
-When resources are held by pointers/handles, swap is very cheap.
-
-### When Copy-and-Swap May Be Slow
-
-```cpp showLineNumbers
-class LargeArray {
-    std::array<int, 1000000> data_;  // Large value member
-    
-public:
-    // Copy-and-swap always makes full copy
-    LargeArray& operator=(LargeArray other) noexcept {
-        swap(*this, other);  // Swaps entire array!
-        return *this;
-    }
-    
-    // Alternative: traditional assignment can reuse memory
-    LargeArray& operator=(const LargeArray& other) {
-        if (this != &other) {
-            data_ = other.data_;  // May reuse existing allocation
-        }
-        return *this;
-    }
-};
-```
-
-For large value types, copy-and-swap always allocates; traditional assignment might reuse.
-
-## Implementing Swap
-
-### Friend Function (Preferred)
-
-```cpp showLineNumbers
-class Widget {
-public:
-    friend void swap(Widget& a, Widget& b) noexcept {
-        using std::swap;
-        swap(a.data_, b.data_);
         swap(a.size_, b.size_);
+        swap(a.data_, b.data_);
     }
-};
 
-// ADL finds the swap
-Widget w1, w2;
-swap(w1, w2);  // Calls friend function via ADL
-```
+    std::size_t size() const { return size_; }
+    int& operator[](std::size_t i) { return data_[i]; }
 
-### Member Function
-
-```cpp showLineNumbers
-class Widget {
-public:
-    void swap(Widget& other) noexcept {
-        using std::swap;
-        swap(data_, other.data_);
-        swap(size_, other.size_);
-    }
-};
-
-// Free function forwards to member
-inline void swap(Widget& a, Widget& b) noexcept {
-    a.swap(b);
-}
-```
-
-Both work; friend is more idiomatic.
-
-## std::swap Specialization
-
-```cpp showLineNumbers
-class Widget {
-    // ... implementation
-};
-
-// Specialize std::swap (pre-C++11 style)
-namespace std {
-    template<>
-    void swap<Widget>(Widget& a, Widget& b) noexcept {
-        a.swap(b);
-    }
-}
-
-// Modern way: use ADL-findable swap
-friend void swap(Widget& a, Widget& b) noexcept {
-    // ...
-}
-```
-
-Modern C++ prefers ADL-findable `swap` over `std::swap` specialization.
-
-## Complete Example with All Special Functions
-
-```cpp showLineNumbers
-#include <algorithm>
-#include <iostream>
-
-class Array {
+private:
+    std::size_t size_;
     int* data_;
-    size_t size_;
-    
-public:
-    // Constructor
-    explicit Array(size_t size = 0)
-        : data_(size ? new int[size]() : nullptr), size_(size) {
-        std::cout << "Ctor\n";
-    }
-    
-    // Destructor
-    ~Array() {
-        std::cout << "Dtor\n";
-        delete[] data_;
-    }
-    
-    // Copy constructor
-    Array(const Array& other)
-        : data_(other.size_ ? new int[other.size_] : nullptr),
-          size_(other.size_) {
-        std::cout << "Copy ctor\n";
-        std::copy(other.data_, other.data_ + size_, data_);
-    }
-    
-    // Move constructor
-    Array(Array&& other) noexcept
-        : data_(other.data_), size_(other.size_) {
-        std::cout << "Move ctor\n";
-        other.data_ = nullptr;
-        other.size_ = 0;
-    }
-    
-    // Unified assignment (copy-and-swap)
-    Array& operator=(Array other) noexcept {
-        std::cout << "Assignment (via copy-and-swap)\n";
-        swap(*this, other);
-        return *this;
-    }
-    
-    // Swap
-    friend void swap(Array& a, Array& b) noexcept {
-        std::cout << "Swap\n";
-        using std::swap;
-        swap(a.data_, b.data_);
-        swap(a.size_, b.size_);
-    }
-    
-    // Access
-    int& operator[](size_t i) { return data_[i]; }
-    const int& operator[](size_t i) const { return data_[i]; }
-    size_t size() const { return size_; }
 };
 
 int main() {
-    Array a1(10);     // Ctor
-    Array a2(20);     // Ctor
-    
-    a1 = a2;          // Copy ctor (creates temp) + Swap + Dtor (temp)
-    
-    a1 = Array(30);   // Ctor + Move ctor (creates temp) + Swap + Dtor (temp)
-    
-    Array a3(a1);     // Copy ctor
-    Array a4(std::move(a1));  // Move ctor
+    Buffer a(3), b(5);
+    a[0] = 42;
+    b = a;                                       // copy assignment: copy a into the parameter
+    std::printf("%zu %d\n", b.size(), b[0]);
+
+    b = Buffer(10);                              // rvalue: parameter is move-constructed (or elided)
+    std::printf("%zu\n", b.size());
+
+    Buffer& alias = b;
+    b = alias;                                   // self-assignment: correct, one needless copy
+    std::printf("%zu\n", b.size());
 }
 ```
 
-## Variations
+Output (g++ 15 and clang++ 21, `-std=c++20 -Wall -Wextra`, `-O0` and `-O2`):
 
-### Separate Copy and Move Assignment
-
-If you need different behavior:
-
-```cpp showLineNumbers
-class Widget {
-public:
-    // Copy assignment
-    Widget& operator=(const Widget& other) {
-        Widget temp(other);  // Copy
-        swap(*this, temp);
-        return *this;
-    }
-    
-    // Move assignment
-    Widget& operator=(Widget&& other) noexcept {
-        swap(*this, other);
-        return *this;
-    }
-};
+```text
+3 42
+10
+10
 ```
 
-### With Custom Allocator
+Reading `operator=(Buffer other)`:
 
-```cpp showLineNumbers
-template<typename T, typename Allocator = std::allocator<T>>
-class Vector {
-    T* data_;
-    size_t size_;
-    Allocator alloc_;
-    
-public:
-    Vector& operator=(Vector other) noexcept {
-        // Swap only data and size, not allocator
-        using std::swap;
-        swap(data_, other.data_);
-        swap(size_, other.size_);
-        // alloc_ not swapped (allocators may not be swappable)
-        return *this;
-    }
+1. **The parameter is the copy.** For `b = a`, `a` is an lvalue, so `other` is copy-constructed from it.
+   That is the only step that can throw, and it happens before the function body, so `*this`
+   is untouched on failure.
+2. **`swap` commits.** It exchanges the two pointers and sizes: no allocation, no throw, so it is
+   `noexcept`. After it, `*this` has the new state and `other` has the old one.
+3. **The destructor of `other` releases the old state** at the closing brace. There is no
+   explicit cleanup code, which is [RAII](./01-raii.md) doing the work.
+
+The failure case, run (g++ 15 and clang++ 21, same flags):
+
+```cpp title="strong.cpp" showLineNumbers
+#include <cstdio>
+#include <stdexcept>
+#include <string>
+#include <utility>
+
+struct Bomb {
+    static inline bool armed = false;
+    Bomb() = default;
+    Bomb(const Bomb&) { if (armed) throw std::runtime_error("copy failed"); }
 };
+
+struct Pair {
+    std::string name;
+    Bomb b;
+    Pair() = default;
+    Pair(const Pair&) = default;
+    Pair& operator=(Pair other) noexcept { name.swap(other.name); return *this; }
+};
+
+int main() {
+    Pair x; x.name = "x";
+    Pair y; y.name = "y";
+    Bomb::armed = true;
+    try { y = x; } catch (const std::exception& e) { std::printf("%s, y=%s\n", e.what(), y.name.c_str()); }
+}
 ```
 
-## Best Practices
-
-:::success[DO]
-- Use copy-and-swap for strong exception safety
-- Implement non-throwing `swap`
-- Pass assignment parameter by value
-- Mark swap as `noexcept`
-- Use for resource-managing classes
-  :::
-
-:::danger[DON'T]
-- Forget to implement move constructor
-- Make swap throwing
-- Use when traditional assignment is more efficient
-- Over-apply to simple value types
-- Forget `using std::swap` in swap function
-  :::
-
-## When NOT to Use
-
-```cpp showLineNumbers
-// Simple types - copy-and-swap is overkill
-class Point {
-    int x_, y_;
-    
-public:
-    // Traditional assignment is fine and efficient
-    Point& operator=(const Point& other) {
-        x_ = other.x_;
-        y_ = other.y_;
-        return *this;
-    }
-};
-
-// Types with allocator/memory that can be reused
-class OptimizedString {
-    char* data_;
-    size_t size_, capacity_;
-    
-public:
-    // Traditional can reuse existing allocation
-    OptimizedString& operator=(const OptimizedString& other) {
-        if (this != &other) {
-            if (capacity_ < other.size_) {
-                delete[] data_;
-                data_ = new char[other.size_];
-                capacity_ = other.size_;
-            }
-            std::strcpy(data_, other.data_);
-            size_ = other.size_;
-        }
-        return *this;
-    }
-};
+```text
+copy failed, y=y
 ```
 
-## Summary
+`y` keeps its previous contents. That is the strong guarantee, and `Pair` got it without
+a single `try`.
 
-Copy-and-swap idiom implements assignment using copy constructor and swap:
+### One operator for copy and move assignment
 
-**Pattern:**
-```cpp
-class T {
-public:
-    T(const T& other);              // Copy constructor
-    T(T&& other) noexcept;          // Move constructor
-    T& operator=(T other) noexcept { // Pass by value!
-        swap(*this, other);
-        return *this;
-    }
-    friend void swap(T& a, T& b) noexcept;
-};
+Because the parameter is taken by value, an rvalue source is **move**-constructed into it (or
+constructed in place, with elision): `b = Buffer(10)` allocates once and swaps. One operator therefore
+covers both assignments, and the move assignment is as cheap as a move constructor plus a swap. The
+move constructor above is written as "default-construct, then swap", which keeps it
+`noexcept` and reuses the swap.
+
+Do not also declare `operator=(Buffer&&)` next to `operator=(Buffer)`: a call with an rvalue is
+ambiguous (checked with g++ 15 and clang++ 21):
+
+```text
+error: ambiguous overload for 'operator=' (operand types are 'T' and 'T')
 ```
 
-**Benefits:**
-- Strong exception safety
-- Automatic self-assignment safety
-- Unified copy and move assignment
-- Code reuse (leverages copy/move constructors)
-- No code duplication
+### Writing `swap`
 
-**Trade-offs:**
-- Always creates temporary (may be less efficient)
-- Not optimal for types that can reuse allocations
-- Requires proper move constructor for efficiency
+Provide a non-member `swap` found by argument-dependent lookup, written as a hidden friend as above.
+Inside it, `using std::swap;` followed by an unqualified call lets each member use its own `swap`
+if one exists and fall back to `std::swap` otherwise. Callers should do the same (or use
+`std::ranges::swap`, C++20) so that your overload is found. Specializing `std::swap` for your own type is unnecessary: the generic version works for any
+move-constructible, move-assignable type, and a hidden friend is found first by ADL. The `swap` must be `noexcept`; if a member's swap can throw, the
+idiom no longer gives the strong guarantee.
 
-**Use when:**
-- Managing resources (memory, handles, connections)
-- Need strong exception safety
-- Want to unify copy/move assignment
+## Trade-offs
+
+Copy-and-swap optimizes for correctness and brevity, not for every case:
+
+- **It always allocates on copy assignment.** The by-value parameter builds a fresh copy even when
+  `*this` already has enough capacity that an element-wise copy would reuse. `std::vector`'s own
+  assignment reuses capacity for exactly this reason. If assignment is hot and sizes are
+  similar, write the two assignments by hand and keep copy-and-swap for the rest.
+- **Self-assignment does a needless copy** (correctly, as `alias` in the example shows). Adding a
+  self-test would slow every other assignment, so the usual advice is not to.
+- **It needs a cheap, `noexcept` swap.** A type with no non-throwing swap (for example one whose
+  members include a throwing-move type) cannot give the strong guarantee this way.
+- **It does not help with already-valid state.** It guarantees "all or nothing" for the object,
+  not for other objects the assignment might touch.
+- **It is the wrong tool for a class that follows the rule of zero.** If every member already
+  manages itself, the compiler-generated assignment is already correct; do not write one.
+
+For a handle class that owns a single raw resource, prefer wrapping the resource in `unique_ptr` (move-only) or
+a container (copy and move) over hand-writing any of this; see [RAII](./01-raii.md).
+
+## Related
+
+- [Copy and Move Semantics](../07-classes-and-oop/copy-and-move-semantics.md): the four operations and what a moved-from object holds.
+- [noexcept and the strong guarantee](../10-error-handling-and-safety/02-noexcept-and-strong-guarantee.md): why "prepare, then commit with a non-throwing step" works.
+- [Pimpl](./02-pimpl.md): the same commit step applied to a single pointer.
+
+## References
+
+- [cppreference: Copy assignment operator](https://en.cppreference.com/w/cpp/language/copy_assignment)
+- [cppreference: `std::swap`](https://en.cppreference.com/w/cpp/algorithm/swap)
+- [cppreference: `std::ranges::swap`](https://en.cppreference.com/w/cpp/utility/ranges/swap)

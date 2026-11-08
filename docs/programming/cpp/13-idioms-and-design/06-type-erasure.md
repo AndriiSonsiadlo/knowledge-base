@@ -3,622 +3,247 @@ id: type-erasure
 title: Type Erasure
 sidebar_label: Type Erasure
 sidebar_position: 6
-tags: [cpp, type-erasure, templates, polymorphism, design-patterns]
+tags: [c++, type-erasure, std-function, std-any, polymorphism, small-buffer-optimization]
 ---
 
 # Type Erasure
 
-Type erasure hides the concrete type behind a common interface, allowing different types to be treated uniformly without inheritance. Combines the flexibility of runtime polymorphism with the performance benefits of templates.
+**Type erasure** gives unrelated types a common run-time interface without a common base class:
+a non-template wrapper stores a value of any type that supports certain operations, and hides the
+concrete type behind a virtual call. `std::function`, `std::any` and `std::move_only_function`
+are all built this way. The caller sees one ordinary value type; the template machinery is inside.
 
-:::info[Polymorphism Without Inheritance]
-Type erasure lets unrelated types work through a common interface without requiring them to inherit from a base class. The canonical example is `std::function` which can store any callable.
-:::
+This page owns how that wrapper is built and what `std::function` and `std::any` store. The choice
+between this, virtual functions and templates is on
+[Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md); lambdas
+and closures are on [Lambda Expressions](../07-classes-and-oop/lambdas.md#passing-lambdas-around).
 
-## The Problem
+**Prerequisites:** [Virtual Functions](../07-classes-and-oop/virtual-functions.md),
+[Class Templates](../08-templates-and-metaprogramming/class-templates.md),
+[`unique_ptr`](../06-pointers-references-and-smart-pointers/unique-ptr.md).
 
-```cpp showLineNumbers
-// Need to store different callables
-void callback1() { std::cout << "Callback 1\n"; }
+## The problem
 
-struct Functor {
-    void operator()() { std::cout << "Functor\n"; }
-};
+Inheritance polymorphism makes every type join a hierarchy: `Circle` must derive from `Shape`, so
+you cannot use `int`, a lambda or a third-party class, and you hold objects by pointer. Templates
+accept anything but produce a different type per argument, so `std::vector<Foo<A>>` and
+`std::vector<Foo<B>>` cannot be mixed, and a template cannot be a virtual function or live in a
+separate `.cpp`. Type erasure takes the part of each that works: values are stored in a single
+concrete type, and the polymorphism is hidden inside it.
 
-// How to store both?
-// Can't use common base class - they're unrelated types
-// Templates require knowing exact type at compile-time
-// Type erasure!
-```
+## Building one by hand
 
-## Basic Type Erasure Pattern
+The pattern has three parts, usually called *concept* (the erased interface, a private abstract
+class), *model* (a template that implements it for one stored type `T`) and the *wrapper* (a
+non-template class holding a pointer to a concept).
 
-```cpp showLineNumbers
-class Function {
-    // Internal interface
-    struct Concept {
-        virtual void call() = 0;
-        virtual ~Concept() = default;
-    };
-    
-    // Wrapper for specific types
-    template<typename F>
-    struct Model : Concept {
-        F func_;
-        
-        Model(F func) : func_(std::move(func)) {}
-        
-        void call() override {
-            func_();
-        }
-    };
-    
-    std::unique_ptr<Concept> impl_;
-    
-public:
-    // Constructor - type erased here
-    template<typename F>
-    Function(F func) 
-        : impl_(std::make_unique<Model<F>>(std::move(func))) {}
-    
-    // Common interface
-    void operator()() {
-        impl_->call();
-    }
-};
+```cpp title="shape.cpp" showLineNumbers
+#include <cstdio>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
-// Usage
-void func() { std::cout << "Free function\n"; }
+// Two unrelated types: no common base class.
+struct Circle { double r; void draw() const { std::printf("circle r=%g\n", r); } };
+struct Label  { std::string text; void draw() const { std::printf("label '%s'\n", text.c_str()); } };
 
-struct Functor {
-    void operator()() { std::cout << "Functor\n"; }
-};
-
-int main() {
-    Function f1 = func;              // Stores function pointer
-    Function f2 = Functor();         // Stores functor
-    Function f3 = []{ std::cout << "Lambda\n"; };  // Stores lambda
-    
-    f1();  // "Free function"
-    f2();  // "Functor"
-    f3();  // "Lambda"
-    
-    // All have same type: Function
-    // Original types erased!
-}
-```
-
-**How it works:**
-1. Template constructor accepts any type `F`
-2. Wraps `F` in `Model<F>` which implements `Concept`
-3. Stores `Model<F>` as pointer to `Concept` (type erased)
-4. Calls forward through `Concept` interface
-
-## std::function Implementation
-
-Simplified version of the standard library:
-
-```cpp showLineNumbers
-template<typename>
-class Function;  // Primary template (undefined)
-
-// Partial specialization for function signatures
-template<typename R, typename... Args>
-class Function<R(Args...)> {
-    struct Concept {
-        virtual R invoke(Args... args) = 0;
-        virtual ~Concept() = default;
-        virtual Concept* clone() const = 0;
-    };
-    
-    template<typename F>
-    struct Model : Concept {
-        F func_;
-        
-        Model(F f) : func_(std::move(f)) {}
-        
-        R invoke(Args... args) override {
-            return func_(std::forward<Args>(args)...);
-        }
-        
-        Concept* clone() const override {
-            return new Model(func_);
-        }
-    };
-    
-    Concept* impl_ = nullptr;
-    
-public:
-    Function() = default;
-    
-    template<typename F>
-    Function(F func) 
-        : impl_(new Model<F>(std::move(func))) {}
-    
-    ~Function() {
-        delete impl_;
-    }
-    
-    // Copy
-    Function(const Function& other)
-        : impl_(other.impl_ ? other.impl_->clone() : nullptr) {}
-    
-    Function& operator=(const Function& other) {
-        if (this != &other) {
-            delete impl_;
-            impl_ = other.impl_ ? other.impl_->clone() : nullptr;
-        }
-        return *this;
-    }
-    
-    // Move
-    Function(Function&& other) noexcept
-        : impl_(other.impl_) {
-        other.impl_ = nullptr;
-    }
-    
-    Function& operator=(Function&& other) noexcept {
-        if (this != &other) {
-            delete impl_;
-            impl_ = other.impl_;
-            other.impl_ = nullptr;
-        }
-        return *this;
-    }
-    
-    // Invoke
-    R operator()(Args... args) {
-        if (!impl_) throw std::bad_function_call();
-        return impl_->invoke(std::forward<Args>(args)...);
-    }
-    
-    explicit operator bool() const {
-        return impl_ != nullptr;
-    }
-};
-
-// Usage
-Function<int(int, int)> add = [](int a, int b) { return a + b; };
-Function<void()> print = []{ std::cout << "Hello\n"; };
-
-int result = add(3, 4);  // 7
-print();                 // "Hello"
-```
-
-## Drawable Example
-
-Type-erased drawing interface:
-
-```cpp showLineNumbers
 class Drawable {
-    struct Concept {
-        virtual void draw() const = 0;
-        virtual ~Concept() = default;
-        virtual Concept* clone() const = 0;
-    };
-    
-    template<typename T>
-    struct Model : Concept {
-        T object_;
-        
-        Model(T obj) : object_(std::move(obj)) {}
-        
-        void draw() const override {
-            object_.draw();  // Calls T::draw()
-        }
-        
-        Concept* clone() const override {
-            return new Model(object_);
-        }
-    };
-    
-    std::unique_ptr<Concept> impl_;
-    
 public:
-    template<typename T>
-    Drawable(T obj) 
-        : impl_(std::make_unique<Model<T>>(std::move(obj))) {}
-    
-    // Copy
-    Drawable(const Drawable& other)
-        : impl_(other.impl_->clone()) {}
-    
-    Drawable& operator=(const Drawable& other) {
-        impl_.reset(other.impl_->clone());
-        return *this;
-    }
-    
-    // Move
-    Drawable(Drawable&&) = default;
-    Drawable& operator=(Drawable&&) = default;
-    
-    void draw() const {
-        impl_->draw();
-    }
-};
+    template <typename T>
+    Drawable(T value) : self_(std::make_unique<Model<T>>(std::move(value))) {}   // implicit on purpose
 
-// Usage - no inheritance needed!
-struct Circle {
-    void draw() const { std::cout << "Circle\n"; }
-};
+    Drawable(const Drawable& o) : self_(o.self_->clone()) {}
+    Drawable(Drawable&&) noexcept = default;
+    Drawable& operator=(Drawable o) noexcept { self_ = std::move(o.self_); return *this; }
 
-struct Square {
-    void draw() const { std::cout << "Square\n"; }
+    void draw() const { self_->draw(); }
+
+private:
+    struct Concept {                              // the erased interface
+        virtual ~Concept() = default;
+        virtual void draw() const = 0;
+        virtual std::unique_ptr<Concept> clone() const = 0;
+    };
+    template <typename T>
+    struct Model final : Concept {                // one per stored type
+        explicit Model(T v) : value(std::move(v)) {}
+        void draw() const override { value.draw(); }
+        std::unique_ptr<Concept> clone() const override { return std::make_unique<Model>(*this); }
+        T value;
+    };
+    std::unique_ptr<Concept> self_;
 };
 
 int main() {
-    std::vector<Drawable> shapes;
-    shapes.push_back(Circle());
-    shapes.push_back(Square());
-    
-    for (const auto& shape : shapes) {
-        shape.draw();
-    }
-    // Output:
-    // Circle
-    // Square
+    std::vector<Drawable> scene;
+    scene.push_back(Circle{1.5});
+    scene.push_back(Label{"hi"});
+    auto copy = scene;                            // deep copies through clone()
+    for (const auto& d : copy) d.draw();
 }
 ```
 
-No common base class needed for `Circle` and `Square`!
+Output (g++ 15 and clang++ 21, `-std=c++23`, `-O0` and `-O2`):
 
-## Small Buffer Optimization (SBO)
-
-Avoid heap allocation for small types:
-
-```cpp showLineNumbers
-template<typename R, typename... Args>
-class Function {
-    static constexpr size_t BUFFER_SIZE = 32;
-    
-    struct Concept {
-        virtual R invoke(Args...) = 0;
-        virtual ~Concept() = default;
-        virtual void clone_to(void* buffer) const = 0;
-        virtual void move_to(void* buffer) = 0;
-    };
-    
-    template<typename F>
-    struct Model : Concept {
-        F func_;
-        
-        Model(F f) : func_(std::move(f)) {}
-        
-        R invoke(Args... args) override {
-            return func_(std::forward<Args>(args)...);
-        }
-        
-        void clone_to(void* buffer) const override {
-            new (buffer) Model(func_);
-        }
-        
-        void move_to(void* buffer) override {
-            new (buffer) Model(std::move(func_));
-        }
-    };
-    
-    alignas(std::max_align_t) char buffer_[BUFFER_SIZE];
-    Concept* impl_ = nullptr;
-    bool is_heap_ = false;
-    
-public:
-    template<typename F>
-    Function(F func) {
-        using ModelType = Model<F>;
-        
-        if constexpr (sizeof(ModelType) <= BUFFER_SIZE) {
-            // Small: use buffer
-            impl_ = new (buffer_) ModelType(std::move(func));
-            is_heap_ = false;
-        } else {
-            // Large: use heap
-            impl_ = new ModelType(std::move(func));
-            is_heap_ = true;
-        }
-    }
-    
-    ~Function() {
-        if (impl_) {
-            if (is_heap_) {
-                delete impl_;
-            } else {
-                impl_->~Concept();
-            }
-        }
-    }
-    
-    R operator()(Args... args) {
-        return impl_->invoke(std::forward<Args>(args)...);
-    }
-};
+```text
+circle r=1.5
+label 'hi'
 ```
 
-Small callables stored in buffer (no allocation), large ones use heap.
+<Diagram title="Anatomy of Drawable" caption="The wrapper is the only type clients name; the model for each stored type is generated by the templated constructor." accent="violet">
+  <DiagramRow>
+    <DiagramNode icon="package" title="Drawable" accent>non-template wrapper; owns a <code>unique_ptr&lt;Concept&gt;</code></DiagramNode>
+    <DiagramNode icon="layers" title="Concept">private abstract class: <code>draw</code>, <code>clone</code></DiagramNode>
+    <DiagramNode icon="blocks" title="Model&lt;T&gt;">holds a <code>T</code>; forwards the virtuals to its members</DiagramNode>
+  </DiagramRow>
+</Diagram>
 
-## std::any Implementation
+What to notice:
 
-Type-erased container for any value:
+- `Circle` and `Label` have no base class and know nothing about `Drawable`. The only requirement is
+  that `value.draw()` compiles; that requirement is checked when `Model<T>` is instantiated, not
+  declared anywhere (add a `requires` clause on the constructor to get a clear error).
+- The stored type is erased in the *wrapper's* type, not in memory: `Model<T>` still has a `T`.
+  The cost is the virtual call and, as written, a heap allocation per object.
+- **Value semantics** come from `clone()`. Without it the wrapper would be move-only. Copying a
+  `Drawable` copies the stored object, so `scene` and `copy` are independent. `std::function` and
+  `std::any` do the same, which is why both require the stored type to be copy constructible.
+- **Pointer-like use needs no design.** The wrapper is a plain value, so it goes in `std::vector`,
+  is returned by value, and is stored in a non-template member.
 
-```cpp showLineNumbers
-class Any {
-    struct Concept {
-        virtual ~Concept() = default;
-        virtual Concept* clone() const = 0;
-        virtual const std::type_info& type() const = 0;
-    };
-    
-    template<typename T>
-    struct Model : Concept {
-        T value_;
-        
-        Model(T value) : value_(std::move(value)) {}
-        
-        Concept* clone() const override {
-            return new Model(value_);
-        }
-        
-        const std::type_info& type() const override {
-            return typeid(T);
-        }
-    };
-    
-    std::unique_ptr<Concept> impl_;
-    
-public:
-    Any() = default;
-    
-    template<typename T>
-    Any(T value) 
-        : impl_(std::make_unique<Model<T>>(std::move(value))) {}
-    
-    // Copy/move
-    Any(const Any& other) 
-        : impl_(other.impl_ ? other.impl_->clone() : nullptr) {}
-    
-    Any(Any&&) = default;
-    Any& operator=(const Any&);
-    Any& operator=(Any&&) = default;
-    
-    // Type checking
-    const std::type_info& type() const {
-        return impl_ ? impl_->type() : typeid(void);
-    }
-    
-    // Access
-    template<typename T>
-    T* cast() {
-        if (type() == typeid(T)) {
-            return &static_cast<Model<T>*>(impl_.get())->value_;
-        }
-        return nullptr;
-    }
-    
-    template<typename T>
-    const T* cast() const {
-        if (type() == typeid(T)) {
-            return &static_cast<const Model<T>*>(impl_.get())->value_;
-        }
-        return nullptr;
-    }
-};
+## `std::function`
 
-// Usage
-Any a = 42;
-Any b = std::string("hello");
-Any c = 3.14;
+`std::function<R(Args...)>` is that pattern with a call operator as the erased operation. It stores a
+copy of any callable (function pointer, lambda, functor, member-function pointer bound with
+`std::bind` or `std::mem_fn`) whose call is compatible with the signature.
 
-int* pi = a.cast<int>();
-if (pi) std::cout << *pi << "\n";  // 42
+```cpp title="fn.cpp (-std=c++23)" showLineNumbers
+#include <cstdio>
+#include <functional>
+#include <memory>
 
-std::string* ps = b.cast<std::string>();
-if (ps) std::cout << *ps << "\n";  // "hello"
+int main() {
+    std::function<int(int)> f;
+    try { f(1); } catch (const std::bad_function_call&) { std::puts("empty: bad_function_call"); }
+    f = [](int x) { return x + 1; };
+    std::printf("%d %d\n", f(1), f.target<int(*)(int)>() != nullptr);
+    auto p = std::make_unique<int>(5);
+    // std::function<int()> g = [q = std::move(p)] { return *q; };   // error: closure not copyable
+    std::move_only_function<int()> g = [q = std::move(p)] { return *q; };
+    std::printf("%d\n", g());
+}
 ```
 
-## Iterator Type Erasure
-
-Abstract over different iterator types:
-
-```cpp showLineNumbers
-template<typename T>
-class AnyIterator {
-    struct Concept {
-        virtual void advance() = 0;
-        virtual T& dereference() = 0;
-        virtual bool equal(const Concept* other) const = 0;
-        virtual Concept* clone() const = 0;
-        virtual ~Concept() = default;
-    };
-    
-    template<typename Iter>
-    struct Model : Concept {
-        Iter iter_;
-        
-        Model(Iter it) : iter_(it) {}
-        
-        void advance() override {
-            ++iter_;
-        }
-        
-        T& dereference() override {
-            return *iter_;
-        }
-        
-        bool equal(const Concept* other) const override {
-            auto* p = dynamic_cast<const Model*>(other);
-            return p && iter_ == p->iter_;
-        }
-        
-        Concept* clone() const override {
-            return new Model(iter_);
-        }
-    };
-    
-    std::unique_ptr<Concept> impl_;
-    
-public:
-    template<typename Iter>
-    AnyIterator(Iter it) 
-        : impl_(std::make_unique<Model<Iter>>(it)) {}
-    
-    AnyIterator(const AnyIterator& other)
-        : impl_(other.impl_->clone()) {}
-    
-    AnyIterator& operator++() {
-        impl_->advance();
-        return *this;
-    }
-    
-    T& operator*() {
-        return impl_->dereference();
-    }
-    
-    bool operator==(const AnyIterator& other) const {
-        return impl_->equal(other.impl_.get());
-    }
-};
-
-// Usage with different container types
-std::vector<int> vec = {1, 2, 3};
-std::list<int> lst = {4, 5, 6};
-
-AnyIterator<int> it1 = vec.begin();
-AnyIterator<int> it2 = lst.begin();
-
-// Both have same type, but wrap different iterators
+```text
+empty: bad_function_call
+2 0
+5
 ```
 
-## Performance Considerations
+- **Empty state.** A default-constructed or null-assigned `std::function` is empty (it converts to
+  `false`); calling it throws `std::bad_function_call`.
+- **Copyable only.** The stored callable must be copy constructible, since `std::function` itself
+  is copyable. A closure that captures a `unique_ptr` by move cannot be stored in one. **C++23**
+  adds `std::move_only_function`, which erases the same way but requires only move construction
+  (the commented-out line is the error it avoids).
+- **`target<T>()`** returns a pointer to the stored object if its type is exactly `T`, otherwise null;
+  here the stored type is the lambda's closure type, not `int(*)(int)`, so it is null.
+  `target_type()` gives the `typeid`.
+- **Non-owning alternative.** `std::function_ref` *(C++26)* erases a callable without owning or
+  copying it, with no allocation, for parameters that are only called during the call.
+- **Call cost.** Each call goes through an indirect call that the compiler usually cannot inline. For
+  an algorithm parameter that is called immediately, a template parameter avoids that
+  ([the comparison table](../07-classes-and-oop/lambdas.md#passing-lambdas-around)); a
+  `std::function` is the right choice when the callable is stored or crosses a non-template boundary.
 
-```cpp showLineNumbers
-// Virtual dispatch overhead
-struct WithTypeErasure {
-    std::function<int(int)> func;  // Virtual dispatch
-    
-    int call(int x) {
-        return func(x);  // ~5-10 ns overhead
-    }
-};
+### Small buffer optimization
 
-// Template - no overhead
-template<typename F>
-struct WithTemplate {
-    F func;
-    
-    int call(int x) {
-        return func(x);  // Inlined, ~1 ns
-    }
-};
+A type-erased wrapper must put the stored object somewhere. Always allocating is simple but slow to
+construct and copy, so most implementations keep a small inline buffer and allocate only for larger
+objects: the **small buffer optimization** (SBO). The standard requires nothing about this for
+`std::function` beyond a recommendation to avoid allocation for function pointers and
+`reference_wrapper`s, so the threshold is implementation-specific. You can observe it by counting
+calls to `operator new` while assigning a closure of a given size:
 
-// Trade-off: Flexibility vs Performance
-// Type erasure: flexible, small overhead
-// Templates: fast, compile-time only
+```cpp title="sbo.cpp (observes libstdc++; not portable)" showLineNumbers
+#include <cstdio>
+#include <cstdlib>
+#include <functional>
+#include <new>
+
+static int g_allocs = 0;
+void* operator new(std::size_t n) { ++g_allocs; if (void* p = std::malloc(n)) return p; throw std::bad_alloc(); }
+void operator delete(void* p) noexcept { std::free(p); }
+void operator delete(void* p, std::size_t) noexcept { std::free(p); }
+
+template <std::size_t N>
+int probe() {
+    char pad[N] = {1};
+    std::function<int()> f;
+    int before = g_allocs;
+    f = [pad] { return pad[0]; };
+    return g_allocs - before;
+}
+
+int main() {
+    std::printf("sizeof(std::function<int()>) = %zu\n", sizeof(std::function<int()>));
+    std::printf("8:%d 16:%d 24:%d 32:%d 48:%d\n", probe<8>(), probe<16>(), probe<24>(), probe<32>(), probe<48>());
+}
 ```
 
-## Comparison with Alternatives
-
-| Approach | Type Info | Runtime Flexibility | Performance | Code Size |
-|----------|-----------|---------------------|-------------|-----------|
-| **Type Erasure** | Erased | High | ~5-10ns overhead | Small |
-| **Virtual Functions** | Known | High | ~5-10ns overhead | Small |
-| **Templates** | Known | None | Zero overhead | Large (bloat) |
-| **Variants** | Known (closed set) | Medium | Zero overhead | Medium |
-
-## Best Practices
-
-:::success[DO]
-- Use for unknown types at compile-time
-- Implement clone for copy support
-- Consider small buffer optimization
-- Use for plugin systems
-- Leverage for callback storage
-  :::
-
-:::danger[DON'T]
-- Use when templates suffice
-- Ignore performance implications
-- Forget to handle copy/move properly
-- Use excessively (compile-time is often better)
-  :::
-
-## Advanced: External Polymorphism
-
-Type erasure enables external polymorphism pattern:
-
-```cpp showLineNumbers
-// External interface
-struct DrawingDevice {
-    virtual void draw_circle(int x, int y, int r) = 0;
-    virtual void draw_rect(int x, int y, int w, int h) = 0;
-    virtual ~DrawingDevice() = default;
-};
-
-// Type-erased wrapper
-template<typename Device>
-struct DeviceModel : DrawingDevice {
-    Device device_;
-    
-    DeviceModel(Device d) : device_(std::move(d)) {}
-    
-    void draw_circle(int x, int y, int r) override {
-        device_.draw_circle(x, y, r);
-    }
-    
-    void draw_rect(int x, int y, int w, int h) override {
-        device_.draw_rect(x, y, w, h);
-    }
-};
-
-// Client code
-class Shape {
-    std::unique_ptr<DrawingDevice> device_;
-    
-public:
-    template<typename Device>
-    void set_device(Device device) {
-        device_ = std::make_unique<DeviceModel<Device>>(
-            std::move(device));
-    }
-    
-    virtual void draw(DrawingDevice& device) = 0;
-};
+```text
+sizeof(std::function<int()>) = 32
+8:0 16:0 24:1 32:1 48:1
 ```
 
-## Summary
+That is libstdc++ 15 (GCC 15.2's headers) on x86-64 Linux, built with both g++ 15 and clang++ 21
+against it, at `-O0` and `-O2`: closures up to 16 bytes are stored inline, larger ones allocate.
+libc++ and MSVC's library use other thresholds, and the numbers can change between versions, so do
+not design around a particular size. The practical rule is: a closure capturing a pointer or two
+is typically cheap to store; one capturing a `std::string` by value will usually allocate.
 
-Type erasure hides concrete types behind a common interface:
+## `std::any`
 
-**Pattern:**
-```cpp
-class TypeErased {
-    struct Concept {
-        virtual void operation() = 0;
-        virtual ~Concept() = default;
-    };
-    
-    template<typename T>
-    struct Model : Concept {
-        T obj_;
-        void operation() override { obj_.operation(); }
-    };
-    
-    std::unique_ptr<Concept> impl_;
-    
-public:
-    template<typename T>
-    TypeErased(T obj) : impl_(new Model<T>(std::move(obj))) {}
-    
-    void operation() { impl_->operation(); }
-};
-```
+`std::any` *(C++17)* erases *nothing but* the type: it holds one copyable value of any type and
+gives it back via `std::any_cast<T>`, which throws `std::bad_any_cast` (or, on a pointer, returns
+null) when `T` is not the stored type. There is no common interface to call, so it is only
+useful at boundaries where the static type is genuinely lost (scripting, plugin properties). When the
+possible types are a closed list, [`std::variant`](../09-standard-library/utilities.md) is better:
+it needs no allocation and the compiler checks the cases. Its API belongs to the
+[utilities](../09-standard-library/utilities.md) page.
 
-**Use cases:**
-- Callback storage (`std::function`)
-- Heterogeneous containers
-- Plugin systems
-- Runtime polymorphism without inheritance
-- `std::any` for arbitrary value storage
+## Design choices when you build your own
 
-**Trade-offs:**
-- Adds virtual dispatch overhead
-- Enables runtime flexibility
-- No template bloat
-- Slightly more complex than templates
+| Decision | Options and consequence |
+|---|---|
+| Ownership | `unique_ptr<Concept>` (move-only, as `move_only_function`); plus `clone()` (value semantics); `shared_ptr<const Concept>` (cheap copies of immutable state) |
+| Storage | always heap; inline small buffer with fallback (SBO); fixed inline size with `static_assert` (no allocation, but a size limit) |
+| Dispatch | virtual `Concept` (simple); a hand-built table of function pointers per type (a common alternative in library implementations; less code per type, more work to write) |
+| Interface | free-function hooks (`draw(const T&)` found by ADL) instead of member calls, so existing types can opt in without being edited |
+| Constraints | `requires` clause on the constructor to reject unusable `T` at the call site |
+
+Constraining the converting constructor with a `requires` clause is worth doing: without it, passing a
+type that lacks `draw()` fails inside `Model<T>`, far from the call site.
+
+## Trade-offs
+
+- **For:** non-intrusive (no base class), value semantics, any type fits, code is compiled once in
+  the wrapper rather than per template argument, and it works in non-template interfaces and across
+  translation units.
+- **Against:** an indirect call per operation (and no inlining through it), usually an allocation,
+  two layers to read when debugging, and constraints are checked only when the constructor
+  template instantiates.
+
+## Related
+
+- [Dynamic vs Static Polymorphism](../07-classes-and-oop/dynamic-vs-static-polymorphism.md): when to choose which.
+- [Lambda Expressions](../07-classes-and-oop/lambdas.md): what gets stored in a `std::function`.
+- [Custom Deleters](../06-pointers-references-and-smart-pointers/custom-deleters.md): `shared_ptr` erases its deleter the same way.
+
+## References
+
+- [cppreference: `std::function`](https://en.cppreference.com/w/cpp/utility/functional/function)
+- [cppreference: `std::move_only_function`](https://en.cppreference.com/w/cpp/utility/functional/move_only_function)
+- [cppreference: `std::function_ref`](https://en.cppreference.com/w/cpp/utility/functional/function_ref)
+- [cppreference: `std::any`](https://en.cppreference.com/w/cpp/utility/any)
